@@ -9,6 +9,10 @@ import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
+var (
+	ErrNameRequired = errors.New("name is required")
+)
+
 type CreateOrderInput struct {
 	Name        string                     `json:"name"`
 	Delivery    *orderentity.DeliveryOrder `json:"delivery"`
@@ -18,7 +22,7 @@ type CreateOrderInput struct {
 
 func (o *CreateOrderInput) Validate() error {
 	if o.Name == "" {
-		return errors.New("name is required")
+		return ErrNameRequired
 	}
 
 	return nil

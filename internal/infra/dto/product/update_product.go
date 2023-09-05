@@ -1,8 +1,6 @@
 package productdto
 
 import (
-	"errors"
-
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -17,13 +15,19 @@ type UpdateProductInput struct {
 	IsAvailable *bool    `json:"is_available"`
 }
 
-func (p *UpdateProductInput) Validate() error {
-	if *p.Price > *p.Cost {
-		return errors.New("price must be greater than cost")
+func (p *UpdateProductInput) Validate(product *productentity.Product) error {
+	if product.Code == "" {
+		return ErrCodeRequired
+	}
+	if product.Name == "" {
+		return ErrNameRequired
+	}
+	if product.Price < product.Cost {
+		return ErrCostGreaterThanPrice
 	}
 
-	if *p.Category == "" {
-		return errors.New("category is required")
+	if product.Category.Name == "" {
+		return ErrCategoryRequired
 	}
 
 	return nil
@@ -49,13 +53,13 @@ func (p *UpdateProductInput) UpdateModel(product *productentity.Product) error {
 		product.Cost = *p.Cost
 	}
 	if p.Category != nil {
-		product.Category = productentity.CategoryProduct{Name: *p.Category}
+		product.Category.Name = *p.Category
 	}
 	if p.IsAvailable != nil {
 		product.IsAvailable = *p.IsAvailable
 	}
 
-	if err := p.Validate(); err != nil {
+	if err := p.Validate(product); err != nil {
 		return err
 	}
 

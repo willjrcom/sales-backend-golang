@@ -12,7 +12,7 @@ import (
 var (
 	ErrCodeRequired         = errors.New("code is required")
 	ErrNameRequired         = errors.New("name is required")
-	ErrPriceGreaterThanCost = errors.New("price must be greater than cost")
+	ErrCostGreaterThanPrice = errors.New("Cost must be greater than Price")
 	ErrCategoryRequired     = errors.New("category is required")
 )
 
@@ -34,8 +34,8 @@ func (p *CreateProductInput) Validate() error {
 	if p.Name == "" {
 		return ErrNameRequired
 	}
-	if p.Price >= p.Cost {
-		return ErrPriceGreaterThanCost
+	if p.Price < p.Cost {
+		return ErrCostGreaterThanPrice
 	}
 
 	if p.Category == "" {
