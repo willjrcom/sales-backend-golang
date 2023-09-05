@@ -1,18 +1,17 @@
 package addressentity
 
-import "github.com/google/uuid"
+import (
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+)
 
 type Address struct {
-	ID         uuid.UUID
-	street     string
-	Number     string
-	Complement string
-	Reference  string
-	City       string
-	State      string
-	Cep        string
-}
-
-func NewAddress() *Address {
-	return &Address{}
+	entity.Entity
+	Street       string
+	Number       string
+	Complement   string
+	Reference    string
+	Neighborhood string
+	City         string
+	State        string
+	Cep          string
 }
