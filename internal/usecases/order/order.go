@@ -2,9 +2,7 @@ package orderusecases
 
 import (
 	"github.com/google/uuid"
-	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	filterdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/filter"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
@@ -24,19 +22,12 @@ func (s *Service) CreateOrder(dto *orderdto.CreateOrderInput) (uuid.UUID, error)
 	if err != nil {
 		return uuid.Nil, err
 	}
-	// save order
+
+	if err = s.Repository.CreateOrder(order); err != nil {
+		return uuid.Nil, err
+	}
+
 	return order.ID, nil
-}
-
-func (s *Service) AddItemOrder(idOrder, idProduct string, dto *orderdto.AddItemOrderInput) (uuid.UUID, error) {
-	// find order and product by id
-	items := itementity.Items{}
-	product := &productentity.Product{}
-	item := dto.ToModel(product)
-
-	item.ItemsID = items.ID
-	items.Products = append(items.Products, *item)
-	return uuid.New(), nil
 }
 
 func (s *Service) LaunchOrder(dto *entitydto.IdRequest) error {
@@ -131,7 +122,7 @@ func (s *Service) UpdateOrderStatus() error {
 	return nil
 }
 
-func (s *Service) GetOrder(dto *entitydto.IdRequest) (*orderentity.Order, error) {
+func (s *Service) GetOrderById(dto *entitydto.IdRequest) (*orderentity.Order, error) {
 	if order, err := s.Repository.GetOrderById(dto.Id.String()); err != nil {
 		return nil, err
 	} else {

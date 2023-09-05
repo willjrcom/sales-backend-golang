@@ -30,7 +30,7 @@ func (s *Service) RegisterProduct(dto *productdto.CreateProductInput) (uuid.UUID
 	return product.ID, nil
 }
 
-func (s *Service) UpdateProduct(dtoId entitydto.IdRequest, dto *productdto.UpdateProductInput) error {
+func (s *Service) UpdateProduct(dtoId *entitydto.IdRequest, dto *productdto.UpdateProductInput) error {
 	product, err := s.Repository.GetProductById(dtoId.Id.String())
 
 	if err != nil {
