@@ -9,6 +9,7 @@ const (
 	OrderStatusShipped  StatusOrder = "Shipped"
 	OrderStatusFinished StatusOrder = "Finished"
 	OrderStatusCanceled StatusOrder = "Canceled"
+	OrderStatusArchived StatusOrder = "Archived"
 )
 
 func getAllStatus() []StatusOrder {
@@ -19,5 +20,6 @@ func getAllStatus() []StatusOrder {
 		OrderStatusShipped,
 		OrderStatusFinished,
 		OrderStatusCanceled,
+		OrderStatusArchived,
 	}
 }
