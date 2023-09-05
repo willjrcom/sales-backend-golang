@@ -9,6 +9,13 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
+var (
+	ErrCodeRequired         = errors.New("code is required")
+	ErrNameRequired         = errors.New("name is required")
+	ErrPriceGreaterThanCost = errors.New("price must be greater than cost")
+	ErrCategoryRequired     = errors.New("category is required")
+)
+
 type CreateProductInput struct {
 	Code        string  `json:"code"`
 	Name        string  `json:"name"`
@@ -21,12 +28,18 @@ type CreateProductInput struct {
 }
 
 func (p *CreateProductInput) Validate() error {
-	if p.Price > p.Cost {
-		return errors.New("price must be greater than cost")
+	if p.Code == "" {
+		return ErrCodeRequired
+	}
+	if p.Name == "" {
+		return ErrNameRequired
+	}
+	if p.Price >= p.Cost {
+		return ErrPriceGreaterThanCost
 	}
 
 	if p.Category == "" {
-		return errors.New("category is required")
+		return ErrCategoryRequired
 	}
 
 	return nil
