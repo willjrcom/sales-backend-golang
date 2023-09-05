@@ -29,19 +29,35 @@ func (p *UpdateProductInput) Validate() error {
 	return nil
 }
 
-func (p *UpdateProductInput) toModel() (*productentity.Product, error) {
-	if err := p.Validate(); err != nil {
-		return nil, err
+func (p *UpdateProductInput) UpdateModel(product *productentity.Product) error {
+	if p.Code != nil {
+		product.Code = *p.Code
+	}
+	if p.Name != nil {
+		product.Name = *p.Name
+	}
+	if p.Description != nil {
+		product.Description = *p.Description
+	}
+	if p.Size != nil {
+		product.Size = *p.Size
+	}
+	if p.Price != nil {
+		product.Price = *p.Price
+	}
+	if p.Cost != nil {
+		product.Cost = *p.Cost
+	}
+	if p.Category != nil {
+		product.Category = productentity.CategoryProduct{Name: *p.Category}
+	}
+	if p.IsAvailable != nil {
+		product.IsAvailable = *p.IsAvailable
 	}
 
-	return &productentity.Product{
-		Code:        *p.Code,
-		Name:        *p.Name,
-		Description: *p.Description,
-		Size:        *p.Size,
-		Price:       *p.Price,
-		Cost:        *p.Cost,
-		Category:    productentity.CategoryProduct{Name: *p.Category},
-		IsAvailable: *p.IsAvailable,
-	}, nil
+	if err := p.Validate(); err != nil {
+		return err
+	}
+
+	return nil
 }

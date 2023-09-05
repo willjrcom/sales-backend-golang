@@ -2,7 +2,10 @@ package productdto
 
 import (
 	"errors"
+	"time"
 
+	"github.com/google/uuid"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -29,12 +32,13 @@ func (p *CreateProductInput) Validate() error {
 	return nil
 }
 
-func (p *CreateProductInput) toModel() (*productentity.Product, error) {
+func (p *CreateProductInput) ToModel() (*productentity.Product, error) {
 	if err := p.Validate(); err != nil {
 		return nil, err
 	}
 
 	return &productentity.Product{
+		Entity:      entity.Entity{ID: uuid.New(), CreatedAt: time.Now()},
 		Code:        p.Code,
 		Name:        p.Name,
 		Description: p.Description,
