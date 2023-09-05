@@ -3,7 +3,7 @@ package personentity
 import (
 	"time"
 
-	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/addressentity"
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 

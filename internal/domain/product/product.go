@@ -1,4 +1,4 @@
-package productEntity
+package productentity
 
 import (
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
