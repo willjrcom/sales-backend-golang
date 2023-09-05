@@ -6,6 +6,7 @@ import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	filterdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/filter"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 )
 
@@ -39,7 +40,7 @@ func (s *Service) AddItemOrder(idOrder, idProduct string, dto *orderdto.AddItemO
 }
 
 func (s *Service) LaunchOrder(dto *entitydto.IdRequest) error {
-	order, err := s.Repository.GetOrder(dto.Id.String())
+	order, err := s.Repository.GetOrderById(dto.Id.String())
 
 	if err != nil {
 		return err
@@ -55,7 +56,7 @@ func (s *Service) LaunchOrder(dto *entitydto.IdRequest) error {
 }
 
 func (s *Service) ArchiveOrder(dto *entitydto.IdRequest) error {
-	order, err := s.Repository.GetOrder(dto.Id.String())
+	order, err := s.Repository.GetOrderById(dto.Id.String())
 
 	if err != nil {
 		return err
@@ -71,7 +72,7 @@ func (s *Service) ArchiveOrder(dto *entitydto.IdRequest) error {
 }
 
 func (s *Service) CancelOrder(dto *entitydto.IdRequest) error {
-	order, err := s.Repository.GetOrder(dto.Id.String())
+	order, err := s.Repository.GetOrderById(dto.Id.String())
 
 	if err != nil {
 		return err
@@ -87,7 +88,7 @@ func (s *Service) CancelOrder(dto *entitydto.IdRequest) error {
 }
 
 func (s *Service) UpdateOrderPayment(dto *entitydto.IdRequest, dtoPayment *orderdto.UpdatePaymentMethod) error {
-	order, err := s.Repository.GetOrder(dto.Id.String())
+	order, err := s.Repository.GetOrderById(dto.Id.String())
 
 	if err != nil {
 		return err
@@ -103,7 +104,7 @@ func (s *Service) UpdateOrderPayment(dto *entitydto.IdRequest, dtoPayment *order
 }
 
 func (s *Service) UpdateOrderObservation(dtoId *entitydto.IdRequest, dto *orderdto.UpdateObservationOrder) error {
-	order, err := s.Repository.GetOrder(dtoId.Id.String())
+	order, err := s.Repository.GetOrderById(dtoId.Id.String())
 
 	if err != nil {
 		return err
@@ -131,15 +132,15 @@ func (s *Service) UpdateOrderStatus() error {
 }
 
 func (s *Service) GetOrder(dto *entitydto.IdRequest) (*orderentity.Order, error) {
-	if order, err := s.Repository.GetOrder(dto.Id.String()); err != nil {
+	if order, err := s.Repository.GetOrderById(dto.Id.String()); err != nil {
 		return nil, err
 	} else {
 		return order, nil
 	}
 }
 
-func (s *Service) GetAllOrder() ([]orderentity.Order, error) {
-	if orders, err := s.Repository.GetAllOrder(); err != nil {
+func (s *Service) GetAllOrder(dto *filterdto.Filter) ([]orderentity.Order, error) {
+	if orders, err := s.Repository.GetAllOrder(dto.Key, dto.Value); err != nil {
 		return nil, err
 	} else {
 		return orders, nil

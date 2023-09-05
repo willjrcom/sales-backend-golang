@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	filterdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/filter"
 	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
 )
 
@@ -30,7 +31,7 @@ func (s *Service) RegisterProduct(dto *productdto.CreateProductInput) (uuid.UUID
 }
 
 func (s *Service) UpdateProduct(dtoId entitydto.IdRequest, dto *productdto.UpdateProductInput) error {
-	product, err := s.Repository.GetProduct(dtoId.Id.String())
+	product, err := s.Repository.GetProductById(dtoId.Id.String())
 
 	if err != nil {
 		return err
@@ -47,8 +48,8 @@ func (s *Service) UpdateProduct(dtoId entitydto.IdRequest, dto *productdto.Updat
 	return nil
 }
 
-func (s *Service) DeleteProduct(dto *entitydto.IdRequest) error {
-	if _, err := s.Repository.GetProduct(dto.Id.String()); err != nil {
+func (s *Service) DeleteProductById(dto *entitydto.IdRequest) error {
+	if _, err := s.Repository.GetProductById(dto.Id.String()); err != nil {
 		return err
 	}
 
@@ -59,10 +60,18 @@ func (s *Service) DeleteProduct(dto *entitydto.IdRequest) error {
 	return nil
 }
 
-func (s *Service) GetProduct(dto *entitydto.IdRequest) (*productentity.Product, error) {
-	if product, err := s.Repository.GetProduct(dto.Id.String()); err != nil {
+func (s *Service) GetProductById(dto *entitydto.IdRequest) (*productentity.Product, error) {
+	if product, err := s.Repository.GetProductById(dto.Id.String()); err != nil {
 		return nil, err
 	} else {
 		return product, nil
+	}
+}
+
+func (s *Service) GetAllProduct(dto *filterdto.Filter) ([]productentity.Product, error) {
+	if products, err := s.Repository.GetAllProduct(dto.Key, dto.Value); err != nil {
+		return nil, err
+	} else {
+		return products, nil
 	}
 }
