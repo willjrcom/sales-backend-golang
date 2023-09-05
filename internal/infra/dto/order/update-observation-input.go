@@ -7,7 +7,5 @@ type UpdateObservationOrder struct {
 }
 
 func (u *UpdateObservationOrder) UpdateModel(order *orderentity.Order) {
-	if u.Observation != "" {
-		order.Observation = u.Observation
-	}
+	order.Observation = u.Observation
 }
