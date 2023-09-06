@@ -31,7 +31,7 @@ func (s *Service) CreateOrder(dto *orderdto.CreateOrderInput) (uuid.UUID, error)
 }
 
 func (s *Service) LaunchOrder(dto *entitydto.IdRequest) error {
-	order, err := s.Repository.GetOrderById(dto.Id.String())
+	order, err := s.Repository.GetOrderById(dto.ID.String())
 
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func (s *Service) LaunchOrder(dto *entitydto.IdRequest) error {
 }
 
 func (s *Service) ArchiveOrder(dto *entitydto.IdRequest) error {
-	order, err := s.Repository.GetOrderById(dto.Id.String())
+	order, err := s.Repository.GetOrderById(dto.ID.String())
 
 	if err != nil {
 		return err
@@ -63,7 +63,7 @@ func (s *Service) ArchiveOrder(dto *entitydto.IdRequest) error {
 }
 
 func (s *Service) CancelOrder(dto *entitydto.IdRequest) error {
-	order, err := s.Repository.GetOrderById(dto.Id.String())
+	order, err := s.Repository.GetOrderById(dto.ID.String())
 
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func (s *Service) CancelOrder(dto *entitydto.IdRequest) error {
 }
 
 func (s *Service) UpdateOrderPayment(dto *entitydto.IdRequest, dtoPayment *orderdto.UpdatePaymentMethod) error {
-	order, err := s.Repository.GetOrderById(dto.Id.String())
+	order, err := s.Repository.GetOrderById(dto.ID.String())
 
 	if err != nil {
 		return err
@@ -95,7 +95,7 @@ func (s *Service) UpdateOrderPayment(dto *entitydto.IdRequest, dtoPayment *order
 }
 
 func (s *Service) UpdateOrderObservation(dtoId *entitydto.IdRequest, dto *orderdto.UpdateObservationOrder) error {
-	order, err := s.Repository.GetOrderById(dtoId.Id.String())
+	order, err := s.Repository.GetOrderById(dtoId.ID.String())
 
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func (s *Service) UpdateOrderStatus() error {
 }
 
 func (s *Service) GetOrderById(dto *entitydto.IdRequest) (*orderentity.Order, error) {
-	if order, err := s.Repository.GetOrderById(dto.Id.String()); err != nil {
+	if order, err := s.Repository.GetOrderById(dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		return order, nil

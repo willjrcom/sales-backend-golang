@@ -30,7 +30,7 @@ func (s *Service) RegisterClient(dto *clientdto.RegisterClientInput) error {
 }
 
 func (s *Service) UpdateClient(dtoId *entitydto.IdRequest, dto *clientdto.UpdateClientInput) error {
-	client, err := s.Repository.GetClientById(dtoId.Id.String())
+	client, err := s.Repository.GetClientById(dtoId.ID.String())
 
 	if err != nil {
 		return err
@@ -48,11 +48,11 @@ func (s *Service) UpdateClient(dtoId *entitydto.IdRequest, dto *clientdto.Update
 }
 
 func (s *Service) DeleteClient(dto *entitydto.IdRequest) error {
-	if _, err := s.Repository.GetClientById(dto.Id.String()); err != nil {
+	if _, err := s.Repository.GetClientById(dto.ID.String()); err != nil {
 		return err
 	}
 
-	if err := s.Repository.DeleteClient(dto.Id.String()); err != nil {
+	if err := s.Repository.DeleteClient(dto.ID.String()); err != nil {
 		return err
 	}
 
@@ -60,7 +60,7 @@ func (s *Service) DeleteClient(dto *entitydto.IdRequest) error {
 }
 
 func (s *Service) GetClientById(dto *entitydto.IdRequest) (*cliententity.Client, error) {
-	if client, err := s.Repository.GetClientById(dto.Id.String()); err != nil {
+	if client, err := s.Repository.GetClientById(dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		return client, nil

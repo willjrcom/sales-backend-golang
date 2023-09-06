@@ -31,7 +31,7 @@ func (s *Service) RegisterProduct(dto *productdto.CreateProductInput) (uuid.UUID
 }
 
 func (s *Service) UpdateProduct(dtoId *entitydto.IdRequest, dto *productdto.UpdateProductInput) error {
-	product, err := s.Repository.GetProductById(dtoId.Id.String())
+	product, err := s.Repository.GetProductById(dtoId.ID.String())
 
 	if err != nil {
 		return err
@@ -49,11 +49,11 @@ func (s *Service) UpdateProduct(dtoId *entitydto.IdRequest, dto *productdto.Upda
 }
 
 func (s *Service) DeleteProductById(dto *entitydto.IdRequest) error {
-	if _, err := s.Repository.GetProductById(dto.Id.String()); err != nil {
+	if _, err := s.Repository.GetProductById(dto.ID.String()); err != nil {
 		return err
 	}
 
-	if err := s.Repository.DeleteProduct(dto.Id.String()); err != nil {
+	if err := s.Repository.DeleteProduct(dto.ID.String()); err != nil {
 		return err
 	}
 
@@ -61,7 +61,7 @@ func (s *Service) DeleteProductById(dto *entitydto.IdRequest) error {
 }
 
 func (s *Service) GetProductById(dto *entitydto.IdRequest) (*productentity.Product, error) {
-	if product, err := s.Repository.GetProductById(dto.Id.String()); err != nil {
+	if product, err := s.Repository.GetProductById(dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		return product, nil
