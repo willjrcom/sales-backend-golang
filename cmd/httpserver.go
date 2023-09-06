@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
+	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category-product"
 	productrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 )
@@ -34,9 +35,10 @@ var HttpserverCmd = &cobra.Command{
 
 		// Load repositories
 		productRepo := productrepositorylocal.NewProductRepositoryLocal()
+		categoryRepo := categoryrepositorylocal.NewCategoryProductRepositoryLocal()
 
 		// Load services
-		productService := productusecases.NewService(productRepo)
+		productService := productusecases.NewService(productRepo, categoryRepo)
 
 		// Load handlers
 		handlerProduct := handlerimpl.NewHandlerProduct(productService)
