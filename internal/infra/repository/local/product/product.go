@@ -70,7 +70,7 @@ func (r *ProductRepositoryLocal) GetProductBy(key string, value string) (*produc
 		if key == "code" && p.Code == value {
 			return p, nil
 		}
-		if key == "category" && p.Category.Name == value {
+		if key == "category" && p.CategoryID.String() == value {
 			return p, nil
 		}
 		if key == "size" && p.Size == value {

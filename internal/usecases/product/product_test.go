@@ -10,14 +10,17 @@ import (
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	filterdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/filter"
 	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
+	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category-product"
 	productrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
 )
 
 var service *Service
 
 func TestMain(m *testing.M) {
-	repo := productrepositorylocal.NewProductRepositoryLocal()
-	service = NewService(repo)
+	rProduct := productrepositorylocal.NewProductRepositoryLocal()
+	rCategoryProduct := categoryrepositorylocal.NewCategoryProductRepositoryLocal()
+
+	service = NewService(rProduct, rCategoryProduct)
 
 	exitCode := m.Run()
 
@@ -26,11 +29,11 @@ func TestMain(m *testing.M) {
 
 func TestRegisterProduct(t *testing.T) {
 	dto := &productdto.CreateProductInput{
-		Code:     "123",
-		Name:     "Test Product",
-		Cost:     100,
-		Price:    100,
-		Category: "Test Category",
+		Code:       "123",
+		Name:       "Test Product",
+		Cost:       100,
+		Price:      100,
+		CategoryID: uuid.New(),
 	}
 
 	idProduct, err := service.RegisterProduct(dto)
@@ -47,10 +50,10 @@ func TestRegisterProduct(t *testing.T) {
 func TestRegisterProductError(t *testing.T) {
 	// Teste 1 - No Code
 	dto := &productdto.CreateProductInput{
-		Name:     "Test Product",
-		Cost:     90,
-		Price:    100,
-		Category: "Test Category",
+		Name:       "Test Product",
+		Cost:       90,
+		Price:      100,
+		CategoryID: uuid.New(),
 	}
 
 	_, err := service.RegisterProduct(dto)
@@ -59,10 +62,10 @@ func TestRegisterProductError(t *testing.T) {
 
 	// Test 2 - No Name
 	dto = &productdto.CreateProductInput{
-		Code:     "CODE",
-		Cost:     90,
-		Price:    100,
-		Category: "Test Category",
+		Code:       "CODE",
+		Cost:       90,
+		Price:      100,
+		CategoryID: uuid.New(),
 	}
 
 	_, err = service.RegisterProduct(dto)
@@ -71,11 +74,11 @@ func TestRegisterProductError(t *testing.T) {
 
 	// Test 3 - Price greater than cost
 	dto = &productdto.CreateProductInput{
-		Code:     "CODE",
-		Name:     "Test Product",
-		Cost:     150,
-		Price:    100,
-		Category: "Test Category",
+		Code:       "CODE",
+		Name:       "Test Product",
+		Cost:       150,
+		Price:      100,
+		CategoryID: uuid.New(),
 	}
 
 	_, err = service.RegisterProduct(dto)
@@ -106,7 +109,6 @@ func TestUpdateProduct(t *testing.T) {
 
 	jsonTest1 := []byte(`{"name": "new Product"}`)
 	jsonTest2 := []byte(`{"cost": 150}`)
-	jsonTest3 := []byte(`{"category": ""}`)
 
 	// Test 1 - New name
 	assert.Nil(t, json.Unmarshal(jsonTest1, &dto))
@@ -121,12 +123,6 @@ func TestUpdateProduct(t *testing.T) {
 	err = service.UpdateProduct(dtoId, dto)
 	assert.EqualError(t, err, productdto.ErrCostGreaterThanPrice.Error())
 	*dto.Cost = float64(90.0)
-
-	// Test 3 - No category
-	assert.Nil(t, json.Unmarshal(jsonTest3, &dto))
-
-	err = service.UpdateProduct(dtoId, dto)
-	assert.EqualError(t, err, productdto.ErrCategoryRequired.Error())
 }
 
 func TestGetAll(t *testing.T) {

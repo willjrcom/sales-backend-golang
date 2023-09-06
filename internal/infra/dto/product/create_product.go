@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
-	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 )
 
 var (
@@ -15,18 +14,17 @@ var (
 	ErrNameRequired         = errors.New("name is required")
 	ErrCostGreaterThanPrice = errors.New("Cost must be greater than Price")
 	ErrCategoryRequired     = errors.New("category is required")
-	ErrCategorySizeRequired = errors.New("category size is required")
 )
 
 type CreateProductInput struct {
-	Code        string              `json:"code"`
-	Name        string              `json:"name"`
-	Description string              `json:"description"`
-	Size        string              `json:"size"`
-	Price       float64             `json:"price"`
-	Cost        float64             `json:"cost"`
-	Category    entitydto.IdRequest `json:"category"`
-	IsAvailable bool                `json:"is_available"`
+	Code        string    `json:"code"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Size        string    `json:"size"`
+	Price       float64   `json:"price"`
+	Cost        float64   `json:"cost"`
+	CategoryID  uuid.UUID `json:"category_id"`
+	IsAvailable bool      `json:"is_available"`
 }
 
 func (p *CreateProductInput) validate() error {
@@ -39,6 +37,9 @@ func (p *CreateProductInput) validate() error {
 	if p.Price < p.Cost {
 		return ErrCostGreaterThanPrice
 	}
+	if p.CategoryID == uuid.Nil {
+		return ErrCategoryRequired
+	}
 
 	return nil
 }
@@ -48,8 +49,6 @@ func (p *CreateProductInput) ToModel() (*productentity.Product, error) {
 		return nil, err
 	}
 
-	category := productentity.CategoryProduct{ID: p.Category.ID}
-
 	return &productentity.Product{
 		Entity:      entity.Entity{ID: uuid.New(), CreatedAt: time.Now()},
 		Code:        p.Code,
@@ -58,7 +57,7 @@ func (p *CreateProductInput) ToModel() (*productentity.Product, error) {
 		Size:        p.Size,
 		Price:       p.Price,
 		Cost:        p.Cost,
-		Category:    category,
+		CategoryID:  p.CategoryID,
 		IsAvailable: p.IsAvailable,
 	}, nil
 }

@@ -1,18 +1,19 @@
 package productdto
 
 import (
+	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
 type UpdateProductInput struct {
-	Code        *string  `json:"code"`
-	Name        *string  `json:"name"`
-	Description *string  `json:"description"`
-	Size        *string  `json:"size"`
-	Price       *float64 `json:"price"`
-	Cost        *float64 `json:"cost"`
-	Category    *string  `json:"category"`
-	IsAvailable *bool    `json:"is_available"`
+	Code        *string    `json:"code"`
+	Name        *string    `json:"name"`
+	Description *string    `json:"description"`
+	Size        *string    `json:"size"`
+	Price       *float64   `json:"price"`
+	Cost        *float64   `json:"cost"`
+	CategoryID  *uuid.UUID `json:"category_id"`
+	IsAvailable *bool      `json:"is_available"`
 }
 
 func (p *UpdateProductInput) Validate(product *productentity.Product) error {
@@ -24,10 +25,6 @@ func (p *UpdateProductInput) Validate(product *productentity.Product) error {
 	}
 	if product.Price < product.Cost {
 		return ErrCostGreaterThanPrice
-	}
-
-	if product.Category.Name == "" {
-		return ErrCategoryRequired
 	}
 
 	return nil
@@ -52,8 +49,8 @@ func (p *UpdateProductInput) UpdateModel(product *productentity.Product) error {
 	if p.Cost != nil {
 		product.Cost = *p.Cost
 	}
-	if p.Category != nil {
-		product.Category.Name = *p.Category
+	if p.CategoryID != nil {
+		product.CategoryID = *p.CategoryID
 	}
 	if p.IsAvailable != nil {
 		product.IsAvailable = *p.IsAvailable

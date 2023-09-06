@@ -1,6 +1,7 @@
 package productentity
 
 import (
+	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
@@ -12,6 +13,7 @@ type Product struct {
 	Size        string
 	Price       float64
 	Cost        float64
-	Category    CategoryProduct
+	CategoryID  uuid.UUID `bun:"rel:belongs-to`
+	Category    *CategoryProduct
 	IsAvailable bool
 }

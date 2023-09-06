@@ -9,11 +9,12 @@ import (
 )
 
 type Service struct {
-	Repository productentity.Repository
+	rProduct  productentity.Repository
+	rCategory productentity.RepositoryCategory
 }
 
-func NewService(repository productentity.Repository) *Service {
-	return &Service{Repository: repository}
+func NewService(r productentity.Repository, c productentity.RepositoryCategory) *Service {
+	return &Service{rProduct: r, rCategory: c}
 }
 
 func (s *Service) RegisterProduct(dto *productdto.CreateProductInput) (uuid.UUID, error) {
@@ -23,7 +24,7 @@ func (s *Service) RegisterProduct(dto *productdto.CreateProductInput) (uuid.UUID
 		return uuid.Nil, err
 	}
 
-	if err := s.Repository.RegisterProduct(product); err != nil {
+	if err := s.rProduct.RegisterProduct(product); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -31,7 +32,7 @@ func (s *Service) RegisterProduct(dto *productdto.CreateProductInput) (uuid.UUID
 }
 
 func (s *Service) UpdateProduct(dtoId *entitydto.IdRequest, dto *productdto.UpdateProductInput) error {
-	product, err := s.Repository.GetProductById(dtoId.ID.String())
+	product, err := s.rProduct.GetProductById(dtoId.ID.String())
 
 	if err != nil {
 		return err
@@ -41,7 +42,7 @@ func (s *Service) UpdateProduct(dtoId *entitydto.IdRequest, dto *productdto.Upda
 		return err
 	}
 
-	if err := s.Repository.UpdateProduct(product); err != nil {
+	if err := s.rProduct.UpdateProduct(product); err != nil {
 		return err
 	}
 
@@ -49,11 +50,11 @@ func (s *Service) UpdateProduct(dtoId *entitydto.IdRequest, dto *productdto.Upda
 }
 
 func (s *Service) DeleteProductById(dto *entitydto.IdRequest) error {
-	if _, err := s.Repository.GetProductById(dto.ID.String()); err != nil {
+	if _, err := s.rProduct.GetProductById(dto.ID.String()); err != nil {
 		return err
 	}
 
-	if err := s.Repository.DeleteProduct(dto.ID.String()); err != nil {
+	if err := s.rProduct.DeleteProduct(dto.ID.String()); err != nil {
 		return err
 	}
 
@@ -61,7 +62,7 @@ func (s *Service) DeleteProductById(dto *entitydto.IdRequest) error {
 }
 
 func (s *Service) GetProductById(dto *entitydto.IdRequest) (*productentity.Product, error) {
-	if product, err := s.Repository.GetProductById(dto.ID.String()); err != nil {
+	if product, err := s.rProduct.GetProductById(dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		return product, nil
@@ -69,7 +70,7 @@ func (s *Service) GetProductById(dto *entitydto.IdRequest) (*productentity.Produ
 }
 
 func (s *Service) GetAllProduct(dto *filterdto.Filter) ([]productentity.Product, error) {
-	if products, err := s.Repository.GetAllProduct(dto.Key, dto.Value); err != nil {
+	if products, err := s.rProduct.GetAllProduct(dto.Key, dto.Value); err != nil {
 		return nil, err
 	} else {
 		return products, nil

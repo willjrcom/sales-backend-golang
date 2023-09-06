@@ -8,3 +8,11 @@ type Repository interface {
 	GetProductBy(key string, value string) (*Product, error)
 	GetAllProduct(key string, value string) ([]Product, error)
 }
+
+type RepositoryCategory interface {
+	RegisterCategoryProduct(category *CategoryProduct) error
+	UpdateCategoryProduct(category *CategoryProduct) error
+	DeleteCategoryProduct(id string) error
+	GetCategoryProductById(id string) (*CategoryProduct, error)
+	GetAllCategoryProduct() ([]CategoryProduct, error)
+}
