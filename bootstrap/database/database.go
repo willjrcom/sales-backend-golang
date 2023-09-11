@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -9,6 +10,14 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
+	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
+	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
+	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
 var (
@@ -19,7 +28,7 @@ var (
 	dbName   = "sales-db"
 )
 
-func NewPostgreSQLConnection() (*bun.DB, error) {
+func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 	// Prepare connection string parameterized
 	connectionParams := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
@@ -45,5 +54,79 @@ func NewPostgreSQLConnection() (*bun.DB, error) {
 
 	bun := bun.NewDB(db, pgdialect.New())
 	fmt.Println("Db connected")
+
+	loadModels(ctx, bun)
 	return bun, nil
+}
+
+func loadModels(ctx context.Context, bun *bun.DB) {
+	bun.RegisterModel((*entity.Entity)(nil))
+
+	bun.RegisterModel((*productentity.CategoryProduct)(nil))
+	bun.RegisterModel((*productentity.Product)(nil))
+
+	bun.RegisterModel((*addressentity.Address)(nil))
+	bun.RegisterModel((*personentity.Person)(nil))
+	bun.RegisterModel((*cliententity.Client)(nil))
+	bun.RegisterModel((*employeeentity.Employee)(nil))
+
+	bun.RegisterModel((*itementity.Item)(nil))
+	bun.RegisterModel((*itementity.Items)(nil))
+
+	bun.RegisterModel((*orderentity.DeliveryOrder)(nil))
+	bun.RegisterModel((*orderentity.TableOrder)(nil))
+	bun.RegisterModel((*orderentity.PaymentOrder)(nil))
+	bun.RegisterModel((*orderentity.Order)(nil))
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*entity.Entity)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for category entity")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.CategoryProduct)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for category product")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Product)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for product")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*addressentity.Address)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for address")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*personentity.Person)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for person")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*cliententity.Client)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for client")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*employeeentity.Employee)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for employee")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*itementity.Item)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for item")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*itementity.Items)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for items")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*orderentity.DeliveryOrder)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for delivery order")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*orderentity.TableOrder)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for table order")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*orderentity.PaymentOrder)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for payment order")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*orderentity.Order)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for order")
+	}
 }

@@ -18,12 +18,6 @@ import (
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 )
 
-const (
-	defaultName = "world"
-)
-
-var ()
-
 // httpserverCmd represents the httpserver command
 var HttpserverCmd = &cobra.Command{
 	Use:   "httpserver",
@@ -37,7 +31,7 @@ var HttpserverCmd = &cobra.Command{
 		server := server.NewServerChi()
 
 		// Load database
-		db, err := database.NewPostgreSQLConnection()
+		db, err := database.NewPostgreSQLConnection(ctx)
 
 		if err != nil {
 			panic(err)
