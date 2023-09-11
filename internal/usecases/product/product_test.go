@@ -1,6 +1,7 @@
 package productusecases
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"testing"
@@ -14,12 +15,19 @@ import (
 	productrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
 )
 
-var service *Service
+var (
+	service *Service
+	ctx     context.Context
+)
 
 func TestMain(m *testing.M) {
+	ctx = context.Background()
+
+	// Repository
 	rProduct := productrepositorylocal.NewProductRepositoryLocal()
 	rCategoryProduct := categoryrepositorylocal.NewCategoryProductRepositoryLocal()
 
+	// Service
 	service = NewService(rProduct, rCategoryProduct)
 
 	exitCode := m.Run()
@@ -28,28 +36,35 @@ func TestMain(m *testing.M) {
 }
 
 func TestRegisterProduct(t *testing.T) {
-	dto := &productdto.CreateProductInput{
+	dtoCategory := &productdto.RegisterCategoryProductInput{Name: "pizza", Sizes: []string{"P", "M", "G"}}
+
+	categoryId, err := service.RegisterCategoryProduct(ctx, *dtoCategory)
+
+	assert.Nil(t, err)
+	assert.NotNil(t, categoryId)
+
+	dto := &productdto.RegisterProductInput{
 		Code:       "123",
 		Name:       "Test Product",
 		Cost:       100,
 		Price:      100,
-		CategoryID: uuid.New(),
+		CategoryID: categoryId,
 	}
 
-	idProduct, err := service.RegisterProduct(dto)
+	productId, err := service.RegisterProduct(dto)
 
-	dtoId := entitydto.NewIdRequest(idProduct)
+	dtoId := entitydto.NewIdRequest(productId)
 	product, err := service.GetProductById(dtoId)
 
 	assert.Nil(t, err)
-	assert.NotContains(t, idProduct, uuid.Nil)
+	assert.NotContains(t, productId, uuid.Nil)
 	assert.Equal(t, product.Name, "Test Product")
-	assert.Equal(t, product.ID, idProduct)
+	assert.Equal(t, product.ID, productId)
 }
 
 func TestRegisterProductError(t *testing.T) {
 	// Teste 1 - No Code
-	dto := &productdto.CreateProductInput{
+	dto := &productdto.RegisterProductInput{
 		Name:       "Test Product",
 		Cost:       90,
 		Price:      100,
@@ -61,7 +76,7 @@ func TestRegisterProductError(t *testing.T) {
 	assert.EqualError(t, err, productdto.ErrCodeRequired.Error())
 
 	// Test 2 - No Name
-	dto = &productdto.CreateProductInput{
+	dto = &productdto.RegisterProductInput{
 		Code:       "CODE",
 		Cost:       90,
 		Price:      100,
@@ -73,7 +88,7 @@ func TestRegisterProductError(t *testing.T) {
 	assert.EqualError(t, err, productdto.ErrNameRequired.Error())
 
 	// Test 3 - Price greater than cost
-	dto = &productdto.CreateProductInput{
+	dto = &productdto.RegisterProductInput{
 		Code:       "CODE",
 		Name:       "Test Product",
 		Cost:       150,
@@ -86,7 +101,7 @@ func TestRegisterProductError(t *testing.T) {
 	assert.EqualError(t, err, productdto.ErrCostGreaterThanPrice.Error())
 
 	// Test 4 - No category
-	dto = &productdto.CreateProductInput{
+	dto = &productdto.RegisterProductInput{
 		Code:  "CODE",
 		Name:  "Test Product",
 		Cost:  90,
@@ -99,9 +114,12 @@ func TestRegisterProductError(t *testing.T) {
 }
 
 func TestUpdateProduct(t *testing.T) {
-	products, err := service.GetAllProduct(&filterdto.Filter{})
+	products, err := service.GetAllProductsByCategory(ctx, &filterdto.Category{Category: "teste"})
 
+	assert.Nil(t, err)
+	assert.NotNil(t, products)
 	assert.Equal(t, len(products), 1)
+
 	idProduct := products[0].ID
 
 	dto := &productdto.UpdateProductInput{}
@@ -126,14 +144,14 @@ func TestUpdateProduct(t *testing.T) {
 }
 
 func TestGetAll(t *testing.T) {
-	products, err := service.GetAllProduct(&filterdto.Filter{})
+	products, err := service.GetAllProductsByCategory(ctx, &filterdto.Category{Category: "teste"})
 
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(products))
 }
 
 func TestGetProductById(t *testing.T) {
-	products, err := service.GetAllProduct(&filterdto.Filter{})
+	products, _ := service.GetAllProductsByCategory(ctx, &filterdto.Category{Category: "teste"})
 	assert.Equal(t, len(products), 1)
 	idProduct := products[0].ID
 

@@ -1,6 +1,8 @@
 package productusecases
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -17,7 +19,7 @@ func NewService(r productentity.Repository, c productentity.RepositoryCategory) 
 	return &Service{rProduct: r, rCategory: c}
 }
 
-func (s *Service) RegisterProduct(dto *productdto.CreateProductInput) (uuid.UUID, error) {
+func (s *Service) RegisterProduct(dto *productdto.RegisterProductInput) (uuid.UUID, error) {
 	product, err := dto.ToModel()
 
 	if err != nil {
@@ -69,10 +71,38 @@ func (s *Service) GetProductById(dto *entitydto.IdRequest) (*productentity.Produ
 	}
 }
 
-func (s *Service) GetAllProduct(dto *filterdto.Filter) ([]productentity.Product, error) {
-	if products, err := s.rProduct.GetAllProduct(dto.Key, dto.Value); err != nil {
+func (s *Service) GetProductBy(ctx context.Context, filter *productdto.FilterProductInput) ([]productentity.Product, error) {
+	product := filter.ToModel()
+
+	if products, err := s.rProduct.GetProductsBy(ctx, product); err != nil {
 		return nil, err
 	} else {
 		return products, nil
 	}
+}
+
+func (s *Service) GetAllProductsByCategory(ctx context.Context, dto *filterdto.Category) ([]productentity.Product, error) {
+	products, err := s.rProduct.GetAllProductsByCategory(ctx, dto.Category)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return products, nil
+}
+
+func (s *Service) RegisterCategoryProduct(ctx context.Context, dto productdto.RegisterCategoryProductInput) (uuid.UUID, error) {
+	categoryProduct, err := dto.ToModel()
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	err = s.rCategory.RegisterCategoryProduct(categoryProduct)
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return categoryProduct.ID, nil
 }
