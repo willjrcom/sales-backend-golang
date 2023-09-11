@@ -60,30 +60,6 @@ func (r *UpdateClientInput) UpdateModel(client *cliententity.Client) error {
 	if r.Cpf != nil {
 		client.Cpf = *r.Cpf
 	}
-	if r.Street != nil {
-		client.Address.Street = *r.Street
-	}
-	if r.Number != nil {
-		client.Address.Number = *r.Number
-	}
-	if r.Complement != nil {
-		client.Address.Complement = *r.Complement
-	}
-	if r.Reference != nil {
-		client.Address.Reference = *r.Reference
-	}
-	if r.Neighborhood != nil {
-		client.Address.Neighborhood = *r.Neighborhood
-	}
-	if r.City != nil {
-		client.Address.City = *r.City
-	}
-	if r.State != nil {
-		client.Address.State = *r.State
-	}
-	if r.Cep != nil {
-		client.Address.Cep = *r.Cep
-	}
 
 	return nil
 }

@@ -4,3 +4,7 @@ type Filter struct {
 	Key   string
 	Value string
 }
+
+type Category struct {
+	Category string
+}

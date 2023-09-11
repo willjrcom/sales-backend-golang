@@ -2,7 +2,6 @@ package productdto
 
 import (
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
@@ -12,11 +11,11 @@ import (
 var (
 	ErrCodeRequired         = errors.New("code is required")
 	ErrNameRequired         = errors.New("name is required")
-	ErrCostGreaterThanPrice = errors.New("Cost must be greater than Price")
+	ErrCostGreaterThanPrice = errors.New("cost must be greater than Price")
 	ErrCategoryRequired     = errors.New("category is required")
 )
 
-type CreateProductInput struct {
+type RegisterProductInput struct {
 	Code        string    `json:"code"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
@@ -27,7 +26,7 @@ type CreateProductInput struct {
 	IsAvailable bool      `json:"is_available"`
 }
 
-func (p *CreateProductInput) validate() error {
+func (p *RegisterProductInput) validate() error {
 	if p.Code == "" {
 		return ErrCodeRequired
 	}
@@ -44,13 +43,13 @@ func (p *CreateProductInput) validate() error {
 	return nil
 }
 
-func (p *CreateProductInput) ToModel() (*productentity.Product, error) {
+func (p *RegisterProductInput) ToModel() (*productentity.Product, error) {
 	if err := p.validate(); err != nil {
 		return nil, err
 	}
 
 	return &productentity.Product{
-		Entity:      entity.Entity{ID: uuid.New(), CreatedAt: time.Now()},
+		Entity:      entity.NewEntity(),
 		Code:        p.Code,
 		Name:        p.Name,
 		Description: p.Description,

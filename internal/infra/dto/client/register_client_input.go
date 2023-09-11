@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	persondto "github.com/willjrcom/sales-backend-go/internal/infra/dto/person"
@@ -34,16 +33,6 @@ func (r *RegisterClientInput) ToModel() (*cliententity.Client, error) {
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
-	adress := addressentity.Address{
-		Street:       r.Person.Address.Street,
-		Number:       r.Person.Address.Number,
-		Complement:   r.Person.Address.Complement,
-		Reference:    r.Person.Address.Reference,
-		Neighborhood: r.Person.Address.Neighborhood,
-		City:         r.Person.Address.City,
-		State:        r.Person.Address.State,
-		Cep:          r.Person.Address.Cep,
-	}
 
 	person := personentity.Person{
 		Name:     r.Person.Name,
@@ -51,7 +40,6 @@ func (r *RegisterClientInput) ToModel() (*cliententity.Client, error) {
 		Email:    r.Person.Email,
 		Contacts: r.Person.Contacts,
 		Cpf:      r.Person.Cpf,
-		Address:  adress,
 	}
 
 	return &cliententity.Client{
