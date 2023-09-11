@@ -19,22 +19,22 @@ func NewService(r productentity.Repository, c productentity.RepositoryCategory) 
 	return &Service{rProduct: r, rCategory: c}
 }
 
-func (s *Service) RegisterProduct(dto *productdto.RegisterProductInput) (uuid.UUID, error) {
+func (s *Service) RegisterProduct(ctx context.Context, dto *productdto.RegisterProductInput) (uuid.UUID, error) {
 	product, err := dto.ToModel()
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	if err := s.rProduct.RegisterProduct(product); err != nil {
+	if err := s.rProduct.RegisterProduct(ctx, product); err != nil {
 		return uuid.Nil, err
 	}
 
 	return product.ID, nil
 }
 
-func (s *Service) UpdateProduct(dtoId *entitydto.IdRequest, dto *productdto.UpdateProductInput) error {
-	product, err := s.rProduct.GetProductById(dtoId.ID.String())
+func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IdRequest, dto *productdto.UpdateProductInput) error {
+	product, err := s.rProduct.GetProductById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
@@ -44,27 +44,27 @@ func (s *Service) UpdateProduct(dtoId *entitydto.IdRequest, dto *productdto.Upda
 		return err
 	}
 
-	if err := s.rProduct.UpdateProduct(product); err != nil {
+	if err := s.rProduct.UpdateProduct(ctx, product); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *Service) DeleteProductById(dto *entitydto.IdRequest) error {
-	if _, err := s.rProduct.GetProductById(dto.ID.String()); err != nil {
+func (s *Service) DeleteProductById(ctx context.Context, dto *entitydto.IdRequest) error {
+	if _, err := s.rProduct.GetProductById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
-	if err := s.rProduct.DeleteProduct(dto.ID.String()); err != nil {
+	if err := s.rProduct.DeleteProduct(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *Service) GetProductById(dto *entitydto.IdRequest) (*productentity.Product, error) {
-	if product, err := s.rProduct.GetProductById(dto.ID.String()); err != nil {
+func (s *Service) GetProductById(ctx context.Context, dto *entitydto.IdRequest) (*productentity.Product, error) {
+	if product, err := s.rProduct.GetProductById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		return product, nil
@@ -98,7 +98,7 @@ func (s *Service) RegisterCategoryProduct(ctx context.Context, dto productdto.Re
 		return uuid.Nil, err
 	}
 
-	err = s.rCategory.RegisterCategoryProduct(categoryProduct)
+	err = s.rCategory.RegisterCategoryProduct(ctx, categoryProduct)
 
 	if err != nil {
 		return uuid.Nil, err

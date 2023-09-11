@@ -95,7 +95,7 @@ func (r *ProductRepositoryBun) GetProductsBy(ctx context.Context, p *productenti
 func (r *ProductRepositoryBun) GetAllProductsByCategory(ctx context.Context, category string) ([]productentity.Product, error) {
 	products := []productentity.Product{}
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&products).Where("category.name = ?", category).Scan(ctx)
+	err := r.db.NewSelect().Model(&products).Relation("Category").Where("category.name = ?", category).Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {

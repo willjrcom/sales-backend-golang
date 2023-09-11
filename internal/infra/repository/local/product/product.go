@@ -23,7 +23,7 @@ func NewProductRepositoryLocal() *ProductRepositoryLocal {
 	return &ProductRepositoryLocal{products: make(map[uuid.UUID]*productentity.Product)}
 }
 
-func (r *ProductRepositoryLocal) RegisterProduct(p *productentity.Product) error {
+func (r *ProductRepositoryLocal) RegisterProduct(_ context.Context, p *productentity.Product) error {
 	r.mu.Lock()
 
 	if _, ok := r.products[p.ID]; ok {
@@ -36,14 +36,14 @@ func (r *ProductRepositoryLocal) RegisterProduct(p *productentity.Product) error
 	return nil
 }
 
-func (r *ProductRepositoryLocal) UpdateProduct(p *productentity.Product) error {
+func (r *ProductRepositoryLocal) UpdateProduct(_ context.Context, p *productentity.Product) error {
 	r.mu.Lock()
 	r.products[p.ID] = p
 	r.mu.Unlock()
 	return nil
 }
 
-func (r *ProductRepositoryLocal) DeleteProduct(id string) error {
+func (r *ProductRepositoryLocal) DeleteProduct(_ context.Context, id string) error {
 	r.mu.Lock()
 
 	if _, ok := r.products[uuid.MustParse(id)]; !ok {
@@ -56,7 +56,7 @@ func (r *ProductRepositoryLocal) DeleteProduct(id string) error {
 	return nil
 }
 
-func (r *ProductRepositoryLocal) GetProductById(id string) (*productentity.Product, error) {
+func (r *ProductRepositoryLocal) GetProductById(_ context.Context, id string) (*productentity.Product, error) {
 	r.mu.Lock()
 
 	if p, ok := r.products[uuid.MustParse(id)]; ok {

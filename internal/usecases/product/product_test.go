@@ -51,10 +51,10 @@ func TestRegisterProduct(t *testing.T) {
 		CategoryID: categoryId,
 	}
 
-	productId, err := service.RegisterProduct(dto)
+	productId, err := service.RegisterProduct(ctx, dto)
 
 	dtoId := entitydto.NewIdRequest(productId)
-	product, err := service.GetProductById(dtoId)
+	product, err := service.GetProductById(ctx, dtoId)
 
 	assert.Nil(t, err)
 	assert.NotContains(t, productId, uuid.Nil)
@@ -71,7 +71,7 @@ func TestRegisterProductError(t *testing.T) {
 		CategoryID: uuid.New(),
 	}
 
-	_, err := service.RegisterProduct(dto)
+	_, err := service.RegisterProduct(ctx, dto)
 	assert.NotNil(t, err)
 	assert.EqualError(t, err, productdto.ErrCodeRequired.Error())
 
@@ -83,7 +83,7 @@ func TestRegisterProductError(t *testing.T) {
 		CategoryID: uuid.New(),
 	}
 
-	_, err = service.RegisterProduct(dto)
+	_, err = service.RegisterProduct(ctx, dto)
 	assert.NotNil(t, err)
 	assert.EqualError(t, err, productdto.ErrNameRequired.Error())
 
@@ -96,7 +96,7 @@ func TestRegisterProductError(t *testing.T) {
 		CategoryID: uuid.New(),
 	}
 
-	_, err = service.RegisterProduct(dto)
+	_, err = service.RegisterProduct(ctx, dto)
 	assert.NotNil(t, err)
 	assert.EqualError(t, err, productdto.ErrCostGreaterThanPrice.Error())
 
@@ -108,7 +108,7 @@ func TestRegisterProductError(t *testing.T) {
 		Price: 100,
 	}
 
-	_, err = service.RegisterProduct(dto)
+	_, err = service.RegisterProduct(ctx, dto)
 	assert.NotNil(t, err)
 	assert.EqualError(t, err, productdto.ErrCategoryRequired.Error())
 }
@@ -132,13 +132,13 @@ func TestUpdateProduct(t *testing.T) {
 	assert.Nil(t, json.Unmarshal(jsonTest1, &dto))
 	assert.Equal(t, "new Product", (*dto.Name))
 
-	err = service.UpdateProduct(dtoId, dto)
+	err = service.UpdateProduct(ctx, dtoId, dto)
 	assert.Nil(t, err)
 
 	// Test 2 - Cost greater than Price
 	assert.Nil(t, json.Unmarshal(jsonTest2, &dto))
 
-	err = service.UpdateProduct(dtoId, dto)
+	err = service.UpdateProduct(ctx, dtoId, dto)
 	assert.EqualError(t, err, productdto.ErrCostGreaterThanPrice.Error())
 	*dto.Cost = float64(90.0)
 }
@@ -156,7 +156,7 @@ func TestGetProductById(t *testing.T) {
 	idProduct := products[0].ID
 
 	dtoId := entitydto.NewIdRequest(idProduct)
-	product, err := service.GetProductById(dtoId)
+	product, err := service.GetProductById(ctx, dtoId)
 
 	assert.Nil(t, err)
 	assert.Equal(t, "new Product", product.Name)

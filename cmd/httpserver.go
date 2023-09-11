@@ -11,8 +11,8 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
-	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category-product"
-	productrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
+	categoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/category-product"
+	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 )
 
@@ -35,15 +35,15 @@ var HttpserverCmd = &cobra.Command{
 		server := server.NewServerChi()
 
 		// Load database
-		_, err := database.NewPostgreSQLConnection()
+		db, err := database.NewPostgreSQLConnection()
 
 		if err != nil {
 			panic(err)
 		}
 
 		// Load repositories
-		productRepo := productrepositorylocal.NewProductRepositoryLocal()
-		categoryRepo := categoryrepositorylocal.NewCategoryProductRepositoryLocal()
+		productRepo := productrepositorybun.NewProductRepositoryBun(db)
+		categoryRepo := categoryrepositorybun.NewCategoryProductRepositoryBun(db)
 
 		// Load services
 		productService := productusecases.NewService(productRepo, categoryRepo)
