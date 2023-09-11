@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  database:
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=sales-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+    networks:
+      - default
+
+volumes:
+  data:
+    
+# Subir container
+# docker-compose -f docker-compose.dev.yml up -d

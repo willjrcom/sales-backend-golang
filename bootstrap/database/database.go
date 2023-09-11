@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/uptrace/bun"
@@ -10,26 +11,39 @@ import (
 	"github.com/uptrace/bun/driver/pgdriver"
 )
 
-// NewPostgreSQLConnection creates a connection with PostgreSQL using sqlx
+var (
+	username = "admin"
+	password = "admin"
+	host     = "localhost"
+	port     = "5432"
+	dbName   = "sales-db"
+)
+
 func NewPostgreSQLConnection() (*bun.DB, error) {
 	// Prepare connection string parameterized
 	connectionParams := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		"name",
-		"password",
-		"host",
-		"5432",
-		"dbname",
+		username,
+		password,
+		host,
+		port,
+		dbName,
 	)
 
 	// Connect to database doing a PING
-	sqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(connectionParams), pgdriver.WithTimeout(time.Second*30)))
+	db := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(connectionParams), pgdriver.WithTimeout(time.Second*30)))
+
+	// Verifique se o banco de dados já existe.
+	if err := db.Ping(); err != nil {
+		log.Printf("erro ao conectar ao banco de dados: %v", err)
+	}
 
 	// set connection settings
-	sqlDB.SetMaxOpenConns(5)
-	sqlDB.SetMaxIdleConns(5)
-	sqlDB.SetConnMaxLifetime(time.Duration(60) * time.Minute)
-	db := bun.NewDB(sqlDB, pgdialect.New())
+	db.SetMaxOpenConns(5)
+	db.SetMaxIdleConns(5)
+	db.SetConnMaxLifetime(time.Duration(60) * time.Minute)
 
-	return db, nil
+	bun := bun.NewDB(db, pgdialect.New())
+	fmt.Println("Db connected")
+	return bun, nil
 }
