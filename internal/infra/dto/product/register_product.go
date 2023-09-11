@@ -36,7 +36,7 @@ func (p *RegisterProductInput) validate() error {
 	if p.Price < p.Cost {
 		return ErrCostGreaterThanPrice
 	}
-	if p.CategoryID == uuid.Nil {
+	if len(p.CategoryID.String()) == 0 || p.CategoryID == uuid.Nil {
 		return ErrCategoryRequired
 	}
 

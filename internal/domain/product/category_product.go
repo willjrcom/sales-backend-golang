@@ -6,7 +6,7 @@ import (
 
 type CategoryProduct struct {
 	entity.Entity
-	Name     string
-	Sizes    []string
-	Products []*Product `bun:"rel:has-many"`
+	Name     string     `bun:"name"`
+	Sizes    []string   `bun:"sizes"`
+	Products []*Product `bun:"products,rel:has-many,join:id=id"`
 }

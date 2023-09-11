@@ -7,10 +7,10 @@ import (
 )
 
 type Entity struct {
-	ID        uuid.UUID
-	CreatedAt time.Time
-	UpdatedAt *time.Time
-	DeletedAt *time.Time
+	ID        uuid.UUID  `bun:"id,type:uuid,pk"`
+	CreatedAt time.Time  `bun:"created_at"`
+	UpdatedAt *time.Time `bun:"updated_at"`
+	DeletedAt *time.Time `bun:"deleted_at"`
 }
 
 func NewEntity() Entity {

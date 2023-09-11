@@ -2,9 +2,11 @@ package categoryrepositorybun
 
 import (
 	"context"
+	"log"
 	"sync"
 
 	"github.com/uptrace/bun"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -13,8 +15,22 @@ type CategoryProductRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewCategoryProductRepositoryBun(db *bun.DB) *CategoryProductRepositoryBun {
-	return &CategoryProductRepositoryBun{db: db}
+func NewCategoryProductRepositoryBun(ctx context.Context, db *bun.DB) *CategoryProductRepositoryBun {
+	r := &CategoryProductRepositoryBun{db: db}
+
+	r.db.RegisterModel((*entity.Entity)(nil))
+	r.db.RegisterModel((*productentity.CategoryProduct)(nil))
+
+	if _, err := r.db.NewCreateTable().IfNotExists().Model((*entity.Entity)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for category entity")
+	}
+
+	if _, err := r.db.NewCreateTable().IfNotExists().Model((*productentity.CategoryProduct)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for category product")
+	}
+
+	log.Println("CategoryProductRepositoryBun created")
+	return r
 }
 
 func (r *CategoryProductRepositoryBun) RegisterCategoryProduct(ctx context.Context, cp *productentity.CategoryProduct) error {

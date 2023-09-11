@@ -5,18 +5,20 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
+	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
+	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
 type handlerProductImpl struct {
-	productService *productusecases.Service
+	ps *productusecases.Service
 }
 
 func NewHandlerProduct(productService *productusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerProductImpl{
-		productService: productService,
+		ps: productService,
 	}
 
 	c.With().Group(func(c chi.Router) {
@@ -31,8 +33,18 @@ func NewHandlerProduct(productService *productusecases.Service) *handler.Handler
 }
 
 func (h *handlerProductImpl) handlerRegisterProduct(w http.ResponseWriter, r *http.Request) {
-	//ctx := r.Context()
-	w.Write([]byte("new product"))
+	ctx := r.Context()
+	product := &productdto.RegisterProductInput{}
+	jsonpkg.ParseBody(r, product)
+
+	id, err := h.ps.RegisterProduct(ctx, product)
+
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.Write([]byte("new product: " + id.String()))
 }
 
 func (h *handlerProductImpl) handlerUpdateProduct(w http.ResponseWriter, r *http.Request) {

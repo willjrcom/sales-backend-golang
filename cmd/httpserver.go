@@ -4,6 +4,7 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"context"
 	"flag"
 	"net/http"
 
@@ -13,6 +14,7 @@ import (
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
 	categoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/category-product"
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
+	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 )
 
@@ -31,7 +33,7 @@ var HttpserverCmd = &cobra.Command{
 		port, _ := cmd.Flags().GetString("port")
 
 		flag.Parse()
-
+		ctx := context.Background()
 		server := server.NewServerChi()
 
 		// Load database
@@ -43,15 +45,18 @@ var HttpserverCmd = &cobra.Command{
 
 		// Load repositories
 		productRepo := productrepositorybun.NewProductRepositoryBun(db)
-		categoryRepo := categoryrepositorybun.NewCategoryProductRepositoryBun(db)
+		categoryRepo := categoryrepositorybun.NewCategoryProductRepositoryBun(ctx, db)
 
 		// Load services
 		productService := productusecases.NewService(productRepo, categoryRepo)
+		categoryProductService := categoryproductusecases.NewService(categoryRepo)
 
 		// Load handlers
 		handlerProduct := handlerimpl.NewHandlerProduct(productService)
+		handlerCategoryProduct := handlerimpl.NewHandlerCategoryProduct(categoryProductService)
 
 		server.AddHandler(handlerProduct)
+		server.AddHandler(handlerCategoryProduct)
 
 		if err := server.StartServer(port); err != nil {
 			panic(err)

@@ -90,19 +90,3 @@ func (s *Service) GetAllProductsByCategory(ctx context.Context, dto *filterdto.C
 
 	return products, nil
 }
-
-func (s *Service) RegisterCategoryProduct(ctx context.Context, dto productdto.RegisterCategoryProductInput) (uuid.UUID, error) {
-	categoryProduct, err := dto.ToModel()
-
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	err = s.rCategory.RegisterCategoryProduct(ctx, categoryProduct)
-
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	return categoryProduct.ID, nil
-}
