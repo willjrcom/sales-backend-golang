@@ -1,11 +1,17 @@
 package productrepositorylocal
 
 import (
+	"context"
 	"errors"
 	"sync"
 
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+)
+
+var (
+	errProductExists   = errors.New("product already exists")
+	errProductNotFound = errors.New("product not found")
 )
 
 type ProductRepositoryLocal struct {
@@ -22,7 +28,7 @@ func (r *ProductRepositoryLocal) RegisterProduct(p *productentity.Product) error
 
 	if _, ok := r.products[p.ID]; ok {
 		r.mu.Unlock()
-		return errors.New("Product already exists")
+		return errProductExists
 	}
 
 	r.products[p.ID] = p
@@ -42,7 +48,7 @@ func (r *ProductRepositoryLocal) DeleteProduct(id string) error {
 
 	if _, ok := r.products[uuid.MustParse(id)]; !ok {
 		r.mu.Unlock()
-		return errors.New("Product not found")
+		return errProductNotFound
 	}
 
 	delete(r.products, uuid.MustParse(id))
@@ -59,32 +65,37 @@ func (r *ProductRepositoryLocal) GetProductById(id string) (*productentity.Produ
 	}
 
 	r.mu.Unlock()
-	return nil, errors.New("Product not found")
+	return nil, errProductNotFound
 }
 
-func (r *ProductRepositoryLocal) GetProductBy(key string, value string) (*productentity.Product, error) {
-	for _, p := range r.products {
-		if key == "name" && p.Name == value {
-			return p, nil
+func (r *ProductRepositoryLocal) GetProductsBy(_ context.Context, p *productentity.Product) ([]productentity.Product, error) {
+	products := make([]productentity.Product, 0)
+
+	for _, v := range r.products {
+		if v.Code != "" && v.Code == p.Code {
+			products = append(products, *v)
 		}
-		if key == "code" && p.Code == value {
-			return p, nil
+		if v.Name != "" && v.Name == p.Name {
+			products = append(products, *v)
 		}
-		if key == "category" && p.CategoryID.String() == value {
-			return p, nil
+		if v.CategoryID != uuid.Nil && v.CategoryID == p.CategoryID {
+			products = append(products, *v)
 		}
-		if key == "size" && p.Size == value {
-			return p, nil
+		if v.Size != "" && v.Size == p.Size {
+			products = append(products, *v)
 		}
 	}
-	return nil, errors.New("Product not found")
+
+	return products, nil
 }
 
-func (r *ProductRepositoryLocal) GetAllProduct(key string, value string) ([]productentity.Product, error) {
+func (r *ProductRepositoryLocal) GetAllProductsByCategory(_ context.Context, category string) ([]productentity.Product, error) {
 	products := make([]productentity.Product, 0)
 
 	for _, p := range r.products {
-		products = append(products, *p)
+		if category == "teste" {
+			products = append(products, *p)
+		}
 	}
 
 	return products, nil
