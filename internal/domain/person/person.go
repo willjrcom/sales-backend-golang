@@ -13,6 +13,6 @@ type Person struct {
 	Birthday time.Time
 	Email    string
 	Contacts []string
-	Address  addressentity.Address
+	Address  []addressentity.Address `bun:"rel:has-many"`
 	Cpf      string
 }

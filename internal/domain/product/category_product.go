@@ -1,11 +1,11 @@
 package productentity
 
 import (
-	"github.com/google/uuid"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 type CategoryProduct struct {
-	ID       uuid.UUID
+	entity.Entity
 	Name     string
 	Sizes    []string
 	Products []*Product `bun:"rel:has-many"`

@@ -12,3 +12,7 @@ type Entity struct {
 	UpdatedAt *time.Time
 	DeletedAt *time.Time
 }
+
+func NewEntity() Entity {
+	return Entity{ID: uuid.New(), CreatedAt: time.Now()}
+}
