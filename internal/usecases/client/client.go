@@ -1,18 +1,21 @@
 package clientusecases
 
 import (
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
+	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	filterdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/filter"
 )
 
 type Service struct {
-	Repository cliententity.Repository
+	rClient  cliententity.Repository
+	rAddress addressentity.Repository
 }
 
-func NewService(repository cliententity.Repository) *Service {
-	return &Service{Repository: repository}
+func NewService(rc cliententity.Repository, ra addressentity.Repository) *Service {
+	return &Service{rClient: rc, rAddress: ra}
 }
 
 func (s *Service) RegisterClient(dto *clientdto.RegisterClientInput) error {
@@ -22,7 +25,7 @@ func (s *Service) RegisterClient(dto *clientdto.RegisterClientInput) error {
 		return err
 	}
 
-	if err := s.Repository.RegisterClient(person); err != nil {
+	if err := s.rClient.RegisterClient(person); err != nil {
 		return err
 	}
 
@@ -30,7 +33,7 @@ func (s *Service) RegisterClient(dto *clientdto.RegisterClientInput) error {
 }
 
 func (s *Service) UpdateClient(dtoId *entitydto.IdRequest, dto *clientdto.UpdateClientInput) error {
-	client, err := s.Repository.GetClientById(dtoId.ID.String())
+	client, err := s.rClient.GetClientById(dtoId.ID.String())
 
 	if err != nil {
 		return err
@@ -40,19 +43,19 @@ func (s *Service) UpdateClient(dtoId *entitydto.IdRequest, dto *clientdto.Update
 		return err
 	}
 
-	if err := s.Repository.UpdateClient(client); err != nil {
+	if err := s.rClient.UpdateClient(client); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *Service) DeleteClient(dto *entitydto.IdRequest) error {
-	if _, err := s.Repository.GetClientById(dto.ID.String()); err != nil {
+func (s *Service) RemoveClient(dto *entitydto.IdRequest) error {
+	if _, err := s.rClient.GetClientById(dto.ID.String()); err != nil {
 		return err
 	}
 
-	if err := s.Repository.DeleteClient(dto.ID.String()); err != nil {
+	if err := s.rClient.DeleteClient(dto.ID.String()); err != nil {
 		return err
 	}
 
@@ -60,7 +63,7 @@ func (s *Service) DeleteClient(dto *entitydto.IdRequest) error {
 }
 
 func (s *Service) GetClientById(dto *entitydto.IdRequest) (*cliententity.Client, error) {
-	if client, err := s.Repository.GetClientById(dto.ID.String()); err != nil {
+	if client, err := s.rClient.GetClientById(dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		return client, nil
@@ -68,9 +71,24 @@ func (s *Service) GetClientById(dto *entitydto.IdRequest) (*cliententity.Client,
 }
 
 func (s *Service) GetAllClient(dto *filterdto.Filter) ([]cliententity.Client, error) {
-	if clients, err := s.Repository.GetAllClient(dto.Key, dto.Value); err != nil {
+	if clients, err := s.rClient.GetAllClient(dto.Key, dto.Value); err != nil {
 		return nil, err
 	} else {
 		return clients, nil
 	}
+}
+
+func (s *Service) RegisterAddress(dtoId *entitydto.IdRequest, dto *addressdto.RegisterAddressInput) error {
+	address, err := dto.ToModel()
+
+	if err != nil {
+		return err
+	}
+
+	address.PersonID = dtoId.ID
+	return nil
+}
+
+func (s *Service) RemoveAddress(dto *entitydto.IdRequest) error {
+	return nil
 }
