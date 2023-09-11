@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
 	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category-product"
@@ -32,6 +33,13 @@ var HttpserverCmd = &cobra.Command{
 		flag.Parse()
 
 		server := server.NewServerChi()
+
+		// Load database
+		_, err := database.NewPostgreSQLConnection()
+
+		if err != nil {
+			panic(err)
+		}
 
 		// Load repositories
 		productRepo := productrepositorylocal.NewProductRepositoryLocal()
