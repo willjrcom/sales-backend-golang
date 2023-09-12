@@ -26,7 +26,8 @@ func NewHandlerCategoryProduct(productService *categoryproductusecases.Service) 
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterCategoryProduct)
-		c.Put("/update/{id}", h.handlerUpdateCategoryProduct)
+		c.Put("/update/name/{id}", h.handlerUpdateCategoryProductName)
+		c.Put("/update/sizes/{id}", h.handlerUpdateCategoryProductSizes)
 		c.Delete("/delete/{id}", h.handlerDeleteCategoryProduct)
 		c.Get("/{id}", h.handlerGetCategoryProduct)
 		c.Get("/all", h.handlerGetAllCategoryProducts)
@@ -50,23 +51,42 @@ func (h *handlerCategoryProductImpl) handlerRegisterCategoryProduct(w http.Respo
 	w.Write([]byte("new product: " + id.String()))
 }
 
-func (h *handlerCategoryProductImpl) handlerUpdateCategoryProduct(w http.ResponseWriter, r *http.Request) {
+func (h *handlerCategoryProductImpl) handlerUpdateCategoryProductName(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	category := &productdto.UpdateCategoryProductInput{}
+	category := &productdto.UpdateCategoryProductNameInput{}
 	jsonpkg.ParseBody(r, category)
 
-	err := h.pcs.UpdateCategoryProduct(ctx, dtoId, category)
+	err := h.pcs.UpdateCategoryProductName(ctx, dtoId, category)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		return
 	}
 
-	w.Write([]byte("update product"))
+	w.Write([]byte("update product name"))
+}
+
+func (h *handlerCategoryProductImpl) handlerUpdateCategoryProductSizes(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	category := &productdto.UpdateCategoryProductSizesInput{}
+	jsonpkg.ParseBody(r, category)
+
+	err := h.pcs.UpdateCategoryProductSizes(ctx, dtoId, category)
+
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.Write([]byte("update product sizes"))
 }
 
 func (h *handlerCategoryProductImpl) handlerDeleteCategoryProduct(w http.ResponseWriter, r *http.Request) {
