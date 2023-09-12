@@ -52,7 +52,7 @@ func (r *CategoryProductRepositoryBun) GetCategoryProductById(ctx context.Contex
 	category := &productentity.CategoryProduct{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(category).Where("id = ?", id).Scan(ctx)
+	err := r.db.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -66,7 +66,7 @@ func (r *CategoryProductRepositoryBun) GetAllCategoryProduct(ctx context.Context
 	categories := []productentity.CategoryProduct{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&categories).Scan(ctx)
+	err := r.db.NewSelect().Model(&categories).Relation("Products").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
