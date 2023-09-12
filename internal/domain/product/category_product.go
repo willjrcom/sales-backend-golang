@@ -8,7 +8,7 @@ import (
 type CategoryProduct struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:category_products"`
-	Name          string     `bun:"name"`
-	Sizes         []string   `bun:"sizes"`
-	Products      []*Product `bun:"rel:has-many,join:id=category_id"`
+	Name          string    `bun:"name"`
+	Sizes         []string  `bun:"sizes"`
+	Products      []Product `bun:"rel:has-many,join:id=category_id"`
 }
