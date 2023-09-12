@@ -6,5 +6,5 @@ type Filter struct {
 }
 
 type Category struct {
-	Category string
+	Category string `json:"category"`
 }
