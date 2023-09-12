@@ -2,12 +2,17 @@ package productusecases
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	filterdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/filter"
 	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
+)
+
+var (
+	ErrSizeIsInvalid = errors.New("size is invalid")
 )
 
 type Service struct {
@@ -23,6 +28,16 @@ func (s *Service) RegisterProduct(ctx context.Context, dto *productdto.RegisterP
 	product, err := dto.ToModel()
 
 	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if category, err := s.rCategory.GetCategoryProductById(ctx, product.CategoryID.String()); err == nil {
+		product.Category = category
+	} else {
+		return uuid.Nil, err
+	}
+
+	if exists, err := product.FindSizeInCategory(); !exists {
 		return uuid.Nil, err
 	}
 
