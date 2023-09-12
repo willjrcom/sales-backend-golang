@@ -50,7 +50,7 @@ func (p *UpdateProductInput) UpdateModel(product *productentity.Product) error {
 		product.Cost = *p.Cost
 	}
 	if p.CategoryID != nil {
-		product.CategoryID = *p.CategoryID
+		product.Category.ID = *p.CategoryID
 	}
 	if p.IsAvailable != nil {
 		product.IsAvailable = *p.IsAvailable

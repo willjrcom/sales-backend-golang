@@ -13,6 +13,7 @@ var (
 	ErrNameRequired         = errors.New("name is required")
 	ErrCostGreaterThanPrice = errors.New("cost must be greater than Price")
 	ErrCategoryRequired     = errors.New("category is required")
+	ErrSizeRequired         = errors.New("size is required")
 )
 
 type RegisterProductInput struct {
@@ -38,6 +39,9 @@ func (p *RegisterProductInput) validate() error {
 	}
 	if len(p.CategoryID.String()) == 0 || p.CategoryID == uuid.Nil {
 		return ErrCategoryRequired
+	}
+	if p.Size == "" {
+		return ErrSizeRequired
 	}
 
 	return nil
