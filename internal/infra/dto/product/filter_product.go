@@ -9,7 +9,7 @@ type FilterProductInput struct {
 	Code       *string    `json:"code"`
 	Name       *string    `json:"name"`
 	CategoryID *uuid.UUID `json:"category_id"`
-	Size       *string    `json:"size"`
+	SizeID     *uuid.UUID `json:"size_id"`
 }
 
 func (f *FilterProductInput) ToModel() *productentity.Product {
@@ -24,8 +24,8 @@ func (f *FilterProductInput) ToModel() *productentity.Product {
 	if f.CategoryID != nil {
 		product.CategoryID = *f.CategoryID
 	}
-	if f.Size != nil {
-		product.Size = *f.Size
+	if f.SizeID != nil {
+		product.SizeID = *f.SizeID
 	}
 
 	return product

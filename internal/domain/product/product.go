@@ -16,15 +16,16 @@ var (
 type Product struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:products"`
-	Code          string           `bun:"code"`
-	Name          string           `bun:"name"`
-	Description   string           `bun:"description"`
-	Size          string           `bun:"size"`
-	Price         float64          `bun:"price"`
-	Cost          float64          `bun:"cost"`
-	CategoryID    uuid.UUID        `bun:"column:category_id,type:uuid,notnull"`
-	Category      *CategoryProduct `bun:"rel:belongs-to"`
-	IsAvailable   bool             `bun:"is_available"`
+	Code          string    `bun:"code"`
+	Name          string    `bun:"name"`
+	Description   string    `bun:"description"`
+	Price         float64   `bun:"price"`
+	Cost          float64   `bun:"cost"`
+	IsAvailable   bool      `bun:"is_available"`
+	CategoryID    uuid.UUID `bun:"column:category_id,type:uuid,notnull"`
+	Category      *Category `bun:"rel:belongs-to"`
+	SizeID        uuid.UUID `bun:"column:size_id,type:uuid,notnull"`
+	Size          *Size     `bun:"rel:belongs-to"`
 }
 
 func (p *Product) FindSizeInCategory() (bool, error) {
@@ -33,7 +34,7 @@ func (p *Product) FindSizeInCategory() (bool, error) {
 	}
 
 	for _, v := range p.Category.Sizes {
-		if v == p.Size {
+		if v.ID == p.SizeID {
 			return true, nil
 		}
 	}

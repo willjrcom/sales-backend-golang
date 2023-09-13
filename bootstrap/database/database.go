@@ -62,7 +62,8 @@ func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 func loadModels(ctx context.Context, bun *bun.DB) {
 	bun.RegisterModel((*entity.Entity)(nil))
 
-	bun.RegisterModel((*productentity.CategoryProduct)(nil))
+	bun.RegisterModel((*productentity.Size)(nil))
+	bun.RegisterModel((*productentity.Category)(nil))
 	bun.RegisterModel((*productentity.Product)(nil))
 
 	bun.RegisterModel((*addressentity.Address)(nil))
@@ -79,10 +80,14 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 	bun.RegisterModel((*orderentity.Order)(nil))
 
 	if _, err := bun.NewCreateTable().IfNotExists().Model((*entity.Entity)(nil)).Exec(ctx); err != nil {
-		panic("Couldn't create table for category entity")
+		panic("Couldn't create table for entity")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.CategoryProduct)(nil)).Exec(ctx); err != nil {
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Size)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for size product")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Category)(nil)).Exec(ctx); err != nil {
 		panic("Couldn't create table for category product")
 	}
 

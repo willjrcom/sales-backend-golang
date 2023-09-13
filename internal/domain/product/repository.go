@@ -4,19 +4,27 @@ import (
 	"context"
 )
 
-type Repository interface {
+type ProductRepository interface {
 	RegisterProduct(ctx context.Context, p *Product) error
 	UpdateProduct(ctx context.Context, p *Product) error
 	DeleteProduct(ctx context.Context, id string) error
 	GetProductById(ctx context.Context, id string) (*Product, error)
 	GetProductsBy(ctx context.Context, p *Product) ([]Product, error)
-	GetAllProductsByCategory(ctx context.Context, category string) ([]Product, error)
+	GetAllProducts(ctx context.Context) ([]Product, error)
 }
 
-type RepositoryCategory interface {
-	RegisterCategoryProduct(ctx context.Context, category *CategoryProduct) error
-	UpdateCategoryProduct(ctx context.Context, category *CategoryProduct) error
-	DeleteCategoryProduct(ctx context.Context, id string) error
-	GetCategoryProductById(ctx context.Context, id string) (*CategoryProduct, error)
-	GetAllCategoryProduct(ctx context.Context) ([]CategoryProduct, error)
+type CategoryRepository interface {
+	RegisterCategory(ctx context.Context, category *Category) error
+	UpdateCategory(ctx context.Context, category *Category) error
+	DeleteCategory(ctx context.Context, id string) error
+	GetCategoryById(ctx context.Context, id string) (*Category, error)
+	GetAllCategoryProducts(ctx context.Context) ([]Category, error)
+	GetAllCategorySizes(ctx context.Context) ([]Category, error)
+}
+
+type SizeRepository interface {
+	RegisterSize(ctx context.Context, Size *Size) error
+	UpdateSize(ctx context.Context, Size *Size) error
+	DeleteSize(ctx context.Context, id string) error
+	GetSizeById(ctx context.Context, id string) (*Size, error)
 }
