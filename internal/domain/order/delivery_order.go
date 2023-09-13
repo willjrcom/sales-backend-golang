@@ -9,16 +9,14 @@ import (
 )
 
 type DeliveryOrder struct {
-	Client      cliententity.Client
-	Driver      *employeeentity.Employee
+	ClientID    uuid.UUID
+	Client      *cliententity.Client `bun:"rel:belongs-to,join:client_id=id"`
+	DriverID    uuid.UUID
+	Driver      *employeeentity.Employee `bun:"rel:has-one,join:driver_id=id"`
 	Pickup      *time.Time
 	Delivered   *time.Time
+	IsCompleted bool
 	DeliveryTax float64
-	OrderID     uuid.UUID
-}
-
-func NewDeliveryOrder(Client *cliententity.Client, tax float64) *DeliveryOrder {
-	return &DeliveryOrder{Client: *Client, DeliveryTax: tax}
 }
 
 func (d *DeliveryOrder) LaunchDelivery(driver *employeeentity.Employee) {
