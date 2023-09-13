@@ -2,7 +2,6 @@ package clientdto
 
 import (
 	"errors"
-	"time"
 
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
@@ -43,8 +42,7 @@ func (r *RegisterClientInput) ToModel() (*cliententity.Client, error) {
 	}
 
 	return &cliententity.Client{
-		Person:       person,
-		TotalOrders:  0,
-		DateRegister: time.Now(),
+		Person:      person,
+		TotalOrders: 0,
 	}, nil
 }

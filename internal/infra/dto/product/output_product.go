@@ -12,8 +12,8 @@ type ProductOutput struct {
 	Description string              `json:"description"`
 	Price       float64             `json:"price"`
 	IsAvailable bool                `json:"is_available"`
-	Category    *CategoryNameOutput `json:"category"`
-	Size        *SizeNameOutput     `json:"size"`
+	Category    *CategoryNameOutput `json:"category,omitempty"`
+	Size        *SizeNameOutput     `json:"size,omitempty"`
 }
 
 func (p *ProductOutput) FromModel(model *productentity.Product) {
