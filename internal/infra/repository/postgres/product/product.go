@@ -53,7 +53,7 @@ func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*
 	product := &productentity.Product{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(product).Where("product.id = ?", id).Relation("Category").Scan(ctx)
+	err := r.db.NewSelect().Model(product).Where("product.id = ?", id).Relation("Category").Relation("Size").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -78,11 +78,11 @@ func (r *ProductRepositoryBun) GetProductsBy(ctx context.Context, p *productenti
 	if p.CategoryID != uuid.Nil {
 		query.Where("category_id = ?", p.CategoryID)
 	}
-	if p.Size != "" {
-		query.Where("product.size = ?", p.Size)
+	if p.SizeID != uuid.Nil {
+		query.Where("size_id = ?", p.SizeID)
 	}
 
-	err := query.Relation("Category").Scan(ctx, &products)
+	err := query.Relation("Category").Relation("Size").Scan(ctx, &products)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -92,10 +92,10 @@ func (r *ProductRepositoryBun) GetProductsBy(ctx context.Context, p *productenti
 	return products, nil
 }
 
-func (r *ProductRepositoryBun) GetAllProductsByCategory(ctx context.Context, categoryId string) ([]productentity.Product, error) {
+func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context) ([]productentity.Product, error) {
 	products := []productentity.Product{}
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&products).Where("category_id = ?", categoryId).Relation("Category").Scan(ctx)
+	err := r.db.NewSelect().Model(&products).Relation("Category").Relation("Size").Scan(ctx)
 
 	r.mu.Unlock()
 

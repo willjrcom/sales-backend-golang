@@ -38,9 +38,9 @@ func TestMain(m *testing.M) {
 }
 
 func TestRegisterProduct(t *testing.T) {
-	dtoCategory := &productdto.RegisterCategoryProductInput{Name: "pizza", Sizes: []string{"P", "M", "G"}}
+	dtoCategory := &productdto.RegisterCategoryInput{Name: "pizza"}
 
-	categoryId, err := categoryProductService.RegisterCategoryProduct(ctx, dtoCategory)
+	categoryId, err := categoryProductService.RegisterCategory(ctx, dtoCategory)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, categoryId)
@@ -117,7 +117,7 @@ func TestRegisterProductError(t *testing.T) {
 }
 
 func TestUpdateProduct(t *testing.T) {
-	products, err := productService.GetAllProductsByCategory(ctx, &filterdto.Category{Category: "teste"})
+	products, err := productService.GetAllProducts(ctx, &filterdto.Category{Category: "teste"})
 
 	assert.Nil(t, err)
 	assert.NotNil(t, products)
@@ -147,14 +147,14 @@ func TestUpdateProduct(t *testing.T) {
 }
 
 func TestGetAll(t *testing.T) {
-	products, err := productService.GetAllProductsByCategory(ctx, &filterdto.Category{Category: "teste"})
+	products, err := productService.GetAllProducts(ctx, &filterdto.Category{Category: "teste"})
 
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(products))
 }
 
 func TestGetProductById(t *testing.T) {
-	products, _ := productService.GetAllProductsByCategory(ctx, &filterdto.Category{Category: "teste"})
+	products, _ := productService.GetAllProducts(ctx, &filterdto.Category{Category: "teste"})
 	assert.Equal(t, len(products), 1)
 	idProduct := products[0].ID
 

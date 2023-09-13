@@ -81,7 +81,7 @@ func (r *ProductRepositoryLocal) GetProductsBy(_ context.Context, p *productenti
 		if v.CategoryID != uuid.Nil && v.CategoryID == p.CategoryID {
 			products = append(products, *v)
 		}
-		if v.Size != "" && v.Size == p.Size {
+		if v.SizeID != uuid.Nil && v.SizeID == p.SizeID {
 			products = append(products, *v)
 		}
 	}
@@ -89,13 +89,11 @@ func (r *ProductRepositoryLocal) GetProductsBy(_ context.Context, p *productenti
 	return products, nil
 }
 
-func (r *ProductRepositoryLocal) GetAllProductsByCategory(_ context.Context, category string) ([]productentity.Product, error) {
+func (r *ProductRepositoryLocal) GetAllProducts(_ context.Context) ([]productentity.Product, error) {
 	products := make([]productentity.Product, 0)
 
 	for _, p := range r.products {
-		if category == "teste" {
-			products = append(products, *p)
-		}
+		products = append(products, *p)
 	}
 
 	return products, nil

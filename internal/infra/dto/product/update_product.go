@@ -9,7 +9,7 @@ type UpdateProductInput struct {
 	Code        *string    `json:"code"`
 	Name        *string    `json:"name"`
 	Description *string    `json:"description"`
-	Size        *string    `json:"size"`
+	SizeID      *uuid.UUID `json:"size_id"`
 	Price       *float64   `json:"price"`
 	Cost        *float64   `json:"cost"`
 	CategoryID  *uuid.UUID `json:"category_id"`
@@ -40,8 +40,8 @@ func (p *UpdateProductInput) UpdateModel(product *productentity.Product) error {
 	if p.Description != nil {
 		product.Description = *p.Description
 	}
-	if p.Size != nil {
-		product.Size = *p.Size
+	if p.SizeID != nil {
+		product.SizeID = *p.SizeID
 	}
 	if p.Price != nil {
 		product.Price = *p.Price

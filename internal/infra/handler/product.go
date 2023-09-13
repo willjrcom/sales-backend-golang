@@ -136,7 +136,7 @@ func (h *handlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *htt
 	filter := &filterdto.Category{}
 	jsonpkg.ParseBody(r, filter)
 
-	categories, err := h.ps.GetAllProductsByCategory(ctx, filter)
+	categories, err := h.ps.GetAllProducts(ctx, filter)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))

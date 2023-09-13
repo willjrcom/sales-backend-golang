@@ -20,7 +20,7 @@ type RegisterProductInput struct {
 	Code        string    `json:"code"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	Size        string    `json:"size"`
+	SizeID      uuid.UUID `json:"size_id"`
 	Price       float64   `json:"price"`
 	Cost        float64   `json:"cost"`
 	CategoryID  uuid.UUID `json:"category_id"`
@@ -40,7 +40,7 @@ func (p *RegisterProductInput) validate() error {
 	if len(p.CategoryID.String()) == 0 || p.CategoryID == uuid.Nil {
 		return ErrCategoryRequired
 	}
-	if p.Size == "" {
+	if p.SizeID == uuid.Nil {
 		return ErrSizeRequired
 	}
 
@@ -57,7 +57,7 @@ func (p *RegisterProductInput) ToModel() (*productentity.Product, error) {
 		Code:        p.Code,
 		Name:        p.Name,
 		Description: p.Description,
-		Size:        p.Size,
+		SizeID:      p.SizeID,
 		Price:       p.Price,
 		Cost:        p.Cost,
 		CategoryID:  p.CategoryID,

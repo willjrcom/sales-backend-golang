@@ -16,11 +16,11 @@ var (
 )
 
 type Service struct {
-	rProduct  productentity.Repository
-	rCategory productentity.RepositoryCategory
+	rProduct  productentity.ProductRepository
+	rCategory productentity.CategoryRepository
 }
 
-func NewService(r productentity.Repository, c productentity.RepositoryCategory) *Service {
+func NewService(r productentity.ProductRepository, c productentity.CategoryRepository) *Service {
 	return &Service{rProduct: r, rCategory: c}
 }
 
@@ -31,7 +31,7 @@ func (s *Service) RegisterProduct(ctx context.Context, dto *productdto.RegisterP
 		return uuid.Nil, err
 	}
 
-	if category, err := s.rCategory.GetCategoryProductById(ctx, product.CategoryID.String()); err == nil {
+	if category, err := s.rCategory.GetCategoryById(ctx, product.CategoryID.String()); err == nil {
 		product.Category = category
 	} else {
 		return uuid.Nil, err
@@ -78,30 +78,43 @@ func (s *Service) DeleteProductById(ctx context.Context, dto *entitydto.IdReques
 	return nil
 }
 
-func (s *Service) GetProductById(ctx context.Context, dto *entitydto.IdRequest) (*productentity.Product, error) {
+func (s *Service) GetProductById(ctx context.Context, dto *entitydto.IdRequest) (*productdto.ProductOutput, error) {
 	if product, err := s.rProduct.GetProductById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return product, nil
+		dtoOutput := &productdto.ProductOutput{}
+		dtoOutput.FromModel(product)
+		return dtoOutput, nil
 	}
 }
 
-func (s *Service) GetProductBy(ctx context.Context, filter *productdto.FilterProductInput) ([]productentity.Product, error) {
+func (s *Service) GetProductBy(ctx context.Context, filter *productdto.FilterProductInput) ([]productdto.ProductOutput, error) {
 	product := filter.ToModel()
 
 	if products, err := s.rProduct.GetProductsBy(ctx, product); err != nil {
 		return nil, err
 	} else {
-		return products, nil
+		dtos := productsToDtos(products)
+		return dtos, nil
 	}
 }
 
-func (s *Service) GetAllProductsByCategory(ctx context.Context, dto *filterdto.Category) ([]productentity.Product, error) {
-	products, err := s.rProduct.GetAllProductsByCategory(ctx, dto.Category)
+func (s *Service) GetAllProducts(ctx context.Context, _ *filterdto.Category) ([]productdto.ProductOutput, error) {
+	products, err := s.rProduct.GetAllProducts(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return products, nil
+	dtos := productsToDtos(products)
+	return dtos, nil
+}
+
+func productsToDtos(products []productentity.Product) []productdto.ProductOutput {
+	dtos := make([]productdto.ProductOutput, len(products))
+	for i, product := range products {
+		dtos[i].FromModel(&product)
+	}
+
+	return dtos
 }
