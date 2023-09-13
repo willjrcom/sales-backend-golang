@@ -1,7 +1,6 @@
 package handlerimpl
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -44,11 +43,11 @@ func (h *handlerCategoryProductImpl) handlerRegisterCategoryProduct(w http.Respo
 	id, err := h.pcs.RegisterCategory(ctx, category)
 
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	w.Write([]byte("new product: " + id.String()))
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerCategoryProductImpl) handlerUpdateCategoryProduct(w http.ResponseWriter, r *http.Request) {
@@ -63,11 +62,11 @@ func (h *handlerCategoryProductImpl) handlerUpdateCategoryProduct(w http.Respons
 	err := h.pcs.UpdateCategory(ctx, dtoId, category)
 
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	w.Write([]byte("update product name"))
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerCategoryProductImpl) handlerDeleteCategoryProduct(w http.ResponseWriter, r *http.Request) {
@@ -79,11 +78,11 @@ func (h *handlerCategoryProductImpl) handlerDeleteCategoryProduct(w http.Respons
 	err := h.pcs.DeleteCategoryById(ctx, dtoId)
 
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	w.Write([]byte("delete category"))
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerCategoryProductImpl) handlerGetCategoryProduct(w http.ResponseWriter, r *http.Request) {
@@ -95,17 +94,11 @@ func (h *handlerCategoryProductImpl) handlerGetCategoryProduct(w http.ResponseWr
 	category, err := h.pcs.GetCategoryById(ctx, dtoId)
 
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	text, err := json.Marshal(category)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Write(text)
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: category})
 }
 
 func (h *handlerCategoryProductImpl) handlerGetAllCategoryProducts(w http.ResponseWriter, r *http.Request) {
@@ -113,18 +106,11 @@ func (h *handlerCategoryProductImpl) handlerGetAllCategoryProducts(w http.Respon
 	categories, err := h.pcs.GetAllCategoryProducts(ctx)
 
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	text, err := json.Marshal(categories)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	w.Write(text)
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
 }
 
 func (h *handlerCategoryProductImpl) handlerGetAllCategorySizes(w http.ResponseWriter, r *http.Request) {
@@ -132,16 +118,9 @@ func (h *handlerCategoryProductImpl) handlerGetAllCategorySizes(w http.ResponseW
 	categories, err := h.pcs.GetAllCategorySizes(ctx)
 
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	text, err := json.Marshal(categories)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	w.Write(text)
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
 }

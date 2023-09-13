@@ -37,14 +37,12 @@ func (h *handlerSizeCategoryImpl) handlerRegisterSize(w http.ResponseWriter, r *
 	size := &productdto.RegisterSizeInput{}
 	jsonpkg.ParseBody(r, size)
 
-	id, err := h.pcs.RegisterSize(ctx, size)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
+	if id, err := h.pcs.RegisterSize(ctx, size); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 	}
-
-	w.Write([]byte("new size: " + id.String()))
 }
 
 func (h *handlerSizeCategoryImpl) handlerUpdateSize(w http.ResponseWriter, r *http.Request) {
@@ -56,14 +54,12 @@ func (h *handlerSizeCategoryImpl) handlerUpdateSize(w http.ResponseWriter, r *ht
 	Size := &productdto.UpdateSizeInput{}
 	jsonpkg.ParseBody(r, Size)
 
-	err := h.pcs.UpdateSize(ctx, dtoId, Size)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
+	if err := h.pcs.UpdateSize(ctx, dtoId, Size); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	w.Write([]byte("update size"))
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerSizeCategoryImpl) handlerDeleteSize(w http.ResponseWriter, r *http.Request) {
@@ -72,12 +68,10 @@ func (h *handlerSizeCategoryImpl) handlerDeleteSize(w http.ResponseWriter, r *ht
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	err := h.pcs.DeleteSizeById(ctx, dtoId)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
+	if err := h.pcs.DeleteSizeById(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	w.Write([]byte("delete size"))
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }

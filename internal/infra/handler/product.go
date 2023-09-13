@@ -1,7 +1,6 @@
 package handlerimpl
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -42,14 +41,12 @@ func (h *handlerProductImpl) handlerRegisterProduct(w http.ResponseWriter, r *ht
 	product := &productdto.RegisterProductInput{}
 	jsonpkg.ParseBody(r, product)
 
-	id, err := h.ps.RegisterProduct(ctx, product)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
+	if id, err := h.ps.RegisterProduct(ctx, product); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 	}
-
-	w.Write([]byte("new product: " + id.String()))
 }
 
 func (h *handlerProductImpl) handlerUpdateProduct(w http.ResponseWriter, r *http.Request) {
@@ -61,14 +58,12 @@ func (h *handlerProductImpl) handlerUpdateProduct(w http.ResponseWriter, r *http
 	product := &productdto.UpdateProductInput{}
 	jsonpkg.ParseBody(r, product)
 
-	err := h.ps.UpdateProduct(ctx, dtoId, product)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
+	if err := h.ps.UpdateProduct(ctx, dtoId, product); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
-
-	w.Write([]byte("new product:"))
 }
 
 func (h *handlerProductImpl) handlerDeleteProduct(w http.ResponseWriter, r *http.Request) {
@@ -77,14 +72,12 @@ func (h *handlerProductImpl) handlerDeleteProduct(w http.ResponseWriter, r *http
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	err := h.ps.DeleteProductById(ctx, dtoId)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
+	if err := h.ps.DeleteProductById(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
-
-	w.Write([]byte("delete product"))
 }
 
 func (h *handlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Request) {
@@ -93,20 +86,12 @@ func (h *handlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Re
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	product, err := h.ps.GetProductById(ctx, dtoId)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
+	if product, err := h.ps.GetProductById(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: product})
 	}
-
-	text, err := json.Marshal(product)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Write(text)
 }
 
 func (h *handlerProductImpl) handlerGetProductBy(w http.ResponseWriter, r *http.Request) {
@@ -115,20 +100,12 @@ func (h *handlerProductImpl) handlerGetProductBy(w http.ResponseWriter, r *http.
 	filter := &productdto.FilterProductInput{}
 	jsonpkg.ParseBody(r, filter)
 
-	product, err := h.ps.GetProductBy(ctx, filter)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
+	if product, err := h.ps.GetProductBy(ctx, filter); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: product})
 	}
-
-	text, err := json.Marshal(product)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-	w.Write(text)
 }
 
 func (h *handlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *http.Request) {
@@ -136,19 +113,10 @@ func (h *handlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *htt
 	filter := &filterdto.Category{}
 	jsonpkg.ParseBody(r, filter)
 
-	categories, err := h.ps.GetAllProducts(ctx, filter)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
+	if categories, err := h.ps.GetAllProducts(ctx, filter); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
 	}
-
-	text, err := json.Marshal(categories)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	w.Write(text)
 }

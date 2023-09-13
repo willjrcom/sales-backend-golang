@@ -39,5 +39,5 @@ func (p *Product) FindSizeInCategory() (bool, error) {
 		}
 	}
 
-	return false, nil
+	return false, errors.New("size not found")
 }
