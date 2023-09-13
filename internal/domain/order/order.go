@@ -2,19 +2,21 @@ package orderentity
 
 import (
 	"github.com/google/uuid"
+	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 )
 
 type Order struct {
 	entity.Entity
-	Name        string
-	OrderNumber int
-	Items       []itementity.Items
-	Delivery    *DeliveryOrder
-	TableOrder  *TableOrder
-	AttendantID uuid.UUID
-	Status      StatusOrder
-	Observation string
 	PaymentOrder
+	Name        string                   `bun:"name"`
+	OrderNumber int                      `bun:"order_number"`
+	Delivery    *DeliveryOrder           `bun:"rel:has-one,join:=id=order_id"`
+	TableOrder  *TableOrder              `bun:"rel:has-one,join:=id=order_id"`
+	AttendantID uuid.UUID                `bun:"column:attendant_id,type:uuid,notnull"`
+	Attendant   *employeeentity.Employee `bun:"rel:belongs-to"`
+	Status      StatusOrder              `bun:"status,type:enum"`
+	Observation string                   `bun:"observation"`
+	GroupItems  []itementity.GroupItem   `bun:"rel:has-many,join:id=order_id"`
 }

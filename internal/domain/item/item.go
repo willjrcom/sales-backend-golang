@@ -7,11 +7,11 @@ import (
 
 type Item struct {
 	entity.Entity
-	Name        string
-	Quantity    float64
-	Description string
-	Price       float64
-	Status      StatusItem
-	ItemsID     uuid.UUID
-	Observation string
+	GroupItemID uuid.UUID  `bun:"group_item_id,type:uuid,notnull"`
+	Name        string     `bun:"name"`
+	Quantity    float64    `bun:"quantity"`
+	Description string     `bun:"description"`
+	Price       float64    `bun:"price"`
+	Status      StatusItem `bun:"status"`
+	Observation string     `bun:"observation"`
 }

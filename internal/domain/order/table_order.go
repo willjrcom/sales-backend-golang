@@ -6,9 +6,9 @@ import (
 )
 
 type TableOrder struct {
-	ID       uuid.UUID
-	NumTable int
-	Waiter   employeeentity.Employee
-	QrCode   string
-	OrderID  uuid.UUID
+	OrderID  uuid.UUID                `bun:"column:order_id,type:uuid,notnull"`
+	NumTable int                      `bun:"num_table"`
+	QrCode   string                   `bun:"qr_code"`
+	WaiterID uuid.UUID                `bun:"column:waiter_id,type:uuid,notnull"`
+	Waiter   *employeeentity.Employee `bun:"rel:belongs-to"`
 }

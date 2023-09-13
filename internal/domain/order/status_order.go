@@ -12,7 +12,7 @@ const (
 	OrderStatusArchived StatusOrder = "Archived"
 )
 
-func getAllStatus() []StatusOrder {
+func GetAllStatus() []StatusOrder {
 	return []StatusOrder{
 		OrderStatusStaging,
 		OrderStatusPending,

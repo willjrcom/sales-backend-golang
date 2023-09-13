@@ -8,7 +8,7 @@ const (
 	StatusItemCanceled StatusItem = "Ready"
 )
 
-func getAllStatus() []StatusItem {
+func GetAllStatus() []StatusItem {
 	return []StatusItem{
 		StatusItemPending,
 		StatusItemReady,

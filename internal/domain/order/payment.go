@@ -1,10 +1,10 @@
 package orderentity
 
 type PaymentOrder struct {
-	IsPaid    bool
-	TotalPaid *float64
-	Change    *float64
-	Method    *PayMethod
+	IsPaid    bool       `bun:"is_paid"`
+	TotalPaid *float64   `bun:"total_paid"`
+	Change    *float64   `bun:"change"`
+	Method    *PayMethod `bun:"method"`
 }
 
 type PayMethod string

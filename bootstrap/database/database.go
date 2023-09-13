@@ -72,7 +72,7 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 	bun.RegisterModel((*employeeentity.Employee)(nil))
 
 	bun.RegisterModel((*itementity.Item)(nil))
-	bun.RegisterModel((*itementity.Items)(nil))
+	bun.RegisterModel((*itementity.GroupItem)(nil))
 
 	bun.RegisterModel((*orderentity.DeliveryOrder)(nil))
 	bun.RegisterModel((*orderentity.TableOrder)(nil))
@@ -115,7 +115,7 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 		panic("Couldn't create table for item")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*itementity.Items)(nil)).Exec(ctx); err != nil {
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*itementity.GroupItem)(nil)).Exec(ctx); err != nil {
 		panic("Couldn't create table for items")
 	}
 
