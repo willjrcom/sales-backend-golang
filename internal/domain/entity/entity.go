@@ -7,8 +7,8 @@ import (
 )
 
 type Entity struct {
-	ID        uuid.UUID  `bun:"id,type:uuid,pk"`
-	CreatedAt time.Time  `bun:"created_at"`
+	ID        uuid.UUID  `bun:"id,type:uuid,pk,notnull"`
+	CreatedAt time.Time  `bun:"created_at,notnull"`
 	UpdatedAt *time.Time `bun:"updated_at"`
 	DeletedAt *time.Time `bun:"deleted_at"`
 }

@@ -17,9 +17,9 @@ type Product struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:products"`
 	Code          string    `bun:"code"`
-	Name          string    `bun:"name"`
+	Name          string    `bun:"name,notnull"`
 	Description   string    `bun:"description"`
-	Price         float64   `bun:"price"`
+	Price         float64   `bun:"price,notnull"`
 	Cost          float64   `bun:"cost"`
 	IsAvailable   bool      `bun:"is_available"`
 	CategoryID    uuid.UUID `bun:"column:category_id,type:uuid,notnull"`

@@ -4,7 +4,7 @@ type PaymentOrder struct {
 	IsPaid    bool       `bun:"is_paid"`
 	TotalPaid *float64   `bun:"total_paid"`
 	Change    *float64   `bun:"change"`
-	Method    *PayMethod `bun:"method"`
+	Method    *PayMethod `bun:"method,notnull"`
 }
 
 type PayMethod string

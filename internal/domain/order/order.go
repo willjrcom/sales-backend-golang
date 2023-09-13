@@ -10,13 +10,13 @@ import (
 type Order struct {
 	entity.Entity
 	PaymentOrder
-	Name        string                   `bun:"name"`
-	OrderNumber int                      `bun:"order_number"`
-	Delivery    *DeliveryOrder           `bun:"rel:has-one,join:=id=order_id"`
-	TableOrder  *TableOrder              `bun:"rel:has-one,join:=id=order_id"`
+	Name        string                   `bun:"name,notnull"`
+	OrderNumber int                      `bun:"order_number,notnull"`
+	Delivery    *DeliveryOrder           `bun:"rel:has-one,join:id=order_id"`
+	TableOrder  *TableOrder              `bun:"rel:has-one,join:id=order_id"`
 	AttendantID uuid.UUID                `bun:"column:attendant_id,type:uuid,notnull"`
 	Attendant   *employeeentity.Employee `bun:"rel:belongs-to"`
-	Status      StatusOrder              `bun:"status,type:enum"`
+	Status      StatusOrder              `bun:"status,type:enum,notnull"`
 	Observation string                   `bun:"observation"`
 	GroupItems  []itementity.GroupItem   `bun:"rel:has-many,join:id=order_id"`
 }

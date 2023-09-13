@@ -7,13 +7,13 @@ import (
 
 type Address struct {
 	entity.Entity
-	PersonID     uuid.UUID `bun:",notnull"`
-	Street       string
-	Number       string
-	Complement   string
-	Reference    string
-	Neighborhood string
-	City         string
-	State        string
-	Cep          string
+	PersonID     uuid.UUID `bun:"person_id,type:uuid,notnull"`
+	Street       string    `bun:"street,notnull"`
+	Number       string    `bun:"number,notnull"`
+	Complement   string    `bun:"complement"`
+	Reference    string    `bun:"reference"`
+	Neighborhood string    `bun:"neighborhood"`
+	City         string    `bun:"city,notnull"`
+	State        string    `bun:"state,notnull"`
+	Cep          string    `bun:"cep"`
 }
