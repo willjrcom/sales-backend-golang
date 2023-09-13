@@ -6,11 +6,11 @@ import (
 
 var ()
 
-type UpdateCategoryProductNameInput struct {
+type UpdateCategoryInput struct {
 	Name *string `json:"name"`
 }
 
-func (c *UpdateCategoryProductNameInput) validate() error {
+func (c *UpdateCategoryInput) validate() error {
 	if c.Name == nil {
 		return ErrNameIsEmpty
 	}
@@ -18,7 +18,7 @@ func (c *UpdateCategoryProductNameInput) validate() error {
 	return nil
 }
 
-func (c *UpdateCategoryProductNameInput) UpdateModel(category *productentity.CategoryProduct) error {
+func (c *UpdateCategoryInput) UpdateModel(category *productentity.Category) error {
 	if err := c.validate(); err != nil {
 		return err
 	}

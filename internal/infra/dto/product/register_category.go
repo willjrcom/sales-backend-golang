@@ -9,33 +9,27 @@ import (
 
 var (
 	ErrNameIsEmpty = errors.New("name is empty")
-	ErrSizeIsEmpty = errors.New("sizes is empty")
 )
 
-type RegisterCategoryProductInput struct {
-	Name  string   `json:"name"`
-	Sizes []string `json:"sizes"`
+type RegisterCategoryInput struct {
+	Name string `json:"name"`
 }
 
-func (c *RegisterCategoryProductInput) validate() error {
+func (c *RegisterCategoryInput) validate() error {
 	if c.Name == "" {
 		return ErrNameIsEmpty
-	}
-	if len(c.Sizes) == 0 {
-		return ErrSizeIsEmpty
 	}
 
 	return nil
 }
 
-func (c *RegisterCategoryProductInput) ToModel() (*productentity.CategoryProduct, error) {
+func (c *RegisterCategoryInput) ToModel() (*productentity.Category, error) {
 	if err := c.validate(); err != nil {
 		return nil, err
 	}
 
-	return &productentity.CategoryProduct{
+	return &productentity.Category{
 		Entity: entity.NewEntity(),
 		Name:   c.Name,
-		Sizes:  c.Sizes,
 	}, nil
 }

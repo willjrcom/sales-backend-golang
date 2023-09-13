@@ -17,20 +17,20 @@ type handlerCategoryProductImpl struct {
 	pcs *categoryproductusecases.Service
 }
 
-func NewHandlerCategoryProduct(productService *categoryproductusecases.Service) *handler.Handler {
+func NewHandlerCategoryProduct(categoryService *categoryproductusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerCategoryProductImpl{
-		pcs: productService,
+		pcs: categoryService,
 	}
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterCategoryProduct)
-		c.Put("/update/name/{id}", h.handlerUpdateCategoryProductName)
-		c.Put("/update/sizes/{id}", h.handlerUpdateCategoryProductSizes)
+		c.Put("/update/{id}", h.handlerUpdateCategoryProduct)
 		c.Delete("/delete/{id}", h.handlerDeleteCategoryProduct)
 		c.Get("/{id}", h.handlerGetCategoryProduct)
-		c.Get("/all", h.handlerGetAllCategoryProducts)
+		c.Get("/allproducts", h.handlerGetAllCategoryProducts)
+		c.Get("/allsizes", h.handlerGetAllCategorySizes)
 	})
 
 	return handler.NewHandler("/category", c)
@@ -38,10 +38,10 @@ func NewHandlerCategoryProduct(productService *categoryproductusecases.Service) 
 
 func (h *handlerCategoryProductImpl) handlerRegisterCategoryProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	category := &productdto.RegisterCategoryProductInput{}
+	category := &productdto.RegisterCategoryInput{}
 	jsonpkg.ParseBody(r, category)
 
-	id, err := h.pcs.RegisterCategoryProduct(ctx, category)
+	id, err := h.pcs.RegisterCategory(ctx, category)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -51,16 +51,16 @@ func (h *handlerCategoryProductImpl) handlerRegisterCategoryProduct(w http.Respo
 	w.Write([]byte("new product: " + id.String()))
 }
 
-func (h *handlerCategoryProductImpl) handlerUpdateCategoryProductName(w http.ResponseWriter, r *http.Request) {
+func (h *handlerCategoryProductImpl) handlerUpdateCategoryProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	category := &productdto.UpdateCategoryProductNameInput{}
+	category := &productdto.UpdateCategoryInput{}
 	jsonpkg.ParseBody(r, category)
 
-	err := h.pcs.UpdateCategoryProductName(ctx, dtoId, category)
+	err := h.pcs.UpdateCategory(ctx, dtoId, category)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -70,32 +70,13 @@ func (h *handlerCategoryProductImpl) handlerUpdateCategoryProductName(w http.Res
 	w.Write([]byte("update product name"))
 }
 
-func (h *handlerCategoryProductImpl) handlerUpdateCategoryProductSizes(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	id := chi.URLParam(r, "id")
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
-
-	category := &productdto.UpdateCategoryProductSizesInput{}
-	jsonpkg.ParseBody(r, category)
-
-	err := h.pcs.UpdateCategoryProductSizes(ctx, dtoId, category)
-
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	w.Write([]byte("update product sizes"))
-}
-
 func (h *handlerCategoryProductImpl) handlerDeleteCategoryProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	err := h.pcs.DeleteCategoryProductById(ctx, dtoId)
+	err := h.pcs.DeleteCategoryById(ctx, dtoId)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -111,7 +92,7 @@ func (h *handlerCategoryProductImpl) handlerGetCategoryProduct(w http.ResponseWr
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	category, err := h.pcs.GetCategoryProductById(ctx, dtoId)
+	category, err := h.pcs.GetCategoryById(ctx, dtoId)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
@@ -129,7 +110,26 @@ func (h *handlerCategoryProductImpl) handlerGetCategoryProduct(w http.ResponseWr
 
 func (h *handlerCategoryProductImpl) handlerGetAllCategoryProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	categories, err := h.pcs.GetAllCategoryProduct(ctx)
+	categories, err := h.pcs.GetAllCategoryProducts(ctx)
+
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	text, err := json.Marshal(categories)
+
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.Write(text)
+}
+
+func (h *handlerCategoryProductImpl) handlerGetAllCategorySizes(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	categories, err := h.pcs.GetAllCategorySizes(ctx)
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
