@@ -1,6 +1,8 @@
 package clientusecases
 
 import (
+	"context"
+
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
@@ -18,22 +20,22 @@ func NewService(rc cliententity.Repository, ra addressentity.Repository) *Servic
 	return &Service{rClient: rc, rAddress: ra}
 }
 
-func (s *Service) RegisterClient(dto *clientdto.RegisterClientInput) error {
+func (s *Service) RegisterClient(ctx context.Context, dto *clientdto.RegisterClientInput) error {
 	person, err := dto.ToModel()
 
 	if err != nil {
 		return err
 	}
 
-	if err := s.rClient.RegisterClient(person); err != nil {
+	if err := s.rClient.RegisterClient(ctx, person); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *Service) UpdateClient(dtoId *entitydto.IdRequest, dto *clientdto.UpdateClientInput) error {
-	client, err := s.rClient.GetClientById(dtoId.ID.String())
+func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IdRequest, dto *clientdto.UpdateClientInput) error {
+	client, err := s.rClient.GetClientById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
@@ -43,42 +45,42 @@ func (s *Service) UpdateClient(dtoId *entitydto.IdRequest, dto *clientdto.Update
 		return err
 	}
 
-	if err := s.rClient.UpdateClient(client); err != nil {
+	if err := s.rClient.UpdateClient(ctx, client); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *Service) RemoveClient(dto *entitydto.IdRequest) error {
-	if _, err := s.rClient.GetClientById(dto.ID.String()); err != nil {
+func (s *Service) RemoveClient(ctx context.Context, dto *entitydto.IdRequest) error {
+	if _, err := s.rClient.GetClientById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
-	if err := s.rClient.DeleteClient(dto.ID.String()); err != nil {
+	if err := s.rClient.DeleteClient(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *Service) GetClientById(dto *entitydto.IdRequest) (*cliententity.Client, error) {
-	if client, err := s.rClient.GetClientById(dto.ID.String()); err != nil {
+func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IdRequest) (*cliententity.Client, error) {
+	if client, err := s.rClient.GetClientById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		return client, nil
 	}
 }
 
-func (s *Service) GetAllClient(dto *filterdto.Filter) ([]cliententity.Client, error) {
-	if clients, err := s.rClient.GetAllClient(dto.Key, dto.Value); err != nil {
+func (s *Service) GetAllClient(ctx context.Context, dto *filterdto.Filter) ([]cliententity.Client, error) {
+	if clients, err := s.rClient.GetAllClients(ctx); err != nil {
 		return nil, err
 	} else {
 		return clients, nil
 	}
 }
 
-func (s *Service) RegisterAddress(dtoId *entitydto.IdRequest, dto *addressdto.RegisterAddressInput) error {
+func (s *Service) RegisterAddress(ctx context.Context, dtoId *entitydto.IdRequest, dto *addressdto.RegisterAddressInput) error {
 	address, err := dto.ToModel()
 
 	if err != nil {
@@ -89,6 +91,6 @@ func (s *Service) RegisterAddress(dtoId *entitydto.IdRequest, dto *addressdto.Re
 	return nil
 }
 
-func (s *Service) RemoveAddress(dto *entitydto.IdRequest) error {
+func (s *Service) RemoveAddress(ctx context.Context, dto *entitydto.IdRequest) error {
 	return nil
 }

@@ -1,34 +1,38 @@
 package employeerepositorylocal
 
-import employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
+import (
+	"context"
 
-type ProductRepositoryLocal struct {
+	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
+)
+
+type ProductRepositoryBun struct {
 }
 
-func NewProductRepositoryLocal() *ProductRepositoryLocal {
-	return &ProductRepositoryLocal{}
+func NewProductRepositoryBun() *ProductRepositoryBun {
+	return &ProductRepositoryBun{}
 }
 
-func (r *ProductRepositoryLocal) RegisterEmployee(p *employeeentity.Employee) error {
+func (r *ProductRepositoryBun) RegisterEmployee(ctx context.Context, p *employeeentity.Employee) error {
 	return nil
 }
 
-func (r *ProductRepositoryLocal) UpdateEmployee(p *employeeentity.Employee) error {
+func (r *ProductRepositoryBun) UpdateEmployee(ctx context.Context, p *employeeentity.Employee) error {
 	return nil
 }
 
-func (r *ProductRepositoryLocal) DeleteEmployee(id string) error {
+func (r *ProductRepositoryBun) DeleteEmployee(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *ProductRepositoryLocal) GetEmployeeById(id string) (*employeeentity.Employee, error) {
+func (r *ProductRepositoryBun) GetEmployeeById(ctx context.Context, id string) (*employeeentity.Employee, error) {
 	return nil, nil
 }
 
-func (r *ProductRepositoryLocal) GetEmployeeBy(key string, value string) (*employeeentity.Employee, error) {
+func (r *ProductRepositoryBun) GetEmployeeBy(ctx context.Context, p *employeeentity.Employee) (*employeeentity.Employee, error) {
 	return nil, nil
 }
 
-func (r *ProductRepositoryLocal) GetAllEmployee(key string, value string) ([]employeeentity.Employee, error) {
+func (r *ProductRepositoryBun) GetAllEmployee(ctx context.Context) ([]employeeentity.Employee, error) {
 	return nil, nil
 }

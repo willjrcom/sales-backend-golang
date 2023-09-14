@@ -1,35 +1,39 @@
 package employeeusecases
 
-import employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
+import (
+	"context"
+
+	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
+)
 
 type Service struct {
-	Repository employeeentity.Repository
+	r employeeentity.Repository
 }
 
 func NewService(repository employeeentity.Repository) *Service {
-	return &Service{Repository: repository}
+	return &Service{r: repository}
 }
 
-func (s *Service) RegisterEmployee(p *employeeentity.Employee) error {
-	return s.Repository.RegisterEmployee(p)
+func (s *Service) RegisterEmployee(ctx context.Context, p *employeeentity.Employee) error {
+	return s.r.RegisterEmployee(ctx, p)
 }
 
-func (s *Service) UpdateEmployee(p *employeeentity.Employee) error {
-	return s.Repository.UpdateEmployee(p)
+func (s *Service) UpdateEmployee(ctx context.Context, p *employeeentity.Employee) error {
+	return s.r.UpdateEmployee(ctx, p)
 }
 
-func (s *Service) DeleteEmployee(id string) error {
-	return s.Repository.DeleteEmployee(id)
+func (s *Service) DeleteEmployee(ctx context.Context, id string) error {
+	return s.r.DeleteEmployee(ctx, id)
 }
 
-func (s *Service) GetEmployeeById(id string) (*employeeentity.Employee, error) {
-	return s.Repository.GetEmployeeById(id)
+func (s *Service) GetEmployeeById(ctx context.Context, id string) (*employeeentity.Employee, error) {
+	return s.r.GetEmployeeById(ctx, id)
 }
 
-func (s *Service) GetEmployeeBy(key string, value string) (*employeeentity.Employee, error) {
-	return s.Repository.GetEmployeeBy(key, value)
+func (s *Service) GetEmployeeBy(ctx context.Context, p *employeeentity.Employee) (*employeeentity.Employee, error) {
+	return s.r.GetEmployeeBy(ctx, nil)
 }
 
-func (s *Service) GetAllEmployee(key string, value string) ([]employeeentity.Employee, error) {
-	return s.Repository.GetAllEmployee(key, value)
+func (s *Service) GetAllEmployee(ctx context.Context) ([]employeeentity.Employee, error) {
+	return s.r.GetAllEmployee(ctx)
 }

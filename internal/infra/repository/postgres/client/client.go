@@ -1,34 +1,37 @@
 package clientrepositorylocal
 
-import cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
+import (
+	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
+	"golang.org/x/net/context"
+)
 
-type ProductRepositoryLocal struct {
+type ProductRepositoryBun struct {
 }
 
-func NewProductRepositoryLocal() *ProductRepositoryLocal {
-	return &ProductRepositoryLocal{}
+func NewProductRepositoryLocal() *ProductRepositoryBun {
+	return &ProductRepositoryBun{}
 }
 
-func (r *ProductRepositoryLocal) RegisterClient(p *cliententity.Client) error {
+func (r *ProductRepositoryBun) RegisterClient(ctx context.Context, c *cliententity.Client) error {
 	return nil
 }
 
-func (r *ProductRepositoryLocal) UpdateClient(p *cliententity.Client) error {
+func (r *ProductRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.Client) error {
 	return nil
 }
 
-func (r *ProductRepositoryLocal) DeleteClient(id string) error {
+func (r *ProductRepositoryBun) DeleteClient(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *ProductRepositoryLocal) GetClientById(id string) (*cliententity.Client, error) {
+func (r *ProductRepositoryBun) GetClientById(ctx context.Context, id string) (*cliententity.Client, error) {
 	return nil, nil
 }
 
-func (r *ProductRepositoryLocal) GetClientBy(key string, value string) (*cliententity.Client, error) {
+func (r *ProductRepositoryBun) GetClientBy(ctx context.Context, c *cliententity.Client) (*cliententity.Client, error) {
 	return nil, nil
 }
 
-func (r *ProductRepositoryLocal) GetAllClient(key string, value string) ([]cliententity.Client, error) {
+func (r *ProductRepositoryBun) GetAllClient(ctx context.Context) ([]cliententity.Client, error) {
 	return nil, nil
 }

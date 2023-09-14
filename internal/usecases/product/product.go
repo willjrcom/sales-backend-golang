@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	filterdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/filter"
 	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
 )
 
@@ -16,12 +15,12 @@ var (
 )
 
 type Service struct {
-	rProduct  productentity.ProductRepository
-	rCategory productentity.CategoryRepository
+	rp productentity.ProductRepository
+	rc productentity.CategoryRepository
 }
 
 func NewService(r productentity.ProductRepository, c productentity.CategoryRepository) *Service {
-	return &Service{rProduct: r, rCategory: c}
+	return &Service{rp: r, rc: c}
 }
 
 func (s *Service) RegisterProduct(ctx context.Context, dto *productdto.RegisterProductInput) (uuid.UUID, error) {
@@ -31,7 +30,7 @@ func (s *Service) RegisterProduct(ctx context.Context, dto *productdto.RegisterP
 		return uuid.Nil, err
 	}
 
-	if category, err := s.rCategory.GetCategoryById(ctx, product.CategoryID.String()); err == nil {
+	if category, err := s.rc.GetCategoryById(ctx, product.CategoryID.String()); err == nil {
 		product.Category = category
 	} else {
 		return uuid.Nil, err
@@ -41,7 +40,7 @@ func (s *Service) RegisterProduct(ctx context.Context, dto *productdto.RegisterP
 		return uuid.Nil, err
 	}
 
-	if err := s.rProduct.RegisterProduct(ctx, product); err != nil {
+	if err := s.rp.RegisterProduct(ctx, product); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -49,7 +48,7 @@ func (s *Service) RegisterProduct(ctx context.Context, dto *productdto.RegisterP
 }
 
 func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IdRequest, dto *productdto.UpdateProductInput) error {
-	product, err := s.rProduct.GetProductById(ctx, dtoId.ID.String())
+	product, err := s.rp.GetProductById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
@@ -59,7 +58,7 @@ func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IdRequest,
 		return err
 	}
 
-	if err := s.rProduct.UpdateProduct(ctx, product); err != nil {
+	if err := s.rp.UpdateProduct(ctx, product); err != nil {
 		return err
 	}
 
@@ -67,11 +66,11 @@ func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IdRequest,
 }
 
 func (s *Service) DeleteProductById(ctx context.Context, dto *entitydto.IdRequest) error {
-	if _, err := s.rProduct.GetProductById(ctx, dto.ID.String()); err != nil {
+	if _, err := s.rp.GetProductById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
-	if err := s.rProduct.DeleteProduct(ctx, dto.ID.String()); err != nil {
+	if err := s.rp.DeleteProduct(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
@@ -79,7 +78,7 @@ func (s *Service) DeleteProductById(ctx context.Context, dto *entitydto.IdReques
 }
 
 func (s *Service) GetProductById(ctx context.Context, dto *entitydto.IdRequest) (*productdto.ProductOutput, error) {
-	if product, err := s.rProduct.GetProductById(ctx, dto.ID.String()); err != nil {
+	if product, err := s.rp.GetProductById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		dtoOutput := &productdto.ProductOutput{}
@@ -91,7 +90,7 @@ func (s *Service) GetProductById(ctx context.Context, dto *entitydto.IdRequest) 
 func (s *Service) GetProductBy(ctx context.Context, filter *productdto.FilterProductInput) ([]productdto.ProductOutput, error) {
 	product := filter.ToModel()
 
-	if products, err := s.rProduct.GetProductsBy(ctx, product); err != nil {
+	if products, err := s.rp.GetProductsBy(ctx, product); err != nil {
 		return nil, err
 	} else {
 		dtos := productsToDtos(products)
@@ -99,8 +98,8 @@ func (s *Service) GetProductBy(ctx context.Context, filter *productdto.FilterPro
 	}
 }
 
-func (s *Service) GetAllProducts(ctx context.Context, _ *filterdto.Category) ([]productdto.ProductOutput, error) {
-	products, err := s.rProduct.GetAllProducts(ctx)
+func (s *Service) GetAllProducts(ctx context.Context) ([]productdto.ProductOutput, error) {
+	products, err := s.rp.GetAllProducts(ctx)
 
 	if err != nil {
 		return nil, err

@@ -9,7 +9,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	filterdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/filter"
 	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
 	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category-product"
 	productrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
@@ -117,7 +116,7 @@ func TestRegisterProductError(t *testing.T) {
 }
 
 func TestUpdateProduct(t *testing.T) {
-	products, err := productService.GetAllProducts(ctx, &filterdto.Category{Category: "teste"})
+	products, err := productService.GetAllProducts(ctx)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, products)
@@ -147,14 +146,14 @@ func TestUpdateProduct(t *testing.T) {
 }
 
 func TestGetAll(t *testing.T) {
-	products, err := productService.GetAllProducts(ctx, &filterdto.Category{Category: "teste"})
+	products, err := productService.GetAllProducts(ctx)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(products))
 }
 
 func TestGetProductById(t *testing.T) {
-	products, _ := productService.GetAllProducts(ctx, &filterdto.Category{Category: "teste"})
+	products, _ := productService.GetAllProducts(ctx)
 	assert.Equal(t, len(products), 1)
 	idProduct := products[0].ID
 

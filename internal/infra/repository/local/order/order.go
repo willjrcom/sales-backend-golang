@@ -1,6 +1,7 @@
 package orderrepositorylocal
 
 import (
+	"context"
 	"errors"
 	"sync"
 
@@ -17,12 +18,12 @@ func NewOrderRepositoryLocal() *OrderRepositoryLocal {
 	return &OrderRepositoryLocal{orders: make(map[uuid.UUID]*orderentity.Order)}
 }
 
-func (r *OrderRepositoryLocal) CreateOrder(order *orderentity.Order) error {
+func (r *OrderRepositoryLocal) CreateOrder(ctx context.Context, order *orderentity.Order) error {
 	r.mu.Lock()
 
 	if _, ok := r.orders[order.Entity.ID]; ok {
 		r.mu.Unlock()
-		return errors.New("Order already exists")
+		return errors.New("order already exists")
 	}
 
 	r.orders[order.ID] = order
@@ -30,12 +31,12 @@ func (r *OrderRepositoryLocal) CreateOrder(order *orderentity.Order) error {
 	return nil
 }
 
-func (r *OrderRepositoryLocal) DeleteOrder(id string) error {
+func (r *OrderRepositoryLocal) DeleteOrder(ctx context.Context, id string) error {
 	r.mu.Lock()
 
 	if _, ok := r.orders[uuid.MustParse(id)]; !ok {
 		r.mu.Unlock()
-		return errors.New("Order not found")
+		return errors.New("order not found")
 	}
 
 	delete(r.orders, uuid.MustParse(id))
@@ -43,14 +44,14 @@ func (r *OrderRepositoryLocal) DeleteOrder(id string) error {
 	return nil
 }
 
-func (r *OrderRepositoryLocal) UpdateOrder(order *orderentity.Order) error {
+func (r *OrderRepositoryLocal) UpdateOrder(ctx context.Context, order *orderentity.Order) error {
 	r.mu.Lock()
 	r.orders[order.ID] = order
 	r.mu.Unlock()
 	return nil
 }
 
-func (r *OrderRepositoryLocal) GetOrderById(id string) (*orderentity.Order, error) {
+func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*orderentity.Order, error) {
 	r.mu.Lock()
 
 	if p, ok := r.orders[uuid.MustParse(id)]; ok {
@@ -59,14 +60,14 @@ func (r *OrderRepositoryLocal) GetOrderById(id string) (*orderentity.Order, erro
 	}
 
 	r.mu.Unlock()
-	return nil, errors.New("Order not found")
+	return nil, errors.New("order not found")
 }
 
-func (r *OrderRepositoryLocal) GetOrderBy(key string, value string) (*orderentity.Order, error) {
+func (r *OrderRepositoryLocal) GetOrderBy(ctx context.Context, o *orderentity.Order) (*orderentity.Order, error) {
 	return nil, nil
 }
 
-func (r *OrderRepositoryLocal) GetAllOrder(key string, value string) ([]orderentity.Order, error) {
+func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context) ([]orderentity.Order, error) {
 	orders := make([]orderentity.Order, 0)
 
 	for _, p := range r.orders {
