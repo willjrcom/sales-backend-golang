@@ -13,9 +13,12 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
 	categoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/category_product"
+	clientrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/client"
+	contactrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/contact"
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
 	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size_category"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
+	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
 )
@@ -44,19 +47,27 @@ var HttpserverCmd = &cobra.Command{
 		categoryRepo := categoryrepositorybun.NewCategoryProductRepositoryBun(db)
 		sizeRepo := sizerepositorybun.NewSizeCategoryRepositoryBun(db)
 
+		clientRepo := clientrepositorybun.NewClientRepositoryBun(db)
+		contactRepo := contactrepositorybun.NewContactRepositoryBun(db)
+
 		// Load services
 		productService := productusecases.NewService(productRepo, categoryRepo)
 		categoryProductService := categoryproductusecases.NewService(categoryRepo)
 		sizeService := sizeusecases.NewService(sizeRepo)
+
+		clientService := clientusecases.NewService(clientRepo, contactRepo)
 
 		// Load handlers
 		productHandler := handlerimpl.NewHandlerProduct(productService)
 		categoryHandler := handlerimpl.NewHandlerCategoryProduct(categoryProductService)
 		sizeHandler := handlerimpl.NewHandlerSizeProduct(sizeService)
 
+		clientHandler := handlerimpl.NewHandlerClient(clientService)
+
 		server.AddHandler(productHandler)
 		server.AddHandler(categoryHandler)
 		server.AddHandler(sizeHandler)
+		server.AddHandler(clientHandler)
 
 		if err := server.StartServer(port); err != nil {
 			panic(err)
