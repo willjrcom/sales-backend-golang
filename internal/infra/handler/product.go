@@ -113,7 +113,7 @@ func (h *handlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *htt
 	filter := &filterdto.Category{}
 	jsonpkg.ParseBody(r, filter)
 
-	if categories, err := h.ps.GetAllProducts(ctx, filter); err != nil {
+	if categories, err := h.ps.GetAllProducts(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	} else {
