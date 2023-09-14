@@ -1,10 +1,12 @@
 package employeeentity
 
+import "context"
+
 type Repository interface {
-	RegisterEmployee(p *Employee) error
-	UpdateEmployee(p *Employee) error
-	DeleteEmployee(id string) error
-	GetEmployeeById(id string) (*Employee, error)
-	GetEmployeeBy(key string, value string) (*Employee, error)
-	GetAllEmployee(key string, value string) ([]Employee, error)
+	RegisterEmployee(ctx context.Context, p *Employee) error
+	UpdateEmployee(ctx context.Context, p *Employee) error
+	DeleteEmployee(ctx context.Context, id string) error
+	GetEmployeeById(ctx context.Context, id string) (*Employee, error)
+	GetEmployeeBy(ctx context.Context, p *Employee) (*Employee, error)
+	GetAllEmployee(ctx context.Context) ([]Employee, error)
 }

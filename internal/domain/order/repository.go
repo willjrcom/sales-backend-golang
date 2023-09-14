@@ -1,10 +1,12 @@
 package orderentity
 
+import "context"
+
 type Repository interface {
-	CreateOrder(order *Order) error
-	UpdateOrder(order *Order) error
-	DeleteOrder(id string) error
-	GetOrderById(id string) (*Order, error)
-	GetOrderBy(key string, value string) (*Order, error)
-	GetAllOrder(key string, value string) ([]Order, error)
+	CreateOrder(ctx context.Context, order *Order) error
+	UpdateOrder(ctx context.Context, order *Order) error
+	DeleteOrder(ctx context.Context, id string) error
+	GetOrderById(ctx context.Context, id string) (*Order, error)
+	GetOrderBy(ctx context.Context, o *Order) (*Order, error)
+	GetAllOrders(ctx context.Context) ([]Order, error)
 }

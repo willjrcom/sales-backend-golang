@@ -1,10 +1,12 @@
 package cliententity
 
+import "context"
+
 type Repository interface {
-	RegisterClient(p *Client) error
-	UpdateClient(p *Client) error
-	DeleteClient(id string) error
-	GetClientById(id string) (*Client, error)
-	GetClientBy(key string, value string) (*Client, error)
-	GetAllClient(key string, value string) ([]Client, error)
+	RegisterClient(ctx context.Context, p *Client) error
+	UpdateClient(ctx context.Context, p *Client) error
+	DeleteClient(ctx context.Context, id string) error
+	GetClientById(ctx context.Context, id string) (*Client, error)
+	GetClientBy(ctx context.Context, c *Client) (*Client, error)
+	GetAllClients(ctx context.Context) ([]Client, error)
 }
