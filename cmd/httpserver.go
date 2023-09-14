@@ -41,8 +41,8 @@ var HttpserverCmd = &cobra.Command{
 
 		// Load repositories
 		productRepo := productrepositorybun.NewProductRepositoryBun(db)
-		categoryRepo := categoryrepositorybun.NewCategoryProductRepositoryBun(ctx, db)
-		sizeRepo := sizerepositorybun.NewSizeCategoryRepositoryBun(ctx, db)
+		categoryRepo := categoryrepositorybun.NewCategoryProductRepositoryBun(db)
+		sizeRepo := sizerepositorybun.NewSizeCategoryRepositoryBun(db)
 
 		// Load services
 		productService := productusecases.NewService(productRepo, categoryRepo)
