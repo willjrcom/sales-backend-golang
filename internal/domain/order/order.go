@@ -2,6 +2,7 @@ package orderentity
 
 import (
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
@@ -9,6 +10,7 @@ import (
 
 type Order struct {
 	entity.Entity
+	bun.BaseModel `bun:"table:orders"`
 	PaymentOrder
 	Name        string                   `bun:"name,notnull"`
 	OrderNumber int                      `bun:"order_number,notnull"`

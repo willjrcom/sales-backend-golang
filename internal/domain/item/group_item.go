@@ -2,17 +2,19 @@ package itementity
 
 import (
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
 type GroupItem struct {
 	entity.Entity
-	Items      []Item                  `bun:"rel:has-many,join:id=group_item_id"`
-	CategoryID uuid.UUID               `bun:"column:category_id,type:uuid,notnull"`
-	Category   *productentity.Category `bun:"rel:belongs-to"`
-	Size       float64                 `bun:"size"`
-	OrderID    uuid.UUID               `bun:"column:order_id,type:uuid,notnull"`
+	bun.BaseModel `bun:"table:group_items"`
+	Items         []Item                  `bun:"rel:has-many,join:id=group_item_id"`
+	CategoryID    uuid.UUID               `bun:"column:category_id,type:uuid,notnull"`
+	Category      *productentity.Category `bun:"rel:belongs-to"`
+	Size          float64                 `bun:"size"`
+	OrderID       uuid.UUID               `bun:"column:order_id,type:uuid,notnull"`
 }
 
 func (i *GroupItem) CalculateQuantity() float64 {
