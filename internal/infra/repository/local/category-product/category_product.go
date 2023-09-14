@@ -14,16 +14,16 @@ var (
 	errCategoryProductNotFound      = errors.New("category Product not found")
 )
 
-type CategoryProductRepositoryLocal struct {
+type CategoryRepositoryLocal struct {
 	mu               sync.Mutex
 	Categoryproducts map[uuid.UUID]*productentity.Category
 }
 
-func NewCategoryProductRepositoryLocal() *CategoryProductRepositoryLocal {
-	return &CategoryProductRepositoryLocal{Categoryproducts: make(map[uuid.UUID]*productentity.Category)}
+func NewCategoryRepositoryLocal() *CategoryRepositoryLocal {
+	return &CategoryRepositoryLocal{Categoryproducts: make(map[uuid.UUID]*productentity.Category)}
 }
 
-func (r *CategoryProductRepositoryLocal) RegisterCategory(_ context.Context, p *productentity.Category) error {
+func (r *CategoryRepositoryLocal) RegisterCategory(_ context.Context, p *productentity.Category) error {
 	r.mu.Lock()
 
 	if _, ok := r.Categoryproducts[p.ID]; ok {
@@ -36,14 +36,14 @@ func (r *CategoryProductRepositoryLocal) RegisterCategory(_ context.Context, p *
 	return nil
 }
 
-func (r *CategoryProductRepositoryLocal) UpdateCategory(_ context.Context, p *productentity.Category) error {
+func (r *CategoryRepositoryLocal) UpdateCategory(_ context.Context, p *productentity.Category) error {
 	r.mu.Lock()
 	r.Categoryproducts[p.ID] = p
 	r.mu.Unlock()
 	return nil
 }
 
-func (r *CategoryProductRepositoryLocal) DeleteCategory(_ context.Context, id string) error {
+func (r *CategoryRepositoryLocal) DeleteCategory(_ context.Context, id string) error {
 	r.mu.Lock()
 
 	if _, ok := r.Categoryproducts[uuid.MustParse(id)]; !ok {
@@ -56,7 +56,7 @@ func (r *CategoryProductRepositoryLocal) DeleteCategory(_ context.Context, id st
 	return nil
 }
 
-func (r *CategoryProductRepositoryLocal) GetCategoryById(_ context.Context, id string) (*productentity.Category, error) {
+func (r *CategoryRepositoryLocal) GetCategoryById(_ context.Context, id string) (*productentity.Category, error) {
 	r.mu.Lock()
 
 	if p, ok := r.Categoryproducts[uuid.MustParse(id)]; ok {
@@ -68,7 +68,7 @@ func (r *CategoryProductRepositoryLocal) GetCategoryById(_ context.Context, id s
 	return nil, errCategoryProductNotFound
 }
 
-func (r *CategoryProductRepositoryLocal) GetAllCategoryProducts(_ context.Context) ([]productentity.Category, error) {
+func (r *CategoryRepositoryLocal) GetAllCategoryProducts(_ context.Context) ([]productentity.Category, error) {
 	Categoryproducts := make([]productentity.Category, 0)
 
 	for _, p := range r.Categoryproducts {
@@ -79,7 +79,7 @@ func (r *CategoryProductRepositoryLocal) GetAllCategoryProducts(_ context.Contex
 	return Categoryproducts, nil
 }
 
-func (r *CategoryProductRepositoryLocal) GetAllCategorySizes(_ context.Context) ([]productentity.Category, error) {
+func (r *CategoryRepositoryLocal) GetAllCategorySizes(_ context.Context) ([]productentity.Category, error) {
 	Categoryproducts := make([]productentity.Category, 0)
 
 	for _, p := range r.Categoryproducts {

@@ -56,7 +56,7 @@ func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IdRequest, dt
 	return nil
 }
 
-func (s *Service) DeleteSizeById(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) DeleteSize(ctx context.Context, dto *entitydto.IdRequest) error {
 	if _, err := s.r.GetSizeById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (s *Service) DeleteSizeById(ctx context.Context, dto *entitydto.IdRequest) 
 	return nil
 }
 
-func (s *Service) getSizeById(ctx context.Context, dto *entitydto.IdRequest) (*productentity.Size, error) {
+func (s *Service) GetSizeById(ctx context.Context, dto *entitydto.IdRequest) (*productentity.Size, error) {
 	if Size, err := s.r.GetSizeById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {

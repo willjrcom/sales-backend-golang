@@ -63,7 +63,7 @@ func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*or
 	return nil, errors.New("order not found")
 }
 
-func (r *OrderRepositoryLocal) GetOrderBy(ctx context.Context, o *orderentity.Order) (*orderentity.Order, error) {
+func (r *OrderRepositoryLocal) GetOrderBy(ctx context.Context, o *orderentity.Order) ([]orderentity.Order, error) {
 	return nil, nil
 }
 

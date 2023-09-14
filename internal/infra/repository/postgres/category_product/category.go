@@ -13,7 +13,7 @@ type CategoryProductRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewCategoryProductRepositoryBun(ctx context.Context, db *bun.DB) *CategoryProductRepositoryBun {
+func NewCategoryProductRepositoryBun(db *bun.DB) *CategoryProductRepositoryBun {
 	return &CategoryProductRepositoryBun{db: db}
 }
 

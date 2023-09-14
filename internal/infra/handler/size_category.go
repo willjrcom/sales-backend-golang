@@ -68,7 +68,7 @@ func (h *handlerSizeCategoryImpl) handlerDeleteSize(w http.ResponseWriter, r *ht
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.pcs.DeleteSizeById(ctx, dtoId); err != nil {
+	if err := h.pcs.DeleteSize(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

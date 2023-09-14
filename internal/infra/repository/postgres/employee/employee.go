@@ -29,7 +29,7 @@ func (r *ProductRepositoryBun) GetEmployeeById(ctx context.Context, id string) (
 	return nil, nil
 }
 
-func (r *ProductRepositoryBun) GetEmployeeBy(ctx context.Context, p *employeeentity.Employee) (*employeeentity.Employee, error) {
+func (r *ProductRepositoryBun) GetEmployeeBy(ctx context.Context, p *employeeentity.Employee) ([]employeeentity.Employee, error) {
 	return nil, nil
 }
 

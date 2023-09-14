@@ -13,7 +13,7 @@ type SizeCategoryRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewSizeCategoryRepositoryBun(ctx context.Context, db *bun.DB) *SizeCategoryRepositoryBun {
+func NewSizeCategoryRepositoryBun(db *bun.DB) *SizeCategoryRepositoryBun {
 	return &SizeCategoryRepositoryBun{db: db}
 }
 

@@ -33,7 +33,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (*orde
 	return nil, nil
 }
 
-func (r *OrderRepositoryBun) GetOrderBy(ctx context.Context, o *orderentity.Order) (*orderentity.Order, error) {
+func (r *OrderRepositoryBun) GetOrderBy(ctx context.Context, o *orderentity.Order) ([]orderentity.Order, error) {
 	return nil, nil
 }
 

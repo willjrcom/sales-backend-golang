@@ -12,11 +12,14 @@ import (
 	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
 	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category-product"
 	productrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
+	sizerepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/size_category"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
+	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
 )
 
 var (
 	productService         *Service
+	sizeService            *sizeusecases.Service
 	categoryProductService *categoryproductusecases.Service
 	ctx                    context.Context
 )
@@ -25,11 +28,13 @@ func TestMain(m *testing.M) {
 	ctx = context.Background()
 
 	// Repository
-	rProduct := productrepositorylocal.NewProductRepositoryLocal()
-	rCategoryProduct := categoryrepositorylocal.NewCategoryProductRepositoryLocal()
+	rp := productrepositorylocal.NewProductRepositoryLocal()
+	rc := categoryrepositorylocal.NewCategoryRepositoryLocal()
+	rs := sizerepositorylocal.NewSizeRepositoryLocal()
 
 	// Service
-	productService = NewService(rProduct, rCategoryProduct)
+	productService = NewService(rp, rc)
+	sizeService = sizeusecases.NewService(rs)
 
 	exitCode := m.Run()
 
@@ -38,11 +43,14 @@ func TestMain(m *testing.M) {
 
 func TestRegisterProduct(t *testing.T) {
 	dtoCategory := &productdto.RegisterCategoryInput{Name: "pizza"}
-
 	categoryId, err := categoryProductService.RegisterCategory(ctx, dtoCategory)
-
 	assert.Nil(t, err)
 	assert.NotNil(t, categoryId)
+
+	dtoSize := &productdto.RegisterSizeInput{Name: "P"}
+	sizeId, err := sizeService.RegisterSize(ctx, dtoSize)
+	assert.Nil(t, err)
+	assert.NotNil(t, sizeId)
 
 	dto := &productdto.RegisterProductInput{
 		Code:       "123",
@@ -50,6 +58,7 @@ func TestRegisterProduct(t *testing.T) {
 		Cost:       100,
 		Price:      100,
 		CategoryID: categoryId,
+		SizeID:     sizeId,
 	}
 
 	productId, err := productService.RegisterProduct(ctx, dto)
