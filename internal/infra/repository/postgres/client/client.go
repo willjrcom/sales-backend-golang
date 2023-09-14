@@ -1,10 +1,11 @@
-package clientrepositorylocal
+package clientrepositorybun
 
 import (
 	"sync"
 
 	"github.com/uptrace/bun"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
+
 	"golang.org/x/net/context"
 )
 
@@ -13,16 +14,14 @@ type ClientRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewClientRepositoryLocal(db *bun.DB) *ClientRepositoryBun {
+func NewClientRepositoryBun(db *bun.DB) *ClientRepositoryBun {
 	return &ClientRepositoryBun{db: db}
 }
 
 func (r *ClientRepositoryBun) RegisterClient(ctx context.Context, c *cliententity.Client) error {
 	r.mu.Lock()
-	_, err := r.db.NewInsert().Model(c).Exec(ctx)
-	r.mu.Unlock()
-
-	if err != nil {
+	if _, err := r.db.NewInsert().Model(c).Exec(ctx); err != nil {
+		r.mu.Unlock()
 		return err
 	}
 
@@ -57,7 +56,7 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*cl
 	client := &cliententity.Client{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(client).Where("client.id = ?", id).Relation("Address").Scan(ctx)
+	err := r.db.NewSelect().Model(client).Where("client.id = ?", id).Relation("Address").Relation("Contacts").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -67,17 +66,17 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*cl
 	return client, nil
 }
 
-func (r *ClientRepositoryBun) GetClientBy(ctx context.Context, c *cliententity.Client) ([]cliententity.Client, error) {
+func (r *ClientRepositoryBun) GetClientsBy(ctx context.Context, c *cliententity.Client) ([]cliententity.Client, error) {
 	clients := []cliententity.Client{}
 
 	r.mu.Lock()
 	query := r.db.NewSelect().Model(&cliententity.Client{})
 
 	if c.Name != "" {
-		query.Where("client.code = ?", c.Name)
+		query.Where("client.name = ?", "%"+c.Name+"%")
 	}
 
-	err := query.Relation("Address").Scan(ctx, &clients)
+	err := query.Relation("Address").Relation("Contacts").Scan(ctx, &clients)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -87,10 +86,10 @@ func (r *ClientRepositoryBun) GetClientBy(ctx context.Context, c *cliententity.C
 	return clients, nil
 }
 
-func (r *ClientRepositoryBun) GetAllClient(ctx context.Context) ([]cliententity.Client, error) {
+func (r *ClientRepositoryBun) GetAllClients(ctx context.Context) ([]cliententity.Client, error) {
 	clients := []cliententity.Client{}
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&clients).Relation("Address").Scan(ctx)
+	err := r.db.NewSelect().Model(&clients).Relation("Address").Relation("Contacts").Scan(ctx)
 
 	r.mu.Unlock()
 

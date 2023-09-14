@@ -7,10 +7,10 @@ import (
 )
 
 type Person struct {
-	Name     string             `json:"name"`
-	Birthday time.Time          `json:"birthday"`
-	Email    string             `json:"email"`
-	Contacts []string           `json:"contacts"`
-	Address  addressdto.Address `json:"address"`
-	Cpf      string             `json:"cpf"`
+	Name     string               `json:"name"`
+	Birthday time.Time            `json:"birthday"`
+	Email    string               `json:"email"`
+	Contacts []Contact            `json:"contacts"`
+	Address  []addressdto.Address `json:"address"`
+	Cpf      string               `json:"cpf"`
 }

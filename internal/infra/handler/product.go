@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	filterdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/filter"
 	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
@@ -110,8 +109,6 @@ func (h *handlerProductImpl) handlerGetProductBy(w http.ResponseWriter, r *http.
 
 func (h *handlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	filter := &filterdto.Category{}
-	jsonpkg.ParseBody(r, filter)
 
 	if categories, err := h.ps.GetAllProducts(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})

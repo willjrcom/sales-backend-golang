@@ -54,9 +54,6 @@ func (r *UpdateClientInput) UpdateModel(client *cliententity.Client) error {
 	if r.Email != nil {
 		client.Email = *r.Email
 	}
-	if r.Contacts != nil {
-		client.Contacts = *r.Contacts
-	}
 	if r.Cpf != nil {
 		client.Cpf = *r.Cpf
 	}

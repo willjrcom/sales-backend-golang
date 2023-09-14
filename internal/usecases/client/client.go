@@ -3,39 +3,44 @@ package clientusecases
 import (
 	"context"
 
-	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
+	"github.com/google/uuid"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
-	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
+	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	filterdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/filter"
 )
 
 type Service struct {
-	rClient  cliententity.Repository
-	rAddress addressentity.Repository
+	rclient  cliententity.Repository
+	rcontact personentity.ContactRepository
 }
 
-func NewService(rc cliententity.Repository, ra addressentity.Repository) *Service {
-	return &Service{rClient: rc, rAddress: ra}
+func NewService(rcliente cliententity.Repository, rcontact personentity.ContactRepository) *Service {
+	return &Service{rclient: rcliente, rcontact: rcontact}
 }
 
-func (s *Service) RegisterClient(ctx context.Context, dto *clientdto.RegisterClientInput) error {
-	person, err := dto.ToModel()
+func (s *Service) RegisterClient(ctx context.Context, dto *clientdto.RegisterClientInput) (uuid.UUID, error) {
+	client, err := dto.ToModel()
 
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
-	if err := s.rClient.RegisterClient(ctx, person); err != nil {
-		return err
+	if err := s.rclient.RegisterClient(ctx, client); err != nil {
+		return uuid.Nil, err
 	}
 
-	return nil
+	for _, contact := range client.Contacts {
+		if err := s.rcontact.RegisterContact(ctx, &contact); err != nil {
+			return uuid.Nil, err
+		}
+	}
+
+	return client.ID, nil
 }
 
 func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IdRequest, dto *clientdto.UpdateClientInput) error {
-	client, err := s.rClient.GetClientById(ctx, dtoId.ID.String())
+	client, err := s.rclient.GetClientById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
@@ -45,19 +50,19 @@ func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IdRequest, 
 		return err
 	}
 
-	if err := s.rClient.UpdateClient(ctx, client); err != nil {
+	if err := s.rclient.UpdateClient(ctx, client); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *Service) RemoveClient(ctx context.Context, dto *entitydto.IdRequest) error {
-	if _, err := s.rClient.GetClientById(ctx, dto.ID.String()); err != nil {
+func (s *Service) DeleteClient(ctx context.Context, dto *entitydto.IdRequest) error {
+	if _, err := s.rclient.GetClientById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
-	if err := s.rClient.DeleteClient(ctx, dto.ID.String()); err != nil {
+	if err := s.rclient.DeleteClient(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
@@ -65,32 +70,25 @@ func (s *Service) RemoveClient(ctx context.Context, dto *entitydto.IdRequest) er
 }
 
 func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IdRequest) (*cliententity.Client, error) {
-	if client, err := s.rClient.GetClientById(ctx, dto.ID.String()); err != nil {
+	if client, err := s.rclient.GetClientById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		return client, nil
 	}
 }
 
-func (s *Service) GetAllClient(ctx context.Context, dto *filterdto.Filter) ([]cliententity.Client, error) {
-	if clients, err := s.rClient.GetAllClients(ctx); err != nil {
+func (s *Service) GetClientsBy(ctx context.Context, dto *clientdto.FilterClientInput) ([]cliententity.Client, error) {
+	if clients, err := s.rclient.GetAllClients(ctx); err != nil {
 		return nil, err
 	} else {
 		return clients, nil
 	}
 }
 
-func (s *Service) RegisterAddress(ctx context.Context, dtoId *entitydto.IdRequest, dto *addressdto.RegisterAddressInput) error {
-	address, err := dto.ToModel()
-
-	if err != nil {
-		return err
+func (s *Service) GetAllClients(ctx context.Context) ([]cliententity.Client, error) {
+	if clients, err := s.rclient.GetAllClients(ctx); err != nil {
+		return nil, err
+	} else {
+		return clients, nil
 	}
-
-	address.PersonID = dtoId.ID
-	return nil
-}
-
-func (s *Service) RemoveAddress(ctx context.Context, dto *entitydto.IdRequest) error {
-	return nil
 }
