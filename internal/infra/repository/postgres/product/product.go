@@ -44,8 +44,13 @@ func (r *ProductRepositoryBun) UpdateProduct(ctx context.Context, p *productenti
 
 func (r *ProductRepositoryBun) DeleteProduct(ctx context.Context, id string) error {
 	r.mu.Lock()
-	r.db.NewDelete().Model(&productentity.Product{}).Where("id = ?", id).Exec(ctx)
+	_, err := r.db.NewDelete().Model(&productentity.Product{}).Where("id = ?", id).Exec(ctx)
 	r.mu.Unlock()
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
