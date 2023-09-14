@@ -8,33 +8,15 @@ import (
 )
 
 type UpdateClientInput struct {
-	Name         *string    `json:"name"`
-	Birthday     *time.Time `json:"birthday"`
-	Email        *string    `json:"email"`
-	Contacts     *[]string  `json:"contacts"`
-	Cpf          *string    `json:"cpf"`
-	Street       *string    `json:"street"`
-	Number       *string    `json:"number"`
-	Complement   *string    `json:"complement"`
-	Reference    *string    `json:"reference"`
-	Neighborhood *string    `json:"neighborhood"`
-	City         *string    `json:"city"`
-	State        *string    `json:"state"`
-	Cep          *string    `json:"cep"`
+	Name     *string    `json:"name"`
+	Email    *string    `json:"email"`
+	Cpf      *string    `json:"cpf"`
+	Birthday *time.Time `json:"birthday"`
 }
 
 func (r *UpdateClientInput) Validate() error {
 	if r.Name != nil && *r.Name == "" {
 		return errors.New("name is required")
-	}
-	if r.Street != nil && *r.Street == "" {
-		return errors.New("street is required")
-	}
-	if r.Number != nil && *r.Number == "" {
-		return errors.New("number is required")
-	}
-	if r.Neighborhood != nil && *r.Neighborhood == "" {
-		return errors.New("Address is required")
 	}
 
 	return nil
@@ -48,14 +30,14 @@ func (r *UpdateClientInput) UpdateModel(client *cliententity.Client) error {
 	if r.Name != nil {
 		client.Name = *r.Name
 	}
-	if r.Birthday != nil {
-		client.Birthday = *r.Birthday
-	}
 	if r.Email != nil {
 		client.Email = *r.Email
 	}
 	if r.Cpf != nil {
 		client.Cpf = *r.Cpf
+	}
+	if r.Birthday != nil {
+		client.Birthday = *r.Birthday
 	}
 
 	return nil
