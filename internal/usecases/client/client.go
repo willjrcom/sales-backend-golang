@@ -69,26 +69,41 @@ func (s *Service) DeleteClient(ctx context.Context, dto *entitydto.IdRequest) er
 	return nil
 }
 
-func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IdRequest) (*cliententity.Client, error) {
+func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IdRequest) (*clientdto.ClientOutput, error) {
 	if client, err := s.rclient.GetClientById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return client, nil
+		dto := &clientdto.ClientOutput{}
+		dto.FromModel(client)
+		return dto, nil
 	}
 }
 
-func (s *Service) GetClientsBy(ctx context.Context, dto *clientdto.FilterClientInput) ([]cliententity.Client, error) {
+func (s *Service) GetClientsBy(ctx context.Context, dto *clientdto.FilterClientInput) ([]clientdto.ClientOutput, error) {
+	clients, err := s.rclient.GetAllClients(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	dtos := clientsToDtos(clients)
+	return dtos, nil
+}
+
+func (s *Service) GetAllClients(ctx context.Context) ([]clientdto.ClientOutput, error) {
 	if clients, err := s.rclient.GetAllClients(ctx); err != nil {
 		return nil, err
 	} else {
-		return clients, nil
+		dtos := clientsToDtos(clients)
+		return dtos, nil
 	}
 }
 
-func (s *Service) GetAllClients(ctx context.Context) ([]cliententity.Client, error) {
-	if clients, err := s.rclient.GetAllClients(ctx); err != nil {
-		return nil, err
-	} else {
-		return clients, nil
+func clientsToDtos(clients []cliententity.Client) []clientdto.ClientOutput {
+	dtos := make([]clientdto.ClientOutput, len(clients))
+	for i, client := range clients {
+		dtos[i].FromModel(&client)
 	}
+
+	return dtos
 }
