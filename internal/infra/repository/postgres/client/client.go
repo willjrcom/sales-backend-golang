@@ -20,8 +20,29 @@ func NewClientRepositoryBun(db *bun.DB) *ClientRepositoryBun {
 
 func (r *ClientRepositoryBun) RegisterClient(ctx context.Context, c *cliententity.Client) error {
 	r.mu.Lock()
-	if _, err := r.db.NewInsert().Model(c).Exec(ctx); err != nil {
-		r.mu.Unlock()
+	tx, err := r.db.Begin()
+
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+		return err
+	}
+
+	for _, contact := range c.Contacts {
+		if _, err := tx.NewInsert().Model(&contact).Exec(ctx); err != nil {
+			if err := tx.Rollback(); err != nil {
+				return err
+			}
+			return err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 

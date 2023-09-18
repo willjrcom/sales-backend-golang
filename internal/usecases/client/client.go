@@ -30,12 +30,6 @@ func (s *Service) RegisterClient(ctx context.Context, dto *clientdto.RegisterCli
 		return uuid.Nil, err
 	}
 
-	for _, contact := range client.Contacts {
-		if err := s.rcontact.RegisterContact(ctx, &contact); err != nil {
-			return uuid.Nil, err
-		}
-	}
-
 	return client.ID, nil
 }
 
