@@ -20,6 +20,7 @@ type Contact struct {
 	PersonID      uuid.UUID `bun:"person_id,type:uuid,notnull"`
 	Ddd           string    `bun:"ddd,notnull"`
 	Number        string    `bun:"number,notnull"`
+	Type          string    `bun:"type,notnull"`
 }
 
 func ValidateAndExtractContact(text string) (ddd string, number string, err error) {
