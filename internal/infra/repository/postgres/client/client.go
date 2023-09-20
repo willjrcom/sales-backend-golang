@@ -4,7 +4,9 @@ import (
 	"sync"
 
 	"github.com/uptrace/bun"
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
+	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 
 	"golang.org/x/net/context"
 )
@@ -26,6 +28,7 @@ func (r *ClientRepositoryBun) RegisterClient(ctx context.Context, c *cliententit
 		return err
 	}
 
+	// Register client
 	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
 		if err := tx.Rollback(); err != nil {
 			return err
@@ -33,12 +36,17 @@ func (r *ClientRepositoryBun) RegisterClient(ctx context.Context, c *cliententit
 		return err
 	}
 
+	// Register contacts
 	for _, contact := range c.Contacts {
 		if _, err := tx.NewInsert().Model(&contact).Exec(ctx); err != nil {
-			if err := tx.Rollback(); err != nil {
-				return err
-			}
-			return err
+			return rollback(&tx, err)
+		}
+	}
+
+	// Register addresses
+	for _, address := range c.Addresses {
+		if _, err := tx.NewInsert().Model(&address).Exec(ctx); err != nil {
+			return rollback(&tx, err)
 		}
 	}
 
@@ -63,10 +71,28 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.
 
 func (r *ClientRepositoryBun) DeleteClient(ctx context.Context, id string) error {
 	r.mu.Lock()
-	_, err := r.db.NewDelete().Model(&cliententity.Client{}).Where("id = ?", id).Exec(ctx)
-	r.mu.Unlock()
+	tx, err := r.db.Begin()
 
 	if err != nil {
+		return err
+	}
+
+	// Delete client
+	if _, err = tx.NewDelete().Model(&cliententity.Client{}).Where("id = ?", id).Exec(ctx); err != nil {
+		return rollback(&tx, err)
+	}
+
+	// Delete contacts
+	if _, err = tx.NewDelete().Model(&personentity.Contact{}).Where("person_id = ?", id).Exec(ctx); err != nil {
+		return rollback(&tx, err)
+	}
+
+	// Delete addresses
+	if _, err = tx.NewDelete().Model(&addressentity.Address{}).Where("person_id = ?", id).Exec(ctx); err != nil {
+		return rollback(&tx, err)
+	}
+
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 
@@ -119,4 +145,12 @@ func (r *ClientRepositoryBun) GetAllClients(ctx context.Context) ([]cliententity
 	}
 
 	return clients, nil
+}
+
+func rollback(tx *bun.Tx, err error) error {
+	if err := tx.Rollback(); err != nil {
+		return err
+	}
+
+	return err
 }
