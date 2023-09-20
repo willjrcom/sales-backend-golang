@@ -12,6 +12,7 @@ type ContactRepository interface {
 	DeleteContact(ctx context.Context, id string) error
 	GetContactById(ctx context.Context, id string) (*Contact, error)
 	GetContactsBy(ctx context.Context, c *Contact) ([]Contact, error)
+	GetAllContacts(ctx context.Context) ([]Contact, error)
 }
 
 type AddressRepository interface {
