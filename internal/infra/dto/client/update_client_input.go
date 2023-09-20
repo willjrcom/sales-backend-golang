@@ -2,9 +2,14 @@ package clientdto
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
+)
+
+var (
+	ErrInvalidEmail = errors.New("invalid email")
 )
 
 type UpdateClientInput struct {
@@ -15,8 +20,8 @@ type UpdateClientInput struct {
 }
 
 func (r *UpdateClientInput) Validate() error {
-	if r.Name != nil && *r.Name == "" {
-		return errors.New("name is required")
+	if r.Email != nil && strings.Contains(*r.Email, "@") {
+		return ErrInvalidEmail
 	}
 
 	return nil
@@ -37,7 +42,7 @@ func (r *UpdateClientInput) UpdateModel(client *cliententity.Client) error {
 		client.Cpf = *r.Cpf
 	}
 	if r.Birthday != nil {
-		client.Birthday = *r.Birthday
+		client.Birthday = r.Birthday
 	}
 
 	return nil

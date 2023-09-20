@@ -20,12 +20,12 @@ type Person struct {
 	Email    string                     `json:"email"`
 	Cpf      string                     `json:"cpf"`
 	Contacts []contactdto.ContactOutput `json:"contacts,omitempty"`
-	Address  []addressdto.Address       `json:"address,omitempty"`
+	Address  []addressdto.AddressOutput `json:"address,omitempty"`
 }
 
 func (p *Person) FromModel(model *personentity.Person) {
 	p.Name = model.Name
-	p.Birthday = model.Birthday
+	p.Birthday = *model.Birthday
 	p.Email = model.Email
 	p.Cpf = model.Cpf
 

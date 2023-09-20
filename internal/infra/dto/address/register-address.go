@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	ErrStreetRequired = errors.New("street is required")
-	ErrNumberRequired = errors.New("number is required")
-	ErrStateRequired  = errors.New("state is required")
-	ErrCityRequired   = errors.New("city is required")
+	ErrStreetRequired       = errors.New("street is required")
+	ErrNumberRequired       = errors.New("number is required")
+	ErrNeighborhoodRequired = errors.New("neighborhood is required")
+	ErrCityRequired         = errors.New("city is required")
+	ErrStateRequired        = errors.New("state is required")
 )
 
 type RegisterAddressInput struct {
@@ -23,6 +24,7 @@ type RegisterAddressInput struct {
 	City         string `json:"city"`
 	State        string `json:"state"`
 	Cep          string `json:"cep"`
+	IsDefault    bool   `json:"is_default"`
 }
 
 func (a *RegisterAddressInput) validate() error {
@@ -32,11 +34,14 @@ func (a *RegisterAddressInput) validate() error {
 	if a.Number == "" {
 		return ErrNumberRequired
 	}
-	if a.State == "" {
-		return ErrStateRequired
+	if a.Neighborhood == "" {
+		return ErrNeighborhoodRequired
 	}
 	if a.City == "" {
 		return ErrCityRequired
+	}
+	if a.State == "" {
+		return ErrStateRequired
 	}
 	return nil
 }
