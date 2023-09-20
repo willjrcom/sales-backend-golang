@@ -7,6 +7,7 @@ import (
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
+	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 )
 
@@ -100,4 +101,25 @@ func clientsToDtos(clients []cliententity.Client) []clientdto.ClientOutput {
 	}
 
 	return dtos
+}
+
+func (s *Service) RegisterContactToClient(ctx context.Context, dtoId *entitydto.IdRequest, dto *contactdto.RegisterContactInput) (uuid.UUID, error) {
+	contact, err := dto.ToModel()
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	// Validate if exists
+	if _, err := s.rclient.GetClientById(ctx, dtoId.ID.String()); err != nil {
+		return uuid.Nil, err
+	}
+
+	contact.PersonID = dtoId.ID
+
+	if err := s.rcontact.RegisterContact(ctx, contact); err != nil {
+		return uuid.Nil, err
+	}
+
+	return contact.ID, nil
 }
