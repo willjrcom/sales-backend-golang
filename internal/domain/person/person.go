@@ -9,10 +9,10 @@ import (
 
 type Person struct {
 	entity.Entity
-	Name     string                  `bun:"name,notnull"`
-	Birthday time.Time               `bun:"birthday"`
-	Email    string                  `bun:"email"`
-	Contacts []Contact               `bun:"rel:has-many,join:id=person_id,notnull"`
-	Address  []addressentity.Address `bun:"rel:has-many,join:id=person_id,notnull"`
-	Cpf      string                  `bun:"cpf"`
+	Name      string                  `bun:"name,notnull"`
+	Email     string                  `bun:"email"`
+	Cpf       string                  `bun:"cpf"`
+	Birthday  *time.Time              `bun:"birthday"`
+	Contacts  []Contact               `bun:"rel:has-many,join:id=person_id,notnull"`
+	Addresses []addressentity.Address `bun:"rel:has-many,join:id=person_id,notnull"`
 }

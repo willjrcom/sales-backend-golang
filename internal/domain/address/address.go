@@ -14,7 +14,7 @@ type Address struct {
 	Number        string    `bun:"number,notnull"`
 	Complement    string    `bun:"complement"`
 	Reference     string    `bun:"reference"`
-	Neighborhood  string    `bun:"neighborhood"`
+	Neighborhood  string    `bun:"neighborhood,notnull"`
 	City          string    `bun:"city,notnull"`
 	State         string    `bun:"state,notnull"`
 	Cep           string    `bun:"cep"`
