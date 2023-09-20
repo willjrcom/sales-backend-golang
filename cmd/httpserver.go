@@ -19,6 +19,7 @@ import (
 	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size_category"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
+	contactusecases "github.com/willjrcom/sales-backend-go/internal/usecases/contact_person"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
 )
@@ -56,6 +57,7 @@ var HttpserverCmd = &cobra.Command{
 		sizeService := sizeusecases.NewService(sizeRepo)
 
 		clientService := clientusecases.NewService(clientRepo, contactRepo)
+		contactService := contactusecases.NewService(contactRepo)
 
 		// Load handlers
 		productHandler := handlerimpl.NewHandlerProduct(productService)
@@ -63,11 +65,13 @@ var HttpserverCmd = &cobra.Command{
 		sizeHandler := handlerimpl.NewHandlerSizeProduct(sizeService)
 
 		clientHandler := handlerimpl.NewHandlerClient(clientService)
+		contactHandler := handlerimpl.NewHandlerContactPerson(contactService)
 
 		server.AddHandler(productHandler)
 		server.AddHandler(categoryHandler)
 		server.AddHandler(sizeHandler)
 		server.AddHandler(clientHandler)
+		server.AddHandler(contactHandler)
 
 		if err := server.StartServer(port); err != nil {
 			panic(err)
