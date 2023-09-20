@@ -25,7 +25,7 @@ func NewHandlerCategoryProduct(categoryService *categoryproductusecases.Service)
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterCategoryProduct)
-		c.Put("/update/{id}", h.handlerUpdateCategoryProduct)
+		c.Patch("/update/{id}", h.handlerUpdateCategoryProduct)
 		c.Delete("/delete/{id}", h.handlerDeleteCategoryProduct)
 		c.Get("/{id}", h.handlerGetCategoryProduct)
 		c.Get("/allproducts", h.handlerGetAllCategoryProducts)

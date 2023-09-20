@@ -25,7 +25,7 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterClient)
-		c.Put("/update/{id}", h.handlerUpdateClient)
+		c.Patch("/update/{id}", h.handlerUpdateClient)
 		c.Delete("/delete/{id}", h.handlerDeleteClient)
 		c.Get("/{id}", h.handlerGetClient)
 		c.Post("/by", h.handlerGetClientsBy)

@@ -25,7 +25,7 @@ func NewHandlerSizeProduct(sizeService *sizeusecases.Service) *handler.Handler {
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterSize)
-		c.Put("/update/{id}", h.handlerUpdateSize)
+		c.Patch("/update/{id}", h.handlerUpdateSize)
 		c.Delete("/delete/{id}", h.handlerDeleteSize)
 	})
 
