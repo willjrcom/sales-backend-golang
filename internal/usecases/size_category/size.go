@@ -23,33 +23,33 @@ func NewService(c productentity.SizeRepository) *Service {
 }
 
 func (s *Service) RegisterSize(ctx context.Context, dto *productdto.RegisterSizeInput) (uuid.UUID, error) {
-	Size, err := dto.ToModel()
+	size, err := dto.ToModel()
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	err = s.r.RegisterSize(ctx, Size)
+	err = s.r.RegisterSize(ctx, size)
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	return Size.ID, nil
+	return size.ID, nil
 }
 
 func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IdRequest, dto *productdto.UpdateSizeInput) error {
-	Size, err := s.r.GetSizeById(ctx, dtoId.ID.String())
+	size, err := s.r.GetSizeById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if err = dto.UpdateModel(Size); err != nil {
+	if err = dto.UpdateModel(size); err != nil {
 		return err
 	}
 
-	if err = s.r.UpdateSize(ctx, Size); err != nil {
+	if err = s.r.UpdateSize(ctx, size); err != nil {
 		return err
 	}
 
@@ -69,9 +69,9 @@ func (s *Service) DeleteSize(ctx context.Context, dto *entitydto.IdRequest) erro
 }
 
 func (s *Service) GetSizeById(ctx context.Context, dto *entitydto.IdRequest) (*productentity.Size, error) {
-	if Size, err := s.r.GetSizeById(ctx, dto.ID.String()); err != nil {
+	if size, err := s.r.GetSizeById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return Size, nil
+		return size, nil
 	}
 }
