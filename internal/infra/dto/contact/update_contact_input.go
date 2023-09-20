@@ -11,12 +11,11 @@ var (
 )
 
 type UpdateContactInput struct {
-	Ddd    *string `json:"ddd"`
-	Number *string `json:"number"`
+	Contact string `json:"contact"`
 }
 
 func (c *UpdateContactInput) validate() error {
-	if c.Ddd == nil && c.Number == nil {
+	if c.Contact != "" {
 		return ErrInvalidContent
 	}
 
@@ -28,12 +27,13 @@ func (c *UpdateContactInput) UpdateModel(model *personentity.Contact) error {
 		return err
 	}
 
-	if c.Ddd != nil {
-		model.Ddd = *c.Ddd
-	}
-	if c.Number != nil {
-		model.Number = *c.Number
+	ddd, number, err := personentity.ValidateAndExtractContact(c.Contact)
+
+	if err != nil {
+		return err
 	}
 
+	model.Ddd = ddd
+	model.Number = number
 	return nil
 }
