@@ -3,6 +3,7 @@ package contactrepositorybun
 import (
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	"golang.org/x/net/context"
@@ -73,6 +74,9 @@ func (r *ContactRepositoryBun) GetContactsBy(ctx context.Context, c *personentit
 	r.mu.Lock()
 	query := r.db.NewSelect().Model(&personentity.Contact{})
 
+	if c.PersonID != uuid.Nil {
+		query.Where("person_id = ?", c.PersonID)
+	}
 	if c.Ddd != "" {
 		query.Where("ddd = ?", c.Ddd)
 	}

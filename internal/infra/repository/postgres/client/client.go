@@ -120,7 +120,11 @@ func (r *ClientRepositoryBun) GetClientsBy(ctx context.Context, c *cliententity.
 	query := r.db.NewSelect().Model(&cliententity.Client{})
 
 	if c.Name != "" {
-		query.Where("client.name = ?", "%"+c.Name+"%")
+		query.Where("client.name LIKE ?", "%"+c.Name+"%")
+	}
+
+	if c.Cpf != "" {
+		query.Where("client.cpf LIKE ?", "%"+c.Cpf+"%")
 	}
 
 	err := query.Relation("Addresses").Relation("Contacts").Scan(ctx, &clients)
