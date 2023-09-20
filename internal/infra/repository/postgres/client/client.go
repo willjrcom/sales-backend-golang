@@ -103,7 +103,7 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*cl
 	client := &cliententity.Client{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(client).Where("client.id = ?", id).Relation("Address").Relation("Contacts").Scan(ctx)
+	err := r.db.NewSelect().Model(client).Where("client.id = ?", id).Relation("Addresses").Relation("Contacts").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -123,7 +123,7 @@ func (r *ClientRepositoryBun) GetClientsBy(ctx context.Context, c *cliententity.
 		query.Where("client.name = ?", "%"+c.Name+"%")
 	}
 
-	err := query.Relation("Address").Relation("Contacts").Scan(ctx, &clients)
+	err := query.Relation("Addresses").Relation("Contacts").Scan(ctx, &clients)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -136,7 +136,7 @@ func (r *ClientRepositoryBun) GetClientsBy(ctx context.Context, c *cliententity.
 func (r *ClientRepositoryBun) GetAllClients(ctx context.Context) ([]cliententity.Client, error) {
 	clients := []cliententity.Client{}
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&clients).Relation("Address").Relation("Contacts").Scan(ctx)
+	err := r.db.NewSelect().Model(&clients).Relation("Addresses").Relation("Contacts").Scan(ctx)
 
 	r.mu.Unlock()
 

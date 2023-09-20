@@ -103,7 +103,7 @@ func clientsToDtos(clients []cliententity.Client) []clientdto.ClientOutput {
 	return dtos
 }
 
-func (s *Service) RegisterContactToClient(ctx context.Context, dtoId *entitydto.IdRequest, dto *contactdto.RegisterContactInput) (uuid.UUID, error) {
+func (s *Service) RegisterContactToClient(ctx context.Context, dto *contactdto.RegisterContactInput) (uuid.UUID, error) {
 	contact, err := dto.ToModel()
 
 	if err != nil {
@@ -111,11 +111,9 @@ func (s *Service) RegisterContactToClient(ctx context.Context, dtoId *entitydto.
 	}
 
 	// Validate if exists
-	if _, err := s.rclient.GetClientById(ctx, dtoId.ID.String()); err != nil {
+	if _, err := s.rclient.GetClientById(ctx, contact.PersonID.String()); err != nil {
 		return uuid.Nil, err
 	}
-
-	contact.PersonID = dtoId.ID
 
 	if err := s.rcontact.RegisterContact(ctx, contact); err != nil {
 		return uuid.Nil, err
