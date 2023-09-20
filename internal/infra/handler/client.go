@@ -31,7 +31,12 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 		c.Get("/{id}", h.handlerGetClient)
 		c.Post("/by", h.handlerGetClientsBy)
 		c.Post("/all", h.handlerGetAllClients)
+	})
+
+	c.With().Group(func(c chi.Router) {
 		c.Post("/contact/new", h.handlerRegisterContactClient)
+		c.Patch("/contact/update/{id}", h.handlerUpdateContactClient)
+		c.Delete("/contact/delete/{id}", h.handlerDeleteContactClient)
 	})
 
 	return handler.NewHandler("/client", c)
@@ -132,12 +137,51 @@ func (h *handlerClientImpl) handlerGetAllClients(w http.ResponseWriter, r *http.
 func (h *handlerClientImpl) handlerRegisterContactClient(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	contact := &contactdto.RegisterContactInput{}
+	contact := &contactdto.RegisterContactClientInput{}
 	jsonpkg.ParseBody(r, contact)
 
 	if id, err := h.ps.RegisterContactToClient(ctx, contact); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+	}
+}
+
+func (h *handlerClientImpl) handlerUpdateContactClient(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	contact := &contactdto.UpdateContactInput{}
+	jsonpkg.ParseBody(r, contact)
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.ps.UpdateContact(ctx, dtoId, contact); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusCreated, nil)
+	}
+}
+
+func (h *handlerClientImpl) handlerDeleteContactClient(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.ps.DeleteContact(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusCreated, nil)
 	}
 }

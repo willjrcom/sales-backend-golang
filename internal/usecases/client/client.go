@@ -75,7 +75,13 @@ func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IdRequest) (
 }
 
 func (s *Service) GetClientsBy(ctx context.Context, dto *clientdto.FilterClientInput) ([]clientdto.ClientOutput, error) {
-	clients, err := s.rclient.GetAllClients(ctx)
+	client, err := dto.ToModel()
+
+	if err != nil {
+		return nil, err
+	}
+
+	clients, err := s.rclient.GetClientsBy(ctx, client)
 
 	if err != nil {
 		return nil, err
@@ -103,7 +109,7 @@ func clientsToDtos(clients []cliententity.Client) []clientdto.ClientOutput {
 	return dtos
 }
 
-func (s *Service) RegisterContactToClient(ctx context.Context, dto *contactdto.RegisterContactInput) (uuid.UUID, error) {
+func (s *Service) RegisterContactToClient(ctx context.Context, dto *contactdto.RegisterContactClientInput) (uuid.UUID, error) {
 	contact, err := dto.ToModel()
 
 	if err != nil {
@@ -120,4 +126,34 @@ func (s *Service) RegisterContactToClient(ctx context.Context, dto *contactdto.R
 	}
 
 	return contact.ID, nil
+}
+
+func (s *Service) UpdateContact(ctx context.Context, dtoId *entitydto.IdRequest, dto *contactdto.UpdateContactInput) error {
+	contact, err := s.rcontact.GetContactById(ctx, dtoId.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	if err := dto.UpdateModel(contact); err != nil {
+		return err
+	}
+
+	if err := s.rcontact.UpdateContact(ctx, contact); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) DeleteContact(ctx context.Context, dtoId *entitydto.IdRequest) error {
+	if _, err := s.rcontact.GetContactById(ctx, dtoId.ID.String()); err != nil {
+		return err
+	}
+
+	if err := s.rcontact.DeleteContact(ctx, dtoId.ID.String()); err != nil {
+		return err
+	}
+
+	return nil
 }
