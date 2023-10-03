@@ -9,9 +9,9 @@ import (
 
 type TableOrder struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:orders"`
+	bun.BaseModel `bun:"table:table_orders"`
 	OrderID       uuid.UUID                `bun:"column:order_id,type:uuid,notnull"`
-	NumTable      int                      `bun:"num_table,notnull"`
+	CodTable      string                   `bun:"cod_table,notnull"`
 	QrCode        string                   `bun:"qr_code"`
 	WaiterID      uuid.UUID                `bun:"column:waiter_id,type:uuid,notnull"`
 	Waiter        *employeeentity.Employee `bun:"rel:belongs-to"`
