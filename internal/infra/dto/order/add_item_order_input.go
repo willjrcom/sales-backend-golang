@@ -1,23 +1,19 @@
 package orderdto
 
 import (
+	"github.com/google/uuid"
 	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
 type AddItemOrderInput struct {
-	Quantity    float64               `json:"quantity"`
-	Status      itementity.StatusItem `json:"status"`
-	Observation string                `json:"observation"`
+	ItemID      uuid.UUID `json:"item_id"`
+	Quantity    float64   `json:"quantity"`
+	Observation string    `json:"observation"`
 }
 
-func (a *AddItemOrderInput) ToModel(product *productentity.Product) *itementity.Item {
-	return &itementity.Item{
-		Name:        product.Name,
-		Price:       product.Price,
-		Description: product.Description,
+func (a *AddItemOrderInput) ToModel() (uuid.UUID, *itementity.Item) {
+	return a.ItemID, &itementity.Item{
 		Quantity:    a.Quantity,
-		Status:      a.Status,
 		Observation: a.Observation,
 	}
 }

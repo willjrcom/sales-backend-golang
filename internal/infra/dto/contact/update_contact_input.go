@@ -15,7 +15,7 @@ type UpdateContactInput struct {
 }
 
 func (c *UpdateContactInput) validate() error {
-	if c.Contact != "" {
+	if c.Contact == "" {
 		return ErrInvalidContent
 	}
 

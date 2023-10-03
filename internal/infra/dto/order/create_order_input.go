@@ -14,10 +14,7 @@ var (
 )
 
 type CreateOrderInput struct {
-	Name        string                     `json:"name"`
-	Delivery    *orderentity.DeliveryOrder `json:"delivery"`
-	TableOrder  *orderentity.TableOrder    `json:"table_order"`
-	AttendantID uuid.UUID                  `json:"attendant_id"`
+	Name string `json:"name"`
 }
 
 func (o *CreateOrderInput) Validate() error {
@@ -34,11 +31,8 @@ func (o *CreateOrderInput) ToModel() (*orderentity.Order, error) {
 	}
 
 	return &orderentity.Order{
-		Entity:      entity.Entity{ID: uuid.New(), CreatedAt: time.Now()},
-		Name:        o.Name,
-		Delivery:    o.Delivery,
-		TableOrder:  o.TableOrder,
-		AttendantID: o.AttendantID,
-		Status:      orderentity.OrderStatusStaging,
+		Entity: entity.Entity{ID: uuid.New(), CreatedAt: time.Now()},
+		Name:   o.Name,
+		Status: orderentity.OrderStatusStaging,
 	}, nil
 }

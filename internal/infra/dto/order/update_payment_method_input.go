@@ -11,15 +11,15 @@ type UpdatePaymentMethod struct {
 
 func (u *UpdatePaymentMethod) UpdateModel(order *orderentity.Order) {
 	if u.IsPaid != nil {
-		order.IsPaid = *u.IsPaid
+		order.Payment.IsPaid = *u.IsPaid
 	}
 	if u.TotalPaid != nil {
-		*order.TotalPaid = *u.TotalPaid
+		*order.Payment.TotalPaid = *u.TotalPaid
 	}
 	if u.Change != nil {
-		*order.Change = *u.Change
+		*order.Payment.Change = *u.Change
 	}
 	if u.Method != nil {
-		*order.Method = *u.Method
+		*order.Payment.Method = *u.Method
 	}
 }
