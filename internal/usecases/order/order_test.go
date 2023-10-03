@@ -20,7 +20,8 @@ var (
 func TestMain(m *testing.M) {
 	ctx = context.Background()
 	repo := orderrepositorylocal.NewOrderRepositoryLocal()
-	service = NewService(repo)
+	//address := addressentity.NewAddressRepositoryLocal()
+	service = NewService(repo, nil)
 
 	exitCode := m.Run()
 
@@ -28,11 +29,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestRegisterOrder(t *testing.T) {
-	dto := &orderdto.CreateOrderInput{
-		Name: "Test Order",
-	}
-
-	idOrder, err := service.CreateOrder(ctx, dto)
+	idOrder, err := service.CreateDefaultOrder(ctx)
 	assert.Nil(t, err)
 
 	dtoId := entitydto.NewIdRequest(idOrder)
@@ -44,19 +41,9 @@ func TestRegisterOrder(t *testing.T) {
 	assert.Equal(t, Order.ID, idOrder)
 }
 
-func TestRegisterOrderError(t *testing.T) {
-	// Teste 1 - No Name
-	dto := &orderdto.CreateOrderInput{}
-
-	_, err := service.CreateOrder(ctx, dto)
-	assert.NotNil(t, err)
-	assert.EqualError(t, err, orderdto.ErrNameRequired.Error())
-
-}
-
 func TestUpdateOrder(t *testing.T) {
 
-	Orders, err := service.GetAllOrder(ctx)
+	Orders, err := service.GetAllOrders(ctx)
 	assert.Nil(t, err)
 
 	assert.Equal(t, len(Orders), 1)
@@ -71,14 +58,14 @@ func TestUpdateOrder(t *testing.T) {
 }
 
 func TestGetAll(t *testing.T) {
-	Orders, err := service.GetAllOrder(ctx)
+	Orders, err := service.GetAllOrders(ctx)
 
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(Orders))
 }
 
 func TestGetOrderById(t *testing.T) {
-	Orders, err := service.GetAllOrder(ctx)
+	Orders, err := service.GetAllOrders(ctx)
 	assert.Nil(t, err)
 	assert.Equal(t, len(Orders), 1)
 	idOrder := Orders[0].ID
