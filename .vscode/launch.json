@@ -13,6 +13,5 @@
             "args": [
             "httpserver"
             ],
-            "preLaunchTask": "filebeat",
         }]
 }
