@@ -1,8 +1,10 @@
 package addressentity
 
+import "context"
+
 type Repository interface {
-	RegisterAddress(address *Address) error
-	UpdateAddress(address *Address) error
-	RemoveAddress(id string) error
-	GetAddressById(id string) (*Address, error)
+	RegisterAddress(ctx context.Context, address *Address) error
+	UpdateAddress(ctx context.Context, address *Address) error
+	RemoveAddress(ctx context.Context, id string) error
+	GetAddressById(ctx context.Context, id string) (*Address, error)
 }
