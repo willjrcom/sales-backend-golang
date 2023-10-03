@@ -15,11 +15,13 @@ import (
 	categoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/category_product"
 	clientrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/client"
 	contactrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/contact"
+	orderrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/order"
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
 	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size_category"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	contactusecases "github.com/willjrcom/sales-backend-go/internal/usecases/contact_person"
+	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
 )
@@ -51,6 +53,8 @@ var HttpserverCmd = &cobra.Command{
 		clientRepo := clientrepositorybun.NewClientRepositoryBun(db)
 		contactRepo := contactrepositorybun.NewContactRepositoryBun(db)
 
+		orderRepo := orderrepositorybun.NewOrderRepositoryBun(db)
+
 		// Load services
 		productService := productusecases.NewService(productRepo, categoryRepo)
 		categoryProductService := categoryproductusecases.NewService(categoryRepo)
@@ -58,6 +62,8 @@ var HttpserverCmd = &cobra.Command{
 
 		clientService := clientusecases.NewService(clientRepo, contactRepo)
 		contactService := contactusecases.NewService(contactRepo)
+
+		orderService := orderusecases.NewService(orderRepo, nil)
 
 		// Load handlers
 		productHandler := handlerimpl.NewHandlerProduct(productService)
@@ -67,11 +73,14 @@ var HttpserverCmd = &cobra.Command{
 		clientHandler := handlerimpl.NewHandlerClient(clientService)
 		contactHandler := handlerimpl.NewHandlerContactPerson(contactService)
 
+		orderHandler := handlerimpl.NewHandlerOrder(orderService)
+
 		server.AddHandler(productHandler)
 		server.AddHandler(categoryHandler)
 		server.AddHandler(sizeHandler)
 		server.AddHandler(clientHandler)
 		server.AddHandler(contactHandler)
+		server.AddHandler(orderHandler)
 
 		if err := server.StartServer(port); err != nil {
 			panic(err)
