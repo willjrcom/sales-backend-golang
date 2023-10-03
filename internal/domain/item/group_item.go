@@ -14,6 +14,7 @@ type GroupItem struct {
 	CategoryID    uuid.UUID               `bun:"column:category_id,type:uuid,notnull"`
 	Category      *productentity.Category `bun:"rel:belongs-to"`
 	Size          float64                 `bun:"size"`
+	Status        StatusItem              `bun:"status,notnull"`
 	OrderID       uuid.UUID               `bun:"column:order_id,type:uuid,notnull"`
 }
 
