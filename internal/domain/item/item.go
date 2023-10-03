@@ -9,11 +9,10 @@ import (
 type Item struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:items"`
-	GroupItemID   uuid.UUID  `bun:"group_item_id,type:uuid,notnull"`
-	Name          string     `bun:"name,notnull"`
-	Quantity      float64    `bun:"quantity,notnull"`
-	Description   string     `bun:"description"`
-	Price         float64    `bun:"price,notnull"`
-	Status        StatusItem `bun:"status"`
-	Observation   string     `bun:"observation"`
+	GroupItemID   uuid.UUID `bun:"group_item_id,type:uuid,notnull"`
+	Name          string    `bun:"name,notnull"`
+	Description   string    `bun:"description"`
+	Observation   string    `bun:"observation"`
+	Price         float64   `bun:"price,notnull"`
+	Quantity      float64   `bun:"quantity,notnull"`
 }
