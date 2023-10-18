@@ -77,7 +77,7 @@ func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context) ([]orderentity.
 	return orders, nil
 }
 
-func (r *OrderRepositoryLocal) UpdateDeliveryOrder(ctx context.Context, order *orderentity.Order, delivery *orderentity.DeliveryOrder) error {
+func (r *OrderRepositoryLocal) UpdateDeliveryOrder(ctx context.Context, delivery *orderentity.DeliveryOrder) error {
 	return nil
 }
 
@@ -85,7 +85,7 @@ func (r *OrderRepositoryLocal) DeleteDeliveryOrder(ctx context.Context, id strin
 	return nil
 }
 
-func (r *OrderRepositoryLocal) UpdateTableOrder(ctx context.Context, order *orderentity.Order, table *orderentity.TableOrder) error {
+func (r *OrderRepositoryLocal) UpdateTableOrder(ctx context.Context, table *orderentity.TableOrder) error {
 	return nil
 }
 

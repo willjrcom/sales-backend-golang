@@ -17,9 +17,9 @@ func NewOrderRepositoryBun(db *bun.DB) *OrderRepositoryBun {
 	return &OrderRepositoryBun{db: db}
 }
 
-func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, o *orderentity.Order) error {
+func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *orderentity.Order) error {
 	r.mu.Lock()
-	_, err := r.db.NewInsert().Model(o).Exec(ctx)
+	_, err := r.db.NewInsert().Model(order).Exec(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -29,9 +29,9 @@ func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, o *orderentity.Ord
 	return nil
 }
 
-func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, o *orderentity.Order) error {
+func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *orderentity.Order) error {
 	r.mu.Lock()
-	_, err := r.db.NewUpdate().Model(o).Where("id = ?", o.ID).Exec(ctx)
+	_, err := r.db.NewUpdate().Model(order).Where("id = ?", order.ID).Exec(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -68,14 +68,14 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (*orde
 	return order, nil
 }
 
-func (r *OrderRepositoryBun) GetOrderBy(ctx context.Context, o *orderentity.Order) ([]orderentity.Order, error) {
+func (r *OrderRepositoryBun) GetOrderBy(ctx context.Context, order *orderentity.Order) ([]orderentity.Order, error) {
 	orders := []orderentity.Order{}
 
 	r.mu.Lock()
 	query := r.db.NewSelect().Model(&orderentity.Order{})
 
-	if o.Status != "" {
-		query.Where("order.status = ?", o.Status)
+	if order.Status != "" {
+		query.Where("order.status = ?", order.Status)
 	}
 
 	err := query.Relation("Delivery").Relation("Table").Relation("Groups").Relation("Attendant").Scan(ctx, &orders)

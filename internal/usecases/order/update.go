@@ -86,29 +86,3 @@ func (s *Service) UpdateOrderObservation(ctx context.Context, dtoId *entitydto.I
 
 	return nil
 }
-
-func (s *Service) UpdateDeliveryAddress(ctx context.Context, dtoId *entitydto.IdRequest, dto *orderdto.UpdateDeliveryOrder) error {
-	order, err := s.ro.GetOrderById(ctx, dtoId.ID.String())
-
-	if err != nil {
-		return err
-	}
-
-	address, err := s.ra.GetAddressById(ctx, dto.AddressID.String())
-
-	if err != nil {
-		return err
-	}
-
-	dto.UpdateModel(order, address)
-
-	if err := s.ro.UpdateOrder(ctx, order); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *Service) UpdateTableOrder(ctx context.Context) error {
-	return nil
-}

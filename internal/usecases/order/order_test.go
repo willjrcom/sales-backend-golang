@@ -21,7 +21,7 @@ func TestMain(m *testing.M) {
 	ctx = context.Background()
 	repo := orderrepositorylocal.NewOrderRepositoryLocal()
 	//address := addressentity.NewAddressRepositoryLocal()
-	service = NewService(repo, nil)
+	service = NewService(repo)
 
 	exitCode := m.Run()
 
