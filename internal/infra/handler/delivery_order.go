@@ -24,7 +24,7 @@ func NewHandlerDeliveryOrder(orderService *deliveryorderusecases.Service) *handl
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new/{id}", h.handlerRegisterDeliveryOrder)
+		c.Post("/new", h.handlerRegisterDeliveryOrder)
 		c.Get("/{id}", h.handlerGetDeliveryById)
 		c.Get("/all", h.handlerGetAllDeliveries)
 	})
@@ -37,10 +37,7 @@ func (h *handlerDeliveryOrderImpl) handlerRegisterDeliveryOrder(w http.ResponseW
 	delivery := &orderdto.CreateDeliveryOrderInput{}
 	jsonpkg.ParseBody(r, delivery)
 
-	id := chi.URLParam(r, "id")
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
-
-	if id, err := h.pcs.CreateDeliveryOrder(ctx, dtoId, delivery); err != nil {
+	if id, err := h.pcs.CreateDeliveryOrder(ctx, delivery); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
