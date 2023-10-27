@@ -15,6 +15,7 @@ import (
 	categoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/category_product"
 	clientrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/client"
 	contactrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/contact"
+	employeerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/employee"
 	orderrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/order"
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
 	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size_category"
@@ -58,6 +59,8 @@ var HttpserverCmd = &cobra.Command{
 		orderRepo := orderrepositorybun.NewOrderRepositoryBun(db)
 		deliveryOrderRepo := orderrepositorybun.NewDeliveryOrderRepositoryBun(db)
 
+		employeeRepo := employeerepositorybun.NewProductRepositoryBun(db)
+
 		// Load services
 		productService := productusecases.NewService(productRepo, categoryRepo)
 		categoryProductService := categoryproductusecases.NewService(categoryRepo)
@@ -67,7 +70,7 @@ var HttpserverCmd = &cobra.Command{
 		contactService := contactusecases.NewService(contactRepo)
 
 		orderService := orderusecases.NewService(orderRepo)
-		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo)
+		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo, employeeRepo)
 
 		// Load handlers
 		productHandler := handlerimpl.NewHandlerProduct(productService)

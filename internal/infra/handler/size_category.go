@@ -49,6 +49,11 @@ func (h *handlerSizeCategoryImpl) handlerUpdateSize(w http.ResponseWriter, r *ht
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	Size := &productdto.UpdateSizeInput{}
@@ -66,6 +71,11 @@ func (h *handlerSizeCategoryImpl) handlerDeleteSize(w http.ResponseWriter, r *ht
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteSize(ctx, dtoId); err != nil {

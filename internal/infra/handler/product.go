@@ -52,6 +52,11 @@ func (h *handlerProductImpl) handlerUpdateProduct(w http.ResponseWriter, r *http
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	product := &productdto.UpdateProductInput{}
@@ -69,6 +74,11 @@ func (h *handlerProductImpl) handlerDeleteProduct(w http.ResponseWriter, r *http
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteProductById(ctx, dtoId); err != nil {
@@ -83,6 +93,11 @@ func (h *handlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if product, err := h.s.GetProductById(ctx, dtoId); err != nil {

@@ -25,21 +25,17 @@ func (u *UpdateDeliveryOrder) Validate() error {
 	return nil
 }
 
-func (u *UpdateDeliveryOrder) UpdateModel(model *orderentity.Order, address *addressentity.Address) error {
+func (u *UpdateDeliveryOrder) UpdateModel(model *orderentity.DeliveryOrder, address *addressentity.Address) error {
 	if err := u.Validate(); err != nil {
 		return err
 	}
 
-	if model.Delivery == nil {
-		return ErrDeliveryNotFound
-	}
-
-	// Invalid person
-	if address.PersonID != (*model.Delivery).ClientID {
+	// Validate if address is from client
+	if address.PersonID != model.ClientID {
 		return ErrAddressNotInClient
 	}
 
-	(*model.Delivery).AddressID = *u.AddressID
+	model.AddressID = *u.AddressID
 
 	return nil
 }

@@ -48,6 +48,11 @@ func (h *handlerContactImpl) handlerGetContactById(w http.ResponseWriter, r *htt
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if id, err := h.s.GetContactById(ctx, dtoId); err != nil {

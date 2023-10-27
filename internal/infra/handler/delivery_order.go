@@ -27,6 +27,8 @@ func NewHandlerDeliveryOrder(orderService *deliveryorderusecases.Service) *handl
 		c.Post("/new", h.handlerRegisterDeliveryOrder)
 		c.Get("/{id}", h.handlerGetDeliveryById)
 		c.Get("/all", h.handlerGetAllDeliveries)
+		c.Put("/update/{id}/driver", h.handlerUpdateDriver)
+		c.Put("/update/{id}/address", h.handlerUpdateDeliveryAddress)
 	})
 
 	return handler.NewHandler("/delivery-order", c)
@@ -48,6 +50,11 @@ func (h *handlerDeliveryOrderImpl) handlerGetDeliveryById(w http.ResponseWriter,
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if id, err := h.s.GetDeliveryById(ctx, dtoId); err != nil {
@@ -64,5 +71,47 @@ func (h *handlerDeliveryOrderImpl) handlerGetAllDeliveries(w http.ResponseWriter
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
+	}
+}
+
+func (h *handlerDeliveryOrderImpl) handlerUpdateDeliveryAddress(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	delivery := &orderdto.UpdateDeliveryOrder{}
+	jsonpkg.ParseBody(r, delivery)
+
+	if err := h.s.UpdateDeliveryAddress(ctx, dtoId, delivery); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	}
+}
+
+func (h *handlerDeliveryOrderImpl) handlerUpdateDriver(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	delivery := &orderdto.UpdateDriverOrder{}
+	jsonpkg.ParseBody(r, delivery)
+
+	if err := h.s.UpdateDriver(ctx, dtoId, delivery); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
 }

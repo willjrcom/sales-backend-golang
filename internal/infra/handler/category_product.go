@@ -54,6 +54,11 @@ func (h *handlerCategoryProductImpl) handlerUpdateCategoryProduct(w http.Respons
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	category := &productdto.UpdateCategoryInput{}
@@ -73,6 +78,11 @@ func (h *handlerCategoryProductImpl) handlerDeleteCategoryProduct(w http.Respons
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	err := h.s.DeleteCategoryById(ctx, dtoId)
@@ -89,6 +99,11 @@ func (h *handlerCategoryProductImpl) handlerGetCategoryProduct(w http.ResponseWr
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	category, err := h.s.GetCategoryById(ctx, dtoId)

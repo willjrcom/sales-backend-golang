@@ -48,6 +48,11 @@ func (h *handlerOrderImpl) handlerGetOrderById(w http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if order, err := h.s.GetOrderById(ctx, dtoId); err != nil {
@@ -71,6 +76,11 @@ func (h *handlerOrderImpl) handlerUpdateObservation(w http.ResponseWriter, r *ht
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	observation := &orderdto.UpdateObservationOrder{}
@@ -87,6 +97,11 @@ func (h *handlerOrderImpl) handlerUpdatePayment(w http.ResponseWriter, r *http.R
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	payment := &orderdto.UpdatePaymentMethod{}
