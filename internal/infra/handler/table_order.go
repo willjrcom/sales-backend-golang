@@ -13,14 +13,14 @@ import (
 )
 
 type handlerTableOrderImpl struct {
-	pcs *tableorderusecases.Service
+	s *tableorderusecases.Service
 }
 
 func NewHandlerTableOrder(orderService *tableorderusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerTableOrderImpl{
-		pcs: orderService,
+		s: orderService,
 	}
 
 	c.With().Group(func(c chi.Router) {
@@ -37,7 +37,7 @@ func (h *handlerTableOrderImpl) handlerRegisterTableOrder(w http.ResponseWriter,
 	table := &orderdto.CreateTableOrderInput{}
 	jsonpkg.ParseBody(r, table)
 
-	if id, err := h.pcs.CreateTableOrder(ctx, table); err != nil {
+	if id, err := h.s.CreateTableOrder(ctx, table); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
@@ -50,19 +50,19 @@ func (h *handlerTableOrderImpl) handlerGetTableById(w http.ResponseWriter, r *ht
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if id, err := h.pcs.GetTableById(ctx, dtoId); err != nil {
+	if id, err := h.s.GetTableById(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
 	}
 }
 
 func (h *handlerTableOrderImpl) handlerGetAllTables(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if orders, err := h.pcs.GetAllTables(ctx); err != nil {
+	if orders, err := h.s.GetAllTables(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: orders})
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
 	}
 }

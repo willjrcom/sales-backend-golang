@@ -20,7 +20,7 @@ type Order struct {
 	Status        StatusOrder              `bun:"status,notnull"`
 	Delivery      *DeliveryOrder           `bun:"rel:has-one,join:id=order_id"`
 	Table         *TableOrder              `bun:"rel:has-one,join:id=order_id"`
-	AttendantID   uuid.UUID                `bun:"column:attendant_id,type:uuid"`
+	AttendantID   *uuid.UUID               `bun:"column:attendant_id,type:uuid"`
 	Attendant     *employeeentity.Employee `bun:"rel:belongs-to"`
 	Groups        []itementity.GroupItem   `bun:"rel:has-many,join:id=order_id"`
 	LaunchedAt    *time.Time               `bun:"launch"`

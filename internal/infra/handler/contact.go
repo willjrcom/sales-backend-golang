@@ -13,14 +13,14 @@ import (
 )
 
 type handlerContactImpl struct {
-	pcs *contactusecases.Service
+	s *contactusecases.Service
 }
 
 func NewHandlerContactPerson(contactService *contactusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerContactImpl{
-		pcs: contactService,
+		s: contactService,
 	}
 
 	c.With().Group(func(c chi.Router) {
@@ -37,10 +37,10 @@ func (h *handlerContactImpl) handlerGetContactsBy(w http.ResponseWriter, r *http
 	contact := &contactdto.FilterContact{}
 	jsonpkg.ParseBody(r, contact)
 
-	if id, err := h.pcs.GetContactsBy(ctx, contact); err != nil {
+	if id, err := h.s.GetContactsBy(ctx, contact); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
 	}
 }
 
@@ -50,19 +50,19 @@ func (h *handlerContactImpl) handlerGetContactById(w http.ResponseWriter, r *htt
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if id, err := h.pcs.GetContactById(ctx, dtoId); err != nil {
+	if id, err := h.s.GetContactById(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
 	}
 }
 
 func (h *handlerContactImpl) handlerGetAllContacts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if contacts, err := h.pcs.GetAllContacts(ctx); err != nil {
+	if contacts, err := h.s.GetAllContacts(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: contacts})
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: contacts})
 	}
 }

@@ -13,14 +13,14 @@ import (
 )
 
 type handlerDeliveryOrderImpl struct {
-	pcs *deliveryorderusecases.Service
+	s *deliveryorderusecases.Service
 }
 
 func NewHandlerDeliveryOrder(orderService *deliveryorderusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerDeliveryOrderImpl{
-		pcs: orderService,
+		s: orderService,
 	}
 
 	c.With().Group(func(c chi.Router) {
@@ -37,31 +37,32 @@ func (h *handlerDeliveryOrderImpl) handlerRegisterDeliveryOrder(w http.ResponseW
 	delivery := &orderdto.CreateDeliveryOrderInput{}
 	jsonpkg.ParseBody(r, delivery)
 
-	if id, err := h.pcs.CreateDeliveryOrder(ctx, delivery); err != nil {
+	if id, err := h.s.CreateDeliveryOrder(ctx, delivery); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 	}
 }
+
 func (h *handlerDeliveryOrderImpl) handlerGetDeliveryById(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if id, err := h.pcs.GetDeliveryById(ctx, dtoId); err != nil {
+	if id, err := h.s.GetDeliveryById(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
 	}
 }
 
 func (h *handlerDeliveryOrderImpl) handlerGetAllDeliveries(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if orders, err := h.pcs.GetAllDeliveries(ctx); err != nil {
+	if orders, err := h.s.GetAllDeliveries(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: orders})
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
 	}
 }

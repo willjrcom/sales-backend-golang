@@ -8,7 +8,7 @@ import (
 )
 
 func (s *Service) GetDeliveryById(ctx context.Context, dto *entitydto.IdRequest) (*orderentity.DeliveryOrder, error) {
-	if delivery, err := s.ro.GetDeliveryById(ctx, dto.ID.String()); err != nil {
+	if delivery, err := s.rdo.GetDeliveryById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		return delivery, nil
@@ -16,7 +16,7 @@ func (s *Service) GetDeliveryById(ctx context.Context, dto *entitydto.IdRequest)
 }
 
 func (s *Service) GetAllDeliveries(ctx context.Context) ([]orderentity.DeliveryOrder, error) {
-	if deliveries, err := s.ro.GetAllDeliveries(ctx); err != nil {
+	if deliveries, err := s.rdo.GetAllDeliveries(ctx); err != nil {
 		return nil, err
 	} else {
 		return deliveries, nil

@@ -14,7 +14,7 @@ import (
 type DeliveryOrder struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:delivery_orders"`
-	OrderID       uuid.UUID                `bun:"column:order_id,type:uuid"`
+	OrderID       uuid.UUID                `bun:"column:order_id,type:uuid,notnull"`
 	Pickup        *time.Time               `bun:"pickup"`
 	Delivered     *time.Time               `bun:"delivered"`
 	IsCompleted   bool                     `bun:"is_completed"`
@@ -23,7 +23,7 @@ type DeliveryOrder struct {
 	Client        *cliententity.Client     `bun:"rel:belongs-to"`
 	AddressID     uuid.UUID                `bun:"column:address_id,type:uuid,notnull"`
 	Address       *addressentity.Address   `bun:"rel:belongs-to"`
-	DriverID      *uuid.UUID               `bun:"column:driver_id,type:uuid,notnull"`
+	DriverID      *uuid.UUID               `bun:"column:driver_id,type:uuid"`
 	Driver        *employeeentity.Employee `bun:"rel:belongs-to"`
 }
 

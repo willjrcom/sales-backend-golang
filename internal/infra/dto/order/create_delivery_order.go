@@ -45,6 +45,7 @@ func (o *CreateDeliveryOrderInput) ToModel() (*orderentity.DeliveryOrder, error)
 		Entity:      entity.NewEntity(),
 		OrderID:     o.OrderID,
 		ClientID:    o.ClientID,
+		AddressID:   o.AddressID,
 		IsCompleted: false,
 	}, nil
 }

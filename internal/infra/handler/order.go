@@ -7,25 +7,28 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
 type handlerOrderImpl struct {
-	pcs *orderusecases.Service
+	s *orderusecases.Service
 }
 
 func NewHandlerOrder(orderService *orderusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerOrderImpl{
-		pcs: orderService,
+		s: orderService,
 	}
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterOrder)
 		c.Get("/{id}", h.handlerGetOrderById)
 		c.Get("/all", h.handlerGetAllOrders)
+		c.Put("/update/{id}/observation", h.handlerUpdateObservation)
+		c.Put("/update/{id}/payment", h.handlerUpdatePayment)
 	})
 
 	return handler.NewHandler("/order", c)
@@ -34,7 +37,7 @@ func NewHandlerOrder(orderService *orderusecases.Service) *handler.Handler {
 func (h *handlerOrderImpl) handlerRegisterOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if id, err := h.pcs.CreateDefaultOrder(ctx); err != nil {
+	if id, err := h.s.CreateDefaultOrder(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
@@ -47,19 +50,51 @@ func (h *handlerOrderImpl) handlerGetOrderById(w http.ResponseWriter, r *http.Re
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if id, err := h.pcs.GetOrderById(ctx, dtoId); err != nil {
+	if order, err := h.s.GetOrderById(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: order})
 	}
 }
 
 func (h *handlerOrderImpl) handlerGetAllOrders(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if orders, err := h.pcs.GetAllOrders(ctx); err != nil {
+	if orders, err := h.s.GetAllOrders(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: orders})
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
+	}
+}
+
+func (h *handlerOrderImpl) handlerUpdateObservation(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	observation := &orderdto.UpdateObservationOrder{}
+	jsonpkg.ParseBody(r, observation)
+
+	if err := h.s.UpdateOrderObservation(ctx, dtoId, observation); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	}
+}
+
+func (h *handlerOrderImpl) handlerUpdatePayment(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	payment := &orderdto.UpdatePaymentMethod{}
+	jsonpkg.ParseBody(r, payment)
+
+	if err := h.s.UpdateOrderPayment(ctx, dtoId, payment); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
 }

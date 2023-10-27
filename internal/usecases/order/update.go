@@ -2,7 +2,9 @@ package orderusecases
 
 import (
 	"context"
+	"errors"
 
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 )
@@ -30,6 +32,10 @@ func (s *Service) ArchiveOrder(ctx context.Context, dto *entitydto.IdRequest) er
 		return err
 	}
 
+	if order.Status != orderentity.OrderStatusCanceled && order.Status != orderentity.OrderStatusFinished {
+		return errors.New("order must be canceled or finished")
+	}
+
 	order.ArchiveOrder()
 
 	if err := s.ro.UpdateOrder(ctx, order); err != nil {
@@ -52,6 +58,7 @@ func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IdRequest) err
 		return err
 	}
 
+	// cancelar todos itens
 	return nil
 }
 

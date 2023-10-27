@@ -13,14 +13,14 @@ import (
 )
 
 type handlerCategoryProductImpl struct {
-	pcs *categoryproductusecases.Service
+	s *categoryproductusecases.Service
 }
 
 func NewHandlerCategoryProduct(categoryService *categoryproductusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerCategoryProductImpl{
-		pcs: categoryService,
+		s: categoryService,
 	}
 
 	c.With().Group(func(c chi.Router) {
@@ -40,7 +40,7 @@ func (h *handlerCategoryProductImpl) handlerRegisterCategoryProduct(w http.Respo
 	category := &productdto.RegisterCategoryInput{}
 	jsonpkg.ParseBody(r, category)
 
-	id, err := h.pcs.RegisterCategory(ctx, category)
+	id, err := h.s.RegisterCategory(ctx, category)
 
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -59,7 +59,7 @@ func (h *handlerCategoryProductImpl) handlerUpdateCategoryProduct(w http.Respons
 	category := &productdto.UpdateCategoryInput{}
 	jsonpkg.ParseBody(r, category)
 
-	err := h.pcs.UpdateCategory(ctx, dtoId, category)
+	err := h.s.UpdateCategory(ctx, dtoId, category)
 
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -75,7 +75,7 @@ func (h *handlerCategoryProductImpl) handlerDeleteCategoryProduct(w http.Respons
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	err := h.pcs.DeleteCategoryById(ctx, dtoId)
+	err := h.s.DeleteCategoryById(ctx, dtoId)
 
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -91,7 +91,7 @@ func (h *handlerCategoryProductImpl) handlerGetCategoryProduct(w http.ResponseWr
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	category, err := h.pcs.GetCategoryById(ctx, dtoId)
+	category, err := h.s.GetCategoryById(ctx, dtoId)
 
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -103,7 +103,7 @@ func (h *handlerCategoryProductImpl) handlerGetCategoryProduct(w http.ResponseWr
 
 func (h *handlerCategoryProductImpl) handlerGetAllCategoryProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	categories, err := h.pcs.GetAllCategoryProducts(ctx)
+	categories, err := h.s.GetAllCategoryProducts(ctx)
 
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -115,7 +115,7 @@ func (h *handlerCategoryProductImpl) handlerGetAllCategoryProducts(w http.Respon
 
 func (h *handlerCategoryProductImpl) handlerGetAllCategorySizes(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	categories, err := h.pcs.GetAllCategorySizes(ctx)
+	categories, err := h.s.GetAllCategorySizes(ctx)
 
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})

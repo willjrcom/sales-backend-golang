@@ -13,14 +13,14 @@ import (
 )
 
 type handlerSizeCategoryImpl struct {
-	pcs *sizeusecases.Service
+	s *sizeusecases.Service
 }
 
 func NewHandlerSizeProduct(sizeService *sizeusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerSizeCategoryImpl{
-		pcs: sizeService,
+		s: sizeService,
 	}
 
 	c.With().Group(func(c chi.Router) {
@@ -37,7 +37,7 @@ func (h *handlerSizeCategoryImpl) handlerRegisterSize(w http.ResponseWriter, r *
 	size := &productdto.RegisterSizeInput{}
 	jsonpkg.ParseBody(r, size)
 
-	if id, err := h.pcs.RegisterSize(ctx, size); err != nil {
+	if id, err := h.s.RegisterSize(ctx, size); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	} else {
@@ -54,7 +54,7 @@ func (h *handlerSizeCategoryImpl) handlerUpdateSize(w http.ResponseWriter, r *ht
 	Size := &productdto.UpdateSizeInput{}
 	jsonpkg.ParseBody(r, Size)
 
-	if err := h.pcs.UpdateSize(ctx, dtoId, Size); err != nil {
+	if err := h.s.UpdateSize(ctx, dtoId, Size); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -68,7 +68,7 @@ func (h *handlerSizeCategoryImpl) handlerDeleteSize(w http.ResponseWriter, r *ht
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.pcs.DeleteSize(ctx, dtoId); err != nil {
+	if err := h.s.DeleteSize(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

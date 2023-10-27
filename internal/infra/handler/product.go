@@ -13,14 +13,14 @@ import (
 )
 
 type handlerProductImpl struct {
-	ps *productusecases.Service
+	s *productusecases.Service
 }
 
 func NewHandlerProduct(productService *productusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerProductImpl{
-		ps: productService,
+		s: productService,
 	}
 
 	c.With().Group(func(c chi.Router) {
@@ -40,7 +40,7 @@ func (h *handlerProductImpl) handlerRegisterProduct(w http.ResponseWriter, r *ht
 	product := &productdto.RegisterProductInput{}
 	jsonpkg.ParseBody(r, product)
 
-	if id, err := h.ps.RegisterProduct(ctx, product); err != nil {
+	if id, err := h.s.RegisterProduct(ctx, product); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	} else {
@@ -57,7 +57,7 @@ func (h *handlerProductImpl) handlerUpdateProduct(w http.ResponseWriter, r *http
 	product := &productdto.UpdateProductInput{}
 	jsonpkg.ParseBody(r, product)
 
-	if err := h.ps.UpdateProduct(ctx, dtoId, product); err != nil {
+	if err := h.s.UpdateProduct(ctx, dtoId, product); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	} else {
@@ -71,7 +71,7 @@ func (h *handlerProductImpl) handlerDeleteProduct(w http.ResponseWriter, r *http
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.ps.DeleteProductById(ctx, dtoId); err != nil {
+	if err := h.s.DeleteProductById(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	} else {
@@ -85,7 +85,7 @@ func (h *handlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Re
 	id := chi.URLParam(r, "id")
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if product, err := h.ps.GetProductById(ctx, dtoId); err != nil {
+	if product, err := h.s.GetProductById(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	} else {
@@ -99,7 +99,7 @@ func (h *handlerProductImpl) handlerGetProductBy(w http.ResponseWriter, r *http.
 	filter := &productdto.FilterProductInput{}
 	jsonpkg.ParseBody(r, filter)
 
-	if product, err := h.ps.GetProductBy(ctx, filter); err != nil {
+	if product, err := h.s.GetProductBy(ctx, filter); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	} else {
@@ -110,7 +110,7 @@ func (h *handlerProductImpl) handlerGetProductBy(w http.ResponseWriter, r *http.
 func (h *handlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if categories, err := h.ps.GetAllProducts(ctx); err != nil {
+	if categories, err := h.s.GetAllProducts(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	} else {

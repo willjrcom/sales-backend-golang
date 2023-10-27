@@ -14,14 +14,14 @@ import (
 )
 
 type handlerClientImpl struct {
-	ps *clientusecases.Service
+	s *clientusecases.Service
 }
 
 func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerClientImpl{
-		ps: clientService,
+		s: clientService,
 	}
 
 	c.With().Group(func(c chi.Router) {
@@ -47,7 +47,7 @@ func (h *handlerClientImpl) handlerRegisterClient(w http.ResponseWriter, r *http
 	client := &clientdto.RegisterClientInput{}
 	jsonpkg.ParseBody(r, client)
 
-	if id, err := h.ps.RegisterClient(ctx, client); err != nil {
+	if id, err := h.s.RegisterClient(ctx, client); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
@@ -68,7 +68,7 @@ func (h *handlerClientImpl) handlerUpdateClient(w http.ResponseWriter, r *http.R
 	client := &clientdto.UpdateClientInput{}
 	jsonpkg.ParseBody(r, client)
 
-	if err := h.ps.UpdateClient(ctx, dtoId, client); err != nil {
+	if err := h.s.UpdateClient(ctx, dtoId, client); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
@@ -86,7 +86,7 @@ func (h *handlerClientImpl) handlerDeleteClient(w http.ResponseWriter, r *http.R
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.ps.DeleteClient(ctx, dtoId); err != nil {
+	if err := h.s.DeleteClient(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
@@ -104,7 +104,7 @@ func (h *handlerClientImpl) handlerGetClient(w http.ResponseWriter, r *http.Requ
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if client, err := h.ps.GetClientById(ctx, dtoId); err != nil {
+	if client, err := h.s.GetClientById(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: client})
@@ -117,7 +117,7 @@ func (h *handlerClientImpl) handlerGetClientsBy(w http.ResponseWriter, r *http.R
 	filter := &clientdto.FilterClientInput{}
 	jsonpkg.ParseBody(r, filter)
 
-	if client, err := h.ps.GetClientsBy(ctx, filter); err != nil {
+	if client, err := h.s.GetClientsBy(ctx, filter); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: client})
@@ -127,7 +127,7 @@ func (h *handlerClientImpl) handlerGetClientsBy(w http.ResponseWriter, r *http.R
 func (h *handlerClientImpl) handlerGetAllClients(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if categories, err := h.ps.GetAllClients(ctx); err != nil {
+	if categories, err := h.s.GetAllClients(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
@@ -140,7 +140,7 @@ func (h *handlerClientImpl) handlerRegisterContactClient(w http.ResponseWriter, 
 	contact := &contactdto.RegisterContactClientInput{}
 	jsonpkg.ParseBody(r, contact)
 
-	if id, err := h.ps.RegisterContactToClient(ctx, contact); err != nil {
+	if id, err := h.s.RegisterContactToClient(ctx, contact); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
@@ -161,10 +161,10 @@ func (h *handlerClientImpl) handlerUpdateContactClient(w http.ResponseWriter, r 
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.ps.UpdateContact(ctx, dtoId, contact); err != nil {
+	if err := h.s.UpdateContact(ctx, dtoId, contact); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, nil)
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
 }
 
@@ -179,9 +179,9 @@ func (h *handlerClientImpl) handlerDeleteContactClient(w http.ResponseWriter, r 
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.ps.DeleteContact(ctx, dtoId); err != nil {
+	if err := h.s.DeleteContact(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, nil)
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
 }
