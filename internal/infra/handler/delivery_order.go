@@ -13,15 +13,13 @@ import (
 )
 
 type handlerDeliveryOrderImpl struct {
-	s *deliveryorderusecases.Service
+	deliveryorderusecases.IService
 }
 
-func NewHandlerDeliveryOrder(orderService *deliveryorderusecases.Service) *handler.Handler {
+func NewHandlerDeliveryOrder(orderService deliveryorderusecases.IService) *handler.Handler {
 	c := chi.NewRouter()
 
-	h := &handlerDeliveryOrderImpl{
-		s: orderService,
-	}
+	h := &handlerDeliveryOrderImpl{orderService}
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterDeliveryOrder)
@@ -39,7 +37,7 @@ func (h *handlerDeliveryOrderImpl) handlerRegisterDeliveryOrder(w http.ResponseW
 	delivery := &orderdto.CreateDeliveryOrderInput{}
 	jsonpkg.ParseBody(r, delivery)
 
-	if id, err := h.s.CreateDeliveryOrder(ctx, delivery); err != nil {
+	if id, err := h.IService.CreateDeliveryOrder(ctx, delivery); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
@@ -57,7 +55,7 @@ func (h *handlerDeliveryOrderImpl) handlerGetDeliveryById(w http.ResponseWriter,
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if id, err := h.s.GetDeliveryById(ctx, dtoId); err != nil {
+	if id, err := h.IService.GetDeliveryById(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
@@ -67,7 +65,7 @@ func (h *handlerDeliveryOrderImpl) handlerGetDeliveryById(w http.ResponseWriter,
 func (h *handlerDeliveryOrderImpl) handlerGetAllDeliveries(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if orders, err := h.s.GetAllDeliveries(ctx); err != nil {
+	if orders, err := h.IService.GetAllDeliveries(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
@@ -88,7 +86,7 @@ func (h *handlerDeliveryOrderImpl) handlerUpdateDeliveryAddress(w http.ResponseW
 	delivery := &orderdto.UpdateDeliveryOrder{}
 	jsonpkg.ParseBody(r, delivery)
 
-	if err := h.s.UpdateDeliveryAddress(ctx, dtoId, delivery); err != nil {
+	if err := h.IService.UpdateDeliveryAddress(ctx, dtoId, delivery); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
@@ -109,7 +107,7 @@ func (h *handlerDeliveryOrderImpl) handlerUpdateDriver(w http.ResponseWriter, r 
 	delivery := &orderdto.UpdateDriverOrder{}
 	jsonpkg.ParseBody(r, delivery)
 
-	if err := h.s.UpdateDriver(ctx, dtoId, delivery); err != nil {
+	if err := h.IService.UpdateDriver(ctx, dtoId, delivery); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
