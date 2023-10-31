@@ -7,6 +7,10 @@ import (
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 )
 
+func (s *Service) UpdateDeliveryOrder(ctx context.Context, dtoId *entitydto.IdRequest, dto *orderdto.DeliveryOrder) (err error) {
+	return nil
+}
+
 func (s *Service) UpdateDeliveryAddress(ctx context.Context, dtoId *entitydto.IdRequest, dto *orderdto.UpdateDeliveryOrder) error {
 	deliveryOrder, err := s.rdo.GetDeliveryById(ctx, dtoId.ID.String())
 
@@ -52,5 +56,13 @@ func (s *Service) UpdateDriver(ctx context.Context, dtoId *entitydto.IdRequest, 
 		return err
 	}
 
+	return nil
+}
+
+func (s *Service) DeliverDeliveryOrder(ctx context.Context, dtoId *entitydto.IdRequest) (err error) {
+	return nil
+}
+
+func (s *Service) ShipDeliveryOrder(ctx context.Context, dtoId *entitydto.IdRequest, driverId *entitydto.IdRequest) (err error) {
 	return nil
 }

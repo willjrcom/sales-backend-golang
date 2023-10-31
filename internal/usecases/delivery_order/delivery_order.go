@@ -16,6 +16,7 @@ type IService interface {
 	ICreateService
 	IGetService
 	IUpdateService
+	IStatusService
 }
 
 type ICreateService interface {
@@ -25,11 +26,21 @@ type ICreateService interface {
 type IGetService interface {
 	GetDeliveryById(ctx context.Context, dto *entitydto.IdRequest) (*orderentity.DeliveryOrder, error)
 	GetAllDeliveries(ctx context.Context) ([]orderentity.DeliveryOrder, error)
+	GetDeliveryOrderByStatus(ctx context.Context) (deliveries []orderentity.DeliveryOrder, err error)
+	GetDeliveryOrderByClientId(ctx context.Context, dto *entitydto.IdRequest) ([]orderentity.DeliveryOrder, error)
+	GetDeliveryOrderByDriverId(ctx context.Context, dto *entitydto.IdRequest) ([]orderentity.DeliveryOrder, error)
 }
 
 type IUpdateService interface {
+	ShipDeliveryOrder(ctx context.Context, dtoId *entitydto.IdRequest, driverId *entitydto.IdRequest) (err error)
+	DeliverDeliveryOrder(ctx context.Context, dtoId *entitydto.IdRequest) (err error)
+	UpdateDeliveryOrder(ctx context.Context, dtoId *entitydto.IdRequest, dto *orderdto.DeliveryOrder) (err error)
 	UpdateDeliveryAddress(ctx context.Context, dtoId *entitydto.IdRequest, dto *orderdto.UpdateDeliveryOrder) (err error)
 	UpdateDriver(ctx context.Context, dto *entitydto.IdRequest, deliveryOrder *orderdto.UpdateDriverOrder) (err error)
+}
+
+type IStatusService interface {
+	GetAllDeliveryOrderStatus(ctx context.Context) (deliveries []orderentity.StatusDeliveryOrder)
 }
 
 type Service struct {

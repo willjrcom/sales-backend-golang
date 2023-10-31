@@ -22,3 +22,19 @@ func (s *Service) GetAllDeliveries(ctx context.Context) ([]orderentity.DeliveryO
 		return deliveries, nil
 	}
 }
+
+func (s *Service) GetAllDeliveryOrderStatus(ctx context.Context) (deliveries []orderentity.StatusDeliveryOrder) {
+	return orderentity.GetAllDeliveryStatus()
+}
+
+func (s Service) GetDeliveryOrderByClientId(ctx context.Context, dto *entitydto.IdRequest) ([]orderentity.DeliveryOrder, error) {
+	return nil, nil
+}
+
+func (s *Service) GetDeliveryOrderByDriverId(ctx context.Context, dto *entitydto.IdRequest) ([]orderentity.DeliveryOrder, error) {
+	return nil, nil
+}
+
+func (s *Service) GetDeliveryOrderByStatus(ctx context.Context) (deliveries []orderentity.DeliveryOrder, err error) {
+	return nil, nil
+}

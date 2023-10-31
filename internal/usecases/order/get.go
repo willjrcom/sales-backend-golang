@@ -22,3 +22,7 @@ func (s *Service) GetAllOrders(ctx context.Context) ([]orderentity.Order, error)
 		return orders, nil
 	}
 }
+
+func (s *Service) GetAllDeliveryOrderStatus(ctx context.Context) ([]orderentity.Order, error) {
+	return []orderentity.Order{}, nil
+}

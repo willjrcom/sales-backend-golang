@@ -46,11 +46,6 @@ func (o *Order) ReadyOrder() {
 	o.Status = OrderStatusFinished
 }
 
-func (o *Order) ShipOrder() {
-	o.Status = OrderStatusShipped
-	*(*o.Delivery).Pickup = time.Now()
-}
-
 func (o *Order) FinishOrder() {
 	o.Status = OrderStatusFinished
 
