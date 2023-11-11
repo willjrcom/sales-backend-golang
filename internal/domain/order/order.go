@@ -12,18 +12,26 @@ import (
 
 type Order struct {
 	entity.Entity
+	OrderType
+	OrderDetail
 	bun.BaseModel `bun:"table:orders"`
 	Payment       *PaymentOrder
-	Name          string                   `bun:"name"`
-	Observation   string                   `bun:"observation"`
-	OrderNumber   int                      `bun:"order_number,notnull"`
-	Status        StatusOrder              `bun:"status,notnull"`
-	Delivery      *DeliveryOrder           `bun:"rel:has-one,join:id=order_id"`
-	Table         *TableOrder              `bun:"rel:has-one,join:id=order_id"`
-	AttendantID   *uuid.UUID               `bun:"column:attendant_id,type:uuid"`
-	Attendant     *employeeentity.Employee `bun:"rel:belongs-to"`
-	Groups        []itementity.GroupItem   `bun:"rel:has-many,join:id=order_id"`
-	LaunchedAt    *time.Time               `bun:"launch"`
+	OrderNumber   int                    `bun:"order_number,notnull"`
+	Status        StatusOrder            `bun:"status,notnull"`
+	Groups        []itementity.GroupItem `bun:"rel:has-many,join:id=order_id"`
+}
+
+type OrderDetail struct {
+	Name        string                   `bun:"name"`
+	Observation string                   `bun:"observation"`
+	AttendantID *uuid.UUID               `bun:"column:attendant_id,type:uuid"`
+	Attendant   *employeeentity.Employee `bun:"rel:belongs-to"`
+	LaunchedAt  *time.Time               `bun:"launch"`
+}
+
+type OrderType struct {
+	Delivery *DeliveryOrder `bun:"rel:has-one,join:id=order_id"`
+	Table    *TableOrder    `bun:"rel:has-one,join:id=order_id"`
 }
 
 func NewDefaultOrder() *Order {

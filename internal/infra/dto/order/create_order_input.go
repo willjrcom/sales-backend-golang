@@ -31,8 +31,8 @@ func (o *CreateOrderInput) ToModel() (*orderentity.Order, error) {
 	}
 
 	return &orderentity.Order{
-		Entity: entity.Entity{ID: uuid.New(), CreatedAt: time.Now()},
-		Name:   o.Name,
-		Status: orderentity.OrderStatusStaging,
+		Entity:      entity.Entity{ID: uuid.New(), CreatedAt: time.Now()},
+		OrderDetail: orderentity.OrderDetail{Name: o.Name},
+		Status:      orderentity.OrderStatusStaging,
 	}, nil
 }

@@ -1,6 +1,8 @@
 package itementity
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
@@ -16,6 +18,7 @@ type GroupItem struct {
 	Size          float64                 `bun:"size"`
 	Status        StatusItem              `bun:"status,notnull"`
 	OrderID       uuid.UUID               `bun:"column:order_id,type:uuid,notnull"`
+	LaunchedAt    *time.Time              `bun:"launch"`
 }
 
 func (i *GroupItem) CalculateQuantity() float64 {
