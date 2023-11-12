@@ -11,14 +11,18 @@ import (
 
 type GroupItem struct {
 	entity.Entity
+	GroupDetails
 	bun.BaseModel `bun:"table:group_items"`
-	Items         []Item                  `bun:"rel:has-many,join:id=group_item_id"`
-	CategoryID    uuid.UUID               `bun:"column:category_id,type:uuid,notnull"`
-	Category      *productentity.Category `bun:"rel:belongs-to"`
-	Size          float64                 `bun:"size"`
-	Status        StatusItem              `bun:"status,notnull"`
-	OrderID       uuid.UUID               `bun:"column:order_id,type:uuid,notnull"`
-	LaunchedAt    *time.Time              `bun:"launch"`
+	Items         []Item    `bun:"rel:has-many,join:id=group_item_id"`
+	OrderID       uuid.UUID `bun:"column:order_id,type:uuid,notnull"`
+}
+
+type GroupDetails struct {
+	Size       float64                 `bun:"size"`
+	Status     StatusItem              `bun:"status,notnull"`
+	LaunchedAt *time.Time              `bun:"launch"`
+	CategoryID uuid.UUID               `bun:"column:category_id,type:uuid,notnull"`
+	Category   *productentity.Category `bun:"rel:belongs-to"`
 }
 
 func (i *GroupItem) CalculateQuantity() float64 {

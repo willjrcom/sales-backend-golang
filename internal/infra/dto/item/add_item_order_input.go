@@ -9,6 +9,11 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
+var (
+	ErrGroupItemNotStaging      = errors.New("group item not staging")
+	ErrGroupItemCategoryInvalid = errors.New("group item category invalid")
+)
+
 type AddItemOrderInput struct {
 	OrderID     uuid.UUID  `json:"order_id"`
 	ProductID   uuid.UUID  `json:"product_id"`
@@ -17,7 +22,7 @@ type AddItemOrderInput struct {
 	Observation string     `json:"observation"`
 }
 
-func (a *AddItemOrderInput) validate() error {
+func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *itementity.GroupItem) error {
 	if a.OrderID == uuid.Nil {
 		return errors.New("order id is required")
 	}
@@ -30,11 +35,19 @@ func (a *AddItemOrderInput) validate() error {
 		return errors.New("quantity is required")
 	}
 
+	if groupItem.Status != itementity.StatusItemStaging {
+		return ErrGroupItemNotStaging
+	}
+
+	if groupItem.CategoryID != product.CategoryID {
+		return ErrGroupItemCategoryInvalid
+	}
+
 	return nil
 }
 
-func (a *AddItemOrderInput) ToModel(product *productentity.Product) (item *itementity.Item, err error) {
-	if err = a.validate(); err != nil {
+func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *itementity.GroupItem) (item *itementity.Item, err error) {
+	if err = a.validate(product, groupItem); err != nil {
 		return
 	}
 
