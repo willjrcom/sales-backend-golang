@@ -30,6 +30,8 @@ func (r *GroupItemRepositoryBun) CreateGroupItem(ctx context.Context, p *groupit
 }
 
 func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *groupitementity.GroupItem) error {
+	p.CalculateTotalValues()
+
 	r.mu.Lock()
 	_, err := r.db.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx)
 	r.mu.Unlock()
@@ -57,7 +59,7 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string) (*
 	item := &groupitementity.GroupItem{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(item).Where("id = ?", id).Scan(ctx)
+	err := r.db.NewSelect().Model(item).Where("id = ?", id).Relation("Items").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -70,7 +72,7 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string) (*
 func (r *GroupItemRepositoryBun) GetAllPendingGroups(ctx context.Context) ([]groupitementity.GroupItem, error) {
 	items := []groupitementity.GroupItem{}
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&items).Where("status = ?", "Pending").Scan(ctx)
+	err := r.db.NewSelect().Model(&items).Where("status = ?", "Pending").Relation("Items").Scan(ctx)
 
 	r.mu.Unlock()
 
@@ -84,7 +86,7 @@ func (r *GroupItemRepositoryBun) GetAllPendingGroups(ctx context.Context) ([]gro
 func (r *GroupItemRepositoryBun) GetGroupsByOrderId(ctx context.Context, id string) ([]groupitementity.GroupItem, error) {
 	items := []groupitementity.GroupItem{}
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&items).Where("status = ?", "Pending").Scan(ctx)
+	err := r.db.NewSelect().Model(&items).Where("status = ?", "Pending").Relation("Items").Scan(ctx)
 
 	r.mu.Unlock()
 
