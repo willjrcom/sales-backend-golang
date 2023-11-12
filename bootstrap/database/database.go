@@ -14,6 +14,7 @@ import (
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
 	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
@@ -72,7 +73,7 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 	bun.RegisterModel((*employeeentity.Employee)(nil))
 
 	bun.RegisterModel((*itementity.Item)(nil))
-	bun.RegisterModel((*itementity.GroupItem)(nil))
+	bun.RegisterModel((*groupitementity.GroupItem)(nil))
 
 	bun.RegisterModel((*orderentity.DeliveryOrder)(nil))
 	bun.RegisterModel((*orderentity.TableOrder)(nil))
@@ -119,7 +120,7 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 		panic("Couldn't create table for item")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*itementity.GroupItem)(nil)).Exec(ctx); err != nil {
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*groupitementity.GroupItem)(nil)).Exec(ctx); err != nil {
 		panic("Couldn't create table for items")
 	}
 

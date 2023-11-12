@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
 	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
@@ -22,7 +23,7 @@ type AddItemOrderInput struct {
 	Observation string     `json:"observation"`
 }
 
-func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *itementity.GroupItem) error {
+func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *groupitementity.GroupItem) error {
 	if a.OrderID == uuid.Nil {
 		return errors.New("order id is required")
 	}
@@ -35,7 +36,7 @@ func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *
 		return errors.New("quantity is required")
 	}
 
-	if groupItem.Status != itementity.StatusItemStaging {
+	if groupItem.Status != groupitementity.StatusGroupStaging {
 		return ErrGroupItemNotStaging
 	}
 
@@ -46,7 +47,7 @@ func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *
 	return nil
 }
 
-func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *itementity.GroupItem) (item *itementity.Item, err error) {
+func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *groupitementity.GroupItem) (item *itementity.Item, err error) {
 	if err = a.validate(product, groupItem); err != nil {
 		return
 	}

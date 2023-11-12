@@ -7,7 +7,7 @@ import (
 	"github.com/uptrace/bun"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
+	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
 )
 
 type Order struct {
@@ -16,9 +16,9 @@ type Order struct {
 	OrderDetail
 	bun.BaseModel `bun:"table:orders"`
 	Payment       *PaymentOrder
-	OrderNumber   int                    `bun:"order_number,notnull"`
-	Status        StatusOrder            `bun:"status,notnull"`
-	Groups        []itementity.GroupItem `bun:"rel:has-many,join:id=order_id"`
+	OrderNumber   int                         `bun:"order_number,notnull"`
+	Status        StatusOrder                 `bun:"status,notnull"`
+	Groups        []groupitementity.GroupItem `bun:"rel:has-many,join:id=order_id"`
 }
 
 type OrderDetail struct {

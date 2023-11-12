@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
 	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
@@ -13,12 +14,12 @@ import (
 
 type Service struct {
 	ri  itementity.ItemRepository
-	rgi itementity.GroupItemRepository
+	rgi groupitementity.GroupItemRepository
 	ro  orderentity.OrderRepository
 	rp  productentity.ProductRepository
 }
 
-func NewService(ri itementity.ItemRepository, rgi itementity.GroupItemRepository, ro orderentity.OrderRepository, rp productentity.ProductRepository) *Service {
+func NewService(ri itementity.ItemRepository, rgi groupitementity.GroupItemRepository, ro orderentity.OrderRepository, rp productentity.ProductRepository) *Service {
 	return &Service{ri: ri, rgi: rgi, ro: ro, rp: rp}
 }
 
@@ -62,13 +63,13 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 	return item.ID, nil
 }
 
-func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product) (groupItem *itementity.GroupItem, err error) {
-	groupItem = &itementity.GroupItem{
+func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product) (groupItem *groupitementity.GroupItem, err error) {
+	groupItem = &groupitementity.GroupItem{
 		Entity:  entity.NewEntity(),
 		OrderID: orderID,
-		GroupDetails: itementity.GroupDetails{
+		GroupDetails: groupitementity.GroupDetails{
 			CategoryID: product.CategoryID,
-			Status:     itementity.StatusItemStaging,
+			Status:     groupitementity.StatusGroupStaging,
 		},
 	}
 
