@@ -22,13 +22,13 @@ func NewHandlerItem(itemService *itemusecases.Service) *handler.Handler {
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/add", h.handlerRegisterItem)
+		c.Post("/add", h.handlerAddItem)
 	})
 
 	return handler.NewHandler("/item", c)
 }
 
-func (h *handlerItemImpl) handlerRegisterItem(w http.ResponseWriter, r *http.Request) {
+func (h *handlerItemImpl) handlerAddItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	addItem := &itemdto.AddItemOrderInput{}

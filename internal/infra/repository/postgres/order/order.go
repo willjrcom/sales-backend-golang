@@ -57,7 +57,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (*orde
 	order := &orderentity.Order{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(order).Where("id = ?", id).Scan(ctx)
+	err := r.db.NewSelect().Model(order).Where("id = ?", id).Relation("Groups.Items").Scan(ctx)
 	r.mu.Unlock()
 	// .Relation("Delivery").Relation("Table").Relation("Groups").Relation("Attendant")
 
@@ -78,7 +78,7 @@ func (r *OrderRepositoryBun) GetOrderBy(ctx context.Context, order *orderentity.
 		query.Where("order.status = ?", order.Status)
 	}
 
-	err := query.Relation("Delivery").Relation("Table").Relation("Groups").Relation("Attendant").Scan(ctx, &orders)
+	err := query.Relation("Delivery").Relation("Table").Relation("Groups.Items").Relation("Attendant").Scan(ctx, &orders)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -91,7 +91,7 @@ func (r *OrderRepositoryBun) GetOrderBy(ctx context.Context, order *orderentity.
 func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]orderentity.Order, error) {
 	orders := []orderentity.Order{}
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&orders).Scan(ctx)
+	err := r.db.NewSelect().Model(&orders).Relation("Groups.Items").Scan(ctx)
 
 	r.mu.Unlock()
 

@@ -25,6 +25,7 @@ import (
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	contactusecases "github.com/willjrcom/sales-backend-go/internal/usecases/contact_person"
 	deliveryorderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/delivery_order"
+	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	itemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/item"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
@@ -77,6 +78,7 @@ var HttpserverCmd = &cobra.Command{
 		orderService := orderusecases.NewService(orderRepo)
 		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo, employeeRepo)
 		itemService := itemusecases.NewService(itemRepo, groupItemRepo, orderRepo, productRepo)
+		groupService := groupitemusecases.NewService(itemRepo, groupItemRepo)
 
 		// Load handlers
 		productHandler := handlerimpl.NewHandlerProduct(productService)
@@ -89,6 +91,7 @@ var HttpserverCmd = &cobra.Command{
 		orderHandler := handlerimpl.NewHandlerOrder(orderService)
 		deliveryOrderHandler := handlerimpl.NewHandlerDeliveryOrder(deliveryOrderService)
 		itemHandler := handlerimpl.NewHandlerItem(itemService)
+		groupHandler := handlerimpl.NewHandlerGroupItem(groupService)
 
 		server.AddHandler(productHandler)
 		server.AddHandler(categoryHandler)
@@ -98,6 +101,7 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(orderHandler)
 		server.AddHandler(deliveryOrderHandler)
 		server.AddHandler(itemHandler)
+		server.AddHandler(groupHandler)
 
 		if err := server.StartServer(port); err != nil {
 			panic(err)
