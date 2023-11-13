@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
+	quantitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/quantity_category"
 	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity_category"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -34,7 +34,7 @@ func NewHandlerQuantityProduct(quantityService *quantityusecases.Service) *handl
 
 func (h *handlerQuantityCategoryImpl) handlerRegisterQuantity(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	quantity := &productdto.RegisterQuantityInput{}
+	quantity := &quantitydto.RegisterQuantityInput{}
 	jsonpkg.ParseBody(r, quantity)
 
 	if id, err := h.s.RegisterQuantity(ctx, quantity); err != nil {
@@ -56,7 +56,7 @@ func (h *handlerQuantityCategoryImpl) handlerUpdateQuantity(w http.ResponseWrite
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	Quantity := &productdto.UpdateQuantityInput{}
+	Quantity := &quantitydto.UpdateQuantityInput{}
 	jsonpkg.ParseBody(r, Quantity)
 
 	if err := h.s.UpdateQuantity(ctx, dtoId, Quantity); err != nil {

@@ -1,4 +1,4 @@
-package productdto
+package quantitydto
 
 import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
@@ -10,7 +10,7 @@ type UpdateQuantityInput struct {
 
 func (s *UpdateQuantityInput) validate() error {
 	if s.Name == nil {
-		return ErrNameIsEmpty
+		return ErrNameRequired
 	}
 
 	return nil

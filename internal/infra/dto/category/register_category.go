@@ -1,4 +1,4 @@
-package productdto
+package categorydto
 
 import (
 	"errors"

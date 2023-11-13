@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
+	quantitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/quantity_category"
 )
 
 var (
@@ -22,7 +22,7 @@ func NewService(c productentity.QuantityRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) RegisterQuantity(ctx context.Context, dto *productdto.RegisterQuantityInput) (uuid.UUID, error) {
+func (s *Service) RegisterQuantity(ctx context.Context, dto *quantitydto.RegisterQuantityInput) (uuid.UUID, error) {
 	quantity, err := dto.ToModel()
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (s *Service) RegisterQuantity(ctx context.Context, dto *productdto.Register
 	return quantity.ID, nil
 }
 
-func (s *Service) UpdateQuantity(ctx context.Context, dtoId *entitydto.IdRequest, dto *productdto.UpdateQuantityInput) error {
+func (s *Service) UpdateQuantity(ctx context.Context, dtoId *entitydto.IdRequest, dto *quantitydto.UpdateQuantityInput) error {
 	quantity, err := s.r.GetQuantityById(ctx, dtoId.ID.String())
 
 	if err != nil {

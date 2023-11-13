@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
+	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size_category"
 )
 
 var (
@@ -22,7 +22,7 @@ func NewService(c productentity.SizeRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) RegisterSize(ctx context.Context, dto *productdto.RegisterSizeInput) (uuid.UUID, error) {
+func (s *Service) RegisterSize(ctx context.Context, dto *sizedto.RegisterSizeInput) (uuid.UUID, error) {
 	size, err := dto.ToModel()
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (s *Service) RegisterSize(ctx context.Context, dto *productdto.RegisterSize
 	return size.ID, nil
 }
 
-func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IdRequest, dto *productdto.UpdateSizeInput) error {
+func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IdRequest, dto *sizedto.UpdateSizeInput) error {
 	size, err := s.r.GetSizeById(ctx, dtoId.ID.String())
 
 	if err != nil {

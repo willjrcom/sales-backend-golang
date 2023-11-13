@@ -1,9 +1,16 @@
-package productdto
+package sizedto
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+)
+
+var (
+	ErrNameRequired     = errors.New("name is required")
+	ErrCategoryRequired = errors.New("category is required")
 )
 
 type RegisterSizeInput struct {
@@ -14,7 +21,7 @@ type RegisterSizeInput struct {
 
 func (s *RegisterSizeInput) validate() error {
 	if s.Name == "" {
-		return ErrNameIsEmpty
+		return ErrNameRequired
 	}
 	if s.CategoryID == uuid.Nil {
 		return ErrCategoryRequired

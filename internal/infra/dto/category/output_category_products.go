@@ -1,4 +1,4 @@
-package productdto
+package categorydto
 
 import (
 	"github.com/google/uuid"
@@ -6,17 +6,17 @@ import (
 )
 
 type CategoryProductsOutput struct {
-	ID       uuid.UUID           `json:"id"`
-	Name     string              `json:"name"`
-	Products []ProductNameOutput `json:"products"`
+	ID       uuid.UUID `json:"id"`
+	Name     string    `json:"name"`
+	Products []string  `json:"product_ids"`
 }
 
 func (c *CategoryProductsOutput) FromModel(model *productentity.Category) {
 	c.ID = model.ID
 	c.Name = model.Name
-	c.Products = make([]ProductNameOutput, len(model.Products))
+	c.Products = make([]string, len(model.Products))
 
 	for i, v := range model.Products {
-		c.Products[i].FromModel(&v)
+		c.Products[i] = v.ID.String()
 	}
 }

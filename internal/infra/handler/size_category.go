@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
+	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size_category"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -34,7 +34,7 @@ func NewHandlerSizeProduct(sizeService *sizeusecases.Service) *handler.Handler {
 
 func (h *handlerSizeCategoryImpl) handlerRegisterSize(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	size := &productdto.RegisterSizeInput{}
+	size := &sizedto.RegisterSizeInput{}
 	jsonpkg.ParseBody(r, size)
 
 	if id, err := h.s.RegisterSize(ctx, size); err != nil {
@@ -56,7 +56,7 @@ func (h *handlerSizeCategoryImpl) handlerUpdateSize(w http.ResponseWriter, r *ht
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	Size := &productdto.UpdateSizeInput{}
+	Size := &sizedto.UpdateSizeInput{}
 	jsonpkg.ParseBody(r, Size)
 
 	if err := h.s.UpdateSize(ctx, dtoId, Size); err != nil {

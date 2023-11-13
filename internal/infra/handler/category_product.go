@@ -6,8 +6,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
+	categorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/category"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -37,7 +37,7 @@ func NewHandlerCategoryProduct(categoryService *categoryproductusecases.Service)
 
 func (h *handlerCategoryProductImpl) handlerRegisterCategoryProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	category := &productdto.RegisterCategoryInput{}
+	category := &categorydto.RegisterCategoryInput{}
 	jsonpkg.ParseBody(r, category)
 
 	id, err := h.s.RegisterCategory(ctx, category)
@@ -61,7 +61,7 @@ func (h *handlerCategoryProductImpl) handlerUpdateCategoryProduct(w http.Respons
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	category := &productdto.UpdateCategoryInput{}
+	category := &categorydto.UpdateCategoryInput{}
 	jsonpkg.ParseBody(r, category)
 
 	err := h.s.UpdateCategory(ctx, dtoId, category)

@@ -1,4 +1,4 @@
-package productdto
+package quantitydto
 
 import (
 	"github.com/google/uuid"

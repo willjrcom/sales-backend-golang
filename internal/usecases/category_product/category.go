@@ -6,8 +6,8 @@ import (
 
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	categorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/category"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
 )
 
 var (
@@ -22,7 +22,7 @@ func NewService(c productentity.CategoryRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) RegisterCategory(ctx context.Context, dto *productdto.RegisterCategoryInput) (uuid.UUID, error) {
+func (s *Service) RegisterCategory(ctx context.Context, dto *categorydto.RegisterCategoryInput) (uuid.UUID, error) {
 	categoryProduct, err := dto.ToModel()
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (s *Service) RegisterCategory(ctx context.Context, dto *productdto.Register
 	return categoryProduct.ID, nil
 }
 
-func (s *Service) UpdateCategory(ctx context.Context, dtoId *entitydto.IdRequest, dto *productdto.UpdateCategoryInput) error {
+func (s *Service) UpdateCategory(ctx context.Context, dtoId *entitydto.IdRequest, dto *categorydto.UpdateCategoryInput) error {
 	category, err := s.r.GetCategoryById(ctx, dtoId.ID.String())
 
 	if err != nil {
@@ -68,17 +68,17 @@ func (s *Service) DeleteCategoryById(ctx context.Context, dto *entitydto.IdReque
 	return nil
 }
 
-func (s *Service) GetCategoryById(ctx context.Context, dto *entitydto.IdRequest) (*productdto.CategorySizesOutput, error) {
+func (s *Service) GetCategoryById(ctx context.Context, dto *entitydto.IdRequest) (*categorydto.CategorySizesOutput, error) {
 	if categoryProduct, err := s.r.GetCategoryById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		dto := &productdto.CategorySizesOutput{}
+		dto := &categorydto.CategorySizesOutput{}
 		dto.FromModel(categoryProduct)
 		return dto, nil
 	}
 }
 
-func (s *Service) GetAllCategoryProducts(ctx context.Context) ([]productdto.CategoryProductsOutput, error) {
+func (s *Service) GetAllCategoryProducts(ctx context.Context) ([]categorydto.CategoryProductsOutput, error) {
 	if categories, err := s.r.GetAllCategoryProducts(ctx); err != nil {
 		return nil, err
 	} else {
@@ -87,7 +87,7 @@ func (s *Service) GetAllCategoryProducts(ctx context.Context) ([]productdto.Cate
 	}
 }
 
-func (s *Service) GetAllCategorySizes(ctx context.Context) ([]productdto.CategorySizesOutput, error) {
+func (s *Service) GetAllCategorySizes(ctx context.Context) ([]categorydto.CategorySizesOutput, error) {
 	if categories, err := s.r.GetAllCategorySizes(ctx); err != nil {
 		return nil, err
 	} else {
@@ -96,11 +96,11 @@ func (s *Service) GetAllCategorySizes(ctx context.Context) ([]productdto.Categor
 	}
 }
 
-func categoryProductsToDtos(categories []productentity.Category) []productdto.CategoryProductsOutput {
-	dtoOutput := []productdto.CategoryProductsOutput{}
+func categoryProductsToDtos(categories []productentity.Category) []categorydto.CategoryProductsOutput {
+	dtoOutput := []categorydto.CategoryProductsOutput{}
 
 	for _, category := range categories {
-		c := &productdto.CategoryProductsOutput{}
+		c := &categorydto.CategoryProductsOutput{}
 		c.FromModel(&category)
 		dtoOutput = append(dtoOutput, *c)
 	}
@@ -108,11 +108,11 @@ func categoryProductsToDtos(categories []productentity.Category) []productdto.Ca
 	return dtoOutput
 }
 
-func categorySizesToDtos(categories []productentity.Category) []productdto.CategorySizesOutput {
-	dtoOutput := []productdto.CategorySizesOutput{}
+func categorySizesToDtos(categories []productentity.Category) []categorydto.CategorySizesOutput {
+	dtoOutput := []categorydto.CategorySizesOutput{}
 
 	for _, category := range categories {
-		c := &productdto.CategorySizesOutput{}
+		c := &categorydto.CategorySizesOutput{}
 		c.FromModel(&category)
 		dtoOutput = append(dtoOutput, *c)
 	}

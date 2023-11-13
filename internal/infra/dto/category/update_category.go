@@ -1,4 +1,4 @@
-package productdto
+package categorydto
 
 import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"

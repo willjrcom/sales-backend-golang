@@ -8,8 +8,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	categorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/category"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
+	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size_category"
 	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category-product"
 	productrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
 	sizerepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/size_category"
@@ -42,12 +44,12 @@ func TestMain(m *testing.M) {
 }
 
 func TestRegisterProduct(t *testing.T) {
-	dtoCategory := &productdto.RegisterCategoryInput{Name: "pizza"}
+	dtoCategory := &categorydto.RegisterCategoryInput{Name: "pizza"}
 	categoryId, err := categoryProductService.RegisterCategory(ctx, dtoCategory)
 	assert.Nil(t, err)
 	assert.NotNil(t, categoryId)
 
-	dtoSize := &productdto.RegisterSizeInput{Name: "P"}
+	dtoSize := &sizedto.RegisterSizeInput{Name: "P"}
 	sizeId, err := sizeService.RegisterSize(ctx, dtoSize)
 	assert.Nil(t, err)
 	assert.NotNil(t, sizeId)

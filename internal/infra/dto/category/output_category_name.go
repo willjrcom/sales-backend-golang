@@ -1,16 +1,16 @@
-package productdto
+package categorydto
 
 import (
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
-type SizeNameOutput struct {
+type CategoryNameOutput struct {
 	ID   uuid.UUID `json:"id"`
 	Name string    `json:"name"`
 }
 
-func (s *SizeNameOutput) FromModel(model *productentity.Size) {
-	s.ID = model.ID
-	s.Name = model.Name
+func (c *CategoryNameOutput) FromModel(model *productentity.Category) {
+	c.ID = model.ID
+	c.Name = model.Name
 }
