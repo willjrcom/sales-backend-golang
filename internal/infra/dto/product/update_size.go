@@ -8,7 +8,6 @@ import (
 
 var (
 	ErrNameAndActiveIsEmpty = errors.New("name and active can't be empty")
-	ErrInvalidInput         = errors.New("invalid input")
 )
 
 type UpdateSizeInput struct {
@@ -22,9 +21,9 @@ func (s *UpdateSizeInput) validate() error {
 	}
 	return nil
 }
-func (s *UpdateSizeInput) UpdateModel(model *productentity.Size) error {
-	if s.validate() != nil {
-		return ErrInvalidInput
+func (s *UpdateSizeInput) UpdateModel(model *productentity.Size) (err error) {
+	if err = s.validate(); err != nil {
+		return err
 	}
 
 	if s.Name != nil {

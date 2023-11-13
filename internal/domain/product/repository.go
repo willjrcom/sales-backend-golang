@@ -28,3 +28,10 @@ type SizeRepository interface {
 	DeleteSize(ctx context.Context, id string) error
 	GetSizeById(ctx context.Context, id string) (*Size, error)
 }
+
+type QuantityRepository interface {
+	RegisterQuantity(ctx context.Context, Quantity *Quantity) error
+	UpdateQuantity(ctx context.Context, Quantity *Quantity) error
+	DeleteQuantity(ctx context.Context, id string) error
+	GetQuantityById(ctx context.Context, id string) (*Quantity, error)
+}

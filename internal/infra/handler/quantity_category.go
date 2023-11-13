@@ -8,36 +8,36 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
-	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
+	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity_category"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
-type handlerSizeCategoryImpl struct {
-	s *sizeusecases.Service
+type handlerQuantityCategoryImpl struct {
+	s *quantityusecases.Service
 }
 
-func NewHandlerSizeProduct(sizeService *sizeusecases.Service) *handler.Handler {
+func NewHandlerQuantityProduct(quantityService *quantityusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
-	h := &handlerSizeCategoryImpl{
-		s: sizeService,
+	h := &handlerQuantityCategoryImpl{
+		s: quantityService,
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterSize)
-		c.Patch("/update/{id}", h.handlerUpdateSize)
-		c.Delete("/delete/{id}", h.handlerDeleteSize)
+		c.Post("/new", h.handlerRegisterQuantity)
+		c.Patch("/update/{id}", h.handlerUpdateQuantity)
+		c.Delete("/delete/{id}", h.handlerDeleteQuantity)
 	})
 
-	return handler.NewHandler("/category-product/size", c)
+	return handler.NewHandler("/category-product/quantity", c)
 }
 
-func (h *handlerSizeCategoryImpl) handlerRegisterSize(w http.ResponseWriter, r *http.Request) {
+func (h *handlerQuantityCategoryImpl) handlerRegisterQuantity(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	size := &productdto.RegisterSizeInput{}
-	jsonpkg.ParseBody(r, size)
+	quantity := &productdto.RegisterQuantityInput{}
+	jsonpkg.ParseBody(r, quantity)
 
-	if id, err := h.s.RegisterSize(ctx, size); err != nil {
+	if id, err := h.s.RegisterQuantity(ctx, quantity); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	} else {
@@ -45,7 +45,7 @@ func (h *handlerSizeCategoryImpl) handlerRegisterSize(w http.ResponseWriter, r *
 	}
 }
 
-func (h *handlerSizeCategoryImpl) handlerUpdateSize(w http.ResponseWriter, r *http.Request) {
+func (h *handlerQuantityCategoryImpl) handlerUpdateQuantity(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -56,10 +56,10 @@ func (h *handlerSizeCategoryImpl) handlerUpdateSize(w http.ResponseWriter, r *ht
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	Size := &productdto.UpdateSizeInput{}
-	jsonpkg.ParseBody(r, Size)
+	Quantity := &productdto.UpdateQuantityInput{}
+	jsonpkg.ParseBody(r, Quantity)
 
-	if err := h.s.UpdateSize(ctx, dtoId, Size); err != nil {
+	if err := h.s.UpdateQuantity(ctx, dtoId, Quantity); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -67,7 +67,7 @@ func (h *handlerSizeCategoryImpl) handlerUpdateSize(w http.ResponseWriter, r *ht
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerSizeCategoryImpl) handlerDeleteSize(w http.ResponseWriter, r *http.Request) {
+func (h *handlerQuantityCategoryImpl) handlerDeleteQuantity(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -78,7 +78,7 @@ func (h *handlerSizeCategoryImpl) handlerDeleteSize(w http.ResponseWriter, r *ht
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.DeleteSize(ctx, dtoId); err != nil {
+	if err := h.s.DeleteQuantity(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

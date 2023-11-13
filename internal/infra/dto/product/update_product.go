@@ -30,7 +30,7 @@ func (p *UpdateProductInput) Validate(product *productentity.Product) error {
 	return nil
 }
 
-func (p *UpdateProductInput) UpdateModel(product *productentity.Product) error {
+func (p *UpdateProductInput) UpdateModel(product *productentity.Product) (err error) {
 	if p.Code != nil {
 		product.Code = *p.Code
 	}
@@ -56,7 +56,7 @@ func (p *UpdateProductInput) UpdateModel(product *productentity.Product) error {
 		product.IsAvailable = *p.IsAvailable
 	}
 
-	if err := p.Validate(product); err != nil {
+	if err = p.Validate(product); err != nil {
 		return err
 	}
 

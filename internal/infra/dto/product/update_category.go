@@ -18,8 +18,8 @@ func (c *UpdateCategoryInput) validate() error {
 	return nil
 }
 
-func (c *UpdateCategoryInput) UpdateModel(category *productentity.Category) error {
-	if err := c.validate(); err != nil {
+func (c *UpdateCategoryInput) UpdateModel(category *productentity.Category) (err error) {
+	if err = c.validate(); err != nil {
 		return err
 	}
 
