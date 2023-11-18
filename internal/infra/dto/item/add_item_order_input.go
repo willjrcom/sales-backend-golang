@@ -13,6 +13,7 @@ import (
 var (
 	ErrGroupItemNotStaging      = errors.New("group item not staging")
 	ErrGroupItemCategoryInvalid = errors.New("group item category invalid")
+	ErrGroupItemSizeInvalid     = errors.New("group item size invalid")
 )
 
 type AddItemOrderInput struct {
@@ -44,6 +45,9 @@ func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *
 		return ErrGroupItemCategoryInvalid
 	}
 
+	if groupItem.Size != product.Size.Name {
+		return ErrGroupItemSizeInvalid
+	}
 	return nil
 }
 

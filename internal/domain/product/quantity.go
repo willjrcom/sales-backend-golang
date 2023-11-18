@@ -9,6 +9,6 @@ import (
 type Quantity struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:quantities"`
-	Name          string    `bun:"name"`
+	Quantity      float64   `bun:"quantity,notnull"`
 	CategoryID    uuid.UUID `bun:"column:category_id,type:uuid,notnull"`
 }

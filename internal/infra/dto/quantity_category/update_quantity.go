@@ -5,12 +5,12 @@ import (
 )
 
 type UpdateQuantityInput struct {
-	Name *string `json:"name"`
+	Quantity float64 `json:"quantity"`
 }
 
 func (s *UpdateQuantityInput) validate() error {
-	if s.Name == nil {
-		return ErrNameRequired
+	if s.Quantity <= 0 {
+		return ErrQuantityRequired
 	}
 
 	return nil
@@ -20,8 +20,8 @@ func (s *UpdateQuantityInput) UpdateModel(model *productentity.Quantity) (err er
 		return err
 	}
 
-	if s.Name != nil {
-		model.Name = *s.Name
+	if s.Quantity != 0 {
+		model.Quantity = s.Quantity
 	}
 
 	return nil

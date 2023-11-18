@@ -43,6 +43,18 @@ func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *groupit
 	return nil
 }
 
+func (r *GroupItemRepositoryBun) CalculateTotal(ctx context.Context, id string) (err error) {
+	groupItem, err := r.GetGroupByID(ctx, id)
+
+	if err != nil {
+		return err
+	}
+
+	groupItem.CalculateTotalValues()
+
+	return r.UpdateGroupItem(ctx, groupItem)
+}
+
 func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string) error {
 	r.mu.Lock()
 	_, err := r.db.NewDelete().Model(&groupitementity.GroupItem{}).Where("id = ?", id).Exec(ctx)

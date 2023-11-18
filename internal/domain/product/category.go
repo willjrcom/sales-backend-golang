@@ -10,6 +10,6 @@ type Category struct {
 	bun.BaseModel `bun:"table:categories"`
 	Name          string     `bun:"name,notnull"`
 	Sizes         []Size     `bun:"rel:has-many,join:id=category_id"`
-	Quantities    []Quantity `bun:"rel:has-many,join:=id=category_id"`
+	Quantities    []Quantity `bun:"rel:has-many,join:id=category_id"`
 	Products      []Product  `bun:"rel:has-many,join:id=category_id"`
 }

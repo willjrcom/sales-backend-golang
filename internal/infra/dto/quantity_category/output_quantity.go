@@ -6,12 +6,11 @@ import (
 )
 
 type QuantityOutput struct {
-	ID     uuid.UUID `json:"id"`
-	Name   string    `json:"name"`
-	Active bool      `json:"active"`
+	ID       uuid.UUID `json:"id"`
+	Quantity float64   `json:"quantity"`
 }
 
 func (s *QuantityOutput) FromModel(model *productentity.Quantity) {
 	s.ID = model.ID
-	s.Name = model.Name
+	s.Quantity = model.Quantity
 }

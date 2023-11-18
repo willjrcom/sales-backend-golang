@@ -60,6 +60,10 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 		return uuid.Nil, err
 	}
 
+	if err = s.rgi.CalculateTotal(ctx, groupItem.ID.String()); err != nil {
+		return uuid.Nil, err
+	}
+
 	return item.ID, nil
 }
 
@@ -70,6 +74,7 @@ func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *
 		GroupDetails: groupitementity.GroupDetails{
 			CategoryID: product.CategoryID,
 			Status:     groupitementity.StatusGroupStaging,
+			Size:       product.Size.Name,
 		},
 	}
 

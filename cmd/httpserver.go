@@ -20,6 +20,7 @@ import (
 	itemrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/item"
 	orderrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/order"
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
+	quantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity_category"
 	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size_category"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
@@ -29,6 +30,7 @@ import (
 	itemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/item"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
+	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity_category"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
 )
 
@@ -55,6 +57,7 @@ var HttpserverCmd = &cobra.Command{
 		productRepo := productrepositorybun.NewProductRepositoryBun(db)
 		categoryRepo := categoryrepositorybun.NewCategoryProductRepositoryBun(db)
 		sizeRepo := sizerepositorybun.NewSizeCategoryRepositoryBun(db)
+		quantityRepo := quantityrepositorybun.NewQuantityCategoryRepositoryBun(db)
 
 		clientRepo := clientrepositorybun.NewClientRepositoryBun(db)
 		contactRepo := contactrepositorybun.NewContactRepositoryBun(db)
@@ -71,6 +74,7 @@ var HttpserverCmd = &cobra.Command{
 		productService := productusecases.NewService(productRepo, categoryRepo)
 		categoryProductService := categoryproductusecases.NewService(categoryRepo)
 		sizeService := sizeusecases.NewService(sizeRepo)
+		quantityService := quantityusecases.NewService(quantityRepo)
 
 		clientService := clientusecases.NewService(clientRepo, contactRepo)
 		contactService := contactusecases.NewService(contactRepo)
@@ -84,6 +88,7 @@ var HttpserverCmd = &cobra.Command{
 		productHandler := handlerimpl.NewHandlerProduct(productService)
 		categoryHandler := handlerimpl.NewHandlerCategoryProduct(categoryProductService)
 		sizeHandler := handlerimpl.NewHandlerSizeProduct(sizeService)
+		quantityHandler := handlerimpl.NewHandlerQuantityProduct(quantityService)
 
 		clientHandler := handlerimpl.NewHandlerClient(clientService)
 		contactHandler := handlerimpl.NewHandlerContactPerson(contactService)
@@ -96,8 +101,11 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(productHandler)
 		server.AddHandler(categoryHandler)
 		server.AddHandler(sizeHandler)
+		server.AddHandler(quantityHandler)
+
 		server.AddHandler(clientHandler)
 		server.AddHandler(contactHandler)
+
 		server.AddHandler(orderHandler)
 		server.AddHandler(deliveryOrderHandler)
 		server.AddHandler(itemHandler)

@@ -19,7 +19,7 @@ type GroupItem struct {
 }
 
 type GroupDetails struct {
-	Size       float64                 `bun:"size"`
+	Size       string                  `bun:"size,notnull"`
 	Status     StatusItem              `bun:"status,notnull"`
 	Price      float64                 `bun:"price"`
 	Quantity   float64                 `bun:"quantity"`

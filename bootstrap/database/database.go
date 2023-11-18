@@ -64,6 +64,7 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 	bun.RegisterModel((*entity.Entity)(nil))
 
 	bun.RegisterModel((*productentity.Size)(nil))
+	bun.RegisterModel((*productentity.Quantity)(nil))
 	bun.RegisterModel((*productentity.Category)(nil))
 	bun.RegisterModel((*productentity.Product)(nil))
 
@@ -90,6 +91,10 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 
 	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Category)(nil)).Exec(ctx); err != nil {
 		panic("Couldn't create table for category product")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Quantity)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for quantity product")
 	}
 
 	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Product)(nil)).Exec(ctx); err != nil {

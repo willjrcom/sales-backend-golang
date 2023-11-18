@@ -9,18 +9,18 @@ import (
 )
 
 var (
-	ErrNameRequired     = errors.New("name is required")
+	ErrQuantityRequired = errors.New("quantity is required")
 	ErrCategoryRequired = errors.New("category is required")
 )
 
 type RegisterQuantityInput struct {
-	Name       string    `json:"name"`
+	Quantity   float64   `json:"quantity"`
 	CategoryID uuid.UUID `json:"category_id"`
 }
 
 func (s *RegisterQuantityInput) validate() error {
-	if s.Name == "" {
-		return ErrNameRequired
+	if s.Quantity <= 0 {
+		return ErrQuantityRequired
 	}
 	if s.CategoryID == uuid.Nil {
 		return ErrCategoryRequired
@@ -36,7 +36,7 @@ func (s *RegisterQuantityInput) ToModel() (*productentity.Quantity, error) {
 
 	return &productentity.Quantity{
 		Entity:     entity.NewEntity(),
-		Name:       s.Name,
+		Quantity:   s.Quantity,
 		CategoryID: s.CategoryID,
 	}, nil
 }
