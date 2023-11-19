@@ -1,0 +1,907 @@
+{
+	"info": {
+		"_postman_id": "92aa73f0-e2a8-4bb4-9e39-df157735292a",
+		"name": "sales-backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "28610432"
+	},
+	"item": [
+		{
+			"name": "product",
+			"item": [
+				{
+					"name": "registerProduct",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"product_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"code\": \"a12\",\n    \"name\": \"Pizza Presunto\",\n    \"price\": 12.50,\n    \"category_id\": \"dddbc05a-19cb-49fd-a50d-81ae5f6b26c6\",\n    \"size_id\": \"01014059-5db1-48a7-8c47-f8a599d3edda\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/product/new"
+					},
+					"response": []
+				},
+				{
+					"name": "atualizar produto",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"size_id\": \"{{size_category_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/product/update/{{product_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "deletar",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{server}}/product/delete/{{product_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/product/{{product_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "get by",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"CategoryID\":\"dddbc05a-19cb-49fd-a50d-81ae5f6b26c6\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/product/by"
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/product/all"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "category",
+			"item": [
+				{
+					"name": "register category",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"category_product_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Lanche\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/category-product/new"
+					},
+					"response": []
+				},
+				{
+					"name": "atualizar category",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Suco\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/category-product/update/{{category_product_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "deletar",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{server}}/category-product/delete/{{category_product_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/category-product/{{category_product_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "get all with products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/category-product/allproducts"
+					},
+					"response": []
+				},
+				{
+					"name": "get all with sizes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/category-product/allsizes"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "size",
+			"item": [
+				{
+					"name": "register size",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"size_category_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"P\",\n    \"category_id\": \"{{category_product_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/category-product/size/new"
+					},
+					"response": []
+				},
+				{
+					"name": "atualizar size",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"active\": \"false\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/category-product/size/update/{{size_category_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "deletar",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{server}}/category-product/size/delete/{{size_category_id}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "quantity",
+			"item": [
+				{
+					"name": "register quantity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"quantity_category_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": 2,\n    \"category_id\": \"{{category_product_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/category-product/quantity/new"
+					},
+					"response": []
+				},
+				{
+					"name": "atualizar quantity",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"quantity\": \"2.5\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/category-product/quantity/update/{{quantity_category_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "deletar",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{server}}/category-product/quantity/delete/{{quantity_category_id}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "client",
+			"item": [
+				{
+					"name": "contact",
+					"item": [
+						{
+							"name": "register contact",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"contact_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"contact\": \"11963849114\",\n    \"person_id\": \"2b4a8299-0a0e-4a31-8d59-1bbef4edd2c1\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/client/contact/new"
+							},
+							"response": []
+						},
+						{
+							"name": "update contact",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"contact_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"contact\": \"12 96384 9136\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/client/contact/update/{{contact_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "delete contact",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"contact_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "{{server}}/client/contact/delete/{{contact_id}}"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "register client",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"client_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"William junior 3\",\n    \"contacts\": [\"11963849111\"],\n    \"addresses\": [{\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\"\n    }],\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/client/new"
+					},
+					"response": []
+				},
+				{
+					"name": "atualizar client",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": "{{server}}/client/update/{{client_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "deletar",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{server}}/client/delete/{{client_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/client/{{client_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "get by",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"William\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/client/by"
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/client/all"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "contact",
+			"item": [
+				{
+					"name": "get by",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"person_id\": \"2b4a8299-0a0e-4a31-8d59-1bbef4edd2c1\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/contact/by"
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/contact/ccde66ef-e711-47cb-bf0b-7fa497d68c57"
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/contact/all"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "order",
+			"item": [
+				{
+					"name": "create default",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"order_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/order/new"
+					},
+					"response": []
+				},
+				{
+					"name": "get",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/order/{{order_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/order/all"
+					},
+					"response": []
+				},
+				{
+					"name": "update observation",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"observation\": \"entregar as 9h\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/order/update/{{order_id}}/observation"
+					},
+					"response": []
+				},
+				{
+					"name": "update payment",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"is_paid\": true,\n    \"total_paid\": 20.0,\n    \"change\": 0.0,\n    \"method\": \"Dinheiro\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/order/update/{{order_id}}/payment"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "delivery order",
+			"item": [
+				{
+					"name": "create delivery",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"order_delivery_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_id\": \"2b4a8299-0a0e-4a31-8d59-1bbef4edd2c1\",\n    \"address_id\": \"392c36ab-2de5-4b80-865f-d1bf3ade58d8\",\n    \"order_id\": \"d1db1385-d43d-4c1b-a3ea-47ffb88b34f9\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/delivery-order/new"
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"order_delivery_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_id\": \"2b4a8299-0a0e-4a31-8d59-1bbef4edd2c1\",\n    \"address_id\": \"392c36ab-2de5-4b80-865f-d1bf3ade58d8\",\n    \"order_id\": \"d1db1385-d43d-4c1b-a3ea-47ffb88b34f9\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/delivery-order/all"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "table order",
+			"item": [
+				{
+					"name": "create table",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"order_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/order/table/new"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "item",
+			"item": [
+				{
+					"name": "add item",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"item_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\" \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/item/add"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "group item",
+			"item": [
+				{
+					"name": "getAll",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"order_id\": \"d1db1385-d43d-4c1b-a3ea-47ffb88b34f9\",\n    \"product_id\": \"ffad990f-0e7b-41d5-b6ea-6a8d2d59ad4b\",\n    \"quantity\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/group/all"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "product_id",
+			"value": ""
+		},
+		{
+			"key": "category_product_id",
+			"value": ""
+		},
+		{
+			"key": "data",
+			"value": ""
+		},
+		{
+			"key": "size_category_id",
+			"value": "01014059-5db1-48a7-8c47-f8a599d3edda"
+		},
+		{
+			"key": "client_id",
+			"value": ""
+		},
+		{
+			"key": "contact_id",
+			"value": ""
+		},
+		{
+			"key": "order_id",
+			"value": ""
+		},
+		{
+			"key": "order_delivery_id",
+			"value": ""
+		},
+		{
+			"key": "server",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "quantity_category_id",
+			"value": "b4ea5641-b204-4404-a06d-8e55eb424261",
+			"type": "string"
+		}
+	]
+}

@@ -19,12 +19,12 @@ var (
 type AddItemOrderInput struct {
 	OrderID     uuid.UUID  `json:"order_id"`
 	ProductID   uuid.UUID  `json:"product_id"`
+	QuantityID  uuid.UUID  `json:"quantity_id"`
 	GroupItemID *uuid.UUID `json:"group_item_id"`
-	Quantity    *float64   `json:"quantity"`
 	Observation string     `json:"observation"`
 }
 
-func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *groupitementity.GroupItem) error {
+func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *groupitementity.GroupItem, quantity *productentity.Quantity) error {
 	if a.OrderID == uuid.Nil {
 		return errors.New("order id is required")
 	}
@@ -33,8 +33,12 @@ func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *
 		return errors.New("item id is required")
 	}
 
-	if a.Quantity == nil {
-		return errors.New("quantity is required")
+	if a.QuantityID == uuid.Nil {
+		return errors.New("quantity id is required")
+	}
+
+	if a.QuantityID != quantity.ID {
+		return errors.New("quantity id is invalid")
 	}
 
 	if groupItem.Status != groupitementity.StatusGroupStaging {
@@ -51,17 +55,17 @@ func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *
 	return nil
 }
 
-func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *groupitementity.GroupItem) (item *itementity.Item, err error) {
-	if err = a.validate(product, groupItem); err != nil {
+func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *groupitementity.GroupItem, quantity *productentity.Quantity) (item *itementity.Item, err error) {
+	if err = a.validate(product, groupItem, quantity); err != nil {
 		return
 	}
 
 	item = &itementity.Item{
 		Entity:      entity.NewEntity(),
 		Name:        product.Name,
-		Price:       product.Price * (*a.Quantity),
+		Price:       product.Price * quantity.Quantity,
 		Description: product.Description,
-		Quantity:    *a.Quantity,
+		Quantity:    quantity.Quantity,
 		Observation: a.Observation,
 		GroupItemID: *a.GroupItemID,
 	}

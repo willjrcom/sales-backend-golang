@@ -81,7 +81,7 @@ var HttpserverCmd = &cobra.Command{
 
 		orderService := orderusecases.NewService(orderRepo)
 		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo, employeeRepo)
-		itemService := itemusecases.NewService(itemRepo, groupItemRepo, orderRepo, productRepo)
+		itemService := itemusecases.NewService(itemRepo, groupItemRepo, orderRepo, productRepo, quantityRepo)
 		groupService := groupitemusecases.NewService(itemRepo, groupItemRepo)
 
 		// Load handlers

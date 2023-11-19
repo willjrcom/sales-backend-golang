@@ -17,10 +17,11 @@ type Service struct {
 	rgi groupitementity.GroupItemRepository
 	ro  orderentity.OrderRepository
 	rp  productentity.ProductRepository
+	rq  productentity.QuantityRepository
 }
 
-func NewService(ri itementity.ItemRepository, rgi groupitementity.GroupItemRepository, ro orderentity.OrderRepository, rp productentity.ProductRepository) *Service {
-	return &Service{ri: ri, rgi: rgi, ro: ro, rp: rp}
+func NewService(ri itementity.ItemRepository, rgi groupitementity.GroupItemRepository, ro orderentity.OrderRepository, rp productentity.ProductRepository, rq productentity.QuantityRepository) *Service {
+	return &Service{ri: ri, rgi: rgi, ro: ro, rp: rp, rq: rq}
 }
 
 func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInput) (id uuid.UUID, err error) {
@@ -50,7 +51,13 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 		return uuid.Nil, err
 	}
 
-	item, err := dto.ToModel(product, groupItem)
+	quantity, err := s.rq.GetQuantityById(ctx, dto.QuantityID.String())
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	item, err := dto.ToModel(product, groupItem, quantity)
 
 	if err != nil {
 		return uuid.Nil, err
