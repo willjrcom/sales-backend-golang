@@ -101,6 +101,10 @@ func (s *Service) RemoveItemOrder(ctx context.Context, dto *entitydto.IdRequest)
 	return nil
 }
 
+func (s *Service) AddAditionalItemOrder(ctx context.Context, dto *entitydto.IdRequest) (id uuid.UUID, err error) {
+	return uuid.Nil, nil
+}
+
 func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product) (groupItem *groupitementity.GroupItem, err error) {
 	groupItem = &groupitementity.GroupItem{
 		Entity:  entity.NewEntity(),

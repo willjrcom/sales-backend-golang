@@ -74,7 +74,7 @@ func (h *handlerItemImpl) handlerAddAditionalItem(w http.ResponseWriter, r *http
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.AddAditionalItemOrder(ctx, dtoId); err != nil {
+	if id, err := h.s.AddAditionalItemOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
