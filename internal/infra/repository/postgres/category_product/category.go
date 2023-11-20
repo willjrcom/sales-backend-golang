@@ -80,7 +80,7 @@ func (r *CategoryProductRepositoryBun) GetAllCategorySizes(ctx context.Context) 
 	categories := []productentity.Category{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&categories).Relation("Sizes").Relation("Quantities").Scan(ctx)
+	err := r.db.NewSelect().Model(&categories).Relation("Sizes").Relation("Quantities").Relation("AditionalCategories").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {

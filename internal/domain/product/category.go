@@ -8,12 +8,12 @@ import (
 
 type Category struct {
 	entity.Entity
-	bun.BaseModel     `bun:"table:categories"`
-	Name              string     `bun:"name,notnull"`
-	Sizes             []Size     `bun:"rel:has-many,join:id=category_id"`
-	Quantities        []Quantity `bun:"rel:has-many,join:id=category_id"`
-	Products          []Product  `bun:"rel:has-many,join:id=category_id"`
-	AditionalCategory []Category `bun:"m2m:category_to_aditional_categories,join:Category=Category"`
+	bun.BaseModel       `bun:"table:categories"`
+	Name                string     `bun:"name,notnull"`
+	Sizes               []Size     `bun:"rel:has-many,join:id=category_id"`
+	Quantities          []Quantity `bun:"rel:has-many,join:id=category_id"`
+	Products            []Product  `bun:"rel:has-many,join:id=category_id"`
+	AditionalCategories []Category `bun:"m2m:category_to_aditional_categories,join:Category=Category"`
 }
 
 type CategoryToAditionalCategories struct {

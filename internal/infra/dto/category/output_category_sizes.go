@@ -8,10 +8,11 @@ import (
 )
 
 type CategorySizesOutput struct {
-	ID         uuid.UUID                    `json:"id"`
-	Name       string                       `json:"name"`
-	Sizes      []sizedto.SizeOutput         `json:"sizes"`
-	Quantities []quantitydto.QuantityOutput `json:"quantities"`
+	ID                uuid.UUID                    `json:"id"`
+	Name              string                       `json:"name"`
+	Sizes             []sizedto.SizeOutput         `json:"sizes"`
+	Quantities        []quantitydto.QuantityOutput `json:"quantities"`
+	AditionalCategory []CategorySizesOutput        `json:"aditional_category"`
 }
 
 func (c *CategorySizesOutput) FromModel(model *productentity.Category) {
@@ -28,5 +29,11 @@ func (c *CategorySizesOutput) FromModel(model *productentity.Category) {
 
 	for i, v := range model.Quantities {
 		c.Quantities[i].FromModel(&v)
+	}
+
+	c.AditionalCategory = make([]CategorySizesOutput, len(model.AditionalCategories))
+
+	for i, v := range model.AditionalCategories {
+		c.AditionalCategory[i].FromModel(&v)
 	}
 }
