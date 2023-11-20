@@ -2,10 +2,12 @@ package groupitemrepositorybun
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 
 	"github.com/uptrace/bun"
 	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
+	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 )
 
 type GroupItemRepositoryBun struct {
@@ -44,7 +46,7 @@ func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *groupit
 }
 
 func (r *GroupItemRepositoryBun) CalculateTotal(ctx context.Context, id string) (err error) {
-	groupItem, err := r.GetGroupByID(ctx, id)
+	groupItem, err := r.GetGroupByID(ctx, id, true)
 
 	if err != nil {
 		return err
@@ -56,22 +58,40 @@ func (r *GroupItemRepositoryBun) CalculateTotal(ctx context.Context, id string) 
 }
 
 func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string) error {
-	r.mu.Lock()
-	_, err := r.db.NewDelete().Model(&groupitementity.GroupItem{}).Where("id = ?", id).Exec(ctx)
-	r.mu.Unlock()
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
 
 	if err != nil {
 		return err
 	}
 
-	return nil
+	_, err = tx.NewDelete().Model(&groupitementity.GroupItem{}).Where("id = ?", id).Exec(ctx)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	_, err = tx.NewDelete().Model(&itementity.Item{}).Where("group_item_id = ?", id).Exec(ctx)
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
 }
 
-func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string) (*groupitementity.GroupItem, error) {
+func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, withRelation bool) (*groupitementity.GroupItem, error) {
 	item := &groupitementity.GroupItem{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(item).Where("id = ?", id).Relation("Items").Scan(ctx)
+	query := r.db.NewSelect().Model(item).Where("id = ?", id)
+
+	if withRelation {
+		query.Relation("Items")
+	}
+
+	err := query.Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {

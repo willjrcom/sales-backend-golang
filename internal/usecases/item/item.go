@@ -9,6 +9,7 @@ import (
 	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	itemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/item"
 )
 
@@ -45,7 +46,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 		dto.GroupItemID = &groupItem.ID
 	}
 
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.GroupItemID.String())
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.GroupItemID.String(), false)
 
 	if err != nil {
 		return uuid.Nil, err
@@ -72,6 +73,32 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 	}
 
 	return item.ID, nil
+}
+
+func (s *Service) RemoveItemOrder(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+	item, err := s.ri.GetItemById(ctx, dto.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	if err = s.ri.DeleteItem(ctx, dto.ID.String()); err != nil {
+		return err
+	}
+
+	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
+
+	if err != nil {
+		return err
+	}
+
+	if len(groupItem.Items) == 0 {
+		if err = s.rgi.DeleteGroupItem(ctx, item.GroupItemID.String()); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product) (groupItem *groupitementity.GroupItem, err error) {

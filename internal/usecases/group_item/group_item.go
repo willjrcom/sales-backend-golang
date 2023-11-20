@@ -23,18 +23,18 @@ func NewService(ri itementity.ItemRepository, rgi groupitementity.GroupItemRepos
 }
 
 func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IdRequest) (groupItem *groupitementity.GroupItem, err error) {
-	return s.rgi.GetGroupByID(ctx, dto.ID.String())
+	return s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
 }
 
 func (s *Service) DeleteGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String())
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if groupItem.LaunchedAt != nil {
 		return ErrItemsFinished
 	}
 
-	if len(groupItem.Items) != 0 {
-		return
+	if err != nil {
+		return err
 	}
 
 	return s.rgi.DeleteGroupItem(ctx, dto.ID.String())

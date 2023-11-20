@@ -23,7 +23,7 @@ func NewHandlerGroupItem(itemService *groupitemusecases.Service) *handler.Handle
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/get/{id}", h.handlerGetGroupByID)
+		c.Get("/get/{id}", h.handlerGetGroupByID)
 		c.Delete("/delete/{id}", h.handlerDeleteGroupByID)
 		c.Get("/all", h.handlerGetAllPendingGroups)
 	})
