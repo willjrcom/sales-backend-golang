@@ -113,30 +113,6 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*cl
 	return client, nil
 }
 
-func (r *ClientRepositoryBun) GetClientsBy(ctx context.Context, c *cliententity.Client) ([]cliententity.Client, error) {
-	clients := []cliententity.Client{}
-
-	r.mu.Lock()
-	query := r.db.NewSelect().Model(&cliententity.Client{})
-
-	if c.Name != "" {
-		query.Where("client.name LIKE ?", "%"+c.Name+"%")
-	}
-
-	if c.Cpf != "" {
-		query.Where("client.cpf LIKE ?", "%"+c.Cpf+"%")
-	}
-
-	err := query.Relation("Addresses").Relation("Contacts").Scan(ctx, &clients)
-	r.mu.Unlock()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return clients, nil
-}
-
 func (r *ClientRepositoryBun) GetAllClients(ctx context.Context) ([]cliententity.Client, error) {
 	clients := []cliententity.Client{}
 	r.mu.Lock()

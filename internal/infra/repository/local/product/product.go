@@ -68,27 +68,6 @@ func (r *ProductRepositoryLocal) GetProductById(_ context.Context, id string) (*
 	return nil, errProductNotFound
 }
 
-func (r *ProductRepositoryLocal) GetProductsBy(_ context.Context, p *productentity.Product) ([]productentity.Product, error) {
-	products := make([]productentity.Product, 0)
-
-	for _, v := range r.products {
-		if v.Code != "" && v.Code == p.Code {
-			products = append(products, *v)
-		}
-		if v.Name != "" && v.Name == p.Name {
-			products = append(products, *v)
-		}
-		if v.CategoryID != uuid.Nil && v.CategoryID == p.CategoryID {
-			products = append(products, *v)
-		}
-		if v.SizeID != uuid.Nil && v.SizeID == p.SizeID {
-			products = append(products, *v)
-		}
-	}
-
-	return products, nil
-}
-
 func (r *ProductRepositoryLocal) GetAllProducts(_ context.Context) ([]productentity.Product, error) {
 	products := make([]productentity.Product, 0)
 

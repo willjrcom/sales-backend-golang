@@ -12,20 +12,24 @@ import (
 
 type GroupItem struct {
 	entity.Entity
-	GroupDetails
 	bun.BaseModel `bun:"table:group_items"`
-	Items         []itementity.Item `bun:"rel:has-many,join:id=group_item_id"`
-	OrderID       uuid.UUID         `bun:"column:order_id,type:uuid,notnull"`
+	GroupCommonAttributes
+}
+
+type GroupCommonAttributes struct {
+	GroupDetails
+	Items   []itementity.Item `bun:"rel:has-many,join:id=group_item_id" json:"items"`
+	OrderID uuid.UUID         `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
 }
 
 type GroupDetails struct {
-	Size       string                  `bun:"size,notnull"`
-	Status     StatusItem              `bun:"status,notnull"`
-	Price      float64                 `bun:"price"`
-	Quantity   float64                 `bun:"quantity"`
-	LaunchedAt *time.Time              `bun:"launch"`
-	CategoryID uuid.UUID               `bun:"column:category_id,type:uuid,notnull"`
-	Category   *productentity.Category `bun:"rel:belongs-to"`
+	Size       string                  `bun:"size,notnull" json:"size"`
+	Status     StatusItem              `bun:"status,notnull" json:"status"`
+	Price      float64                 `bun:"price" json:"price"`
+	Quantity   float64                 `bun:"quantity" json:"quantity"`
+	LaunchedAt *time.Time              `bun:"launch" json:"launch"`
+	CategoryID uuid.UUID               `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
+	Category   *productentity.Category `bun:"rel:belongs-to" json:"category"`
 }
 
 func (i *GroupItem) CalculateTotalValues() {

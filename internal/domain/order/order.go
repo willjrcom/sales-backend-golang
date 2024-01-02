@@ -12,32 +12,48 @@ import (
 
 type Order struct {
 	entity.Entity
+	bun.BaseModel `bun:"table:orders"`
+	OrderTimeLogs
+	OrderCommonAttributes
+}
+
+type OrderCommonAttributes struct {
 	OrderType
 	OrderDetail
-	bun.BaseModel `bun:"table:orders"`
-	Payment       *PaymentOrder
-	OrderNumber   int                         `bun:"order_number,notnull"`
-	Status        StatusOrder                 `bun:"status,notnull"`
-	Groups        []groupitementity.GroupItem `bun:"rel:has-many,join:id=order_id"`
+	Payment     *PaymentOrder
+	OrderNumber int                         `bun:"order_number,notnull" json:"order_number"`
+	Status      StatusOrder                 `bun:"status,notnull" json:"status"`
+	Groups      []groupitementity.GroupItem `bun:"rel:has-many,join:id=order_id" json:"groups"`
 }
 
 type OrderDetail struct {
-	Name        string                   `bun:"name"`
-	Observation string                   `bun:"observation"`
-	AttendantID *uuid.UUID               `bun:"column:attendant_id,type:uuid"`
-	Attendant   *employeeentity.Employee `bun:"rel:belongs-to"`
-	LaunchedAt  *time.Time               `bun:"launch"`
+	Name        string                   `bun:"name" json:"name"`
+	Observation string                   `bun:"observation" json:"observation"`
+	AttendantID *uuid.UUID               `bun:"column:attendant_id,type:uuid" json:"attendant_id"`
+	Attendant   *employeeentity.Employee `bun:"rel:belongs-to" json:"attendant"`
+	LaunchedAt  *time.Time               `bun:"launched_at" json:"launched_at"`
+	ShiftID     *uuid.UUID               `bun:"column:shift_id,type:uuid" json:"shift_id"`
 }
 
 type OrderType struct {
-	Delivery *DeliveryOrder `bun:"rel:has-one,join:id=order_id"`
-	Table    *TableOrder    `bun:"rel:has-one,join:id=order_id"`
+	Delivery *DeliveryOrder `bun:"rel:has-one,join:id=order_id" json:"delivery"`
+	Table    *TableOrder    `bun:"rel:has-one,join:id=order_id" json:"table"`
+}
+
+type OrderTimeLogs struct {
+	FinishedAt  *time.Time `bun:"finished_at" json:"finished_at"`
+	CancelledAt *time.Time `bun:"cancelled_at" json:"cancelled_at"`
+	ArchivedAt  *time.Time `bun:"archived_at" json:"archived_at"`
 }
 
 func NewDefaultOrder() *Order {
-	return &Order{
-		Entity: entity.NewEntity(),
+	orderCommonAttributes := OrderCommonAttributes{
 		Status: OrderStatusStaging,
+	}
+
+	return &Order{
+		Entity:                entity.NewEntity(),
+		OrderCommonAttributes: orderCommonAttributes,
 	}
 }
 
@@ -58,7 +74,7 @@ func (o *Order) FinishOrder() {
 	o.Status = OrderStatusFinished
 
 	if o.Delivery != nil {
-		*(*o.Delivery).Delivered = time.Now()
+		*(*o.Delivery).DeliveredAt = time.Now()
 	}
 }
 

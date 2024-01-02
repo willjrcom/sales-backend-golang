@@ -14,9 +14,7 @@ var (
 )
 
 type RegisterSizeInput struct {
-	Name       string    `json:"name"`
-	Active     *bool     `json:"active"`
-	CategoryID uuid.UUID `json:"category_id"`
+	productentity.SizeCommonAttributes
 }
 
 func (s *RegisterSizeInput) validate() error {
@@ -39,10 +37,14 @@ func (s *RegisterSizeInput) ToModel() (*productentity.Size, error) {
 		return nil, err
 	}
 
-	return &productentity.Size{
-		Entity:     entity.NewEntity(),
+	sizeCommonAttributes := productentity.SizeCommonAttributes{
 		Name:       s.Name,
-		Active:     *s.Active,
+		Active:     s.Active,
 		CategoryID: s.CategoryID,
+	}
+
+	return &productentity.Size{
+		Entity:               entity.NewEntity(),
+		SizeCommonAttributes: sizeCommonAttributes,
 	}, nil
 }

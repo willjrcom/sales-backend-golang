@@ -12,7 +12,7 @@ var (
 )
 
 type RegisterCategoryInput struct {
-	Name string `json:"name"`
+	productentity.CategoryCommonAttributes
 }
 
 func (c *RegisterCategoryInput) validate() error {
@@ -28,8 +28,12 @@ func (c *RegisterCategoryInput) ToModel() (*productentity.Category, error) {
 		return nil, err
 	}
 
+	categoryCommonAttributes := productentity.CategoryCommonAttributes{
+		Name: c.Name,
+	}
+
 	return &productentity.Category{
-		Entity: entity.NewEntity(),
-		Name:   c.Name,
+		Entity:                   entity.NewEntity(),
+		CategoryCommonAttributes: categoryCommonAttributes,
 	}, nil
 }

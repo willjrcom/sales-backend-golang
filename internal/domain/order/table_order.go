@@ -10,9 +10,13 @@ import (
 type TableOrder struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:table_orders"`
-	OrderID       uuid.UUID                `bun:"column:order_id,type:uuid,notnull"`
-	CodTable      string                   `bun:"cod_table,notnull"`
-	QrCode        string                   `bun:"qr_code"`
-	WaiterID      uuid.UUID                `bun:"column:waiter_id,type:uuid,notnull"`
-	Waiter        *employeeentity.Employee `bun:"rel:belongs-to"`
+	TableOrderCommonAttributes
+}
+
+type TableOrderCommonAttributes struct {
+	Name     string                   `bun:"name,notnull" json:"name"`
+	WaiterID uuid.UUID                `bun:"column:waiter_id,type:uuid,notnull" json:"waiter_id"`
+	Waiter   *employeeentity.Employee `bun:"rel:belongs-to" json:"waiter"`
+	OrderID  uuid.UUID                `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
+	TableID  uuid.UUID                `bun:"column:table_id,type:uuid,notnull" json:"table_id"`
 }

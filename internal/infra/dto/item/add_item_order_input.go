@@ -60,14 +60,18 @@ func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *g
 		return
 	}
 
-	item = &itementity.Item{
-		Entity:      entity.NewEntity(),
+	itemCommonAttributes := itementity.ItemCommonAttributes{
 		Name:        product.Name,
 		Price:       product.Price * quantity.Quantity,
 		Description: product.Description,
 		Quantity:    quantity.Quantity,
 		Observation: a.Observation,
 		GroupItemID: *a.GroupItemID,
+	}
+
+	item = &itementity.Item{
+		Entity:               entity.NewEntity(),
+		ItemCommonAttributes: itemCommonAttributes,
 	}
 
 	return

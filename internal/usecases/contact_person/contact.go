@@ -16,23 +16,6 @@ func NewService(c personentity.ContactRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) GetContactsBy(ctx context.Context, dto *contactdto.FilterContact) ([]contactdto.ContactOutput, error) {
-	contact, err := dto.ToModel()
-
-	if err != nil {
-		return nil, err
-	}
-
-	contacts, err := s.r.GetContactsBy(ctx, contact)
-
-	if err != nil {
-		return nil, err
-	}
-
-	dtos := contactsToDtos(contacts)
-	return dtos, nil
-}
-
 func (s *Service) GetContactById(ctx context.Context, dto *entitydto.IdRequest) (*contactdto.ContactOutput, error) {
 	if contact, err := s.r.GetContactById(ctx, dto.ID.String()); err != nil {
 		return nil, err

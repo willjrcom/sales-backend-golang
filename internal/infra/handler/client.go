@@ -29,7 +29,6 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 		c.Patch("/update/{id}", h.handlerUpdateClient)
 		c.Delete("/delete/{id}", h.handlerDeleteClient)
 		c.Get("/{id}", h.handlerGetClient)
-		c.Post("/by", h.handlerGetClientsBy)
 		c.Post("/all", h.handlerGetAllClients)
 	})
 
@@ -105,19 +104,6 @@ func (h *handlerClientImpl) handlerGetClient(w http.ResponseWriter, r *http.Requ
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if client, err := h.s.GetClientById(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: client})
-	}
-}
-
-func (h *handlerClientImpl) handlerGetClientsBy(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	filter := &clientdto.FilterClientInput{}
-	jsonpkg.ParseBody(r, filter)
-
-	if client, err := h.s.GetClientsBy(ctx, filter); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: client})

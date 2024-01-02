@@ -16,31 +16,23 @@ var (
 )
 
 type RegisterAddressInput struct {
-	Street       string `json:"street"`
-	Number       string `json:"number"`
-	Complement   string `json:"complement"`
-	Reference    string `json:"reference"`
-	Neighborhood string `json:"neighborhood"`
-	City         string `json:"city"`
-	State        string `json:"state"`
-	Cep          string `json:"cep"`
-	IsDefault    bool   `json:"is_default"`
+	addressentity.PatchAddress
 }
 
 func (a *RegisterAddressInput) validate() error {
-	if a.Street == "" {
+	if a.Street == nil {
 		return ErrStreetRequired
 	}
-	if a.Number == "" {
+	if a.Number == nil {
 		return ErrNumberRequired
 	}
-	if a.Neighborhood == "" {
+	if a.Neighborhood == nil {
 		return ErrNeighborhoodRequired
 	}
-	if a.City == "" {
+	if a.City == nil {
 		return ErrCityRequired
 	}
-	if a.State == "" {
+	if a.State == nil {
 		return ErrStateRequired
 	}
 	return nil
@@ -51,15 +43,19 @@ func (a *RegisterAddressInput) ToModel() (*addressentity.Address, error) {
 		return nil, err
 	}
 
+	addressCommonAttributes := addressentity.AddressCommonAttributes{
+		Street:       *a.Street,
+		Number:       *a.Number,
+		Complement:   *a.Complement,
+		Reference:    *a.Reference,
+		Neighborhood: *a.Neighborhood,
+		City:         *a.City,
+		State:        *a.State,
+		Cep:          *a.Cep,
+	}
+
 	return &addressentity.Address{
-		Entity:       entity.NewEntity(),
-		Street:       a.Street,
-		Number:       a.Number,
-		Complement:   a.Complement,
-		Reference:    a.Reference,
-		Neighborhood: a.Neighborhood,
-		City:         a.City,
-		State:        a.State,
-		Cep:          a.Cep,
+		Entity:                  entity.NewEntity(),
+		AddressCommonAttributes: addressCommonAttributes,
 	}, nil
 }

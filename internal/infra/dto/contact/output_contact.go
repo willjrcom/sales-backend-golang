@@ -6,15 +6,11 @@ import (
 )
 
 type ContactOutput struct {
-	ID       uuid.UUID `json:"id"`
-	PersonID uuid.UUID `json:"person_id,omitempty"`
-	Ddd      string    `json:"ddd"`
-	Number   string    `json:"number"`
+	ID uuid.UUID `json:"id"`
+	personentity.ContactCommonAttributes
 }
 
 func (c *ContactOutput) FromModel(model *personentity.Contact) {
 	c.ID = model.ID
-	c.Ddd = model.Ddd
-	c.Number = model.Number
-	c.PersonID = model.PersonID
+	c.ContactCommonAttributes = model.ContactCommonAttributes
 }

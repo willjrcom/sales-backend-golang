@@ -28,7 +28,7 @@ func NewHandlerOrder(orderService *orderusecases.Service) *handler.Handler {
 		c.Get("/{id}", h.handlerGetOrderById)
 		c.Get("/all", h.handlerGetAllOrders)
 		c.Put("/update/{id}/observation", h.handlerUpdateObservation)
-		c.Put("/update/{id}/payment", h.handlerUpdatePayment)
+		c.Put("/update/{id}/payment", h.handlerUpdatePaymentMethod)
 	})
 
 	return handler.NewHandler("/order", c)
@@ -93,7 +93,7 @@ func (h *handlerOrderImpl) handlerUpdateObservation(w http.ResponseWriter, r *ht
 	}
 }
 
-func (h *handlerOrderImpl) handlerUpdatePayment(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderImpl) handlerUpdatePaymentMethod(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -107,7 +107,7 @@ func (h *handlerOrderImpl) handlerUpdatePayment(w http.ResponseWriter, r *http.R
 	payment := &orderdto.UpdatePaymentMethod{}
 	jsonpkg.ParseBody(r, payment)
 
-	if err := h.s.UpdateOrderPayment(ctx, dtoId, payment); err != nil {
+	if err := h.s.UpdatePaymentMethod(ctx, dtoId, payment); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)

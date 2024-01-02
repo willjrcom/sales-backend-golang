@@ -68,26 +68,6 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (*orde
 	return order, nil
 }
 
-func (r *OrderRepositoryBun) GetOrderBy(ctx context.Context, order *orderentity.Order) ([]orderentity.Order, error) {
-	orders := []orderentity.Order{}
-
-	r.mu.Lock()
-	query := r.db.NewSelect().Model(&orderentity.Order{})
-
-	if order.Status != "" {
-		query.Where("order.status = ?", order.Status)
-	}
-
-	err := query.Relation("Delivery").Relation("Table").Relation("Groups.Items").Relation("Attendant").Scan(ctx, &orders)
-	r.mu.Unlock()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return orders, nil
-}
-
 func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]orderentity.Order, error) {
 	orders := []orderentity.Order{}
 	r.mu.Lock()

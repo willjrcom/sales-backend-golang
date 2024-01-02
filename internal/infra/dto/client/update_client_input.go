@@ -3,9 +3,9 @@ package clientdto
 import (
 	"errors"
 	"strings"
-	"time"
 
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
+	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 )
 
 var (
@@ -13,10 +13,7 @@ var (
 )
 
 type UpdateClientInput struct {
-	Name     *string    `json:"name"`
-	Email    *string    `json:"email"`
-	Cpf      *string    `json:"cpf"`
-	Birthday *time.Time `json:"birthday"`
+	personentity.PatchPerson
 }
 
 func (r *UpdateClientInput) Validate() error {

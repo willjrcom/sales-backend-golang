@@ -63,10 +63,6 @@ func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*or
 	return nil, errors.New("order not found")
 }
 
-func (r *OrderRepositoryLocal) GetOrderBy(ctx context.Context, o *orderentity.Order) ([]orderentity.Order, error) {
-	return nil, nil
-}
-
 func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context) ([]orderentity.Order, error) {
 	orders := make([]orderentity.Order, 0)
 

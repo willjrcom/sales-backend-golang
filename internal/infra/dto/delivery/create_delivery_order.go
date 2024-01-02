@@ -1,4 +1,4 @@
-package orderdto
+package deliveryorderdto
 
 import (
 	"errors"
@@ -41,11 +41,13 @@ func (o *CreateDeliveryOrderInput) ToModel() (*orderentity.DeliveryOrder, error)
 		return nil, err
 	}
 
+	orderCommonAttributes := orderentity.DeliveryOrderCommonAttributes{
+		OrderID:   o.OrderID,
+		ClientID:  o.ClientID,
+		AddressID: o.AddressID,
+	}
 	return &orderentity.DeliveryOrder{
-		Entity:      entity.NewEntity(),
-		OrderID:     o.OrderID,
-		ClientID:    o.ClientID,
-		AddressID:   o.AddressID,
-		IsCompleted: false,
+		Entity:                        entity.NewEntity(),
+		DeliveryOrderCommonAttributes: orderCommonAttributes,
 	}, nil
 }

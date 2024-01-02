@@ -80,7 +80,7 @@ func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IdRequest) err
 	return nil
 }
 
-func (s *Service) UpdateOrderPayment(ctx context.Context, dto *entitydto.IdRequest, dtoPayment *orderdto.UpdatePaymentMethod) error {
+func (s *Service) UpdatePaymentMethod(ctx context.Context, dto *entitydto.IdRequest, dtoPayment *orderdto.UpdatePaymentMethod) error {
 	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {

@@ -29,10 +29,6 @@ func (r *ClientRepositoryLocal) GetClientById(ctx context.Context, id string) (*
 	return nil, nil
 }
 
-func (r *ClientRepositoryLocal) GetClientsBy(ctx context.Context, c *cliententity.Client) ([]cliententity.Client, error) {
-	return nil, nil
-}
-
 func (r *ClientRepositoryLocal) GetAllClient(ctx context.Context) ([]cliententity.Client, error) {
 	return nil, nil
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
@@ -66,35 +65,6 @@ func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*
 	}
 
 	return product, nil
-}
-
-func (r *ProductRepositoryBun) GetProductsBy(ctx context.Context, p *productentity.Product) ([]productentity.Product, error) {
-	products := []productentity.Product{}
-
-	r.mu.Lock()
-	query := r.db.NewSelect().Model(&productentity.Product{})
-
-	if p.Code != "" {
-		query.Where("product.code = ?", p.Code)
-	}
-	if p.Name != "" {
-		query.Where("product.name = ?", p.Name)
-	}
-	if p.CategoryID != uuid.Nil {
-		query.Where("category_id = ?", p.CategoryID)
-	}
-	if p.SizeID != uuid.Nil {
-		query.Where("size_id = ?", p.SizeID)
-	}
-
-	err := query.Relation("Category").Relation("Size").Scan(ctx, &products)
-	r.mu.Unlock()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return products, nil
 }
 
 func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context) ([]productentity.Product, error) {

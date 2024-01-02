@@ -1,4 +1,4 @@
-package orderdto
+package deliveryorderdto
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ var (
 )
 
 type UpdateDriverOrder struct {
-	DriverID *uuid.UUID `json:"address_id"`
+	DriverID *uuid.UUID `json:"driver_id"`
 }
 
 func (u *UpdateDriverOrder) Validate() error {
@@ -27,7 +27,7 @@ func (u *UpdateDriverOrder) UpdateModel(model *orderentity.DeliveryOrder) error 
 		return err
 	}
 
-	model.DriverID = u.DriverID
+	model.DriverID = *u.DriverID
 
 	return nil
 }

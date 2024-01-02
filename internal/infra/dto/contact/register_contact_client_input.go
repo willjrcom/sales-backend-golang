@@ -41,11 +41,15 @@ func (c *RegisterContactClientInput) ToModel() (*personentity.Contact, error) {
 		return nil, err
 	}
 
-	return &personentity.Contact{
-		Entity:   entity.NewEntity(),
+	contactCommonAttributes := personentity.ContactCommonAttributes{
+		PersonID: c.PersonID,
 		Ddd:      ddd,
 		Number:   number,
-		PersonID: c.PersonID,
-		Type:     "client",
+		Type:     personentity.ContactTypeClient,
+	}
+
+	return &personentity.Contact{
+		Entity:                  entity.NewEntity(),
+		ContactCommonAttributes: contactCommonAttributes,
 	}, nil
 }

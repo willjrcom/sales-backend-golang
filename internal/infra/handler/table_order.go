@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
+	tableorderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/table_order"
 	tableorderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table_order"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -34,7 +34,7 @@ func NewHandlerTableOrder(orderService *tableorderusecases.Service) *handler.Han
 
 func (h *handlerTableOrderImpl) handlerRegisterTableOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	table := &orderdto.CreateTableOrderInput{}
+	table := &tableorderdto.CreateTableOrderInput{}
 	jsonpkg.ParseBody(r, table)
 
 	if id, err := h.s.CreateTableOrder(ctx, table); err != nil {

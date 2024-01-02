@@ -9,8 +9,17 @@ import (
 type Size struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:sizes"`
-	Name          string    `bun:"name"`
-	Active        bool      `bun:"active"`
-	CategoryID    uuid.UUID `bun:"column:category_id,type:uuid,notnull"`
-	Products      []Product `bun:"rel:has-many,join:id=size_id"`
+	SizeCommonAttributes
+}
+
+type SizeCommonAttributes struct {
+	Name       string    `bun:"name" json:"name"`
+	Active     *bool     `bun:"active" json:"active"`
+	CategoryID uuid.UUID `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
+	Products   []Product `bun:"rel:has-many,join:id=size_id" json:"products"`
+}
+
+type PatchSize struct {
+	Name   *string `json:"name"`
+	Active *bool   `json:"active"`
 }

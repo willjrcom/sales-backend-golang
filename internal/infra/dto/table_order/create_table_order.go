@@ -1,4 +1,4 @@
-package orderdto
+package tableorderdto
 
 import (
 	"errors"
@@ -9,15 +9,13 @@ import (
 )
 
 var (
-	ErrCodTableRequired = errors.New("num_table is required")
+	ErrOrderIDRequired  = errors.New("order id is required")
 	ErrWaiterIDRequired = errors.New("waiter_id is required")
+	ErrTableIDRequired  = errors.New("table_id is required")
 )
 
 type CreateTableOrderInput struct {
-	OrderID  uuid.UUID `json:"order_id"`
-	CodTable string    `json:"cod_table"`
-	QrCode   *string   `json:"qr_code"`
-	WaiterID uuid.UUID `json:"waiter_id"`
+	orderentity.TableOrderCommonAttributes
 }
 
 func (o *CreateTableOrderInput) Validate() error {
@@ -25,13 +23,14 @@ func (o *CreateTableOrderInput) Validate() error {
 		return ErrOrderIDRequired
 	}
 
-	if o.CodTable == "" {
-		return ErrCodTableRequired
-	}
-
 	if o.WaiterID == uuid.Nil {
 		return ErrWaiterIDRequired
 	}
+
+	if o.TableID == uuid.Nil {
+		return ErrTableIDRequired
+	}
+
 	return nil
 }
 
@@ -40,15 +39,15 @@ func (o *CreateTableOrderInput) ToModel() (*orderentity.TableOrder, error) {
 		return nil, err
 	}
 
-	table := &orderentity.TableOrder{
-		Entity:   entity.NewEntity(),
+	tableCommonAttributes := orderentity.TableOrderCommonAttributes{
 		OrderID:  o.OrderID,
-		CodTable: o.CodTable,
 		WaiterID: o.WaiterID,
+		TableID:  o.TableID,
 	}
 
-	if o.QrCode != nil {
-		table.QrCode = *o.QrCode
+	table := &orderentity.TableOrder{
+		Entity:                     entity.NewEntity(),
+		TableOrderCommonAttributes: tableCommonAttributes,
 	}
 
 	return table, nil

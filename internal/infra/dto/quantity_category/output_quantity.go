@@ -6,11 +6,11 @@ import (
 )
 
 type QuantityOutput struct {
-	ID       uuid.UUID `json:"id"`
-	Quantity float64   `json:"quantity"`
+	ID uuid.UUID `json:"id"`
+	productentity.QuantityCommonAttributes
 }
 
 func (s *QuantityOutput) FromModel(model *productentity.Quantity) {
 	s.ID = model.ID
-	s.Quantity = model.Quantity
+	s.QuantityCommonAttributes = model.QuantityCommonAttributes
 }

@@ -28,7 +28,6 @@ func NewHandlerProduct(productService *productusecases.Service) *handler.Handler
 		c.Patch("/update/{id}", h.handlerUpdateProduct)
 		c.Delete("/delete/{id}", h.handlerDeleteProduct)
 		c.Get("/{id}", h.handlerGetProduct)
-		c.Post("/by", h.handlerGetProductBy)
 		c.Post("/all", h.handlerGetAllProducts)
 	})
 
@@ -101,20 +100,6 @@ func (h *handlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Re
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if product, err := h.s.GetProductById(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-		return
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: product})
-	}
-}
-
-func (h *handlerProductImpl) handlerGetProductBy(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	filter := &productdto.FilterProductInput{}
-	jsonpkg.ParseBody(r, filter)
-
-	if product, err := h.s.GetProductBy(ctx, filter); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	} else {

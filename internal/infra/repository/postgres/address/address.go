@@ -67,29 +67,6 @@ func (r *AddressRepositoryBun) GetAddressById(ctx context.Context, id string) (*
 	return aAddress, nil
 }
 
-func (r *AddressRepositoryBun) GetAddressBy(ctx context.Context, c *addressentity.Address) ([]addressentity.Address, error) {
-	addresss := []addressentity.Address{}
-
-	r.mu.Lock()
-	query := r.db.NewSelect().Model(&addressentity.Address{})
-
-	if c.Street != "" {
-		query.Where("street = ?", c.Street)
-	}
-	if c.City != "" {
-		query.Where("city ?", c.City)
-	}
-
-	err := query.Scan(ctx, &addresss)
-	r.mu.Unlock()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return addresss, nil
-}
-
 func (r *AddressRepositoryBun) GetAllAddress(ctx context.Context) ([]addressentity.Address, error) {
 	addresss := []addressentity.Address{}
 	r.mu.Lock()

@@ -1,19 +1,11 @@
 package productdto
 
 import (
-	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
 type UpdateProductInput struct {
-	Code        *string    `json:"code"`
-	Name        *string    `json:"name"`
-	Description *string    `json:"description"`
-	SizeID      *uuid.UUID `json:"size_id"`
-	Price       *float64   `json:"price"`
-	Cost        *float64   `json:"cost"`
-	CategoryID  *uuid.UUID `json:"category_id"`
-	IsAvailable *bool      `json:"is_available"`
+	productentity.PatchProduct
 }
 
 func (p *UpdateProductInput) Validate(product *productentity.Product) error {

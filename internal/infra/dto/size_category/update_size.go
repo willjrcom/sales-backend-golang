@@ -11,14 +11,14 @@ var (
 )
 
 type UpdateSizeInput struct {
-	Name   *string `json:"name"`
-	Active *bool   `json:"active"`
+	productentity.PatchSize
 }
 
 func (s *UpdateSizeInput) validate() error {
 	if s.Name == nil && s.Active == nil {
 		return ErrNameAndActiveIsEmpty
 	}
+
 	return nil
 }
 func (s *UpdateSizeInput) UpdateModel(model *productentity.Size) (err error) {
@@ -30,7 +30,7 @@ func (s *UpdateSizeInput) UpdateModel(model *productentity.Size) (err error) {
 		model.Name = *s.Name
 	}
 	if s.Active != nil {
-		model.Active = *s.Active
+		model.Active = s.Active
 	}
 
 	return nil

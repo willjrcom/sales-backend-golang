@@ -19,6 +19,7 @@ import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
 )
 
 var (
@@ -67,6 +68,7 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 	bun.RegisterModel((*productentity.Quantity)(nil))
 	bun.RegisterModel((*productentity.CategoryToAditionalCategories)(nil))
 	bun.RegisterModel((*productentity.Category)(nil))
+	bun.RegisterModel((*productentity.Process)(nil))
 	bun.RegisterModel((*productentity.Product)(nil))
 
 	bun.RegisterModel((*addressentity.Address)(nil))
@@ -82,12 +84,14 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 	bun.RegisterModel((*orderentity.PaymentOrder)(nil))
 	bun.RegisterModel((*orderentity.Order)(nil))
 
+	bun.RegisterModel((*tableentity.Table)(nil))
+
 	if _, err := bun.NewCreateTable().IfNotExists().Model((*entity.Entity)(nil)).Exec(ctx); err != nil {
 		panic("Couldn't create table for entity")
 	}
 
 	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Size)(nil)).Exec(ctx); err != nil {
-		panic("Couldn't create table for size product")
+		panic("Couldn't create table for size category")
 	}
 
 	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.CategoryToAditionalCategories)(nil)).Exec(ctx); err != nil {
@@ -99,7 +103,11 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 	}
 
 	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Quantity)(nil)).Exec(ctx); err != nil {
-		panic("Couldn't create table for quantity product")
+		panic("Couldn't create table for quantity category")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Process)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for process category")
 	}
 
 	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Product)(nil)).Exec(ctx); err != nil {
@@ -148,5 +156,9 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 
 	if _, err := bun.NewCreateTable().IfNotExists().Model((*orderentity.Order)(nil)).Exec(ctx); err != nil {
 		panic("Couldn't create table for order")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*tableentity.Table)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for table")
 	}
 }

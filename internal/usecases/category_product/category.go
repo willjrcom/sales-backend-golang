@@ -68,26 +68,17 @@ func (s *Service) DeleteCategoryById(ctx context.Context, dto *entitydto.IdReque
 	return nil
 }
 
-func (s *Service) GetCategoryById(ctx context.Context, dto *entitydto.IdRequest) (*categorydto.CategorySizesOutput, error) {
+func (s *Service) GetCategoryById(ctx context.Context, dto *entitydto.IdRequest) (*categorydto.CategoryOutput, error) {
 	if categoryProduct, err := s.r.GetCategoryById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		dto := &categorydto.CategorySizesOutput{}
+		dto := &categorydto.CategoryOutput{}
 		dto.FromModel(categoryProduct)
 		return dto, nil
 	}
 }
 
-func (s *Service) GetAllCategoryProducts(ctx context.Context) ([]categorydto.CategoryProductsOutput, error) {
-	if categories, err := s.r.GetAllCategoryProducts(ctx); err != nil {
-		return nil, err
-	} else {
-		dtos := categoryProductsToDtos(categories)
-		return dtos, nil
-	}
-}
-
-func (s *Service) GetAllCategorySizes(ctx context.Context) ([]categorydto.CategorySizesOutput, error) {
+func (s *Service) GetAllCategories(ctx context.Context) ([]categorydto.CategoryOutput, error) {
 	if categories, err := s.r.GetAllCategorySizes(ctx); err != nil {
 		return nil, err
 	} else {
@@ -96,23 +87,11 @@ func (s *Service) GetAllCategorySizes(ctx context.Context) ([]categorydto.Catego
 	}
 }
 
-func categoryProductsToDtos(categories []productentity.Category) []categorydto.CategoryProductsOutput {
-	dtoOutput := []categorydto.CategoryProductsOutput{}
+func categorySizesToDtos(categories []productentity.Category) []categorydto.CategoryOutput {
+	dtoOutput := []categorydto.CategoryOutput{}
 
 	for _, category := range categories {
-		c := &categorydto.CategoryProductsOutput{}
-		c.FromModel(&category)
-		dtoOutput = append(dtoOutput, *c)
-	}
-
-	return dtoOutput
-}
-
-func categorySizesToDtos(categories []productentity.Category) []categorydto.CategorySizesOutput {
-	dtoOutput := []categorydto.CategorySizesOutput{}
-
-	for _, category := range categories {
-		c := &categorydto.CategorySizesOutput{}
+		c := &categorydto.CategoryOutput{}
 		c.FromModel(&category)
 		dtoOutput = append(dtoOutput, *c)
 	}

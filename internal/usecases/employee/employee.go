@@ -30,10 +30,6 @@ func (s *Service) GetEmployeeById(ctx context.Context, id string) (*employeeenti
 	return s.r.GetEmployeeById(ctx, id)
 }
 
-func (s *Service) GetEmployeeBy(ctx context.Context, p *employeeentity.Employee) ([]employeeentity.Employee, error) {
-	return s.r.GetEmployeeBy(ctx, nil)
-}
-
 func (s *Service) GetAllEmployee(ctx context.Context) ([]employeeentity.Employee, error) {
 	return s.r.GetAllEmployee(ctx)
 }

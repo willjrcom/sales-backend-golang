@@ -1,4 +1,4 @@
-package orderdto
+package deliveryorderdto
 
 import (
 	"errors"
@@ -10,7 +10,6 @@ import (
 
 var (
 	ErrInvalidAddressID   = errors.New("address id required")
-	ErrDeliveryNotFound   = errors.New("delivery not found")
 	ErrAddressNotInClient = errors.New("address not in client")
 )
 

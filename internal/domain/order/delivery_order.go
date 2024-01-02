@@ -14,28 +14,32 @@ import (
 type DeliveryOrder struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:delivery_orders"`
-	OrderID       uuid.UUID                `bun:"column:order_id,type:uuid,notnull"`
-	Pickup        *time.Time               `bun:"pickup"`
-	Delivered     *time.Time               `bun:"delivered"`
-	IsCompleted   bool                     `bun:"is_completed"`
-	DeliveryTax   *float64                 `bun:"delivery_tax"`
-	Status        StatusDeliveryOrder      `bun:"status"`
-	ClientID      uuid.UUID                `bun:"column:client_id,type:uuid,notnull"`
-	Client        *cliententity.Client     `bun:"rel:belongs-to"`
-	AddressID     uuid.UUID                `bun:"column:address_id,type:uuid,notnull"`
-	Address       *addressentity.Address   `bun:"rel:belongs-to"`
-	DriverID      *uuid.UUID               `bun:"column:driver_id,type:uuid"`
-	Driver        *employeeentity.Employee `bun:"rel:belongs-to"`
+	DeliveryTimeLogs
+	DeliveryOrderCommonAttributes
 }
 
-type ModelBase struct {
+type DeliveryOrderCommonAttributes struct {
+	Status      StatusDeliveryOrder      `bun:"status" json:"status"`
+	DeliveryTax *float64                 `bun:"delivery_tax" json:"delivery_tax"`
+	ClientID    uuid.UUID                `bun:"column:client_id,type:uuid,notnull" json:"client_id"`
+	Client      *cliententity.Client     `bun:"rel:belongs-to" json:"client"`
+	AddressID   uuid.UUID                `bun:"column:address_id,type:uuid,notnull" json:"address_id"`
+	Address     *addressentity.Address   `bun:"rel:belongs-to" json:"address"`
+	DriverID    uuid.UUID                `bun:"column:driver_id,type:uuid" json:"driver_id"`
+	Driver      *employeeentity.Employee `bun:"rel:belongs-to" json:"driver"`
+	OrderID     uuid.UUID                `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
 }
 
-func (d *DeliveryOrder) LaunchDelivery(driver *employeeentity.Employee) {
-	*d.Driver = *driver
-	*d.Pickup = time.Now()
+type DeliveryTimeLogs struct {
+	LaunchedAt  *time.Time `bun:"launched_at" json:"launched_at"`
+	DeliveredAt *time.Time `bun:"delivered_at" json:"delivered_at"`
+}
+
+func (d *DeliveryOrder) LaunchDelivery(driverID uuid.UUID) {
+	d.DriverID = driverID
+	*d.LaunchedAt = time.Now()
 }
 
 func (d *DeliveryOrder) FinishDelivery() {
-	*d.Delivered = time.Now()
+	*d.DeliveredAt = time.Now()
 }

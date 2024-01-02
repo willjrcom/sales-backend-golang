@@ -7,7 +7,7 @@ import (
 var ()
 
 type UpdateCategoryInput struct {
-	Name *string `json:"name"`
+	productentity.PatchCategory
 }
 
 func (c *UpdateCategoryInput) validate() error {

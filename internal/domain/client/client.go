@@ -8,5 +8,4 @@ import (
 type Client struct {
 	bun.BaseModel `bun:"table:clients"`
 	personentity.Person
-	TotalOrders int `bun:"total_orders"`
 }

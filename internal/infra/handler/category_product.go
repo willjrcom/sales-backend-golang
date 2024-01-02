@@ -28,8 +28,7 @@ func NewHandlerCategoryProduct(categoryService *categoryproductusecases.Service)
 		c.Patch("/update/{id}", h.handlerUpdateCategoryProduct)
 		c.Delete("/delete/{id}", h.handlerDeleteCategoryProduct)
 		c.Get("/{id}", h.handlerGetCategoryProduct)
-		c.Get("/allproducts", h.handlerGetAllCategoryProducts)
-		c.Get("/allsizes", h.handlerGetAllCategorySizes)
+		c.Get("/all", h.handlerGetAllCategories)
 	})
 
 	return handler.NewHandler("/category-product", c)
@@ -116,21 +115,9 @@ func (h *handlerCategoryProductImpl) handlerGetCategoryProduct(w http.ResponseWr
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: category})
 }
 
-func (h *handlerCategoryProductImpl) handlerGetAllCategoryProducts(w http.ResponseWriter, r *http.Request) {
+func (h *handlerCategoryProductImpl) handlerGetAllCategories(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	categories, err := h.s.GetAllCategoryProducts(ctx)
-
-	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
-}
-
-func (h *handlerCategoryProductImpl) handlerGetAllCategorySizes(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	categories, err := h.s.GetAllCategorySizes(ctx)
+	categories, err := h.s.GetAllCategories(ctx)
 
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})

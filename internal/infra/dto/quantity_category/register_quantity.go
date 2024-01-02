@@ -14,8 +14,7 @@ var (
 )
 
 type RegisterQuantityInput struct {
-	Quantity   float64   `json:"quantity"`
-	CategoryID uuid.UUID `json:"category_id"`
+	productentity.QuantityCommonAttributes
 }
 
 func (s *RegisterQuantityInput) validate() error {
@@ -34,9 +33,13 @@ func (s *RegisterQuantityInput) ToModel() (*productentity.Quantity, error) {
 		return nil, err
 	}
 
-	return &productentity.Quantity{
-		Entity:     entity.NewEntity(),
+	quantityCommonAttributes := productentity.QuantityCommonAttributes{
 		Quantity:   s.Quantity,
 		CategoryID: s.CategoryID,
+	}
+
+	return &productentity.Quantity{
+		Entity:                   entity.NewEntity(),
+		QuantityCommonAttributes: quantityCommonAttributes,
 	}, nil
 }

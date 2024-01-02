@@ -9,6 +9,14 @@ import (
 type Quantity struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:quantities"`
-	Quantity      float64   `bun:"quantity,notnull"`
-	CategoryID    uuid.UUID `bun:"column:category_id,type:uuid,notnull"`
+	QuantityCommonAttributes
+}
+
+type QuantityCommonAttributes struct {
+	Quantity   float64   `bun:"quantity,notnull" json:"quantity"`
+	CategoryID uuid.UUID `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
+}
+
+type PatchQuantity struct {
+	Quantity *float64 `json:"quantity"`
 }

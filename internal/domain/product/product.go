@@ -16,16 +16,31 @@ var (
 type Product struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:products"`
-	Code          string    `bun:"code"`
-	Name          string    `bun:"name,notnull"`
-	Description   string    `bun:"description"`
-	Price         float64   `bun:"price,notnull"`
-	Cost          float64   `bun:"cost"`
-	IsAvailable   bool      `bun:"is_available"`
-	CategoryID    uuid.UUID `bun:"column:category_id,type:uuid,notnull"`
-	Category      *Category `bun:"rel:belongs-to"`
-	SizeID        uuid.UUID `bun:"column:size_id,type:uuid,notnull"`
-	Size          *Size     `bun:"rel:belongs-to"`
+	ProductCommonAttributes
+}
+
+type ProductCommonAttributes struct {
+	Code        string    `bun:"code" json:"code"`
+	Name        string    `bun:"name,notnull" json:"name"`
+	Description string    `bun:"description" json:"description"`
+	Price       float64   `bun:"price,notnull" json:"price"`
+	Cost        float64   `bun:"cost" json:"cost"`
+	IsAvailable bool      `bun:"is_available" json:"is_available"`
+	CategoryID  uuid.UUID `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
+	Category    *Category `bun:"rel:belongs-to" json:"category,omitempty"`
+	SizeID      uuid.UUID `bun:"column:size_id,type:uuid,notnull" json:"size_id"`
+	Size        *Size     `bun:"rel:belongs-to" json:"size,omitempty"`
+}
+
+type PatchProduct struct {
+	Code        *string    `json:"code"`
+	Name        *string    `json:"name"`
+	Description *string    `json:"description"`
+	Price       *float64   `json:"price"`
+	Cost        *float64   `json:"cost"`
+	IsAvailable *bool      `json:"is_available"`
+	CategoryID  *uuid.UUID `json:"category_id"`
+	SizeID      *uuid.UUID `json:"size_id"`
 }
 
 func (p *Product) FindSizeInCategory() (bool, error) {

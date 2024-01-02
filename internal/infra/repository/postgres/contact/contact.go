@@ -3,7 +3,6 @@ package contactrepositorybun
 import (
 	"sync"
 
-	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	"golang.org/x/net/context"
@@ -66,32 +65,6 @@ func (r *ContactRepositoryBun) GetContactById(ctx context.Context, id string) (*
 	}
 
 	return contact, nil
-}
-
-func (r *ContactRepositoryBun) GetContactsBy(ctx context.Context, c *personentity.Contact) ([]personentity.Contact, error) {
-	contacts := []personentity.Contact{}
-
-	r.mu.Lock()
-	query := r.db.NewSelect().Model(&personentity.Contact{})
-
-	if c.PersonID != uuid.Nil {
-		query.Where("person_id = ?", c.PersonID)
-	}
-	if c.Ddd != "" {
-		query.Where("ddd = ?", c.Ddd)
-	}
-	if c.Number != "" {
-		query.Where("number LIKE ?", "%"+c.Number+"%")
-	}
-
-	err := query.Scan(ctx, &contacts)
-	r.mu.Unlock()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return contacts, nil
 }
 
 func (r *ContactRepositoryBun) GetAllContacts(ctx context.Context) ([]personentity.Contact, error) {

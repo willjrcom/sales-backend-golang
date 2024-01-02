@@ -12,9 +12,5 @@ type ProcessOutput struct {
 
 func (s *ProcessOutput) FromModel(model *productentity.Process) {
 	s.ID = model.ID
-	s.Name = model.Name
-	s.Order = model.Order
-	s.IdealTime = model.IdealTime
-	s.ExperimentalError = model.ExperimentalError
-	s.CategoryID = model.CategoryID
+	s.ProcessCommonAttributes = model.ProcessCommonAttributes
 }

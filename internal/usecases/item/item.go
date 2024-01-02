@@ -106,14 +106,18 @@ func (s *Service) AddAditionalItemOrder(ctx context.Context, dto *entitydto.IdRe
 }
 
 func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product) (groupItem *groupitementity.GroupItem, err error) {
-	groupItem = &groupitementity.GroupItem{
-		Entity:  entity.NewEntity(),
+	groupCommonAttributes := groupitementity.GroupCommonAttributes{
 		OrderID: orderID,
 		GroupDetails: groupitementity.GroupDetails{
 			CategoryID: product.CategoryID,
 			Status:     groupitementity.StatusGroupStaging,
 			Size:       product.Size.Name,
 		},
+	}
+
+	groupItem = &groupitementity.GroupItem{
+		Entity:                entity.NewEntity(),
+		GroupCommonAttributes: groupCommonAttributes,
 	}
 
 	err = s.rgi.CreateGroupItem(ctx, groupItem)

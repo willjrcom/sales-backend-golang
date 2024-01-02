@@ -67,10 +67,6 @@ func (r *ProductRepositoryBun) GetEmployeeById(ctx context.Context, id string) (
 	return employee, nil
 }
 
-func (r *ProductRepositoryBun) GetEmployeeBy(ctx context.Context, p *employeeentity.Employee) ([]employeeentity.Employee, error) {
-	return nil, nil
-}
-
 func (r *ProductRepositoryBun) GetAllEmployee(ctx context.Context) ([]employeeentity.Employee, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()

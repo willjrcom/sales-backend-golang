@@ -74,23 +74,6 @@ func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IdRequest) (
 	}
 }
 
-func (s *Service) GetClientsBy(ctx context.Context, dto *clientdto.FilterClientInput) ([]clientdto.ClientOutput, error) {
-	client, err := dto.ToModel()
-
-	if err != nil {
-		return nil, err
-	}
-
-	clients, err := s.rclient.GetClientsBy(ctx, client)
-
-	if err != nil {
-		return nil, err
-	}
-
-	dtos := clientsToDtos(clients)
-	return dtos, nil
-}
-
 func (s *Service) GetAllClients(ctx context.Context) ([]clientdto.ClientOutput, error) {
 	if clients, err := s.rclient.GetAllClients(ctx); err != nil {
 		return nil, err

@@ -17,10 +17,28 @@ var (
 type Contact struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:contacts"`
-	PersonID      uuid.UUID `bun:"person_id,type:uuid,notnull"`
-	Ddd           string    `bun:"ddd,notnull"`
-	Number        string    `bun:"number,notnull"`
-	Type          string    `bun:"type,notnull"`
+	ContactCommonAttributes
+}
+
+type ContactCommonAttributes struct {
+	PersonID uuid.UUID   `bun:"person_id,type:uuid,notnull" json:"person_id"`
+	Ddd      string      `bun:"ddd,notnull" json:"ddd"`
+	Number   string      `bun:"number,notnull" json:"number"`
+	Type     ContactType `bun:"type,notnull" json:"type"`
+}
+
+type ContactType string
+
+const (
+	ContactTypeClient   ContactType = "Client"
+	ContactTypeEmployee ContactType = "Employee"
+)
+
+func GetAllOrderStatus() []ContactType {
+	return []ContactType{
+		ContactTypeClient,
+		ContactTypeEmployee,
+	}
 }
 
 func ValidateAndExtractContact(text string) (ddd string, number string, err error) {

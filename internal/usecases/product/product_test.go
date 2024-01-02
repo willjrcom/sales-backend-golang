@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	categorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/category"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
@@ -44,23 +45,25 @@ func TestMain(m *testing.M) {
 }
 
 func TestRegisterProduct(t *testing.T) {
-	dtoCategory := &categorydto.RegisterCategoryInput{Name: "pizza"}
+	dtoCategory := &categorydto.RegisterCategoryInput{CategoryCommonAttributes: productentity.CategoryCommonAttributes{Name: "pizza"}}
 	categoryId, err := categoryProductService.RegisterCategory(ctx, dtoCategory)
 	assert.Nil(t, err)
 	assert.NotNil(t, categoryId)
 
-	dtoSize := &sizedto.RegisterSizeInput{Name: "P"}
+	dtoSize := &sizedto.RegisterSizeInput{SizeCommonAttributes: productentity.SizeCommonAttributes{Name: "P"}}
 	sizeId, err := sizeService.RegisterSize(ctx, dtoSize)
 	assert.Nil(t, err)
 	assert.NotNil(t, sizeId)
 
 	dto := &productdto.RegisterProductInput{
-		Code:       "123",
-		Name:       "Test Product",
-		Cost:       100,
-		Price:      100,
-		CategoryID: categoryId,
-		SizeID:     sizeId,
+		ProductCommonAttributes: productentity.ProductCommonAttributes{
+			Code:       "123",
+			Name:       "Test Product",
+			Cost:       100,
+			Price:      100,
+			CategoryID: categoryId,
+			SizeID:     sizeId,
+		},
 	}
 
 	productId, err := productService.RegisterProduct(ctx, dto)
@@ -78,10 +81,12 @@ func TestRegisterProduct(t *testing.T) {
 func TestRegisterProductError(t *testing.T) {
 	// Teste 1 - No Code
 	dto := &productdto.RegisterProductInput{
-		Name:       "Test Product",
-		Cost:       90,
-		Price:      100,
-		CategoryID: uuid.New(),
+		ProductCommonAttributes: productentity.ProductCommonAttributes{
+			Name:       "Test Product",
+			Cost:       90,
+			Price:      100,
+			CategoryID: uuid.New(),
+		},
 	}
 
 	_, err := productService.RegisterProduct(ctx, dto)
@@ -90,10 +95,12 @@ func TestRegisterProductError(t *testing.T) {
 
 	// Test 2 - No Name
 	dto = &productdto.RegisterProductInput{
-		Code:       "CODE",
-		Cost:       90,
-		Price:      100,
-		CategoryID: uuid.New(),
+		ProductCommonAttributes: productentity.ProductCommonAttributes{
+			Code:       "CODE",
+			Cost:       90,
+			Price:      100,
+			CategoryID: uuid.New(),
+		},
 	}
 
 	_, err = productService.RegisterProduct(ctx, dto)
@@ -102,11 +109,13 @@ func TestRegisterProductError(t *testing.T) {
 
 	// Test 3 - Price greater than cost
 	dto = &productdto.RegisterProductInput{
-		Code:       "CODE",
-		Name:       "Test Product",
-		Cost:       150,
-		Price:      100,
-		CategoryID: uuid.New(),
+		ProductCommonAttributes: productentity.ProductCommonAttributes{
+			Code:       "CODE",
+			Name:       "Test Product",
+			Cost:       150,
+			Price:      100,
+			CategoryID: uuid.New(),
+		},
 	}
 
 	_, err = productService.RegisterProduct(ctx, dto)
@@ -115,10 +124,12 @@ func TestRegisterProductError(t *testing.T) {
 
 	// Test 4 - No category
 	dto = &productdto.RegisterProductInput{
-		Code:  "CODE",
-		Name:  "Test Product",
-		Cost:  90,
-		Price: 100,
+		ProductCommonAttributes: productentity.ProductCommonAttributes{
+			Code:  "CODE",
+			Name:  "Test Product",
+			Cost:  90,
+			Price: 100,
+		},
 	}
 
 	_, err = productService.RegisterProduct(ctx, dto)

@@ -9,7 +9,6 @@ type ProductRepository interface {
 	UpdateProduct(ctx context.Context, p *Product) error
 	DeleteProduct(ctx context.Context, id string) error
 	GetProductById(ctx context.Context, id string) (*Product, error)
-	GetProductsBy(ctx context.Context, p *Product) ([]Product, error)
 	GetAllProducts(ctx context.Context) ([]Product, error)
 }
 

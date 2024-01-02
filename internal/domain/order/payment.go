@@ -1,10 +1,16 @@
 package orderentity
 
+import "time"
+
 type PaymentOrder struct {
-	IsPaid    bool       `bun:"is_paid"`
-	TotalPaid *float64   `bun:"total_paid"`
-	Change    *float64   `bun:"change"`
-	Method    *PayMethod `bun:"method,notnull"`
+	PaymentTimeLogs
+	TotalPaid *float64   `bun:"total_paid" json:"total_paid"`
+	Change    *float64   `bun:"change" json:"change"`
+	Method    *PayMethod `bun:"method,notnull" json:"method"`
+}
+
+type PaymentTimeLogs struct {
+	PaidAt *time.Time `bun:"paid_at" json:"paid_at"`
 }
 
 type PayMethod string

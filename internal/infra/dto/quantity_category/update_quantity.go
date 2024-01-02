@@ -5,11 +5,11 @@ import (
 )
 
 type UpdateQuantityInput struct {
-	Quantity float64 `json:"quantity"`
+	productentity.PatchQuantity
 }
 
 func (s *UpdateQuantityInput) validate() error {
-	if s.Quantity <= 0 {
+	if s.Quantity != nil && *s.Quantity <= 0 {
 		return ErrQuantityRequired
 	}
 
@@ -20,8 +20,8 @@ func (s *UpdateQuantityInput) UpdateModel(model *productentity.Quantity) (err er
 		return err
 	}
 
-	if s.Quantity != 0 {
-		model.Quantity = s.Quantity
+	if *s.Quantity > 0.0 {
+		model.Quantity = *s.Quantity
 	}
 
 	return nil

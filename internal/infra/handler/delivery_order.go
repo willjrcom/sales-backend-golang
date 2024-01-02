@@ -6,8 +6,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
+	deliveryorderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/delivery"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 	deliveryorderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/delivery_order"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -34,7 +34,7 @@ func NewHandlerDeliveryOrder(orderService deliveryorderusecases.IService) *handl
 
 func (h *handlerDeliveryOrderImpl) handlerRegisterDeliveryOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	delivery := &orderdto.CreateDeliveryOrderInput{}
+	delivery := &deliveryorderdto.CreateDeliveryOrderInput{}
 	jsonpkg.ParseBody(r, delivery)
 
 	if id, err := h.IService.CreateDeliveryOrder(ctx, delivery); err != nil {
@@ -83,7 +83,7 @@ func (h *handlerDeliveryOrderImpl) handlerUpdateDeliveryAddress(w http.ResponseW
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	delivery := &orderdto.UpdateDeliveryOrder{}
+	delivery := &deliveryorderdto.UpdateDeliveryOrder{}
 	jsonpkg.ParseBody(r, delivery)
 
 	if err := h.IService.UpdateDeliveryAddress(ctx, dtoId, delivery); err != nil {
@@ -104,10 +104,10 @@ func (h *handlerDeliveryOrderImpl) handlerUpdateDriver(w http.ResponseWriter, r 
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	delivery := &orderdto.UpdateDriverOrder{}
+	delivery := &deliveryorderdto.UpdateDriverOrder{}
 	jsonpkg.ParseBody(r, delivery)
 
-	if err := h.IService.UpdateDriver(ctx, dtoId, delivery); err != nil {
+	if err := h.IService.UpdateDeliveryDriver(ctx, dtoId, delivery); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)

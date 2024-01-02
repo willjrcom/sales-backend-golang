@@ -8,8 +8,8 @@ import (
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	deliveryorderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/delivery"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 )
 
 type IService interface {
@@ -20,7 +20,7 @@ type IService interface {
 }
 
 type ICreateService interface {
-	CreateDeliveryOrder(ctx context.Context, dto *orderdto.CreateDeliveryOrderInput) (uuid.UUID, error)
+	CreateDeliveryOrder(ctx context.Context, dto *deliveryorderdto.CreateDeliveryOrderInput) (uuid.UUID, error)
 }
 
 type IGetService interface {
@@ -32,11 +32,10 @@ type IGetService interface {
 }
 
 type IUpdateService interface {
-	ShipDeliveryOrder(ctx context.Context, dtoId *entitydto.IdRequest, driverId *entitydto.IdRequest) (err error)
-	DeliverDeliveryOrder(ctx context.Context, dtoId *entitydto.IdRequest) (err error)
-	UpdateDeliveryOrder(ctx context.Context, dtoId *entitydto.IdRequest, dto *orderdto.DeliveryOrder) (err error)
-	UpdateDeliveryAddress(ctx context.Context, dtoId *entitydto.IdRequest, dto *orderdto.UpdateDeliveryOrder) (err error)
-	UpdateDriver(ctx context.Context, dto *entitydto.IdRequest, deliveryOrder *orderdto.UpdateDriverOrder) (err error)
+	LaunchDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest, driverID *entitydto.IdRequest) (err error)
+	FinishDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
+	UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.IdRequest, dto *deliveryorderdto.UpdateDeliveryOrder) (err error)
+	UpdateDeliveryDriver(ctx context.Context, dto *entitydto.IdRequest, deliveryOrder *deliveryorderdto.UpdateDriverOrder) (err error)
 }
 
 type IStatusService interface {
@@ -44,13 +43,13 @@ type IStatusService interface {
 }
 
 type Service struct {
-	rdo orderentity.DeliveryRepository
+	rdo orderentity.DeliveryOrderRepository
 	ra  addressentity.Repository
 	rc  cliententity.Repository
 	ro  orderentity.OrderRepository
 	re  employeeentity.Repository
 }
 
-func NewService(rdo orderentity.DeliveryRepository, ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, re employeeentity.Repository) IService {
+func NewService(rdo orderentity.DeliveryOrderRepository, ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, re employeeentity.Repository) IService {
 	return &Service{rdo: rdo, ra: ra, rc: rc, ro: ro, re: re}
 }

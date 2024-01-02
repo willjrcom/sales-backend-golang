@@ -2,12 +2,10 @@ package clientdto
 
 import (
 	"errors"
-	"time"
 
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
-	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
 )
 
 var (
@@ -19,17 +17,11 @@ var (
 )
 
 type RegisterClientInput struct {
-	person    *personentity.Person
-	Name      string                            `json:"name"`
-	Email     *string                           `json:"email"`
-	Cpf       *string                           `json:"cpf"`
-	Birthday  *time.Time                        `json:"birthday"`
-	Contacts  []string                          `json:"contacts"`
-	Addresses []addressdto.RegisterAddressInput `json:"addresses"`
+	personentity.PatchPerson
 }
 
 func (r *RegisterClientInput) Validate() error {
-	if r.Name == "" {
+	if r.Name == nil || *r.Name == "" {
 		return ErrNameRequired
 	}
 	if len(r.Contacts) == 0 {
@@ -56,71 +48,35 @@ func (r *RegisterClientInput) ToModel() (*cliententity.Client, error) {
 		return nil, err
 	}
 
+	personCommonAttributes := personentity.PersonCommonAttributes{
+		Name:      *r.Name,
+		Addresses: r.Addresses,
+	}
+
 	// Create person
-	r.person = &personentity.Person{
-		Entity: entity.NewEntity(),
-		Name:   r.Name,
+	person := &personentity.Person{
+		Entity:                 entity.NewEntity(),
+		PersonCommonAttributes: personCommonAttributes,
 	}
 
 	// Optional fields
 	if r.Email != nil {
-		r.person.Email = *r.Email
+		person.Email = *r.Email
 	}
 	if r.Cpf != nil {
-		r.person.Cpf = *r.Cpf
+		person.Cpf = *r.Cpf
 	}
 	if r.Birthday != nil {
-		r.person.Birthday = r.Birthday
+		person.Birthday = r.Birthday
 	}
 
-	// Contacts
-	if err := r.addContactsToPerson(r.Contacts); err != nil {
-		return nil, err
-	}
-
-	if err := r.addAddressesToPerson(r.Addresses); err != nil {
-		return nil, err
+	for _, contact := range r.Contacts {
+		if err := person.AddContact(contact, personentity.ContactTypeClient); err != nil {
+			return nil, err
+		}
 	}
 
 	return &cliententity.Client{
-		Person:      *r.person,
-		TotalOrders: 0,
+		Person: *person,
 	}, nil
-}
-
-func (r *RegisterClientInput) addContactsToPerson(list []string) error {
-	for _, contact := range list {
-		// Validate contact
-		ddd, number, err := personentity.ValidateAndExtractContact(contact)
-
-		if err != nil {
-			return err
-		}
-
-		// Create first contact
-		contact := &personentity.Contact{
-			Entity:   entity.NewEntity(),
-			Ddd:      ddd,
-			Number:   number,
-			PersonID: r.person.ID,
-		}
-
-		r.person.Contacts = append(r.person.Contacts, *contact)
-	}
-	return nil
-}
-
-func (r *RegisterClientInput) addAddressesToPerson(list []addressdto.RegisterAddressInput) error {
-	for _, dto := range list {
-		address, err := dto.ToModel()
-
-		if err != nil {
-			return err
-		}
-
-		address.PersonID = r.person.ID
-		r.person.Addresses = append(r.person.Addresses, *address)
-	}
-
-	return nil
 }

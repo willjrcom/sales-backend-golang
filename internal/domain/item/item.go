@@ -9,10 +9,14 @@ import (
 type Item struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:items"`
-	GroupItemID   uuid.UUID `bun:"group_item_id,type:uuid,notnull"`
-	Name          string    `bun:"name,notnull"`
-	Description   string    `bun:"description"`
-	Observation   string    `bun:"observation"`
-	Price         float64   `bun:"price,notnull"`
-	Quantity      float64   `bun:"quantity,notnull"`
+	ItemCommonAttributes
+}
+
+type ItemCommonAttributes struct {
+	Name        string    `bun:"name,notnull" json:"name"`
+	Description string    `bun:"description" json:"description"`
+	Observation string    `bun:"observation" json:"observation"`
+	Price       float64   `bun:"price,notnull" json:"price"`
+	Quantity    float64   `bun:"quantity,notnull" json:"quantity"`
+	GroupItemID uuid.UUID `bun:"group_item_id,type:uuid,notnull" json:"group_item_id"`
 }

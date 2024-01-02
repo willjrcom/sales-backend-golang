@@ -87,17 +87,6 @@ func (s *Service) GetProductById(ctx context.Context, dto *entitydto.IdRequest) 
 	}
 }
 
-func (s *Service) GetProductBy(ctx context.Context, filter *productdto.FilterProductInput) ([]productdto.ProductOutput, error) {
-	product := filter.ToModel()
-
-	if products, err := s.rp.GetProductsBy(ctx, product); err != nil {
-		return nil, err
-	} else {
-		dtos := productsToDtos(products)
-		return dtos, nil
-	}
-}
-
 func (s *Service) GetAllProducts(ctx context.Context) ([]productdto.ProductOutput, error) {
 	products, err := s.rp.GetAllProducts(ctx)
 

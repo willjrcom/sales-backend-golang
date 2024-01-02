@@ -2,9 +2,7 @@ package orderdto
 
 import (
 	"errors"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
@@ -30,9 +28,13 @@ func (o *CreateOrderInput) ToModel() (*orderentity.Order, error) {
 		return nil, err
 	}
 
-	return &orderentity.Order{
-		Entity:      entity.Entity{ID: uuid.New(), CreatedAt: time.Now()},
+	orderCommonAttributes := orderentity.OrderCommonAttributes{
 		OrderDetail: orderentity.OrderDetail{Name: o.Name},
 		Status:      orderentity.OrderStatusStaging,
+	}
+
+	return &orderentity.Order{
+		Entity:                entity.NewEntity(),
+		OrderCommonAttributes: orderCommonAttributes,
 	}, nil
 }

@@ -17,14 +17,7 @@ var (
 )
 
 type RegisterProductInput struct {
-	Code        string    `json:"code"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	SizeID      uuid.UUID `json:"size_id"`
-	Price       float64   `json:"price"`
-	Cost        float64   `json:"cost"`
-	CategoryID  uuid.UUID `json:"category_id"`
-	IsAvailable bool      `json:"is_available"`
+	productentity.ProductCommonAttributes
 }
 
 func (p *RegisterProductInput) validate() error {
@@ -52,8 +45,7 @@ func (p *RegisterProductInput) ToModel() (*productentity.Product, error) {
 		return nil, err
 	}
 
-	return &productentity.Product{
-		Entity:      entity.NewEntity(),
+	productCommonAttributes := productentity.ProductCommonAttributes{
 		Code:        p.Code,
 		Name:        p.Name,
 		Description: p.Description,
@@ -62,5 +54,10 @@ func (p *RegisterProductInput) ToModel() (*productentity.Product, error) {
 		Cost:        p.Cost,
 		CategoryID:  p.CategoryID,
 		IsAvailable: p.IsAvailable,
+	}
+
+	return &productentity.Product{
+		Entity:                  entity.NewEntity(),
+		ProductCommonAttributes: productCommonAttributes,
 	}, nil
 }

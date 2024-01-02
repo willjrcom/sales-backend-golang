@@ -6,13 +6,11 @@ import (
 )
 
 type SizeOutput struct {
-	ID     uuid.UUID `json:"id"`
-	Name   string    `json:"name"`
-	Active bool      `json:"active"`
+	ID uuid.UUID `json:"id"`
+	productentity.SizeCommonAttributes
 }
 
 func (s *SizeOutput) FromModel(model *productentity.Size) {
 	s.ID = model.ID
-	s.Name = model.Name
-	s.Active = model.Active
+	s.SizeCommonAttributes = model.SizeCommonAttributes
 }
