@@ -35,3 +35,10 @@ type QuantityRepository interface {
 	DeleteQuantity(ctx context.Context, id string) error
 	GetQuantityById(ctx context.Context, id string) (*Quantity, error)
 }
+
+type ProcessRepository interface {
+	RegisterProcess(ctx context.Context, Process *Process) error
+	UpdateProcess(ctx context.Context, Process *Process) error
+	DeleteProcess(ctx context.Context, id string) error
+	GetProcessById(ctx context.Context, id string) (*Process, error)
+}

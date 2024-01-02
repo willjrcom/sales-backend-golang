@@ -13,6 +13,7 @@ type Category struct {
 	Sizes               []Size     `bun:"rel:has-many,join:id=category_id"`
 	Quantities          []Quantity `bun:"rel:has-many,join:id=category_id"`
 	Products            []Product  `bun:"rel:has-many,join:id=category_id"`
+	Processes           []Process  `bun:"rel:has-many,join:id=category_id"`
 	AditionalCategories []Category `bun:"m2m:category_to_aditional_categories,join:Category=Category"`
 }
 
