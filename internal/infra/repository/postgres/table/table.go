@@ -61,3 +61,17 @@ func (r *TableRepositoryBun) GetTableById(ctx context.Context, id string) (*tabl
 
 	return table, nil
 }
+
+func (r *TableRepositoryBun) GetAllTables(ctx context.Context) ([]tableentity.Table, error) {
+	tables := make([]tableentity.Table, 0)
+
+	r.mu.Lock()
+	err := r.db.NewSelect().Model(&tables).Scan(ctx)
+	r.mu.Unlock()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return tables, nil
+}

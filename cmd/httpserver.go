@@ -23,6 +23,7 @@ import (
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
 	quantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity_category"
 	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size_category"
+	tablerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/table"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	contactusecases "github.com/willjrcom/sales-backend-go/internal/usecases/contact_person"
@@ -34,6 +35,7 @@ import (
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity_category"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
+	tableusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table"
 )
 
 // httpserverCmd represents the httpserver command
@@ -72,6 +74,7 @@ var HttpserverCmd = &cobra.Command{
 		groupItemRepo := groupitemrepositorybun.NewGroupItemRepositoryBun(db)
 
 		employeeRepo := employeerepositorybun.NewProductRepositoryBun(db)
+		tableRepo := tablerepositorybun.NewTableRepositoryBun(db)
 
 		// Load services
 		productService := productusecases.NewService(productRepo, categoryRepo)
@@ -88,6 +91,8 @@ var HttpserverCmd = &cobra.Command{
 		itemService := itemusecases.NewService(itemRepo, groupItemRepo, orderRepo, productRepo, quantityRepo)
 		groupService := groupitemusecases.NewService(itemRepo, groupItemRepo)
 
+		tableService := tableusecases.NewService(tableRepo)
+
 		// Load handlers
 		productHandler := handlerimpl.NewHandlerProduct(productService)
 		categoryHandler := handlerimpl.NewHandlerCategoryProduct(categoryProductService)
@@ -103,6 +108,8 @@ var HttpserverCmd = &cobra.Command{
 		itemHandler := handlerimpl.NewHandlerItem(itemService)
 		groupHandler := handlerimpl.NewHandlerGroupItem(groupService)
 
+		tableHandler := handlerimpl.NewHandlerTable(tableService)
+
 		server.AddHandler(productHandler)
 		server.AddHandler(categoryHandler)
 		server.AddHandler(sizeHandler)
@@ -116,6 +123,8 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(deliveryOrderHandler)
 		server.AddHandler(itemHandler)
 		server.AddHandler(groupHandler)
+
+		server.AddHandler(tableHandler)
 
 		if err := server.StartServer(port); err != nil {
 			panic(err)
