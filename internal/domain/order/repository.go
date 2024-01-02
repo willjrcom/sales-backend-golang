@@ -22,6 +22,6 @@ type TableOrderRepository interface {
 	CreateTableOrder(ctx context.Context, table *TableOrder) error
 	UpdateTableOrder(ctx context.Context, table *TableOrder) error
 	DeleteTableOrder(ctx context.Context, id string) error
-	GetTableById(ctx context.Context, id string) (*TableOrder, error)
-	GetAllTables(ctx context.Context) ([]TableOrder, error)
+	GetTableOrderById(ctx context.Context, id string) (*TableOrder, error)
+	GetAllTableOrders(ctx context.Context) ([]TableOrder, error)
 }

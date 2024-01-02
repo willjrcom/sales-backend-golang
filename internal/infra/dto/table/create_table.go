@@ -1,4 +1,4 @@
-package tableorderdto
+package tabledto
 
 import (
 	"errors"

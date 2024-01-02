@@ -25,7 +25,9 @@ func NewHandlerTableOrder(orderService *tableorderusecases.Service) *handler.Han
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterTableOrder)
-		c.Get("/{id}", h.handlerGetTableById)
+		c.Delete("/delete/{id}", h.handlerDeleteTableOrderById)
+		c.Post("/update/change-table/{id}", h.handlerChangeTable)
+		c.Get("/{id}", h.handlerGetTableOrderById)
 		c.Get("/all", h.handlerGetAllTables)
 	})
 
@@ -44,7 +46,46 @@ func (h *handlerTableOrderImpl) handlerRegisterTableOrder(w http.ResponseWriter,
 	}
 }
 
-func (h *handlerTableOrderImpl) handlerGetTableById(w http.ResponseWriter, r *http.Request) {
+func (h *handlerTableOrderImpl) handlerDeleteTableOrderById(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.s.DeleteTableOrder(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+	}
+}
+
+func (h *handlerTableOrderImpl) handlerChangeTable(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	table := &tableorderdto.UpdateTableOrderInput{}
+	jsonpkg.ParseBody(r, table)
+
+	if err := h.s.ChangeTable(ctx, dtoId, table); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+	}
+}
+
+func (h *handlerTableOrderImpl) handlerGetTableOrderById(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
