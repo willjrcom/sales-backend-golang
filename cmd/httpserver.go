@@ -19,6 +19,7 @@ import (
 	groupitemrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/group_item"
 	itemrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/item"
 	orderrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/order"
+	processrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/process_category"
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
 	quantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity_category"
 	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size_category"
@@ -29,6 +30,7 @@ import (
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	itemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/item"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
+	processusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_category"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity_category"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
@@ -58,6 +60,7 @@ var HttpserverCmd = &cobra.Command{
 		categoryRepo := categoryrepositorybun.NewCategoryProductRepositoryBun(db)
 		sizeRepo := sizerepositorybun.NewSizeCategoryRepositoryBun(db)
 		quantityRepo := quantityrepositorybun.NewQuantityCategoryRepositoryBun(db)
+		processRepo := processrepositorybun.NewProcessCategoryRepositoryBun(db)
 
 		clientRepo := clientrepositorybun.NewClientRepositoryBun(db)
 		contactRepo := contactrepositorybun.NewContactRepositoryBun(db)
@@ -75,6 +78,7 @@ var HttpserverCmd = &cobra.Command{
 		categoryProductService := categoryproductusecases.NewService(categoryRepo)
 		sizeService := sizeusecases.NewService(sizeRepo)
 		quantityService := quantityusecases.NewService(quantityRepo)
+		processService := processusecases.NewService(processRepo)
 
 		clientService := clientusecases.NewService(clientRepo, contactRepo)
 		contactService := contactusecases.NewService(contactRepo)
@@ -87,8 +91,9 @@ var HttpserverCmd = &cobra.Command{
 		// Load handlers
 		productHandler := handlerimpl.NewHandlerProduct(productService)
 		categoryHandler := handlerimpl.NewHandlerCategoryProduct(categoryProductService)
-		sizeHandler := handlerimpl.NewHandlerSizeProduct(sizeService)
-		quantityHandler := handlerimpl.NewHandlerQuantityProduct(quantityService)
+		sizeHandler := handlerimpl.NewHandlerSizeCategory(sizeService)
+		quantityHandler := handlerimpl.NewHandlerQuantityCategory(quantityService)
+		processHandler := handlerimpl.NewHandlerProcessCategory(processService)
 
 		clientHandler := handlerimpl.NewHandlerClient(clientService)
 		contactHandler := handlerimpl.NewHandlerContactPerson(contactService)
@@ -102,6 +107,7 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(categoryHandler)
 		server.AddHandler(sizeHandler)
 		server.AddHandler(quantityHandler)
+		server.AddHandler(processHandler)
 
 		server.AddHandler(clientHandler)
 		server.AddHandler(contactHandler)

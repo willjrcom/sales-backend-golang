@@ -16,7 +16,7 @@ type handlerSizeCategoryImpl struct {
 	s *sizeusecases.Service
 }
 
-func NewHandlerSizeProduct(sizeService *sizeusecases.Service) *handler.Handler {
+func NewHandlerSizeCategory(sizeService *sizeusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerSizeCategoryImpl{

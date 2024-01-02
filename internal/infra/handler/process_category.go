@@ -7,37 +7,37 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	quantitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/quantity_category"
-	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity_category"
+	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process_category"
+	processusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_category"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
-type handlerQuantityCategoryImpl struct {
-	s *quantityusecases.Service
+type handlerProcessCategoryImpl struct {
+	s *processusecases.Service
 }
 
-func NewHandlerQuantityCategory(quantityService *quantityusecases.Service) *handler.Handler {
+func NewHandlerProcessCategory(processService *processusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
-	h := &handlerQuantityCategoryImpl{
-		s: quantityService,
+	h := &handlerProcessCategoryImpl{
+		s: processService,
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterQuantity)
-		c.Patch("/update/{id}", h.handlerUpdateQuantity)
-		c.Delete("/delete/{id}", h.handlerDeleteQuantity)
+		c.Post("/new", h.handlerRegisterProcess)
+		c.Patch("/update/{id}", h.handlerUpdateProcess)
+		c.Delete("/delete/{id}", h.handlerDeleteProcess)
 	})
 
-	return handler.NewHandler("/category-product/quantity", c)
+	return handler.NewHandler("/category-product/process", c)
 }
 
-func (h *handlerQuantityCategoryImpl) handlerRegisterQuantity(w http.ResponseWriter, r *http.Request) {
+func (h *handlerProcessCategoryImpl) handlerRegisterProcess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	quantity := &quantitydto.RegisterQuantityInput{}
-	jsonpkg.ParseBody(r, quantity)
+	process := &processdto.RegisterProcessInput{}
+	jsonpkg.ParseBody(r, process)
 
-	if id, err := h.s.RegisterQuantity(ctx, quantity); err != nil {
+	if id, err := h.s.RegisterProcess(ctx, process); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	} else {
@@ -45,7 +45,7 @@ func (h *handlerQuantityCategoryImpl) handlerRegisterQuantity(w http.ResponseWri
 	}
 }
 
-func (h *handlerQuantityCategoryImpl) handlerUpdateQuantity(w http.ResponseWriter, r *http.Request) {
+func (h *handlerProcessCategoryImpl) handlerUpdateProcess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -56,10 +56,10 @@ func (h *handlerQuantityCategoryImpl) handlerUpdateQuantity(w http.ResponseWrite
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	Quantity := &quantitydto.UpdateQuantityInput{}
-	jsonpkg.ParseBody(r, Quantity)
+	Process := &processdto.UpdateProcessInput{}
+	jsonpkg.ParseBody(r, Process)
 
-	if err := h.s.UpdateQuantity(ctx, dtoId, Quantity); err != nil {
+	if err := h.s.UpdateProcess(ctx, dtoId, Process); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -67,7 +67,7 @@ func (h *handlerQuantityCategoryImpl) handlerUpdateQuantity(w http.ResponseWrite
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerQuantityCategoryImpl) handlerDeleteQuantity(w http.ResponseWriter, r *http.Request) {
+func (h *handlerProcessCategoryImpl) handlerDeleteProcess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -78,7 +78,7 @@ func (h *handlerQuantityCategoryImpl) handlerDeleteQuantity(w http.ResponseWrite
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.DeleteQuantity(ctx, dtoId); err != nil {
+	if err := h.s.DeleteProcess(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
