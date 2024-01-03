@@ -27,8 +27,12 @@ func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IdRequest) (g
 	return s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
 }
 
-func (s *Service) GetAllGroupsByStatus(ctx context.Context, dto *groupitemdto.GroupStatusInput) (groups []groupitementity.GroupItem, err error) {
-	return s.rgi.GetAllGroupsByStatus(ctx, dto.Status)
+func (s *Service) GetGroupsByStatus(ctx context.Context, dto *groupitemdto.GroupItemByStatusInput) (groups []groupitementity.GroupItem, err error) {
+	return s.rgi.GetGroupsByStatus(ctx, dto.Status)
+}
+
+func (s *Service) GetGroupsByOrderIDAndStatus(ctx context.Context, dto *groupitemdto.GroupItemByOrderIDAndStatusInput) (groups []groupitementity.GroupItem, err error) {
+	return s.rgi.GetGroupsByOrderIDAndStatus(ctx, dto.OrderID.String(), dto.Status)
 }
 
 func (s *Service) StartGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
@@ -67,20 +71,6 @@ func (s *Service) CancelGroupItem(ctx context.Context, dto *entitydto.IdRequest)
 	}
 
 	groupItem.CancelGroupItem()
-
-	return s.rgi.UpdateGroupItem(ctx, groupItem)
-}
-
-func (s *Service) FinishGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
-
-	if err != nil {
-		return err
-	}
-
-	if err = groupItem.FinishGroupItem(); err != nil {
-		return err
-	}
 
 	return s.rgi.UpdateGroupItem(ctx, groupItem)
 }

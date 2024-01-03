@@ -8,7 +8,6 @@ const (
 	StatusGroupStarted  StatusGroupItem = "Started"
 	StatusGroupReady    StatusGroupItem = "Ready"
 	StatusGroupCanceled StatusGroupItem = "Canceled"
-	StatusGroupFinished StatusGroupItem = "Finished"
 )
 
 func GetAllStatus() []StatusGroupItem {
@@ -17,6 +16,5 @@ func GetAllStatus() []StatusGroupItem {
 		StatusGroupPending,
 		StatusGroupReady,
 		StatusGroupCanceled,
-		StatusGroupFinished,
 	}
 }

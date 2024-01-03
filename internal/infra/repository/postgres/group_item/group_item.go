@@ -85,7 +85,7 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 	item := &groupitementity.GroupItem{}
 
 	r.mu.Lock()
-	query := r.db.NewSelect().Model(item).Where("id = ?", id)
+	query := r.db.NewSelect().Model(item).Where("group_item.id = ?", id).Relation("Category")
 
 	if withRelation {
 		query.Relation("Items")
@@ -101,10 +101,10 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 	return item, nil
 }
 
-func (r *GroupItemRepositoryBun) GetAllGroupsByStatus(ctx context.Context, status groupitementity.StatusGroupItem) ([]groupitementity.GroupItem, error) {
+func (r *GroupItemRepositoryBun) GetGroupsByStatus(ctx context.Context, status groupitementity.StatusGroupItem) ([]groupitementity.GroupItem, error) {
 	items := []groupitementity.GroupItem{}
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&items).Where("status = ?", status).Relation("Items").Scan(ctx)
+	err := r.db.NewSelect().Model(&items).Where("status = ?", status).Relation("Items").Relation("Category").Scan(ctx)
 
 	r.mu.Unlock()
 
@@ -115,10 +115,10 @@ func (r *GroupItemRepositoryBun) GetAllGroupsByStatus(ctx context.Context, statu
 	return items, nil
 }
 
-func (r *GroupItemRepositoryBun) GetGroupsByOrderID(ctx context.Context, id string) ([]groupitementity.GroupItem, error) {
+func (r *GroupItemRepositoryBun) GetGroupsByOrderIDAndStatus(ctx context.Context, id string, status groupitementity.StatusGroupItem) ([]groupitementity.GroupItem, error) {
 	items := []groupitementity.GroupItem{}
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&items).Where("status = ?", "Pending").Relation("Items").Scan(ctx)
+	err := r.db.NewSelect().Model(&items).Where("order_id = ? AND status = ?", id, status).Relation("Items").Relation("Category").Scan(ctx)
 
 	r.mu.Unlock()
 

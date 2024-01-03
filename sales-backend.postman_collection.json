@@ -618,6 +618,35 @@
 					"response": []
 				},
 				{
+					"name": "pending",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/order/pending/{{order_id}}"
+					},
+					"response": []
+				},
+				{
 					"name": "get by id",
 					"event": [
 						{
@@ -821,8 +850,10 @@
 							"script": {
 								"exec": [
 									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"item_id\", task_id)"
+									"let item_id = response.data.item_id",
+									"let group_item_id = response.data.group_item_id",
+									"pm.collectionVariables.set(\"item_id\", item_id)",
+									"pm.collectionVariables.set(\"group_item_id\", group_item_id)"
 								],
 								"type": "text/javascript"
 							}
@@ -833,7 +864,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\",\n    \"group_item_id\": \"9e8ff7e0-b6fe-4154-aafe-c3dead54aab7\"\n}",
+							"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\",\n    \"group_item_id\": \"{{group_item_id}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -859,6 +890,15 @@
 			"name": "group item",
 			"item": [
 				{
+					"name": "get by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/group/get/{{group_item_id}}"
+					},
+					"response": []
+				},
+				{
 					"name": "getAll",
 					"request": {
 						"method": "POST",
@@ -877,47 +917,47 @@
 					"response": []
 				},
 				{
-					"name": "get by id",
+					"name": "by orderID and status",
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
-						"url": "{{server}}/group/get/{{group_id}}"
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"Staging\",\n    \"order_id\": \"{{order_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/group/by-order-id-and-status"
 					},
 					"response": []
 				},
 				{
 					"name": "start",
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
-						"url": "{{server}}/group/start/{{group_id}}"
+						"url": "{{server}}/group/start/{{group_item_id}}"
 					},
 					"response": []
 				},
 				{
 					"name": "ready",
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
-						"url": "{{server}}/group/ready/{{group_id}}"
+						"url": "{{server}}/group/ready/{{group_item_id}}"
 					},
 					"response": []
 				},
 				{
 					"name": "cancel",
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
-						"url": "{{server}}/group/cancel/{{group_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "finish",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": "{{server}}/group/finish/{{group_id}}"
+						"url": "{{server}}/group/cancel/{{group_item_id}}"
 					},
 					"response": []
 				},
@@ -926,7 +966,7 @@
 					"request": {
 						"method": "DELETE",
 						"header": [],
-						"url": "{{server}}/group/delete/{{group_id}}"
+						"url": "{{server}}/group/delete/{{group_item_id}}"
 					},
 					"response": []
 				}
@@ -955,6 +995,11 @@
 	],
 	"variable": [
 		{
+			"key": "server",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
 			"key": "product_id",
 			"value": ""
 		},
@@ -963,12 +1008,21 @@
 			"value": ""
 		},
 		{
-			"key": "data",
-			"value": ""
+			"key": "quantity_category_id",
+			"value": "19ae320b-174a-4283-90dc-f7aadd6a7b20",
+			"type": "string"
 		},
 		{
 			"key": "size_category_id",
 			"value": "01014059-5db1-48a7-8c47-f8a599d3edda"
+		},
+		{
+			"key": "process_category_id",
+			"value": ""
+		},
+		{
+			"key": "data",
+			"value": ""
 		},
 		{
 			"key": "client_id",
@@ -987,25 +1041,11 @@
 			"value": ""
 		},
 		{
-			"key": "server",
-			"value": "http://localhost:8080",
-			"type": "string"
-		},
-		{
-			"key": "quantity_category_id",
-			"value": "19ae320b-174a-4283-90dc-f7aadd6a7b20",
-			"type": "string"
-		},
-		{
-			"key": "group_id",
-			"value": "1b2524b0-f4ab-48e2-a94b-2e77e94f9220"
-		},
-		{
 			"key": "item_id",
 			"value": ""
 		},
 		{
-			"key": "process_category_id",
+			"key": "group_item_id",
 			"value": ""
 		}
 	]

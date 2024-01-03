@@ -2,6 +2,7 @@ package orderrepositorybun
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 
 	"github.com/uptrace/bun"
@@ -27,6 +28,34 @@ func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *orderentity
 	}
 
 	return nil
+}
+
+func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *orderentity.Order) error {
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
+
+	if err != nil {
+		return err
+	}
+
+	r.mu.Lock()
+	_, err = tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx)
+	r.mu.Unlock()
+
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	for _, group := range p.Groups {
+		_, err = tx.NewUpdate().Model(&group).WherePK().Exec(ctx)
+
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
 func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *orderentity.Order) error {

@@ -44,6 +44,13 @@ func (r *OrderRepositoryLocal) DeleteOrder(ctx context.Context, id string) error
 	return nil
 }
 
+func (r *OrderRepositoryLocal) PendingOrder(ctx context.Context, order *orderentity.Order) error {
+	r.mu.Lock()
+	r.orders[order.ID] = order
+	r.mu.Unlock()
+	return nil
+}
+
 func (r *OrderRepositoryLocal) UpdateOrder(ctx context.Context, order *orderentity.Order) error {
 	r.mu.Lock()
 	r.orders[order.ID] = order

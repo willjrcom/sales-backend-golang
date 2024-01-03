@@ -18,6 +18,24 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 		return err
 	}
 
+	if err := s.ro.PendingOrder(ctx, order); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) FinishOrder(ctx context.Context, dto *entitydto.IdRequest) error {
+	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	if err = order.FinishOrder(); err != nil {
+		return err
+	}
+
 	if err := s.ro.UpdateOrder(ctx, order); err != nil {
 		return err
 	}

@@ -10,6 +10,6 @@ type GroupItemRepository interface {
 	CalculateTotal(ctx context.Context, id string) (err error)
 	GetGroupByID(ctx context.Context, id string, withRelation bool) (*GroupItem, error)
 	DeleteGroupItem(ctx context.Context, id string) error
-	GetGroupsByOrderID(ctx context.Context, id string) ([]GroupItem, error)
-	GetAllGroupsByStatus(ctx context.Context, status StatusGroupItem) ([]GroupItem, error)
+	GetGroupsByOrderIDAndStatus(ctx context.Context, id string, status StatusGroupItem) ([]GroupItem, error)
+	GetGroupsByStatus(ctx context.Context, status StatusGroupItem) ([]GroupItem, error)
 }

@@ -2,6 +2,7 @@ package groupitementity
 
 import (
 	"errors"
+	"math"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,6 +13,7 @@ import (
 )
 
 var (
+	ErrQuantityNotInteger   = errors.New("quantity items in group isnot integer")
 	ErrGroupNotPending      = errors.New("group not pending")
 	ErrGroupNotStarted      = errors.New("group not started")
 	ErrGroupNotReady        = errors.New("group not ready")
@@ -44,13 +46,19 @@ type GroupDetails struct {
 type GroupItemTimeLogs struct {
 	PendingAt   *time.Time `bun:"pending_at" json:"pending_at,omitempty"`
 	StartedAt   *time.Time `bun:"started_at" json:"started_at,omitempty"`
-	FinishedAt  *time.Time `bun:"finished_at" json:"finished_at,omitempty"`
+	ReadyAt     *time.Time `bun:"ready_at" json:"ready_at,omitempty"`
 	CancelledAt *time.Time `bun:"cancelled_at" json:"cancelled_at,omitempty"`
 }
 
-func (i *GroupItem) PendingGroupItem() {
+func (i *GroupItem) PendingGroupItem() (err error) {
+	if math.Mod(i.Quantity, 1) != 0 {
+		return ErrQuantityNotInteger
+	}
+
 	i.Status = StatusGroupPending
 	i.PendingAt = &time.Time{}
+	*i.PendingAt = time.Now()
+	return nil
 }
 
 func (i *GroupItem) StartGroupItem() (err error) {
@@ -60,6 +68,7 @@ func (i *GroupItem) StartGroupItem() (err error) {
 
 	i.Status = StatusGroupStarted
 	i.StartedAt = &time.Time{}
+	*i.StartedAt = time.Now()
 	return nil
 }
 
@@ -69,27 +78,15 @@ func (i *GroupItem) ReadyGroupItem() (err error) {
 	}
 
 	i.Status = StatusGroupReady
-	i.StartedAt = &time.Time{}
+	i.ReadyAt = &time.Time{}
+	*i.ReadyAt = time.Now()
 	return nil
 }
 
 func (i *GroupItem) CancelGroupItem() {
 	i.Status = StatusGroupCanceled
 	i.CancelledAt = &time.Time{}
-}
-
-func (i *GroupItem) FinishGroupItem() (err error) {
-	if i.Status != StatusGroupReady {
-		return ErrGroupNotReady
-	}
-
-	if i.Status == StatusGroupFinished {
-		return ErrGroupAlreadyFinished
-	}
-
-	i.Status = StatusGroupFinished
-	i.FinishedAt = &time.Time{}
-	return nil
+	*i.CancelledAt = time.Now()
 }
 
 func (i *GroupItem) DeleteGroupItem() (err error) {

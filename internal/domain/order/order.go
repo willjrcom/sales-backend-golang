@@ -85,7 +85,14 @@ func (o *Order) PendingOrder() (err error) {
 		return ErrOrderWithoutItems
 	}
 
+	for i := range o.Groups {
+		if err = o.Groups[i].PendingGroupItem(); err != nil {
+			return err
+		}
+	}
+
 	o.Status = OrderStatusPending
+	o.PendingAt = &time.Time{}
 	*o.PendingAt = time.Now()
 	return nil
 }
@@ -101,6 +108,7 @@ func (o *Order) FinishOrder() (err error) {
 
 	o.Status = OrderStatusFinished
 	o.FinishedAt = &time.Time{}
+	*o.FinishedAt = time.Now()
 	return nil
 }
 
@@ -115,6 +123,7 @@ func (o *Order) CancelOrder() (err error) {
 
 	o.Status = OrderStatusCanceled
 	o.CancelledAt = &time.Time{}
+	*o.CancelledAt = time.Now()
 	return nil
 }
 
@@ -129,5 +138,6 @@ func (o *Order) ArchiveOrder() (err error) {
 
 	o.Status = OrderStatusArchived
 	o.ArchivedAt = &time.Time{}
+	*o.ArchivedAt = time.Now()
 	return nil
 }
