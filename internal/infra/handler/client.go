@@ -29,7 +29,7 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 		c.Patch("/update/{id}", h.handlerUpdateClient)
 		c.Delete("/delete/{id}", h.handlerDeleteClient)
 		c.Get("/{id}", h.handlerGetClient)
-		c.Post("/all", h.handlerGetAllClients)
+		c.Get("/all", h.handlerGetAllClients)
 	})
 
 	c.With().Group(func(c chi.Router) {

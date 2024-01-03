@@ -28,7 +28,7 @@ func NewHandlerProduct(productService *productusecases.Service) *handler.Handler
 		c.Patch("/update/{id}", h.handlerUpdateProduct)
 		c.Delete("/delete/{id}", h.handlerDeleteProduct)
 		c.Get("/{id}", h.handlerGetProduct)
-		c.Post("/all", h.handlerGetAllProducts)
+		c.Get("/all", h.handlerGetAllProducts)
 	})
 
 	return handler.NewHandler("/product", c)

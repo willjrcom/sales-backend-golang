@@ -31,8 +31,8 @@ type DeliveryOrderCommonAttributes struct {
 }
 
 type DeliveryTimeLogs struct {
-	LaunchedAt  *time.Time `bun:"launched_at" json:"launched_at"`
-	DeliveredAt *time.Time `bun:"delivered_at" json:"delivered_at"`
+	LaunchedAt  *time.Time `bun:"launched_at" json:"launched_at,omitempty"`
+	DeliveredAt *time.Time `bun:"delivered_at" json:"delivered_at,omitempty"`
 }
 
 func (d *DeliveryOrder) LaunchDelivery(driverID uuid.UUID) {

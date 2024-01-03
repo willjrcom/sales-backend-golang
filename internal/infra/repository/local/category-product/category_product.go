@@ -68,22 +68,11 @@ func (r *CategoryRepositoryLocal) GetCategoryById(_ context.Context, id string) 
 	return nil, errCategoryProductNotFound
 }
 
-func (r *CategoryRepositoryLocal) GetAllCategoryProducts(_ context.Context) ([]productentity.Category, error) {
+func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context) ([]productentity.Category, error) {
 	Categoryproducts := make([]productentity.Category, 0)
 
 	for _, p := range r.Categoryproducts {
 		p.Sizes = nil
-		Categoryproducts = append(Categoryproducts, *p)
-	}
-
-	return Categoryproducts, nil
-}
-
-func (r *CategoryRepositoryLocal) GetAllCategorySizes(_ context.Context) ([]productentity.Category, error) {
-	Categoryproducts := make([]productentity.Category, 0)
-
-	for _, p := range r.Categoryproducts {
-		p.Products = nil
 		Categoryproducts = append(Categoryproducts, *p)
 	}
 

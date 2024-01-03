@@ -14,7 +14,7 @@ var (
 )
 
 type RegisterContactClientInput struct {
-	PersonID uuid.UUID `json:"person_id"`
+	ClientID uuid.UUID `json:"client_id"`
 	Contact  string    `json:"contact"`
 }
 
@@ -22,7 +22,7 @@ func (c *RegisterContactClientInput) validate() error {
 	if c.Contact == "" {
 		return ErrContactIsEmpty
 	}
-	if c.PersonID == uuid.Nil {
+	if c.ClientID == uuid.Nil {
 		return ErrPersonIdIsEmpty
 	}
 
@@ -42,7 +42,7 @@ func (c *RegisterContactClientInput) ToModel() (*personentity.Contact, error) {
 	}
 
 	contactCommonAttributes := personentity.ContactCommonAttributes{
-		PersonID: c.PersonID,
+		PersonID: c.ClientID,
 		Ddd:      ddd,
 		Number:   number,
 		Type:     personentity.ContactTypeClient,

@@ -7,6 +7,7 @@ import (
 	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
 	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
 )
 
 var (
@@ -26,20 +27,74 @@ func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IdRequest) (g
 	return s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
 }
 
-func (s *Service) DeleteGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+func (s *Service) GetAllGroupsByStatus(ctx context.Context, dto *groupitemdto.GroupStatusInput) (groups []groupitementity.GroupItem, err error) {
+	return s.rgi.GetAllGroupsByStatus(ctx, dto.Status)
+}
 
-	if groupItem.LaunchedAt != nil {
-		return ErrItemsFinished
-	}
+func (s *Service) StartGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
 		return err
 	}
 
-	return s.rgi.DeleteGroupItem(ctx, dto.ID.String())
+	if err = groupItem.StartGroupItem(); err != nil {
+		return err
+	}
+
+	return s.rgi.UpdateGroupItem(ctx, groupItem)
 }
 
-func (s *Service) GetAllPendingGroups(ctx context.Context) (groups []groupitementity.GroupItem, err error) {
-	return s.rgi.GetAllPendingGroups(ctx)
+func (s *Service) ReadyGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+
+	if err != nil {
+		return err
+	}
+
+	if err = groupItem.ReadyGroupItem(); err != nil {
+		return err
+	}
+
+	return s.rgi.UpdateGroupItem(ctx, groupItem)
+}
+
+func (s *Service) CancelGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+
+	if err != nil {
+		return err
+	}
+
+	groupItem.CancelGroupItem()
+
+	return s.rgi.UpdateGroupItem(ctx, groupItem)
+}
+
+func (s *Service) FinishGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+
+	if err != nil {
+		return err
+	}
+
+	if err = groupItem.FinishGroupItem(); err != nil {
+		return err
+	}
+
+	return s.rgi.UpdateGroupItem(ctx, groupItem)
+}
+
+func (s *Service) DeleteGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+
+	if err != nil {
+		return err
+	}
+
+	if err = groupItem.DeleteGroupItem(); err != nil {
+		return err
+	}
+
+	return s.rgi.DeleteGroupItem(ctx, groupItem.ID.String())
 }

@@ -14,10 +14,10 @@ type Category struct {
 
 type CategoryCommonAttributes struct {
 	Name                string     `bun:"name,notnull" json:"name"`
-	Sizes               []Size     `bun:"rel:has-many,join:id=category_id" json:"sizes"`
-	Quantities          []Quantity `bun:"rel:has-many,join:id=category_id" json:"quantities"`
-	Products            []Product  `bun:"rel:has-many,join:id=category_id" json:"products"`
-	Processes           []Process  `bun:"rel:has-many,join:id=category_id" json:"processes"`
+	Sizes               []Size     `bun:"rel:has-many,join:id=category_id" json:"sizes,omitempty"`
+	Quantities          []Quantity `bun:"rel:has-many,join:id=category_id" json:"quantities,omitempty"`
+	Products            []Product  `bun:"rel:has-many,join:id=category_id" json:"products,omitempty"`
+	Processes           []Process  `bun:"rel:has-many,join:id=category_id" json:"processes,omitempty"`
 	AditionalCategories []Category `bun:"m2m:category_to_aditional_categories,join:Category=Category" json:"aditional_categories,omitempty"`
 }
 

@@ -101,10 +101,10 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 	return item, nil
 }
 
-func (r *GroupItemRepositoryBun) GetAllPendingGroups(ctx context.Context) ([]groupitementity.GroupItem, error) {
+func (r *GroupItemRepositoryBun) GetAllGroupsByStatus(ctx context.Context, status groupitementity.StatusGroupItem) ([]groupitementity.GroupItem, error) {
 	items := []groupitementity.GroupItem{}
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&items).Where("status = ?", "Pending").Relation("Items").Scan(ctx)
+	err := r.db.NewSelect().Model(&items).Where("status = ?", status).Relation("Items").Scan(ctx)
 
 	r.mu.Unlock()
 
@@ -115,7 +115,7 @@ func (r *GroupItemRepositoryBun) GetAllPendingGroups(ctx context.Context) ([]gro
 	return items, nil
 }
 
-func (r *GroupItemRepositoryBun) GetGroupsByOrderId(ctx context.Context, id string) ([]groupitementity.GroupItem, error) {
+func (r *GroupItemRepositoryBun) GetGroupsByOrderID(ctx context.Context, id string) ([]groupitementity.GroupItem, error) {
 	items := []groupitementity.GroupItem{}
 	r.mu.Lock()
 	err := r.db.NewSelect().Model(&items).Where("status = ?", "Pending").Relation("Items").Scan(ctx)

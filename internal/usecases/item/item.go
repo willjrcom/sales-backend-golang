@@ -2,6 +2,7 @@ package itemusecases
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
@@ -11,6 +12,11 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	itemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/item"
+)
+
+var (
+	ErrCategoryNotFound = errors.New("category not found")
+	ErrSizeNotFound     = errors.New("size not found")
 )
 
 type Service struct {
@@ -25,22 +31,30 @@ func NewService(ri itementity.ItemRepository, rgi groupitementity.GroupItemRepos
 	return &Service{ri: ri, rgi: rgi, ro: ro, rp: rp, rq: rq}
 }
 
-func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInput) (id uuid.UUID, err error) {
+func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInput) (ids *itemdto.ItemIDAndGroupItemOutput, err error) {
 	if _, err := s.ro.GetOrderById(ctx, dto.OrderID.String()); err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	product, err := s.rp.GetProductById(ctx, dto.ProductID.String())
 
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
+	}
+
+	if product.Category == nil {
+		return nil, ErrCategoryNotFound
+	}
+
+	if product.Size == nil {
+		return nil, ErrSizeNotFound
 	}
 
 	if dto.GroupItemID == nil {
 		groupItem, err := s.newGroupItem(ctx, dto.OrderID, product)
 
 		if err != nil {
-			return uuid.Nil, err
+			return nil, err
 		}
 
 		dto.GroupItemID = &groupItem.ID
@@ -49,33 +63,36 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 	groupItem, err := s.rgi.GetGroupByID(ctx, dto.GroupItemID.String(), false)
 
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	quantity, err := s.rq.GetQuantityById(ctx, dto.QuantityID.String())
 
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	item, err := dto.ToModel(product, groupItem, quantity)
 
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	if err = s.ri.AddItem(ctx, item); err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	if err = s.rgi.CalculateTotal(ctx, groupItem.ID.String()); err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
-	return item.ID, nil
+	return &itemdto.ItemIDAndGroupItemOutput{
+		GroupItemID: groupItem.ID,
+		ItemID:      item.ID,
+	}, nil
 }
 
-func (s *Service) RemoveItemOrder(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest) (err error) {
 	item, err := s.ri.GetItemById(ctx, dto.ID.String())
 
 	if err != nil {

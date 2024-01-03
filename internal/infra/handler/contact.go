@@ -7,7 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	contactusecases "github.com/willjrcom/sales-backend-go/internal/usecases/contact_person"
+	keysdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/keys"
+	contactusecases "github.com/willjrcom/sales-backend-go/internal/usecases/contact"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
@@ -25,6 +26,7 @@ func NewHandlerContactPerson(contactService *contactusecases.Service) *handler.H
 	c.With().Group(func(c chi.Router) {
 		c.Get("/{id}", h.handlerGetContactById)
 		c.Get("/all", h.handlerGetAllContacts)
+		c.Post("/search", h.handlerFtSearchContacts)
 	})
 
 	return handler.NewHandler("/contact", c)
@@ -52,6 +54,18 @@ func (h *handlerContactImpl) handlerGetAllContacts(w http.ResponseWriter, r *htt
 	ctx := r.Context()
 
 	if contacts, err := h.s.GetAllContacts(ctx); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: contacts})
+	}
+}
+
+func (h *handlerContactImpl) handlerFtSearchContacts(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	keys := &keysdto.KeysInput{}
+	jsonpkg.ParseBody(r, keys)
+
+	if contacts, err := h.s.FtSearchContacts(ctx, keys); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: contacts})

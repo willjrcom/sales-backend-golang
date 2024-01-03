@@ -10,7 +10,7 @@ import (
 
 var (
 	ErrNameRequired              = errors.New("name is required")
-	ErrOrderRequired             = errors.New("order is required")
+	ErrOrderRequired             = errors.New("order min: 1is required")
 	ErrIdealTimeRequired         = errors.New("ideal time is required")
 	ErrExperimentalErrorRequired = errors.New("experimental error is required")
 	ErrCategoryRequired          = errors.New("category ID is required")

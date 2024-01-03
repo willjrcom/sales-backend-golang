@@ -1,17 +1,18 @@
 package groupitementity
 
-type StatusItem string
+type StatusGroupItem string
 
 const (
-	StatusGroupStaging  StatusItem = "Staging"
-	StatusGroupPending  StatusItem = "Pending"
-	StatusGroupReady    StatusItem = "Ready"
-	StatusGroupCanceled StatusItem = "Canceled"
-	StatusGroupFinished StatusItem = "Finished"
+	StatusGroupStaging  StatusGroupItem = "Staging"
+	StatusGroupPending  StatusGroupItem = "Pending"
+	StatusGroupStarted  StatusGroupItem = "Started"
+	StatusGroupReady    StatusGroupItem = "Ready"
+	StatusGroupCanceled StatusGroupItem = "Canceled"
+	StatusGroupFinished StatusGroupItem = "Finished"
 )
 
-func GetAllStatus() []StatusItem {
-	return []StatusItem{
+func GetAllStatus() []StatusGroupItem {
+	return []StatusGroupItem{
 		StatusGroupStaging,
 		StatusGroupPending,
 		StatusGroupReady,

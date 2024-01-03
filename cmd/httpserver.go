@@ -26,7 +26,7 @@ import (
 	tablerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/table"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
-	contactusecases "github.com/willjrcom/sales-backend-go/internal/usecases/contact_person"
+	contactusecases "github.com/willjrcom/sales-backend-go/internal/usecases/contact"
 	deliveryorderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/delivery_order"
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	itemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/item"
@@ -65,7 +65,7 @@ var HttpserverCmd = &cobra.Command{
 		processRepo := processrepositorybun.NewProcessCategoryRepositoryBun(db)
 
 		clientRepo := clientrepositorybun.NewClientRepositoryBun(db)
-		contactRepo := contactrepositorybun.NewContactRepositoryBun(db)
+		contactRepo := contactrepositorybun.NewContactRepositoryBun(ctx, db)
 		addressRepo := addressrepositorybun.NewAddressRepositoryBun(db)
 
 		orderRepo := orderrepositorybun.NewOrderRepositoryBun(db)

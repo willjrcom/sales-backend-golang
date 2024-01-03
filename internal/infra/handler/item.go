@@ -25,7 +25,7 @@ func NewHandlerItem(itemService *itemusecases.Service) *handler.Handler {
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/add", h.handlerAddItem)
-		c.Delete("/delete/{id}", h.handlerRemoveItem)
+		c.Delete("/delete/{id}", h.handlerDeleteItem)
 		c.Post("/add/aditional/{id}", h.handlerAddAditionalItem)
 	})
 
@@ -38,14 +38,14 @@ func (h *handlerItemImpl) handlerAddItem(w http.ResponseWriter, r *http.Request)
 	addItem := &itemdto.AddItemOrderInput{}
 	jsonpkg.ParseBody(r, addItem)
 
-	if id, err := h.s.AddItemOrder(ctx, addItem); err != nil {
+	if ids, err := h.s.AddItemOrder(ctx, addItem); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: ids})
 	}
 }
 
-func (h *handlerItemImpl) handlerRemoveItem(w http.ResponseWriter, r *http.Request) {
+func (h *handlerItemImpl) handlerDeleteItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -56,7 +56,7 @@ func (h *handlerItemImpl) handlerRemoveItem(w http.ResponseWriter, r *http.Reque
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.RemoveItemOrder(ctx, dtoId); err != nil {
+	if err := h.s.DeleteItemOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})

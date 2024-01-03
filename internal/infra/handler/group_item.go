@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -24,8 +25,12 @@ func NewHandlerGroupItem(itemService *groupitemusecases.Service) *handler.Handle
 
 	c.With().Group(func(c chi.Router) {
 		c.Get("/get/{id}", h.handlerGetGroupByID)
+		c.Post("/all", h.handlerGetAllGroupsByStatus)
+		c.Post("/start/{id}", h.handlerStartGroupByID)
+		c.Post("/ready/{id}", h.handlerReadyGroupByID)
+		c.Post("/cancel/{id}", h.handlerCancelGroupByID)
+		c.Post("/finish/{id}", h.handlerFinishGroupByID)
 		c.Delete("/delete/{id}", h.handlerDeleteGroupByID)
-		c.Get("/all", h.handlerGetAllPendingGroups)
 	})
 
 	return handler.NewHandler("/group", c)
@@ -49,6 +54,91 @@ func (h *handlerGroupItemImpl) handlerGetGroupByID(w http.ResponseWriter, r *htt
 	}
 }
 
+func (h *handlerGroupItemImpl) handlerGetAllGroupsByStatus(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	dto := &groupitemdto.GroupStatusInput{}
+
+	jsonpkg.ParseBody(r, dto)
+
+	if groups, err := h.s.GetAllGroupsByStatus(ctx, dto); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: groups})
+	}
+}
+
+func (h *handlerGroupItemImpl) handlerStartGroupByID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.s.StartGroupItem(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	}
+}
+
+func (h *handlerGroupItemImpl) handlerReadyGroupByID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.s.ReadyGroupItem(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	}
+}
+
+func (h *handlerGroupItemImpl) handlerFinishGroupByID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.s.FinishGroupItem(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	}
+}
+
+func (h *handlerGroupItemImpl) handlerCancelGroupByID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.s.CancelGroupItem(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	}
+}
+
 func (h *handlerGroupItemImpl) handlerDeleteGroupByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -64,15 +154,5 @@ func (h *handlerGroupItemImpl) handlerDeleteGroupByID(w http.ResponseWriter, r *
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
-	}
-}
-
-func (h *handlerGroupItemImpl) handlerGetAllPendingGroups(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	if groups, err := h.s.GetAllPendingGroups(ctx); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: groups})
 	}
 }

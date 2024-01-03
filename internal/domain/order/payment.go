@@ -4,13 +4,20 @@ import "time"
 
 type PaymentOrder struct {
 	PaymentTimeLogs
-	TotalPaid *float64   `bun:"total_paid" json:"total_paid"`
-	Change    *float64   `bun:"change" json:"change"`
-	Method    *PayMethod `bun:"method,notnull" json:"method"`
+	TotalPaid float64   `bun:"total_paid" json:"total_paid"`
+	Change    float64   `bun:"change" json:"change"`
+	Method    PayMethod `bun:"method,notnull" json:"method"`
+}
+
+type PatchPaymentOrder struct {
+	PaymentTimeLogs
+	TotalPaid *float64   `json:"total_paid"`
+	Change    *float64   `json:"change"`
+	Method    *PayMethod `json:"method"`
 }
 
 type PaymentTimeLogs struct {
-	PaidAt *time.Time `bun:"paid_at" json:"paid_at"`
+	PaidAt *time.Time `bun:"paid_at" json:"paid_at,omitempty"`
 }
 
 type PayMethod string

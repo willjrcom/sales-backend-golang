@@ -10,7 +10,7 @@
 			"name": "product",
 			"item": [
 				{
-					"name": "registerProduct",
+					"name": "create",
 					"event": [
 						{
 							"listen": "test",
@@ -29,7 +29,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"code\": \"a12\",\n    \"name\": \"Pizza Presunto\",\n    \"price\": 12.50,\n    \"category_id\": \"dddbc05a-19cb-49fd-a50d-81ae5f6b26c6\",\n    \"size_id\": \"01014059-5db1-48a7-8c47-f8a599d3edda\"\n}",
+							"raw": "{\n    \"code\": \"p12\",\n    \"name\": \"Pizza Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 30.0,\n    \"cost\": 10.0,\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": false\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -41,13 +41,13 @@
 					"response": []
 				},
 				{
-					"name": "atualizar produto",
+					"name": "update",
 					"request": {
 						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"size_id\": \"{{size_category_id}}\"\n}",
+							"raw": "{\n    \"code\": \"a12\",\n    \"name\": \"Pizza de Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 15.0,\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -59,7 +59,7 @@
 					"response": []
 				},
 				{
-					"name": "deletar",
+					"name": "delete",
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -68,7 +68,7 @@
 					"response": []
 				},
 				{
-					"name": "get",
+					"name": "get by id",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -77,27 +77,12 @@
 					"response": []
 				},
 				{
-					"name": "get by",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"CategoryID\":\"dddbc05a-19cb-49fd-a50d-81ae5f6b26c6\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/product/by"
-					},
-					"response": []
-				},
-				{
 					"name": "get all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -118,7 +103,7 @@
 			"name": "category",
 			"item": [
 				{
-					"name": "register category",
+					"name": "create",
 					"event": [
 						{
 							"listen": "test",
@@ -149,7 +134,7 @@
 					"response": []
 				},
 				{
-					"name": "atualizar category",
+					"name": "update",
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -176,7 +161,7 @@
 					"response": []
 				},
 				{
-					"name": "get",
+					"name": "get by id",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -185,20 +170,11 @@
 					"response": []
 				},
 				{
-					"name": "get all with products",
+					"name": "get all",
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": "{{server}}/category-product/allproducts"
-					},
-					"response": []
-				},
-				{
-					"name": "get all with sizes",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": "{{server}}/category-product/allsizes"
+						"url": "{{server}}/category-product/all"
 					},
 					"response": []
 				}
@@ -208,7 +184,7 @@
 			"name": "size",
 			"item": [
 				{
-					"name": "register size",
+					"name": "create",
 					"event": [
 						{
 							"listen": "test",
@@ -227,7 +203,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"P\",\n    \"category_id\": \"{{category_product_id}}\"\n}",
+							"raw": "{\n    \"name\": \"P\",\n    \"active\": \"false\",\n    \"category_id\": \"{{category_product_id}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -239,13 +215,13 @@
 					"response": []
 				},
 				{
-					"name": "atualizar size",
+					"name": "update",
 					"request": {
-						"method": "PUT",
+						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"active\": \"false\"\n}",
+							"raw": "{\n    \"name\": \"G\",\n    \"active\": \"true\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -268,10 +244,73 @@
 			]
 		},
 		{
+			"name": "process",
+			"item": [
+				{
+					"name": "create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"process_category_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Cortar pão\",\n    \"order\": 1,\n    \"ideal_time\": \"3m30s\",\n    \"experimental_error\": \"30s\",\n    \"category_id\": \"{{category_product_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/category-product/process/new"
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Cortar pão\",\n    \"order\": 0,\n    \"ideal_time\": \"\",\n    \"experimental_error\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/category-product/process/update/{{size_category_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "deletar",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{server}}/category-product/process/delete/{{size_category_id}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "quantity",
 			"item": [
 				{
-					"name": "register quantity",
+					"name": "create",
 					"event": [
 						{
 							"listen": "test",
@@ -302,9 +341,9 @@
 					"response": []
 				},
 				{
-					"name": "atualizar quantity",
+					"name": "update",
 					"request": {
-						"method": "PUT",
+						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -334,10 +373,10 @@
 			"name": "client",
 			"item": [
 				{
-					"name": "contact",
+					"name": "contact client",
 					"item": [
 						{
-							"name": "register contact",
+							"name": "create",
 							"event": [
 								{
 									"listen": "test",
@@ -356,7 +395,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"contact\": \"11963849114\",\n    \"person_id\": \"2b4a8299-0a0e-4a31-8d59-1bbef4edd2c1\"\n}",
+									"raw": "{\n    \"contact\": \"11963849114\",\n    \"client_id\": \"{{client_id}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -368,7 +407,7 @@
 							"response": []
 						},
 						{
-							"name": "update contact",
+							"name": "update",
 							"event": [
 								{
 									"listen": "test",
@@ -399,7 +438,7 @@
 							"response": []
 						},
 						{
-							"name": "delete contact",
+							"name": "delete",
 							"event": [
 								{
 									"listen": "test",
@@ -423,7 +462,7 @@
 					]
 				},
 				{
-					"name": "register client",
+					"name": "create",
 					"event": [
 						{
 							"listen": "test",
@@ -454,9 +493,9 @@
 					"response": []
 				},
 				{
-					"name": "atualizar client",
+					"name": "update",
 					"request": {
-						"method": "PUT",
+						"method": "PATCH",
 						"header": [],
 						"url": "{{server}}/client/update/{{client_id}}"
 					},
@@ -472,7 +511,7 @@
 					"response": []
 				},
 				{
-					"name": "get",
+					"name": "get by id",
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -481,27 +520,12 @@
 					"response": []
 				},
 				{
-					"name": "get by",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"William\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/client/by"
-					},
-					"response": []
-				},
-				{
 					"name": "get all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
 						"body": {
 							"mode": "raw",
@@ -522,20 +546,20 @@
 			"name": "contact",
 			"item": [
 				{
-					"name": "get by",
+					"name": "ftsearch",
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"person_id\": \"2b4a8299-0a0e-4a31-8d59-1bbef4edd2c1\"\n}",
+							"raw": "{\n    \"query\": \"96384911\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "{{server}}/contact/by"
+						"url": "{{server}}/contact/search"
 					},
 					"response": []
 				},
@@ -544,7 +568,7 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": "{{server}}/contact/ccde66ef-e711-47cb-bf0b-7fa497d68c57"
+						"url": "{{server}}/contact/{{contact_id}}"
 					},
 					"response": []
 				},
@@ -594,7 +618,7 @@
 					"response": []
 				},
 				{
-					"name": "get",
+					"name": "get by id",
 					"event": [
 						{
 							"listen": "test",
@@ -675,7 +699,7 @@
 			"name": "delivery order",
 			"item": [
 				{
-					"name": "create delivery",
+					"name": "create",
 					"event": [
 						{
 							"listen": "test",
@@ -745,7 +769,7 @@
 			"name": "table order",
 			"item": [
 				{
-					"name": "create table",
+					"name": "create",
 					"event": [
 						{
 							"listen": "test",
@@ -764,14 +788,23 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "",
+							"raw": "{\n    \"name\": \"Mesa 1\",\n    \"is_available\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "{{server}}/order/table/new"
+						"url": "{{server}}/table/new"
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/table/all"
 					},
 					"response": []
 				}
@@ -800,7 +833,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\" \n}",
+							"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\",\n    \"group_item_id\": \"9e8ff7e0-b6fe-4154-aafe-c3dead54aab7\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -808,6 +841,15 @@
 							}
 						},
 						"url": "{{server}}/item/add"
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{server}}/item/delete/{{item_id}}"
 					},
 					"response": []
 				}
@@ -818,15 +860,12 @@
 			"item": [
 				{
 					"name": "getAll",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
 					"request": {
-						"method": "GET",
+						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"order_id\": \"d1db1385-d43d-4c1b-a3ea-47ffb88b34f9\",\n    \"product_id\": \"ffad990f-0e7b-41d5-b6ea-6a8d2d59ad4b\",\n    \"quantity\": 1\n}",
+							"raw": "{\n    \"status\": \"Pending\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -834,6 +873,60 @@
 							}
 						},
 						"url": "{{server}}/group/all"
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/group/get/{{group_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "start",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/group/start/{{group_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "ready",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/group/ready/{{group_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "cancel",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/group/cancel/{{group_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "finish",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/group/finish/{{group_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{server}}/group/delete/{{group_id}}"
 					},
 					"response": []
 				}
@@ -900,8 +993,20 @@
 		},
 		{
 			"key": "quantity_category_id",
-			"value": "b4ea5641-b204-4404-a06d-8e55eb424261",
+			"value": "19ae320b-174a-4283-90dc-f7aadd6a7b20",
 			"type": "string"
+		},
+		{
+			"key": "group_id",
+			"value": "1b2524b0-f4ab-48e2-a94b-2e77e94f9220"
+		},
+		{
+			"key": "item_id",
+			"value": ""
+		},
+		{
+			"key": "process_category_id",
+			"value": ""
 		}
 	]
 }

@@ -52,7 +52,7 @@ func (r *CategoryProductRepositoryBun) GetCategoryById(ctx context.Context, id s
 	category := &productentity.Category{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Relation("Sizes").Relation("Quantities").Scan(ctx)
+	err := r.db.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("Processes").Relation("AditionalCategories").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -62,25 +62,11 @@ func (r *CategoryProductRepositoryBun) GetCategoryById(ctx context.Context, id s
 	return category, nil
 }
 
-func (r *CategoryProductRepositoryBun) GetAllCategoryProducts(ctx context.Context) ([]productentity.Category, error) {
+func (r *CategoryProductRepositoryBun) GetAllCategories(ctx context.Context) ([]productentity.Category, error) {
 	categories := []productentity.Category{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&categories).Relation("Products").Scan(ctx)
-	r.mu.Unlock()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return categories, nil
-}
-
-func (r *CategoryProductRepositoryBun) GetAllCategorySizes(ctx context.Context) ([]productentity.Category, error) {
-	categories := []productentity.Category{}
-
-	r.mu.Lock()
-	err := r.db.NewSelect().Model(&categories).Relation("Sizes").Relation("Quantities").Relation("AditionalCategories").Scan(ctx)
+	err := r.db.NewSelect().Model(&categories).Relation("Sizes").Relation("Quantities").Relation("Processes").Relation("AditionalCategories").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {

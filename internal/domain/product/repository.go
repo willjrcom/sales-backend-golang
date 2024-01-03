@@ -17,8 +17,7 @@ type CategoryRepository interface {
 	UpdateCategory(ctx context.Context, category *Category) error
 	DeleteCategory(ctx context.Context, id string) error
 	GetCategoryById(ctx context.Context, id string) (*Category, error)
-	GetAllCategoryProducts(ctx context.Context) ([]Category, error)
-	GetAllCategorySizes(ctx context.Context) ([]Category, error)
+	GetAllCategories(ctx context.Context) ([]Category, error)
 }
 
 type SizeRepository interface {

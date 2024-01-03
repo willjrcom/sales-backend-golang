@@ -20,7 +20,7 @@ type Product struct {
 }
 
 type ProductCommonAttributes struct {
-	Code        string    `bun:"code" json:"code"`
+	Code        string    `bun:"code,unique,notnull" json:"code"`
 	Name        string    `bun:"name,notnull" json:"name"`
 	Description string    `bun:"description" json:"description"`
 	Price       float64   `bun:"price,notnull" json:"price"`

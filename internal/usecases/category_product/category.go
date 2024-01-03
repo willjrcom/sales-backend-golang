@@ -79,7 +79,7 @@ func (s *Service) GetCategoryById(ctx context.Context, dto *entitydto.IdRequest)
 }
 
 func (s *Service) GetAllCategories(ctx context.Context) ([]categorydto.CategoryOutput, error) {
-	if categories, err := s.r.GetAllCategorySizes(ctx); err != nil {
+	if categories, err := s.r.GetAllCategories(ctx); err != nil {
 		return nil, err
 	} else {
 		dtos := categorySizesToDtos(categories)

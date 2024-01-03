@@ -16,7 +16,7 @@ type SizeCommonAttributes struct {
 	Name       string    `bun:"name" json:"name"`
 	Active     *bool     `bun:"active" json:"active"`
 	CategoryID uuid.UUID `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
-	Products   []Product `bun:"rel:has-many,join:id=size_id" json:"products"`
+	Products   []Product `bun:"rel:has-many,join:id=size_id" json:"products,omitempty"`
 }
 
 type PatchSize struct {
