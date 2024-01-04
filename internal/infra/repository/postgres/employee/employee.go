@@ -5,7 +5,9 @@ import (
 	"sync"
 
 	"github.com/uptrace/bun"
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
+	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 )
 
 type EmployeeRepositoryBun struct {
@@ -17,16 +19,49 @@ func NewEmployeeRepositoryBun(db *bun.DB) *EmployeeRepositoryBun {
 	return &EmployeeRepositoryBun{db: db}
 }
 
-func (r *EmployeeRepositoryBun) RegisterEmployee(ctx context.Context, p *employeeentity.Employee) error {
+func (r *EmployeeRepositoryBun) RegisterEmployee(ctx context.Context, c *employeeentity.Employee) error {
 	r.mu.Lock()
-	_, err := r.db.NewInsert().Model(p).Exec(ctx)
-	r.mu.Unlock()
+	tx, err := r.db.Begin()
 
 	if err != nil {
 		return err
 	}
 
+	// Register employee
+	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
+		if err := tx.Rollback(); err != nil {
+			return err
+		}
+		return err
+	}
+
+	// Register contacts
+	for _, contact := range c.Contacts {
+		if _, err := tx.NewInsert().Model(&contact).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
+	}
+
+	// Register addresses
+	for _, address := range c.Addresses {
+		if _, err := tx.NewInsert().Model(&address).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func rollback(tx *bun.Tx, err error) error {
+	if err := tx.Rollback(); err != nil {
+		return err
+	}
+
+	return err
 }
 
 func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeeentity.Employee) error {
@@ -43,10 +78,28 @@ func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeee
 
 func (r *EmployeeRepositoryBun) DeleteEmployee(ctx context.Context, id string) error {
 	r.mu.Lock()
-	_, err := r.db.NewDelete().Model(&employeeentity.Employee{}).Where("id = ?", id).Exec(ctx)
-	r.mu.Unlock()
+	tx, err := r.db.Begin()
 
 	if err != nil {
+		return err
+	}
+
+	// Delete employee
+	if _, err = tx.NewDelete().Model(&employeeentity.Employee{}).Where("id = ?", id).Exec(ctx); err != nil {
+		return rollback(&tx, err)
+	}
+
+	// Delete contacts
+	if _, err = tx.NewDelete().Model(&personentity.Contact{}).Where("person_id = ?", id).Exec(ctx); err != nil {
+		return rollback(&tx, err)
+	}
+
+	// Delete addresses
+	if _, err = tx.NewDelete().Model(&addressentity.Address{}).Where("person_id = ?", id).Exec(ctx); err != nil {
+		return rollback(&tx, err)
+	}
+
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 
@@ -57,7 +110,7 @@ func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) 
 	employee := &employeeentity.Employee{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(employee).Where("id = ?", id).Scan(ctx)
+	err := r.db.NewSelect().Model(employee).Where("id = ?", id).Relation("Addresses").Relation("Contacts").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -71,7 +124,7 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]employee
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	employees := []employeeentity.Employee{}
-	err := r.db.NewSelect().Model(&employees).Scan(ctx)
+	err := r.db.NewSelect().Model(&employees).Relation("Addresses").Relation("Contacts").Scan(ctx)
 
 	return employees, err
 }

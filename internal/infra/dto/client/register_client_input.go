@@ -48,6 +48,13 @@ func (r *RegisterClientInput) ToModel() (*cliententity.Client, error) {
 		return nil, err
 	}
 
+	personEntity := entity.NewEntity()
+
+	for i := range r.Addresses {
+		r.Addresses[i].Entity = entity.NewEntity()
+		r.Addresses[i].PersonID = personEntity.ID
+	}
+
 	personCommonAttributes := personentity.PersonCommonAttributes{
 		Name:      *r.Name,
 		Addresses: r.Addresses,
@@ -55,7 +62,7 @@ func (r *RegisterClientInput) ToModel() (*cliententity.Client, error) {
 
 	// Create person
 	person := &personentity.Person{
-		Entity:                 entity.NewEntity(),
+		Entity:                 personEntity,
 		PersonCommonAttributes: personCommonAttributes,
 	}
 
