@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
@@ -39,4 +40,25 @@ func (r *TableOrderRepositoryBun) DeleteTableOrder(ctx context.Context, id strin
 	r.mu.Unlock()
 
 	return err
+}
+
+func (r *TableOrderRepositoryBun) GetTableOrderById(ctx context.Context, id string) (table *orderentity.TableOrder, err error) {
+	table = &orderentity.TableOrder{}
+	table.ID = uuid.MustParse(id)
+
+	r.mu.Lock()
+	err = r.db.NewSelect().Model(table).WherePK().Relation("Waiter").Scan(ctx)
+	r.mu.Unlock()
+
+	return table, err
+}
+
+func (r *TableOrderRepositoryBun) GetAllTableOrders(ctx context.Context) (tables []orderentity.TableOrder, err error) {
+	tables = make([]orderentity.TableOrder, 0)
+
+	r.mu.Lock()
+	err = r.db.NewSelect().Model(&tables).Relation("Waiter").Scan(ctx)
+	r.mu.Unlock()
+
+	return tables, err
 }

@@ -25,6 +25,7 @@ func NewHandlerDeliveryOrder(orderService deliveryorderusecases.IService) *handl
 		c.Post("/new", h.handlerRegisterDeliveryOrder)
 		c.Get("/{id}", h.handlerGetDeliveryById)
 		c.Get("/all", h.handlerGetAllDeliveries)
+		c.Post("/update/launch/{id}", h.handlerLaunchDeliveryOrder)
 		c.Post("/update/finish/{id}", h.handlerFinishDeliveryOrder)
 		c.Put("/update/driver/{id}", h.handlerUpdateDriver)
 		c.Put("/update/address/{id}", h.handlerUpdateDeliveryAddress)

@@ -37,6 +37,7 @@ import (
 	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity_category"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
 	tableusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table"
+	tableorderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table_order"
 )
 
 // httpserverCmd represents the httpserver command
@@ -71,6 +72,7 @@ var HttpserverCmd = &cobra.Command{
 
 		orderRepo := orderrepositorybun.NewOrderRepositoryBun(db)
 		deliveryOrderRepo := orderrepositorybun.NewDeliveryOrderRepositoryBun(db)
+		tableOrderRepo := orderrepositorybun.NewTableOrderRepositoryBun(db)
 		itemRepo := itemrepositorybun.NewItemRepositoryBun(db)
 		groupItemRepo := groupitemrepositorybun.NewGroupItemRepositoryBun(db)
 
@@ -90,6 +92,7 @@ var HttpserverCmd = &cobra.Command{
 
 		orderService := orderusecases.NewService(orderRepo)
 		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo, employeeRepo)
+		tableOrderService := tableorderusecases.NewService(tableOrderRepo, tableRepo)
 		itemService := itemusecases.NewService(itemRepo, groupItemRepo, orderRepo, productRepo, quantityRepo)
 		groupService := groupitemusecases.NewService(itemRepo, groupItemRepo)
 
@@ -108,6 +111,7 @@ var HttpserverCmd = &cobra.Command{
 
 		orderHandler := handlerimpl.NewHandlerOrder(orderService)
 		deliveryOrderHandler := handlerimpl.NewHandlerDeliveryOrder(deliveryOrderService)
+		tableOrderHandler := handlerimpl.NewHandlerTableOrder(tableOrderService)
 		itemHandler := handlerimpl.NewHandlerItem(itemService)
 		groupHandler := handlerimpl.NewHandlerGroupItem(groupService)
 
@@ -125,6 +129,7 @@ var HttpserverCmd = &cobra.Command{
 
 		server.AddHandler(orderHandler)
 		server.AddHandler(deliveryOrderHandler)
+		server.AddHandler(tableOrderHandler)
 		server.AddHandler(itemHandler)
 		server.AddHandler(groupHandler)
 

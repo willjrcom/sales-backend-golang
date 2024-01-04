@@ -543,6 +543,179 @@
 			]
 		},
 		{
+			"name": "employee",
+			"item": [
+				{
+					"name": "contact employee",
+					"item": [
+						{
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"contact_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"contact\": \"11963849114\",\n    \"client_id\": \"{{employee_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/employee/contact/new"
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"contact_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"contact\": \"12 96384 9136\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/employee/contact/update/{{contact_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "delete",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"contact_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "{{server}}/employee/contact/delete/{{contact_id}}"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"employee_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"William junior 3\",\n    \"contacts\": [\"11963849111\"],\n    \"addresses\": [{\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\"\n    }],\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/employee/new"
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": "{{server}}/employee/update/{{employee_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "deletar",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": "{{server}}/employee/delete/{{employee_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/employee/{{employee_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/employee/all"
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "contact",
 			"item": [
 				{
@@ -806,7 +979,61 @@
 								"exec": [
 									"let response = pm.response.json()",
 									"let task_id = response.data",
-									"pm.collectionVariables.set(\"order_id\", task_id)"
+									"pm.collectionVariables.set(\"table_order_id\", task_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Mesa 1\",\n    \"waiter_id\": \"{{employee_id}}\",\n    \"order_id\": \"{{order_id}}\",\n    \"table_id\": \"{{table_id}}\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/table-order/new"
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/table-order/{{table_order_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "get all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/table-order/all"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "table",
+			"item": [
+				{
+					"name": "create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let task_id = response.data",
+									"pm.collectionVariables.set(\"table_id\", task_id)"
 								],
 								"type": "text/javascript"
 							}
@@ -825,6 +1052,15 @@
 							}
 						},
 						"url": "{{server}}/table/new"
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/table/{{table_id}}"
 					},
 					"response": []
 				},
@@ -1029,6 +1265,11 @@
 			"value": ""
 		},
 		{
+			"key": "employee_id",
+			"value": "",
+			"type": "string"
+		},
+		{
 			"key": "contact_id",
 			"value": ""
 		},
@@ -1047,6 +1288,15 @@
 		{
 			"key": "group_item_id",
 			"value": ""
+		},
+		{
+			"key": "table_id",
+			"value": ""
+		},
+		{
+			"key": "table_order_id",
+			"value": "",
+			"type": "string"
 		}
 	]
 }
