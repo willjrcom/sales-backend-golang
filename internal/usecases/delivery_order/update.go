@@ -13,18 +13,22 @@ var (
 	ErrOrderDelivered = errors.New("order already delivered")
 )
 
-func (s *Service) LaunchDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest, driverId *entitydto.IdRequest) (err error) {
+func (s *Service) LaunchDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest, dtoDriver *deliveryorderdto.UpdateDriverOrder) (err error) {
 	deliveryOrder, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if _, err = s.re.GetEmployeeById(ctx, driverId.ID.String()); err != nil {
+	if err = dtoDriver.UpdateModel(deliveryOrder); err != nil {
 		return err
 	}
 
-	deliveryOrder.LaunchDelivery(driverId.ID)
+	if _, err = s.re.GetEmployeeById(ctx, deliveryOrder.DriverID.String()); err != nil {
+		return err
+	}
+
+	deliveryOrder.LaunchDelivery(deliveryOrder.DriverID)
 
 	if err = s.rdo.UpdateDeliveryOrder(ctx, deliveryOrder); err != nil {
 		return err
@@ -88,9 +92,11 @@ func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoID *entitydto.IdR
 		return err
 	}
 
-	_, err = s.re.GetEmployeeById(ctx, dto.DriverID.String())
+	if deliveryOrder.DeliveredAt != nil {
+		return ErrOrderDelivered
+	}
 
-	if err != nil {
+	if _, err = s.re.GetEmployeeById(ctx, dto.DriverID.String()); err != nil {
 		return err
 	}
 

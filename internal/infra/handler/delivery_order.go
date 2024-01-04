@@ -25,8 +25,9 @@ func NewHandlerDeliveryOrder(orderService deliveryorderusecases.IService) *handl
 		c.Post("/new", h.handlerRegisterDeliveryOrder)
 		c.Get("/{id}", h.handlerGetDeliveryById)
 		c.Get("/all", h.handlerGetAllDeliveries)
-		c.Put("/update/{id}/driver", h.handlerUpdateDriver)
-		c.Put("/update/{id}/address", h.handlerUpdateDeliveryAddress)
+		c.Post("/update/finish/{id}", h.handlerFinishDeliveryOrder)
+		c.Put("/update/driver/{id}", h.handlerUpdateDriver)
+		c.Put("/update/address/{id}", h.handlerUpdateDeliveryAddress)
 	})
 
 	return handler.NewHandler("/delivery-order", c)
@@ -69,6 +70,47 @@ func (h *handlerDeliveryOrderImpl) handlerGetAllDeliveries(w http.ResponseWriter
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
+	}
+}
+func (h *handlerDeliveryOrderImpl) handlerLaunchDeliveryOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	delivery := &deliveryorderdto.UpdateDriverOrder{}
+	jsonpkg.ParseBody(r, delivery)
+
+	if err := h.IService.LaunchDeliveryOrder(ctx, dtoId, delivery); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	}
+}
+
+func (h *handlerDeliveryOrderImpl) handlerFinishDeliveryOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	delivery := &deliveryorderdto.UpdateDriverOrder{}
+	jsonpkg.ParseBody(r, delivery)
+
+	if err := h.IService.FinishDeliveryOrder(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
 }
 
