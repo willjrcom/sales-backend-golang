@@ -12,14 +12,13 @@ import (
 )
 
 var (
-	ErrStatusNotStaging                = errors.New("status not staging")
-	ErrStatusNotPending                = errors.New("status not pending")
-	ErrStatusNotFinishedAndNotCanceled = errors.New("order must be canceled or finished")
-	ErrOrderWithoutItems               = errors.New("order must have at least one item")
-	ErrStatusAlreadyPending            = errors.New("status already pending")
-	ErrOrderAlreadyFinished            = errors.New("order already finished")
-	ErrOrderAlreadyCanceled            = errors.New("order already canceled")
-	ErrOrderAlreadyArchived            = errors.New("order already archived")
+	ErrOrderMustBeFinishedOrCanceled = errors.New("order must be canceled or finished")
+	ErrOrderWithoutItems             = errors.New("order must have at least one item")
+	ErrOrderMustBePending            = errors.New("order must be pending")
+	ErrOrderMustBeArchived           = errors.New("order must be archived")
+	ErrOrderAlreadyFinished          = errors.New("order already finished")
+	ErrOrderAlreadyCanceled          = errors.New("order already canceled")
+	ErrOrderAlreadyArchived          = errors.New("order already archived")
 )
 
 type Order struct {
@@ -73,12 +72,8 @@ func (o *Order) StagingOrder() {
 }
 
 func (o *Order) PendingOrder() (err error) {
-	if o.Status != OrderStatusStaging {
-		return ErrStatusNotStaging
-	}
-
-	if o.Status == OrderStatusPending {
-		return ErrStatusAlreadyPending
+	if o.Status == OrderStatusFinished {
+		return ErrOrderAlreadyFinished
 	}
 
 	if len(o.Groups) == 0 {
@@ -99,7 +94,7 @@ func (o *Order) PendingOrder() (err error) {
 
 func (o *Order) FinishOrder() (err error) {
 	if o.Status != OrderStatusPending {
-		return ErrStatusNotPending
+		return ErrOrderMustBePending
 	}
 
 	if o.Status == OrderStatusFinished {
@@ -129,7 +124,7 @@ func (o *Order) CancelOrder() (err error) {
 
 func (o *Order) ArchiveOrder() (err error) {
 	if o.Status != OrderStatusFinished && o.Status != OrderStatusCanceled {
-		return ErrStatusNotFinishedAndNotCanceled
+		return ErrOrderMustBeFinishedOrCanceled
 	}
 
 	if o.Status == OrderStatusArchived {
@@ -140,4 +135,18 @@ func (o *Order) ArchiveOrder() (err error) {
 	o.ArchivedAt = &time.Time{}
 	*o.ArchivedAt = time.Now()
 	return nil
+}
+
+func (o *Order) UnarchiveOrder() (err error) {
+	if o.Status != OrderStatusArchived {
+		return ErrOrderMustBeArchived
+	}
+
+	if o.CancelledAt != nil {
+		o.Status = OrderStatusCanceled
+		return
+	}
+
+	o.Status = OrderStatusFinished
+	return
 }

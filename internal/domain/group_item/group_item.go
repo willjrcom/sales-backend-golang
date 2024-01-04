@@ -55,10 +55,11 @@ func (i *GroupItem) PendingGroupItem() (err error) {
 		return ErrQuantityNotInteger
 	}
 
-	if i.Status == StatusGroupStaging {
-		i.Status = StatusGroupPending
+	if i.Status != StatusGroupStaging {
+		return nil
 	}
 
+	i.Status = StatusGroupPending
 	i.PendingAt = &time.Time{}
 	*i.PendingAt = time.Now()
 	return nil
