@@ -15,7 +15,7 @@ type Person struct {
 type PersonCommonAttributes struct {
 	Name      string                  `bun:"name,notnull" json:"name"`
 	Email     string                  `bun:"email" json:"email"`
-	Cpf       string                  `bun:"cpf" json:"cpf"`
+	Cpf       string                  `bun:"cpf,unique" json:"cpf"`
 	Birthday  *time.Time              `bun:"birthday" json:"birthday"`
 	Contacts  []Contact               `bun:"rel:has-many,join:id=person_id,notnull" json:"contacts"`
 	Addresses []addressentity.Address `bun:"rel:has-many,join:id=person_id,notnull" json:"addresses"`

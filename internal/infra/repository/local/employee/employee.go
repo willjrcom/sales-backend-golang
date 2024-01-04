@@ -29,6 +29,6 @@ func (r *EmployeeRepositoryLocal) GetEmployeeById(ctx context.Context, id string
 	return nil, nil
 }
 
-func (r *EmployeeRepositoryLocal) GetAllEmployee(ctx context.Context) ([]employeeentity.Employee, error) {
+func (r *EmployeeRepositoryLocal) GetAllEmployees(ctx context.Context) ([]employeeentity.Employee, error) {
 	return nil, nil
 }

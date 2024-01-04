@@ -92,7 +92,7 @@ func clientsToDtos(clients []cliententity.Client) []clientdto.ClientOutput {
 	return dtos
 }
 
-func (s *Service) RegisterContactToClient(ctx context.Context, dto *contactdto.RegisterContactClientInput) (uuid.UUID, error) {
+func (s *Service) RegisterContactToClient(ctx context.Context, dto *contactdto.RegisterContactInput) (uuid.UUID, error) {
 	contact, err := dto.ToModel()
 
 	if err != nil {

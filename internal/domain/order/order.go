@@ -23,7 +23,7 @@ var (
 
 type Order struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:orders"`
+	bun.BaseModel `bun:"table:orders,alias:order"`
 	OrderTimeLogs
 	OrderCommonAttributes
 }

@@ -28,6 +28,7 @@ import (
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	contactusecases "github.com/willjrcom/sales-backend-go/internal/usecases/contact"
 	deliveryorderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/delivery_order"
+	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	itemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/item"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
@@ -73,7 +74,7 @@ var HttpserverCmd = &cobra.Command{
 		itemRepo := itemrepositorybun.NewItemRepositoryBun(db)
 		groupItemRepo := groupitemrepositorybun.NewGroupItemRepositoryBun(db)
 
-		employeeRepo := employeerepositorybun.NewProductRepositoryBun(db)
+		employeeRepo := employeerepositorybun.NewEmployeeRepositoryBun(db)
 		tableRepo := tablerepositorybun.NewTableRepositoryBun(db)
 
 		// Load services
@@ -84,6 +85,7 @@ var HttpserverCmd = &cobra.Command{
 		processService := processusecases.NewService(processRepo)
 
 		clientService := clientusecases.NewService(clientRepo, contactRepo)
+		employeeService := employeeusecases.NewService(employeeRepo, contactRepo)
 		contactService := contactusecases.NewService(contactRepo)
 
 		orderService := orderusecases.NewService(orderRepo)
@@ -101,6 +103,7 @@ var HttpserverCmd = &cobra.Command{
 		processHandler := handlerimpl.NewHandlerProcessCategory(processService)
 
 		clientHandler := handlerimpl.NewHandlerClient(clientService)
+		employeeHandler := handlerimpl.NewHandlerEmployee(employeeService)
 		contactHandler := handlerimpl.NewHandlerContactPerson(contactService)
 
 		orderHandler := handlerimpl.NewHandlerOrder(orderService)
@@ -117,6 +120,7 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(processHandler)
 
 		server.AddHandler(clientHandler)
+		server.AddHandler(employeeHandler)
 		server.AddHandler(contactHandler)
 
 		server.AddHandler(orderHandler)

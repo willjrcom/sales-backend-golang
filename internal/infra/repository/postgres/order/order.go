@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
@@ -82,13 +83,26 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (*orderentity.Order, error) {
-	order := &orderentity.Order{}
+func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order *orderentity.Order, err error) {
+	order = &orderentity.Order{}
+	order.ID = uuid.MustParse(id)
+	relation := ""
+
+	if order.Table != nil {
+		relation = "Table"
+	} else if order.Delivery != nil {
+		relation = "Delivery"
+	}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(order).Where("id = ?", id).Relation("Groups.Items").Scan(ctx)
+	query := r.db.NewSelect().Model(order).WherePK().Relation("Groups.Items").Relation("Attendant")
+
+	if relation != "" {
+		query = query.Relation(relation)
+	}
+
+	err = query.Scan(ctx)
 	r.mu.Unlock()
-	// .Relation("Delivery").Relation("Table").Relation("Groups").Relation("Attendant")
 
 	if err != nil {
 		return nil, err
