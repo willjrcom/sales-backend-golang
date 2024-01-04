@@ -52,3 +52,15 @@ func (s *Service) ChangeTable(ctx context.Context, dtoTableOrder *entitydto.IdRe
 	return s.rto.UpdateTableOrder(ctx, tableOrder)
 
 }
+
+func (s *Service) FinishTableOrder(ctx context.Context, dtoID *entitydto.IdRequest) error {
+	table, err := s.rt.GetTableById(ctx, dtoID.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	table.UnlockTable()
+
+	return s.rt.UpdateTable(ctx, table)
+}
