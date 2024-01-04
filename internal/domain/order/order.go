@@ -116,6 +116,10 @@ func (o *Order) CancelOrder() (err error) {
 		return ErrOrderAlreadyArchived
 	}
 
+	for i := range o.Groups {
+		o.Groups[i].CancelGroupItem()
+	}
+
 	o.Status = OrderStatusCanceled
 	o.CancelledAt = &time.Time{}
 	*o.CancelledAt = time.Now()

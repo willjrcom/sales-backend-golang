@@ -43,24 +43,25 @@ func (s *Service) FinishOrder(ctx context.Context, dto *entitydto.IdRequest) err
 	return nil
 }
 
-func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IdRequest) (err error) {
 	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	order.CancelOrder()
+	if err = order.CancelOrder(); err != nil {
+		return err
+	}
 
 	if err := s.ro.UpdateOrder(ctx, order); err != nil {
 		return err
 	}
 
-	// cancelar todos itens
 	return nil
 }
 
-func (s *Service) ArchiveOrder(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) ArchiveOrder(ctx context.Context, dto *entitydto.IdRequest) (err error) {
 	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
