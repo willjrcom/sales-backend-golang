@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 )
 
@@ -28,6 +29,13 @@ func NewServerChi() *ServerChi {
 
 func (c *ServerChi) newServer() {
 	c.Router = chi.NewRouter()
+	Cors := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:4200"}, // Permitir solicitações apenas a partir deste domínio
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"*"},
+		AllowCredentials: true,
+	})
+	c.Router.Use(Cors.Handler)
 }
 
 func (c *ServerChi) StartServer(port string) error {
