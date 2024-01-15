@@ -3,6 +3,7 @@ package orderusecases
 import (
 	"context"
 
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 )
@@ -97,16 +98,24 @@ func (s *Service) UnarchiveOrder(ctx context.Context, dto *entitydto.IdRequest) 
 	return nil
 }
 
-func (s *Service) UpdatePaymentMethod(ctx context.Context, dto *entitydto.IdRequest, dtoPayment *orderdto.UpdatePaymentMethod) error {
+func (s *Service) AddPaymentMethod(ctx context.Context, dto *entitydto.IdRequest, dtoPayment *orderdto.AddPaymentMethod) error {
 	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	dtoPayment.UpdateModel(order)
+	if order.Status != orderentity.OrderStatusPending {
+		return ErrOrderMustBePending
+	}
 
-	if err := s.ro.UpdateOrder(ctx, order); err != nil {
+	paymentOrder, err := dtoPayment.ToModel(order)
+
+	if err != nil {
+		return err
+	}
+
+	if err := s.ro.AddPaymentOrder(ctx, paymentOrder); err != nil {
 		return err
 	}
 

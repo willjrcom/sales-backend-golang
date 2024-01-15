@@ -1,19 +1,17 @@
 package orderentity
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type PaymentOrder struct {
 	PaymentTimeLogs
 	TotalPaid float64   `bun:"total_paid" json:"total_paid"`
 	Change    float64   `bun:"change" json:"change"`
 	Method    PayMethod `bun:"method,notnull" json:"method"`
-}
-
-type PatchPaymentOrder struct {
-	PaymentTimeLogs
-	TotalPaid *float64   `json:"total_paid"`
-	Change    *float64   `json:"change"`
-	Method    *PayMethod `json:"method"`
+	OrderID   uuid.UUID `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
 }
 
 type PaymentTimeLogs struct {
@@ -40,7 +38,7 @@ const (
 	Outros          PayMethod = "Outros"
 )
 
-func GetAll() []PayMethod {
+func GetAllPayMethod() []PayMethod {
 	return []PayMethod{
 		Visa,
 		MasterCard,

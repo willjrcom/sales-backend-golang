@@ -95,3 +95,7 @@ func (r *OrderRepositoryLocal) UpdateTableOrder(ctx context.Context, table *orde
 func (r *OrderRepositoryLocal) DeleteTableOrder(ctx context.Context, id string) error {
 	return nil
 }
+
+func (r *OrderRepositoryLocal) AddPaymentOrder(ctx context.Context, payment *orderentity.PaymentOrder) error {
+	return nil
+}

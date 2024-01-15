@@ -109,10 +109,10 @@ func (h *handlerOrderImpl) handlerUpdatePaymentMethod(w http.ResponseWriter, r *
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	payment := &orderdto.UpdatePaymentMethod{}
+	payment := &orderdto.AddPaymentMethod{}
 	jsonpkg.ParseBody(r, payment)
 
-	if err := h.s.UpdatePaymentMethod(ctx, dtoId, payment); err != nil {
+	if err := h.s.AddPaymentMethod(ctx, dtoId, payment); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)

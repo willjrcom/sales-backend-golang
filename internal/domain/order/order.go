@@ -31,10 +31,10 @@ type Order struct {
 type OrderCommonAttributes struct {
 	OrderType
 	OrderDetail
-	Payment     *PaymentOrder
 	OrderNumber int                         `bun:"order_number,notnull" json:"order_number"`
 	Status      StatusOrder                 `bun:"status,notnull" json:"status"`
 	Groups      []groupitementity.GroupItem `bun:"rel:has-many,join:id=order_id" json:"groups"`
+	Payments    []PaymentOrder              `bun:"rel:has-many,join:id=order_id" json:"payments,omitempty"`
 }
 
 type OrderDetail struct {

@@ -95,7 +95,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	}
 
 	r.mu.Lock()
-	query := r.db.NewSelect().Model(order).WherePK().Relation("Groups.Items").Relation("Attendant")
+	query := r.db.NewSelect().Model(order).WherePK().Relation("Groups.Items").Relation("Attendant").Relation("Payments")
 
 	if relation != "" {
 		query = query.Relation(relation)
@@ -123,4 +123,16 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]orderentity.Or
 	}
 
 	return orders, nil
+}
+
+func (r *OrderRepositoryBun) AddPaymentOrder(ctx context.Context, payment *orderentity.PaymentOrder) error {
+	r.mu.Lock()
+	_, err := r.db.NewInsert().Model(payment).Exec(ctx)
+	r.mu.Unlock()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
