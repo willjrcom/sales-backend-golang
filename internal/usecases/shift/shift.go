@@ -1,0 +1,60 @@
+package contactusecases
+
+import (
+	"context"
+
+	"github.com/google/uuid"
+	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
+	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	shiftdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/shift"
+)
+
+type Service struct {
+	r shiftentity.ShiftRepository
+}
+
+func NewService(c shiftentity.ShiftRepository) *Service {
+	return &Service{r: c}
+}
+
+func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.OpenShift) (id uuid.UUID, err error) {
+	shift, err := dto.ToModel()
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	shift.OpenShift()
+
+	if err = s.r.SaveShift(ctx, shift); err != nil {
+		return uuid.Nil, err
+	}
+
+	return shift.ID, nil
+}
+
+func (s *Service) CloseShift(ctx context.Context, dtoID *entitydto.IdRequest, dto *shiftdto.CloseShift) (err error) {
+	endChange, err := dto.ToModel()
+
+	if err != nil {
+		return err
+	}
+
+	shift, err := s.r.GetShiftByID(ctx, dtoID.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	shift.CloseShift(endChange)
+
+	if err := s.r.SaveShift(ctx, shift); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IdRequest) (shift *shiftentity.Shift, err error) {
+	return s.r.GetShiftByID(ctx, dtoID.ID.String())
+}

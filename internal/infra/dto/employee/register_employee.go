@@ -20,7 +20,7 @@ type RegisterEmployeeInput struct {
 	personentity.PatchPerson
 }
 
-func (r *RegisterEmployeeInput) Validate() error {
+func (r *RegisterEmployeeInput) validate() error {
 	if r.Name == nil || *r.Name == "" {
 		return ErrNameRequired
 	}
@@ -44,7 +44,7 @@ func (r *RegisterEmployeeInput) Validate() error {
 }
 
 func (r *RegisterEmployeeInput) ToModel() (*employeeentity.Employee, error) {
-	if err := r.Validate(); err != nil {
+	if err := r.validate(); err != nil {
 		return nil, err
 	}
 

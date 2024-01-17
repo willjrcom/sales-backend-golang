@@ -15,7 +15,7 @@ type CreateTableInput struct {
 	tableentity.TableCommonAttributes
 }
 
-func (o *CreateTableInput) Validate() error {
+func (o *CreateTableInput) validate() error {
 	if o.Name == "" {
 		return ErrNameRequired
 	}
@@ -24,7 +24,7 @@ func (o *CreateTableInput) Validate() error {
 }
 
 func (o *CreateTableInput) ToModel() (*tableentity.Table, error) {
-	if err := o.Validate(); err != nil {
+	if err := o.validate(); err != nil {
 		return nil, err
 	}
 

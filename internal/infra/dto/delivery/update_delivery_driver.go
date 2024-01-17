@@ -15,7 +15,7 @@ type UpdateDriverOrder struct {
 	DriverID *uuid.UUID `json:"driver_id"`
 }
 
-func (u *UpdateDriverOrder) Validate() error {
+func (u *UpdateDriverOrder) validate() error {
 	if u.DriverID == nil {
 		return ErrInvalidDriverID
 	}
@@ -23,7 +23,7 @@ func (u *UpdateDriverOrder) Validate() error {
 }
 
 func (u *UpdateDriverOrder) UpdateModel(model *orderentity.DeliveryOrder) error {
-	if err := u.Validate(); err != nil {
+	if err := u.validate(); err != nil {
 		return err
 	}
 

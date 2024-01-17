@@ -18,7 +18,7 @@ type CreateTableOrderInput struct {
 	orderentity.TableOrderCommonAttributes
 }
 
-func (o *CreateTableOrderInput) Validate() error {
+func (o *CreateTableOrderInput) validate() error {
 	if o.OrderID == uuid.Nil {
 		return ErrOrderIDRequired
 	}
@@ -35,7 +35,7 @@ func (o *CreateTableOrderInput) Validate() error {
 }
 
 func (o *CreateTableOrderInput) ToModel() (*orderentity.TableOrder, error) {
-	if err := o.Validate(); err != nil {
+	if err := o.validate(); err != nil {
 		return nil, err
 	}
 

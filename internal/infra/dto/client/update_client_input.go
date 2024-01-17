@@ -16,7 +16,7 @@ type UpdateClientInput struct {
 	personentity.PatchPerson
 }
 
-func (r *UpdateClientInput) Validate() error {
+func (r *UpdateClientInput) validate() error {
 	if r.Email != nil && strings.Contains(*r.Email, "@") {
 		return ErrInvalidEmail
 	}
@@ -25,7 +25,7 @@ func (r *UpdateClientInput) Validate() error {
 }
 
 func (r *UpdateClientInput) UpdateModel(client *cliententity.Client) error {
-	if err := r.Validate(); err != nil {
+	if err := r.validate(); err != nil {
 		return err
 	}
 

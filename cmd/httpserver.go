@@ -78,6 +78,7 @@ var HttpserverCmd = &cobra.Command{
 
 		employeeRepo := employeerepositorybun.NewEmployeeRepositoryBun(db)
 		tableRepo := tablerepositorybun.NewTableRepositoryBun(db)
+		shiftRepo := ShiftRepositoryBun.NewShiftRepositoryBun(ctx, db)
 
 		// Load services
 		productService := productusecases.NewService(productRepo, categoryRepo)

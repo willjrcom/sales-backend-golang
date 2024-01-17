@@ -17,7 +17,7 @@ type UpdateDeliveryOrder struct {
 	AddressID *uuid.UUID `json:"address_id"`
 }
 
-func (u *UpdateDeliveryOrder) Validate() error {
+func (u *UpdateDeliveryOrder) validate() error {
 	if u.AddressID == nil {
 		return ErrInvalidAddressID
 	}
@@ -25,7 +25,7 @@ func (u *UpdateDeliveryOrder) Validate() error {
 }
 
 func (u *UpdateDeliveryOrder) UpdateModel(model *orderentity.DeliveryOrder, address *addressentity.Address) error {
-	if err := u.Validate(); err != nil {
+	if err := u.validate(); err != nil {
 		return err
 	}
 

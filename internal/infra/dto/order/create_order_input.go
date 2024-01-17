@@ -15,7 +15,7 @@ type CreateOrderInput struct {
 	Name string `json:"name"`
 }
 
-func (o *CreateOrderInput) Validate() error {
+func (o *CreateOrderInput) validate() error {
 	if o.Name == "" {
 		return ErrNameRequired
 	}
@@ -24,7 +24,7 @@ func (o *CreateOrderInput) Validate() error {
 }
 
 func (o *CreateOrderInput) ToModel() (*orderentity.Order, error) {
-	if err := o.Validate(); err != nil {
+	if err := o.validate(); err != nil {
 		return nil, err
 	}
 

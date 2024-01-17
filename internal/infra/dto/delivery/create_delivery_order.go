@@ -20,7 +20,7 @@ type CreateDeliveryOrderInput struct {
 	AddressID uuid.UUID `json:"address_id"`
 }
 
-func (o *CreateDeliveryOrderInput) Validate() error {
+func (o *CreateDeliveryOrderInput) validate() error {
 	if o.OrderID == uuid.Nil {
 		return ErrOrderIDRequired
 	}
@@ -37,7 +37,7 @@ func (o *CreateDeliveryOrderInput) Validate() error {
 }
 
 func (o *CreateDeliveryOrderInput) ToModel() (*orderentity.DeliveryOrder, error) {
-	if err := o.Validate(); err != nil {
+	if err := o.validate(); err != nil {
 		return nil, err
 	}
 

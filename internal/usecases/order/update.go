@@ -137,3 +137,21 @@ func (s *Service) UpdateOrderObservation(ctx context.Context, dtoId *entitydto.I
 
 	return nil
 }
+
+func (s *Service) UpdateScheduleOrder(ctx context.Context, dtoId *entitydto.IdRequest, dto *orderdto.UpdateScheduleOrder) (err error) {
+	startAt, err := dto.ToModel()
+
+	if err != nil {
+		return err
+	}
+
+	order, err := s.ro.GetOrderById(ctx, dtoId.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	order.ScheduleOrder(startAt)
+
+	return s.ro.UpdateOrder(ctx, order)
+}

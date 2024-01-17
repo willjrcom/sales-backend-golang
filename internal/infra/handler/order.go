@@ -29,6 +29,7 @@ func NewHandlerOrder(orderService *orderusecases.Service) *handler.Handler {
 		c.Get("/all", h.handlerGetAllOrders)
 		c.Put("/update/{id}/observation", h.handlerUpdateObservation)
 		c.Put("/update/{id}/payment", h.handlerUpdatePaymentMethod)
+		c.Put("/update/{id}/schedule", h.handlerScheduleOrder)
 		c.Post("/pending/{id}", h.handlerPendingOrder)
 		c.Post("/finish/{id}", h.handlerFinishOrder)
 		c.Post("/cancel/{id}", h.handlerCancelOrder)
@@ -203,6 +204,27 @@ func (h *handlerOrderImpl) handlerUnarchiveOrder(w http.ResponseWriter, r *http.
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.UnarchiveOrder(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	}
+}
+
+func (h *handlerOrderImpl) handlerScheduleOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	observation := &orderdto.UpdateScheduleOrder{}
+	jsonpkg.ParseBody(r, observation)
+
+	if err := h.s.UpdateScheduleOrder(ctx, dtoId, observation); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)

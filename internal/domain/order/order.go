@@ -38,6 +38,7 @@ type OrderCommonAttributes struct {
 }
 
 type OrderDetail struct {
+	ScheduledOrder
 	Name        string                   `bun:"name" json:"name"`
 	Observation string                   `bun:"observation" json:"observation"`
 	AttendantID *uuid.UUID               `bun:"column:attendant_id,type:uuid,notnull" json:"attendant_id"`
@@ -48,6 +49,10 @@ type OrderDetail struct {
 type OrderType struct {
 	Delivery *DeliveryOrder `bun:"rel:has-one,join:id=order_id" json:"delivery,omitempty"`
 	Table    *TableOrder    `bun:"rel:has-one,join:id=order_id" json:"table,omitempty"`
+}
+
+type ScheduledOrder struct {
+	StartAt *time.Time `bun:"start_at" json:"start_at,omitempty"`
 }
 
 type OrderTimeLogs struct {
@@ -153,4 +158,8 @@ func (o *Order) UnarchiveOrder() (err error) {
 
 	o.Status = OrderStatusFinished
 	return
+}
+
+func (o *Order) ScheduleOrder(startAt *time.Time) {
+	o.StartAt = startAt
 }
