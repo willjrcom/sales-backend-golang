@@ -19,6 +19,7 @@ import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
 	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
 )
 
@@ -85,6 +86,7 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 	bun.RegisterModel((*orderentity.Order)(nil))
 
 	bun.RegisterModel((*tableentity.Table)(nil))
+	bun.RegisterModel((*shiftentity.Shift)(nil))
 
 	if _, err := bun.NewCreateTable().IfNotExists().Model((*entity.Entity)(nil)).Exec(ctx); err != nil {
 		panic("Couldn't create table for entity")
@@ -160,5 +162,9 @@ func loadModels(ctx context.Context, bun *bun.DB) {
 
 	if _, err := bun.NewCreateTable().IfNotExists().Model((*tableentity.Table)(nil)).Exec(ctx); err != nil {
 		panic("Couldn't create table for table")
+	}
+
+	if _, err := bun.NewCreateTable().IfNotExists().Model((*shiftentity.Shift)(nil)).Exec(ctx); err != nil {
+		panic("Couldn't create table for shift")
 	}
 }

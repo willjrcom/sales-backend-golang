@@ -1,4 +1,4 @@
-package contactrepositorybun
+package shiftrepositorybun
 
 import (
 	"sync"
@@ -17,9 +17,21 @@ func NewShiftRepositoryBun(ctx context.Context, db *bun.DB) *ShiftRepositoryBun 
 	return &ShiftRepositoryBun{db: db}
 }
 
-func (r *ShiftRepositoryBun) SaveShift(ctx context.Context, c *shiftentity.Shift) error {
+func (r *ShiftRepositoryBun) CreateShift(ctx context.Context, c *shiftentity.Shift) error {
 	r.mu.Lock()
 	_, err := r.db.NewInsert().Model(c).Exec(ctx)
+	r.mu.Unlock()
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ShiftRepositoryBun) UpdateShift(ctx context.Context, c *shiftentity.Shift) error {
+	r.mu.Lock()
+	_, err := r.db.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -41,18 +53,18 @@ func (r *ShiftRepositoryBun) DeleteShift(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *ShiftRepositoryBun) GetShiftById(ctx context.Context, id string) (*shiftentity.Shift, error) {
-	contact := &shiftentity.Shift{}
+func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*shiftentity.Shift, error) {
+	shift := &shiftentity.Shift{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(contact).Where("shift.id = ?", id).Scan(ctx)
+	err := r.db.NewSelect().Model(shift).Where("shift.id = ?", id).Relation("Attendant").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
 		return nil, err
 	}
 
-	return contact, nil
+	return shift, nil
 }
 
 func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context) ([]shiftentity.Shift, error) {

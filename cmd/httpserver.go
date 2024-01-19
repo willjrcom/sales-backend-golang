@@ -22,6 +22,7 @@ import (
 	processrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/process_category"
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
 	quantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity_category"
+	shiftrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/shift"
 	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size_category"
 	tablerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/table"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
@@ -35,6 +36,7 @@ import (
 	processusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_category"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity_category"
+	shiftusecases "github.com/willjrcom/sales-backend-go/internal/usecases/shift"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
 	tableusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table"
 	tableorderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table_order"
@@ -78,7 +80,7 @@ var HttpserverCmd = &cobra.Command{
 
 		employeeRepo := employeerepositorybun.NewEmployeeRepositoryBun(db)
 		tableRepo := tablerepositorybun.NewTableRepositoryBun(db)
-		shiftRepo := ShiftRepositoryBun.NewShiftRepositoryBun(ctx, db)
+		shiftRepo := shiftrepositorybun.NewShiftRepositoryBun(ctx, db)
 
 		// Load services
 		productService := productusecases.NewService(productRepo, categoryRepo)
@@ -91,13 +93,14 @@ var HttpserverCmd = &cobra.Command{
 		employeeService := employeeusecases.NewService(employeeRepo, contactRepo)
 		contactService := contactusecases.NewService(contactRepo)
 
-		orderService := orderusecases.NewService(orderRepo)
+		orderService := orderusecases.NewService(orderRepo, shiftRepo)
 		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo, employeeRepo)
 		tableOrderService := tableorderusecases.NewService(tableOrderRepo, tableRepo)
 		itemService := itemusecases.NewService(itemRepo, groupItemRepo, orderRepo, productRepo, quantityRepo)
 		groupService := groupitemusecases.NewService(itemRepo, groupItemRepo)
 
 		tableService := tableusecases.NewService(tableRepo)
+		shiftService := shiftusecases.NewService(shiftRepo)
 
 		// Load handlers
 		productHandler := handlerimpl.NewHandlerProduct(productService)
@@ -117,6 +120,7 @@ var HttpserverCmd = &cobra.Command{
 		groupHandler := handlerimpl.NewHandlerGroupItem(groupService)
 
 		tableHandler := handlerimpl.NewHandlerTable(tableService)
+		shiftHandler := handlerimpl.NewHandlerShift(shiftService)
 
 		server.AddHandler(productHandler)
 		server.AddHandler(categoryHandler)
@@ -135,6 +139,7 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(groupHandler)
 
 		server.AddHandler(tableHandler)
+		server.AddHandler(shiftHandler)
 
 		if err := server.StartServer(port); err != nil {
 			panic(err)

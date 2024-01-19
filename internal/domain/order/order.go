@@ -39,11 +39,10 @@ type OrderCommonAttributes struct {
 
 type OrderDetail struct {
 	ScheduledOrder
-	Name        string                   `bun:"name" json:"name"`
 	Observation string                   `bun:"observation" json:"observation"`
 	AttendantID *uuid.UUID               `bun:"column:attendant_id,type:uuid,notnull" json:"attendant_id"`
 	Attendant   *employeeentity.Employee `bun:"rel:belongs-to" json:"attendant,omitempty"`
-	ShiftID     *uuid.UUID               `bun:"column:shift_id,type:uuid,notnull" json:"shift_id"`
+	ShiftID     *uuid.UUID               `bun:"column:shift_id,type:uuid" json:"shift_id"`
 }
 
 type OrderType struct {
@@ -62,10 +61,16 @@ type OrderTimeLogs struct {
 	ArchivedAt  *time.Time `bun:"archived_at" json:"archived_at,omitempty"`
 }
 
-func NewDefaultOrder() *Order {
+func NewDefaultOrder(shiftID *uuid.UUID, currentOrderNumber int, attendantID *uuid.UUID) *Order {
 	order := &Order{
-		Entity:                entity.NewEntity(),
-		OrderCommonAttributes: OrderCommonAttributes{},
+		Entity: entity.NewEntity(),
+		OrderCommonAttributes: OrderCommonAttributes{
+			OrderNumber: currentOrderNumber,
+			OrderDetail: OrderDetail{
+				ShiftID:     shiftID,
+				AttendantID: attendantID,
+			},
+		},
 	}
 
 	order.StagingOrder()

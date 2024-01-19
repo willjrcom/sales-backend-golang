@@ -3,38 +3,29 @@ package orderdto
 import (
 	"errors"
 
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	"github.com/google/uuid"
 )
 
 var (
-	ErrNameRequired = errors.New("name is required")
+	ErrShiftIDRequired = errors.New("shift ID is required")
 )
 
 type CreateOrderInput struct {
-	Name string `json:"name"`
+	ShiftID *uuid.UUID `json:"shift_id"`
 }
 
 func (o *CreateOrderInput) validate() error {
-	if o.Name == "" {
-		return ErrNameRequired
+	if o.ShiftID == nil {
+		return ErrShiftIDRequired
 	}
 
 	return nil
 }
 
-func (o *CreateOrderInput) ToModel() (*orderentity.Order, error) {
+func (o *CreateOrderInput) ToModel() (*uuid.UUID, error) {
 	if err := o.validate(); err != nil {
 		return nil, err
 	}
 
-	orderCommonAttributes := orderentity.OrderCommonAttributes{
-		OrderDetail: orderentity.OrderDetail{Name: o.Name},
-		Status:      orderentity.OrderStatusStaging,
-	}
-
-	return &orderentity.Order{
-		Entity:                entity.NewEntity(),
-		OrderCommonAttributes: orderCommonAttributes,
-	}, nil
+	return o.ShiftID, nil
 }

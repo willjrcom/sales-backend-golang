@@ -1,12 +1,17 @@
-package contactusecases
+package shiftusecases
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	shiftdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/shift"
+)
+
+var (
+	ErrShiftAlreadyClosed = errors.New("shift already closed")
 )
 
 type Service struct {
@@ -26,7 +31,7 @@ func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.OpenShift) (id uu
 
 	shift.OpenShift()
 
-	if err = s.r.SaveShift(ctx, shift); err != nil {
+	if err = s.r.CreateShift(ctx, shift); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -46,9 +51,13 @@ func (s *Service) CloseShift(ctx context.Context, dtoID *entitydto.IdRequest, dt
 		return err
 	}
 
+	if shift.IsClosed() {
+		return ErrShiftAlreadyClosed
+	}
+
 	shift.CloseShift(endChange)
 
-	if err := s.r.SaveShift(ctx, shift); err != nil {
+	if err := s.r.UpdateShift(ctx, shift); err != nil {
 		return err
 	}
 

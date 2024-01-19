@@ -26,7 +26,7 @@ func NewHandlerShift(shiftService *shiftusecases.Service) *handler.Handler {
 	c.With().Group(func(c chi.Router) {
 		c.Post("/open", h.handlerOpenShift)
 		c.Put("/close/{id}", h.handlerCloseShift)
-		c.Get("/{id}", h.handlerGetShiftById)
+		c.Get("/{id}", h.handlerGetShiftByID)
 	})
 
 	return handler.NewHandler("/shift", c)
@@ -66,7 +66,7 @@ func (h *handlerShiftImpl) handlerCloseShift(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-func (h *handlerShiftImpl) handlerGetShiftById(w http.ResponseWriter, r *http.Request) {
+func (h *handlerShiftImpl) handlerGetShiftByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")

@@ -18,13 +18,14 @@ type Shift struct {
 }
 
 type ShiftCommonAttributes struct {
-	Day         *time.Time               `bun:"day,notnull" json:"day"`
-	Orders      []orderentity.Order      `bun:"rel:has-many,join:id=shift_id" json:"orders"`
-	Redeem      []string                 `bun:"redeem,type:json" json:"redeem"`
-	StartChange float32                  `bun:"start_change" json:"start_change"`
-	EndChange   *float32                 `bun:"end_change" json:"end_change"`
-	AttendantID *uuid.UUID               `bun:"column:attendant_id,type:uuid" json:"attendant_id"`
-	Attendant   *employeeentity.Employee `bun:"rel:belongs-to" json:"attendant"`
+	CurrentOrderNumber int                      `bun:"current_order_number,notnull" json:"current_order_number"`
+	Day                *time.Time               `bun:"day,notnull" json:"day"`
+	Orders             []orderentity.Order      `bun:"rel:has-many,join:id=shift_id" json:"orders,omitempty"`
+	Redeems            []string                 `bun:"redeems,type:json" json:"redeems,omitempty"`
+	StartChange        float32                  `bun:"start_change" json:"start_change"`
+	EndChange          *float32                 `bun:"end_change" json:"end_change,omitempty"`
+	AttendantID        *uuid.UUID               `bun:"column:attendant_id,type:uuid" json:"attendant_id"`
+	Attendant          *employeeentity.Employee `bun:"rel:belongs-to" json:"attendant"`
 }
 
 type OrderTimeLogs struct {
@@ -33,6 +34,7 @@ type OrderTimeLogs struct {
 }
 
 func (s *Shift) OpenShift() (err error) {
+	s.CurrentOrderNumber = 0
 	s.OpenedAt = &time.Time{}
 	*s.OpenedAt = time.Now()
 	return nil
@@ -43,4 +45,12 @@ func (s *Shift) CloseShift(endChange float32) (err error) {
 	s.ClosedAt = &time.Time{}
 	*s.ClosedAt = time.Now()
 	return nil
+}
+
+func (s *Shift) IncrementCurrentOrder() {
+	s.CurrentOrderNumber++
+}
+
+func (s *Shift) IsClosed() bool {
+	return s.EndChange != nil
 }
