@@ -14,7 +14,7 @@ import (
 	addressrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/address"
 	categoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/category_product"
 	clientrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/client"
-	companyrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/company1"
+	companyrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/company"
 	contactrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/contact"
 	employeerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/employee"
 	groupitemrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/group_item"
