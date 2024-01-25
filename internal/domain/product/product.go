@@ -22,6 +22,7 @@ type Product struct {
 type ProductCommonAttributes struct {
 	Code        string    `bun:"code,unique,notnull" json:"code"`
 	Name        string    `bun:"name,notnull" json:"name"`
+	ImagePath   *string   `bun:"image_path" json:"image_path"`
 	Description string    `bun:"description" json:"description"`
 	Price       float64   `bun:"price,notnull" json:"price"`
 	Cost        float64   `bun:"cost" json:"cost"`
@@ -35,6 +36,7 @@ type ProductCommonAttributes struct {
 type PatchProduct struct {
 	Code        *string    `json:"code"`
 	Name        *string    `json:"name"`
+	ImagePath   *string    `json:"image_path"`
 	Description *string    `json:"description"`
 	Price       *float64   `json:"price"`
 	Cost        *float64   `json:"cost"`

@@ -1,0 +1,23 @@
+<!-- Frontend HTML/JavaScript -->
+<form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" name="image" id="imagemInput" accept="image/*">
+    <button type="button" onclick="uploadImagem()">Enviar Imagem</button>
+</form>
+
+<script>
+    function uploadImagem() {
+        var formData = new FormData(document.getElementById('uploadForm'));
+
+        fetch('http://localhost:8080/product/new', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Resposta do backend:', data);
+        })
+        .catch(error => {
+            console.error('Erro ao enviar imagem:', error);
+        });
+    }
+</script>

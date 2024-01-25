@@ -2,6 +2,7 @@ package productdto
 
 import (
 	"errors"
+	"mime/multipart"
 
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
@@ -18,6 +19,7 @@ var (
 
 type RegisterProductInput struct {
 	productentity.ProductCommonAttributes
+	Image *multipart.File `json:"image"`
 }
 
 func (p *RegisterProductInput) validate() error {

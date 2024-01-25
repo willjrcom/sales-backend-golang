@@ -3,11 +3,13 @@ package productusecases
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
 var (
@@ -39,6 +41,13 @@ func (s *Service) RegisterProduct(ctx context.Context, dto *productdto.RegisterP
 	if exists, err := product.FindSizeInCategory(); !exists {
 		return uuid.Nil, err
 	}
+
+	imagePath, err := s3.UploadToS3(dto.Image)
+	if err != nil {
+		fmt.Printf("Erro ao fazer upload: %v\n", err)
+	}
+
+	product.ImagePath = imagePath
 
 	if err := s.rp.RegisterProduct(ctx, product); err != nil {
 		return uuid.Nil, err
