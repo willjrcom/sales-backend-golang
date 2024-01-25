@@ -1,6 +1,8 @@
 package addressentity
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
@@ -13,7 +15,7 @@ type Address struct {
 }
 
 type AddressCommonAttributes struct {
-	PersonID     uuid.UUID `bun:"person_id,type:uuid,notnull" json:"person_id"`
+	ObjectID     uuid.UUID `bun:"object_id,type:uuid,notnull" json:"object_id"`
 	Street       string    `bun:"street,notnull" json:"street"`
 	Number       string    `bun:"number,notnull" json:"number"`
 	Complement   string    `bun:"complement" json:"complement"`
@@ -36,4 +38,23 @@ type PatchAddress struct {
 	State        *string  `json:"state"`
 	Cep          *string  `json:"cep"`
 	DeliveryTax  *float64 `json:"delivery_tax"`
+}
+
+func (a *Address) Validate() error {
+	if a.Street == "" {
+		return errors.New("street is required")
+	}
+	if a.Number == "" {
+		return errors.New("number is required")
+	}
+	if a.Neighborhood == "" {
+		return errors.New("neighborhood is required")
+	}
+	if a.City == "" {
+		return errors.New("city is required")
+	}
+	if a.State == "" {
+		return errors.New("state is required")
+	}
+	return nil
 }

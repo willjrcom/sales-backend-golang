@@ -52,7 +52,7 @@ func (r *RegisterClientInput) ToModel() (*cliententity.Client, error) {
 
 	for i := range r.Addresses {
 		r.Addresses[i].Entity = entity.NewEntity()
-		r.Addresses[i].PersonID = personEntity.ID
+		r.Addresses[i].ObjectID = personEntity.ID
 	}
 
 	personCommonAttributes := personentity.PersonCommonAttributes{

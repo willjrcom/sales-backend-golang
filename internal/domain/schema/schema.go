@@ -3,5 +3,5 @@ package schemaentity
 import "context"
 
 type Repository interface {
-	NewSchema(ctx context.Context, id string)
+	NewSchema(ctx context.Context, id string) error
 }

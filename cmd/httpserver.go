@@ -14,6 +14,7 @@ import (
 	addressrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/address"
 	categoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/category_product"
 	clientrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/client"
+	companyrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/company1"
 	contactrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/contact"
 	employeerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/employee"
 	groupitemrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/group_item"
@@ -26,8 +27,10 @@ import (
 	shiftrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/shift"
 	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size_category"
 	tablerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/table"
+	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/schema"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
+	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 	contactusecases "github.com/willjrcom/sales-backend-go/internal/usecases/contact"
 	deliveryorderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/delivery_order"
 	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
@@ -37,7 +40,6 @@ import (
 	processusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_category"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity_category"
-	schemausecases "github.com/willjrcom/sales-backend-go/internal/usecases/schema"
 	shiftusecases "github.com/willjrcom/sales-backend-go/internal/usecases/shift"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
 	tableusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table"
@@ -85,6 +87,7 @@ var HttpserverCmd = &cobra.Command{
 		shiftRepo := shiftrepositorybun.NewShiftRepositoryBun(db)
 
 		schemaRepo := schemarepositorybun.NewSchemaRepositoryBun(db)
+		companyRepo := companyrepositorybun.NewCompanyRepositoryBun(db)
 
 		// Load services
 		productService := productusecases.NewService(productRepo, categoryRepo)
@@ -106,7 +109,8 @@ var HttpserverCmd = &cobra.Command{
 		tableService := tableusecases.NewService(tableRepo)
 		shiftService := shiftusecases.NewService(shiftRepo)
 
-		schemaService := schemausecases.NewService(schemaRepo)
+		schemaService := schemaservice.NewService(schemaRepo)
+		companyService := companyusecases.NewService(companyRepo, *schemaService)
 
 		// Load handlers
 		productHandler := handlerimpl.NewHandlerProduct(productService)
@@ -128,7 +132,7 @@ var HttpserverCmd = &cobra.Command{
 		tableHandler := handlerimpl.NewHandlerTable(tableService)
 		shiftHandler := handlerimpl.NewHandlerShift(shiftService)
 
-		schemaHandler := handlerimpl.NewHandlerSchema(schemaService)
+		companyHandler := handlerimpl.NewHandlerCompany(companyService)
 
 		server.AddHandler(productHandler)
 		server.AddHandler(categoryHandler)
@@ -149,7 +153,7 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(tableHandler)
 		server.AddHandler(shiftHandler)
 
-		server.AddHandler(schemaHandler)
+		server.AddHandler(companyHandler)
 
 		if err := server.StartServer(port); err != nil {
 			panic(err)

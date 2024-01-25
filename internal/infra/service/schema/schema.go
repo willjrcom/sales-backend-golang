@@ -1,10 +1,9 @@
-package schemausecases
+package schemaservice
 
 import (
 	"context"
 
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
-	schemadto "github.com/willjrcom/sales-backend-go/internal/infra/dto/schema"
 )
 
 type Service struct {
@@ -15,6 +14,6 @@ func NewService(r schemaentity.Repository) *Service {
 	return &Service{r: r}
 }
 
-func (s *Service) NewSchema(ctx context.Context, dto *schemadto.SchemaInput) {
-	s.r.NewSchema(ctx, dto.Name)
+func (s *Service) NewSchema(ctx context.Context, name string) error {
+	return s.r.NewSchema(ctx, name)
 }

@@ -57,7 +57,7 @@ func (c *RegisterContactInput) ToModel() (*personentity.Contact, error) {
 	}
 
 	contactCommonAttributes := personentity.ContactCommonAttributes{
-		PersonID: id,
+		ObjectID: id,
 		Ddd:      ddd,
 		Number:   number,
 		Type:     contactType,

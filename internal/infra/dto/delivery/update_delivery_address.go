@@ -30,7 +30,7 @@ func (u *UpdateDeliveryOrder) UpdateModel(model *orderentity.DeliveryOrder, addr
 	}
 
 	// Validate if address is from client
-	if address.PersonID != model.ClientID {
+	if address.ObjectID != model.ClientID {
 		return ErrAddressNotInClient
 	}
 

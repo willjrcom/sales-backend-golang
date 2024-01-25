@@ -90,12 +90,12 @@ func (r *EmployeeRepositoryBun) DeleteEmployee(ctx context.Context, id string) e
 	}
 
 	// Delete contacts
-	if _, err = tx.NewDelete().Model(&personentity.Contact{}).Where("person_id = ?", id).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", id).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
 
 	// Delete addresses
-	if _, err = tx.NewDelete().Model(&addressentity.Address{}).Where("person_id = ?", id).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", id).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
 

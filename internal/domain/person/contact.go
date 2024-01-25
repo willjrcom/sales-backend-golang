@@ -21,7 +21,7 @@ type Contact struct {
 }
 
 type ContactCommonAttributes struct {
-	PersonID uuid.UUID   `bun:"person_id,type:uuid,notnull" json:"person_id"`
+	ObjectID uuid.UUID   `bun:"object_id,type:uuid,notnull" json:"object_id"`
 	Ddd      string      `bun:"ddd,notnull" json:"ddd"`
 	Number   string      `bun:"number,notnull" json:"number"`
 	Type     ContactType `bun:"type,notnull" json:"type"`

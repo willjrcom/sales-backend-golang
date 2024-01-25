@@ -100,7 +100,7 @@ func (s *Service) RegisterContactToClient(ctx context.Context, dto *contactdto.R
 	}
 
 	// Validate if exists
-	if _, err := s.rclient.GetClientById(ctx, contact.PersonID.String()); err != nil {
+	if _, err := s.rclient.GetClientById(ctx, contact.ObjectID.String()); err != nil {
 		return uuid.Nil, err
 	}
 

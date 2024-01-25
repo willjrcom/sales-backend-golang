@@ -100,7 +100,7 @@ func (s *Service) RegisterContactToEmployee(ctx context.Context, dto *contactdto
 	}
 
 	// Validate if exists
-	if _, err := s.re.GetEmployeeById(ctx, contact.PersonID.String()); err != nil {
+	if _, err := s.re.GetEmployeeById(ctx, contact.ObjectID.String()); err != nil {
 		return uuid.Nil, err
 	}
 

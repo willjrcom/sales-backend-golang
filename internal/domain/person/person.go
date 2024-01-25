@@ -17,8 +17,8 @@ type PersonCommonAttributes struct {
 	Email     string                  `bun:"email" json:"email,omitempty"`
 	Cpf       string                  `bun:"cpf" json:"cpf,omitempty"`
 	Birthday  *time.Time              `bun:"birthday" json:"birthday,omitempty"`
-	Contacts  []Contact               `bun:"rel:has-many,join:id=person_id,notnull" json:"contacts,omitempty"`
-	Addresses []addressentity.Address `bun:"rel:has-many,join:id=person_id,notnull" json:"addresses,omitempty"`
+	Contacts  []Contact               `bun:"rel:has-many,join:id=object_id,notnull" json:"contacts,omitempty"`
+	Addresses []addressentity.Address `bun:"rel:has-many,join:id=object_id,notnull" json:"addresses,omitempty"`
 }
 
 type PatchPerson struct {
@@ -40,7 +40,7 @@ func (p *Person) AddContact(contactInput string, contactType ContactType) error 
 	contact := Contact{
 		Entity: entity.NewEntity(),
 		ContactCommonAttributes: ContactCommonAttributes{
-			PersonID: p.ID,
+			ObjectID: p.ID,
 			Ddd:      ddd,
 			Number:   number,
 			Type:     contactType,

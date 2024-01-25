@@ -83,12 +83,12 @@ func (r *ClientRepositoryBun) DeleteClient(ctx context.Context, id string) error
 	}
 
 	// Delete contacts
-	if _, err = tx.NewDelete().Model(&personentity.Contact{}).Where("person_id = ?", id).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", id).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
 
 	// Delete addresses
-	if _, err = tx.NewDelete().Model(&addressentity.Address{}).Where("person_id = ?", id).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", id).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
 
