@@ -13,7 +13,7 @@ type ShiftRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewShiftRepositoryBun(ctx context.Context, db *bun.DB) *ShiftRepositoryBun {
+func NewShiftRepositoryBun(db *bun.DB) *ShiftRepositoryBun {
 	return &ShiftRepositoryBun{db: db}
 }
 

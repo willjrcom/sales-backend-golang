@@ -56,6 +56,8 @@ func (r *ProductRepositoryBun) DeleteProduct(ctx context.Context, id string) err
 func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*productentity.Product, error) {
 	product := &productentity.Product{}
 
+	ChangeSchema(r.db, "patrik_dog")
+
 	r.mu.Lock()
 	err := r.db.NewSelect().Model(product).Where("product.id = ?", id).Relation("Category").Relation("Size").Scan(ctx)
 	r.mu.Unlock()
@@ -69,6 +71,9 @@ func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*
 
 func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context) ([]productentity.Product, error) {
 	products := []productentity.Product{}
+
+	ChangeSchema(r.db, "public")
+
 	r.mu.Lock()
 	err := r.db.NewSelect().Model(&products).Relation("Category").Relation("Size").Scan(ctx)
 
@@ -79,4 +84,10 @@ func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context) ([]productent
 	}
 
 	return products, nil
+}
+
+// Exemplo de alteração dinâmica do schema no Bun ORM
+func ChangeSchema(db *bun.DB, schemaName string) error {
+	_, err := db.Exec("SET search_path=?", schemaName)
+	return err
 }

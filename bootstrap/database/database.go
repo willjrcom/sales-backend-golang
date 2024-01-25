@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/uptrace/bun"
@@ -58,113 +59,150 @@ func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 	bun := bun.NewDB(db, pgdialect.New())
 	fmt.Println("Db connected")
 
-	loadModels(ctx, bun)
+	LoadModels(ctx, bun, "public")
 	return bun, nil
 }
 
-func loadModels(ctx context.Context, bun *bun.DB) {
-	bun.RegisterModel((*entity.Entity)(nil))
+func ChangeSchema(db *bun.DB, schemaName string) error {
+	_, err := db.Exec("SET search_path=?", schemaName)
+	return err
+}
 
-	bun.RegisterModel((*productentity.Size)(nil))
-	bun.RegisterModel((*productentity.Quantity)(nil))
-	bun.RegisterModel((*productentity.CategoryToAditionalCategories)(nil))
-	bun.RegisterModel((*productentity.Category)(nil))
-	bun.RegisterModel((*productentity.Process)(nil))
-	bun.RegisterModel((*productentity.Product)(nil))
+func LoadModels(ctx context.Context, db *bun.DB, schema string) {
+	mu := sync.Mutex{}
+	mu.Lock()
 
-	bun.RegisterModel((*addressentity.Address)(nil))
-	bun.RegisterModel((*personentity.Contact)(nil))
-	bun.RegisterModel((*cliententity.Client)(nil))
-	bun.RegisterModel((*employeeentity.Employee)(nil))
+	if _, err := db.Exec("CREATE SCHEMA IF NOT EXISTS " + schema); err != nil {
+		panic(err)
+	}
 
-	bun.RegisterModel((*itementity.Item)(nil))
-	bun.RegisterModel((*groupitementity.GroupItem)(nil))
+	if err := ChangeSchema(db, schema); err != nil {
+		mu.Unlock()
+		panic(err)
+	}
 
-	bun.RegisterModel((*orderentity.DeliveryOrder)(nil))
-	bun.RegisterModel((*orderentity.TableOrder)(nil))
-	bun.RegisterModel((*orderentity.PaymentOrder)(nil))
-	bun.RegisterModel((*orderentity.Order)(nil))
+	db.RegisterModel((*entity.Entity)(nil))
 
-	bun.RegisterModel((*tableentity.Table)(nil))
-	bun.RegisterModel((*shiftentity.Shift)(nil))
+	db.RegisterModel((*productentity.Size)(nil))
+	db.RegisterModel((*productentity.Quantity)(nil))
+	db.RegisterModel((*productentity.CategoryToAditionalCategories)(nil))
+	db.RegisterModel((*productentity.Category)(nil))
+	db.RegisterModel((*productentity.Process)(nil))
+	db.RegisterModel((*productentity.Product)(nil))
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*entity.Entity)(nil)).Exec(ctx); err != nil {
+	db.RegisterModel((*addressentity.Address)(nil))
+	db.RegisterModel((*personentity.Contact)(nil))
+	db.RegisterModel((*cliententity.Client)(nil))
+	db.RegisterModel((*employeeentity.Employee)(nil))
+
+	db.RegisterModel((*itementity.Item)(nil))
+	db.RegisterModel((*groupitementity.GroupItem)(nil))
+
+	db.RegisterModel((*orderentity.DeliveryOrder)(nil))
+	db.RegisterModel((*orderentity.TableOrder)(nil))
+	db.RegisterModel((*orderentity.PaymentOrder)(nil))
+	db.RegisterModel((*orderentity.Order)(nil))
+
+	db.RegisterModel((*tableentity.Table)(nil))
+	db.RegisterModel((*shiftentity.Shift)(nil))
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*entity.Entity)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for entity")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Size)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Size)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for size category")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.CategoryToAditionalCategories)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.CategoryToAditionalCategories)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for category to aditional")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Category)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Category)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for category product")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Quantity)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Quantity)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for quantity category")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Process)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Process)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for process category")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*productentity.Product)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Product)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for product")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*addressentity.Address)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*addressentity.Address)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for address")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*personentity.Contact)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*personentity.Contact)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for address")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*personentity.Person)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*personentity.Person)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for person")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*cliententity.Client)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*cliententity.Client)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for client")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*employeeentity.Employee)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*employeeentity.Employee)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for employee")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*itementity.Item)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*itementity.Item)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for item")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*groupitementity.GroupItem)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*groupitementity.GroupItem)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for items")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*orderentity.DeliveryOrder)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.DeliveryOrder)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for delivery order")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*orderentity.TableOrder)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.TableOrder)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for table order")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*orderentity.PaymentOrder)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.PaymentOrder)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for payment order")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*orderentity.Order)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.Order)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for order")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*tableentity.Table)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*tableentity.Table)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for table")
 	}
 
-	if _, err := bun.NewCreateTable().IfNotExists().Model((*shiftentity.Shift)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*shiftentity.Shift)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		panic("Couldn't create table for shift")
 	}
 }
