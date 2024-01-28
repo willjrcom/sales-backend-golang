@@ -61,7 +61,7 @@ func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *g
 	}
 
 	itemCommonAttributes := itementity.ItemCommonAttributes{
-		Name:        product.Name,
+		Name:        product.Name + " (" + product.Size.Name + ")",
 		Price:       product.Price * quantity.Quantity,
 		Description: product.Description,
 		Quantity:    quantity.Quantity,

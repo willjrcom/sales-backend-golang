@@ -39,6 +39,7 @@ type GroupDetails struct {
 	Status     StatusGroupItem         `bun:"status,notnull" json:"status"`
 	Total      float64                 `bun:"total" json:"total"`
 	Quantity   float64                 `bun:"quantity" json:"quantity"`
+	NeedPrint  bool                    `bun:"need_print" json:"need_print"`
 	CategoryID uuid.UUID               `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
 	Category   *productentity.Category `bun:"rel:belongs-to" json:"category,omitempty"`
 }
@@ -48,6 +49,13 @@ type GroupItemTimeLogs struct {
 	StartedAt   *time.Time `bun:"started_at" json:"started_at,omitempty"`
 	ReadyAt     *time.Time `bun:"ready_at" json:"ready_at,omitempty"`
 	CancelledAt *time.Time `bun:"cancelled_at" json:"cancelled_at,omitempty"`
+}
+
+func NewGroupItem(groupCommonAttributes GroupCommonAttributes) *GroupItem {
+	return &GroupItem{
+		Entity:                entity.NewEntity(),
+		GroupCommonAttributes: groupCommonAttributes,
+	}
 }
 
 func (i *GroupItem) PendingGroupItem() (err error) {

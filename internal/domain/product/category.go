@@ -14,6 +14,7 @@ type Category struct {
 
 type CategoryCommonAttributes struct {
 	Name                string     `bun:"name,notnull" json:"name"`
+	NeedPrint           bool       `bun:"need_print,notnull" json:"need_print"`
 	Sizes               []Size     `bun:"rel:has-many,join:id=category_id" json:"sizes,omitempty"`
 	Quantities          []Quantity `bun:"rel:has-many,join:id=category_id" json:"quantities,omitempty"`
 	Products            []Product  `bun:"rel:has-many,join:id=category_id" json:"products,omitempty"`
@@ -22,7 +23,8 @@ type CategoryCommonAttributes struct {
 }
 
 type PatchCategory struct {
-	Name *string `json:"name"`
+	Name      *string `json:"name"`
+	NeedPrint *bool   `json:"need_print"`
 }
 
 type CategoryToAditionalCategories struct {

@@ -110,6 +110,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		return nil, err
 	}
 
+	order.CalculateTotalChange()
 	return order, nil
 }
 
@@ -124,6 +125,9 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]orderentity.Or
 		return nil, err
 	}
 
+	for i := range orders {
+		orders[i].CalculateTotalChange()
+	}
 	return orders, nil
 }
 
