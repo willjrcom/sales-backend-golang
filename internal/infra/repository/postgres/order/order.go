@@ -60,6 +60,8 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *orderentity.Or
 }
 
 func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *orderentity.Order) error {
+	order.CalculateTotalChange()
+
 	r.mu.Lock()
 	_, err := r.db.NewUpdate().Model(order).Where("id = ?", order.ID).Exec(ctx)
 	r.mu.Unlock()

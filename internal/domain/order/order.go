@@ -19,6 +19,7 @@ var (
 	ErrOrderAlreadyFinished          = errors.New("order already finished")
 	ErrOrderAlreadyCanceled          = errors.New("order already canceled")
 	ErrOrderAlreadyArchived          = errors.New("order already archived")
+	ErrOrderPaidMoreThanTotal        = errors.New("order paid more than total")
 )
 
 type Order struct {
@@ -39,6 +40,8 @@ type OrderCommonAttributes struct {
 
 type OrderDetail struct {
 	ScheduledOrder
+	TotalPaid   float64                  `bun:"total_paid" json:"total_paid"`
+	TotalChange float64                  `bun:"total_change" json:"total_change"`
 	Observation string                   `bun:"observation" json:"observation"`
 	AttendantID *uuid.UUID               `bun:"column:attendant_id,type:uuid,notnull" json:"attendant_id"`
 	Attendant   *employeeentity.Employee `bun:"rel:belongs-to" json:"attendant,omitempty"`
@@ -69,6 +72,8 @@ func NewDefaultOrder(shiftID *uuid.UUID, currentOrderNumber int, attendantID *uu
 			OrderDetail: OrderDetail{
 				ShiftID:     shiftID,
 				AttendantID: attendantID,
+				TotalPaid:   0,
+				TotalChange: 0,
 			},
 		},
 	}
@@ -167,4 +172,49 @@ func (o *Order) UnarchiveOrder() (err error) {
 
 func (o *Order) ScheduleOrder(startAt *time.Time) {
 	o.StartAt = startAt
+}
+
+func (o *Order) ValidatePayments() error {
+	if o.Status != OrderStatusPending {
+		return ErrOrderMustBePending
+	}
+
+	totalToPay := 0.00
+	for _, group := range o.Groups {
+		totalToPay += group.Total
+	}
+
+	if o.Delivery != nil {
+		totalToPay += *o.Delivery.DeliveryTax
+	}
+
+	if totalToPay < o.TotalPaid {
+		return ErrOrderPaidMoreThanTotal
+	}
+
+	return nil
+}
+
+func (o *Order) AddPayment(payment *PaymentOrder) {
+	o.TotalPaid += payment.TotalPaid
+	o.Payments = append(o.Payments, *payment)
+}
+
+func (o *Order) CalculateTotalChange() {
+	totalPaid := 0.00
+
+	for _, payment := range o.Payments {
+		totalPaid += payment.TotalPaid
+	}
+
+	totalToPay := 0.00
+	for _, group := range o.Groups {
+		totalToPay += group.Total
+	}
+
+	o.TotalPaid = totalPaid
+
+	if totalToPay < totalPaid {
+		o.TotalChange = totalPaid - totalToPay
+	}
 }

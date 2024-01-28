@@ -37,7 +37,7 @@ type GroupCommonAttributes struct {
 type GroupDetails struct {
 	Size       string                  `bun:"size,notnull" json:"size"`
 	Status     StatusGroupItem         `bun:"status,notnull" json:"status"`
-	Price      float64                 `bun:"price" json:"price"`
+	Total      float64                 `bun:"total" json:"total"`
 	Quantity   float64                 `bun:"quantity" json:"quantity"`
 	CategoryID uuid.UUID               `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
 	Category   *productentity.Category `bun:"rel:belongs-to" json:"category,omitempty"`
@@ -102,13 +102,13 @@ func (i *GroupItem) DeleteGroupItem() (err error) {
 }
 func (i *GroupItem) CalculateTotalValues() {
 	qtd := 0.0
-	price := 0.0
+	total := 0.0
 
 	for _, item := range i.Items {
 		qtd += item.Quantity
-		price += item.Price * item.Quantity
+		total += item.Price * item.Quantity
 	}
 
 	i.GroupDetails.Quantity = qtd
-	i.GroupDetails.Price = price
+	i.GroupDetails.Total = total
 }

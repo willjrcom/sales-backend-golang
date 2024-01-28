@@ -7,7 +7,8 @@ import (
 )
 
 var (
-	ErrMethodInvalid = errors.New("payment method is invalid")
+	ErrMethodInvalid    = errors.New("payment method is invalid")
+	ErrTotalPaidInvalid = errors.New("total paid is invalid")
 )
 
 type AddPaymentMethod struct {
@@ -23,6 +24,10 @@ func (u *AddPaymentMethod) validate() error {
 }
 
 func (u *AddPaymentMethod) validatePayMethod() error {
+	if u.TotalPaid <= 0 {
+		return ErrTotalPaidInvalid
+	}
+
 	for _, method := range orderentity.GetAllPayMethod() {
 		if method == u.Method {
 			return nil

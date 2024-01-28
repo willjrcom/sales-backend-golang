@@ -9,7 +9,6 @@ import (
 type PaymentOrder struct {
 	PaymentTimeLogs
 	TotalPaid float64   `bun:"total_paid" json:"total_paid"`
-	Change    float64   `bun:"change" json:"change"`
 	Method    PayMethod `bun:"method,notnull" json:"method"`
 	OrderID   uuid.UUID `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
 }

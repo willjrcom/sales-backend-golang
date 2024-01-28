@@ -116,7 +116,7 @@ func (h *handlerOrderImpl) handlerUpdatePaymentMethod(w http.ResponseWriter, r *
 	payment := &orderdto.AddPaymentMethod{}
 	jsonpkg.ParseBody(r, payment)
 
-	if err := h.s.AddPaymentMethod(ctx, dtoId, payment); err != nil {
+	if err := h.s.AddPayment(ctx, dtoId, payment); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
