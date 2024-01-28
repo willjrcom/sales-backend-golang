@@ -28,7 +28,15 @@ func NewSchemaRepositoryBun(db *bun.DB) *SchemaRepositoryBun {
 }
 
 func (r *SchemaRepositoryBun) NewSchema(ctx context.Context, schemaName string) error {
-	return loadCompanyModels(ctx, r.db, schemaName)
+	if err := loadCompanyModels(ctx, r.db, schemaName); err != nil {
+		return err
+	}
+
+	if err := setupFtSearch(ctx, r.db); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func loadCompanyModels(ctx context.Context, db *bun.DB, schema string) error {

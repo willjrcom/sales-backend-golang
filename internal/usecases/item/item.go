@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
 	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
@@ -129,14 +128,15 @@ func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *
 			CategoryID: product.CategoryID,
 			Status:     groupitementity.StatusGroupStaging,
 			Size:       product.Size.Name,
+			NeedPrint:  product.Category.NeedPrint,
 		},
 	}
 
-	groupItem = &groupitementity.GroupItem{
-		Entity:                entity.NewEntity(),
-		GroupCommonAttributes: groupCommonAttributes,
+	if len(product.Category.Processes) != 0 {
+		groupCommonAttributes.Status = groupitementity.StatusGroupReady
 	}
 
+	groupItem = groupitementity.NewGroupItem(groupCommonAttributes)
 	err = s.rgi.CreateGroupItem(ctx, groupItem)
 	return
 }
