@@ -25,7 +25,6 @@ func NewHandlerContactPerson(contactService *contactusecases.Service) *handler.H
 
 	c.With().Group(func(c chi.Router) {
 		c.Get("/{id}", h.handlerGetContactById)
-		c.Get("/all", h.handlerGetAllContacts)
 		c.Post("/search", h.handlerFtSearchContacts)
 	})
 
@@ -47,16 +46,6 @@ func (h *handlerContactImpl) handlerGetContactById(w http.ResponseWriter, r *htt
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
-	}
-}
-
-func (h *handlerContactImpl) handlerGetAllContacts(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	if contacts, err := h.s.GetAllContacts(ctx); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: contacts})
 	}
 }
 

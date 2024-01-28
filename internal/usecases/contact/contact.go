@@ -27,15 +27,6 @@ func (s *Service) GetContactById(ctx context.Context, dto *entitydto.IdRequest) 
 	}
 }
 
-func (s *Service) GetAllContacts(ctx context.Context) ([]contactdto.ContactOutput, error) {
-	if contacts, err := s.r.GetAllContacts(ctx); err != nil {
-		return nil, err
-	} else {
-		dtos := contactsToDtos(contacts)
-		return dtos, nil
-	}
-}
-
 func (s *Service) FtSearchContacts(ctx context.Context, keys *keysdto.KeysInput) ([]contactdto.ContactOutput, error) {
 	if keys.Query == "" {
 		return nil, keysdto.ErrInvalidQuery

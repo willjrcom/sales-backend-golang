@@ -4,16 +4,13 @@ import (
 	"errors"
 
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 )
 
 var (
-	ErrNameRequired     = errors.New("name is required")
-	ErrAddressRequired  = errors.New("address is required")
-	ErrMaxAddresses     = errors.New("max addresses is 3")
-	ErrContactsRequired = errors.New("contacts is required")
-	ErrMaxContacts      = errors.New("max contacts is 3")
+	ErrNameRequired    = errors.New("name is required")
+	ErrAddressRequired = errors.New("address is required")
+	ErrContactRequired = errors.New("contact is required")
 )
 
 type RegisterClientInput struct {
@@ -24,20 +21,11 @@ func (r *RegisterClientInput) validate() error {
 	if r.Name == nil || *r.Name == "" {
 		return ErrNameRequired
 	}
-	if len(r.Contacts) == 0 {
-		return ErrContactsRequired
+	if r.Contact == nil {
+		return ErrContactRequired
 	}
-	if len(r.Contacts) > 3 {
-		return ErrMaxContacts
-	}
-	if len(r.Addresses) == 0 {
+	if r.Address == nil {
 		return ErrAddressRequired
-	}
-	if len(r.Addresses) > 3 {
-		return ErrMaxAddresses
-	}
-	if len(r.Addresses) == 1 {
-		r.Addresses[0].IsDefault = true
 	}
 
 	return nil
@@ -48,23 +36,12 @@ func (r *RegisterClientInput) ToModel() (*cliententity.Client, error) {
 		return nil, err
 	}
 
-	personEntity := entity.NewEntity()
-
-	for i := range r.Addresses {
-		r.Addresses[i].Entity = entity.NewEntity()
-		r.Addresses[i].ObjectID = personEntity.ID
-	}
-
 	personCommonAttributes := personentity.PersonCommonAttributes{
-		Name:      *r.Name,
-		Addresses: r.Addresses,
+		Name: *r.Name,
 	}
 
 	// Create person
-	person := &personentity.Person{
-		Entity:                 personEntity,
-		PersonCommonAttributes: personCommonAttributes,
-	}
+	person := personentity.NewPerson(personCommonAttributes)
 
 	// Optional fields
 	if r.Email != nil {
@@ -77,10 +54,12 @@ func (r *RegisterClientInput) ToModel() (*cliententity.Client, error) {
 		person.Birthday = r.Birthday
 	}
 
-	for _, contact := range r.Contacts {
-		if err := person.AddContact(contact, personentity.ContactTypeClient); err != nil {
-			return nil, err
-		}
+	if err := person.AddContact(r.Contact, personentity.ContactTypeClient); err != nil {
+		return nil, err
+	}
+
+	if err := person.AddAddress(&r.Address.AddressCommonAttributes); err != nil {
+		return nil, err
 	}
 
 	return &cliententity.Client{

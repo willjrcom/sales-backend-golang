@@ -93,20 +93,6 @@ func (r *ContactRepositoryBun) GetContactById(ctx context.Context, id string) (*
 	return contact, nil
 }
 
-func (r *ContactRepositoryBun) GetAllContacts(ctx context.Context) ([]personentity.Contact, error) {
-	Contacts := []personentity.Contact{}
-	r.mu.Lock()
-	err := r.db.NewSelect().Model(&Contacts).Scan(ctx)
-
-	r.mu.Unlock()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return Contacts, nil
-}
-
 func (r *ContactRepositoryBun) FtSearchContacts(ctx context.Context, id string) (contacts []personentity.Contact, err error) {
 	contacts = []personentity.Contact{}
 	err = r.db.NewSelect().Model(&contacts).Where("ts @@ websearch_to_tsquery('simple', ?)", id).Scan(ctx)

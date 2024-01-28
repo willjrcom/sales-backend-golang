@@ -35,18 +35,14 @@ func (r *EmployeeRepositoryBun) RegisterEmployee(ctx context.Context, c *employe
 		return err
 	}
 
-	// Register contacts
-	for _, contact := range c.Contacts {
-		if _, err := tx.NewInsert().Model(&contact).Exec(ctx); err != nil {
-			return rollback(&tx, err)
-		}
+	// Register contact
+	if _, err := tx.NewInsert().Model(&c.Contact).Exec(ctx); err != nil {
+		return rollback(&tx, err)
 	}
 
-	// Register addresses
-	for _, address := range c.Addresses {
-		if _, err := tx.NewInsert().Model(&address).Exec(ctx); err != nil {
-			return rollback(&tx, err)
-		}
+	// Register address
+	if _, err := tx.NewInsert().Model(&c.Address).Exec(ctx); err != nil {
+		return rollback(&tx, err)
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -89,12 +85,12 @@ func (r *EmployeeRepositoryBun) DeleteEmployee(ctx context.Context, id string) e
 		return rollback(&tx, err)
 	}
 
-	// Delete contacts
+	// Delete contact
 	if _, err = tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", id).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
 
-	// Delete addresses
+	// Delete address
 	if _, err = tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", id).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
@@ -110,7 +106,7 @@ func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) 
 	employee := &employeeentity.Employee{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(employee).Where("id = ?", id).Relation("Addresses").Relation("Contacts").Scan(ctx)
+	err := r.db.NewSelect().Model(employee).Where("id = ?", id).Relation("Address").Relation("Contact").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -124,7 +120,7 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]employee
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	employees := []employeeentity.Employee{}
-	err := r.db.NewSelect().Model(&employees).Relation("Addresses").Relation("Contacts").Scan(ctx)
+	err := r.db.NewSelect().Model(&employees).Relation("Address").Relation("Contact").Scan(ctx)
 
 	return employees, err
 }

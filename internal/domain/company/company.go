@@ -18,5 +18,5 @@ type CompanyCommonAttributes struct {
 	Cnpj       string                `bun:"cnpj,notnull" json:"cnpj"`
 	Email      string                `bun:"email" json:"email"`
 	Contacts   []string              `bun:"contacts,type:jsonb" json:"contacts,omitempty"`
-	Address    addressentity.Address `bun:"rel:has-one,join:id=object_id,notnull" json:"addresses,omitempty"`
+	Address    addressentity.Address `bun:"rel:has-one,join:id=object_id,notnull" json:"address,omitempty"`
 }

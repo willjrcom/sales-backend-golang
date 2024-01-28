@@ -58,3 +58,10 @@ func (a *Address) Validate() error {
 	}
 	return nil
 }
+
+func NewAddress(addressCommonAttributes *AddressCommonAttributes) *Address {
+	return &Address{
+		Entity:                  entity.NewEntity(),
+		AddressCommonAttributes: *addressCommonAttributes,
+	}
+}

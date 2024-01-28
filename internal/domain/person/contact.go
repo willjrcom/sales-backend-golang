@@ -41,6 +41,13 @@ func GetAllOrderStatus() []ContactType {
 	}
 }
 
+func NewContact(contactCommonAttributes ContactCommonAttributes) *Contact {
+	return &Contact{
+		Entity:                  entity.NewEntity(),
+		ContactCommonAttributes: contactCommonAttributes,
+	}
+}
+
 func ValidateAndExtractContact(text string) (ddd string, number string, err error) {
 	// Use uma expressão regular para extrair o DDD e o número
 	re := regexp.MustCompile(`\(?(\d{2})\)?\s*(\d{4,5}(?:-|\s)?\d{4})`)

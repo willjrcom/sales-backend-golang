@@ -36,18 +36,14 @@ func (r *ClientRepositoryBun) RegisterClient(ctx context.Context, c *cliententit
 		return err
 	}
 
-	// Register contacts
-	for _, contact := range c.Contacts {
-		if _, err := tx.NewInsert().Model(&contact).Exec(ctx); err != nil {
-			return rollback(&tx, err)
-		}
+	// Register contact
+	if _, err := tx.NewInsert().Model(&c.Contact).Exec(ctx); err != nil {
+		return rollback(&tx, err)
 	}
 
-	// Register addresses
-	for _, address := range c.Addresses {
-		if _, err := tx.NewInsert().Model(&address).Exec(ctx); err != nil {
-			return rollback(&tx, err)
-		}
+	// Register addresse
+	if _, err := tx.NewInsert().Model(&c.Address).Exec(ctx); err != nil {
+		return rollback(&tx, err)
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -82,12 +78,12 @@ func (r *ClientRepositoryBun) DeleteClient(ctx context.Context, id string) error
 		return rollback(&tx, err)
 	}
 
-	// Delete contacts
+	// Delete contact
 	if _, err = tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", id).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
 
-	// Delete addresses
+	// Delete addresse
 	if _, err = tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", id).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
@@ -103,7 +99,7 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*cl
 	client := &cliententity.Client{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(client).Where("client.id = ?", id).Relation("Addresses").Relation("Contacts").Scan(ctx)
+	err := r.db.NewSelect().Model(client).Where("client.id = ?", id).Relation("Address").Relation("Contact").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -116,7 +112,7 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*cl
 func (r *ClientRepositoryBun) GetAllClients(ctx context.Context) ([]cliententity.Client, error) {
 	clients := []cliententity.Client{}
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&clients).Relation("Addresses").Relation("Contacts").Scan(ctx)
+	err := r.db.NewSelect().Model(&clients).Relation("Address").Relation("Contact").Scan(ctx)
 
 	r.mu.Unlock()
 
