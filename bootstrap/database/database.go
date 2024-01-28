@@ -3,6 +3,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -49,7 +50,12 @@ func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 	return bun, nil
 }
 
-func ChangeSchema(db *bun.DB, schemaName string) error {
+func ChangeSchema(ctx context.Context, db *bun.DB) error {
+	schemaName := ctx.Value("schema")
+	if schemaName == nil {
+		return errors.New("schema not found")
+	}
+
 	_, err := db.Exec("SET search_path=?", schemaName)
 	return err
 }

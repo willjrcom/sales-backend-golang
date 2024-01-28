@@ -1,6 +1,7 @@
 package schemarepositorybun
 
 import (
+	"errors"
 	"sync"
 
 	"github.com/uptrace/bun"
@@ -27,8 +28,8 @@ func NewSchemaRepositoryBun(db *bun.DB) *SchemaRepositoryBun {
 	return &SchemaRepositoryBun{db: db}
 }
 
-func (r *SchemaRepositoryBun) NewSchema(ctx context.Context, schemaName string) error {
-	if err := loadCompanyModels(ctx, r.db, schemaName); err != nil {
+func (r *SchemaRepositoryBun) NewSchema(ctx context.Context) error {
+	if err := loadCompanyModels(ctx, r.db); err != nil {
 		return err
 	}
 
@@ -39,17 +40,23 @@ func (r *SchemaRepositoryBun) NewSchema(ctx context.Context, schemaName string) 
 	return nil
 }
 
-func loadCompanyModels(ctx context.Context, db *bun.DB, schema string) error {
+func loadCompanyModels(ctx context.Context, db *bun.DB) error {
 	mu := sync.Mutex{}
 	mu.Lock()
 
-	if _, err := db.Exec("CREATE SCHEMA IF NOT EXISTS " + schema); err != nil {
-		panic(err)
+	schema := ctx.Value("schema")
+	if schema == nil {
+		mu.Unlock()
+		return errors.New("schema not found")
 	}
 
-	if err := database.ChangeSchema(db, schema); err != nil {
+	if _, err := db.Exec("CREATE SCHEMA IF NOT EXISTS " + schema.(string)); err != nil {
+		return err
+	}
+
+	if err := database.ChangeSchema(ctx, db); err != nil {
 		mu.Unlock()
-		panic(err)
+		return err
 	}
 
 	db.RegisterModel((*entity.Entity)(nil))

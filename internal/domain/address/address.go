@@ -24,7 +24,6 @@ type AddressCommonAttributes struct {
 	City         string    `bun:"city,notnull" json:"city"`
 	State        string    `bun:"state,notnull" json:"state"`
 	Cep          string    `bun:"cep" json:"cep"`
-	IsDefault    bool      `bun:"is_default,notnull" json:"is_default"`
 	DeliveryTax  float64   `bun:"delivery_tax,notnull" json:"delivery_tax"`
 }
 

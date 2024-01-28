@@ -14,6 +14,6 @@ func NewService(r schemaentity.Repository) *Service {
 	return &Service{r: r}
 }
 
-func (s *Service) NewSchema(ctx context.Context, name string) error {
-	return s.r.NewSchema(ctx, name)
+func (s *Service) NewSchema(ctx context.Context) error {
+	return s.r.NewSchema(ctx)
 }

@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/uptrace/bun"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 )
 
@@ -19,6 +20,11 @@ func NewAddressRepositoryBun(db *bun.DB) *AddressRepositoryBun {
 
 func (r *AddressRepositoryBun) RegisterAddress(ctx context.Context, c *addressentity.Address) error {
 	r.mu.Lock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		r.mu.Unlock()
+		return err
+	}
 	_, err := r.db.NewInsert().Model(c).Exec(ctx)
 	r.mu.Unlock()
 

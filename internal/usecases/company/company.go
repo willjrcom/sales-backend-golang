@@ -5,8 +5,10 @@ import (
 
 	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/schema"
 )
 
@@ -20,12 +22,24 @@ func NewService(r companyentity.Repository, s schemaservice.Service) *Service {
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) (uuid.UUID, error) {
-	company, err := dto.ToModel()
+	cnpjString, email, contacts, err := dto.ToModel()
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	if err := s.s.NewSchema(ctx, company.SchemaName); err != nil {
+	cnpjData, err := cnpj.Get(cnpjString)
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	company := companyentity.NewCompany(cnpjData)
+	company.Email = email
+	company.Contacts = contacts
+
+	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), company.SchemaName)
+
+	if err := s.s.NewSchema(ctx); err != nil {
 		return uuid.Nil, err
 	}
 
