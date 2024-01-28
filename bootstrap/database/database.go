@@ -11,6 +11,7 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
+	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 )
 
 var (
@@ -51,11 +52,20 @@ func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 }
 
 func ChangeSchema(ctx context.Context, db *bun.DB) error {
-	schemaName := ctx.Value("schema")
-	if schemaName == nil {
-		return errors.New("schema not found")
+	schemaName, err := GetSchema(ctx)
+
+	if err != nil {
+		return err
 	}
 
-	_, err := db.Exec("SET search_path=?", schemaName)
+	_, err = db.Exec("SET search_path=?", schemaName)
 	return err
+}
+
+func GetSchema(ctx context.Context) (string, error) {
+	schemaName := ctx.Value(schemaentity.Schema("schema"))
+	if schemaName == nil {
+		return "", errors.New("schema not found")
+	}
+	return schemaName.(string), nil
 }

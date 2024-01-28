@@ -1,7 +1,9 @@
 package companyentity
 
 import (
-	"github.com/google/uuid"
+	"strings"
+
+	"github.com/teris-io/shortid"
 	"github.com/uptrace/bun"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
@@ -25,13 +27,16 @@ type CompanyCommonAttributes struct {
 }
 
 func NewCompany(cnpjData *cnpj.Cnpj) *Company {
+	id, _ := shortid.Generate()
+
+	schema := "loja_" + strings.ToLower(cnpjData.TradeName) + "_" + strings.ToLower(id)
 	company := &Company{
 		Entity: entity.NewEntity(),
 		CompanyCommonAttributes: CompanyCommonAttributes{
 			BusinessName: cnpjData.BusinessName,
 			TradeName:    cnpjData.TradeName,
 			Cnpj:         cnpjData.Cnpj,
-			SchemaName:   "loja_" + cnpjData.TradeName + "_" + uuid.NewString(),
+			SchemaName:   schema,
 		},
 	}
 
@@ -50,5 +55,6 @@ func NewCompany(cnpjData *cnpj.Cnpj) *Company {
 }
 
 func (c *Company) AddAddress(addressCommonAttributes *addressentity.AddressCommonAttributes) {
+	addressCommonAttributes.ObjectID = c.ID
 	c.Address = *addressentity.NewAddress(addressCommonAttributes)
 }

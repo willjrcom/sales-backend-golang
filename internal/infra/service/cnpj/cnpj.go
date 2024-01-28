@@ -2,9 +2,14 @@ package cnpj
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"regexp"
+)
+
+var (
+	ErrCNPJNotFound = errors.New("cnpj not found")
 )
 
 const url = "https://www.receitaws.com.br/v1/cnpj/"
@@ -43,6 +48,10 @@ func Get(cnpjString string) (*Cnpj, error) {
 	var cnpj Cnpj
 	if err := json.Unmarshal(body, &cnpj); err != nil {
 		return nil, err
+	}
+
+	if cnpj.Cnpj == "" {
+		return nil, ErrCNPJNotFound
 	}
 
 	return &cnpj, nil

@@ -110,7 +110,7 @@ var HttpserverCmd = &cobra.Command{
 		shiftService := shiftusecases.NewService(shiftRepo)
 
 		schemaService := schemaservice.NewService(schemaRepo)
-		companyService := companyusecases.NewService(companyRepo, *schemaService)
+		companyService := companyusecases.NewService(companyRepo, addressRepo, *schemaService)
 
 		// Load handlers
 		productHandler := handlerimpl.NewHandlerProduct(productService)

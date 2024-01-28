@@ -1,13 +1,13 @@
 package schemarepositorybun
 
 import (
-	"errors"
 	"sync"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
@@ -42,15 +42,14 @@ func (r *SchemaRepositoryBun) NewSchema(ctx context.Context) error {
 
 func loadCompanyModels(ctx context.Context, db *bun.DB) error {
 	mu := sync.Mutex{}
-	mu.Lock()
 
-	schema := ctx.Value("schema")
-	if schema == nil {
-		mu.Unlock()
-		return errors.New("schema not found")
+	schemaName, err := database.GetSchema(ctx)
+	if err != nil {
+		return err
 	}
 
-	if _, err := db.Exec("CREATE SCHEMA IF NOT EXISTS " + schema.(string)); err != nil {
+	mu.Lock()
+	if _, err := db.Exec("CREATE SCHEMA IF NOT EXISTS " + schemaName); err != nil {
 		return err
 	}
 
@@ -83,6 +82,7 @@ func loadCompanyModels(ctx context.Context, db *bun.DB) error {
 
 	db.RegisterModel((*tableentity.Table)(nil))
 	db.RegisterModel((*shiftentity.Shift)(nil))
+	db.RegisterModel((*companyentity.Company)(nil))
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*entity.Entity)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
@@ -180,6 +180,11 @@ func loadCompanyModels(ctx context.Context, db *bun.DB) error {
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*shiftentity.Shift)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.Company)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}
