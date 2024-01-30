@@ -779,7 +779,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "",
+							"raw": "{\n    \"shift_id\": \"{{shift_id}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -816,6 +816,86 @@
 							}
 						},
 						"url": "{{server}}/order/pending/{{order_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "finish",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{server}}/order/finish/{{order_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "cancel",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{server}}/order/cancel/{{order_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "archive",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{server}}/order/archive/{{order_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "unarchive",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": "{{server}}/order/unarchive/{{order_id}}"
 					},
 					"response": []
 				},
@@ -878,13 +958,13 @@
 					"response": []
 				},
 				{
-					"name": "update payment",
+					"name": "add payment",
 					"request": {
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"is_paid\": true,\n    \"total_paid\": 20.0,\n    \"change\": 0.0,\n    \"method\": \"Dinheiro\"\n}",
+							"raw": "{\n    \"is_paid\": true,\n    \"total_paid\": 10,\n    \"change\": 0.0,\n    \"method\": \"MasterCard\",\n    \"order_id\": \"{{order_id}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -892,6 +972,24 @@
 							}
 						},
 						"url": "{{server}}/order/update/{{order_id}}/payment"
+					},
+					"response": []
+				},
+				{
+					"name": "update schedule",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"start_at\": \"2024-01-17T20:39:23.107002Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/order/update/{{order_id}}/schedule"
 					},
 					"response": []
 				}
@@ -938,9 +1036,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"order_delivery_id\", task_id)"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -1207,6 +1303,219 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "shift",
+			"item": [
+				{
+					"name": "open shift",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let shift_id = response.data",
+									"pm.collectionVariables.set(\"shift_id\", shift_id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"attendant_id\": \"30f547e5-cb8a-4d29-a0ec-106bc5f789d1\",\n    \"day\": \"2024-01-17T20:39:23.107002Z\",\n    \"start_change\": 10\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/shift/open"
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/shift/{{shift_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "close shift",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"end_change\": 20\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/shift/close/{{shift_id}}"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "company",
+			"item": [
+				{
+					"name": "new",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let company_id = response.data.company_id",
+									"let schema = response.data.schema",
+									"pm.collectionVariables.set(\"company_id\", company_id)",
+									"pm.collectionVariables.set(\"schema\", schema)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"will@gmail.com\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/company/new"
+					},
+					"response": []
+				},
+				{
+					"name": "get",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "schema",
+								"value": "{{schema}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{server}}/company",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"company"
+							],
+							"query": [
+								{
+									"key": "schema",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"williamjunior67@gmail.com\",\n    \"password\": \"Objetivo42461255!\",\n    \"employee_id\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"schemas\": [\"loja_gazaltech_zu0b5ktir\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/user/new"
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"williamjunior67@gmail.com\",\n    \"old_password\": \"Objetivo42461255!!\",\n    \"new_password\": \"Objetivo42461255!\"\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/user/update"
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"williamjunior67@gmail.com\",\n    \"password\": \"Objetivo42461255!\",\n    \"current_schema\": \"\"\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/user/login"
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"event": [
@@ -1297,6 +1606,18 @@
 			"key": "table_order_id",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "shift_id",
+			"value": ""
+		},
+		{
+			"key": "company_id",
+			"value": ""
+		},
+		{
+			"key": "schema",
+			"value": ""
 		}
 	]
 }
