@@ -12,6 +12,7 @@ import (
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
+	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
 )
 
 var (
@@ -47,6 +48,21 @@ func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 	db.SetConnMaxLifetime(time.Duration(60) * time.Minute)
 
 	bun := bun.NewDB(db, pgdialect.New())
+
+	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.LOST_SCHEMA)
+	if err := CreateSchema(ctx, bun); err != nil {
+		return nil, err
+	}
+
+	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
+	if err := CreateSchema(ctx, bun); err != nil {
+		return nil, err
+	}
+
+	if err := defaultTables(ctx, bun); err != nil {
+		return nil, err
+	}
+
 	fmt.Println("Db connected")
 	return bun, nil
 }
@@ -68,4 +84,32 @@ func GetSchema(ctx context.Context) (string, error) {
 		return "", errors.New("schema not found")
 	}
 	return schemaName.(string), nil
+}
+
+func CreateSchema(ctx context.Context, db *bun.DB) error {
+	schemaName, err := GetSchema(ctx)
+
+	if err != nil {
+		schemaName = schemaentity.LOST_SCHEMA
+	}
+
+	if _, err := db.Exec("CREATE SCHEMA IF NOT EXISTS " + schemaName); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func defaultTables(ctx context.Context, db *bun.DB) error {
+	db.RegisterModel((*userentity.User)(nil))
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*userentity.User)(nil)).Exec(ctx); err != nil {
+		return err
+	}
+
+	if _, err := db.ExecContext(ctx, "CREATE EXTENSION IF NOT EXISTS pgcrypto;"); err != nil {
+		return err
+	}
+
+	return nil
 }

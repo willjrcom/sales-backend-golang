@@ -27,6 +27,7 @@ import (
 	shiftrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/shift"
 	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size_category"
 	tablerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/table"
+	userrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/user"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/schema"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
@@ -44,6 +45,7 @@ import (
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
 	tableusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table"
 	tableorderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table_order"
+	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 )
 
 // httpserverCmd represents the httpserver command
@@ -88,6 +90,7 @@ var HttpserverCmd = &cobra.Command{
 
 		schemaRepo := schemarepositorybun.NewSchemaRepositoryBun(db)
 		companyRepo := companyrepositorybun.NewCompanyRepositoryBun(db)
+		userRepo := userrepositorybun.NewUserRepositoryBun(db)
 
 		// Load services
 		productService := productusecases.NewService(productRepo, categoryRepo)
@@ -111,6 +114,7 @@ var HttpserverCmd = &cobra.Command{
 
 		schemaService := schemaservice.NewService(schemaRepo)
 		companyService := companyusecases.NewService(companyRepo, addressRepo, *schemaService)
+		userService := userusecases.NewService(userRepo)
 
 		// Load handlers
 		productHandler := handlerimpl.NewHandlerProduct(productService)
@@ -133,6 +137,7 @@ var HttpserverCmd = &cobra.Command{
 		shiftHandler := handlerimpl.NewHandlerShift(shiftService)
 
 		companyHandler := handlerimpl.NewHandlerCompany(companyService)
+		userHandler := handlerimpl.NewHandlerUser(userService)
 
 		server.AddHandler(productHandler)
 		server.AddHandler(categoryHandler)
@@ -154,6 +159,7 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(shiftHandler)
 
 		server.AddHandler(companyHandler)
+		server.AddHandler(userHandler)
 
 		if err := server.StartServer(port); err != nil {
 			panic(err)

@@ -43,13 +43,9 @@ func (r *SchemaRepositoryBun) NewSchema(ctx context.Context) error {
 func loadCompanyModels(ctx context.Context, db *bun.DB) error {
 	mu := sync.Mutex{}
 
-	schemaName, err := database.GetSchema(ctx)
-	if err != nil {
-		return err
-	}
-
 	mu.Lock()
-	if _, err := db.Exec("CREATE SCHEMA IF NOT EXISTS " + schemaName); err != nil {
+	if err := database.CreateSchema(ctx, db); err != nil {
+		mu.Unlock()
 		return err
 	}
 
