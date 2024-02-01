@@ -10,7 +10,6 @@ import (
 var (
 	ErrEmailInvalid             = errors.New("email is invalid")
 	ErrPasswordInvalid          = errors.New("password is invalid")
-	ErrEmployeeIDRequired       = errors.New("employee id is required")
 	ErrMustHaveAtLeastOneSchema = errors.New("must have at least one schema")
 )
 
@@ -25,10 +24,6 @@ func (u *CreateUserInput) validate() error {
 
 	if !utils.IsValidPassword(u.Password) {
 		return ErrPasswordInvalid
-	}
-
-	if u.EmployeeID == nil {
-		return ErrEmployeeIDRequired
 	}
 
 	if len(u.Schemas) == 0 {

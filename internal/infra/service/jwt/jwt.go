@@ -12,10 +12,9 @@ var secretKey = "sua_chave_secreta"
 func CreateToken(user *userentity.UserCommonAttributes) (string, error) {
 
 	claims := jwt.MapClaims{
-		"id":          user.Email,
-		"schemas":     user.Schemas,
-		"employee_id": user.EmployeeID,
-		"exp":         time.Now().Add(time.Hour * 1).Unix(),
+		"id":      user.Email,
+		"schemas": user.Schemas,
+		"exp":     time.Now().Add(time.Hour * 1).Unix(),
 	}
 
 	// Criar um token JWT usando a chave secreta
