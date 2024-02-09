@@ -26,10 +26,10 @@ func (c *CompanyInput) validate() error {
 	return nil
 }
 
-func (c *CompanyInput) ToModel() (cnpj string, email string, contacts []string, err error) {
+func (c *CompanyInput) ToModel() (cnpj string, tradeName string, email string, contacts []string, err error) {
 	if err := c.validate(); err != nil {
-		return "", "", nil, err
+		return "", "", "", nil, err
 	}
 
-	return c.Cnpj, c.Email, c.Contacts, nil
+	return c.Cnpj, c.TradeName, c.Email, c.Contacts, nil
 }

@@ -9,7 +9,8 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
-	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/schema"
+	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/headerservice"
+	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -54,6 +55,16 @@ func (h *handlerCompanyImpl) handlerNewCompany(w http.ResponseWriter, r *http.Re
 
 func (h *handlerCompanyImpl) handlerGetCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	tokenString := r.Header.Get("token")
+	token, error := jwtservice.ValidateToken(ctx, tokenString)
+
+	if error != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusUnauthorized, jsonpkg.Error{Message: error.Error()})
+		return
+	}
+
+	println(token.Claims)
+
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaservice.GetSchemaHeader(r))
 	if id, err := h.s.GetCompany(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})

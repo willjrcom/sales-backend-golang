@@ -8,6 +8,8 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/headerservice"
+	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -27,6 +29,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 		c.Post("/new", h.handlerNewUser)
 		c.Post("/update", h.handlerUpdateUser)
 		c.Post("/login", h.handlerLoginUser)
+		c.Post("/access", h.handlerAccessCompany)
 		c.Delete("/delete", h.handlerDeleteUser)
 	})
 
@@ -69,6 +72,26 @@ func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Reques
 	jsonpkg.ParseBody(r, user)
 
 	if token, err := h.s.LoginUser(ctx, user); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: token})
+	}
+}
+
+func (h *handlerUserImpl) handlerAccessCompany(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	headerToken := headerservice.GetAccessTokenHeader(r)
+	accessToken, err := jwtservice.ValidateToken(ctx, headerToken)
+
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusUnauthorized, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	schema := &userdto.AccessCompanyInput{}
+	jsonpkg.ParseBody(r, schema)
+
+	if token, err := h.s.AccessCompany(ctx, schema, accessToken); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: token})

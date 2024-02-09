@@ -2,7 +2,10 @@ package userusecases
 
 import (
 	"context"
+	"errors"
+	"strings"
 
+	"github.com/dgrijalva/jwt-go"
 	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	bcryptservice "github.com/willjrcom/sales-backend-go/internal/infra/service/bcrypt"
@@ -69,7 +72,37 @@ func (s *Service) LoginUser(ctx context.Context, dto *userdto.LoginUserInput) (t
 		return "", err
 	}
 
-	return jwtservice.CreateToken(&userLoggedIn.UserCommonAttributes)
+	return jwtservice.CreateAccessToken(userLoggedIn)
+}
+
+func (s *Service) AccessCompany(ctx context.Context, dto *userdto.AccessCompanyInput, accessToken *jwt.Token) (token string, err error) {
+	schema, err := dto.ToModel()
+
+	if err != nil {
+		return "", err
+	}
+
+	schemasInterface := accessToken.Claims.(jwt.MapClaims)["schemas"].([]interface{})
+
+	if len(schemasInterface) == 0 {
+		return "", errors.New("schemas not found in token")
+	}
+
+	if !findSchemaInSchemas(schemasInterface, *schema) {
+		return "", errors.New("schema not found in schemas in token")
+	}
+
+	return jwtservice.CreateIDToken(accessToken, *schema)
+}
+
+func findSchemaInSchemas(schemas []interface{}, schema string) bool {
+	for _, s := range schemas {
+		if strings.EqualFold(s.(string), schema) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (s *Service) DeleteUser(ctx context.Context, dto *userdto.DeleteUserInput) error {

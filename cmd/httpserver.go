@@ -28,7 +28,7 @@ import (
 	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size_category"
 	tablerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/table"
 	userrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/user"
-	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/schema"
+	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/headerservice"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"

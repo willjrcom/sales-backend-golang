@@ -9,7 +9,7 @@ import (
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
-	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/schema"
+	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/headerservice"
 )
 
 type Service struct {
@@ -23,7 +23,7 @@ func NewService(r companyentity.Repository, a addressentity.Repository, s schema
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) (id uuid.UUID, schemaName *string, err error) {
-	cnpjString, email, contacts, err := dto.ToModel()
+	cnpjString, tradeName, email, contacts, err := dto.ToModel()
 	if err != nil {
 		return uuid.Nil, nil, err
 	}
@@ -32,6 +32,10 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) 
 
 	if err != nil {
 		return uuid.Nil, nil, err
+	}
+
+	if tradeName != cnpjData.TradeName {
+		cnpjData.TradeName = tradeName
 	}
 
 	company := companyentity.NewCompany(cnpjData)
