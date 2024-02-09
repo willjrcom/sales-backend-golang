@@ -8,7 +8,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
-	"github.com/willjrcom/sales-backend-go/internal/infra/service/headerservice"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"

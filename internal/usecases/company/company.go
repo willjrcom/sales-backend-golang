@@ -9,7 +9,7 @@ import (
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
-	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/headerservice"
+	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 )
 
 type Service struct {
