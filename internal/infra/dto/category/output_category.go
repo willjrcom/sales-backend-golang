@@ -29,8 +29,8 @@ func (c *CategoryOutput) FromModel(model *productentity.Category) {
 		model.Processes = []productentity.Process{}
 	}
 
-	if len(model.AditionalCategories) == 0 {
-		model.AditionalCategories = []productentity.Category{}
+	if len(model.AdditionalCategories) == 0 {
+		model.AdditionalCategories = []productentity.Category{}
 	}
 
 	c.CategoryCommonAttributes = model.CategoryCommonAttributes

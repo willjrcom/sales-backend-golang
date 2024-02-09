@@ -2,6 +2,7 @@ package categoryrepositorybun
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 
 	"github.com/uptrace/bun"
@@ -29,14 +30,48 @@ func (r *CategoryProductRepositoryBun) RegisterCategory(ctx context.Context, cp 
 	return nil
 }
 
-func (r *CategoryProductRepositoryBun) UpdateCategory(ctx context.Context, cp *productentity.Category) error {
+func (r *CategoryProductRepositoryBun) UpdateCategory(ctx context.Context, c *productentity.Category) error {
 	r.mu.Lock()
-	_, err := r.db.NewUpdate().Model(cp).Where("id = ?", cp.ID).Exec(ctx)
-	r.mu.Unlock()
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
 
 	if err != nil {
+		r.mu.Unlock()
 		return err
 	}
+
+	if _, err = tx.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
+		if err = tx.Rollback(); err != nil {
+			r.mu.Unlock()
+			return err
+		}
+
+		r.mu.Unlock()
+		return err
+	}
+
+	if _, err = tx.NewDelete().Model(productentity.CategoryCategory{}).Where("category_id = ?", c.ID).Exec(ctx); err != nil {
+		if err = tx.Rollback(); err != nil {
+			r.mu.Unlock()
+			return err
+		}
+
+		r.mu.Unlock()
+		return err
+	}
+
+	for _, ac := range c.AdditionalCategories {
+		if _, err = tx.NewInsert().Model(ac).Exec(ctx); err != nil {
+			if err = tx.Rollback(); err != nil {
+				r.mu.Unlock()
+				return err
+			}
+
+			r.mu.Unlock()
+			return err
+		}
+	}
+
+	r.mu.Unlock()
 
 	return nil
 }
