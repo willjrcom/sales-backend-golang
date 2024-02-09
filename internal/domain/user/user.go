@@ -12,11 +12,16 @@ type User struct {
 }
 
 type UserCommonAttributes struct {
-	Email         string   `bun:"column:email,unique,notnull" json:"email"`
-	Password      string   `bun:"-" json:"password"`
-	Hash          string   `bun:"column:hash,notnull" json:"hash"`
-	Schemas       []string `bun:"column:schemas,notnull,type:jsonb,notnull" json:"schemas"`
-	CurrentSchema *string  `bun:"-" json:"current_schema"`
+	Email    string          `bun:"column:email,unique,notnull" json:"email"`
+	Password string          `bun:"-" json:"password"`
+	Hash     string          `bun:"column:hash,notnull" json:"hash"`
+	Schemas  []SchemaCompany `bun:"column:schemas,notnull,type:jsonb,notnull" json:"schemas"`
+}
+
+type SchemaCompany struct {
+	Schema string `json:"schema"`
+	Name   string `json:"name"`
+	Cnpj   string `json:"cnpj"`
 }
 
 func NewUser(userCommonAttributes UserCommonAttributes) *User {
@@ -26,11 +31,11 @@ func NewUser(userCommonAttributes UserCommonAttributes) *User {
 	}
 }
 
-func (u *User) AddSchema(schema string) {
+func (u *User) AddSchema(schema SchemaCompany) {
 	u.Schemas = append(u.Schemas, schema)
 }
 
-func (u *User) RemoveSchema(schema string) {
+func (u *User) RemoveSchema(schema SchemaCompany) {
 	for i, s := range u.Schemas {
 		if s == schema {
 			u.Schemas = append(u.Schemas[:i], u.Schemas[i+1:]...)

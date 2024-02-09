@@ -1,14 +1,8 @@
 package userdto
 
 import (
-	"errors"
-
 	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
-)
-
-var (
-	ErrCurrentSchemaRequired = errors.New("current schema required")
 )
 
 type LoginUserInput struct {
@@ -24,9 +18,6 @@ func (u *LoginUserInput) validate() error {
 		return ErrPasswordInvalid
 	}
 
-	if u.CurrentSchema == nil {
-		return ErrCurrentSchemaRequired
-	}
 	return nil
 }
 

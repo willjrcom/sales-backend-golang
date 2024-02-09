@@ -16,8 +16,8 @@ type Service struct {
 	r userentity.Repository
 }
 
-func NewService(c userentity.Repository) *Service {
-	return &Service{r: c}
+func NewService(r userentity.Repository) *Service {
+	return &Service{r: r}
 }
 
 func (s *Service) CreateUser(ctx context.Context, dto *userdto.CreateUserInput) error {
@@ -59,30 +59,40 @@ func (s *Service) UpdateUser(ctx context.Context, dto *userdto.UpdatePasswordInp
 	return s.r.UpdateUser(ctx, user)
 }
 
-func (s *Service) LoginUser(ctx context.Context, dto *userdto.LoginUserInput) (token string, err error) {
+func (s *Service) LoginUser(ctx context.Context, dto *userdto.LoginUserInput) (data *userdto.TokenAndSchemasOutput, err error) {
 	user, err := dto.ToModel()
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	userLoggedIn, err := s.r.LoginUser(ctx, user)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return jwtservice.CreateAccessToken(userLoggedIn)
+	accessToken, err := jwtservice.CreateAccessToken(userLoggedIn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	data = &userdto.TokenAndSchemasOutput{
+		AccessToken: accessToken,
+		Schemas:     userLoggedIn.Schemas,
+	}
+	return data, nil
 }
 
-func (s *Service) AccessCompany(ctx context.Context, dto *userdto.AccessCompanyInput, accessToken *jwt.Token) (token string, err error) {
+func (s *Service) Access(ctx context.Context, dto *userdto.AccessCompanyInput, accessToken *jwt.Token) (token string, err error) {
 	schema, err := dto.ToModel()
 
 	if err != nil {
 		return "", err
 	}
 
-	schemasInterface := accessToken.Claims.(jwt.MapClaims)["schemas"].([]interface{})
+	schemasInterface := jwtservice.GetSchemasFromToken(accessToken)
 
 	if len(schemasInterface) == 0 {
 		return "", errors.New("schemas not found in token")
@@ -97,7 +107,12 @@ func (s *Service) AccessCompany(ctx context.Context, dto *userdto.AccessCompanyI
 
 func findSchemaInSchemas(schemas []interface{}, schema string) bool {
 	for _, s := range schemas {
-		if strings.EqualFold(s.(string), schema) {
+		schemaCompany, ok := s.(map[string]interface{})
+
+		if !ok {
+			continue
+		}
+		if strings.EqualFold(schemaCompany["schema"].(string), schema) {
 			return true
 		}
 	}
