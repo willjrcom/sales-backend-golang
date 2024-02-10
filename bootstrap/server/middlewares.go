@@ -13,20 +13,20 @@ import (
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
-func loggingMiddleware(next http.Handler) http.Handler {
+func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
 		// Verificar se a URL atual está na lista de URLs afetados
-		shouldLog := false
-		for _, url := range []string{"/category-product"} {
+		shouldValidate := true
+		for _, url := range c.UnprotectedRoutes {
 			if strings.Contains(r.URL.Path, url) {
-				shouldLog = true
+				shouldValidate = false
 				break
 			}
 		}
 
-		if shouldLog {
+		if shouldValidate {
 			// Executar a lógica desejada apenas para os endpoints selecionados
 			fmt.Println("Antes de chamar o endpoint:", r.URL.Path)
 

@@ -17,8 +17,9 @@ type ServerInterface interface {
 }
 
 type ServerChi struct {
-	Router     *chi.Mux
-	HttpServer *http.Server
+	Router            *chi.Mux
+	HttpServer        *http.Server
+	UnprotectedRoutes []string
 }
 
 func NewServerChi() *ServerChi {
@@ -36,7 +37,7 @@ func (c *ServerChi) newServer() {
 		AllowCredentials: true,
 	})
 	c.Router.Use(Cors.Handler)
-	c.Router.Use(loggingMiddleware)
+	c.Router.Use(c.middlewareAuthUser)
 }
 
 func (c *ServerChi) StartServer(port string) error {
@@ -57,4 +58,5 @@ func (c *ServerChi) StartServer(port string) error {
 
 func (c *ServerChi) AddHandler(h *handler.Handler) {
 	c.Router.Mount(h.Path, h.Handler)
+	c.UnprotectedRoutes = append(c.UnprotectedRoutes, h.UnprotectedRoutes...)
 }

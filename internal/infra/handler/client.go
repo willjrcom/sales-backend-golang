@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -24,6 +25,8 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 		s: clientService,
 	}
 
+	route := "/client"
+
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterClient)
 		c.Patch("/update/{id}", h.handlerUpdateClient)
@@ -38,7 +41,15 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 		c.Delete("/contact/delete/{id}", h.handlerDeleteContactClient)
 	})
 
-	return handler.NewHandler("/client", c)
+	unprotectedRoutes := []string{
+		fmt.Sprintf("%s/new", route),
+		fmt.Sprintf("%s/update/{id}", route),
+		fmt.Sprintf("%s/{id}", route),
+		fmt.Sprintf("%s/contact/new", route),
+		fmt.Sprintf("%s/contact/update/{id}", route),
+		fmt.Sprintf("%s/contact/delete/{id}", route),
+	}
+	return handler.NewHandler(route, c, unprotectedRoutes...)
 }
 
 func (h *handlerClientImpl) handlerRegisterClient(w http.ResponseWriter, r *http.Request) {

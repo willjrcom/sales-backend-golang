@@ -25,6 +25,8 @@ func NewHandlerCategoryProduct(categoryService *categoryproductusecases.Service)
 		s: categoryService,
 	}
 
+	route := "/category-product"
+
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterCategoryProduct)
 		c.Patch("/update/{id}", h.handlerUpdateCategoryProduct)
@@ -33,7 +35,7 @@ func NewHandlerCategoryProduct(categoryService *categoryproductusecases.Service)
 		c.Get("/all", h.handlerGetAllCategories)
 	})
 
-	return handler.NewHandler("/category-product", c)
+	return handler.NewHandler(route, c, route+"/all")
 }
 
 func (h *handlerCategoryProductImpl) handlerRegisterCategoryProduct(w http.ResponseWriter, r *http.Request) {

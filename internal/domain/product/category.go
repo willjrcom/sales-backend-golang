@@ -21,7 +21,7 @@ type CategoryCommonAttributes struct {
 	Quantities           []Quantity `bun:"rel:has-many,join:id=category_id" json:"quantities,omitempty"`
 	Products             []Product  `bun:"rel:has-many,join:id=category_id" json:"products,omitempty"`
 	Processes            []Process  `bun:"rel:has-many,join:id=category_id" json:"processes,omitempty"`
-	AdditionalCategories []Category `bun:"m2m:category_to_additional_categories,join:Category=Category" json:"additional_categories,omitempty"`
+	AdditionalCategories []Category `bun:"m2m:category_additional_categories,join:Category=Category" json:"additional_categories,omitempty"`
 }
 
 type PatchCategory struct {
@@ -29,7 +29,7 @@ type PatchCategory struct {
 	NeedPrint *bool   `json:"need_print"`
 }
 
-type CategoryToAdditionalCategories struct {
+type CategoryAdditionalCategories struct {
 	CategoryID   uuid.UUID `bun:"type:uuid,pk"`
 	Category     *Category `bun:"rel:belongs-to,join:category_id=id"`
 	AdditionalID uuid.UUID `bun:"type:uuid,pk"`

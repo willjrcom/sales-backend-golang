@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -23,13 +24,20 @@ func NewHandlerItem(itemService *itemusecases.Service) *handler.Handler {
 		s: itemService,
 	}
 
+	route := "/item"
+
 	c.With().Group(func(c chi.Router) {
 		c.Post("/add", h.handlerAddItem)
 		c.Delete("/delete/{id}", h.handlerDeleteItem)
 		c.Post("/add/aditional/{id}", h.handlerAddAditionalItem)
 	})
 
-	return handler.NewHandler("/item", c)
+	unprotectedRoutes := []string{
+		fmt.Sprintf("%s/add", route),
+		fmt.Sprintf("%s/delete/{id}", route),
+		fmt.Sprintf("%s/add/aditional/{id}", route),
+	}
+	return handler.NewHandler(route, c, unprotectedRoutes...)
 }
 
 func (h *handlerItemImpl) handlerAddItem(w http.ResponseWriter, r *http.Request) {

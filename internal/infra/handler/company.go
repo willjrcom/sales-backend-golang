@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -22,12 +23,16 @@ func NewHandlerCompany(companyService *companyusecases.Service) *handler.Handler
 		s: companyService,
 	}
 
+	route := "/company"
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerNewCompany)
 		c.Get("/", h.handlerGetCompany)
 	})
 
-	return handler.NewHandler("/company", c)
+	unprotectedRoutes := []string{
+		fmt.Sprintf("%s/new", route),
+	}
+	return handler.NewHandler("/company", c, unprotectedRoutes...)
 }
 
 func (h *handlerCompanyImpl) handlerNewCompany(w http.ResponseWriter, r *http.Request) {
