@@ -1,11 +1,13 @@
 package handlerimpl
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
+	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	categorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/category"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
@@ -51,7 +53,6 @@ func (h *handlerCategoryProductImpl) handlerRegisterCategoryProduct(w http.Respo
 
 func (h *handlerCategoryProductImpl) handlerUpdateCategoryProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
@@ -96,7 +97,7 @@ func (h *handlerCategoryProductImpl) handlerDeleteCategoryProduct(w http.Respons
 
 func (h *handlerCategoryProductImpl) handlerGetCategoryProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
+	fmt.Println(ctx.Value(schemaentity.Schema("schema")))
 	id := chi.URLParam(r, "id")
 
 	if id == "" {

@@ -80,7 +80,7 @@ func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Reques
 
 func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	headerToken := headerservice.GetAccessTokenHeader(r)
+	headerToken, _ := headerservice.GetAccessTokenHeader(r)
 	accessToken, err := jwtservice.ValidateToken(ctx, headerToken)
 
 	if err != nil {

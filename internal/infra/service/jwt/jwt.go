@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
 )
 
@@ -57,4 +59,17 @@ func GetSchemasFromToken(token *jwt.Token) []interface{} {
 
 func GetSchemaFromToken(token *jwt.Token) string {
 	return token.Claims.(jwt.MapClaims)["current_schema"].(string)
+}
+
+func GetUserFromToken(token *jwt.Token) userentity.User {
+	id := token.Claims.(jwt.MapClaims)["user_id"].(string)
+	email := token.Claims.(jwt.MapClaims)["user_email"].(string)
+	return userentity.User{
+		Entity: entity.Entity{
+			ID: uuid.MustParse(id),
+		},
+		UserCommonAttributes: userentity.UserCommonAttributes{
+			Email: email,
+		},
+	}
 }

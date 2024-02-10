@@ -36,6 +36,7 @@ func (c *ServerChi) newServer() {
 		AllowCredentials: true,
 	})
 	c.Router.Use(Cors.Handler)
+	c.Router.Use(loggingMiddleware)
 }
 
 func (c *ServerChi) StartServer(port string) error {

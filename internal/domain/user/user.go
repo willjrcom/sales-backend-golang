@@ -5,6 +5,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
+type UserValue string
 type User struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:users,alias:u"`
