@@ -16,7 +16,7 @@ type UserCommonAttributes struct {
 	Email    string          `bun:"column:email,unique,notnull" json:"email"`
 	Password string          `bun:"-" json:"password"`
 	Hash     string          `bun:"column:hash,notnull" json:"hash"`
-	Schemas  []SchemaCompany `bun:"column:schemas,notnull,type:jsonb,notnull" json:"schemas"`
+	Schemas  []SchemaCompany `bun:"-" json:"schemas"`
 }
 
 type SchemaCompany struct {

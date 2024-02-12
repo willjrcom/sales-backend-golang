@@ -7,6 +7,7 @@ import (
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
+	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
@@ -16,10 +17,11 @@ type Service struct {
 	r companyentity.Repository
 	a addressentity.Repository
 	s schemaservice.Service
+	u userentity.Repository
 }
 
-func NewService(r companyentity.Repository, a addressentity.Repository, s schemaservice.Service) *Service {
-	return &Service{r: r, a: a, s: s}
+func NewService(r companyentity.Repository, a addressentity.Repository, s schemaservice.Service, u userentity.Repository) *Service {
+	return &Service{r: r, a: a, s: s, u: u}
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) (id uuid.UUID, schemaName *string, err error) {
@@ -48,7 +50,27 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) 
 		return uuid.Nil, nil, err
 	}
 
-	if err := s.r.NewCompany(ctx, company); err != nil {
+	publicCompanyID, err := s.r.NewCompany(ctx, company)
+
+	if err != nil {
+		return uuid.Nil, nil, err
+	}
+
+	userID, err := s.u.GetIDByEmail(ctx, company.Email)
+
+	if err != nil {
+		return uuid.Nil, nil, err
+	}
+
+	if userID == uuid.Nil {
+		userID, err = s.newUser(ctx, company.Email)
+
+		if err != nil {
+			return uuid.Nil, nil, err
+		}
+	}
+
+	if err := s.r.AddUser(ctx, publicCompanyID, userID); err != nil {
 		return uuid.Nil, nil, err
 	}
 
@@ -63,4 +85,18 @@ func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyOutput, er
 		output.FromModel(company)
 		return output, nil
 	}
+}
+
+func (s *Service) newUser(ctx context.Context, email string) (id uuid.UUID, err error) {
+	userCommonAttributes := userentity.UserCommonAttributes{
+		Email:    email,
+		Password: "12345",
+	}
+	user := userentity.NewUser(userCommonAttributes)
+
+	if err = s.u.CreateUser(ctx, user); err != nil {
+		return uuid.Nil, err
+	}
+
+	return user.ID, nil
 }

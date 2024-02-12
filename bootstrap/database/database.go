@@ -11,6 +11,7 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
 )
@@ -102,8 +103,18 @@ func CreateSchema(ctx context.Context, db *bun.DB) error {
 
 func defaultTables(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*userentity.User)(nil))
+	db.RegisterModel((*companyentity.CompanyToUsers)(nil))
+	db.RegisterModel((*companyentity.CompanyWithUsers)(nil))
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*userentity.User)(nil)).Exec(ctx); err != nil {
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.CompanyToUsers)(nil)).Exec(ctx); err != nil {
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.CompanyWithUsers)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 

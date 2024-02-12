@@ -3,8 +3,10 @@ package userrepositorybun
 import (
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
 	"golang.org/x/net/context"
 )
@@ -95,4 +97,26 @@ func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *userentity.User
 	}
 
 	return user, nil
+}
+
+func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (uuid.UUID, error) {
+	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
+
+	r.mu.Lock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		r.mu.Unlock()
+		return uuid.Nil, err
+	}
+
+	user := &userentity.User{}
+	err := r.db.NewSelect().Model(user).Where("u.email = ?", email).Column("id").Scan(ctx)
+
+	r.mu.Unlock()
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return user.ID, nil
 }

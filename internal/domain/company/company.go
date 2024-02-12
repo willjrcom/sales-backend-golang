@@ -3,10 +3,12 @@ package companyentity
 import (
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/teris-io/shortid"
 	"github.com/uptrace/bun"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 )
 
@@ -24,6 +26,20 @@ type CompanyCommonAttributes struct {
 	Email        string                `bun:"email" json:"email"`
 	Contacts     []string              `bun:"contacts,type:jsonb" json:"contacts,omitempty"`
 	Address      addressentity.Address `bun:"rel:has-one,join:id=object_id,notnull" json:"address,omitempty"`
+}
+
+type CompanyWithUsers struct {
+	entity.Entity
+	bun.BaseModel `bun:"table:companies"`
+	CompanyCommonAttributes
+	Users []*userentity.User `bun:"m2m:company_to_users,join:CompanyWithUsers=User" json:"company_users,omitempty"`
+}
+
+type CompanyToUsers struct {
+	CompanyWithUsersID uuid.UUID         `bun:"type:uuid,pk"`
+	CompanyWithUsers   *CompanyWithUsers `bun:"rel:belongs-to,join:company_with_users_id=id" json:"company,omitempty"`
+	UserID             uuid.UUID         `bun:"type:uuid,pk"`
+	User               *userentity.User  `bun:"rel:belongs-to,join:user_id=id" json:"user,omitempty"`
 }
 
 func NewCompany(cnpjData *cnpj.Cnpj) *Company {
