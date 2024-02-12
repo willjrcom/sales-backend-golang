@@ -1,12 +1,12 @@
 package userdto
 
 import (
-	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 )
 
 type DeleteUserInput struct {
-	userentity.UserCommonAttributes
+	companyentity.UserCommonAttributes
 }
 
 func (u *DeleteUserInput) validate() error {
@@ -21,15 +21,15 @@ func (u *DeleteUserInput) validate() error {
 	return nil
 }
 
-func (u *DeleteUserInput) ToModel() (*userentity.User, error) {
+func (u *DeleteUserInput) ToModel() (*companyentity.User, error) {
 	if err := u.validate(); err != nil {
 		return nil, err
 	}
 
-	userCommonAttributes := userentity.UserCommonAttributes{
+	userCommonAttributes := companyentity.UserCommonAttributes{
 		Email:    u.Email,
 		Password: u.Password,
 	}
 
-	return userentity.NewUser(userCommonAttributes), nil
+	return companyentity.NewUser(userCommonAttributes), nil
 }

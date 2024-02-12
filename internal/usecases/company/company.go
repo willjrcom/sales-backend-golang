@@ -7,20 +7,19 @@ import (
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
-	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 )
 
 type Service struct {
-	r companyentity.Repository
+	r companyentity.CompanyRepository
 	a addressentity.Repository
 	s schemaservice.Service
-	u userentity.Repository
+	u companyentity.UserRepository
 }
 
-func NewService(r companyentity.Repository, a addressentity.Repository, s schemaservice.Service, u userentity.Repository) *Service {
+func NewService(r companyentity.CompanyRepository, a addressentity.Repository, s schemaservice.Service, u companyentity.UserRepository) *Service {
 	return &Service{r: r, a: a, s: s, u: u}
 }
 
@@ -88,11 +87,11 @@ func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyOutput, er
 }
 
 func (s *Service) newUser(ctx context.Context, email string) (id uuid.UUID, err error) {
-	userCommonAttributes := userentity.UserCommonAttributes{
+	userCommonAttributes := companyentity.UserCommonAttributes{
 		Email:    email,
 		Password: "12345",
 	}
-	user := userentity.NewUser(userCommonAttributes)
+	user := companyentity.NewUser(userCommonAttributes)
 
 	if err = s.u.CreateUser(ctx, user); err != nil {
 		return uuid.Nil, err

@@ -3,7 +3,7 @@ package userdto
 import (
 	"errors"
 
-	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 )
 
@@ -14,7 +14,7 @@ var (
 )
 
 type CreateUserInput struct {
-	userentity.UserCommonAttributes
+	companyentity.UserCommonAttributes
 }
 
 func (u *CreateUserInput) validate() error {
@@ -26,17 +26,17 @@ func (u *CreateUserInput) validate() error {
 		return ErrPasswordInvalid
 	}
 
-	if len(u.Schemas) == 0 {
+	if len(u.CompanyToUsers) == 0 {
 		return ErrMustHaveAtLeastOneSchema
 	}
 
 	return nil
 }
 
-func (u *CreateUserInput) ToModel() (*userentity.User, error) {
+func (u *CreateUserInput) ToModel() (*companyentity.User, error) {
 	if err := u.validate(); err != nil {
 		return nil, err
 	}
 
-	return userentity.NewUser(u.UserCommonAttributes), nil
+	return companyentity.NewUser(u.UserCommonAttributes), nil
 }

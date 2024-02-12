@@ -6,17 +6,17 @@ import (
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
-	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	bcryptservice "github.com/willjrcom/sales-backend-go/internal/infra/service/bcrypt"
 	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
 )
 
 type Service struct {
-	r userentity.Repository
+	r companyentity.UserRepository
 }
 
-func NewService(r userentity.Repository) *Service {
+func NewService(r companyentity.UserRepository) *Service {
 	return &Service{r: r}
 }
 
@@ -80,7 +80,7 @@ func (s *Service) LoginUser(ctx context.Context, dto *userdto.LoginUserInput) (d
 
 	data = &userdto.TokenAndSchemasOutput{
 		AccessToken: accessToken,
-		Schemas:     userLoggedIn.Schemas,
+		Companies:   userLoggedIn.Companies,
 	}
 	return data, nil
 }

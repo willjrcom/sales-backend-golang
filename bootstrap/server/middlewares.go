@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
-	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
@@ -45,7 +45,7 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 			}
 
 			ctx = context.WithValue(ctx, schemaentity.Schema("schema"), jwtservice.GetSchemaFromToken(token))
-			ctx = context.WithValue(ctx, userentity.UserValue("user"), jwtservice.GetUserFromToken(token))
+			ctx = context.WithValue(ctx, companyentity.UserValue("user"), jwtservice.GetUserFromToken(token))
 		}
 
 		// Chamando o próximo handler

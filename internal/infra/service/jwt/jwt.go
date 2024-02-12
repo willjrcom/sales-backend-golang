@@ -6,18 +6,18 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
 )
 
 var secretKey = "sua_chave_secreta"
 
-func CreateAccessToken(user *userentity.User) (string, error) {
+func CreateAccessToken(user *companyentity.User) (string, error) {
 
 	claims := jwt.MapClaims{
 		"user_id":                user.ID,
 		"user_email":             user.Email,
-		"available_user_schemas": user.Schemas,
+		"available_user_schemas": user.CompanyToUsers,
 		"sub":                    "access-token",
 		"exp":                    time.Now().Add(time.Minute * 5).Unix(),
 	}
@@ -61,14 +61,14 @@ func GetSchemaFromToken(token *jwt.Token) string {
 	return token.Claims.(jwt.MapClaims)["current_schema"].(string)
 }
 
-func GetUserFromToken(token *jwt.Token) userentity.User {
+func GetUserFromToken(token *jwt.Token) companyentity.User {
 	id := token.Claims.(jwt.MapClaims)["user_id"].(string)
 	email := token.Claims.(jwt.MapClaims)["user_email"].(string)
-	return userentity.User{
+	return companyentity.User{
 		Entity: entity.Entity{
 			ID: uuid.MustParse(id),
 		},
-		UserCommonAttributes: userentity.UserCommonAttributes{
+		UserCommonAttributes: companyentity.UserCommonAttributes{
 			Email: email,
 		},
 	}

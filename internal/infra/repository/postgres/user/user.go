@@ -6,8 +6,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
-	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
 	"golang.org/x/net/context"
 )
 
@@ -20,7 +20,7 @@ func NewUserRepositoryBun(db *bun.DB) *UserRepositoryBun {
 	return &UserRepositoryBun{db: db}
 }
 
-func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *userentity.User) error {
+func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *companyentity.User) error {
 	r.mu.Lock()
 
 	if err := database.ChangeSchema(ctx, r.db); err != nil {
@@ -38,7 +38,7 @@ func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *userentity.Use
 	return nil
 }
 
-func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *userentity.User) error {
+func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *companyentity.User) error {
 	r.mu.Lock()
 
 	if err := database.ChangeSchema(ctx, r.db); err != nil {
@@ -56,7 +56,7 @@ func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *userentity.Use
 	return nil
 }
 
-func (r *UserRepositoryBun) DeleteUser(ctx context.Context, user *userentity.User) error {
+func (r *UserRepositoryBun) DeleteUser(ctx context.Context, user *companyentity.User) error {
 	r.mu.Lock()
 
 	if err := database.ChangeSchema(ctx, r.db); err != nil {
@@ -64,7 +64,7 @@ func (r *UserRepositoryBun) DeleteUser(ctx context.Context, user *userentity.Use
 		return err
 	}
 
-	_, err := r.db.NewDelete().Model(&userentity.User{}).Where("u.email = ? AND u.hash = ?", user.Email, user.Hash).Exec(ctx)
+	_, err := r.db.NewDelete().Model(&companyentity.User{}).Where("u.email = ? AND u.hash = ?", user.Email, user.Hash).Exec(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -74,7 +74,7 @@ func (r *UserRepositoryBun) DeleteUser(ctx context.Context, user *userentity.Use
 	return nil
 }
 
-func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *userentity.User) (*userentity.User, error) {
+func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *companyentity.User) (*companyentity.User, error) {
 	r.mu.Lock()
 
 	if err := database.ChangeSchema(ctx, r.db); err != nil {
@@ -86,16 +86,27 @@ func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *userentity.User
 		Model(user).
 		Where("u.email = ?", user.Email).
 		Where("crypt(?, u.hash) = u.hash", user.Password).
+		Relation("CompanyToUsers").
 		Limit(1).
 		ExcludeColumn("hash").
 		Scan(context.Background())
-
-	r.mu.Unlock()
 
 	if err != nil {
 		return nil, err
 	}
 
+	for _, ctu := range user.CompanyToUsers {
+		company := &companyentity.CompanyWithUsers{}
+		if err = r.db.NewSelect().Model(company).Where("id = ?", ctu.CompanyWithUsersID).Scan(ctx); err != nil {
+			r.mu.Unlock()
+			return nil, err
+		}
+
+		company.Address = nil
+		user.Companies = append(user.Companies, *company)
+	}
+
+	r.mu.Unlock()
 	return user, nil
 }
 
@@ -109,7 +120,7 @@ func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (uui
 		return uuid.Nil, err
 	}
 
-	user := &userentity.User{}
+	user := &companyentity.User{}
 	err := r.db.NewSelect().Model(user).Where("u.email = ?", email).Column("id").Scan(ctx)
 
 	r.mu.Unlock()

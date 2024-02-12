@@ -1,8 +1,8 @@
 package userdto
 
-import userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
+import companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 
 type TokenAndSchemasOutput struct {
-	AccessToken string                     `json:"accessToken"`
-	Schemas     []userentity.SchemaCompany `json:"schemas"`
+	AccessToken string                           `json:"accessToken"`
+	Companies   []companyentity.CompanyWithUsers `json:"companies"`
 }

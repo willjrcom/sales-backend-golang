@@ -3,7 +3,7 @@ package userdto
 import (
 	"errors"
 
-	userentity "github.com/willjrcom/sales-backend-go/internal/domain/user"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 )
 
@@ -33,15 +33,15 @@ func (r *UpdatePasswordInput) validate() error {
 	return nil
 }
 
-func (r *UpdatePasswordInput) ToModel() (*userentity.User, error) {
+func (r *UpdatePasswordInput) ToModel() (*companyentity.User, error) {
 	if err := r.validate(); err != nil {
 		return nil, err
 	}
 
-	userCommonAttributes := userentity.UserCommonAttributes{
+	userCommonAttributes := companyentity.UserCommonAttributes{
 		Email:    r.Email,
 		Password: r.OldPassword,
 	}
 
-	return userentity.NewUser(userCommonAttributes), nil
+	return companyentity.NewUser(userCommonAttributes), nil
 }
