@@ -2,6 +2,7 @@ package companyusecases
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
@@ -42,34 +43,27 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) 
 	company := companyentity.NewCompany(cnpjData)
 	company.Email = email
 	company.Contacts = contacts
-
+	fmt.Println(company.SchemaName)
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), company.SchemaName)
 
 	if err := s.s.NewSchema(ctx); err != nil {
 		return uuid.Nil, nil, err
 	}
 
-	publicCompanyID, err := s.r.NewCompany(ctx, company)
-
-	if err != nil {
+	if err = s.r.NewCompany(ctx, company); err != nil {
 		return uuid.Nil, nil, err
 	}
 
-	userID, err := s.u.GetIDByEmail(ctx, company.Email)
+	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), company.SchemaName)
 
-	if err != nil {
-		return uuid.Nil, nil, err
+	userCommonAttributes := companyentity.UserCommonAttributes{
+		Email:    email,
+		Password: "12345",
 	}
 
-	if userID == uuid.Nil {
-		userID, err = s.newUser(ctx, company.Email)
+	userInput := &companydto.UserInput{UserCommonAttributes: userCommonAttributes}
 
-		if err != nil {
-			return uuid.Nil, nil, err
-		}
-	}
-
-	if err := s.r.AddUser(ctx, publicCompanyID, userID); err != nil {
+	if err = s.AddUserToCompany(ctx, userInput); err != nil {
 		return uuid.Nil, nil, err
 	}
 
@@ -86,7 +80,35 @@ func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyOutput, er
 	}
 }
 
-func (s *Service) newUser(ctx context.Context, email string) (id uuid.UUID, err error) {
+func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserInput) error {
+	user, err := dto.ToModel()
+
+	if err != nil {
+		return err
+	}
+
+	userID, err := s.u.GetIDByEmail(ctx, user.Email)
+
+	if err != nil {
+		return err
+	}
+
+	if userID == uuid.Nil {
+		userID, err = s.createUser(ctx, user.Email)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := s.r.AddUserToPublicCompany(ctx, userID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) createUser(ctx context.Context, email string) (id uuid.UUID, err error) {
 	userCommonAttributes := companyentity.UserCommonAttributes{
 		Email:    email,
 		Password: "12345",

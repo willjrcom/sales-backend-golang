@@ -7,9 +7,9 @@ import (
 )
 
 type CompanyRepository interface {
-	NewCompany(ctx context.Context, company *Company) (uuid.UUID, error)
+	NewCompany(ctx context.Context, company *Company) error
 	GetCompany(ctx context.Context) (*Company, error)
-	AddUser(ctx context.Context, companyID uuid.UUID, userID uuid.UUID) error
+	AddUserToPublicCompany(ctx context.Context, userID uuid.UUID) error
 }
 
 type UserRepository interface {

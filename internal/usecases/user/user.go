@@ -107,12 +107,12 @@ func (s *Service) Access(ctx context.Context, dto *userdto.AccessCompanyInput, a
 
 func findSchemaInSchemas(schemas []interface{}, schema string) bool {
 	for _, s := range schemas {
-		schemaCompany, ok := s.(map[string]interface{})
+		schemaCompany, ok := s.(string)
 
 		if !ok {
 			continue
 		}
-		if strings.EqualFold(schemaCompany["schema"].(string), schema) {
+		if strings.EqualFold(schemaCompany, schema) {
 			return true
 		}
 	}

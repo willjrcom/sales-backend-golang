@@ -17,7 +17,7 @@ func CreateAccessToken(user *companyentity.User) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id":                user.ID,
 		"user_email":             user.Email,
-		"available_user_schemas": user.CompanyToUsers,
+		"available_user_schemas": user.GetSchemas(),
 		"sub":                    "access-token",
 		"exp":                    time.Now().Add(time.Minute * 5).Unix(),
 	}

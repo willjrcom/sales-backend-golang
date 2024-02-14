@@ -26,3 +26,13 @@ func NewUser(userCommonAttributes UserCommonAttributes) *User {
 		UserCommonAttributes: userCommonAttributes,
 	}
 }
+
+func (u *User) GetSchemas() []string {
+	schemas := []string{}
+
+	for _, company := range u.Companies {
+		schemas = append(schemas, company.SchemaName)
+	}
+
+	return schemas
+}
