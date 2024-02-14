@@ -15,6 +15,7 @@ var (
 
 type CreateUserInput struct {
 	companyentity.UserCommonAttributes
+	GeneratePassword bool `json:"generate_password"`
 }
 
 func (u *CreateUserInput) validate() error {
@@ -22,12 +23,8 @@ func (u *CreateUserInput) validate() error {
 		return ErrEmailInvalid
 	}
 
-	if !utils.IsValidPassword(u.Password) {
+	if !utils.IsValidPassword(u.Password) && !u.GeneratePassword {
 		return ErrPasswordInvalid
-	}
-
-	if len(u.CompanyToUsers) == 0 {
-		return ErrMustHaveAtLeastOneSchema
 	}
 
 	return nil
@@ -36,6 +33,10 @@ func (u *CreateUserInput) validate() error {
 func (u *CreateUserInput) ToModel() (*companyentity.User, error) {
 	if err := u.validate(); err != nil {
 		return nil, err
+	}
+
+	if u.GeneratePassword {
+		u.Password = "12345"
 	}
 
 	return companyentity.NewUser(u.UserCommonAttributes), nil

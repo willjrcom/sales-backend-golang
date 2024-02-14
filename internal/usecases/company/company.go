@@ -9,19 +9,22 @@ import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
+	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
+	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 )
 
 type Service struct {
-	r companyentity.CompanyRepository
-	a addressentity.Repository
-	s schemaservice.Service
-	u companyentity.UserRepository
+	r  companyentity.CompanyRepository
+	a  addressentity.Repository
+	s  schemaservice.Service
+	u  companyentity.UserRepository
+	us userusecases.Service
 }
 
-func NewService(r companyentity.CompanyRepository, a addressentity.Repository, s schemaservice.Service, u companyentity.UserRepository) *Service {
-	return &Service{r: r, a: a, s: s, u: u}
+func NewService(r companyentity.CompanyRepository, a addressentity.Repository, s schemaservice.Service, u companyentity.UserRepository, us userusecases.Service) *Service {
+	return &Service{r: r, a: a, s: s, u: u, us: us}
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) (id uuid.UUID, schemaName *string, err error) {
@@ -90,9 +93,16 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserInpu
 	userID, _ := s.u.GetIDByEmail(ctx, user.Email)
 
 	if userID == uuid.Nil {
-		userID, err = s.createUser(ctx, user.Email)
+		userCommonAttributes := &companyentity.UserCommonAttributes{
+			Email: user.Email,
+		}
 
-		if err != nil {
+		createUserInput := &userdto.CreateUserInput{
+			UserCommonAttributes: *userCommonAttributes,
+			GeneratePassword:     true,
+		}
+
+		if userID, err = s.us.CreateUser(ctx, createUserInput); err != nil {
 			return err
 		}
 	}
@@ -122,18 +132,4 @@ func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.Use
 	}
 
 	return nil
-}
-
-func (s *Service) createUser(ctx context.Context, email string) (id uuid.UUID, err error) {
-	userCommonAttributes := companyentity.UserCommonAttributes{
-		Email:    email,
-		Password: "12345",
-	}
-	user := companyentity.NewUser(userCommonAttributes)
-
-	if err = s.u.CreateUser(ctx, user); err != nil {
-		return uuid.Nil, err
-	}
-
-	return user.ID, nil
 }

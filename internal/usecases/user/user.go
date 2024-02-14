@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	bcryptservice "github.com/willjrcom/sales-backend-go/internal/infra/service/bcrypt"
@@ -20,21 +21,21 @@ func NewService(r companyentity.UserRepository) *Service {
 	return &Service{r: r}
 }
 
-func (s *Service) CreateUser(ctx context.Context, dto *userdto.CreateUserInput) error {
+func (s *Service) CreateUser(ctx context.Context, dto *userdto.CreateUserInput) (uuid.UUID, error) {
 	user, err := dto.ToModel()
 
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
 	hash, err := bcryptservice.HashPassword(dto.Password)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
 	user.Hash = string(hash)
 
-	return s.r.CreateUser(ctx, user)
+	return user.ID, s.r.CreateUser(ctx, user)
 }
 
 func (s *Service) UpdateUser(ctx context.Context, dto *userdto.UpdatePasswordInput) error {

@@ -47,10 +47,10 @@ func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request)
 	user := &userdto.CreateUserInput{}
 	jsonpkg.ParseBody(r, user)
 
-	if err := h.s.CreateUser(ctx, user); err != nil {
+	if id, err := h.s.CreateUser(ctx, user); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
 	}
 }
 
