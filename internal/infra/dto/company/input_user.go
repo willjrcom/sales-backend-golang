@@ -20,9 +20,6 @@ func (c *UserInput) validate() error {
 		return ErrMustBeEmail
 	}
 
-	if c.Password == "" {
-		return ErrMustBePassword
-	}
 	return nil
 }
 

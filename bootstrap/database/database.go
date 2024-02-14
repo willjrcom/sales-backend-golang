@@ -78,6 +78,11 @@ func ChangeSchema(ctx context.Context, db *bun.DB) error {
 	return err
 }
 
+func ChangeToPublicSchema(ctx context.Context, db *bun.DB) error {
+	_, err := db.Exec("SET search_path=?", schemaentity.DEFAULT_SCHEMA)
+	return err
+}
+
 func GetSchema(ctx context.Context) (string, error) {
 	schemaName := ctx.Value(schemaentity.Schema("schema"))
 	if schemaName == nil {

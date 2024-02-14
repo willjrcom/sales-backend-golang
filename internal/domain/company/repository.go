@@ -10,6 +10,7 @@ type CompanyRepository interface {
 	NewCompany(ctx context.Context, company *Company) error
 	GetCompany(ctx context.Context) (*Company, error)
 	AddUserToPublicCompany(ctx context.Context, userID uuid.UUID) error
+	RemoveUserFromPublicCompany(ctx context.Context, userID uuid.UUID) error
 }
 
 type UserRepository interface {

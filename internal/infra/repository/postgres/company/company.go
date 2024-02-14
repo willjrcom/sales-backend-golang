@@ -53,13 +53,12 @@ func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *companye
 		return err
 	}
 
-	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
 	companyWithUsers := &companyentity.CompanyWithUsers{
 		Entity:                  entity.NewEntity(),
 		CompanyCommonAttributes: company.CompanyCommonAttributes,
 	}
 
-	if err = database.ChangeSchema(ctx, r.db); err != nil {
+	if err = database.ChangeToPublicSchema(ctx, r.db); err != nil {
 		r.mu.Unlock()
 		return err
 	}
@@ -95,11 +94,10 @@ func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*companyentity.C
 
 func (r *CompanyRepositoryBun) AddUserToPublicCompany(ctx context.Context, userID uuid.UUID) error {
 	schema := ctx.Value(schemaentity.Schema("schema")).(string)
-	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
 
 	r.mu.Lock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
 		r.mu.Unlock()
 		return err
 	}
@@ -111,6 +109,29 @@ func (r *CompanyRepositoryBun) AddUserToPublicCompany(ctx context.Context, userI
 	}
 
 	_, err := r.db.NewInsert().Model(&companyentity.CompanyToUsers{CompanyWithUsersID: companyWithUsers.ID, UserID: userID}).Exec(ctx)
+
+	r.mu.Unlock()
+	return err
+
+}
+
+func (r *CompanyRepositoryBun) RemoveUserFromPublicCompany(ctx context.Context, userID uuid.UUID) error {
+	schema := ctx.Value(schemaentity.Schema("schema")).(string)
+
+	r.mu.Lock()
+
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+		r.mu.Unlock()
+		return err
+	}
+
+	companyWithUsers := &companyentity.CompanyWithUsers{}
+	if err := r.db.NewSelect().Model(companyWithUsers).Where("schema_name = ?", schema).Scan(ctx); err != nil {
+		r.mu.Unlock()
+		return err
+	}
+
+	_, err := r.db.NewDelete().Model(&companyentity.CompanyToUsers{}).Where("company_with_users_id = ? AND user_id = ?", companyWithUsers.ID, userID).Exec(ctx)
 
 	r.mu.Unlock()
 	return err

@@ -87,11 +87,7 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserInpu
 		return err
 	}
 
-	userID, err := s.u.GetIDByEmail(ctx, user.Email)
-
-	if err != nil {
-		return err
-	}
+	userID, _ := s.u.GetIDByEmail(ctx, user.Email)
 
 	if userID == uuid.Nil {
 		userID, err = s.createUser(ctx, user.Email)
@@ -102,6 +98,26 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserInpu
 	}
 
 	if err := s.r.AddUserToPublicCompany(ctx, userID); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.UserInput) error {
+	user, err := dto.ToModel()
+
+	if err != nil {
+		return err
+	}
+
+	userID, err := s.u.GetIDByEmail(ctx, user.Email)
+
+	if err != nil {
+		return err
+	}
+
+	if err := s.r.RemoveUserFromPublicCompany(ctx, userID); err != nil {
 		return err
 	}
 

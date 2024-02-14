@@ -7,7 +7,6 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
-	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	"golang.org/x/net/context"
 )
 
@@ -23,7 +22,7 @@ func NewUserRepositoryBun(db *bun.DB) *UserRepositoryBun {
 func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *companyentity.User) error {
 	r.mu.Lock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
 		r.mu.Unlock()
 		return err
 	}
@@ -41,7 +40,7 @@ func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *companyentity.
 func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *companyentity.User) error {
 	r.mu.Lock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
 		r.mu.Unlock()
 		return err
 	}
@@ -59,7 +58,7 @@ func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *companyentity.
 func (r *UserRepositoryBun) DeleteUser(ctx context.Context, user *companyentity.User) error {
 	r.mu.Lock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
 		r.mu.Unlock()
 		return err
 	}
@@ -77,7 +76,7 @@ func (r *UserRepositoryBun) DeleteUser(ctx context.Context, user *companyentity.
 func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *companyentity.User) (*companyentity.User, error) {
 	r.mu.Lock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
 		r.mu.Unlock()
 		return nil, err
 	}
@@ -92,6 +91,7 @@ func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *companyentity.U
 		Scan(context.Background())
 
 	if err != nil {
+		r.mu.Unlock()
 		return nil, err
 	}
 
@@ -111,11 +111,9 @@ func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *companyentity.U
 }
 
 func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (uuid.UUID, error) {
-	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
-
 	r.mu.Lock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
 		r.mu.Unlock()
 		return uuid.Nil, err
 	}
@@ -124,10 +122,5 @@ func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (uui
 	err := r.db.NewSelect().Model(user).Where("u.email = ?", email).Column("id").Scan(ctx)
 
 	r.mu.Unlock()
-
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	return user.ID, nil
+	return user.ID, err
 }

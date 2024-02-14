@@ -27,6 +27,8 @@ func NewHandlerCompany(companyService *companyusecases.Service) *handler.Handler
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerNewCompany)
 		c.Get("/", h.handlerGetCompany)
+		c.Post("/add/user", h.handlerAddUserToCompany)
+		c.Delete("/remove/user", h.handlerRemoveUserFromCompany)
 	})
 
 	unprotectedRoutes := []string{
@@ -60,5 +62,31 @@ func (h *handlerCompanyImpl) handlerGetCompany(w http.ResponseWriter, r *http.Re
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+	}
+}
+
+func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	user := &companydto.UserInput{}
+	jsonpkg.ParseBody(r, user)
+
+	if err := h.s.AddUserToCompany(ctx, user); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	}
+}
+
+func (h *handlerCompanyImpl) handlerRemoveUserFromCompany(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	user := &companydto.UserInput{}
+	jsonpkg.ParseBody(r, user)
+
+	if err := h.s.RemoveUserFromCompany(ctx, user); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
 }

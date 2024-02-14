@@ -1,13 +1,11 @@
 package handlerimpl
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
-	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
@@ -45,7 +43,6 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 
 func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
 
 	user := &userdto.CreateUserInput{}
 	jsonpkg.ParseBody(r, user)
@@ -59,7 +56,6 @@ func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request)
 
 func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
 
 	user := &userdto.UpdatePasswordInput{}
 	jsonpkg.ParseBody(r, user)
@@ -73,7 +69,6 @@ func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Reque
 
 func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
 
 	user := &userdto.LoginUserInput{}
 	jsonpkg.ParseBody(r, user)
@@ -107,7 +102,6 @@ func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) 
 
 func (h *handlerUserImpl) handlerDeleteUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
 
 	user := &userdto.DeleteUserInput{}
 	jsonpkg.ParseBody(r, user)
