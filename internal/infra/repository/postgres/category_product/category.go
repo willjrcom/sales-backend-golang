@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -20,18 +22,38 @@ func NewCategoryProductRepositoryBun(db *bun.DB) *CategoryProductRepositoryBun {
 
 func (r *CategoryProductRepositoryBun) RegisterCategory(ctx context.Context, cp *productentity.Category) error {
 	r.mu.Lock()
-	_, err := r.db.NewInsert().Model(cp).Exec(ctx)
-	r.mu.Unlock()
-
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		r.mu.Unlock()
 		return err
 	}
 
-	return nil
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
+
+	if err != nil {
+		r.mu.Unlock()
+		return err
+	}
+
+	if _, err = tx.NewInsert().Model(cp).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			r.mu.Unlock()
+			return errRollBack
+		}
+
+		r.mu.Unlock()
+		return err
+	}
+
+	return r.updateAdditionalCategories(ctx, tx, cp.ID, cp.AdditionalCategories)
 }
 
 func (r *CategoryProductRepositoryBun) UpdateCategory(ctx context.Context, c *productentity.Category) error {
 	r.mu.Lock()
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		r.mu.Unlock()
+		return err
+	}
+
 	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
 
 	if err != nil {
@@ -40,30 +62,39 @@ func (r *CategoryProductRepositoryBun) UpdateCategory(ctx context.Context, c *pr
 	}
 
 	if _, err = tx.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
-		if err = tx.Rollback(); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
 			r.mu.Unlock()
-			return err
+			return errRollBack
 		}
 
 		r.mu.Unlock()
 		return err
 	}
 
-	if _, err = tx.NewDelete().Model(productentity.CategoryCategory{}).Where("category_id = ?", c.ID).Exec(ctx); err != nil {
-		if err = tx.Rollback(); err != nil {
+	return r.updateAdditionalCategories(ctx, tx, c.ID, c.AdditionalCategories)
+}
+
+func (r *CategoryProductRepositoryBun) updateAdditionalCategories(ctx context.Context, tx bun.Tx, categoryID uuid.UUID, additionalCategories []productentity.Category) error {
+	if _, err := tx.NewDelete().Model(&productentity.CategoryToAdditional{}).Where("category_id = ?", categoryID).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
 			r.mu.Unlock()
-			return err
+			return errRollBack
 		}
 
 		r.mu.Unlock()
 		return err
 	}
 
-	for _, ac := range c.AdditionalCategories {
-		if _, err = tx.NewInsert().Model(ac).Exec(ctx); err != nil {
-			if err = tx.Rollback(); err != nil {
+	for _, ac := range additionalCategories {
+		categoryToAdditional := &productentity.CategoryToAdditional{
+			CategoryID:           categoryID,
+			AdditionalCategoryID: ac.ID,
+		}
+
+		if _, err := tx.NewInsert().Model(categoryToAdditional).Exec(ctx); err != nil {
+			if errRollBack := tx.Rollback(); errRollBack != nil {
 				r.mu.Unlock()
-				return err
+				return errRollBack
 			}
 
 			r.mu.Unlock()
@@ -71,14 +102,59 @@ func (r *CategoryProductRepositoryBun) UpdateCategory(ctx context.Context, c *pr
 		}
 	}
 
-	r.mu.Unlock()
+	if err := tx.Commit(); err != nil {
+		r.mu.Unlock()
+		return err
+	}
 
+	r.mu.Unlock()
 	return nil
 }
 
 func (r *CategoryProductRepositoryBun) DeleteCategory(ctx context.Context, id string) error {
 	r.mu.Lock()
-	r.db.NewDelete().Model(&productentity.Category{}).Where("id = ?", id).Exec(ctx)
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		r.mu.Unlock()
+		return err
+	}
+
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
+
+	if err != nil {
+		r.mu.Unlock()
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&productentity.Category{}).Where("id = ?", id).Exec(ctx); err != nil {
+		if err = tx.Rollback(); err != nil {
+			r.mu.Unlock()
+			return err
+		}
+
+		r.mu.Unlock()
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&productentity.CategoryToAdditional{}).Where("category_id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			r.mu.Unlock()
+			return errRollBack
+		}
+
+		r.mu.Unlock()
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&productentity.CategoryToAdditional{}).Where("category_additional_id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			r.mu.Unlock()
+			return errRollBack
+		}
+
+		r.mu.Unlock()
+		return err
+	}
+
 	r.mu.Unlock()
 	return nil
 }
@@ -87,7 +163,12 @@ func (r *CategoryProductRepositoryBun) GetCategoryById(ctx context.Context, id s
 	category := &productentity.Category{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("Processes").Relation("AditionalCategories").Scan(ctx)
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		r.mu.Unlock()
+		return nil, err
+	}
+
+	err := r.db.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("Processes").Relation("AdditionalCategories").Scan(ctx)
 	r.mu.Unlock()
 
 	if err != nil {
@@ -101,12 +182,16 @@ func (r *CategoryProductRepositoryBun) GetAllCategories(ctx context.Context) ([]
 	categories := []productentity.Category{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&categories).Relation("Sizes").Relation("Quantities").Relation("Processes").Relation("AditionalCategories").Scan(ctx)
-	r.mu.Unlock()
-
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		r.mu.Unlock()
 		return nil, err
 	}
 
+	if err := r.db.NewSelect().Model(&categories).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("Processes").Relation("AdditionalCategories").Scan(ctx); err != nil {
+		r.mu.Unlock()
+		return nil, err
+	}
+
+	r.mu.Unlock()
 	return categories, nil
 }

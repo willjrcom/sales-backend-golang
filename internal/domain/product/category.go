@@ -1,7 +1,6 @@
 package productentity
 
 import (
-	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
@@ -21,17 +20,18 @@ type CategoryCommonAttributes struct {
 	Quantities           []Quantity `bun:"rel:has-many,join:id=category_id" json:"quantities,omitempty"`
 	Products             []Product  `bun:"rel:has-many,join:id=category_id" json:"products,omitempty"`
 	Processes            []Process  `bun:"rel:has-many,join:id=category_id" json:"processes,omitempty"`
-	AdditionalCategories []Category `bun:"m2m:category_additional_categories,join:Category=Category" json:"additional_categories,omitempty"`
+	AdditionalCategories []Category `bun:"m2m:category_to_additional,join:Category=AdditionalCategory" json:"category_to_additional,omitempty"`
 }
 
 type PatchCategory struct {
-	Name      *string `json:"name"`
-	NeedPrint *bool   `json:"need_print"`
+	Name                 *string    `json:"name"`
+	NeedPrint            *bool      `json:"need_print"`
+	AdditionalCategories []Category `json:"category_to_additional,omitempty"`
 }
 
-type CategoryAdditionalCategories struct {
-	CategoryID   uuid.UUID `bun:"type:uuid,pk"`
-	Category     *Category `bun:"rel:belongs-to,join:category_id=id"`
-	AdditionalID uuid.UUID `bun:"type:uuid,pk"`
-	Additional   *Category `bun:"rel:belongs-to,join:additional_id=id"`
+func NewCategory(categoryCommonAttributes CategoryCommonAttributes) *Category {
+	return &Category{
+		Entity:                   entity.NewEntity(),
+		CategoryCommonAttributes: categoryCommonAttributes,
+	}
 }

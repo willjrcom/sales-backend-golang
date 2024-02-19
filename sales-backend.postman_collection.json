@@ -158,7 +158,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Lanche\"\n}",
+							"raw": "{\n    \"name\": \"Pizza\",\n    \"category_to_additional\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -182,7 +182,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"Suco\"\n}",
+							"raw": "{\n    \"category_to_additional\": [\n        {\n            \"id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\"\n        },\n        {\n            \"id\": \"3ace5f45-9bc0-41f2-a70f-2b6b862b5225\"\n        }\n    ]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1836,7 +1836,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"will@gmail.com\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"]\n}",
+							"raw": "{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"williamjunior68@gmail.com\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"],\n    \"trade_name\": \"ibiti\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1874,6 +1874,76 @@
 								}
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "add user to company",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "id-token",
+								"value": "{{IDToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"williamjunior68@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/company/add/user"
+					},
+					"response": []
+				},
+				{
+					"name": "remove user to company Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "id-token",
+								"value": "{{IDToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"williamjunior68@gmail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/company/remove/user"
 					},
 					"response": []
 				}
@@ -1964,7 +2034,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"williamjunior67@gmail.com\",\n    \"password\": \"Objetivo42461255!\"\n    \n}",
+							"raw": "{\n    \"email\": \"williamjunior68@gmail.com\",\n    \"password\": \"12345\"\n    \n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2001,7 +2071,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"schema\": \"{{schema}}\"\n    \n}",
+							"raw": "{\n    \"schema\": \"loja_ibiti__2qititsr\"\n    \n}",
 							"options": {
 								"raw": {
 									"language": "json"

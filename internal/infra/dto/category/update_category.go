@@ -10,21 +10,13 @@ type UpdateCategoryInput struct {
 	productentity.PatchCategory
 }
 
-func (c *UpdateCategoryInput) validate() error {
-	if c.Name == nil {
-		return ErrNameIsEmpty
-	}
-
-	return nil
-}
-
 func (c *UpdateCategoryInput) UpdateModel(category *productentity.Category) (err error) {
-	if err = c.validate(); err != nil {
-		return err
-	}
-
 	if c.Name != nil {
 		category.Name = *c.Name
+	}
+
+	if c.AdditionalCategories != nil {
+		category.AdditionalCategories = c.AdditionalCategories
 	}
 
 	return nil

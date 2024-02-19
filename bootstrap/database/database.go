@@ -6,13 +6,25 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
+	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
+	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
+	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
+	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
+	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
 )
 
 var (
@@ -47,24 +59,24 @@ func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 	db.SetMaxIdleConns(5)
 	db.SetConnMaxLifetime(time.Duration(60) * time.Minute)
 
-	bun := bun.NewDB(db, pgdialect.New())
+	dbBun := bun.NewDB(db, pgdialect.New())
 
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.LOST_SCHEMA)
-	if err := CreateSchema(ctx, bun); err != nil {
+	if err := CreateSchema(ctx, dbBun); err != nil {
 		return nil, err
 	}
 
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
-	if err := CreateSchema(ctx, bun); err != nil {
+	if err := CreateSchema(ctx, dbBun); err != nil {
 		return nil, err
 	}
 
-	if err := defaultTables(ctx, bun); err != nil {
+	if err := defaultTables(ctx, dbBun); err != nil {
 		return nil, err
 	}
 
 	fmt.Println("Db connected")
-	return bun, nil
+	return dbBun, nil
 }
 
 func ChangeSchema(ctx context.Context, db *bun.DB) error {
@@ -110,6 +122,10 @@ func defaultTables(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*companyentity.CompanyToUsers)(nil))
 	db.RegisterModel((*companyentity.CompanyWithUsers)(nil))
 
+	if err := RegisterModels(ctx, db); err != nil {
+		return err
+	}
+
 	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.User)(nil)).Exec(ctx); err != nil {
 		return err
 	}
@@ -123,6 +139,170 @@ func defaultTables(ctx context.Context, db *bun.DB) error {
 	}
 
 	if _, err := db.ExecContext(ctx, "CREATE EXTENSION IF NOT EXISTS pgcrypto;"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func RegisterModels(ctx context.Context, db *bun.DB) error {
+	mu := sync.Mutex{}
+
+	mu.Lock()
+	if err := CreateSchema(ctx, db); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if err := ChangeSchema(ctx, db); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	db.RegisterModel((*entity.Entity)(nil))
+
+	db.RegisterModel((*productentity.CategoryToAdditional)(nil))
+	db.RegisterModel((*productentity.Size)(nil))
+	db.RegisterModel((*productentity.Quantity)(nil))
+	db.RegisterModel((*productentity.Category)(nil))
+	db.RegisterModel((*productentity.Process)(nil))
+	db.RegisterModel((*productentity.Product)(nil))
+
+	db.RegisterModel((*addressentity.Address)(nil))
+	db.RegisterModel((*personentity.Contact)(nil))
+	db.RegisterModel((*cliententity.Client)(nil))
+	db.RegisterModel((*employeeentity.Employee)(nil))
+
+	db.RegisterModel((*itementity.Item)(nil))
+	db.RegisterModel((*groupitementity.GroupItem)(nil))
+
+	db.RegisterModel((*orderentity.DeliveryOrder)(nil))
+	db.RegisterModel((*orderentity.TableOrder)(nil))
+	db.RegisterModel((*orderentity.PaymentOrder)(nil))
+	db.RegisterModel((*orderentity.Order)(nil))
+
+	db.RegisterModel((*tableentity.Table)(nil))
+	db.RegisterModel((*shiftentity.Shift)(nil))
+	db.RegisterModel((*companyentity.Company)(nil))
+	return nil
+}
+
+func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
+	mu := sync.Mutex{}
+
+	mu.Lock()
+	if err := CreateSchema(ctx, db); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if err := ChangeSchema(ctx, db); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*entity.Entity)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Size)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.CategoryToAdditional)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Category)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Quantity)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Process)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Product)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*addressentity.Address)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*personentity.Contact)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*personentity.Person)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*cliententity.Client)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*employeeentity.Employee)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*itementity.Item)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*groupitementity.GroupItem)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.DeliveryOrder)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.TableOrder)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.PaymentOrder)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.Order)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*tableentity.Table)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*shiftentity.Shift)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.Company)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
 		return err
 	}
 

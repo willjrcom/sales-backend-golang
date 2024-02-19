@@ -3,7 +3,6 @@ package categorydto
 import (
 	"errors"
 
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -29,11 +28,12 @@ func (c *RegisterCategoryInput) ToModel() (*productentity.Category, error) {
 	}
 
 	categoryCommonAttributes := productentity.CategoryCommonAttributes{
-		Name: c.Name,
+		Name:                 c.Name,
+		AdditionalCategories: c.AdditionalCategories,
+		RemovableItems:       c.RemovableItems,
+		ImagePath:            c.ImagePath,
+		NeedPrint:            c.NeedPrint,
 	}
 
-	return &productentity.Category{
-		Entity:                   entity.NewEntity(),
-		CategoryCommonAttributes: categoryCommonAttributes,
-	}, nil
+	return productentity.NewCategory(categoryCommonAttributes), nil
 }
