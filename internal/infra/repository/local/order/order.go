@@ -3,14 +3,12 @@ package orderrepositorylocal
 import (
 	"context"
 	"errors"
-	"sync"
 
 	"github.com/google/uuid"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 type OrderRepositoryLocal struct {
-	mu     sync.Mutex
 	orders map[uuid.UUID]*orderentity.Order
 }
 
@@ -19,54 +17,39 @@ func NewOrderRepositoryLocal() *OrderRepositoryLocal {
 }
 
 func (r *OrderRepositoryLocal) CreateOrder(ctx context.Context, order *orderentity.Order) error {
-	r.mu.Lock()
-
 	if _, ok := r.orders[order.Entity.ID]; ok {
-		r.mu.Unlock()
 		return errors.New("order already exists")
 	}
 
 	r.orders[order.ID] = order
-	r.mu.Unlock()
 	return nil
 }
 
 func (r *OrderRepositoryLocal) DeleteOrder(ctx context.Context, id string) error {
-	r.mu.Lock()
-
 	if _, ok := r.orders[uuid.MustParse(id)]; !ok {
-		r.mu.Unlock()
+
 		return errors.New("order not found")
 	}
 
 	delete(r.orders, uuid.MustParse(id))
-	r.mu.Unlock()
 	return nil
 }
 
 func (r *OrderRepositoryLocal) PendingOrder(ctx context.Context, order *orderentity.Order) error {
-	r.mu.Lock()
 	r.orders[order.ID] = order
-	r.mu.Unlock()
 	return nil
 }
 
 func (r *OrderRepositoryLocal) UpdateOrder(ctx context.Context, order *orderentity.Order) error {
-	r.mu.Lock()
 	r.orders[order.ID] = order
-	r.mu.Unlock()
 	return nil
 }
 
 func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*orderentity.Order, error) {
-	r.mu.Lock()
-
 	if p, ok := r.orders[uuid.MustParse(id)]; ok {
-		r.mu.Unlock()
 		return p, nil
 	}
 
-	r.mu.Unlock()
 	return nil, errors.New("order not found")
 }
 

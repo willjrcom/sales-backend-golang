@@ -154,6 +154,7 @@ func (r *CategoryProductRepositoryBun) GetCategoryById(ctx context.Context, id s
 	category := &productentity.Category{}
 
 	r.mu.Lock()
+	defer r.mu.Unlock()
 
 	if err := database.ChangeSchema(ctx, r.db); err != nil {
 		return nil, err
