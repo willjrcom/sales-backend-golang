@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/uptrace/bun"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	"golang.org/x/net/context"
 )
@@ -19,8 +20,13 @@ func NewContactRepositoryBun(ctx context.Context, db *bun.DB) *ContactRepository
 
 func (r *ContactRepositoryBun) RegisterContact(ctx context.Context, c *personentity.Contact) error {
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
 	_, err := r.db.NewInsert().Model(c).Exec(ctx)
-	r.mu.Unlock()
 
 	if err != nil {
 		return err
@@ -31,8 +37,13 @@ func (r *ContactRepositoryBun) RegisterContact(ctx context.Context, c *personent
 
 func (r *ContactRepositoryBun) UpdateContact(ctx context.Context, c *personentity.Contact) error {
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
 	_, err := r.db.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx)
-	r.mu.Unlock()
 
 	if err != nil {
 		return err
@@ -43,8 +54,13 @@ func (r *ContactRepositoryBun) UpdateContact(ctx context.Context, c *personentit
 
 func (r *ContactRepositoryBun) DeleteContact(ctx context.Context, id string) error {
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
 	_, err := r.db.NewDelete().Model(&personentity.Contact{}).Where("id = ?", id).Exec(ctx)
-	r.mu.Unlock()
 
 	if err != nil {
 		return err
@@ -57,8 +73,13 @@ func (r *ContactRepositoryBun) GetContactById(ctx context.Context, id string) (*
 	contact := &personentity.Contact{}
 
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
 	err := r.db.NewSelect().Model(contact).Where("contact.id = ?", id).Scan(ctx)
-	r.mu.Unlock()
 
 	if err != nil {
 		return nil, err
@@ -69,6 +90,14 @@ func (r *ContactRepositoryBun) GetContactById(ctx context.Context, id string) (*
 
 func (r *ContactRepositoryBun) FtSearchContacts(ctx context.Context, id string) (contacts []personentity.Contact, err error) {
 	contacts = []personentity.Contact{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
 	err = r.db.NewSelect().Model(&contacts).Where("ts @@ websearch_to_tsquery('simple', ?)", id).Scan(ctx)
-	return contacts, err
+	return
 }

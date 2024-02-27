@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/uptrace/bun"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
 	"golang.org/x/net/context"
 )
@@ -19,10 +20,13 @@ func NewShiftRepositoryBun(db *bun.DB) *ShiftRepositoryBun {
 
 func (r *ShiftRepositoryBun) CreateShift(ctx context.Context, c *shiftentity.Shift) error {
 	r.mu.Lock()
-	_, err := r.db.NewInsert().Model(c).Exec(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewInsert().Model(c).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -31,10 +35,13 @@ func (r *ShiftRepositoryBun) CreateShift(ctx context.Context, c *shiftentity.Shi
 
 func (r *ShiftRepositoryBun) UpdateShift(ctx context.Context, c *shiftentity.Shift) error {
 	r.mu.Lock()
-	_, err := r.db.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -43,10 +50,13 @@ func (r *ShiftRepositoryBun) UpdateShift(ctx context.Context, c *shiftentity.Shi
 
 func (r *ShiftRepositoryBun) DeleteShift(ctx context.Context, id string) error {
 	r.mu.Lock()
-	_, err := r.db.NewUpdate().Model(&shiftentity.Shift{}).Where("id = ?", id).Exec(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewUpdate().Model(&shiftentity.Shift{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -57,10 +67,13 @@ func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*shif
 	shift := &shiftentity.Shift{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(shift).Where("shift.id = ?", id).Relation("Attendant").Scan(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(shift).Where("shift.id = ?", id).Relation("Attendant").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -69,12 +82,15 @@ func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*shif
 
 func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context) ([]shiftentity.Shift, error) {
 	Shifts := []shiftentity.Shift{}
+
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&Shifts).Scan(ctx)
+	defer r.mu.Unlock()
 
-	r.mu.Unlock()
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
 
-	if err != nil {
+	if err := r.db.NewSelect().Model(&Shifts).Scan(ctx); err != nil {
 		return nil, err
 	}
 

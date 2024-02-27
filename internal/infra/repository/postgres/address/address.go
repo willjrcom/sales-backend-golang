@@ -20,15 +20,12 @@ func NewAddressRepositoryBun(db *bun.DB) *AddressRepositoryBun {
 
 func (r *AddressRepositoryBun) RegisterAddress(ctx context.Context, c *addressentity.Address) error {
 	r.mu.Lock()
+	defer r.mu.Unlock()
 
 	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		r.mu.Unlock()
 		return err
 	}
-	_, err := r.db.NewInsert().Model(c).Exec(ctx)
-	r.mu.Unlock()
-
-	if err != nil {
+	if _, err := r.db.NewInsert().Model(c).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -37,10 +34,13 @@ func (r *AddressRepositoryBun) RegisterAddress(ctx context.Context, c *addressen
 
 func (r *AddressRepositoryBun) UpdateAddress(ctx context.Context, c *addressentity.Address) error {
 	r.mu.Lock()
-	_, err := r.db.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -49,10 +49,13 @@ func (r *AddressRepositoryBun) UpdateAddress(ctx context.Context, c *addressenti
 
 func (r *AddressRepositoryBun) DeleteAddress(ctx context.Context, id string) error {
 	r.mu.Lock()
-	_, err := r.db.NewDelete().Model(&addressentity.Address{}).Where("id = ?", id).Exec(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewDelete().Model(&addressentity.Address{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -63,10 +66,13 @@ func (r *AddressRepositoryBun) GetAddressById(ctx context.Context, id string) (*
 	aAddress := &addressentity.Address{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(aAddress).Where("address.id = ?", id).Scan(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(aAddress).Where("address.id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -75,12 +81,15 @@ func (r *AddressRepositoryBun) GetAddressById(ctx context.Context, id string) (*
 
 func (r *AddressRepositoryBun) GetAllAddress(ctx context.Context) ([]addressentity.Address, error) {
 	addresss := []addressentity.Address{}
+
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&addresss).Scan(ctx)
+	defer r.mu.Unlock()
 
-	r.mu.Unlock()
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
 
-	if err != nil {
+	if err := r.db.NewSelect().Model(&addresss).Scan(ctx); err != nil {
 		return nil, err
 	}
 

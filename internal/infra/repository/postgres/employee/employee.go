@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/uptrace/bun"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
@@ -21,6 +22,12 @@ func NewEmployeeRepositoryBun(db *bun.DB) *EmployeeRepositoryBun {
 
 func (r *EmployeeRepositoryBun) RegisterEmployee(ctx context.Context, c *employeeentity.Employee) error {
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
 	tx, err := r.db.Begin()
 
 	if err != nil {
@@ -62,10 +69,13 @@ func rollback(tx *bun.Tx, err error) error {
 
 func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeeentity.Employee) error {
 	r.mu.Lock()
-	_, err := r.db.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -74,6 +84,12 @@ func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeee
 
 func (r *EmployeeRepositoryBun) DeleteEmployee(ctx context.Context, id string) error {
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
 	tx, err := r.db.Begin()
 
 	if err != nil {
@@ -106,10 +122,13 @@ func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) 
 	employee := &employeeentity.Employee{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(employee).Where("id = ?", id).Relation("Address").Relation("Contact").Scan(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(employee).Where("id = ?", id).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -119,8 +138,15 @@ func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) 
 func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]employeeentity.Employee, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	employees := []employeeentity.Employee{}
-	err := r.db.NewSelect().Model(&employees).Relation("Address").Relation("Contact").Scan(ctx)
 
-	return employees, err
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	employees := []employeeentity.Employee{}
+	if err := r.db.NewSelect().Model(&employees).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return employees, nil
 }

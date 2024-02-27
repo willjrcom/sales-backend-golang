@@ -4,6 +4,7 @@ import (
 	"sync"
 
 	"github.com/uptrace/bun"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
@@ -22,6 +23,12 @@ func NewClientRepositoryBun(db *bun.DB) *ClientRepositoryBun {
 
 func (r *ClientRepositoryBun) RegisterClient(ctx context.Context, c *cliententity.Client) error {
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
 	tx, err := r.db.Begin()
 
 	if err != nil {
@@ -30,10 +37,7 @@ func (r *ClientRepositoryBun) RegisterClient(ctx context.Context, c *cliententit
 
 	// Register client
 	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
-		}
-		return err
+		return rollback(&tx, err)
 	}
 
 	// Register contact
@@ -55,10 +59,13 @@ func (r *ClientRepositoryBun) RegisterClient(ctx context.Context, c *cliententit
 
 func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.Client) error {
 	r.mu.Lock()
-	_, err := r.db.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -67,6 +74,12 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.
 
 func (r *ClientRepositoryBun) DeleteClient(ctx context.Context, id string) error {
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
 	tx, err := r.db.Begin()
 
 	if err != nil {
@@ -99,10 +112,13 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*cl
 	client := &cliententity.Client{}
 
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(client).Where("client.id = ?", id).Relation("Address").Relation("Contact").Scan(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(client).Where("client.id = ?", id).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -112,11 +128,13 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*cl
 func (r *ClientRepositoryBun) GetAllClients(ctx context.Context) ([]cliententity.Client, error) {
 	clients := []cliententity.Client{}
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&clients).Relation("Address").Relation("Contact").Scan(ctx)
+	defer r.mu.Unlock()
 
-	r.mu.Unlock()
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
 
-	if err != nil {
+	if err := r.db.NewSelect().Model(&clients).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -124,8 +142,8 @@ func (r *ClientRepositoryBun) GetAllClients(ctx context.Context) ([]cliententity
 }
 
 func rollback(tx *bun.Tx, err error) error {
-	if err := tx.Rollback(); err != nil {
-		return err
+	if errRoolback := tx.Rollback(); errRoolback != nil {
+		return errRoolback
 	}
 
 	return err

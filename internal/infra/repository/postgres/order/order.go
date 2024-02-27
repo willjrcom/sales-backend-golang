@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
@@ -21,10 +22,13 @@ func NewOrderRepositoryBun(db *bun.DB) *OrderRepositoryBun {
 
 func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *orderentity.Order) error {
 	r.mu.Lock()
-	_, err := r.db.NewInsert().Model(order).Exec(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewInsert().Model(order).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -32,41 +36,56 @@ func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *orderentity
 }
 
 func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *orderentity.Order) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
 	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
 
 	if err != nil {
 		return err
 	}
 
-	r.mu.Lock()
-	_, err = tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx)
-	r.mu.Unlock()
-
-	if err != nil {
+	if _, err = tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	for _, group := range p.Groups {
-		_, err = tx.NewUpdate().Model(&group).WherePK().Exec(ctx)
+		if _, err = tx.NewUpdate().Model(&group).WherePK().Exec(ctx); err != nil {
+			if errRoolback := tx.Rollback(); errRoolback != nil {
+				return errRoolback
+			}
 
-		if err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
 
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		if errRoolback := tx.Rollback(); errRoolback != nil {
+			return errRoolback
+		}
+
+		return err
+	}
+
+	return nil
 }
 
 func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *orderentity.Order) error {
 	order.CalculateTotalChange()
 
 	r.mu.Lock()
-	_, err := r.db.NewUpdate().Model(order).Where("id = ?", order.ID).Exec(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewUpdate().Model(order).Where("id = ?", order.ID).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -75,10 +94,13 @@ func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *orderentity
 
 func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 	r.mu.Lock()
-	_, err := r.db.NewDelete().Model(&orderentity.Order{}).Where("id = ?", id).Exec(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewDelete().Model(&orderentity.Order{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -97,16 +119,19 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	}
 
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
 	query := r.db.NewSelect().Model(order).WherePK().Relation("Groups.Items").Relation("Attendant").Relation("Payments")
 
 	if relation != "" {
 		query = query.Relation(relation)
 	}
 
-	err = query.Scan(ctx)
-	r.mu.Unlock()
-
-	if err != nil {
+	if err = query.Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -116,27 +141,34 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 
 func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]orderentity.Order, error) {
 	orders := []orderentity.Order{}
+
 	r.mu.Lock()
-	err := r.db.NewSelect().Model(&orders).Relation("Groups.Items").Scan(ctx)
+	defer r.mu.Unlock()
 
-	r.mu.Unlock()
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
 
-	if err != nil {
+	if err := r.db.NewSelect().Model(&orders).Relation("Groups.Items").Scan(ctx); err != nil {
 		return nil, err
 	}
 
 	for i := range orders {
 		orders[i].CalculateTotalChange()
 	}
+
 	return orders, nil
 }
 
 func (r *OrderRepositoryBun) AddPaymentOrder(ctx context.Context, payment *orderentity.PaymentOrder) error {
 	r.mu.Lock()
-	_, err := r.db.NewInsert().Model(payment).Exec(ctx)
-	r.mu.Unlock()
+	defer r.mu.Unlock()
 
-	if err != nil {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewInsert().Model(payment).Exec(ctx); err != nil {
 		return err
 	}
 
