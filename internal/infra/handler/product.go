@@ -35,21 +35,21 @@ func NewHandlerProduct(productService *productusecases.Service) *handler.Handler
 }
 
 func (h *handlerProductImpl) handlerRegisterProduct(w http.ResponseWriter, r *http.Request) {
-	file, _, err := r.FormFile("image")
-	if err != nil && err.Error() != "http: no such file" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
-		return
-	}
+	// file, _, err := r.FormFile("image")
+	// if err != nil && err.Error() != "http: no such file" {
+	// 	jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+	// 	return
+	// }
 
-	defer file.Close()
+	// defer file.Close()
 
 	ctx := r.Context()
 	product := &productdto.RegisterProductInput{}
 	jsonpkg.ParseBody(r, product)
 
-	if file != nil {
-		product.Image = &file
-	}
+	// if file != nil {
+	// 	product.Image = &file
+	// }
 
 	if id, err := h.s.RegisterProduct(ctx, product); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
