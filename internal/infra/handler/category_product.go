@@ -35,7 +35,7 @@ func NewHandlerCategoryProduct(categoryService *categoryproductusecases.Service)
 		c.Get("/all", h.handlerGetAllCategories)
 	})
 
-	return handler.NewHandler(route, c, route+"/all")
+	return handler.NewHandler(route, c)
 }
 
 func (h *handlerCategoryProductImpl) handlerRegisterCategoryProduct(w http.ResponseWriter, r *http.Request) {

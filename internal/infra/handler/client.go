@@ -1,7 +1,6 @@
 package handlerimpl
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -10,6 +9,7 @@ import (
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
 	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	keysdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/keys"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -31,7 +31,8 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 		c.Post("/new", h.handlerRegisterClient)
 		c.Patch("/update/{id}", h.handlerUpdateClient)
 		c.Delete("/delete/{id}", h.handlerDeleteClient)
-		c.Get("/{id}", h.handlerGetClient)
+		c.Get("/{id}", h.handlerGetClientById)
+		c.Post("/by-contact", h.handlerGetClientByContact)
 		c.Get("/all", h.handlerGetAllClients)
 	})
 
@@ -41,14 +42,7 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 		c.Delete("/contact/delete/{id}", h.handlerDeleteContactClient)
 	})
 
-	unprotectedRoutes := []string{
-		fmt.Sprintf("%s/new", route),
-		fmt.Sprintf("%s/update/{id}", route),
-		fmt.Sprintf("%s/{id}", route),
-		fmt.Sprintf("%s/contact/new", route),
-		fmt.Sprintf("%s/contact/update/{id}", route),
-		fmt.Sprintf("%s/contact/delete/{id}", route),
-	}
+	unprotectedRoutes := []string{}
 	return handler.NewHandler(route, c, unprotectedRoutes...)
 }
 
@@ -103,7 +97,7 @@ func (h *handlerClientImpl) handlerDeleteClient(w http.ResponseWriter, r *http.R
 	}
 }
 
-func (h *handlerClientImpl) handlerGetClient(w http.ResponseWriter, r *http.Request) {
+func (h *handlerClientImpl) handlerGetClientById(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -115,6 +109,21 @@ func (h *handlerClientImpl) handlerGetClient(w http.ResponseWriter, r *http.Requ
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if client, err := h.s.GetClientById(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: client})
+	}
+}
+
+func (h *handlerClientImpl) handlerGetClientByContact(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	dtoContact := &keysdto.KeysInput{}
+	if err := jsonpkg.ParseBody(r, dtoContact); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	if client, err := h.s.GetClientByContact(ctx, dtoContact); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: client})

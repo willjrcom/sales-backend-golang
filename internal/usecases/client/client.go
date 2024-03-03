@@ -2,6 +2,7 @@ package clientusecases
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
@@ -9,6 +10,7 @@ import (
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
 	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	keysdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/keys"
 )
 
 type Service struct {
@@ -66,6 +68,26 @@ func (s *Service) DeleteClient(ctx context.Context, dto *entitydto.IdRequest) er
 
 func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IdRequest) (*clientdto.ClientOutput, error) {
 	if client, err := s.rclient.GetClientById(ctx, dto.ID.String()); err != nil {
+		return nil, err
+	} else {
+		dto := &clientdto.ClientOutput{}
+		dto.FromModel(client)
+		return dto, nil
+	}
+}
+
+func (s *Service) GetClientByContact(ctx context.Context, dto *keysdto.KeysInput) (*clientdto.ClientOutput, error) {
+	contact, err := s.rcontact.GetContactByDddAndNumber(ctx, dto.Ddd, dto.Number, personentity.ContactTypeClient)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if contact == nil {
+		return nil, errors.New(("contact not found"))
+	}
+
+	if client, err := s.rclient.GetClientById(ctx, contact.ObjectID.String()); err != nil {
 		return nil, err
 	} else {
 		dto := &clientdto.ClientOutput{}

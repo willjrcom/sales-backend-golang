@@ -7,5 +7,7 @@ var (
 )
 
 type KeysInput struct {
-	Query string `json:"query"`
+	Query  string `json:"query"`
+	Ddd    string `json:"ddd"`
+	Number string `json:"number"`
 }

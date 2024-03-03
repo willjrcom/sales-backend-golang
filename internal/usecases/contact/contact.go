@@ -32,7 +32,7 @@ func (s *Service) FtSearchContacts(ctx context.Context, keys *keysdto.KeysInput)
 		return nil, keysdto.ErrInvalidQuery
 	}
 
-	if contacts, err := s.r.FtSearchContacts(ctx, keys.Query); err != nil {
+	if contacts, err := s.r.FtSearchContacts(ctx, keys.Query, personentity.ContactTypeClient); err != nil {
 		return nil, err
 	} else {
 		dtos := contactsToDtos(contacts)

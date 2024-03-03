@@ -88,7 +88,24 @@ func (r *ContactRepositoryBun) GetContactById(ctx context.Context, id string) (*
 	return contact, nil
 }
 
-func (r *ContactRepositoryBun) FtSearchContacts(ctx context.Context, id string) (contacts []personentity.Contact, err error) {
+func (r *ContactRepositoryBun) GetContactByDddAndNumber(ctx context.Context, ddd string, number string, contactType personentity.ContactType) (*personentity.Contact, error) {
+	contact := &personentity.Contact{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(contact).Where("ddd = ? AND number = ? AND type = ?", ddd, number, contactType).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return contact, nil
+}
+
+func (r *ContactRepositoryBun) FtSearchContacts(ctx context.Context, text string, contactType personentity.ContactType) (contacts []personentity.Contact, err error) {
 	contacts = []personentity.Contact{}
 
 	r.mu.Lock()
@@ -98,6 +115,6 @@ func (r *ContactRepositoryBun) FtSearchContacts(ctx context.Context, id string) 
 		return nil, err
 	}
 
-	err = r.db.NewSelect().Model(&contacts).Where("ts @@ websearch_to_tsquery('simple', ?)", id).Scan(ctx)
+	err = r.db.NewSelect().Model(&contacts).Where("ts @@ websearch_to_tsquery('simple', ?) and type = ?", text, contactType).Scan(ctx)
 	return
 }
