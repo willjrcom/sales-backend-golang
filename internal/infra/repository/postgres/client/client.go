@@ -65,8 +65,40 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
+	tx, err := r.db.Begin()
+
+	if err != nil {
 		return err
+	}
+
+	if _, err := tx.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
+		return err
+	}
+
+	if c.Contact != nil {
+		if _, err := tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
+
+		// Register contact
+		if _, err := tx.NewInsert().Model(&c.Contact).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
+	}
+
+	if c.Address != nil {
+		if _, err := tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
+
+		// Register addresse
+		if _, err := tx.NewInsert().Model(&c.Address).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return rollback(&tx, err)
 	}
 
 	return nil

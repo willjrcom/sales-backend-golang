@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
-	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	keysdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/keys"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
@@ -34,12 +33,6 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 		c.Get("/{id}", h.handlerGetClientById)
 		c.Post("/by-contact", h.handlerGetClientByContact)
 		c.Get("/all", h.handlerGetAllClients)
-	})
-
-	c.With().Group(func(c chi.Router) {
-		c.Post("/contact/new", h.handlerRegisterContactClient)
-		c.Patch("/contact/update/{id}", h.handlerUpdateContactClient)
-		c.Delete("/contact/delete/{id}", h.handlerDeleteContactClient)
 	})
 
 	unprotectedRoutes := []string{}
@@ -137,57 +130,5 @@ func (h *handlerClientImpl) handlerGetAllClients(w http.ResponseWriter, r *http.
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
-	}
-}
-
-func (h *handlerClientImpl) handlerRegisterContactClient(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	contact := &contactdto.RegisterContactInput{}
-	jsonpkg.ParseBody(r, contact)
-
-	if id, err := h.s.RegisterContactToClient(ctx, contact); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
-	}
-}
-
-func (h *handlerClientImpl) handlerUpdateContactClient(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	contact := &contactdto.UpdateContactInput{}
-	jsonpkg.ParseBody(r, contact)
-
-	id := chi.URLParam(r, "id")
-
-	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
-	}
-
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
-
-	if err := h.s.UpdateContact(ctx, dtoId, contact); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
-	}
-}
-
-func (h *handlerClientImpl) handlerDeleteContactClient(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	id := chi.URLParam(r, "id")
-
-	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
-	}
-
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
-
-	if err := h.s.DeleteContact(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
 }

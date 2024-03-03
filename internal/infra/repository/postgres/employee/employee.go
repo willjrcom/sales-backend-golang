@@ -36,24 +36,33 @@ func (r *EmployeeRepositoryBun) RegisterEmployee(ctx context.Context, c *employe
 
 	// Register employee
 	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
-		if err := tx.Rollback(); err != nil {
-			return err
+		return rollback(&tx, err)
+	}
+
+	if c.Contact != nil {
+		if _, err := tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
+			return rollback(&tx, err)
 		}
-		return err
+
+		// Register contact
+		if _, err := tx.NewInsert().Model(&c.Contact).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
 	}
 
-	// Register contact
-	if _, err := tx.NewInsert().Model(&c.Contact).Exec(ctx); err != nil {
-		return rollback(&tx, err)
-	}
+	if c.Address != nil {
+		if _, err := tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
 
-	// Register address
-	if _, err := tx.NewInsert().Model(&c.Address).Exec(ctx); err != nil {
-		return rollback(&tx, err)
+		// Register addresse
+		if _, err := tx.NewInsert().Model(&c.Address).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return err
+		return rollback(&tx, err)
 	}
 
 	return nil
@@ -75,8 +84,40 @@ func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeee
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
+	tx, err := r.db.Begin()
+
+	if err != nil {
 		return err
+	}
+
+	if _, err := tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
+		return err
+	}
+
+	if p.Contact != nil {
+		if _, err := tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", p.ID).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
+
+		// Register contact
+		if _, err := tx.NewInsert().Model(&p.Contact).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
+	}
+
+	if p.Address != nil {
+		if _, err := tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", p.ID).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
+
+		// Register addresse
+		if _, err := tx.NewInsert().Model(&p.Address).Exec(ctx); err != nil {
+			return rollback(&tx, err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return rollback(&tx, err)
 	}
 
 	return nil
