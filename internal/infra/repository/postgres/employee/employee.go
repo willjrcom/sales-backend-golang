@@ -45,7 +45,7 @@ func (r *EmployeeRepositoryBun) RegisterEmployee(ctx context.Context, c *employe
 		}
 
 		// Register contact
-		if _, err := tx.NewInsert().Model(&c.Contact).Exec(ctx); err != nil {
+		if _, err := tx.NewInsert().Model(c.Contact).Exec(ctx); err != nil {
 			return rollback(&tx, err)
 		}
 	}
@@ -56,7 +56,7 @@ func (r *EmployeeRepositoryBun) RegisterEmployee(ctx context.Context, c *employe
 		}
 
 		// Register addresse
-		if _, err := tx.NewInsert().Model(&c.Address).Exec(ctx); err != nil {
+		if _, err := tx.NewInsert().Model(c.Address).Exec(ctx); err != nil {
 			return rollback(&tx, err)
 		}
 	}
@@ -90,7 +90,7 @@ func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeee
 		return err
 	}
 
-	if _, err := tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(p).Where("employee.id = ?", p.ID).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -100,7 +100,7 @@ func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeee
 		}
 
 		// Register contact
-		if _, err := tx.NewInsert().Model(&p.Contact).Exec(ctx); err != nil {
+		if _, err := tx.NewInsert().Model(p.Contact).Exec(ctx); err != nil {
 			return rollback(&tx, err)
 		}
 	}
@@ -111,7 +111,7 @@ func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeee
 		}
 
 		// Register addresse
-		if _, err := tx.NewInsert().Model(&p.Address).Exec(ctx); err != nil {
+		if _, err := tx.NewInsert().Model(p.Address).Exec(ctx); err != nil {
 			return rollback(&tx, err)
 		}
 	}
@@ -138,7 +138,7 @@ func (r *EmployeeRepositoryBun) DeleteEmployee(ctx context.Context, id string) e
 	}
 
 	// Delete employee
-	if _, err = tx.NewDelete().Model(&employeeentity.Employee{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&employeeentity.Employee{}).Where("employee.id = ?", id).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
 
@@ -169,7 +169,7 @@ func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) 
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(employee).Where("id = ?", id).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(employee).Where("employee.id = ?", id).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
 		return nil, err
 	}
 

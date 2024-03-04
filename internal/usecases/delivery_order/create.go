@@ -14,20 +14,21 @@ func (s *Service) CreateDeliveryOrder(ctx context.Context, dto *deliveryorderdto
 		return uuid.Nil, err
 	}
 
-	// Validate address
-	if _, err := s.ra.GetAddressById(ctx, delivery.AddressID.String()); err != nil {
+	orderID, err := s.os.CreateDefaultOrder(ctx)
+
+	if err != nil {
 		return uuid.Nil, err
 	}
+
+	delivery.OrderID = orderID
 
 	// Validate client
-	if _, err := s.rc.GetClientById(ctx, delivery.ClientID.String()); err != nil {
+	client, err := s.rc.GetClientById(ctx, delivery.ClientID.String())
+	if err != nil {
 		return uuid.Nil, err
 	}
 
-	// Validate order
-	if _, err := s.ro.GetOrderById(ctx, delivery.OrderID.String()); err != nil {
-		return uuid.Nil, err
-	}
+	delivery.AddressID = client.Address.ID
 
 	if err = s.rdo.CreateDeliveryOrder(ctx, delivery); err != nil {
 		return uuid.Nil, err

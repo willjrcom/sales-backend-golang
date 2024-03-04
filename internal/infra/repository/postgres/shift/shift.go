@@ -80,6 +80,23 @@ func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*shif
 	return shift, nil
 }
 
+func (r *ShiftRepositoryBun) GetOpenedShift(ctx context.Context) (*shiftentity.Shift, error) {
+	shift := &shiftentity.Shift{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(shift).Where("shift.closed_at is NULL").Relation("Attendant").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return shift, nil
+}
+
 func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context) ([]shiftentity.Shift, error) {
 	Shifts := []shiftentity.Shift{}
 

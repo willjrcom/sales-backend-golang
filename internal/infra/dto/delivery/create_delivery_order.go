@@ -15,22 +15,12 @@ var (
 )
 
 type CreateDeliveryOrderInput struct {
-	OrderID   uuid.UUID `json:"order_id"`
-	ClientID  uuid.UUID `json:"client_id"`
-	AddressID uuid.UUID `json:"address_id"`
+	ClientID uuid.UUID `json:"client_id"`
 }
 
 func (o *CreateDeliveryOrderInput) validate() error {
-	if o.OrderID == uuid.Nil {
-		return ErrOrderIDRequired
-	}
-
 	if o.ClientID == uuid.Nil {
 		return ErrClientIDRequired
-	}
-
-	if o.AddressID == uuid.Nil {
-		return ErrAddressIDRequired
 	}
 
 	return nil
@@ -42,10 +32,10 @@ func (o *CreateDeliveryOrderInput) ToModel() (*orderentity.DeliveryOrder, error)
 	}
 
 	orderCommonAttributes := orderentity.DeliveryOrderCommonAttributes{
-		OrderID:   o.OrderID,
-		ClientID:  o.ClientID,
-		AddressID: o.AddressID,
+		ClientID: o.ClientID,
+		Status:   orderentity.DeliveryOrderStatusPending,
 	}
+
 	return &orderentity.DeliveryOrder{
 		Entity:                        entity.NewEntity(),
 		DeliveryOrderCommonAttributes: orderCommonAttributes,

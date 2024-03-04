@@ -15,14 +15,11 @@ var (
 )
 
 type CreateTableOrderInput struct {
-	orderentity.TableOrderCommonAttributes
+	WaiterID uuid.UUID `json:"waiter_id"`
+	TableID  uuid.UUID `json:"table_id"`
 }
 
 func (o *CreateTableOrderInput) validate() error {
-	if o.OrderID == uuid.Nil {
-		return ErrOrderIDRequired
-	}
-
 	if o.WaiterID == uuid.Nil {
 		return ErrWaiterIDRequired
 	}
@@ -40,7 +37,6 @@ func (o *CreateTableOrderInput) ToModel() (*orderentity.TableOrder, error) {
 	}
 
 	tableCommonAttributes := orderentity.TableOrderCommonAttributes{
-		OrderID:  o.OrderID,
 		WaiterID: o.WaiterID,
 		TableID:  o.TableID,
 	}

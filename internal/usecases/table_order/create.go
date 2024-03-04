@@ -19,14 +19,18 @@ func (s *Service) CreateTableOrder(ctx context.Context, dto *tableorderdto.Creat
 		return uuid.Nil, err
 	}
 
-	table, err := s.rt.GetTableById(ctx, tableOrder.TableID.String())
+	orderID, err := s.os.CreateDefaultOrder(ctx)
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	if !table.IsAvailable {
-		return uuid.Nil, ErrTableIsNotAvailable
+	tableOrder.OrderID = orderID
+
+	table, err := s.rt.GetTableById(ctx, tableOrder.TableID.String())
+
+	if err != nil {
+		return uuid.Nil, err
 	}
 
 	table.LockTable()

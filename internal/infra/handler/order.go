@@ -24,7 +24,7 @@ func NewHandlerOrder(orderService *orderusecases.Service) *handler.Handler {
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerCreateOrder)
+		//c.Post("/new", h.handlerCreateOrder)
 		c.Get("/{id}", h.handlerGetOrderById)
 		c.Get("/all", h.handlerGetAllOrders)
 		c.Put("/update/{id}/observation", h.handlerUpdateObservation)
@@ -46,7 +46,7 @@ func (h *handlerOrderImpl) handlerCreateOrder(w http.ResponseWriter, r *http.Req
 	order := &orderdto.CreateOrderInput{}
 	jsonpkg.ParseBody(r, order)
 
-	if id, err := h.s.CreateDefaultOrder(ctx, order); err != nil {
+	if id, err := h.s.CreateDefaultOrder(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})

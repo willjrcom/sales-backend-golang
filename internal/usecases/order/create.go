@@ -5,16 +5,10 @@ import (
 
 	"github.com/google/uuid"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
-	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 )
 
-func (s *Service) CreateDefaultOrder(ctx context.Context, dto *orderdto.CreateOrderInput) (uuid.UUID, error) {
-	shiftID, err := dto.ToModel()
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	shift, err := s.rs.GetShiftByID(ctx, shiftID.String())
+func (s *Service) CreateDefaultOrder(ctx context.Context) (uuid.UUID, error) {
+	shift, err := s.rs.GetOpenedShift(ctx)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -24,7 +18,7 @@ func (s *Service) CreateDefaultOrder(ctx context.Context, dto *orderdto.CreateOr
 		return uuid.Nil, err
 	}
 
-	order := orderentity.NewDefaultOrder(shiftID, shift.CurrentOrderNumber, shift.AttendantID)
+	order := orderentity.NewDefaultOrder(&shift.ID, shift.CurrentOrderNumber, shift.AttendantID)
 
 	if err := s.ro.CreateOrder(ctx, order); err != nil {
 		return uuid.Nil, err

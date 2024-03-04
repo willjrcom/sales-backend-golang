@@ -41,12 +41,12 @@ func (r *ClientRepositoryBun) RegisterClient(ctx context.Context, c *cliententit
 	}
 
 	// Register contact
-	if _, err := tx.NewInsert().Model(&c.Contact).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(c.Contact).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
 
 	// Register addresse
-	if _, err := tx.NewInsert().Model(&c.Address).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(c.Address).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
 
@@ -81,7 +81,7 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.
 		}
 
 		// Register contact
-		if _, err := tx.NewInsert().Model(&c.Contact).Exec(ctx); err != nil {
+		if _, err := tx.NewInsert().Model(c.Contact).Exec(ctx); err != nil {
 			return rollback(&tx, err)
 		}
 	}
@@ -92,7 +92,7 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.
 		}
 
 		// Register addresse
-		if _, err := tx.NewInsert().Model(&c.Address).Exec(ctx); err != nil {
+		if _, err := tx.NewInsert().Model(c.Address).Exec(ctx); err != nil {
 			return rollback(&tx, err)
 		}
 	}

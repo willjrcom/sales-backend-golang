@@ -10,6 +10,7 @@ import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	deliveryorderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/delivery"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 )
 
 type IService interface {
@@ -48,8 +49,9 @@ type Service struct {
 	rc  cliententity.Repository
 	ro  orderentity.OrderRepository
 	re  employeeentity.Repository
+	os  *orderusecases.Service
 }
 
-func NewService(rdo orderentity.DeliveryOrderRepository, ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, re employeeentity.Repository) IService {
-	return &Service{rdo: rdo, ra: ra, rc: rc, ro: ro, re: re}
+func NewService(rdo orderentity.DeliveryOrderRepository, ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, re employeeentity.Repository, os *orderusecases.Service) IService {
+	return &Service{rdo: rdo, ra: ra, rc: rc, ro: ro, re: re, os: os}
 }
