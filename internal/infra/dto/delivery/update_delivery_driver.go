@@ -27,7 +27,7 @@ func (u *UpdateDriverOrder) UpdateModel(model *orderentity.DeliveryOrder) error 
 		return err
 	}
 
-	model.DriverID = *u.DriverID
+	*model.DriverID = *u.DriverID
 
 	return nil
 }

@@ -73,7 +73,7 @@ func (r *DeliveryOrderRepositoryBun) GetAllDeliveries(ctx context.Context) ([]or
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&deliveries).Relation("Client").Relation("Address").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&deliveries).Relation("Client").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
 		return nil, err
 	}
 

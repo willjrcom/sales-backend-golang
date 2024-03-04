@@ -24,6 +24,9 @@
 							}
 						}
 					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
 					"request": {
 						"method": "POST",
 						"header": [
@@ -31,6 +34,12 @@
 								"key": "id-token",
 								"value": "{{IDToken}}",
 								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "multipart/form-data",
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"body": {
@@ -487,113 +496,6 @@
 			"name": "client",
 			"item": [
 				{
-					"name": "contact client",
-					"item": [
-						{
-							"name": "create",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"contact_id\", task_id)"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"contact\": \"11963849114\",\n    \"client_id\": \"{{client_id}}\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": "{{server}}/client/contact/new"
-							},
-							"response": []
-						},
-						{
-							"name": "update",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"contact_id\", task_id)"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "PATCH",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"contact\": \"12 96384 9136\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": "{{server}}/client/contact/update/{{contact_id}}"
-							},
-							"response": []
-						},
-						{
-							"name": "delete",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"contact_id\", task_id)"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"url": "{{server}}/client/contact/delete/{{contact_id}}"
-							},
-							"response": []
-						}
-					]
-				},
-				{
 					"name": "create",
 					"event": [
 						{
@@ -619,7 +521,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"William junior 3\",\n    \"contacts\": [\"11963849111\"],\n    \"addresses\": [{\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\"\n    }],\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
+							"raw": "{\n    \"name\": \"William junior 3\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -701,119 +603,36 @@
 						"url": "{{server}}/client/all"
 					},
 					"response": []
+				},
+				{
+					"name": "get by contact",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "id-token",
+								"value": "{{IDToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ddd\": \"11\",\n    \"number\": \"963849111\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/client/by-contact"
+					},
+					"response": []
 				}
 			]
 		},
 		{
 			"name": "employee",
 			"item": [
-				{
-					"name": "contact employee",
-					"item": [
-						{
-							"name": "create",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"contact_id\", task_id)"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"contact\": \"11963849114\",\n    \"client_id\": \"{{employee_id}}\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": "{{server}}/employee/contact/new"
-							},
-							"response": []
-						},
-						{
-							"name": "update",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"contact_id\", task_id)"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "PATCH",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"contact\": \"12 96384 9136\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": "{{server}}/employee/contact/update/{{contact_id}}"
-							},
-							"response": []
-						},
-						{
-							"name": "delete",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"contact_id\", task_id)"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"url": "{{server}}/employee/contact/delete/{{contact_id}}"
-							},
-							"response": []
-						}
-					]
-				},
 				{
 					"name": "create",
 					"event": [
@@ -840,7 +659,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"William junior 3\",\n    \"contacts\": [\"11963849111\"],\n    \"addresses\": [{\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\"\n    }],\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
+							"raw": "{\n    \"name\": \"William junior\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -987,43 +806,6 @@
 		{
 			"name": "order",
 			"item": [
-				{
-					"name": "create default",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"order_id\", task_id)"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"shift_id\": \"{{shift_id}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/order/new"
-					},
-					"response": []
-				},
 				{
 					"name": "pending",
 					"event": [
@@ -1318,7 +1100,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"client_id\": \"2b4a8299-0a0e-4a31-8d59-1bbef4edd2c1\",\n    \"address_id\": \"392c36ab-2de5-4b80-865f-d1bf3ade58d8\",\n    \"order_id\": \"d1db1385-d43d-4c1b-a3ea-47ffb88b34f9\"\n}",
+							"raw": "{\n    \"client_id\": \"{{client_id}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1326,6 +1108,146 @@
 							}
 						},
 						"url": "{{server}}/delivery-order/new"
+					},
+					"response": []
+				},
+				{
+					"name": "launch",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "id-token",
+								"value": "{{IDToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"driver_id\": \"{{employee_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/delivery-order/update/launch/{{order_delivery_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "finish",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "id-token",
+								"value": "{{IDToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"client_id\": \"{{client_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/delivery-order/update/finish/{{order_delivery_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "update driver",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "id-token",
+								"value": "{{IDToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"driver_id\": \"{{employee_id}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/delivery-order/update/driver/{{order_delivery_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "update address",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "id-token",
+								"value": "{{IDToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address_id\": \"a9c5af44-dcce-488d-b880-98419248e930\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/delivery-order/update/address/{{order_delivery_id}}"
 					},
 					"response": []
 				},
@@ -1729,7 +1651,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"attendant_id\": \"30f547e5-cb8a-4d29-a0ec-106bc5f789d1\",\n    \"day\": \"2024-01-17T20:39:23.107002Z\",\n    \"start_change\": 10\n}",
+							"raw": "{\n    \"attendant_id\": \"{{employee_id}}\",\n    \"day\": \"2024-01-17T20:39:23.107002Z\",\n    \"start_change\": 10\n}",
 							"options": {
 								"raw": {
 									"language": "json"

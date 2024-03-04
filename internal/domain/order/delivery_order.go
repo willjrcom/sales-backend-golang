@@ -25,7 +25,7 @@ type DeliveryOrderCommonAttributes struct {
 	Client      *cliententity.Client     `bun:"rel:belongs-to" json:"client"`
 	AddressID   uuid.UUID                `bun:"column:address_id,type:uuid,notnull" json:"address_id"`
 	Address     *addressentity.Address   `bun:"rel:belongs-to" json:"address"`
-	DriverID    uuid.UUID                `bun:"column:driver_id,type:uuid" json:"driver_id"`
+	DriverID    *uuid.UUID               `bun:"column:driver_id,type:uuid" json:"driver_id"`
 	Driver      *employeeentity.Employee `bun:"rel:belongs-to" json:"driver"`
 	OrderID     uuid.UUID                `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
 }
@@ -36,10 +36,14 @@ type DeliveryTimeLogs struct {
 }
 
 func (d *DeliveryOrder) LaunchDelivery(driverID uuid.UUID) {
-	d.DriverID = driverID
+	*d.DriverID = driverID
+	d.LaunchedAt = &time.Time{}
 	*d.LaunchedAt = time.Now()
+	d.Status = DeliveryOrderStatusShipped
 }
 
 func (d *DeliveryOrder) FinishDelivery() {
+	d.DeliveredAt = &time.Time{}
 	*d.DeliveredAt = time.Now()
+	d.Status = DeliveryOrderStatusDelivered
 }

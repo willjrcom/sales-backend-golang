@@ -28,7 +28,7 @@ func (s *Service) LaunchDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRe
 		return err
 	}
 
-	deliveryOrder.LaunchDelivery(deliveryOrder.DriverID)
+	deliveryOrder.LaunchDelivery(*deliveryOrder.DriverID)
 
 	if err = s.rdo.UpdateDeliveryOrder(ctx, deliveryOrder); err != nil {
 		return err
