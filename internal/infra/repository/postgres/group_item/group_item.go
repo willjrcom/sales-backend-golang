@@ -38,7 +38,7 @@ func (r *GroupItemRepositoryBun) CreateGroupItem(ctx context.Context, p *groupit
 func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *groupitementity.GroupItem) error {
 	p.CalculateTotalValues()
 
-	r.mu.Lock()
+	r.mu.TryLock()
 	defer r.mu.Unlock()
 
 	if err := database.ChangeSchema(ctx, r.db); err != nil {
@@ -114,8 +114,7 @@ func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string)
 
 func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, withRelation bool) (*groupitementity.GroupItem, error) {
 	item := &groupitementity.GroupItem{}
-
-	r.mu.Lock()
+	r.mu.TryLock()
 	defer r.mu.Unlock()
 
 	if err := database.ChangeSchema(ctx, r.db); err != nil {

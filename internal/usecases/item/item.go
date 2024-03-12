@@ -16,6 +16,7 @@ import (
 var (
 	ErrCategoryNotFound = errors.New("category not found")
 	ErrSizeNotFound     = errors.New("size not found")
+	ErrGroupNotStaging  = errors.New("group not staging")
 )
 
 type Service struct {
@@ -65,6 +66,10 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 		return nil, err
 	}
 
+	if !groupItem.CanAddItems() {
+		return nil, ErrGroupNotStaging
+	}
+
 	quantity, err := s.rq.GetQuantityById(ctx, dto.QuantityID.String())
 
 	if err != nil {
@@ -89,6 +94,46 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 		GroupItemID: groupItem.ID,
 		ItemID:      item.ID,
 	}, nil
+}
+
+func (s *Service) StartItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+	groupItem, err := s.ri.GetItemById(ctx, dto.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	if err = groupItem.StartItem(); err != nil {
+		return err
+	}
+
+	return s.ri.UpdateItem(ctx, groupItem)
+}
+
+func (s *Service) ReadyItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+	groupItem, err := s.ri.GetItemById(ctx, dto.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	if err = groupItem.ReadyItem(); err != nil {
+		return err
+	}
+
+	return s.ri.UpdateItem(ctx, groupItem)
+}
+
+func (s *Service) CancelItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+	groupItem, err := s.ri.GetItemById(ctx, dto.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	groupItem.CancelItem()
+
+	return s.ri.UpdateItem(ctx, groupItem)
 }
 
 func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest) (err error) {
@@ -126,14 +171,9 @@ func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *
 		OrderID: orderID,
 		GroupDetails: groupitementity.GroupDetails{
 			CategoryID: product.CategoryID,
-			Status:     groupitementity.StatusGroupStaging,
 			Size:       product.Size.Name,
 			NeedPrint:  product.Category.NeedPrint,
 		},
-	}
-
-	if len(product.Category.Processes) != 0 {
-		groupCommonAttributes.Status = groupitementity.StatusGroupReady
 	}
 
 	groupItem = groupitementity.NewGroupItem(groupCommonAttributes)

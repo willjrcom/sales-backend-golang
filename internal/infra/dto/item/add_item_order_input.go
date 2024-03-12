@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
 	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
@@ -69,10 +68,6 @@ func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *g
 		GroupItemID: *a.GroupItemID,
 	}
 
-	item = &itementity.Item{
-		Entity:               entity.NewEntity(),
-		ItemCommonAttributes: itemCommonAttributes,
-	}
-
+	item = itementity.NewItem(itemCommonAttributes)
 	return
 }

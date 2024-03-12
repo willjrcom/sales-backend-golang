@@ -82,9 +82,5 @@ func (s *Service) DeleteGroupItem(ctx context.Context, dto *entitydto.IdRequest)
 		return err
 	}
 
-	if err = groupItem.DeleteGroupItem(); err != nil {
-		return err
-	}
-
 	return s.rgi.DeleteGroupItem(ctx, groupItem.ID.String())
 }

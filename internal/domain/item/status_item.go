@@ -5,9 +5,9 @@ type StatusItem string
 const (
 	StatusItemStaging  StatusItem = "Staging"
 	StatusItemPending  StatusItem = "Pending"
+	StatusItemStarted  StatusItem = "Started"
 	StatusItemReady    StatusItem = "Ready"
 	StatusItemCanceled StatusItem = "Canceled"
-	StatusItemFinished StatusItem = "Finished"
 )
 
 func GetAllStatus() []StatusItem {
@@ -16,6 +16,6 @@ func GetAllStatus() []StatusItem {
 		StatusItemPending,
 		StatusItemReady,
 		StatusItemCanceled,
-		StatusItemFinished,
+		StatusItemStarted,
 	}
 }

@@ -14,6 +14,7 @@ func GetAllStatus() []StatusGroupItem {
 	return []StatusGroupItem{
 		StatusGroupStaging,
 		StatusGroupPending,
+		StatusGroupStarted,
 		StatusGroupReady,
 		StatusGroupCanceled,
 	}

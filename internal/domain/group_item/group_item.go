@@ -13,12 +13,11 @@ import (
 )
 
 var (
-	ErrQuantityNotInteger   = errors.New("quantity items in group isnot integer")
-	ErrGroupNotPending      = errors.New("group not pending")
-	ErrGroupNotStarted      = errors.New("group not started")
-	ErrGroupNotReady        = errors.New("group not ready")
-	ErrGroupAlreadyFinished = errors.New("group already finished")
-	ErrOnlyCancelAllowed    = errors.New("only cancel allowed")
+	ErrQuantityNotInteger = errors.New("quantity items in group is not integer")
+	ErrGroupNotStaging    = errors.New("group not staging")
+	ErrGroupNotPending    = errors.New("group not pending")
+	ErrGroupNotStarted    = errors.New("group not started")
+	ErrGroupNotReady      = errors.New("group not ready")
 )
 
 type GroupItem struct {
@@ -52,6 +51,8 @@ type GroupItemTimeLogs struct {
 }
 
 func NewGroupItem(groupCommonAttributes GroupCommonAttributes) *GroupItem {
+	groupCommonAttributes.Status = StatusGroupStaging
+
 	return &GroupItem{
 		Entity:                entity.NewEntity(),
 		GroupCommonAttributes: groupCommonAttributes,
@@ -65,6 +66,12 @@ func (i *GroupItem) PendingGroupItem() (err error) {
 
 	if i.Status != StatusGroupStaging {
 		return nil
+	}
+
+	for index := range i.Items {
+		if err = i.Items[index].PendingItem(); err != nil {
+			return err
+		}
 	}
 
 	i.Status = StatusGroupPending
@@ -101,13 +108,6 @@ func (i *GroupItem) CancelGroupItem() {
 	*i.CancelledAt = time.Now()
 }
 
-func (i *GroupItem) DeleteGroupItem() (err error) {
-	if i.Status != StatusGroupPending && i.Status != StatusGroupStaging {
-		return ErrOnlyCancelAllowed
-	}
-
-	return nil
-}
 func (i *GroupItem) CalculateTotalValues() {
 	qtd := 0.0
 	total := 0.0
@@ -119,4 +119,12 @@ func (i *GroupItem) CalculateTotalValues() {
 
 	i.GroupDetails.Quantity = qtd
 	i.GroupDetails.Total = total
+}
+
+func (i *GroupItem) CanAddItems() bool {
+	if i.Status != StatusGroupStaging {
+		return false
+	}
+
+	return true
 }
