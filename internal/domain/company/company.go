@@ -43,8 +43,9 @@ type CompanyToUsers struct {
 
 func NewCompany(cnpjData *cnpj.Cnpj) *Company {
 	id, _ := shortid.Generate()
+	lowerName := strings.ReplaceAll(strings.ToLower(cnpjData.TradeName), " ", "_")
+	schema := "loja_" + lowerName + "_" + strings.ToLower(id)
 
-	schema := "loja_" + strings.ToLower(cnpjData.TradeName) + "_" + strings.ToLower(id)
 	company := &Company{
 		Entity: entity.NewEntity(),
 		CompanyCommonAttributes: CompanyCommonAttributes{
