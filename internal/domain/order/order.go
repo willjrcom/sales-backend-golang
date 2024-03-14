@@ -58,10 +58,10 @@ type ScheduledOrder struct {
 }
 
 type OrderTimeLogs struct {
-	PendingAt   *time.Time `bun:"pending_at" json:"pending_at,omitempty"`
-	FinishedAt  *time.Time `bun:"finished_at" json:"finished_at,omitempty"`
-	CancelledAt *time.Time `bun:"cancelled_at" json:"cancelled_at,omitempty"`
-	ArchivedAt  *time.Time `bun:"archived_at" json:"archived_at,omitempty"`
+	PendingAt  *time.Time `bun:"pending_at" json:"pending_at,omitempty"`
+	FinishedAt *time.Time `bun:"finished_at" json:"finished_at,omitempty"`
+	CanceledAt *time.Time `bun:"canceled_at" json:"canceled_at,omitempty"`
+	ArchivedAt *time.Time `bun:"archived_at" json:"archived_at,omitempty"`
 }
 
 func NewDefaultOrder(shiftID *uuid.UUID, currentOrderNumber int, attendantID *uuid.UUID) *Order {
@@ -136,8 +136,8 @@ func (o *Order) CancelOrder() (err error) {
 	}
 
 	o.Status = OrderStatusCanceled
-	o.CancelledAt = &time.Time{}
-	*o.CancelledAt = time.Now()
+	o.CanceledAt = &time.Time{}
+	*o.CanceledAt = time.Now()
 	return nil
 }
 
@@ -161,7 +161,7 @@ func (o *Order) UnarchiveOrder() (err error) {
 		return ErrOrderMustBeArchived
 	}
 
-	if o.CancelledAt != nil {
+	if o.CanceledAt != nil {
 		o.Status = OrderStatusCanceled
 		return
 	}

@@ -34,10 +34,10 @@ type ItemCommonAttributes struct {
 }
 
 type ItemTimeLogs struct {
-	PendingAt   *time.Time `bun:"pending_at" json:"pending_at,omitempty"`
-	StartedAt   *time.Time `bun:"started_at" json:"started_at,omitempty"`
-	ReadyAt     *time.Time `bun:"ready_at" json:"ready_at,omitempty"`
-	CancelledAt *time.Time `bun:"cancelled_at" json:"cancelled_at,omitempty"`
+	PendingAt  *time.Time `bun:"pending_at" json:"pending_at,omitempty"`
+	StartedAt  *time.Time `bun:"started_at" json:"started_at,omitempty"`
+	ReadyAt    *time.Time `bun:"ready_at" json:"ready_at,omitempty"`
+	CanceledAt *time.Time `bun:"canceled_at" json:"canceled_at,omitempty"`
 }
 
 func NewItem(itemCommonAttributes ItemCommonAttributes) *Item {
@@ -84,6 +84,6 @@ func (i *Item) ReadyItem() (err error) {
 
 func (i *Item) CancelItem() {
 	i.Status = StatusItemCanceled
-	i.CancelledAt = &time.Time{}
-	*i.CancelledAt = time.Now()
+	i.CanceledAt = &time.Time{}
+	*i.CanceledAt = time.Now()
 }
