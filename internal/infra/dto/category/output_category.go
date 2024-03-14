@@ -25,8 +25,8 @@ func (c *CategoryOutput) FromModel(model *productentity.Category) {
 		model.Products = []productentity.Product{}
 	}
 
-	if len(model.Processes) == 0 {
-		model.Processes = []productentity.Process{}
+	if len(model.ProcessRules) == 0 {
+		model.ProcessRules = []productentity.ProcessRule{}
 	}
 
 	if len(model.AdditionalCategories) == 0 {

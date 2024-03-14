@@ -160,7 +160,7 @@ func (r *CategoryProductRepositoryBun) GetCategoryById(ctx context.Context, id s
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("Processes").Relation("AdditionalCategories").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -177,7 +177,7 @@ func (r *CategoryProductRepositoryBun) GetAllCategories(ctx context.Context) ([]
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&categories).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("Processes").Relation("AdditionalCategories").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&categories).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Scan(ctx); err != nil {
 		return nil, err
 	}
 

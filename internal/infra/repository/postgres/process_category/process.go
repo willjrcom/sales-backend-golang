@@ -1,4 +1,4 @@
-package processrepositorybun
+package processRulerepositorybun
 
 import (
 	"context"
@@ -9,16 +9,16 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
-type ProcessCategoryRepositoryBun struct {
+type ProcessRuleCategoryRepositoryBun struct {
 	mu sync.Mutex
 	db *bun.DB
 }
 
-func NewProcessCategoryRepositoryBun(db *bun.DB) *ProcessCategoryRepositoryBun {
-	return &ProcessCategoryRepositoryBun{db: db}
+func NewProcessRuleCategoryRepositoryBun(db *bun.DB) *ProcessRuleCategoryRepositoryBun {
+	return &ProcessRuleCategoryRepositoryBun{db: db}
 }
 
-func (r *ProcessCategoryRepositoryBun) RegisterProcess(ctx context.Context, s *productentity.Process) error {
+func (r *ProcessRuleCategoryRepositoryBun) RegisterProcessRule(ctx context.Context, s *productentity.ProcessRule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -33,7 +33,7 @@ func (r *ProcessCategoryRepositoryBun) RegisterProcess(ctx context.Context, s *p
 	return nil
 }
 
-func (r *ProcessCategoryRepositoryBun) UpdateProcess(ctx context.Context, s *productentity.Process) error {
+func (r *ProcessRuleCategoryRepositoryBun) UpdateProcessRule(ctx context.Context, s *productentity.ProcessRule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -48,7 +48,7 @@ func (r *ProcessCategoryRepositoryBun) UpdateProcess(ctx context.Context, s *pro
 	return nil
 }
 
-func (r *ProcessCategoryRepositoryBun) DeleteProcess(ctx context.Context, id string) error {
+func (r *ProcessRuleCategoryRepositoryBun) DeleteProcessRule(ctx context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -56,15 +56,15 @@ func (r *ProcessCategoryRepositoryBun) DeleteProcess(ctx context.Context, id str
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&productentity.Process{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&productentity.ProcessRule{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *ProcessCategoryRepositoryBun) GetProcessById(ctx context.Context, id string) (*productentity.Process, error) {
-	process := &productentity.Process{}
+func (r *ProcessRuleCategoryRepositoryBun) GetProcessRuleById(ctx context.Context, id string) (*productentity.ProcessRule, error) {
+	processRule := &productentity.ProcessRule{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -73,9 +73,9 @@ func (r *ProcessCategoryRepositoryBun) GetProcessById(ctx context.Context, id st
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(process).Where("id = ?", id).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(processRule).Where("id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
-	return process, nil
+	return processRule, nil
 }

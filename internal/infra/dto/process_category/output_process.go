@@ -1,16 +1,16 @@
-package processdto
+package processRuledto
 
 import (
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
-type ProcessOutput struct {
+type ProcessRuleOutput struct {
 	ID uuid.UUID `json:"id"`
-	productentity.ProcessCommonAttributes
+	productentity.ProcessRuleCommonAttributes
 }
 
-func (s *ProcessOutput) FromModel(model *productentity.Process) {
+func (s *ProcessRuleOutput) FromModel(model *productentity.ProcessRule) {
 	s.ID = model.ID
-	s.ProcessCommonAttributes = model.ProcessCommonAttributes
+	s.ProcessRuleCommonAttributes = model.ProcessRuleCommonAttributes
 }

@@ -1,14 +1,14 @@
-package processdto
+package processRuledto
 
 import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
-type UpdateProcessInput struct {
-	productentity.PatchProcess
+type UpdateProcessRuleInput struct {
+	productentity.PatchProcessRule
 }
 
-func (s *UpdateProcessInput) validate() error {
+func (s *UpdateProcessRuleInput) validate() error {
 	if s.Name != nil && *s.Name == "" {
 		return ErrNameRequired
 	}
@@ -20,7 +20,7 @@ func (s *UpdateProcessInput) validate() error {
 	return nil
 }
 
-func (s *UpdateProcessInput) UpdateModel(model *productentity.Process) (err error) {
+func (s *UpdateProcessRuleInput) UpdateModel(model *productentity.ProcessRule) (err error) {
 	if err = s.validate(); err != nil {
 		return err
 	}

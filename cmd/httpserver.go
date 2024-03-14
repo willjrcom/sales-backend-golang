@@ -20,7 +20,7 @@ import (
 	groupitemrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/group_item"
 	itemrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/item"
 	orderrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/order"
-	processrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/process_category"
+	processRulerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/process_category"
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
 	quantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity_category"
 	schemarepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/schema"
@@ -38,7 +38,7 @@ import (
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	itemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/item"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
-	processusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_category"
+	processRuleusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_category"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity_category"
 	shiftusecases "github.com/willjrcom/sales-backend-go/internal/usecases/shift"
@@ -72,7 +72,7 @@ var HttpserverCmd = &cobra.Command{
 		categoryRepo := categoryrepositorybun.NewCategoryProductRepositoryBun(db)
 		sizeRepo := sizerepositorybun.NewSizeCategoryRepositoryBun(db)
 		quantityRepo := quantityrepositorybun.NewQuantityCategoryRepositoryBun(db)
-		processRepo := processrepositorybun.NewProcessCategoryRepositoryBun(db)
+		processRuleRepo := processRulerepositorybun.NewProcessRuleCategoryRepositoryBun(db)
 
 		clientRepo := clientrepositorybun.NewClientRepositoryBun(db)
 		contactRepo := contactrepositorybun.NewContactRepositoryBun(ctx, db)
@@ -97,7 +97,7 @@ var HttpserverCmd = &cobra.Command{
 		categoryProductService := categoryproductusecases.NewService(categoryRepo)
 		sizeService := sizeusecases.NewService(sizeRepo)
 		quantityService := quantityusecases.NewService(quantityRepo)
-		processService := processusecases.NewService(processRepo)
+		processRuleService := processRuleusecases.NewService(processRuleRepo)
 
 		clientService := clientusecases.NewService(clientRepo, contactRepo)
 		employeeService := employeeusecases.NewService(employeeRepo, contactRepo)
@@ -121,7 +121,7 @@ var HttpserverCmd = &cobra.Command{
 		categoryHandler := handlerimpl.NewHandlerCategoryProduct(categoryProductService)
 		sizeHandler := handlerimpl.NewHandlerSizeCategory(sizeService)
 		quantityHandler := handlerimpl.NewHandlerQuantityCategory(quantityService)
-		processHandler := handlerimpl.NewHandlerProcessCategory(processService)
+		processRuleHandler := handlerimpl.NewHandlerProcessRuleCategory(processRuleService)
 
 		clientHandler := handlerimpl.NewHandlerClient(clientService)
 		employeeHandler := handlerimpl.NewHandlerEmployee(employeeService)
@@ -143,7 +143,7 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(categoryHandler)
 		server.AddHandler(sizeHandler)
 		server.AddHandler(quantityHandler)
-		server.AddHandler(processHandler)
+		server.AddHandler(processRuleHandler)
 
 		server.AddHandler(clientHandler)
 		server.AddHandler(employeeHandler)

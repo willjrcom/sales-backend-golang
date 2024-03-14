@@ -331,7 +331,7 @@
 			]
 		},
 		{
-			"name": "process",
+			"name": "processRule",
 			"item": [
 				{
 					"name": "create",
@@ -342,7 +342,7 @@
 								"exec": [
 									"let response = pm.response.json()",
 									"let task_id = response.data",
-									"pm.collectionVariables.set(\"process_category_id\", task_id)"
+									"pm.collectionVariables.set(\"processRule_category_id\", task_id)"
 								],
 								"type": "text/javascript"
 							}
@@ -366,7 +366,7 @@
 								}
 							}
 						},
-						"url": "{{server}}/category-product/process/new"
+						"url": "{{server}}/category-product/processRule/new"
 					},
 					"response": []
 				},
@@ -390,7 +390,7 @@
 								}
 							}
 						},
-						"url": "{{server}}/category-product/process/update/{{size_category_id}}"
+						"url": "{{server}}/category-product/processRule/update/{{size_category_id}}"
 					},
 					"response": []
 				},
@@ -405,7 +405,7 @@
 								"type": "text"
 							}
 						],
-						"url": "{{server}}/category-product/process/delete/{{size_category_id}}"
+						"url": "{{server}}/category-product/processRule/delete/{{size_category_id}}"
 					},
 					"response": []
 				}
@@ -2051,7 +2051,7 @@
 			"value": "01014059-5db1-48a7-8c47-f8a599d3edda"
 		},
 		{
-			"key": "process_category_id",
+			"key": "processRule_category_id",
 			"value": ""
 		},
 		{

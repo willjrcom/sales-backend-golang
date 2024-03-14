@@ -1,4 +1,4 @@
-package processdto
+package processRuledto
 
 import (
 	"errors"
@@ -16,11 +16,11 @@ var (
 	ErrCategoryRequired          = errors.New("category ID is required")
 )
 
-type RegisterProcessInput struct {
-	productentity.ProcessCommonAttributes
+type RegisterProcessRuleInput struct {
+	productentity.ProcessRuleCommonAttributes
 }
 
-func (s *RegisterProcessInput) validate() error {
+func (s *RegisterProcessRuleInput) validate() error {
 	if s.Name == "" {
 		return ErrNameRequired
 	}
@@ -43,11 +43,11 @@ func (s *RegisterProcessInput) validate() error {
 	return nil
 }
 
-func (s *RegisterProcessInput) ToModel() (*productentity.Process, error) {
+func (s *RegisterProcessRuleInput) ToModel() (*productentity.ProcessRule, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}
-	processCommonAttributes := productentity.ProcessCommonAttributes{
+	processRuleCommonAttributes := productentity.ProcessRuleCommonAttributes{
 		Name:              s.Name,
 		Order:             s.Order,
 		IdealTime:         s.IdealTime,
@@ -55,8 +55,8 @@ func (s *RegisterProcessInput) ToModel() (*productentity.Process, error) {
 		CategoryID:        s.CategoryID,
 	}
 
-	return &productentity.Process{
-		Entity:                  entity.NewEntity(),
-		ProcessCommonAttributes: processCommonAttributes,
+	return &productentity.ProcessRule{
+		Entity:                      entity.NewEntity(),
+		ProcessRuleCommonAttributes: processRuleCommonAttributes,
 	}, nil
 }

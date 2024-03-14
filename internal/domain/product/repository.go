@@ -34,9 +34,9 @@ type QuantityRepository interface {
 	GetQuantityById(ctx context.Context, id string) (*Quantity, error)
 }
 
-type ProcessRepository interface {
-	RegisterProcess(ctx context.Context, Process *Process) error
-	UpdateProcess(ctx context.Context, Process *Process) error
-	DeleteProcess(ctx context.Context, id string) error
-	GetProcessById(ctx context.Context, id string) (*Process, error)
+type ProcessRuleRepository interface {
+	RegisterProcessRule(ctx context.Context, ProcessRule *ProcessRule) error
+	UpdateProcessRule(ctx context.Context, ProcessRule *ProcessRule) error
+	DeleteProcessRule(ctx context.Context, id string) error
+	GetProcessRuleById(ctx context.Context, id string) (*ProcessRule, error)
 }

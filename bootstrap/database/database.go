@@ -165,7 +165,7 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*productentity.Size)(nil))
 	db.RegisterModel((*productentity.Quantity)(nil))
 	db.RegisterModel((*productentity.Category)(nil))
-	db.RegisterModel((*productentity.Process)(nil))
+	db.RegisterModel((*productentity.ProcessRule)(nil))
 	db.RegisterModel((*productentity.Product)(nil))
 
 	db.RegisterModel((*addressentity.Address)(nil))
@@ -226,7 +226,7 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Process)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProcessRule)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}
