@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -55,8 +54,5 @@ func (s *RegisterProcessRuleInput) ToModel() (*productentity.ProcessRule, error)
 		CategoryID:        s.CategoryID,
 	}
 
-	return &productentity.ProcessRule{
-		Entity:                      entity.NewEntity(),
-		ProcessRuleCommonAttributes: processRuleCommonAttributes,
-	}, nil
+	return productentity.NewProcessRule(processRuleCommonAttributes), nil
 }

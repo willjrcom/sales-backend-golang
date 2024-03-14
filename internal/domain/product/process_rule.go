@@ -28,3 +28,10 @@ type PatchProcessRule struct {
 	IdealTime         *time.Duration `json:"ideal_time"`
 	ExperimentalError *time.Duration `json:"experimental_error"`
 }
+
+func NewProcessRule(processCommonAttributes ProcessRuleCommonAttributes) *ProcessRule {
+	return &ProcessRule{
+		Entity:                      entity.NewEntity(),
+		ProcessRuleCommonAttributes: processCommonAttributes,
+	}
+}
