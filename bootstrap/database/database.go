@@ -21,6 +21,7 @@ import (
 	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
+	processentity "github.com/willjrcom/sales-backend-go/internal/domain/process"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
@@ -173,6 +174,7 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*cliententity.Client)(nil))
 	db.RegisterModel((*employeeentity.Employee)(nil))
 
+	db.RegisterModel((*processentity.Process)(nil))
 	db.RegisterModel((*itementity.Item)(nil))
 	db.RegisterModel((*groupitementity.GroupItem)(nil))
 
@@ -257,6 +259,11 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*employeeentity.Employee)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*processentity.Process)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}

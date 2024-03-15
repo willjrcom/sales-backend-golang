@@ -1,4 +1,4 @@
-package processRuledto
+package processruledto
 
 import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"

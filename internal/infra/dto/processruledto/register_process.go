@@ -1,4 +1,4 @@
-package processRuledto
+package processruledto
 
 import (
 	"errors"

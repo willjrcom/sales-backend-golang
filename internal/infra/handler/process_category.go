@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process_category"
+	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/processruledto"
 	processusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_category"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
