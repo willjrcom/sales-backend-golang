@@ -7,37 +7,37 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process_category"
-	processusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_category"
+	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process"
+	processusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
-type handlerProcessRuleCategoryImpl struct {
+type handlerProcessImpl struct {
 	s *processusecases.Service
 }
 
-func NewHandlerProcessRuleCategory(processRuleService *processusecases.Service) *handler.Handler {
+func NewHandlerProcess(processService *processusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
-	h := &handlerProcessRuleCategoryImpl{
-		s: processRuleService,
+	h := &handlerProcessImpl{
+		s: processService,
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterProcessRule)
-		c.Patch("/update/{id}", h.handlerUpdateProcessRule)
-		c.Delete("/delete/{id}", h.handlerDeleteProcessRule)
+		c.Post("/new", h.handlerRegisterProcess)
+		c.Patch("/update/{id}", h.handlerUpdateProcess)
+		c.Delete("/delete/{id}", h.handlerDeleteProcess)
 	})
 
-	return handler.NewHandler("/category-product/process", c)
+	return handler.NewHandler("/process", c)
 }
 
-func (h *handlerProcessRuleCategoryImpl) handlerRegisterProcessRule(w http.ResponseWriter, r *http.Request) {
+func (h *handlerProcessImpl) handlerRegisterProcess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	processRule := &processdto.RegisterProcessRuleInput{}
-	jsonpkg.ParseBody(r, processRule)
+	process := &processdto.CreateProcessInput{}
+	jsonpkg.ParseBody(r, process)
 
-	if id, err := h.s.RegisterProcessRule(ctx, processRule); err != nil {
+	if id, err := h.s.RegisterProcess(ctx, process); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	} else {
@@ -45,7 +45,7 @@ func (h *handlerProcessRuleCategoryImpl) handlerRegisterProcessRule(w http.Respo
 	}
 }
 
-func (h *handlerProcessRuleCategoryImpl) handlerUpdateProcessRule(w http.ResponseWriter, r *http.Request) {
+func (h *handlerProcessImpl) handlerUpdateProcess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -56,10 +56,7 @@ func (h *handlerProcessRuleCategoryImpl) handlerUpdateProcessRule(w http.Respons
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	ProcessRule := &processdto.UpdateProcessRuleInput{}
-	jsonpkg.ParseBody(r, ProcessRule)
-
-	if err := h.s.UpdateProcessRule(ctx, dtoId, ProcessRule); err != nil {
+	if err := h.s.UpdateProcess(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -67,7 +64,7 @@ func (h *handlerProcessRuleCategoryImpl) handlerUpdateProcessRule(w http.Respons
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerProcessRuleCategoryImpl) handlerDeleteProcessRule(w http.ResponseWriter, r *http.Request) {
+func (h *handlerProcessImpl) handlerDeleteProcess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -78,7 +75,7 @@ func (h *handlerProcessRuleCategoryImpl) handlerDeleteProcessRule(w http.Respons
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.DeleteProcessRule(ctx, dtoId); err != nil {
+	if err := h.s.DeleteProcess(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

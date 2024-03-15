@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/processruledto"
+	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process_category"
 )
 
 var (

@@ -17,10 +17,10 @@ type Process struct {
 }
 
 type ProcessCommonAttributes struct {
-	EmployeeID uuid.UUID                `bun:"column:employee_id,type:uuid,notnull" json:"employee_id"`
-	Employee   *employeeentity.Employee `bun:"rel:belongs-to" json:"employee,omitempty"`
-	ItemID     uuid.UUID                `bun:"item_id,type:uuid,notnull" json:"item_id"`
-	ProcessID  uuid.UUID                `bun:"process_id,type:uuid,notnull" json:"process_id"`
+	EmployeeID    uuid.UUID                `bun:"column:employee_id,type:uuid,notnull" json:"employee_id"`
+	Employee      *employeeentity.Employee `bun:"rel:belongs-to" json:"employee,omitempty"`
+	ItemID        uuid.UUID                `bun:"item_id,type:uuid,notnull" json:"item_id"`
+	ProcessRuleID uuid.UUID                `bun:"process_rule_id,type:uuid,notnull" json:"process_rule_id"`
 }
 
 type ProcessTimeLogs struct {

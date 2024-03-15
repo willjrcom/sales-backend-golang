@@ -1,4 +1,4 @@
-package processRulerepositorybun
+package processrulerepositorybun
 
 import (
 	"context"

@@ -9,5 +9,5 @@ type ProcessRepository interface {
 	UpdateProcess(ctx context.Context, p *Process) error
 	DeleteProcess(ctx context.Context, id string) error
 	GetProcessById(ctx context.Context, id string) (*Process, error)
-	GetAllProcesss(ctx context.Context) ([]Process, error)
+	GetAllProcesses(ctx context.Context) ([]Process, error)
 }

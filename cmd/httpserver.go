@@ -20,7 +20,8 @@ import (
 	groupitemrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/group_item"
 	itemrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/item"
 	orderrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/order"
-	processRulerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/process_category"
+	processrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/process"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/processrulerepositorybun"
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
 	quantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity_category"
 	schemarepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/schema"
@@ -38,6 +39,7 @@ import (
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	itemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/item"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
+	processusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process"
 	processRuleusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_category"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity_category"
@@ -72,7 +74,7 @@ var HttpserverCmd = &cobra.Command{
 		categoryRepo := categoryrepositorybun.NewCategoryProductRepositoryBun(db)
 		sizeRepo := sizerepositorybun.NewSizeCategoryRepositoryBun(db)
 		quantityRepo := quantityrepositorybun.NewQuantityCategoryRepositoryBun(db)
-		processRuleRepo := processRulerepositorybun.NewProcessRuleCategoryRepositoryBun(db)
+		processRuleRepo := processrulerepositorybun.NewProcessRuleCategoryRepositoryBun(db)
 
 		clientRepo := clientrepositorybun.NewClientRepositoryBun(db)
 		contactRepo := contactrepositorybun.NewContactRepositoryBun(ctx, db)
@@ -81,6 +83,7 @@ var HttpserverCmd = &cobra.Command{
 		orderRepo := orderrepositorybun.NewOrderRepositoryBun(db)
 		deliveryOrderRepo := orderrepositorybun.NewDeliveryOrderRepositoryBun(db)
 		tableOrderRepo := orderrepositorybun.NewTableOrderRepositoryBun(db)
+		processRepo := processrepositorybun.NewProcessRepositoryBun(db)
 		itemRepo := itemrepositorybun.NewItemRepositoryBun(db)
 		groupItemRepo := groupitemrepositorybun.NewGroupItemRepositoryBun(db)
 
@@ -106,6 +109,7 @@ var HttpserverCmd = &cobra.Command{
 		orderService := orderusecases.NewService(orderRepo, shiftRepo)
 		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo, employeeRepo, orderService)
 		tableOrderService := tableorderusecases.NewService(tableOrderRepo, tableRepo, orderService)
+		processService := processusecases.NewService(processRepo)
 		itemService := itemusecases.NewService(itemRepo, groupItemRepo, orderRepo, productRepo, quantityRepo)
 		groupService := groupitemusecases.NewService(itemRepo, groupItemRepo)
 
@@ -130,6 +134,7 @@ var HttpserverCmd = &cobra.Command{
 		orderHandler := handlerimpl.NewHandlerOrder(orderService)
 		deliveryOrderHandler := handlerimpl.NewHandlerDeliveryOrder(deliveryOrderService)
 		tableOrderHandler := handlerimpl.NewHandlerTableOrder(tableOrderService)
+		processHandler := handlerimpl.NewHandlerProcess(processService)
 		itemHandler := handlerimpl.NewHandlerItem(itemService)
 		groupHandler := handlerimpl.NewHandlerGroupItem(groupService)
 
@@ -152,6 +157,7 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(orderHandler)
 		server.AddHandler(deliveryOrderHandler)
 		server.AddHandler(tableOrderHandler)
+		server.AddHandler(processHandler)
 		server.AddHandler(itemHandler)
 		server.AddHandler(groupHandler)
 
