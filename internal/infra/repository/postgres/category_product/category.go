@@ -71,9 +71,6 @@ func (r *CategoryProductRepositoryBun) UpdateCategory(ctx context.Context, c *pr
 }
 
 func (r *CategoryProductRepositoryBun) updateAdditionalCategories(ctx context.Context, tx bun.Tx, categoryID uuid.UUID, additionalCategories []productentity.Category) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	if err := database.ChangeSchema(ctx, r.db); err != nil {
 
 		return err

@@ -21,7 +21,7 @@ import (
 	itemrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/item"
 	orderrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/order"
 	processrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/process"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/processrulerepositorybun"
+	processrulerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/process_rule"
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
 	quantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity_category"
 	schemarepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/schema"

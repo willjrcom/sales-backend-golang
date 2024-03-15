@@ -7,488 +7,1415 @@
 	},
 	"item": [
 		{
-			"name": "product",
+			"name": "category product",
 			"item": [
 				{
-					"name": "create",
-					"event": [
+					"name": "product",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"product_id\", task_id)"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disabledSystemHeaders": {}
-					},
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"product_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disabledSystemHeaders": {}
 							},
-							{
-								"key": "Content-Type",
-								"value": "multipart/form-data",
-								"type": "text",
-								"disabled": true
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"code\": \"p12\",\n    \"name\": \"Pizza Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 30.0,\n    \"cost\": 10.0,\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": false\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "multipart/form-data",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"p12\",\n    \"name\": \"Pizza Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 30.0,\n    \"cost\": 10.0,\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/product/new"
+							},
+							"response": []
 						},
-						"url": "{{server}}/product/new"
-					},
-					"response": []
-				},
-				{
-					"name": "update",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"code\": \"a12\",\n    \"name\": \"Pizza de Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 15.0,\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+						{
+							"name": "update",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"code\": \"a12\",\n    \"name\": \"Pizza de Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 15.0,\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/product/update/{{product_id}}"
+							},
+							"response": []
 						},
-						"url": "{{server}}/product/update/{{product_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "delete",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/product/delete/{{product_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "get by id",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/product/{{product_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "get all",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+						{
+							"name": "delete",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/product/delete/{{product_id}}"
+							},
+							"response": []
 						},
-						"url": "{{server}}/product/all"
-					},
-					"response": []
+						{
+							"name": "get by id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/product/{{product_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "get all",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/product/all"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "category",
+					"item": [
+						{
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"category_product_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Pizza\",\n    \"category_to_additional\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/category-product/new"
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"removable_items\": [\"cebola\", \"tomate\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/category-product/update/{{category_product_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "deletar",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/category-product/delete/{{category_product_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "get by id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/category-product/{{category_product_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "get all",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/category-product/all"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "size",
+					"item": [
+						{
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"size_category_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"P\",\n    \"active\": \"false\",\n    \"category_id\": \"{{category_product_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/category-product/size/new"
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"G\",\n    \"active\": \"true\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/category-product/size/update/{{size_category_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "deletar",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/category-product/size/delete/{{size_category_id}}"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "process rule",
+					"item": [
+						{
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"process_rule_category_id\", task_id)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Prensar\",\n    \"order\": 3,\n    \"ideal_time\": \"3m30s\",\n    \"experimental_error\": \"30s\",\n    \"category_id\": \"{{category_product_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/category-product/process/new"
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/category-product/process/update/{{process_rule_category_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "deletar",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/category-product/process/delete/{{process_rule_category_id}}"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "quantity",
+					"item": [
+						{
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"quantity_category_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"quantity\": 2,\n    \"category_id\": \"{{category_product_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/category-product/quantity/new"
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"quantity\": \"2.5\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/category-product/quantity/update/{{quantity_category_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "deletar",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/category-product/quantity/delete/{{quantity_category_id}}"
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
 		{
-			"name": "category",
+			"name": "order",
 			"item": [
 				{
-					"name": "create",
-					"event": [
+					"name": "order",
+					"item": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"category_product_id\", task_id)"
+							"name": "pending",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
 								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Pizza\",\n    \"category_to_additional\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/order/pending/{{order_id}}"
+							},
+							"response": []
 						},
-						"url": "{{server}}/category-product/new"
-					},
-					"response": []
-				},
-				{
-					"name": "update",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"category_to_additional\": [\n        {\n            \"id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\"\n        },\n        {\n            \"id\": \"3ace5f45-9bc0-41f2-a70f-2b6b862b5225\"\n        }\n    ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/category-product/update/{{category_product_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "deletar",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/category-product/delete/{{category_product_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "get by id",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/category-product/{{category_product_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "get all",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/category-product/all"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "size",
-			"item": [
-				{
-					"name": "create",
-					"event": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"size_category_id\", task_id)"
+							"name": "finish",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
 								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"P\",\n    \"active\": \"false\",\n    \"category_id\": \"{{category_product_id}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+								"url": "{{server}}/order/finish/{{order_id}}"
+							},
+							"response": []
 						},
-						"url": "{{server}}/category-product/size/new"
-					},
-					"response": []
-				},
-				{
-					"name": "update",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"G\",\n    \"active\": \"true\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/category-product/size/update/{{size_category_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "deletar",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/category-product/size/delete/{{size_category_id}}"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "processRule",
-			"item": [
-				{
-					"name": "create",
-					"event": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"processRule_category_id\", task_id)"
+							"name": "cancel",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
 								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Cortar pão\",\n    \"order\": 1,\n    \"ideal_time\": \"3m30s\",\n    \"experimental_error\": \"30s\",\n    \"category_id\": \"{{category_product_id}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+								"url": "{{server}}/order/cancel/{{order_id}}"
+							},
+							"response": []
 						},
-						"url": "{{server}}/category-product/processRule/new"
-					},
-					"response": []
-				},
-				{
-					"name": "update",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Cortar pão\",\n    \"order\": 0,\n    \"ideal_time\": \"\",\n    \"experimental_error\": \"\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/category-product/processRule/update/{{size_category_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "deletar",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/category-product/processRule/delete/{{size_category_id}}"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "quantity",
-			"item": [
-				{
-					"name": "create",
-					"event": [
 						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"quantity_category_id\", task_id)"
+							"name": "archive",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
 								],
-								"type": "text/javascript"
-							}
+								"url": "{{server}}/order/archive/{{order_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "unarchive",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/order/unarchive/{{order_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "get by id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/order/{{order_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "get all",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/order/all"
+							},
+							"response": []
+						},
+						{
+							"name": "update observation",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"observation\": \"entregar as 9h\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/order/update/{{order_id}}/observation"
+							},
+							"response": []
+						},
+						{
+							"name": "add payment",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"is_paid\": true,\n    \"total_paid\": 10,\n    \"change\": 0.0,\n    \"method\": \"MasterCard\",\n    \"order_id\": \"{{order_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/order/update/{{order_id}}/payment"
+							},
+							"response": []
+						},
+						{
+							"name": "update schedule",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"start_at\": \"2024-01-17T20:39:23.107002Z\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/order/update/{{order_id}}/schedule"
+							},
+							"response": []
 						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"quantity\": 2,\n    \"category_id\": \"{{category_product_id}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/category-product/quantity/new"
-					},
-					"response": []
+					]
 				},
 				{
-					"name": "update",
-					"request": {
-						"method": "PATCH",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"quantity\": \"2.5\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
+					"name": "delivery order",
+					"item": [
+						{
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"order_delivery_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
 								}
-							}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"client_id\": \"{{client_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/delivery-order/new"
+							},
+							"response": []
 						},
-						"url": "{{server}}/category-product/quantity/update/{{quantity_category_id}}"
-					},
-					"response": []
+						{
+							"name": "launch",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"driver_id\": \"{{employee_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/delivery-order/update/launch/{{order_delivery_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "finish",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"client_id\": \"{{client_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/delivery-order/update/finish/{{order_delivery_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "update driver",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"driver_id\": \"{{employee_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/delivery-order/update/driver/{{order_delivery_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "update address",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"address_id\": \"a9c5af44-dcce-488d-b880-98419248e930\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/delivery-order/update/address/{{order_delivery_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "get all",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"client_id\": \"2b4a8299-0a0e-4a31-8d59-1bbef4edd2c1\",\n    \"address_id\": \"392c36ab-2de5-4b80-865f-d1bf3ade58d8\",\n    \"order_id\": \"d1db1385-d43d-4c1b-a3ea-47ffb88b34f9\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/delivery-order/all"
+							},
+							"response": []
+						}
+					]
 				},
 				{
-					"name": "deletar",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/category-product/quantity/delete/{{quantity_category_id}}"
-					},
-					"response": []
+					"name": "table order",
+					"item": [
+						{
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"table_order_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Mesa 1\",\n    \"waiter_id\": \"{{employee_id}}\",\n    \"order_id\": \"{{order_id}}\",\n    \"table_id\": \"{{table_id}}\"\n\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/table-order/new"
+							},
+							"response": []
+						},
+						{
+							"name": "get by id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/table-order/{{table_order_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "get all",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/table-order/all"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "table",
+					"item": [
+						{
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"table_id\", task_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Mesa 1\",\n    \"is_available\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/table/new"
+							},
+							"response": []
+						},
+						{
+							"name": "get by id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/table/{{table_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "get all",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/table/all"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "item",
+					"item": [
+						{
+							"name": "add item",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let item_id = response.data.item_id",
+											"let group_item_id = response.data.group_item_id",
+											"pm.collectionVariables.set(\"item_id\", item_id)",
+											"pm.collectionVariables.set(\"group_item_id\", group_item_id)"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\",\n    \"group_item_id\": \"{{group_item_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/item/add"
+							},
+							"response": []
+						},
+						{
+							"name": "delete",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/item/delete/{{item_id}}"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "group item",
+					"item": [
+						{
+							"name": "get by id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/group/get/{{group_item_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "getAll",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"status\": \"Pending\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/group/all"
+							},
+							"response": []
+						},
+						{
+							"name": "by orderID and status",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"status\": \"Staging\",\n    \"order_id\": \"{{order_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/group/by-order-id-and-status"
+							},
+							"response": []
+						},
+						{
+							"name": "start",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/group/start/{{group_item_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "ready",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/group/ready/{{group_item_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "cancel",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/group/cancel/{{group_item_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "delete",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/group/delete/{{group_item_id}}"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "process",
+					"item": [
+						{
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let task_id = response.data",
+											"pm.collectionVariables.set(\"process_category_id\", task_id)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"employee_id\": \"{{employee_id}}\",\n    \"item_id\": \"{{item_id}}\",\n    \"process_rule_id\": \"{{process_rule_category_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/process/new"
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Cortar pão\",\n    \"order\": 0,\n    \"ideal_time\": \"\",\n    \"experimental_error\": \"\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/process/update/{{size_category_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "deletar",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/process/delete/{{size_category_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "get all",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/process/all"
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
@@ -785,840 +1712,6 @@
 						"url": "{{server}}/contact/{{contact_id}}"
 					},
 					"response": []
-				},
-				{
-					"name": "get all",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/contact/all"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "order",
-			"item": [
-				{
-					"name": "pending",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/order/pending/{{order_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "finish",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/order/finish/{{order_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "cancel",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/order/cancel/{{order_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "archive",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/order/archive/{{order_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "unarchive",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/order/unarchive/{{order_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "get by id",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/order/{{order_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "get all",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/order/all"
-					},
-					"response": []
-				},
-				{
-					"name": "update observation",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"observation\": \"entregar as 9h\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/order/update/{{order_id}}/observation"
-					},
-					"response": []
-				},
-				{
-					"name": "add payment",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"is_paid\": true,\n    \"total_paid\": 10,\n    \"change\": 0.0,\n    \"method\": \"MasterCard\",\n    \"order_id\": \"{{order_id}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/order/update/{{order_id}}/payment"
-					},
-					"response": []
-				},
-				{
-					"name": "update schedule",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"start_at\": \"2024-01-17T20:39:23.107002Z\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/order/update/{{order_id}}/schedule"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "delivery order",
-			"item": [
-				{
-					"name": "create",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"order_delivery_id\", task_id)"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"client_id\": \"{{client_id}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/delivery-order/new"
-					},
-					"response": []
-				},
-				{
-					"name": "launch",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"driver_id\": \"{{employee_id}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/delivery-order/update/launch/{{order_delivery_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "finish",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"client_id\": \"{{client_id}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/delivery-order/update/finish/{{order_delivery_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "update driver",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"driver_id\": \"{{employee_id}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/delivery-order/update/driver/{{order_delivery_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "update address",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"address_id\": \"a9c5af44-dcce-488d-b880-98419248e930\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/delivery-order/update/address/{{order_delivery_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "get all",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"client_id\": \"2b4a8299-0a0e-4a31-8d59-1bbef4edd2c1\",\n    \"address_id\": \"392c36ab-2de5-4b80-865f-d1bf3ade58d8\",\n    \"order_id\": \"d1db1385-d43d-4c1b-a3ea-47ffb88b34f9\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/delivery-order/all"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "table order",
-			"item": [
-				{
-					"name": "create",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"table_order_id\", task_id)"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Mesa 1\",\n    \"waiter_id\": \"{{employee_id}}\",\n    \"order_id\": \"{{order_id}}\",\n    \"table_id\": \"{{table_id}}\"\n\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/table-order/new"
-					},
-					"response": []
-				},
-				{
-					"name": "get by id",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/table-order/{{table_order_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "get all",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/table-order/all"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "table",
-			"item": [
-				{
-					"name": "create",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"table_id\", task_id)"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": \"Mesa 1\",\n    \"is_available\": true\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/table/new"
-					},
-					"response": []
-				},
-				{
-					"name": "get by id",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/table/{{table_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "get all",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/table/all"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "item",
-			"item": [
-				{
-					"name": "add item",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"let response = pm.response.json()",
-									"let item_id = response.data.item_id",
-									"let group_item_id = response.data.group_item_id",
-									"pm.collectionVariables.set(\"item_id\", item_id)",
-									"pm.collectionVariables.set(\"group_item_id\", group_item_id)"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\",\n    \"group_item_id\": \"{{group_item_id}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/item/add"
-					},
-					"response": []
-				},
-				{
-					"name": "delete",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/item/delete/{{item_id}}"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "group item",
-			"item": [
-				{
-					"name": "get by id",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/group/get/{{group_item_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "getAll",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"status\": \"Pending\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/group/all"
-					},
-					"response": []
-				},
-				{
-					"name": "by orderID and status",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"status\": \"Staging\",\n    \"order_id\": \"{{order_id}}\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/group/by-order-id-and-status"
-					},
-					"response": []
-				},
-				{
-					"name": "start",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/group/start/{{group_item_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "ready",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/group/ready/{{group_item_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "cancel",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/group/cancel/{{group_item_id}}"
-					},
-					"response": []
-				},
-				{
-					"name": "delete",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"url": "{{server}}/group/delete/{{group_item_id}}"
-					},
-					"response": []
 				}
 			]
 		},
@@ -1901,7 +1994,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"williamjunior67@gmail.com\",\n    \"password\": \"Objetivo42461255!\",\n    \"employee_id\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"schemas\": [\"loja_gazaltech_zu0b5ktir\"]\n}",
+							"raw": "{\n    \"email\": \"williamjunior67@gmail.com\",\n    \"password\": \"Objetivo42461255!\",\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2051,7 +2144,7 @@
 			"value": "01014059-5db1-48a7-8c47-f8a599d3edda"
 		},
 		{
-			"key": "processRule_category_id",
+			"key": "process_rule_category_id",
 			"value": ""
 		},
 		{
@@ -2114,6 +2207,10 @@
 		},
 		{
 			"key": "IDToken",
+			"value": ""
+		},
+		{
+			"key": "process_category_id",
 			"value": ""
 		}
 	]

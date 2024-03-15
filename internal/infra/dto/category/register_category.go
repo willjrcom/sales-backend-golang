@@ -30,7 +30,7 @@ func (c *RegisterCategoryInput) ToModel() (*productentity.Category, error) {
 	categoryCommonAttributes := productentity.CategoryCommonAttributes{
 		Name:                 c.Name,
 		AdditionalCategories: c.AdditionalCategories,
-		RemovableItems:       c.RemovableItems,
+		RemovableIngredients: c.RemovableIngredients,
 		ImagePath:            c.ImagePath,
 		NeedPrint:            c.NeedPrint,
 	}

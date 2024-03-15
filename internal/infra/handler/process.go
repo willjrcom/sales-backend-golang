@@ -27,6 +27,7 @@ func NewHandlerProcess(processService *processusecases.Service) *handler.Handler
 		c.Post("/new", h.handlerRegisterProcess)
 		c.Patch("/update/{id}", h.handlerUpdateProcess)
 		c.Delete("/delete/{id}", h.handlerDeleteProcess)
+		c.Get("/all", h.handlerGetAllProcesses)
 	})
 
 	return handler.NewHandler("/process", c)
@@ -81,4 +82,14 @@ func (h *handlerProcessImpl) handlerDeleteProcess(w http.ResponseWriter, r *http
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+func (h *handlerProcessImpl) handlerGetAllProcesses(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	if processes, err := h.s.GetAllProcesses(ctx); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processes})
+	}
 }

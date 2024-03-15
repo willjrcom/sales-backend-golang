@@ -13,19 +13,21 @@ type Category struct {
 
 type CategoryCommonAttributes struct {
 	Name                 string        `bun:"name,notnull" json:"name"`
-	ImagePath            *string       `bun:"image_path" json:"image_path"`
+	ImagePath            string        `bun:"image_path" json:"image_path"`
 	NeedPrint            bool          `bun:"need_print,notnull" json:"need_print"`
-	RemovableItems       []string      `bun:"removable_items,type:jsonb" json:"removable_items,omitempty"`
+	RemovableIngredients []string      `bun:"removable_ingredients,type:jsonb" json:"removable_items,omitempty"`
 	Sizes                []Size        `bun:"rel:has-many,join:id=category_id" json:"sizes,omitempty"`
 	Quantities           []Quantity    `bun:"rel:has-many,join:id=category_id" json:"quantities,omitempty"`
 	Products             []Product     `bun:"rel:has-many,join:id=category_id" json:"products,omitempty"`
-	ProcessRules         []ProcessRule `bun:"rel:has-many,join:id=category_id" json:"processRules,omitempty"`
+	ProcessRules         []ProcessRule `bun:"rel:has-many,join:id=category_id" json:"process_rules,omitempty"`
 	AdditionalCategories []Category    `bun:"m2m:category_to_additional,join:Category=AdditionalCategory" json:"category_to_additional,omitempty"`
 }
 
 type PatchCategory struct {
 	Name                 *string    `json:"name"`
+	ImagePath            *string    `json:"image_path"`
 	NeedPrint            *bool      `json:"need_print"`
+	RemovableIngredients []string   `json:"removable_ingredients"`
 	AdditionalCategories []Category `json:"category_to_additional,omitempty"`
 }
 

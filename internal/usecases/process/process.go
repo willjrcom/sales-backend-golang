@@ -2,16 +2,11 @@ package processusecases
 
 import (
 	"context"
-	"errors"
 
 	"github.com/google/uuid"
 	processentity "github.com/willjrcom/sales-backend-go/internal/domain/process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process"
-)
-
-var (
-	ErrProcessIsUsed = errors.New("process is used in products")
 )
 
 type Service struct {
@@ -29,9 +24,7 @@ func (s *Service) RegisterProcess(ctx context.Context, dto *processdto.CreatePro
 		return uuid.Nil, err
 	}
 
-	err = s.r.RegisterProcess(ctx, process)
-
-	if err != nil {
+	if err = s.r.RegisterProcess(ctx, process); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -72,7 +65,7 @@ func (s *Service) GetProcessById(ctx context.Context, dto *entitydto.IdRequest) 
 	}
 }
 
-func (s *Service) GetAllProcesses(ctx context.Context, dto *entitydto.IdRequest) ([]processentity.Process, error) {
+func (s *Service) GetAllProcesses(ctx context.Context) ([]processentity.Process, error) {
 	if process, err := s.r.GetAllProcesses(ctx); err != nil {
 		return nil, err
 	} else {
