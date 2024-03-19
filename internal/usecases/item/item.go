@@ -14,9 +14,11 @@ import (
 )
 
 var (
-	ErrCategoryNotFound = errors.New("category not found")
-	ErrSizeNotFound     = errors.New("size not found")
-	ErrGroupNotStaging  = errors.New("group not staging")
+	ErrCategoryNotFound         = errors.New("category not found")
+	ErrSizeNotFound             = errors.New("size not found")
+	ErrSizeMustBeTheSame        = errors.New("size must be the same")
+	ErrGroupNotStaging          = errors.New("group not staging")
+	ErrItemNotStagingAndPending = errors.New("item not staging or pending")
 )
 
 type Service struct {
@@ -86,7 +88,9 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 		return nil, err
 	}
 
-	if err = s.rgi.CalculateTotal(ctx, groupItem.ID.String()); err != nil {
+	groupItem.CalculateTotalValues()
+
+	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
 		return nil, err
 	}
 
@@ -202,8 +206,61 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest)
 	return nil
 }
 
-func (s *Service) AddAditionalItemOrder(ctx context.Context, dto *entitydto.IdRequest) (id uuid.UUID, err error) {
-	return uuid.Nil, nil
+func (s *Service) AddAditionalItemOrder(ctx context.Context, dto *entitydto.IdRequest, dtoAdditional *entitydto.IdRequest) (id uuid.UUID, err error) {
+
+	item, err := s.ri.GetItemById(ctx, dto.ID.String())
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if !item.CanAddAdditionalItems() {
+		return uuid.Nil, ErrItemNotStagingAndPending
+	}
+
+	productAdditional, err := s.rp.GetProductById(ctx, dtoAdditional.ID.String())
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if item.Size != productAdditional.Size.Name {
+		return uuid.Nil, ErrSizeMustBeTheSame
+	}
+
+	itemAdditionalCommonAttributes := itementity.ItemCommonAttributes{
+		Name:     productAdditional.Name,
+		Status:   item.Status,
+		Price:    productAdditional.Price * item.Quantity,
+		Size:     item.Size,
+		Quantity: item.Quantity,
+	}
+
+	itemAdditional := itementity.NewItem(itemAdditionalCommonAttributes)
+
+	if err = s.ri.AddItem(ctx, itemAdditional); err != nil {
+		return uuid.Nil, err
+	}
+
+	item.AddAdditionalItem(itemAdditional.ID)
+
+	if err = s.ri.UpdateItem(ctx, item); err != nil {
+		return uuid.Nil, err
+	}
+
+	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	groupItem.CalculateTotalValues()
+
+	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
+		return uuid.Nil, err
+	}
+
+	return itemAdditional.ID, nil
 }
 
 func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product) (groupItem *groupitementity.GroupItem, err error) {

@@ -52,25 +52,6 @@ func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *groupit
 	return nil
 }
 
-func (r *GroupItemRepositoryBun) CalculateTotal(ctx context.Context, id string) (err error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	groupItem, err := r.GetGroupByID(ctx, id, true)
-
-	if err != nil {
-		return err
-	}
-
-	groupItem.CalculateTotalValues()
-
-	return r.UpdateGroupItem(ctx, groupItem)
-}
-
 func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()

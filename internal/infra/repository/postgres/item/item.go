@@ -73,7 +73,7 @@ func (r *ItemRepositoryBun) GetItemById(ctx context.Context, id string) (*itemen
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(item).Where("item.id = ?", id).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(item).Where("item.id = ?", id).Relation("AdditionalItem").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -90,7 +90,7 @@ func (r *ItemRepositoryBun) GetAllItems(ctx context.Context) ([]itementity.Item,
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&items).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&items).Relation("AdditionalItem").Scan(ctx); err != nil {
 		return nil, err
 	}
 

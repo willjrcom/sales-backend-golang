@@ -63,6 +63,7 @@ func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *g
 		Name:        product.Name + " (" + product.Size.Name + ")",
 		Price:       product.Price * quantity.Quantity,
 		Description: product.Description,
+		Size:        product.Size.Name,
 		Quantity:    quantity.Quantity,
 		Observation: a.Observation,
 		GroupItemID: *a.GroupItemID,

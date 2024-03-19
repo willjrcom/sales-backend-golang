@@ -122,7 +122,7 @@ func (i *GroupItem) CalculateTotalValues() {
 }
 
 func (i *GroupItem) CanAddItems() bool {
-	if i.Status != StatusGroupStaging {
+	if i.Status != StatusGroupStaging && i.Status != StatusGroupPending {
 		return false
 	}
 

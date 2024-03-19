@@ -31,7 +31,7 @@ func NewHandlerItem(itemService *itemusecases.Service) *handler.Handler {
 		c.Post("/ready/{id}", h.handlerReadyItemByID)
 		c.Post("/cancel/{id}", h.handlerCancelItemByID)
 		c.Delete("/delete/{id}", h.handlerDeleteItem)
-		c.Post("/add/aditional/{id}", h.handlerAddAditionalItem)
+		c.Post("/update/{id}/aditional/{id-additional}", h.handlerAddAditionalItem)
 	})
 
 	unprotectedRoutes := []string{}
@@ -133,7 +133,15 @@ func (h *handlerItemImpl) handlerAddAditionalItem(w http.ResponseWriter, r *http
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if id, err := h.s.AddAditionalItemOrder(ctx, dtoId); err != nil {
+	idAdditional := chi.URLParam(r, "id-additional")
+
+	if idAdditional == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id additional is required"})
+	}
+
+	dtoIdAdditional := &entitydto.IdRequest{ID: uuid.MustParse(idAdditional)}
+
+	if id, err := h.s.AddAditionalItemOrder(ctx, dtoId, dtoIdAdditional); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
