@@ -58,7 +58,8 @@ func (h *handlerCategoryProductImpl) handlerUpdateCategoryProduct(w http.Respons
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -104,6 +105,7 @@ func (h *handlerCategoryProductImpl) handlerGetCategoryProduct(w http.ResponseWr
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}

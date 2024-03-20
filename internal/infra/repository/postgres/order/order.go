@@ -149,7 +149,7 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]orderentity.Or
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&orders).Relation("Groups.Items").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&orders).Relation("Groups.Items.AdditionalItems").Relation("Groups.ComplementItem").Scan(ctx); err != nil {
 		return nil, err
 	}
 

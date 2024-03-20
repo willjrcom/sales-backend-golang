@@ -60,6 +60,7 @@ func (h *handlerOrderImpl) handlerGetOrderById(w http.ResponseWriter, r *http.Re
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -88,6 +89,7 @@ func (h *handlerOrderImpl) handlerUpdateObservation(w http.ResponseWriter, r *ht
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -109,6 +111,7 @@ func (h *handlerOrderImpl) handlerUpdatePaymentMethod(w http.ResponseWriter, r *
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -130,6 +133,7 @@ func (h *handlerOrderImpl) handlerPendingOrder(w http.ResponseWriter, r *http.Re
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -148,6 +152,7 @@ func (h *handlerOrderImpl) handlerFinishOrder(w http.ResponseWriter, r *http.Req
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -166,6 +171,7 @@ func (h *handlerOrderImpl) handlerCancelOrder(w http.ResponseWriter, r *http.Req
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -184,6 +190,7 @@ func (h *handlerOrderImpl) handlerArchiveOrder(w http.ResponseWriter, r *http.Re
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -202,6 +209,7 @@ func (h *handlerOrderImpl) handlerUnarchiveOrder(w http.ResponseWriter, r *http.
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -220,6 +228,7 @@ func (h *handlerOrderImpl) handlerScheduleOrder(w http.ResponseWriter, r *http.R
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}

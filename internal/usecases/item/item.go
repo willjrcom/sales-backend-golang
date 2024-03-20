@@ -134,7 +134,12 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest)
 	return nil
 }
 
-func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdRequest, dtoAdditional *entitydto.IdRequest) (id uuid.UUID, err error) {
+func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdRequest, dtoAdditional *itemdto.AddAdditionalItemOrderInput) (id uuid.UUID, err error) {
+	productID, quantity, err := dtoAdditional.ToModel()
+
+	if err != nil {
+		return uuid.Nil, err
+	}
 
 	item, err := s.ri.GetItemById(ctx, dto.ID.String())
 
@@ -146,7 +151,7 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 		return uuid.Nil, ErrItemNotStagingAndPending
 	}
 
-	productAdditional, err := s.rp.GetProductById(ctx, dtoAdditional.ID.String())
+	productAdditional, err := s.rp.GetProductById(ctx, productID.String())
 
 	if err != nil {
 		return uuid.Nil, err
@@ -155,9 +160,9 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 	itemAdditionalCommonAttributes := itementity.ItemCommonAttributes{
 		Name:     productAdditional.Name,
 		Status:   item.Status,
-		Price:    productAdditional.Price * item.Quantity,
+		Price:    productAdditional.Price * float64(quantity),
 		Size:     item.Size,
-		Quantity: item.Quantity,
+		Quantity: float64(quantity),
 	}
 
 	itemAdditional := itementity.NewItem(itemAdditionalCommonAttributes)

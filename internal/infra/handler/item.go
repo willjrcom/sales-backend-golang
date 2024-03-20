@@ -58,6 +58,7 @@ func (h *handlerItemImpl) handlerStartItemByID(w http.ResponseWriter, r *http.Re
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -76,6 +77,7 @@ func (h *handlerItemImpl) handlerReadyItemByID(w http.ResponseWriter, r *http.Re
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -94,6 +96,7 @@ func (h *handlerItemImpl) handlerCancelItemByID(w http.ResponseWriter, r *http.R
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -112,6 +115,7 @@ func (h *handlerItemImpl) handlerDeleteItem(w http.ResponseWriter, r *http.Reque
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -119,7 +123,7 @@ func (h *handlerItemImpl) handlerDeleteItem(w http.ResponseWriter, r *http.Reque
 	if err := h.s.DeleteItemOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
 }
 
@@ -130,19 +134,15 @@ func (h *handlerItemImpl) handlerAddAdditionalItem(w http.ResponseWriter, r *htt
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	idAdditional := chi.URLParam(r, "id-additional")
+	addAdditionalItem := &itemdto.AddAdditionalItemOrderInput{}
+	jsonpkg.ParseBody(r, addAdditionalItem)
 
-	if idAdditional == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id additional is required"})
-	}
-
-	dtoIdAdditional := &entitydto.IdRequest{ID: uuid.MustParse(idAdditional)}
-
-	if id, err := h.s.AddAdditionalItemOrder(ctx, dtoId, dtoIdAdditional); err != nil {
+	if id, err := h.s.AddAdditionalItemOrder(ctx, dtoId, addAdditionalItem); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
@@ -156,6 +156,7 @@ func (h *handlerItemImpl) handlerDeleteAdditionalItem(w http.ResponseWriter, r *
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}

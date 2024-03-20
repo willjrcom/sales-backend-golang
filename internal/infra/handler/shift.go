@@ -55,6 +55,7 @@ func (h *handlerShiftImpl) handlerCloseShift(w http.ResponseWriter, r *http.Requ
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -73,6 +74,7 @@ func (h *handlerShiftImpl) handlerGetShiftByID(w http.ResponseWriter, r *http.Re
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}

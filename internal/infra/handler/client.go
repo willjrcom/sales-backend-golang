@@ -58,6 +58,7 @@ func (h *handlerClientImpl) handlerUpdateClient(w http.ResponseWriter, r *http.R
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -79,6 +80,7 @@ func (h *handlerClientImpl) handlerDeleteClient(w http.ResponseWriter, r *http.R
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -97,6 +99,7 @@ func (h *handlerClientImpl) handlerGetClientById(w http.ResponseWriter, r *http.
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}

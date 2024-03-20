@@ -38,6 +38,7 @@ func (h *handlerContactImpl) handlerGetContactById(w http.ResponseWriter, r *htt
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}

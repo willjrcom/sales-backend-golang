@@ -52,6 +52,7 @@ func (h *handlerQuantityCategoryImpl) handlerUpdateQuantity(w http.ResponseWrite
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -74,6 +75,7 @@ func (h *handlerQuantityCategoryImpl) handlerDeleteQuantity(w http.ResponseWrite
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}

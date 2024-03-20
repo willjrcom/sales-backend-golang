@@ -54,6 +54,7 @@ func (h *handlerTableOrderImpl) handlerDeleteTableOrderById(w http.ResponseWrite
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -72,6 +73,7 @@ func (h *handlerTableOrderImpl) handlerChangeTable(w http.ResponseWriter, r *htt
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -93,6 +95,7 @@ func (h *handlerTableOrderImpl) handlerFinishTableOrder(w http.ResponseWriter, r
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -111,6 +114,7 @@ func (h *handlerTableOrderImpl) handlerGetTableOrderById(w http.ResponseWriter, 
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}

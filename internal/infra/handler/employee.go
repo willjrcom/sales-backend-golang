@@ -53,6 +53,7 @@ func (h *handlerEmployeeImpl) handlerUpdateEmployee(w http.ResponseWriter, r *ht
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -74,6 +75,7 @@ func (h *handlerEmployeeImpl) handlerDeleteEmployee(w http.ResponseWriter, r *ht
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -92,6 +94,7 @@ func (h *handlerEmployeeImpl) handlerGetEmployee(w http.ResponseWriter, r *http.
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}

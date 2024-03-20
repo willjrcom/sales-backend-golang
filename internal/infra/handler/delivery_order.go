@@ -53,6 +53,7 @@ func (h *handlerDeliveryOrderImpl) handlerGetDeliveryById(w http.ResponseWriter,
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -80,6 +81,7 @@ func (h *handlerDeliveryOrderImpl) handlerLaunchDeliveryOrder(w http.ResponseWri
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -101,6 +103,7 @@ func (h *handlerDeliveryOrderImpl) handlerFinishDeliveryOrder(w http.ResponseWri
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -122,6 +125,7 @@ func (h *handlerDeliveryOrderImpl) handlerUpdateDeliveryAddress(w http.ResponseW
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -143,6 +147,7 @@ func (h *handlerDeliveryOrderImpl) handlerUpdateDriver(w http.ResponseWriter, r 
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}

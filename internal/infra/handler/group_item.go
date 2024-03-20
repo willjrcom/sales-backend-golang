@@ -45,6 +45,7 @@ func (h *handlerGroupItemImpl) handlerGetGroupByID(w http.ResponseWriter, r *htt
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -89,6 +90,7 @@ func (h *handlerGroupItemImpl) handlerStartGroupByID(w http.ResponseWriter, r *h
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -107,6 +109,7 @@ func (h *handlerGroupItemImpl) handlerReadyGroupByID(w http.ResponseWriter, r *h
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -125,6 +128,7 @@ func (h *handlerGroupItemImpl) handlerCancelGroupByID(w http.ResponseWriter, r *
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -143,6 +147,7 @@ func (h *handlerGroupItemImpl) handlerDeleteGroupByID(w http.ResponseWriter, r *
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -161,6 +166,7 @@ func (h *handlerGroupItemImpl) handlerAddComplementItem(w http.ResponseWriter, r
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
@@ -187,6 +193,7 @@ func (h *handlerGroupItemImpl) handlerDeleteComplementItem(w http.ResponseWriter
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
 	}
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
