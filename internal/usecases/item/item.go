@@ -100,86 +100,6 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 	}, nil
 }
 
-func (s *Service) StartItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
-	item, err := s.ri.GetItemById(ctx, dto.ID.String())
-
-	if err != nil {
-		return err
-	}
-
-	if err = item.StartItem(); err != nil {
-		return err
-	}
-
-	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), false)
-
-	if err != nil {
-		return err
-	}
-
-	if groupItem.Status == groupitementity.StatusGroupPending {
-		groupItem.StartGroupItem()
-	}
-
-	if err = s.ri.UpdateItem(ctx, item); err != nil {
-		return err
-	}
-
-	return s.rgi.UpdateGroupItem(ctx, groupItem)
-}
-
-func (s *Service) ReadyItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
-	item, err := s.ri.GetItemById(ctx, dto.ID.String())
-
-	if err != nil {
-		return err
-	}
-
-	if err = item.ReadyItem(); err != nil {
-		return err
-	}
-
-	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), false)
-
-	if err != nil {
-		return err
-	}
-
-	if err = s.ri.UpdateItem(ctx, item); err != nil {
-		return err
-	}
-
-	isAllItemsReady := true
-	for i := range groupItem.Items {
-		if groupItem.Items[i].Status != itementity.StatusItemReady {
-			isAllItemsReady = false
-			break
-		}
-	}
-
-	if !isAllItemsReady {
-		return nil
-	}
-
-	if err = groupItem.ReadyGroupItem(); err != nil {
-		return err
-	}
-
-	return s.rgi.UpdateGroupItem(ctx, groupItem)
-}
-
-func (s *Service) CancelItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
-	item, err := s.ri.GetItemById(ctx, dto.ID.String())
-
-	if err != nil {
-		return err
-	}
-
-	item.CancelItem()
-
-	return s.ri.UpdateItem(ctx, item)
-}
-
 func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest) (err error) {
 	item, err := s.ri.GetItemById(ctx, dto.ID.String())
 
@@ -206,7 +126,7 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest)
 	return nil
 }
 
-func (s *Service) AddAditionalItemOrder(ctx context.Context, dto *entitydto.IdRequest, dtoAdditional *entitydto.IdRequest) (id uuid.UUID, err error) {
+func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdRequest, dtoAdditional *entitydto.IdRequest) (id uuid.UUID, err error) {
 
 	item, err := s.ri.GetItemById(ctx, dto.ID.String())
 
@@ -224,10 +144,6 @@ func (s *Service) AddAditionalItemOrder(ctx context.Context, dto *entitydto.IdRe
 		return uuid.Nil, err
 	}
 
-	if item.Size != productAdditional.Size.Name {
-		return uuid.Nil, ErrSizeMustBeTheSame
-	}
-
 	itemAdditionalCommonAttributes := itementity.ItemCommonAttributes{
 		Name:     productAdditional.Name,
 		Status:   item.Status,
@@ -238,13 +154,7 @@ func (s *Service) AddAditionalItemOrder(ctx context.Context, dto *entitydto.IdRe
 
 	itemAdditional := itementity.NewItem(itemAdditionalCommonAttributes)
 
-	if err = s.ri.AddItem(ctx, itemAdditional); err != nil {
-		return uuid.Nil, err
-	}
-
-	item.AddAdditionalItem(itemAdditional.ID)
-
-	if err = s.ri.UpdateItem(ctx, item); err != nil {
+	if err = s.ri.AddAdditionalItem(ctx, item.ID, itemAdditional); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -261,6 +171,32 @@ func (s *Service) AddAditionalItemOrder(ctx context.Context, dto *entitydto.IdRe
 	}
 
 	return itemAdditional.ID, nil
+}
+
+func (s *Service) DeleteAdditionalItemOrder(ctx context.Context, dto *entitydto.IdRequest, dtoAdditional *entitydto.IdRequest) (err error) {
+	item, err := s.ri.GetItemById(ctx, dto.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	if err = s.ri.DeleteAdditionalItem(ctx, item.ID, dtoAdditional.ID); err != nil {
+		return err
+	}
+
+	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
+
+	if err != nil {
+		return err
+	}
+
+	groupItem.CalculateTotalValues()
+
+	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product) (groupItem *groupitementity.GroupItem, err error) {

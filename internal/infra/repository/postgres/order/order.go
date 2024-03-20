@@ -125,7 +125,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		return nil, err
 	}
 
-	query := r.db.NewSelect().Model(order).WherePK().Relation("Groups.Items").Relation("Attendant").Relation("Payments")
+	query := r.db.NewSelect().Model(order).WherePK().Relation("Groups.Items.AdditionalItems").Relation("Attendant").Relation("Payments")
 
 	if relation != "" {
 		query = query.Relation(relation)

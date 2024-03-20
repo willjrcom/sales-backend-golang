@@ -23,7 +23,8 @@
 											"let task_id = response.data",
 											"pm.collectionVariables.set(\"product_id\", task_id)"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -266,7 +267,8 @@
 											"let task_id = response.data",
 											"pm.collectionVariables.set(\"size_category_id\", task_id)"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -652,7 +654,8 @@
 										"exec": [
 											""
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -1149,7 +1152,8 @@
 											"pm.collectionVariables.set(\"item_id\", item_id)",
 											"pm.collectionVariables.set(\"group_item_id\", group_item_id)"
 										],
-										"type": "text/javascript"
+										"type": "text/javascript",
+										"packages": {}
 									}
 								}
 							],
@@ -1164,7 +1168,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\",\n    \"group_item_id\": \"{{group_item_id}}\"\n}",
+									"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1172,6 +1176,84 @@
 									}
 								},
 								"url": "{{server}}/item/add"
+							},
+							"response": []
+						},
+						{
+							"name": "add additional",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let item_id = response.data",
+											"pm.collectionVariables.set(\"additional_item_id\", item_id)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/item/update/{{item_id}}/additional/{{product_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "delete additional",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let item_id = response.data.item_id",
+											"let group_item_id = response.data.group_item_id",
+											"pm.collectionVariables.set(\"item_id\", item_id)",
+											"pm.collectionVariables.set(\"group_item_id\", group_item_id)"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/item/update/{{item_id}}/additional/{{additional_item_id}}"
 							},
 							"response": []
 						},
@@ -2212,6 +2294,11 @@
 		{
 			"key": "process_category_id",
 			"value": ""
+		},
+		{
+			"key": "additional_item_id",
+			"value": "",
+			"type": "string"
 		}
 	]
 }

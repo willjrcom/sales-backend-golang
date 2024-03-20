@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -62,6 +63,10 @@ func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 
 	dbBun := bun.NewDB(db, pgdialect.New())
 
+	if err := LoadAllSchemas(ctx, dbBun); err != nil {
+		return nil, err
+	}
+
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.LOST_SCHEMA)
 	if err := CreateSchema(ctx, dbBun); err != nil {
 		return nil, err
@@ -73,6 +78,10 @@ func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 	}
 
 	if err := defaultTables(ctx, dbBun); err != nil {
+		return nil, err
+	}
+
+	if err := LoadAllSchemas(ctx, dbBun); err != nil {
 		return nil, err
 	}
 
@@ -146,6 +155,37 @@ func defaultTables(ctx context.Context, db *bun.DB) error {
 	return nil
 }
 
+func LoadAllSchemas(ctx context.Context, db *bun.DB) error {
+	results, err := db.QueryContext(ctx, "SELECT schema_name FROM information_schema.schemata;")
+
+	if err != nil {
+		return err
+	}
+
+	for results.Next() {
+		var schemaName string
+		if err := results.Scan(&schemaName); err != nil {
+			return err
+		}
+
+		if !strings.Contains(schemaName, "loja_") {
+			continue
+		}
+
+		ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaName)
+
+		if err := RegisterModels(ctx, db); err != nil {
+			return err
+		}
+
+		if err := LoadCompanyModels(ctx, db); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func RegisterModels(ctx context.Context, db *bun.DB) error {
 	mu := sync.Mutex{}
 
@@ -175,6 +215,7 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*employeeentity.Employee)(nil))
 
 	db.RegisterModel((*processentity.Process)(nil))
+	db.RegisterModel((*itementity.ItemToAdditional)(nil))
 	db.RegisterModel((*itementity.Item)(nil))
 	db.RegisterModel((*groupitementity.GroupItem)(nil))
 
@@ -269,6 +310,11 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*itementity.Item)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*itementity.ItemToAdditional)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}

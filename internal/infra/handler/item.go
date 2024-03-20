@@ -31,7 +31,8 @@ func NewHandlerItem(itemService *itemusecases.Service) *handler.Handler {
 		c.Post("/ready/{id}", h.handlerReadyItemByID)
 		c.Post("/cancel/{id}", h.handlerCancelItemByID)
 		c.Delete("/delete/{id}", h.handlerDeleteItem)
-		c.Post("/update/{id}/aditional/{id-additional}", h.handlerAddAditionalItem)
+		c.Post("/update/{id}/additional/{id-additional}", h.handlerAddAdditionalItem)
+		c.Delete("/update/{id}/additional/{id-additional}", h.handlerDeleteAdditionalItem)
 	})
 
 	unprotectedRoutes := []string{}
@@ -118,11 +119,11 @@ func (h *handlerItemImpl) handlerDeleteItem(w http.ResponseWriter, r *http.Reque
 	if err := h.s.DeleteItemOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
 	}
 }
 
-func (h *handlerItemImpl) handlerAddAditionalItem(w http.ResponseWriter, r *http.Request) {
+func (h *handlerItemImpl) handlerAddAdditionalItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -141,9 +142,35 @@ func (h *handlerItemImpl) handlerAddAditionalItem(w http.ResponseWriter, r *http
 
 	dtoIdAdditional := &entitydto.IdRequest{ID: uuid.MustParse(idAdditional)}
 
-	if id, err := h.s.AddAditionalItemOrder(ctx, dtoId, dtoIdAdditional); err != nil {
+	if id, err := h.s.AddAdditionalItemOrder(ctx, dtoId, dtoIdAdditional); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+	}
+}
+
+func (h *handlerItemImpl) handlerDeleteAdditionalItem(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	idAdditional := chi.URLParam(r, "id-additional")
+
+	if idAdditional == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id additional is required"})
+	}
+
+	dtoIdAdditional := &entitydto.IdRequest{ID: uuid.MustParse(idAdditional)}
+
+	if err := h.s.DeleteAdditionalItemOrder(ctx, dtoId, dtoIdAdditional); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
 }

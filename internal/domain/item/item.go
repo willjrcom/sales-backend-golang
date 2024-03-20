@@ -24,16 +24,15 @@ type Item struct {
 }
 
 type ItemCommonAttributes struct {
-	Name             string     `bun:"name,notnull" json:"name"`
-	Status           StatusItem `bun:"status,notnull" json:"status"`
-	Description      string     `bun:"description" json:"description"`
-	Observation      string     `bun:"observation" json:"observation"`
-	Price            float64    `bun:"price,notnull" json:"price"`
-	Size             string     `bun:"size,notnull" json:"size"`
-	Quantity         float64    `bun:"quantity,notnull" json:"quantity"`
-	GroupItemID      uuid.UUID  `bun:"group_item_id,type:uuid" json:"group_item_id"`
-	AdditionalItemID *uuid.UUID `bun:"additional_item_id,type:uuid" json:"additional_item_id"`
-	AdditionalItem   *Item      `bun:"rel:belongs-to" json:"additional_item,omitempty"`
+	Name            string     `bun:"name,notnull" json:"name"`
+	Status          StatusItem `bun:"status,notnull" json:"status"`
+	Description     string     `bun:"description" json:"description"`
+	Observation     string     `bun:"observation" json:"observation"`
+	Price           float64    `bun:"price,notnull" json:"price"`
+	Size            string     `bun:"size,notnull" json:"size"`
+	Quantity        float64    `bun:"quantity,notnull" json:"quantity"`
+	GroupItemID     uuid.UUID  `bun:"group_item_id,type:uuid" json:"group_item_id"`
+	AdditionalItems []Item     `bun:"m2m:item_to_additional,join:Item=AdditionalItem" json:"item_to_additional,omitempty"`
 }
 
 type ItemTimeLogs struct {
@@ -97,8 +96,4 @@ func (i *Item) CanAddAdditionalItems() bool {
 	}
 
 	return true
-}
-
-func (i *Item) AddAdditionalItem(id uuid.UUID) {
-	i.AdditionalItemID = &id
 }
