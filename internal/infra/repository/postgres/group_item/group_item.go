@@ -36,8 +36,6 @@ func (r *GroupItemRepositoryBun) CreateGroupItem(ctx context.Context, p *groupit
 }
 
 func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *groupitementity.GroupItem) error {
-	p.CalculateTotalValues()
-
 	r.mu.TryLock()
 	defer r.mu.Unlock()
 

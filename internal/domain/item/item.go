@@ -29,6 +29,7 @@ type ItemCommonAttributes struct {
 	Description     string     `bun:"description" json:"description"`
 	Observation     string     `bun:"observation" json:"observation"`
 	Price           float64    `bun:"price,notnull" json:"price"`
+	TotalPrice      float64    `bun:"total_price,notnull" json:"total_price"`
 	Size            string     `bun:"size,notnull" json:"size"`
 	Quantity        float64    `bun:"quantity,notnull" json:"quantity"`
 	GroupItemID     uuid.UUID  `bun:"group_item_id,type:uuid" json:"group_item_id"`
@@ -96,4 +97,14 @@ func (i *Item) CanAddAdditionalItems() bool {
 	}
 
 	return true
+}
+
+func (i *Item) CalculateTotalPrice() float64 {
+	totalPrice := i.TotalPrice
+
+	for _, additionalItem := range i.AdditionalItems {
+		totalPrice += additionalItem.Price
+	}
+
+	return totalPrice
 }

@@ -62,7 +62,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 		dto.GroupItemID = &groupItem.ID
 	}
 
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.GroupItemID.String(), false)
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.GroupItemID.String(), true)
 
 	if err != nil {
 		return nil, err
@@ -121,6 +121,14 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest)
 		if err = s.rgi.DeleteGroupItem(ctx, item.GroupItemID.String()); err != nil {
 			return err
 		}
+
+		return nil
+	}
+
+	groupItem.CalculateTotalValues()
+
+	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
+		return err
 	}
 
 	return nil

@@ -111,16 +111,21 @@ func (i *GroupItem) CancelGroupItem() {
 }
 
 func (i *GroupItem) CalculateTotalValues() {
-	qtd := 0.0
-	total := 0.0
+	qtdItems := 0.0
+	totalPrice := 0.0
 
 	for _, item := range i.Items {
-		qtd += item.Quantity
-		total += item.Price * item.Quantity
+		totalPrice = item.CalculateTotalPrice()
+		qtdItems += item.Quantity
+		totalPrice += item.Price * item.Quantity
 	}
 
-	i.GroupDetails.Quantity = qtd
-	i.GroupDetails.Total = total
+	if i.ComplementItem != nil {
+		totalPrice += i.ComplementItem.Price
+	}
+
+	i.GroupDetails.Quantity = qtdItems
+	i.GroupDetails.Total = totalPrice
 }
 
 func (i *GroupItem) CanAddItems() bool {

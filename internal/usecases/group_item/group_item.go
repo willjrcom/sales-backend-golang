@@ -101,13 +101,16 @@ func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IdReques
 }
 
 func (s *Service) DeleteComplementItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), false)
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
 		return err
 	}
 
 	groupItem.ComplementItemID = nil
+	groupItem.ComplementItem = nil
+
+	groupItem.CalculateTotalValues()
 
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
 		return err
