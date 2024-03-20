@@ -40,12 +40,14 @@ type OrderCommonAttributes struct {
 
 type OrderDetail struct {
 	ScheduledOrder
-	TotalPaid   float64                  `bun:"total_paid" json:"total_paid"`
-	TotalChange float64                  `bun:"total_change" json:"total_change"`
-	Observation string                   `bun:"observation" json:"observation"`
-	AttendantID *uuid.UUID               `bun:"column:attendant_id,type:uuid,notnull" json:"attendant_id"`
-	Attendant   *employeeentity.Employee `bun:"rel:belongs-to" json:"attendant,omitempty"`
-	ShiftID     *uuid.UUID               `bun:"column:shift_id,type:uuid" json:"shift_id"`
+	TotalPayable  float64                  `bun:"total_payable" json:"total_payable"`
+	TotalPaid     float64                  `bun:"total_paid" json:"total_paid"`
+	TotalChange   float64                  `bun:"total_change" json:"total_change"`
+	QuantityItems float64                  `bun:"quantity_items" json:"quantity_items"`
+	Observation   string                   `bun:"observation" json:"observation"`
+	AttendantID   *uuid.UUID               `bun:"column:attendant_id,type:uuid,notnull" json:"attendant_id"`
+	Attendant     *employeeentity.Employee `bun:"rel:belongs-to" json:"attendant,omitempty"`
+	ShiftID       *uuid.UUID               `bun:"column:shift_id,type:uuid" json:"shift_id"`
 }
 
 type OrderType struct {
@@ -217,4 +219,22 @@ func (o *Order) CalculateTotalChange() {
 	if totalToPay < totalPaid {
 		o.TotalChange = totalPaid - totalToPay
 	}
+}
+
+func (o *Order) CalculateTotalPrice() {
+	totalPrice := 0.00
+	qtd := 0.00
+
+	for i := range o.Groups {
+		o.Groups[i].CalculateTotalPrice()
+		totalPrice += o.Groups[i].Total
+		qtd += o.Groups[i].Quantity
+	}
+
+	if o.Delivery != nil && o.Delivery.DeliveryTax != nil {
+		totalPrice += *o.Delivery.DeliveryTax
+	}
+
+	o.TotalPayable = totalPrice
+	o.QuantityItems = qtd
 }

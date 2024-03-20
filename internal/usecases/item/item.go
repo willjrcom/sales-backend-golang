@@ -88,7 +88,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 		return nil, err
 	}
 
-	groupItem.CalculateTotalValues()
+	groupItem.CalculateTotalPrice()
 
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
 		return nil, err
@@ -125,7 +125,7 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest)
 		return nil
 	}
 
-	groupItem.CalculateTotalValues()
+	groupItem.CalculateTotalPrice()
 
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
 		return err
@@ -177,7 +177,7 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 		return uuid.Nil, err
 	}
 
-	groupItem.CalculateTotalValues()
+	groupItem.CalculateTotalPrice()
 
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
 		return uuid.Nil, err
@@ -203,7 +203,7 @@ func (s *Service) DeleteAdditionalItemOrder(ctx context.Context, dto *entitydto.
 		return err
 	}
 
-	groupItem.CalculateTotalValues()
+	groupItem.CalculateTotalPrice()
 
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
 		return err

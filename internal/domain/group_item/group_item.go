@@ -114,16 +114,18 @@ func (i *GroupItem) CancelGroupItem() {
 	i.Status = StatusGroupCanceled
 	i.CanceledAt = &time.Time{}
 	*i.CanceledAt = time.Now()
+
+	i.ComplementItem.CancelItem()
 }
 
-func (i *GroupItem) CalculateTotalValues() {
+func (i *GroupItem) CalculateTotalPrice() {
 	qtdItems := 0.0
 	totalPrice := 0.0
 
 	for _, item := range i.Items {
 		totalPrice = item.CalculateTotalPrice()
 		qtdItems += item.Quantity
-		totalPrice += item.Price * item.Quantity
+		totalPrice += item.Price
 	}
 
 	if i.ComplementItem != nil {

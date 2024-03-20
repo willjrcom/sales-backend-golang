@@ -91,7 +91,7 @@ func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IdReques
 		return err
 	}
 
-	groupItem.CalculateTotalValues()
+	groupItem.CalculateTotalPrice()
 
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
 		return err
@@ -110,7 +110,7 @@ func (s *Service) DeleteComplementItem(ctx context.Context, dto *entitydto.IdReq
 	groupItem.ComplementItemID = nil
 	groupItem.ComplementItem = nil
 
-	groupItem.CalculateTotalValues()
+	groupItem.CalculateTotalPrice()
 
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
 		return err
