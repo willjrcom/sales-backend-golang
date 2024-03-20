@@ -76,6 +76,12 @@ func (i *GroupItem) PendingGroupItem() (err error) {
 		}
 	}
 
+	if i.ComplementItem != nil {
+		if err = i.ComplementItem.PendingItem(); err != nil {
+			return err
+		}
+	}
+
 	i.Status = StatusGroupPending
 	i.PendingAt = &time.Time{}
 	*i.PendingAt = time.Now()

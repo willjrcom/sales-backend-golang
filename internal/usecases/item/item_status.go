@@ -19,6 +19,12 @@ func (s *Service) StartItem(ctx context.Context, dto *entitydto.IdRequest) (err 
 		return err
 	}
 
+	for i := range item.AdditionalItems {
+		if err = item.AdditionalItems[i].StartItem(); err != nil {
+			return err
+		}
+	}
+
 	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), false)
 
 	if err != nil {
@@ -31,6 +37,12 @@ func (s *Service) StartItem(ctx context.Context, dto *entitydto.IdRequest) (err 
 
 	if err = s.ri.UpdateItem(ctx, item); err != nil {
 		return err
+	}
+
+	for i := range item.AdditionalItems {
+		if err = s.ri.UpdateItem(ctx, &item.AdditionalItems[i]); err != nil {
+			return err
+		}
 	}
 
 	return s.rgi.UpdateGroupItem(ctx, groupItem)
@@ -47,6 +59,12 @@ func (s *Service) ReadyItem(ctx context.Context, dto *entitydto.IdRequest) (err 
 		return err
 	}
 
+	for i := range item.AdditionalItems {
+		if err = item.AdditionalItems[i].ReadyItem(); err != nil {
+			return err
+		}
+	}
+
 	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), false)
 
 	if err != nil {
@@ -55,6 +73,12 @@ func (s *Service) ReadyItem(ctx context.Context, dto *entitydto.IdRequest) (err 
 
 	if err = s.ri.UpdateItem(ctx, item); err != nil {
 		return err
+	}
+
+	for i := range item.AdditionalItems {
+		if err = s.ri.UpdateItem(ctx, &item.AdditionalItems[i]); err != nil {
+			return err
+		}
 	}
 
 	isAllItemsReady := true
@@ -85,5 +109,16 @@ func (s *Service) CancelItem(ctx context.Context, dto *entitydto.IdRequest) (err
 
 	item.CancelItem()
 
-	return s.ri.UpdateItem(ctx, item)
+	if err = s.ri.UpdateItem(ctx, item); err != nil {
+		return err
+	}
+
+	for i := range item.AdditionalItems {
+		item.AdditionalItems[i].CancelItem()
+		if err = s.ri.UpdateItem(ctx, &item.AdditionalItems[i]); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

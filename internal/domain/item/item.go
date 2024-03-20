@@ -57,6 +57,12 @@ func (i *Item) PendingItem() (err error) {
 		return nil
 	}
 
+	for index := range i.AdditionalItems {
+		if err = i.AdditionalItems[index].PendingItem(); err != nil {
+			return err
+		}
+	}
+
 	i.Status = StatusItemPending
 	i.PendingAt = &time.Time{}
 	*i.PendingAt = time.Now()

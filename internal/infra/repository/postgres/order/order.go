@@ -62,6 +62,36 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *orderentity.Or
 
 			return err
 		}
+
+		for _, item := range group.Items {
+			if _, err = tx.NewUpdate().Model(&item).WherePK().Exec(ctx); err != nil {
+				if errRoolback := tx.Rollback(); errRoolback != nil {
+					return errRoolback
+				}
+
+				return err
+			}
+
+			for _, additionalItem := range item.AdditionalItems {
+				if _, err = tx.NewUpdate().Model(&additionalItem).WherePK().Exec(ctx); err != nil {
+					if errRoolback := tx.Rollback(); errRoolback != nil {
+						return errRoolback
+					}
+
+					return err
+				}
+			}
+
+			if group.ComplementItemID != nil && group.ComplementItem != nil {
+				if _, err = tx.NewUpdate().Model(group.ComplementItem).WherePK().Exec(ctx); err != nil {
+					if errRoolback := tx.Rollback(); errRoolback != nil {
+						return errRoolback
+					}
+
+					return err
+				}
+			}
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -125,7 +155,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		return nil, err
 	}
 
-	query := r.db.NewSelect().Model(order).WherePK().Relation("Groups.Items.AdditionalItems").Relation("Attendant").Relation("Payments")
+	query := r.db.NewSelect().Model(order).WherePK().Relation("Groups.Items.AdditionalItems").Relation("Attendant").Relation("Payments").Relation("Groups.ComplementItem")
 
 	if relation != "" {
 		query = query.Relation(relation)

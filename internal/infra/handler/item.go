@@ -31,7 +31,7 @@ func NewHandlerItem(itemService *itemusecases.Service) *handler.Handler {
 		c.Post("/ready/{id}", h.handlerReadyItemByID)
 		c.Post("/cancel/{id}", h.handlerCancelItemByID)
 		c.Delete("/delete/{id}", h.handlerDeleteItem)
-		c.Post("/update/{id}/additional/{id-additional}", h.handlerAddAdditionalItem)
+		c.Post("/update/{id}/additional", h.handlerAddAdditionalItem)
 		c.Delete("/update/{id}/additional/{id-additional}", h.handlerDeleteAdditionalItem)
 	})
 
