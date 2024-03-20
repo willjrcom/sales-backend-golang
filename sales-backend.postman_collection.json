@@ -1288,7 +1288,7 @@
 										"type": "text"
 									}
 								],
-								"url": "{{server}}/group/get/{{group_item_id}}"
+								"url": "{{server}}/group-item/get/{{group_item_id}}"
 							},
 							"response": []
 						},
@@ -1305,14 +1305,14 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"status\": \"Pending\"\n}",
+									"raw": "{\n    \"status\": \"Staging\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
 										}
 									}
 								},
-								"url": "{{server}}/group/all"
+								"url": "{{server}}/group-item/all"
 							},
 							"response": []
 						},
@@ -1336,7 +1336,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/group/by-order-id-and-status"
+								"url": "{{server}}/group-item/by-order-id-and-status"
 							},
 							"response": []
 						},
@@ -1351,7 +1351,7 @@
 										"type": "text"
 									}
 								],
-								"url": "{{server}}/group/start/{{group_item_id}}"
+								"url": "{{server}}/group-item/start/{{group_item_id}}"
 							},
 							"response": []
 						},
@@ -1366,7 +1366,7 @@
 										"type": "text"
 									}
 								],
-								"url": "{{server}}/group/ready/{{group_item_id}}"
+								"url": "{{server}}/group-item/ready/{{group_item_id}}"
 							},
 							"response": []
 						},
@@ -1381,7 +1381,7 @@
 										"type": "text"
 									}
 								],
-								"url": "{{server}}/group/cancel/{{group_item_id}}"
+								"url": "{{server}}/group-item/cancel/{{group_item_id}}"
 							},
 							"response": []
 						},
@@ -1396,7 +1396,37 @@
 										"type": "text"
 									}
 								],
-								"url": "{{server}}/group/delete/{{group_item_id}}"
+								"url": "{{server}}/group-item/delete/{{group_item_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "add complement",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/group-item/update/{{group_item_id}}/complement-item/{{product_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "delete complement",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"url": "{{server}}/group-item/update/{{group_item_id}}/complement-item"
 							},
 							"response": []
 						}

@@ -179,7 +179,7 @@ func (r *ItemRepositoryBun) GetAllItems(ctx context.Context) ([]itementity.Item,
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&items).Relation("AdditionalItem").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&items).Relation("AdditionalItems").Scan(ctx); err != nil {
 		return nil, err
 	}
 

@@ -102,10 +102,10 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 		return nil, err
 	}
 
-	query := r.db.NewSelect().Model(item).Where("group_item.id = ?", id).Relation("Category")
+	query := r.db.NewSelect().Model(item).Where("group_item.id = ?", id).Relation("Category").Relation("ComplementItem")
 
 	if withRelation {
-		query.Relation("Items")
+		query.Relation("Items.AdditionalItems")
 	}
 
 	if err := query.Scan(ctx); err != nil {
@@ -125,7 +125,7 @@ func (r *GroupItemRepositoryBun) GetGroupsByStatus(ctx context.Context, status g
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&items).Where("status = ?", status).Relation("Items").Relation("Category").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&items).Where("group_item.status = ?", status).Relation("Items.AdditionalItems").Relation("Category").Relation("ComplementItem").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -142,7 +142,7 @@ func (r *GroupItemRepositoryBun) GetGroupsByOrderIDAndStatus(ctx context.Context
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&items).Where("order_id = ? AND status = ?", id, status).Relation("Items").Relation("Category").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&items).Where("group_item.order_id = ? AND group_item.status = ?", id, status).Relation("Items.AdditionalItems").Relation("ComplementItem").Relation("Category").Scan(ctx); err != nil {
 		return nil, err
 	}
 

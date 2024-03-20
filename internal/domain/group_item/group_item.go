@@ -34,13 +34,15 @@ type GroupCommonAttributes struct {
 }
 
 type GroupDetails struct {
-	Size       string                  `bun:"size,notnull" json:"size"`
-	Status     StatusGroupItem         `bun:"status,notnull" json:"status"`
-	Total      float64                 `bun:"total" json:"total"`
-	Quantity   float64                 `bun:"quantity" json:"quantity"`
-	NeedPrint  bool                    `bun:"need_print" json:"need_print"`
-	CategoryID uuid.UUID               `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
-	Category   *productentity.Category `bun:"rel:belongs-to" json:"category,omitempty"`
+	Size             string                  `bun:"size,notnull" json:"size"`
+	Status           StatusGroupItem         `bun:"status,notnull" json:"status"`
+	Total            float64                 `bun:"total" json:"total"`
+	Quantity         float64                 `bun:"quantity" json:"quantity"`
+	NeedPrint        bool                    `bun:"need_print" json:"need_print"`
+	CategoryID       uuid.UUID               `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
+	Category         *productentity.Category `bun:"rel:belongs-to" json:"category,omitempty"`
+	ComplementItemID *uuid.UUID              `bun:"column:complement_item_id,type:uuid,notnull" json:"complement_item_id"`
+	ComplementItem   *itementity.Item        `bun:"rel:belongs-to" json:"complement_item,omitempty"`
 }
 
 type GroupItemTimeLogs struct {

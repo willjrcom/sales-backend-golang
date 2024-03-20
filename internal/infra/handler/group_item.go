@@ -31,9 +31,11 @@ func NewHandlerGroupItem(itemService *groupitemusecases.Service) *handler.Handle
 		c.Post("/ready/{id}", h.handlerReadyGroupByID)
 		c.Post("/cancel/{id}", h.handlerCancelGroupByID)
 		c.Delete("/delete/{id}", h.handlerDeleteGroupByID)
+		c.Post("/update/{id}/complement-item/{id-complement}", h.handlerAddComplementItem)
+		c.Delete("/update/{id}/complement-item", h.handlerDeleteComplementItem)
 	})
 
-	return handler.NewHandler("/group", c)
+	return handler.NewHandler("/group-item", c)
 }
 
 func (h *handlerGroupItemImpl) handlerGetGroupByID(w http.ResponseWriter, r *http.Request) {
@@ -146,6 +148,50 @@ func (h *handlerGroupItemImpl) handlerDeleteGroupByID(w http.ResponseWriter, r *
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteGroupItem(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	}
+}
+
+func (h *handlerGroupItemImpl) handlerAddComplementItem(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	idComplement := chi.URLParam(r, "id-complement")
+
+	if idComplement == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id complement is required"})
+	}
+
+	dtoIdComplement := &entitydto.IdRequest{ID: uuid.MustParse(idComplement)}
+
+	if err := h.s.AddComplementItem(ctx, dtoId, dtoIdComplement); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+	} else {
+		jsonpkg.ResponseJson(w, r, http.StatusCreated, nil)
+	}
+}
+
+func (h *handlerGroupItemImpl) handlerDeleteComplementItem(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.s.DeleteComplementItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
