@@ -26,7 +26,7 @@ func NewHandlerProcess(processService *processusecases.Service) *handler.Handler
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterProcess)
 		c.Patch("/update/{id}", h.handlerUpdateProcess)
-		c.Delete("/delete/{id}", h.handlerDeleteProcess)
+		c.Delete("/{id}", h.handlerDeleteProcess)
 		c.Get("/all", h.handlerGetAllProcesses)
 	})
 

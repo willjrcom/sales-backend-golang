@@ -26,7 +26,7 @@ func NewHandlerQuantityCategory(quantityService *quantityusecases.Service) *hand
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterQuantity)
 		c.Patch("/update/{id}", h.handlerUpdateQuantity)
-		c.Delete("/delete/{id}", h.handlerDeleteQuantity)
+		c.Delete("/{id}", h.handlerDeleteQuantity)
 	})
 
 	return handler.NewHandler("/category-product/quantity", c)

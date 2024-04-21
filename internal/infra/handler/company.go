@@ -28,7 +28,7 @@ func NewHandlerCompany(companyService *companyusecases.Service) *handler.Handler
 		c.Post("/new", h.handlerNewCompany)
 		c.Get("/", h.handlerGetCompany)
 		c.Post("/add/user", h.handlerAddUserToCompany)
-		c.Delete("/remove/user", h.handlerRemoveUserFromCompany)
+		c.Post("/remove/user", h.handlerRemoveUserFromCompany)
 	})
 
 	unprotectedRoutes := []string{

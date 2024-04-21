@@ -26,7 +26,7 @@ func NewHandlerProcessRuleCategory(processRuleService *processusecases.Service) 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterProcessRule)
 		c.Patch("/update/{id}", h.handlerUpdateProcessRule)
-		c.Delete("/delete/{id}", h.handlerDeleteProcessRule)
+		c.Delete("/{id}", h.handlerDeleteProcessRule)
 	})
 
 	return handler.NewHandler("/category-product/process", c)

@@ -30,7 +30,7 @@ func NewHandlerGroupItem(itemService *groupitemusecases.Service) *handler.Handle
 		c.Post("/start/{id}", h.handlerStartGroupByID)
 		c.Post("/ready/{id}", h.handlerReadyGroupByID)
 		c.Post("/cancel/{id}", h.handlerCancelGroupByID)
-		c.Delete("/delete/{id}", h.handlerDeleteGroupByID)
+		c.Delete("/{id}", h.handlerDeleteGroupByID)
 		c.Post("/update/{id}/complement-item/{id-complement}", h.handlerAddComplementItem)
 		c.Delete("/update/{id}/complement-item", h.handlerDeleteComplementItem)
 	})

@@ -26,7 +26,7 @@ func NewHandlerEmployee(employeeService *employeeusecases.Service) *handler.Hand
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterEmployee)
 		c.Patch("/update/{id}", h.handlerUpdateEmployee)
-		c.Delete("/delete/{id}", h.handlerDeleteEmployee)
+		c.Delete("/{id}", h.handlerDeleteEmployee)
 		c.Get("/{id}", h.handlerGetEmployee)
 		c.Get("/all", h.handlerGetAllEmployees)
 	})

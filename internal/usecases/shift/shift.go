@@ -38,14 +38,14 @@ func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.OpenShift) (id uu
 	return shift.ID, nil
 }
 
-func (s *Service) CloseShift(ctx context.Context, dtoID *entitydto.IdRequest, dto *shiftdto.CloseShift) (err error) {
+func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.CloseShift) (err error) {
 	endChange, err := dto.ToModel()
 
 	if err != nil {
 		return err
 	}
 
-	shift, err := s.r.GetShiftByID(ctx, dtoID.ID.String())
+	shift, err := s.r.GetOpenedShift(ctx)
 
 	if err != nil {
 		return err

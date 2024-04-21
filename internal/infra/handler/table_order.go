@@ -25,9 +25,9 @@ func NewHandlerTableOrder(orderService *tableorderusecases.Service) *handler.Han
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterTableOrder)
-		c.Delete("/delete/{id}", h.handlerDeleteTableOrderById)
 		c.Post("/update/change-table/{id}", h.handlerChangeTable)
 		c.Post("/update/finish/{id}", h.handlerFinishTableOrder)
+		c.Delete("/{id}", h.handlerDeleteTableOrderById)
 		c.Get("/{id}", h.handlerGetTableOrderById)
 		c.Get("/all", h.handlerGetAllTables)
 	})

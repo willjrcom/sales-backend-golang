@@ -25,7 +25,7 @@ func NewHandlerShift(shiftService *shiftusecases.Service) *handler.Handler {
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/open", h.handlerOpenShift)
-		c.Put("/close/{id}", h.handlerCloseShift)
+		c.Put("/close", h.handlerCloseShift)
 		c.Get("/{id}", h.handlerGetShiftByID)
 	})
 
@@ -51,16 +51,7 @@ func (h *handlerShiftImpl) handlerCloseShift(w http.ResponseWriter, r *http.Requ
 	dto := &shiftdto.CloseShift{}
 	jsonpkg.ParseBody(r, dto)
 
-	id := chi.URLParam(r, "id")
-
-	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
-		return
-	}
-
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
-
-	if err := h.s.CloseShift(ctx, dtoId, dto); err != nil {
+	if err := h.s.CloseShift(ctx, dto); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
