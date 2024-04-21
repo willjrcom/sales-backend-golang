@@ -25,7 +25,7 @@ func NewHandlerTable(orderService *tableusecases.Service) *handler.Handler {
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterTable)
-		c.Delete("/delete/{id}", h.handlerDeleteTableById)
+		c.Delete("/{id}", h.handlerDeleteTableById)
 		c.Get("/{id}", h.handlerGetTableById)
 		c.Get("/all", h.handlerGetAllTables)
 	})

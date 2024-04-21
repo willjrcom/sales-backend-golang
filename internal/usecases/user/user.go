@@ -128,5 +128,15 @@ func (s *Service) DeleteUser(ctx context.Context, dto *userdto.DeleteUserInput) 
 		return err
 	}
 
+	userLogged, err := s.r.LoginUser(ctx, user)
+
+	if err != nil {
+		return err
+	}
+
+	if userLogged == nil {
+		return errors.New("invalid email or password")
+	}
+
 	return s.r.DeleteUser(ctx, user)
 }

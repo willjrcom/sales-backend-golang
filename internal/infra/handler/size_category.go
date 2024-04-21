@@ -26,7 +26,7 @@ func NewHandlerSizeCategory(sizeService *sizeusecases.Service) *handler.Handler 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterSize)
 		c.Patch("/update/{id}", h.handlerUpdateSize)
-		c.Delete("/delete/{id}", h.handlerDeleteSize)
+		c.Delete("/{id}", h.handlerDeleteSize)
 	})
 
 	return handler.NewHandler("/category-product/size", c)
