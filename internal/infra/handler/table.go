@@ -38,11 +38,13 @@ func (h *handlerTableImpl) handlerRegisterTable(w http.ResponseWriter, r *http.R
 	table := &tabledto.CreateTableInput{}
 	jsonpkg.ParseBody(r, table)
 
-	if id, err := h.s.CreateTable(ctx, table); err != nil {
+	id, err := h.s.CreateTable(ctx, table)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerTableImpl) handlerDeleteTableById(w http.ResponseWriter, r *http.Request) {
@@ -59,9 +61,10 @@ func (h *handlerTableImpl) handlerDeleteTableById(w http.ResponseWriter, r *http
 
 	if err := h.s.DeleteTable(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerTableImpl) handlerGetTableById(w http.ResponseWriter, r *http.Request) {
@@ -76,19 +79,23 @@ func (h *handlerTableImpl) handlerGetTableById(w http.ResponseWriter, r *http.Re
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if id, err := h.s.GetTableById(ctx, dtoId); err != nil {
+	table, err := h.s.GetTableById(ctx, dtoId)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: table})
 }
 
 func (h *handlerTableImpl) handlerGetAllTables(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if tables, err := h.s.GetAllTables(ctx); err != nil {
+	tables, err := h.s.GetAllTables(ctx)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: tables})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: tables})
 }

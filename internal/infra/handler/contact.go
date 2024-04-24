@@ -43,11 +43,13 @@ func (h *handlerContactImpl) handlerGetContactById(w http.ResponseWriter, r *htt
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if id, err := h.s.GetContactById(ctx, dtoId); err != nil {
+	contact, err := h.s.GetContactById(ctx, dtoId)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: contact})
 }
 
 func (h *handlerContactImpl) handlerFtSearchContacts(w http.ResponseWriter, r *http.Request) {
@@ -55,9 +57,11 @@ func (h *handlerContactImpl) handlerFtSearchContacts(w http.ResponseWriter, r *h
 	keys := &keysdto.KeysInput{}
 	jsonpkg.ParseBody(r, keys)
 
-	if contacts, err := h.s.FtSearchContacts(ctx, keys); err != nil {
+	contacts, err := h.s.FtSearchContacts(ctx, keys)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: contacts})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: contacts})
 }

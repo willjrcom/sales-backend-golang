@@ -45,12 +45,15 @@ func (h *handlerItemImpl) handlerAddItem(w http.ResponseWriter, r *http.Request)
 	addItem := &itemdto.AddItemOrderInput{}
 	jsonpkg.ParseBody(r, addItem)
 
-	if ids, err := h.s.AddItemOrder(ctx, addItem); err != nil {
+	ids, err := h.s.AddItemOrder(ctx, addItem)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: ids})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: ids})
 }
+
 func (h *handlerItemImpl) handlerStartItemByID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -65,9 +68,10 @@ func (h *handlerItemImpl) handlerStartItemByID(w http.ResponseWriter, r *http.Re
 
 	if err := h.s.StartItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerItemImpl) handlerReadyItemByID(w http.ResponseWriter, r *http.Request) {
@@ -84,9 +88,10 @@ func (h *handlerItemImpl) handlerReadyItemByID(w http.ResponseWriter, r *http.Re
 
 	if err := h.s.ReadyItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerItemImpl) handlerCancelItemByID(w http.ResponseWriter, r *http.Request) {
@@ -103,9 +108,10 @@ func (h *handlerItemImpl) handlerCancelItemByID(w http.ResponseWriter, r *http.R
 
 	if err := h.s.CancelItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerItemImpl) handlerDeleteItem(w http.ResponseWriter, r *http.Request) {
@@ -122,9 +128,10 @@ func (h *handlerItemImpl) handlerDeleteItem(w http.ResponseWriter, r *http.Reque
 
 	if err := h.s.DeleteItemOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerItemImpl) handlerAddAdditionalItem(w http.ResponseWriter, r *http.Request) {
@@ -142,11 +149,13 @@ func (h *handlerItemImpl) handlerAddAdditionalItem(w http.ResponseWriter, r *htt
 	addAdditionalItem := &itemdto.AddAdditionalItemOrderInput{}
 	jsonpkg.ParseBody(r, addAdditionalItem)
 
-	if id, err := h.s.AddAdditionalItemOrder(ctx, dtoId, addAdditionalItem); err != nil {
+	additionalId, err := h.s.AddAdditionalItemOrder(ctx, dtoId, addAdditionalItem)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: additionalId})
 }
 
 func (h *handlerItemImpl) handlerDeleteAdditionalItem(w http.ResponseWriter, r *http.Request) {
@@ -165,13 +174,15 @@ func (h *handlerItemImpl) handlerDeleteAdditionalItem(w http.ResponseWriter, r *
 
 	if idAdditional == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id additional is required"})
+		return
 	}
 
 	dtoIdAdditional := &entitydto.IdRequest{ID: uuid.MustParse(idAdditional)}
 
 	if err := h.s.DeleteAdditionalItemOrder(ctx, dtoId, dtoIdAdditional); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }

@@ -39,11 +39,13 @@ func (h *handlerEmployeeImpl) handlerRegisterEmployee(w http.ResponseWriter, r *
 	employee := &employeedto.RegisterEmployeeInput{}
 	jsonpkg.ParseBody(r, employee)
 
-	if id, err := h.s.RegisterEmployee(ctx, employee); err != nil {
+	id, err := h.s.RegisterEmployee(ctx, employee)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerEmployeeImpl) handlerUpdateEmployee(w http.ResponseWriter, r *http.Request) {
@@ -63,11 +65,11 @@ func (h *handlerEmployeeImpl) handlerUpdateEmployee(w http.ResponseWriter, r *ht
 
 	if err := h.s.UpdateEmployee(ctx, dtoId, employee); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
-}
 
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
 func (h *handlerEmployeeImpl) handlerDeleteEmployee(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -82,9 +84,10 @@ func (h *handlerEmployeeImpl) handlerDeleteEmployee(w http.ResponseWriter, r *ht
 
 	if err := h.s.DeleteEmployee(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerEmployeeImpl) handlerGetEmployee(w http.ResponseWriter, r *http.Request) {
@@ -99,19 +102,23 @@ func (h *handlerEmployeeImpl) handlerGetEmployee(w http.ResponseWriter, r *http.
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if employee, err := h.s.GetEmployeeById(ctx, dtoId); err != nil {
+	employee, err := h.s.GetEmployeeById(ctx, dtoId)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: employee})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: employee})
 }
 
 func (h *handlerEmployeeImpl) handlerGetAllEmployees(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if categories, err := h.s.GetAllEmployees(ctx); err != nil {
+	categories, err := h.s.GetAllEmployees(ctx)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
 }

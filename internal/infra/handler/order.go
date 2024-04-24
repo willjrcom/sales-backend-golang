@@ -46,11 +46,13 @@ func (h *handlerOrderImpl) handlerCreateOrder(w http.ResponseWriter, r *http.Req
 	order := &orderdto.CreateOrderInput{}
 	jsonpkg.ParseBody(r, order)
 
-	if id, err := h.s.CreateDefaultOrder(ctx); err != nil {
+	id, err := h.s.CreateDefaultOrder(ctx)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerOrderImpl) handlerGetOrderById(w http.ResponseWriter, r *http.Request) {
@@ -65,21 +67,25 @@ func (h *handlerOrderImpl) handlerGetOrderById(w http.ResponseWriter, r *http.Re
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if order, err := h.s.GetOrderById(ctx, dtoId); err != nil {
+	order, err := h.s.GetOrderById(ctx, dtoId)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: order})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: order})
 }
 
 func (h *handlerOrderImpl) handlerGetAllOrders(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if orders, err := h.s.GetAllOrders(ctx); err != nil {
+	orders, err := h.s.GetAllOrders(ctx)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
 }
 
 func (h *handlerOrderImpl) handlerUpdateObservation(w http.ResponseWriter, r *http.Request) {
@@ -99,9 +105,10 @@ func (h *handlerOrderImpl) handlerUpdateObservation(w http.ResponseWriter, r *ht
 
 	if err := h.s.UpdateOrderObservation(ctx, dtoId, observation); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerOrderImpl) handlerUpdatePaymentMethod(w http.ResponseWriter, r *http.Request) {
@@ -121,9 +128,10 @@ func (h *handlerOrderImpl) handlerUpdatePaymentMethod(w http.ResponseWriter, r *
 
 	if err := h.s.AddPayment(ctx, dtoId, payment); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerOrderImpl) handlerPendingOrder(w http.ResponseWriter, r *http.Request) {
@@ -140,9 +148,10 @@ func (h *handlerOrderImpl) handlerPendingOrder(w http.ResponseWriter, r *http.Re
 
 	if err := h.s.PendingOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerOrderImpl) handlerFinishOrder(w http.ResponseWriter, r *http.Request) {
@@ -159,9 +168,10 @@ func (h *handlerOrderImpl) handlerFinishOrder(w http.ResponseWriter, r *http.Req
 
 	if err := h.s.FinishOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerOrderImpl) handlerCancelOrder(w http.ResponseWriter, r *http.Request) {
@@ -178,9 +188,10 @@ func (h *handlerOrderImpl) handlerCancelOrder(w http.ResponseWriter, r *http.Req
 
 	if err := h.s.CancelOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerOrderImpl) handlerArchiveOrder(w http.ResponseWriter, r *http.Request) {
@@ -197,9 +208,10 @@ func (h *handlerOrderImpl) handlerArchiveOrder(w http.ResponseWriter, r *http.Re
 
 	if err := h.s.ArchiveOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerOrderImpl) handlerUnarchiveOrder(w http.ResponseWriter, r *http.Request) {
@@ -216,9 +228,10 @@ func (h *handlerOrderImpl) handlerUnarchiveOrder(w http.ResponseWriter, r *http.
 
 	if err := h.s.UnarchiveOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerOrderImpl) handlerScheduleOrder(w http.ResponseWriter, r *http.Request) {
@@ -238,7 +251,8 @@ func (h *handlerOrderImpl) handlerScheduleOrder(w http.ResponseWriter, r *http.R
 
 	if err := h.s.UpdateScheduleOrder(ctx, dtoId, observation); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }

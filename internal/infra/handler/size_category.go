@@ -37,12 +37,13 @@ func (h *handlerSizeCategoryImpl) handlerRegisterSize(w http.ResponseWriter, r *
 	size := &sizedto.RegisterSizeInput{}
 	jsonpkg.ParseBody(r, size)
 
-	if id, err := h.s.RegisterSize(ctx, size); err != nil {
+	id, err := h.s.RegisterSize(ctx, size)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerSizeCategoryImpl) handlerUpdateSize(w http.ResponseWriter, r *http.Request) {

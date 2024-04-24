@@ -43,26 +43,31 @@ func (h *handlerCompanyImpl) handlerNewCompany(w http.ResponseWriter, r *http.Re
 	company := &companydto.CompanyInput{}
 	jsonpkg.ParseBody(r, company)
 
-	if id, schemaName, err := h.s.NewCompany(ctx, company); err != nil {
+	id, schemaName, err := h.s.NewCompany(ctx, company)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: struct {
-			ID     uuid.UUID `json:"company_id"`
-			Schema *string   `json:"schema"`
-		}{
-			ID:     id,
-			Schema: schemaName,
-		}})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: struct {
+		ID     uuid.UUID `json:"company_id"`
+		Schema *string   `json:"schema"`
+	}{
+		ID:     id,
+		Schema: schemaName,
+	}})
 }
 
 func (h *handlerCompanyImpl) handlerGetCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	if id, err := h.s.GetCompany(ctx); err != nil {
+
+	id, err := h.s.GetCompany(ctx)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *http.Request) {
@@ -73,9 +78,10 @@ func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *h
 
 	if err := h.s.AddUserToCompany(ctx, user); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerCompanyImpl) handlerRemoveUserFromCompany(w http.ResponseWriter, r *http.Request) {
@@ -86,7 +92,8 @@ func (h *handlerCompanyImpl) handlerRemoveUserFromCompany(w http.ResponseWriter,
 
 	if err := h.s.RemoveUserFromCompany(ctx, user); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }

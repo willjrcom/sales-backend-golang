@@ -40,11 +40,13 @@ func (h *handlerTableOrderImpl) handlerRegisterTableOrder(w http.ResponseWriter,
 	table := &tableorderdto.CreateTableOrderInput{}
 	jsonpkg.ParseBody(r, table)
 
-	if id, err := h.s.CreateTableOrder(ctx, table); err != nil {
+	id, err := h.s.CreateTableOrder(ctx, table)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerTableOrderImpl) handlerDeleteTableOrderById(w http.ResponseWriter, r *http.Request) {
@@ -61,9 +63,10 @@ func (h *handlerTableOrderImpl) handlerDeleteTableOrderById(w http.ResponseWrite
 
 	if err := h.s.DeleteTableOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerTableOrderImpl) handlerChangeTable(w http.ResponseWriter, r *http.Request) {
@@ -83,9 +86,10 @@ func (h *handlerTableOrderImpl) handlerChangeTable(w http.ResponseWriter, r *htt
 
 	if err := h.s.ChangeTable(ctx, dtoId, table); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerTableOrderImpl) handlerFinishTableOrder(w http.ResponseWriter, r *http.Request) {
@@ -102,9 +106,10 @@ func (h *handlerTableOrderImpl) handlerFinishTableOrder(w http.ResponseWriter, r
 
 	if err := h.s.FinishTableOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerTableOrderImpl) handlerGetTableOrderById(w http.ResponseWriter, r *http.Request) {
@@ -119,19 +124,23 @@ func (h *handlerTableOrderImpl) handlerGetTableOrderById(w http.ResponseWriter, 
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if id, err := h.s.GetTableById(ctx, dtoId); err != nil {
+	table, err := h.s.GetTableById(ctx, dtoId)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: table})
 }
 
 func (h *handlerTableOrderImpl) handlerGetAllTables(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if orders, err := h.s.GetAllTables(ctx); err != nil {
+	orders, err := h.s.GetAllTables(ctx)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
 }

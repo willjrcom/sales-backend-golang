@@ -50,11 +50,13 @@ func (h *handlerGroupItemImpl) handlerGetGroupByID(w http.ResponseWriter, r *htt
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if groupItem, err := h.s.GetGroupByID(ctx, dtoId); err != nil {
+	groupItem, err := h.s.GetGroupByID(ctx, dtoId)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: groupItem})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: groupItem})
 }
 
 func (h *handlerGroupItemImpl) handlerGetGroupsByStatus(w http.ResponseWriter, r *http.Request) {
@@ -63,11 +65,13 @@ func (h *handlerGroupItemImpl) handlerGetGroupsByStatus(w http.ResponseWriter, r
 
 	jsonpkg.ParseBody(r, dto)
 
-	if groups, err := h.s.GetGroupsByStatus(ctx, dto); err != nil {
+	groups, err := h.s.GetGroupsByStatus(ctx, dto)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: groups})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: groups})
 }
 
 func (h *handlerGroupItemImpl) handlerGetGroupsByOrderIDAndStatus(w http.ResponseWriter, r *http.Request) {
@@ -76,11 +80,13 @@ func (h *handlerGroupItemImpl) handlerGetGroupsByOrderIDAndStatus(w http.Respons
 
 	jsonpkg.ParseBody(r, dto)
 
-	if groups, err := h.s.GetGroupsByOrderIDAndStatus(ctx, dto); err != nil {
+	groups, err := h.s.GetGroupsByOrderIDAndStatus(ctx, dto)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: groups})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: groups})
 }
 
 func (h *handlerGroupItemImpl) handlerStartGroupByID(w http.ResponseWriter, r *http.Request) {
@@ -97,9 +103,10 @@ func (h *handlerGroupItemImpl) handlerStartGroupByID(w http.ResponseWriter, r *h
 
 	if err := h.s.StartGroupItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerGroupItemImpl) handlerReadyGroupByID(w http.ResponseWriter, r *http.Request) {
@@ -116,9 +123,10 @@ func (h *handlerGroupItemImpl) handlerReadyGroupByID(w http.ResponseWriter, r *h
 
 	if err := h.s.ReadyGroupItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerGroupItemImpl) handlerCancelGroupByID(w http.ResponseWriter, r *http.Request) {
@@ -135,9 +143,10 @@ func (h *handlerGroupItemImpl) handlerCancelGroupByID(w http.ResponseWriter, r *
 
 	if err := h.s.CancelGroupItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerGroupItemImpl) handlerDeleteGroupByID(w http.ResponseWriter, r *http.Request) {
@@ -154,9 +163,10 @@ func (h *handlerGroupItemImpl) handlerDeleteGroupByID(w http.ResponseWriter, r *
 
 	if err := h.s.DeleteGroupItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerGroupItemImpl) handlerAddComplementItem(w http.ResponseWriter, r *http.Request) {
@@ -175,15 +185,17 @@ func (h *handlerGroupItemImpl) handlerAddComplementItem(w http.ResponseWriter, r
 
 	if idComplement == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id complement is required"})
+		return
 	}
 
 	dtoIdComplement := &entitydto.IdRequest{ID: uuid.MustParse(idComplement)}
 
 	if err := h.s.AddComplementItem(ctx, dtoId, dtoIdComplement); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, nil)
 }
 
 func (h *handlerGroupItemImpl) handlerDeleteComplementItem(w http.ResponseWriter, r *http.Request) {
@@ -200,7 +212,8 @@ func (h *handlerGroupItemImpl) handlerDeleteComplementItem(w http.ResponseWriter
 
 	if err := h.s.DeleteComplementItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }

@@ -37,12 +37,13 @@ func (h *handlerQuantityCategoryImpl) handlerRegisterQuantity(w http.ResponseWri
 	quantity := &quantitydto.RegisterQuantityInput{}
 	jsonpkg.ParseBody(r, quantity)
 
-	if id, err := h.s.RegisterQuantity(ctx, quantity); err != nil {
+	id, err := h.s.RegisterQuantity(ctx, quantity)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerQuantityCategoryImpl) handlerUpdateQuantity(w http.ResponseWriter, r *http.Request) {

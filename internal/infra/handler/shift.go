@@ -27,6 +27,7 @@ func NewHandlerShift(shiftService *shiftusecases.Service) *handler.Handler {
 		c.Post("/open", h.handlerOpenShift)
 		c.Put("/close", h.handlerCloseShift)
 		c.Get("/{id}", h.handlerGetShiftByID)
+		c.Get("/current", h.handlerGetOpenedShift)
 	})
 
 	return handler.NewHandler("/shift", c)
@@ -38,11 +39,13 @@ func (h *handlerShiftImpl) handlerOpenShift(w http.ResponseWriter, r *http.Reque
 	dto := &shiftdto.OpenShift{}
 	jsonpkg.ParseBody(r, dto)
 
-	if id, err := h.s.OpenShift(ctx, dto); err != nil {
+	id, err := h.s.OpenShift(ctx, dto)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerShiftImpl) handlerCloseShift(w http.ResponseWriter, r *http.Request) {
@@ -53,9 +56,10 @@ func (h *handlerShiftImpl) handlerCloseShift(w http.ResponseWriter, r *http.Requ
 
 	if err := h.s.CloseShift(ctx, dto); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerShiftImpl) handlerGetShiftByID(w http.ResponseWriter, r *http.Request) {
@@ -70,11 +74,25 @@ func (h *handlerShiftImpl) handlerGetShiftByID(w http.ResponseWriter, r *http.Re
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if id, err := h.s.GetShiftByID(ctx, dtoId); err != nil {
+	shift, err := h.s.GetShiftByID(ctx, dtoId)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: shift})
+}
+
+func (h *handlerShiftImpl) handlerGetOpenedShift(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	shift, err := h.s.GetOpenedShift(ctx)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: shift})
 }
 
 // func (h *handlerShiftImpl) handlerGetAllShifts(w http.ResponseWriter, r *http.Request) {

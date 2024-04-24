@@ -51,12 +51,13 @@ func (h *handlerProductImpl) handlerRegisterProduct(w http.ResponseWriter, r *ht
 	// 	product.Image = &file
 	// }
 
-	if id, err := h.s.RegisterProduct(ctx, product); err != nil {
+	id, err := h.s.RegisterProduct(ctx, product)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerProductImpl) handlerUpdateProduct(w http.ResponseWriter, r *http.Request) {
@@ -77,9 +78,9 @@ func (h *handlerProductImpl) handlerUpdateProduct(w http.ResponseWriter, r *http
 	if err := h.s.UpdateProduct(ctx, dtoId, product); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerProductImpl) handlerDeleteProduct(w http.ResponseWriter, r *http.Request) {
@@ -97,9 +98,9 @@ func (h *handlerProductImpl) handlerDeleteProduct(w http.ResponseWriter, r *http
 	if err := h.s.DeleteProductById(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Request) {
@@ -114,21 +115,23 @@ func (h *handlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Re
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if product, err := h.s.GetProductById(ctx, dtoId); err != nil {
+	product, err := h.s.GetProductById(ctx, dtoId)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: product})
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: product})
 }
 
 func (h *handlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if categories, err := h.s.GetAllProducts(ctx); err != nil {
+	categories, err := h.s.GetAllProducts(ctx)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
 }

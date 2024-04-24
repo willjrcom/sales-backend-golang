@@ -50,11 +50,13 @@ func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request)
 	user := &userdto.CreateUserInput{}
 	jsonpkg.ParseBody(r, user)
 
-	if id, err := h.s.CreateUser(ctx, user); err != nil {
+	id, err := h.s.CreateUser(ctx, user)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Request) {
@@ -65,9 +67,10 @@ func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Reque
 
 	if err := h.s.UpdateUser(ctx, user); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Request) {
@@ -76,11 +79,13 @@ func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Reques
 	user := &userdto.LoginUserInput{}
 	jsonpkg.ParseBody(r, user)
 
-	if token, err := h.s.LoginUser(ctx, user); err != nil {
+	token, err := h.s.LoginUser(ctx, user)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: token})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: token})
 }
 
 func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) {
@@ -96,11 +101,13 @@ func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) 
 	schema := &userdto.AccessCompanyInput{}
 	jsonpkg.ParseBody(r, schema)
 
-	if token, err := h.s.Access(ctx, schema, accessToken); err != nil {
+	token, err := h.s.Access(ctx, schema, accessToken)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: token})
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: token})
 }
 
 func (h *handlerUserImpl) handlerDeleteUser(w http.ResponseWriter, r *http.Request) {
@@ -111,7 +118,8 @@ func (h *handlerUserImpl) handlerDeleteUser(w http.ResponseWriter, r *http.Reque
 
 	if err := h.s.DeleteUser(ctx, user); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+		return
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }

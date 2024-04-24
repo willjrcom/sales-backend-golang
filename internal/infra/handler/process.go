@@ -38,12 +38,13 @@ func (h *handlerProcessImpl) handlerRegisterProcess(w http.ResponseWriter, r *ht
 	process := &processdto.CreateProcessInput{}
 	jsonpkg.ParseBody(r, process)
 
-	if id, err := h.s.RegisterProcess(ctx, process); err != nil {
+	id, err := h.s.RegisterProcess(ctx, process)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerProcessImpl) handlerUpdateProcess(w http.ResponseWriter, r *http.Request) {
@@ -88,10 +89,11 @@ func (h *handlerProcessImpl) handlerDeleteProcess(w http.ResponseWriter, r *http
 func (h *handlerProcessImpl) handlerGetAllProcesses(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if processes, err := h.s.GetAllProcesses(ctx); err != nil {
+	processes, err := h.s.GetAllProcesses(ctx)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processes})
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processes})
 }

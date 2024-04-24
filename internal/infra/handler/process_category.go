@@ -37,12 +37,13 @@ func (h *handlerProcessRuleCategoryImpl) handlerRegisterProcessRule(w http.Respo
 	processRule := &processdto.RegisterProcessRuleInput{}
 	jsonpkg.ParseBody(r, processRule)
 
-	if id, err := h.s.RegisterProcessRule(ctx, processRule); err != nil {
+	id, err := h.s.RegisterProcessRule(ctx, processRule)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
-	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
 func (h *handlerProcessRuleCategoryImpl) handlerUpdateProcessRule(w http.ResponseWriter, r *http.Request) {
