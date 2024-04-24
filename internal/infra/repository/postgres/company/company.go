@@ -83,6 +83,29 @@ func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*companyentity.C
 	return company, err
 }
 
+func (r *CompanyRepositoryBun) ValidateUserToPublicCompany(ctx context.Context, userID uuid.UUID) (bool, error) {
+	schema := ctx.Value(schemaentity.Schema("schema")).(string)
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+		return false, err
+	}
+
+	companyWithUsers := &companyentity.CompanyWithUsers{}
+	if err := r.db.NewSelect().Model(companyWithUsers).Where("schema_name = ?", schema).Scan(ctx); err != nil {
+		return false, err
+	}
+
+	companyToUsers := &companyentity.CompanyToUsers{}
+	if err := r.db.NewSelect().Model(companyToUsers).Where("company_with_users_id = ? AND user_id = ?", companyWithUsers.ID, userID).Scan(ctx); err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 func (r *CompanyRepositoryBun) AddUserToPublicCompany(ctx context.Context, userID uuid.UUID) error {
 	schema := ctx.Value(schemaentity.Schema("schema")).(string)
 

@@ -2,6 +2,7 @@ package companyusecases
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -92,6 +93,12 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserInpu
 
 	userID, _ := s.u.GetIDByEmail(ctx, user.Email)
 
+	if userID != uuid.Nil {
+		if exists, _ := s.r.ValidateUserToPublicCompany(ctx, userID); exists {
+			return errors.New("user already added to company")
+		}
+	}
+
 	if userID == uuid.Nil {
 		userCommonAttributes := &companyentity.UserCommonAttributes{
 			Email: user.Email,
@@ -125,6 +132,12 @@ func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.Use
 
 	if err != nil {
 		return err
+	}
+
+	if userID != uuid.Nil {
+		if exists, _ := s.r.ValidateUserToPublicCompany(ctx, userID); !exists {
+			return errors.New("user already removed from company")
+		}
 	}
 
 	if err := s.r.RemoveUserFromPublicCompany(ctx, userID); err != nil {
