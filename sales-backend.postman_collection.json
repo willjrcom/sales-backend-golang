@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "80d1965c-d3f8-4a5d-a214-795e10f72462",
+		"_postman_id": "9ba14927-a0bb-494d-9a5d-dd205a34a46d",
 		"name": "sales-backend",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "11728719"
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "28610432"
 	},
 	"item": [
 		{
@@ -55,16 +55,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/product/new",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"product",
-										"new"
-									]
-								}
+								"url": "{{server}}/product/new"
 							},
 							"response": []
 						},
@@ -88,17 +79,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/product/update/{{product_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"product",
-										"update",
-										"{{product_id}}"
-									]
-								}
+								"url": "{{server}}/product/update/{{product_id}}"
 							},
 							"response": []
 						},
@@ -122,16 +103,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/product/{{product_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"product",
-										"{{product_id}}"
-									]
-								}
+								"url": "{{server}}/product/{{product_id}}"
 							},
 							"response": []
 						},
@@ -158,18 +130,56 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/product/{{product_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"product",
-										"{{product_id}}"
-									]
-								}
+								"url": "{{server}}/product/{{product_id}}"
 							},
-							"response": []
+							"response": [
+								{
+									"name": "get by id",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "id-token",
+												"value": "{{IDToken}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/product/{{product_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 24 Apr 2024 21:49:47 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "737"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": {\n        \"id\": \"de15ecb5-0e96-4564-a605-a909501afefd\",\n        \"code\": \"p12\",\n        \"name\": \"Pizza Presunto\",\n        \"image_path\": null,\n        \"description\": \"mussarela e tomate\",\n        \"price\": 30,\n        \"cost\": 10,\n        \"is_available\": false,\n        \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n        \"category\": {\n            \"id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n            \"created_at\": \"2024-02-19T03:16:43.632335Z\",\n            \"updated_at\": \"2024-02-19T03:16:43.632335Z\",\n            \"name\": \"Pizza\",\n            \"image_path\": \"\",\n            \"need_print\": false,\n            \"removable_items\": [\n                \"cebola\",\n                \"tomate\"\n            ]\n        },\n        \"size_id\": \"958df42f-cedd-4872-8dcb-55643b5ca599\",\n        \"size\": {\n            \"id\": \"958df42f-cedd-4872-8dcb-55643b5ca599\",\n            \"created_at\": \"2024-02-27T01:56:21.634578Z\",\n            \"updated_at\": \"2024-02-27T01:56:21.634578Z\",\n            \"name\": \"P\",\n            \"active\": false,\n            \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\"\n        }\n    }\n}"
+								}
+							]
 						},
 						{
 							"name": "get all",
@@ -194,18 +204,56 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/product/all",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"product",
-										"all"
-									]
-								}
+								"url": "{{server}}/product/all"
 							},
-							"response": []
+							"response": [
+								{
+									"name": "get all",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "id-token",
+												"value": "{{IDToken}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/product/all"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 24 Apr 2024 21:49:30 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "1437"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": [\n        {\n            \"id\": \"de15ecb5-0e96-4564-a605-a909501afefd\",\n            \"code\": \"p12\",\n            \"name\": \"Pizza Presunto\",\n            \"image_path\": null,\n            \"description\": \"mussarela e tomate\",\n            \"price\": 30,\n            \"cost\": 10,\n            \"is_available\": false,\n            \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n            \"category\": {\n                \"id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n                \"created_at\": \"2024-02-19T03:16:43.632335Z\",\n                \"updated_at\": \"2024-02-19T03:16:43.632335Z\",\n                \"name\": \"Pizza\",\n                \"image_path\": \"\",\n                \"need_print\": false,\n                \"removable_items\": [\n                    \"cebola\",\n                    \"tomate\"\n                ]\n            },\n            \"size_id\": \"958df42f-cedd-4872-8dcb-55643b5ca599\",\n            \"size\": {\n                \"id\": \"958df42f-cedd-4872-8dcb-55643b5ca599\",\n                \"created_at\": \"2024-02-27T01:56:21.634578Z\",\n                \"updated_at\": \"2024-02-27T01:56:21.634578Z\",\n                \"name\": \"P\",\n                \"active\": false,\n                \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\"\n            }\n        },\n        {\n            \"id\": \"8133b042-b78d-4844-84ed-8c1d6da25e87\",\n            \"code\": \"b1\",\n            \"name\": \"Borda Catupiry\",\n            \"image_path\": null,\n            \"description\": \"mussarela e tomate\",\n            \"price\": 30,\n            \"cost\": 10,\n            \"is_available\": true,\n            \"category_id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\",\n            \"category\": {\n                \"id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\",\n                \"created_at\": \"2024-02-19T03:14:23.495016Z\",\n                \"updated_at\": \"2024-02-19T03:14:23.495016Z\",\n                \"name\": \"Borda recheada\",\n                \"image_path\": \"\",\n                \"need_print\": false\n            },\n            \"size_id\": \"9f04efa3-a4f2-4fd6-a588-65936815ba62\",\n            \"size\": {\n                \"id\": \"9f04efa3-a4f2-4fd6-a588-65936815ba62\",\n                \"created_at\": \"2024-03-19T20:34:25.510595Z\",\n                \"updated_at\": \"2024-03-19T20:34:25.510595Z\",\n                \"name\": \"P\",\n                \"active\": false,\n                \"category_id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\"\n            }\n        }\n    ]\n}"
+								}
+							]
 						}
 					]
 				},
@@ -246,16 +294,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/new",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"new"
-									]
-								}
+								"url": "{{server}}/category-product/new"
 							},
 							"response": []
 						},
@@ -279,17 +318,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/update/{{category_product_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"update",
-										"{{category_product_id}}"
-									]
-								}
+								"url": "{{server}}/category-product/update/{{category_product_id}}"
 							},
 							"response": []
 						},
@@ -313,16 +342,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/{{category_product_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"{{category_product_id}}"
-									]
-								}
+								"url": "{{server}}/category-product/{{category_product_id}}"
 							},
 							"response": []
 						},
@@ -349,18 +369,56 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/{{category_product_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"{{category_product_id}}"
-									]
-								}
+								"url": "{{server}}/category-product/{{category_product_id}}"
 							},
-							"response": []
+							"response": [
+								{
+									"name": "get by id",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "id-token",
+												"value": "{{IDToken}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/category-product/{{category_product_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 24 Apr 2024 21:50:10 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "1133"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": {\n        \"id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\",\n        \"name\": \"Borda recheada\",\n        \"image_path\": \"\",\n        \"need_print\": false,\n        \"sizes\": [\n            {\n                \"id\": \"9f04efa3-a4f2-4fd6-a588-65936815ba62\",\n                \"created_at\": \"2024-03-19T20:34:25.510595Z\",\n                \"updated_at\": \"2024-03-19T20:34:25.510595Z\",\n                \"name\": \"P\",\n                \"active\": false,\n                \"category_id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\"\n            },\n            {\n                \"id\": \"e71db839-9bd4-4f4b-aeee-8376bb1870fc\",\n                \"created_at\": \"2024-03-19T20:34:29.393011Z\",\n                \"updated_at\": \"2024-03-19T20:34:29.393011Z\",\n                \"name\": \"M\",\n                \"active\": false,\n                \"category_id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\"\n            },\n            {\n                \"id\": \"4202616b-9771-4a53-acb3-c7a838b13371\",\n                \"created_at\": \"2024-03-19T20:34:33.481123Z\",\n                \"updated_at\": \"2024-03-19T20:34:33.481123Z\",\n                \"name\": \"G\",\n                \"active\": false,\n                \"category_id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\"\n            }\n        ],\n        \"products\": [\n            {\n                \"id\": \"8133b042-b78d-4844-84ed-8c1d6da25e87\",\n                \"created_at\": \"2024-03-19T20:34:52.688641Z\",\n                \"updated_at\": \"2024-03-19T20:34:52.688641Z\",\n                \"code\": \"b1\",\n                \"name\": \"Borda Catupiry\",\n                \"image_path\": null,\n                \"description\": \"mussarela e tomate\",\n                \"price\": 30,\n                \"cost\": 10,\n                \"is_available\": true,\n                \"category_id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\",\n                \"size_id\": \"9f04efa3-a4f2-4fd6-a588-65936815ba62\"\n            }\n        ]\n    }\n}"
+								}
+							]
 						},
 						{
 							"name": "get all",
@@ -385,18 +443,56 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/all",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"all"
-									]
-								}
+								"url": "{{server}}/category-product/all"
 							},
-							"response": []
+							"response": [
+								{
+									"name": "get all",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "id-token",
+												"value": "{{IDToken}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/category-product/all"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 24 Apr 2024 21:49:57 GMT"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": [\n        {\n            \"id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\",\n            \"name\": \"Borda recheada\",\n            \"image_path\": \"\",\n            \"need_print\": false,\n            \"sizes\": [\n                {\n                    \"id\": \"9f04efa3-a4f2-4fd6-a588-65936815ba62\",\n                    \"created_at\": \"2024-03-19T20:34:25.510595Z\",\n                    \"updated_at\": \"2024-03-19T20:34:25.510595Z\",\n                    \"name\": \"P\",\n                    \"active\": false,\n                    \"category_id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\"\n                },\n                {\n                    \"id\": \"e71db839-9bd4-4f4b-aeee-8376bb1870fc\",\n                    \"created_at\": \"2024-03-19T20:34:29.393011Z\",\n                    \"updated_at\": \"2024-03-19T20:34:29.393011Z\",\n                    \"name\": \"M\",\n                    \"active\": false,\n                    \"category_id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\"\n                },\n                {\n                    \"id\": \"4202616b-9771-4a53-acb3-c7a838b13371\",\n                    \"created_at\": \"2024-03-19T20:34:33.481123Z\",\n                    \"updated_at\": \"2024-03-19T20:34:33.481123Z\",\n                    \"name\": \"G\",\n                    \"active\": false,\n                    \"category_id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\"\n                }\n            ],\n            \"products\": [\n                {\n                    \"id\": \"8133b042-b78d-4844-84ed-8c1d6da25e87\",\n                    \"created_at\": \"2024-03-19T20:34:52.688641Z\",\n                    \"updated_at\": \"2024-03-19T20:34:52.688641Z\",\n                    \"code\": \"b1\",\n                    \"name\": \"Borda Catupiry\",\n                    \"image_path\": null,\n                    \"description\": \"mussarela e tomate\",\n                    \"price\": 30,\n                    \"cost\": 10,\n                    \"is_available\": true,\n                    \"category_id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\",\n                    \"size_id\": \"9f04efa3-a4f2-4fd6-a588-65936815ba62\"\n                }\n            ]\n        },\n        {\n            \"id\": \"3ace5f45-9bc0-41f2-a70f-2b6b862b5225\",\n            \"name\": \"Ingredientes\",\n            \"image_path\": \"\",\n            \"need_print\": false\n        },\n        {\n            \"id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n            \"name\": \"Pizza\",\n            \"image_path\": \"\",\n            \"need_print\": false,\n            \"removable_items\": [\n                \"cebola\",\n                \"tomate\"\n            ],\n            \"sizes\": [\n                {\n                    \"id\": \"958df42f-cedd-4872-8dcb-55643b5ca599\",\n                    \"created_at\": \"2024-02-27T01:56:21.634578Z\",\n                    \"updated_at\": \"2024-02-27T01:56:21.634578Z\",\n                    \"name\": \"P\",\n                    \"active\": false,\n                    \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\"\n                }\n            ],\n            \"quantities\": [\n                {\n                    \"id\": \"b490ade3-0f6b-4620-8db4-65c02f819be2\",\n                    \"created_at\": \"2024-03-05T03:00:17.536697Z\",\n                    \"updated_at\": \"2024-03-05T03:00:17.536697Z\",\n                    \"quantity\": 2,\n                    \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\"\n                }\n            ],\n            \"products\": [\n                {\n                    \"id\": \"de15ecb5-0e96-4564-a605-a909501afefd\",\n                    \"created_at\": \"2024-02-27T02:07:40.595951Z\",\n                    \"updated_at\": \"2024-02-27T02:07:40.595951Z\",\n                    \"code\": \"p12\",\n                    \"name\": \"Pizza Presunto\",\n                    \"image_path\": null,\n                    \"description\": \"mussarela e tomate\",\n                    \"price\": 30,\n                    \"cost\": 10,\n                    \"is_available\": false,\n                    \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n                    \"size_id\": \"958df42f-cedd-4872-8dcb-55643b5ca599\"\n                }\n            ],\n            \"process_rules\": [\n                {\n                    \"id\": \"d9905e6b-4c60-400f-acde-423a665e83b5\",\n                    \"created_at\": \"2024-03-15T18:37:01.051273Z\",\n                    \"updated_at\": \"2024-03-15T18:37:01.051273Z\",\n                    \"name\": \"Cortar pão\",\n                    \"order\": 1,\n                    \"ideal_time\": 0,\n                    \"experimental_error\": 0,\n                    \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\"\n                },\n                {\n                    \"id\": \"4065e7e1-1cf1-4cdc-ae52-d9fff2fe2956\",\n                    \"created_at\": \"2024-03-15T18:37:16.109522Z\",\n                    \"updated_at\": \"2024-03-15T18:37:16.109522Z\",\n                    \"name\": \"Rechear\",\n                    \"order\": 2,\n                    \"ideal_time\": 0,\n                    \"experimental_error\": 0,\n                    \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\"\n                },\n                {\n                    \"id\": \"23ec67dc-5d9c-4fab-8fe4-9a34f6e9b826\",\n                    \"created_at\": \"2024-03-15T18:37:24.468659Z\",\n                    \"updated_at\": \"2024-03-15T18:37:24.468659Z\",\n                    \"name\": \"Prensar\",\n                    \"order\": 3,\n                    \"ideal_time\": 0,\n                    \"experimental_error\": 0,\n                    \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\"\n                }\n            ],\n            \"category_to_additional\": [\n                {\n                    \"id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\",\n                    \"created_at\": \"2024-02-19T03:14:23.495016Z\",\n                    \"updated_at\": \"2024-02-19T03:14:23.495016Z\",\n                    \"name\": \"Borda recheada\",\n                    \"image_path\": \"\",\n                    \"need_print\": false\n                },\n                {\n                    \"id\": \"3ace5f45-9bc0-41f2-a70f-2b6b862b5225\",\n                    \"created_at\": \"2024-02-19T03:26:56.710874Z\",\n                    \"updated_at\": \"2024-02-19T03:26:56.710874Z\",\n                    \"name\": \"Ingredientes\",\n                    \"image_path\": \"\",\n                    \"need_print\": false\n                }\n            ]\n        }\n    ]\n}"
+								}
+							]
 						}
 					]
 				},
@@ -437,17 +533,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/size/new",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"size",
-										"new"
-									]
-								}
+								"url": "{{server}}/category-product/size/new"
 							},
 							"response": []
 						},
@@ -471,18 +557,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/size/update/{{size_category_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"size",
-										"update",
-										"{{size_category_id}}"
-									]
-								}
+								"url": "{{server}}/category-product/size/update/{{size_category_id}}"
 							},
 							"response": []
 						},
@@ -506,17 +581,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/size/{{size_category_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"size",
-										"{{size_category_id}}"
-									]
-								}
+								"url": "{{server}}/category-product/size/{{size_category_id}}"
 							},
 							"response": []
 						}
@@ -559,17 +624,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/process/new",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"process",
-										"new"
-									]
-								}
+								"url": "{{server}}/category-product/process/new"
 							},
 							"response": []
 						},
@@ -593,18 +648,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/process/update/{{process_rule_category_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"process",
-										"update",
-										"{{process_rule_category_id}}"
-									]
-								}
+								"url": "{{server}}/category-product/process/update/{{process_rule_category_id}}"
 							},
 							"response": []
 						},
@@ -628,17 +672,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/process/{{process_rule_category_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"process",
-										"{{process_rule_category_id}}"
-									]
-								}
+								"url": "{{server}}/category-product/process/{{process_rule_category_id}}"
 							},
 							"response": []
 						}
@@ -681,17 +715,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/quantity/new",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"quantity",
-										"new"
-									]
-								}
+								"url": "{{server}}/category-product/quantity/new"
 							},
 							"response": []
 						},
@@ -715,18 +739,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/quantity/update/{{quantity_category_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"quantity",
-										"update",
-										"{{quantity_category_id}}"
-									]
-								}
+								"url": "{{server}}/category-product/quantity/update/{{quantity_category_id}}"
 							},
 							"response": []
 						},
@@ -750,17 +763,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/category-product/quantity/{{quantity_category_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"category-product",
-										"quantity",
-										"{{quantity_category_id}}"
-									]
-								}
+								"url": "{{server}}/category-product/quantity/{{quantity_category_id}}"
 							},
 							"response": []
 						}
@@ -809,17 +812,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/order/pending/{{order_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"order",
-												"pending",
-												"{{order_id}}"
-											]
-										}
+										"url": "{{server}}/order/pending/{{order_id}}"
 									},
 									"response": []
 								},
@@ -855,17 +848,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/order/finish/{{order_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"order",
-												"finish",
-												"{{order_id}}"
-											]
-										}
+										"url": "{{server}}/order/finish/{{order_id}}"
 									},
 									"response": []
 								},
@@ -901,17 +884,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/order/cancel/{{order_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"order",
-												"cancel",
-												"{{order_id}}"
-											]
-										}
+										"url": "{{server}}/order/cancel/{{order_id}}"
 									},
 									"response": []
 								},
@@ -947,17 +920,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/order/archive/{{order_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"order",
-												"archive",
-												"{{order_id}}"
-											]
-										}
+										"url": "{{server}}/order/archive/{{order_id}}"
 									},
 									"response": []
 								},
@@ -993,17 +956,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/order/unarchive/{{order_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"order",
-												"unarchive",
-												"{{order_id}}"
-											]
-										}
+										"url": "{{server}}/order/unarchive/{{order_id}}"
 									},
 									"response": []
 								}
@@ -1044,18 +997,56 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/order/{{order_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"order",
-										"{{order_id}}"
-									]
-								}
+								"url": "{{server}}/order/{{order_id}}"
 							},
-							"response": []
+							"response": [
+								{
+									"name": "get by id",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "id-token",
+												"value": "{{IDToken}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/order/{{order_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 24 Apr 2024 21:50:49 GMT"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": {\n        \"id\": \"c6e8cbf3-5dd5-4017-acbc-cfeea793b608\",\n        \"created_at\": \"2024-03-19T20:11:06.297142Z\",\n        \"updated_at\": \"2024-03-19T20:11:06.297142Z\",\n        \"pending_at\": \"2024-03-20T19:15:39.858307Z\",\n        \"finished_at\": \"2024-03-20T19:33:34.662071Z\",\n        \"total_payable\": 270,\n        \"total_paid\": 0,\n        \"total_change\": 0,\n        \"quantity_items\": 2,\n        \"observation\": \"\",\n        \"attendant_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n        \"attendant\": {\n            \"id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"created_at\": \"2024-03-04T02:05:30.377557Z\",\n            \"updated_at\": \"2024-03-04T02:05:30.377557Z\",\n            \"name\": \"William junior 3\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\"\n        },\n        \"shift_id\": \"90be08d2-0676-4bff-8880-94018e883963\",\n        \"order_number\": 4,\n        \"status\": \"Finished\",\n        \"groups\": [\n            {\n                \"id\": \"f9867ba0-ee62-4a44-83bb-244537a2b44f\",\n                \"created_at\": \"2024-03-19T20:24:39.342752Z\",\n                \"updated_at\": \"2024-03-19T20:24:39.342752Z\",\n                \"size\": \"P\",\n                \"status\": \"Pending\",\n                \"total\": 270,\n                \"quantity\": 2,\n                \"need_print\": false,\n                \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n                \"complement_item_id\": \"d1a851b8-e156-4b15-88d6-cb1b775b7bd0\",\n                \"complement_item\": {\n                    \"id\": \"d1a851b8-e156-4b15-88d6-cb1b775b7bd0\",\n                    \"created_at\": \"2024-03-20T18:48:52.526376Z\",\n                    \"updated_at\": \"2024-03-20T18:48:52.526376Z\",\n                    \"pending_at\": \"2024-03-20T19:15:38.223602Z\",\n                    \"name\": \"Borda Catupiry\",\n                    \"status\": \"Pending\",\n                    \"description\": \"\",\n                    \"observation\": \"\",\n                    \"price\": 60,\n                    \"total_price\": 0,\n                    \"size\": \"P\",\n                    \"quantity\": 2,\n                    \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                },\n                \"pending_at\": \"2024-03-20T19:15:39.858307Z\",\n                \"items\": [\n                    {\n                        \"id\": \"fc1f82b6-4b92-4bda-a7a3-0cf4270afe85\",\n                        \"created_at\": \"2024-03-19T20:24:43.712847Z\",\n                        \"updated_at\": \"2024-03-19T20:24:43.712847Z\",\n                        \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                        \"name\": \"Pizza Presunto (P)\",\n                        \"status\": \"Pending\",\n                        \"description\": \"mussarela e tomate\",\n                        \"observation\": \"\",\n                        \"price\": 60,\n                        \"total_price\": 0,\n                        \"size\": \"P\",\n                        \"quantity\": 2,\n                        \"group_item_id\": \"f9867ba0-ee62-4a44-83bb-244537a2b44f\",\n                        \"item_to_additional\": [\n                            {\n                                \"id\": \"30e15ce1-b654-427a-aa9b-c1ffb86fc44c\",\n                                \"created_at\": \"2024-03-20T18:46:11.773341Z\",\n                                \"updated_at\": \"2024-03-20T18:46:11.773341Z\",\n                                \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                                \"name\": \"Borda Catupiry\",\n                                \"status\": \"Pending\",\n                                \"description\": \"\",\n                                \"observation\": \"\",\n                                \"price\": 60,\n                                \"total_price\": 0,\n                                \"size\": \"P\",\n                                \"quantity\": 2,\n                                \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                            },\n                            {\n                                \"id\": \"b0228e78-bfa8-46fb-b00a-560b4cb8b012\",\n                                \"created_at\": \"2024-03-20T19:02:23.845536Z\",\n                                \"updated_at\": \"2024-03-20T19:02:23.845536Z\",\n                                \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                                \"name\": \"Borda Catupiry\",\n                                \"status\": \"Pending\",\n                                \"description\": \"\",\n                                \"observation\": \"\",\n                                \"price\": 90,\n                                \"total_price\": 0,\n                                \"size\": \"P\",\n                                \"quantity\": 3,\n                                \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                            }\n                        ]\n                    }\n                ],\n                \"order_id\": \"c6e8cbf3-5dd5-4017-acbc-cfeea793b608\"\n            }\n        ]\n    }\n}"
+								}
+							]
 						},
 						{
 							"name": "get all",
@@ -1092,18 +1083,56 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/order/all",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"order",
-										"all"
-									]
-								}
+								"url": "{{server}}/order/all"
 							},
-							"response": []
+							"response": [
+								{
+									"name": "get all",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "id-token",
+												"value": "{{IDToken}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/order/all"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 24 Apr 2024 21:50:34 GMT"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": [\n        {\n            \"id\": \"c6e8cbf3-5dd5-4017-acbc-cfeea793b608\",\n            \"created_at\": \"2024-03-19T20:11:06.297142Z\",\n            \"updated_at\": \"2024-03-19T20:11:06.297142Z\",\n            \"pending_at\": \"2024-03-20T19:15:39.858307Z\",\n            \"finished_at\": \"2024-03-20T19:33:34.662071Z\",\n            \"total_payable\": 0,\n            \"total_paid\": 0,\n            \"total_change\": 0,\n            \"quantity_items\": 0,\n            \"observation\": \"\",\n            \"attendant_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"shift_id\": \"90be08d2-0676-4bff-8880-94018e883963\",\n            \"order_number\": 4,\n            \"status\": \"Finished\",\n            \"groups\": [\n                {\n                    \"id\": \"f9867ba0-ee62-4a44-83bb-244537a2b44f\",\n                    \"created_at\": \"2024-03-19T20:24:39.342752Z\",\n                    \"updated_at\": \"2024-03-19T20:24:39.342752Z\",\n                    \"size\": \"P\",\n                    \"status\": \"Pending\",\n                    \"total\": 330,\n                    \"quantity\": 2,\n                    \"need_print\": false,\n                    \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n                    \"complement_item_id\": \"d1a851b8-e156-4b15-88d6-cb1b775b7bd0\",\n                    \"complement_item\": {\n                        \"id\": \"d1a851b8-e156-4b15-88d6-cb1b775b7bd0\",\n                        \"created_at\": \"2024-03-20T18:48:52.526376Z\",\n                        \"updated_at\": \"2024-03-20T18:48:52.526376Z\",\n                        \"pending_at\": \"2024-03-20T19:15:38.223602Z\",\n                        \"name\": \"Borda Catupiry\",\n                        \"status\": \"Pending\",\n                        \"description\": \"\",\n                        \"observation\": \"\",\n                        \"price\": 60,\n                        \"total_price\": 0,\n                        \"size\": \"P\",\n                        \"quantity\": 2,\n                        \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                    },\n                    \"pending_at\": \"2024-03-20T19:15:39.858307Z\",\n                    \"items\": [\n                        {\n                            \"id\": \"fc1f82b6-4b92-4bda-a7a3-0cf4270afe85\",\n                            \"created_at\": \"2024-03-19T20:24:43.712847Z\",\n                            \"updated_at\": \"2024-03-19T20:24:43.712847Z\",\n                            \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                            \"name\": \"Pizza Presunto (P)\",\n                            \"status\": \"Pending\",\n                            \"description\": \"mussarela e tomate\",\n                            \"observation\": \"\",\n                            \"price\": 60,\n                            \"total_price\": 0,\n                            \"size\": \"P\",\n                            \"quantity\": 2,\n                            \"group_item_id\": \"f9867ba0-ee62-4a44-83bb-244537a2b44f\",\n                            \"item_to_additional\": [\n                                {\n                                    \"id\": \"30e15ce1-b654-427a-aa9b-c1ffb86fc44c\",\n                                    \"created_at\": \"2024-03-20T18:46:11.773341Z\",\n                                    \"updated_at\": \"2024-03-20T18:46:11.773341Z\",\n                                    \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                                    \"name\": \"Borda Catupiry\",\n                                    \"status\": \"Pending\",\n                                    \"description\": \"\",\n                                    \"observation\": \"\",\n                                    \"price\": 60,\n                                    \"total_price\": 0,\n                                    \"size\": \"P\",\n                                    \"quantity\": 2,\n                                    \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                                },\n                                {\n                                    \"id\": \"b0228e78-bfa8-46fb-b00a-560b4cb8b012\",\n                                    \"created_at\": \"2024-03-20T19:02:23.845536Z\",\n                                    \"updated_at\": \"2024-03-20T19:02:23.845536Z\",\n                                    \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                                    \"name\": \"Borda Catupiry\",\n                                    \"status\": \"Pending\",\n                                    \"description\": \"\",\n                                    \"observation\": \"\",\n                                    \"price\": 90,\n                                    \"total_price\": 0,\n                                    \"size\": \"P\",\n                                    \"quantity\": 3,\n                                    \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                                }\n                            ]\n                        }\n                    ],\n                    \"order_id\": \"c6e8cbf3-5dd5-4017-acbc-cfeea793b608\"\n                }\n            ]\n        }\n    ]\n}"
+								}
+							]
 						},
 						{
 							"name": "update observation",
@@ -1125,18 +1154,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/order/update/{{order_id}}/observation",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"order",
-										"update",
-										"{{order_id}}",
-										"observation"
-									]
-								}
+								"url": "{{server}}/order/update/{{order_id}}/observation"
 							},
 							"response": []
 						},
@@ -1160,18 +1178,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/order/update/{{order_id}}/payment",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"order",
-										"update",
-										"{{order_id}}",
-										"payment"
-									]
-								}
+								"url": "{{server}}/order/update/{{order_id}}/payment"
 							},
 							"response": []
 						},
@@ -1195,18 +1202,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/order/update/{{order_id}}/schedule",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"order",
-										"update",
-										"{{order_id}}",
-										"schedule"
-									]
-								}
+								"url": "{{server}}/order/update/{{order_id}}/schedule"
 							},
 							"response": []
 						}
@@ -1252,16 +1248,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/delivery-order/new",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"delivery-order",
-												"new"
-											]
-										}
+										"url": "{{server}}/delivery-order/new"
 									},
 									"response": []
 								},
@@ -1297,18 +1284,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/delivery-order/update/launch/{{order_delivery_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"delivery-order",
-												"update",
-												"launch",
-												"{{order_delivery_id}}"
-											]
-										}
+										"url": "{{server}}/delivery-order/update/launch/{{order_delivery_id}}"
 									},
 									"response": []
 								},
@@ -1344,18 +1320,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/delivery-order/update/finish/{{order_delivery_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"delivery-order",
-												"update",
-												"finish",
-												"{{order_delivery_id}}"
-											]
-										}
+										"url": "{{server}}/delivery-order/update/finish/{{order_delivery_id}}"
 									},
 									"response": []
 								}
@@ -1393,18 +1358,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/delivery-order/update/driver/{{order_delivery_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"delivery-order",
-										"update",
-										"driver",
-										"{{order_delivery_id}}"
-									]
-								}
+								"url": "{{server}}/delivery-order/update/driver/{{order_delivery_id}}"
 							},
 							"response": []
 						},
@@ -1440,18 +1394,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/delivery-order/update/address/{{order_delivery_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"delivery-order",
-										"update",
-										"address",
-										"{{order_delivery_id}}"
-									]
-								}
+								"url": "{{server}}/delivery-order/update/address/{{order_delivery_id}}"
 							},
 							"response": []
 						},
@@ -1490,18 +1433,56 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/delivery-order/all",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"delivery-order",
-										"all"
-									]
-								}
+								"url": "{{server}}/delivery-order/all"
 							},
-							"response": []
+							"response": [
+								{
+									"name": "get all",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "id-token",
+												"value": "{{IDToken}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/delivery-order/all"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 24 Apr 2024 21:51:08 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "590"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": [\n        {\n            \"id\": \"0e73e751-0385-44af-950e-e647ea30167d\",\n            \"created_at\": \"2024-03-19T20:11:06.281511Z\",\n            \"updated_at\": \"2024-03-19T20:11:06.281511Z\",\n            \"status\": \"Pending\",\n            \"delivery_tax\": null,\n            \"client_id\": \"6064f8ce-dc69-43f6-852a-3534a0079ecd\",\n            \"client\": {\n                \"id\": \"6064f8ce-dc69-43f6-852a-3534a0079ecd\",\n                \"created_at\": \"2024-03-03T02:11:28.015471Z\",\n                \"updated_at\": \"2024-03-03T02:11:28.015471Z\",\n                \"name\": \"William junior\",\n                \"email\": \"will@gmail.com\",\n                \"cpf\": \"43637799855\"\n            },\n            \"address_id\": \"b76dcd07-3de6-45b3-b860-4150e0827eaa\",\n            \"address\": null,\n            \"driver_id\": null,\n            \"driver\": null,\n            \"order_id\": \"c6e8cbf3-5dd5-4017-acbc-cfeea793b608\"\n        }\n    ]\n}"
+								}
+							]
 						}
 					]
 				},
@@ -1542,16 +1523,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/table-order/new",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"table-order",
-										"new"
-									]
-								}
+								"url": "{{server}}/table-order/new"
 							},
 							"response": []
 						},
@@ -1575,16 +1547,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/table-order/{{table_order_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"table-order",
-										"{{table_order_id}}"
-									]
-								}
+								"url": "{{server}}/table-order/{{table_order_id}}"
 							},
 							"response": []
 						},
@@ -1611,16 +1574,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/table-order/{{table_order_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"table-order",
-										"{{table_order_id}}"
-									]
-								}
+								"url": "{{server}}/table-order/{{table_order_id}}"
 							},
 							"response": []
 						},
@@ -1647,16 +1601,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/table-order/all",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"table-order",
-										"all"
-									]
-								}
+								"url": "{{server}}/table-order/all"
 							},
 							"response": []
 						}
@@ -1702,19 +1647,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/item/update/{{item_id}}/additional/{{product_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"item",
-												"update",
-												"{{item_id}}",
-												"additional",
-												"{{product_id}}"
-											]
-										}
+										"url": "{{server}}/item/update/{{item_id}}/additional/{{product_id}}"
 									},
 									"response": []
 								},
@@ -1754,19 +1687,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/item/update/{{item_id}}/additional/{{additional_item_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"item",
-												"update",
-												"{{item_id}}",
-												"additional",
-												"{{additional_item_id}}"
-											]
-										}
+										"url": "{{server}}/item/update/{{item_id}}/additional/{{additional_item_id}}"
 									},
 									"response": []
 								}
@@ -1808,16 +1729,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/item/add",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"item",
-										"add"
-									]
-								}
+								"url": "{{server}}/item/add"
 							},
 							"response": []
 						},
@@ -1841,16 +1753,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/item/{{item_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"item",
-										"{{item_id}}"
-									]
-								}
+								"url": "{{server}}/item/{{item_id}}"
 							},
 							"response": []
 						}
@@ -1882,17 +1785,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/group-item/start/{{group_item_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"group-item",
-												"start",
-												"{{group_item_id}}"
-											]
-										}
+										"url": "{{server}}/group-item/start/{{group_item_id}}"
 									},
 									"response": []
 								},
@@ -1916,17 +1809,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/group-item/ready/{{group_item_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"group-item",
-												"ready",
-												"{{group_item_id}}"
-											]
-										}
+										"url": "{{server}}/group-item/ready/{{group_item_id}}"
 									},
 									"response": []
 								},
@@ -1950,17 +1833,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/group-item/cancel/{{group_item_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"group-item",
-												"cancel",
-												"{{group_item_id}}"
-											]
-										}
+										"url": "{{server}}/group-item/cancel/{{group_item_id}}"
 									},
 									"response": []
 								}
@@ -1989,19 +1862,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/group-item/update/{{group_item_id}}/complement-item/{{product_id}}",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"group-item",
-												"update",
-												"{{group_item_id}}",
-												"complement-item",
-												"{{product_id}}"
-											]
-										}
+										"url": "{{server}}/group-item/update/{{group_item_id}}/complement-item/{{product_id}}"
 									},
 									"response": []
 								},
@@ -2025,18 +1886,7 @@
 												}
 											}
 										},
-										"url": {
-											"raw": "{{server}}/group-item/update/{{group_item_id}}/complement-item",
-											"host": [
-												"{{server}}"
-											],
-											"path": [
-												"group-item",
-												"update",
-												"{{group_item_id}}",
-												"complement-item"
-											]
-										}
+										"url": "{{server}}/group-item/update/{{group_item_id}}/complement-item"
 									},
 									"response": []
 								}
@@ -2065,22 +1915,12 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/group-item/get/{{group_item_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"group-item",
-										"get",
-										"{{group_item_id}}"
-									]
-								}
+								"url": "{{server}}/group-item/get/{{group_item_id}}"
 							},
 							"response": []
 						},
 						{
-							"name": "getAll",
+							"name": "get all",
 							"request": {
 								"method": "POST",
 								"header": [
@@ -2092,25 +1932,63 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"status\": \"Staging\"\n}",
+									"raw": "// NEED LOGIN\n{\n    \"status\": \"Pending\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/group-item/all",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"group-item",
-										"all"
-									]
-								}
+								"url": "{{server}}/group-item/all-by-status"
 							},
-							"response": []
+							"response": [
+								{
+									"name": "get all",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "id-token",
+												"value": "{{IDToken}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\n{\n    \"status\": \"Pending\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/group-item/all-by-status"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 24 Apr 2024 21:53:18 GMT"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": [\n        {\n            \"id\": \"f9867ba0-ee62-4a44-83bb-244537a2b44f\",\n            \"created_at\": \"2024-03-19T20:24:39.342752Z\",\n            \"updated_at\": \"2024-03-19T20:24:39.342752Z\",\n            \"size\": \"P\",\n            \"status\": \"Pending\",\n            \"total\": 330,\n            \"quantity\": 2,\n            \"need_print\": false,\n            \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n            \"category\": {\n                \"id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n                \"created_at\": \"2024-02-19T03:16:43.632335Z\",\n                \"updated_at\": \"2024-02-19T03:16:43.632335Z\",\n                \"name\": \"Pizza\",\n                \"image_path\": \"\",\n                \"need_print\": false,\n                \"removable_items\": [\n                    \"cebola\",\n                    \"tomate\"\n                ]\n            },\n            \"complement_item_id\": \"d1a851b8-e156-4b15-88d6-cb1b775b7bd0\",\n            \"complement_item\": {\n                \"id\": \"d1a851b8-e156-4b15-88d6-cb1b775b7bd0\",\n                \"created_at\": \"2024-03-20T18:48:52.526376Z\",\n                \"updated_at\": \"2024-03-20T18:48:52.526376Z\",\n                \"pending_at\": \"2024-03-20T19:15:38.223602Z\",\n                \"name\": \"Borda Catupiry\",\n                \"status\": \"Pending\",\n                \"description\": \"\",\n                \"observation\": \"\",\n                \"price\": 60,\n                \"total_price\": 0,\n                \"size\": \"P\",\n                \"quantity\": 2,\n                \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n            },\n            \"pending_at\": \"2024-03-20T19:15:39.858307Z\",\n            \"items\": [\n                {\n                    \"id\": \"fc1f82b6-4b92-4bda-a7a3-0cf4270afe85\",\n                    \"created_at\": \"2024-03-19T20:24:43.712847Z\",\n                    \"updated_at\": \"2024-03-19T20:24:43.712847Z\",\n                    \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                    \"name\": \"Pizza Presunto (P)\",\n                    \"status\": \"Pending\",\n                    \"description\": \"mussarela e tomate\",\n                    \"observation\": \"\",\n                    \"price\": 60,\n                    \"total_price\": 0,\n                    \"size\": \"P\",\n                    \"quantity\": 2,\n                    \"group_item_id\": \"f9867ba0-ee62-4a44-83bb-244537a2b44f\",\n                    \"item_to_additional\": [\n                        {\n                            \"id\": \"30e15ce1-b654-427a-aa9b-c1ffb86fc44c\",\n                            \"created_at\": \"2024-03-20T18:46:11.773341Z\",\n                            \"updated_at\": \"2024-03-20T18:46:11.773341Z\",\n                            \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                            \"name\": \"Borda Catupiry\",\n                            \"status\": \"Pending\",\n                            \"description\": \"\",\n                            \"observation\": \"\",\n                            \"price\": 60,\n                            \"total_price\": 0,\n                            \"size\": \"P\",\n                            \"quantity\": 2,\n                            \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                        },\n                        {\n                            \"id\": \"b0228e78-bfa8-46fb-b00a-560b4cb8b012\",\n                            \"created_at\": \"2024-03-20T19:02:23.845536Z\",\n                            \"updated_at\": \"2024-03-20T19:02:23.845536Z\",\n                            \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                            \"name\": \"Borda Catupiry\",\n                            \"status\": \"Pending\",\n                            \"description\": \"\",\n                            \"observation\": \"\",\n                            \"price\": 90,\n                            \"total_price\": 0,\n                            \"size\": \"P\",\n                            \"quantity\": 3,\n                            \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                        }\n                    ]\n                }\n            ],\n            \"order_id\": \"c6e8cbf3-5dd5-4017-acbc-cfeea793b608\"\n        }\n    ]\n}"
+								}
+							]
 						},
 						{
 							"name": "by orderID and status",
@@ -2125,25 +2003,63 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"status\": \"Staging\",\n    \"order_id\": \"{{order_id}}\"\n}",
+									"raw": "// NEED LOGIN\n{\n    \"status\": \"Pending\",\n    \"order_id\": \"{{order_id}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/group-item/by-order-id-and-status",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"group-item",
-										"by-order-id-and-status"
-									]
-								}
+								"url": "{{server}}/group-item/by-order-id-and-status"
 							},
-							"response": []
+							"response": [
+								{
+									"name": "by orderID and status",
+									"originalRequest": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "id-token",
+												"value": "{{IDToken}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\n{\n    \"status\": \"Pending\",\n    \"order_id\": \"{{order_id}}\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/group-item/by-order-id-and-status"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 24 Apr 2024 21:52:00 GMT"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": [\n        {\n            \"id\": \"f9867ba0-ee62-4a44-83bb-244537a2b44f\",\n            \"created_at\": \"2024-03-19T20:24:39.342752Z\",\n            \"updated_at\": \"2024-03-19T20:24:39.342752Z\",\n            \"size\": \"P\",\n            \"status\": \"Pending\",\n            \"total\": 330,\n            \"quantity\": 2,\n            \"need_print\": false,\n            \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n            \"category\": {\n                \"id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n                \"created_at\": \"2024-02-19T03:16:43.632335Z\",\n                \"updated_at\": \"2024-02-19T03:16:43.632335Z\",\n                \"name\": \"Pizza\",\n                \"image_path\": \"\",\n                \"need_print\": false,\n                \"removable_items\": [\n                    \"cebola\",\n                    \"tomate\"\n                ]\n            },\n            \"complement_item_id\": \"d1a851b8-e156-4b15-88d6-cb1b775b7bd0\",\n            \"complement_item\": {\n                \"id\": \"d1a851b8-e156-4b15-88d6-cb1b775b7bd0\",\n                \"created_at\": \"2024-03-20T18:48:52.526376Z\",\n                \"updated_at\": \"2024-03-20T18:48:52.526376Z\",\n                \"pending_at\": \"2024-03-20T19:15:38.223602Z\",\n                \"name\": \"Borda Catupiry\",\n                \"status\": \"Pending\",\n                \"description\": \"\",\n                \"observation\": \"\",\n                \"price\": 60,\n                \"total_price\": 0,\n                \"size\": \"P\",\n                \"quantity\": 2,\n                \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n            },\n            \"pending_at\": \"2024-03-20T19:15:39.858307Z\",\n            \"items\": [\n                {\n                    \"id\": \"fc1f82b6-4b92-4bda-a7a3-0cf4270afe85\",\n                    \"created_at\": \"2024-03-19T20:24:43.712847Z\",\n                    \"updated_at\": \"2024-03-19T20:24:43.712847Z\",\n                    \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                    \"name\": \"Pizza Presunto (P)\",\n                    \"status\": \"Pending\",\n                    \"description\": \"mussarela e tomate\",\n                    \"observation\": \"\",\n                    \"price\": 60,\n                    \"total_price\": 0,\n                    \"size\": \"P\",\n                    \"quantity\": 2,\n                    \"group_item_id\": \"f9867ba0-ee62-4a44-83bb-244537a2b44f\",\n                    \"item_to_additional\": [\n                        {\n                            \"id\": \"30e15ce1-b654-427a-aa9b-c1ffb86fc44c\",\n                            \"created_at\": \"2024-03-20T18:46:11.773341Z\",\n                            \"updated_at\": \"2024-03-20T18:46:11.773341Z\",\n                            \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                            \"name\": \"Borda Catupiry\",\n                            \"status\": \"Pending\",\n                            \"description\": \"\",\n                            \"observation\": \"\",\n                            \"price\": 60,\n                            \"total_price\": 0,\n                            \"size\": \"P\",\n                            \"quantity\": 2,\n                            \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                        },\n                        {\n                            \"id\": \"b0228e78-bfa8-46fb-b00a-560b4cb8b012\",\n                            \"created_at\": \"2024-03-20T19:02:23.845536Z\",\n                            \"updated_at\": \"2024-03-20T19:02:23.845536Z\",\n                            \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                            \"name\": \"Borda Catupiry\",\n                            \"status\": \"Pending\",\n                            \"description\": \"\",\n                            \"observation\": \"\",\n                            \"price\": 90,\n                            \"total_price\": 0,\n                            \"size\": \"P\",\n                            \"quantity\": 3,\n                            \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                        }\n                    ]\n                }\n            ],\n            \"order_id\": \"c6e8cbf3-5dd5-4017-acbc-cfeea793b608\"\n        }\n    ]\n}"
+								}
+							]
 						},
 						{
 							"name": "delete",
@@ -2165,16 +2081,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/group-item/{{group_item_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"group-item",
-										"{{group_item_id}}"
-									]
-								}
+								"url": "{{server}}/group-item/{{group_item_id}}"
 							},
 							"response": []
 						}
@@ -2217,16 +2124,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/process/new",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"process",
-										"new"
-									]
-								}
+								"url": "{{server}}/process/new"
 							},
 							"response": []
 						},
@@ -2250,17 +2148,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/process/update/{{size_category_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"process",
-										"update",
-										"{{size_category_id}}"
-									]
-								}
+								"url": "{{server}}/process/update/{{size_category_id}}"
 							},
 							"response": []
 						},
@@ -2284,17 +2172,7 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/process/delete/{{size_category_id}}",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"process",
-										"delete",
-										"{{size_category_id}}"
-									]
-								}
+								"url": "{{server}}/process/delete/{{size_category_id}}"
 							},
 							"response": []
 						},
@@ -2321,18 +2199,56 @@
 										}
 									}
 								},
-								"url": {
-									"raw": "{{server}}/process/all",
-									"host": [
-										"{{server}}"
-									],
-									"path": [
-										"process",
-										"all"
-									]
-								}
+								"url": "{{server}}/process/all"
 							},
-							"response": []
+							"response": [
+								{
+									"name": "get all",
+									"originalRequest": {
+										"method": "GET",
+										"header": [
+											{
+												"key": "id-token",
+												"value": "{{IDToken}}",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/process/all"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 24 Apr 2024 21:48:36 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "344"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": [\n        {\n            \"id\": \"356f9afc-4c37-403a-a878-96dd5bbe0bc3\",\n            \"created_at\": \"2024-03-15T19:24:29.378464Z\",\n            \"updated_at\": \"2024-03-15T19:24:29.378464Z\",\n            \"started_at\": \"2024-03-15T19:24:29.378491Z\",\n            \"employee_id\": \"d97f0e43-5fbf-4461-87a0-bf094543c90e\",\n            \"item_id\": \"ccf6e63f-7c1e-44e2-aa9e-a58a3c5c3a6e\",\n            \"process_rule_id\": \"23ec67dc-5d9c-4fab-8fe4-9a34f6e9b826\"\n        }\n    ]\n}"
+								}
+							]
 						}
 					]
 				}
@@ -2368,25 +2284,63 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\n{\n    \"name\": \"William junior 3\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
+							"raw": "// NEED LOGIN\n{\n    \"name\": \"William junior 3\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\",\n        \"complement\": \"\",\n        \"reference\": \"\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/client/new",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"client",
-								"new"
-							]
-						}
+						"url": "{{server}}/client/new"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "create",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"William junior 3\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\",\n        \"complement\": \"\",\n        \"reference\": \"\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/client/new"
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:21:41 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "47"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": \"5968c7b5-9095-4c58-9cfb-264802ef6668\"\n}"
+						}
+					]
 				},
 				{
 					"name": "update",
@@ -2401,26 +2355,63 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n",
+							"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"William junior\",\r\n    \"contact\": \"11963849111\",\r\n    \"address\": {\r\n        \"street\": \"Rua piedade\",\r\n        \"number\": \"221\",\r\n        \"neighborhood\": \"Jardim Leocadia\",\r\n        \"city\": \"Sorocaba\",\r\n        \"state\": \"SP\",\r\n        \"complement\": \"\",\r\n        \"reference\": \"\"\r\n    },\r\n    \"cpf\": \"43637799855\",\r\n    \"email\": \"will@gmail.com\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/client/update/{{client_id}}",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"client",
-								"update",
-								"{{client_id}}"
-							]
-						}
+						"url": "{{server}}/client/update/{{client_id}}"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "update",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"William junior\",\r\n    \"contact\": \"11963849112\",\r\n    \"address\": {\r\n        \"street\": \"Rua piedade\",\r\n        \"number\": \"221\",\r\n        \"neighborhood\": \"Jardim Leocadia\",\r\n        \"city\": \"Sorocaba\",\r\n        \"state\": \"SP\",\r\n        \"complement\": \"\",\r\n        \"reference\": \"\"\r\n    },\r\n    \"cpf\": \"43637799855\",\r\n    \"email\": \"will@gmail.com\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/client/update/{{client_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:24:45 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
 				},
 				{
 					"name": "deletar",
@@ -2442,18 +2433,56 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/client/{{client_id}}",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"client",
-								"{{client_id}}"
-							]
-						}
+						"url": "{{server}}/client/{{client_id}}"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "deletar",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/client/{{client_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:25:07 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
 				},
 				{
 					"name": "get by id",
@@ -2478,18 +2507,56 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/client/{{client_id}}",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"client",
-								"{{client_id}}"
-							]
-						}
+						"url": "{{server}}/client/{{client_id}}"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "get by id",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/client/{{client_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:21:26 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "716"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"id\": \"6064f8ce-dc69-43f6-852a-3534a0079ecd\",\n        \"name\": \"William junior 3\",\n        \"email\": \"will@gmail.com\",\n        \"cpf\": \"43637799855\",\n        \"contact\": {\n            \"id\": \"32712432-148d-4f84-8d49-6dcdc4fdb132\",\n            \"created_at\": \"2024-03-03T02:11:28.01556Z\",\n            \"updated_at\": \"2024-03-03T02:11:28.01556Z\",\n            \"object_id\": \"6064f8ce-dc69-43f6-852a-3534a0079ecd\",\n            \"ddd\": \"11\",\n            \"number\": \"963849111\",\n            \"type\": \"Client\"\n        },\n        \"address\": {\n            \"id\": \"b76dcd07-3de6-45b3-b860-4150e0827eaa\",\n            \"created_at\": \"2024-03-03T02:11:28.015564Z\",\n            \"updated_at\": \"2024-03-03T02:11:28.015564Z\",\n            \"object_id\": \"6064f8ce-dc69-43f6-852a-3534a0079ecd\",\n            \"street\": \"Rua piedade\",\n            \"number\": \"226\",\n            \"complement\": \"\",\n            \"reference\": \"\",\n            \"neighborhood\": \"Jardim Leocadia\",\n            \"city\": \"Sorocaba\",\n            \"state\": \"SP\",\n            \"cep\": \"\",\n            \"delivery_tax\": 0\n        }\n    }\n}"
+						}
+					]
 				},
 				{
 					"name": "get all",
@@ -2514,18 +2581,56 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/client/all",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"client",
-								"all"
-							]
-						}
+						"url": "{{server}}/client/all"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "get all",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/client/all"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:21:06 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "718"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": [\n        {\n            \"id\": \"6064f8ce-dc69-43f6-852a-3534a0079ecd\",\n            \"name\": \"William junior 3\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\",\n            \"contact\": {\n                \"id\": \"32712432-148d-4f84-8d49-6dcdc4fdb132\",\n                \"created_at\": \"2024-03-03T02:11:28.01556Z\",\n                \"updated_at\": \"2024-03-03T02:11:28.01556Z\",\n                \"object_id\": \"6064f8ce-dc69-43f6-852a-3534a0079ecd\",\n                \"ddd\": \"11\",\n                \"number\": \"963849111\",\n                \"type\": \"Client\"\n            },\n            \"address\": {\n                \"id\": \"b76dcd07-3de6-45b3-b860-4150e0827eaa\",\n                \"created_at\": \"2024-03-03T02:11:28.015564Z\",\n                \"updated_at\": \"2024-03-03T02:11:28.015564Z\",\n                \"object_id\": \"6064f8ce-dc69-43f6-852a-3534a0079ecd\",\n                \"street\": \"Rua piedade\",\n                \"number\": \"226\",\n                \"complement\": \"\",\n                \"reference\": \"\",\n                \"neighborhood\": \"Jardim Leocadia\",\n                \"city\": \"Sorocaba\",\n                \"state\": \"SP\",\n                \"cep\": \"\",\n                \"delivery_tax\": 0\n            }\n        }\n    ]\n}"
+						}
+					]
 				},
 				{
 					"name": "get by contact",
@@ -2547,18 +2652,56 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/client/by-contact",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"client",
-								"by-contact"
-							]
-						}
+						"url": "{{server}}/client/by-contact"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "get by contact",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"ddd\": \"11\",\n    \"number\": \"963849111\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/client/by-contact"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:05:57 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "716"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"id\": \"6064f8ce-dc69-43f6-852a-3534a0079ecd\",\n        \"name\": \"William junior 3\",\n        \"email\": \"will@gmail.com\",\n        \"cpf\": \"43637799855\",\n        \"contact\": {\n            \"id\": \"32712432-148d-4f84-8d49-6dcdc4fdb132\",\n            \"created_at\": \"2024-03-03T02:11:28.01556Z\",\n            \"updated_at\": \"2024-03-03T02:11:28.01556Z\",\n            \"object_id\": \"6064f8ce-dc69-43f6-852a-3534a0079ecd\",\n            \"ddd\": \"11\",\n            \"number\": \"963849111\",\n            \"type\": \"Client\"\n        },\n        \"address\": {\n            \"id\": \"b76dcd07-3de6-45b3-b860-4150e0827eaa\",\n            \"created_at\": \"2024-03-03T02:11:28.015564Z\",\n            \"updated_at\": \"2024-03-03T02:11:28.015564Z\",\n            \"object_id\": \"6064f8ce-dc69-43f6-852a-3534a0079ecd\",\n            \"street\": \"Rua piedade\",\n            \"number\": \"226\",\n            \"complement\": \"\",\n            \"reference\": \"\",\n            \"neighborhood\": \"Jardim Leocadia\",\n            \"city\": \"Sorocaba\",\n            \"state\": \"SP\",\n            \"cep\": \"\",\n            \"delivery_tax\": 0\n        }\n    }\n}"
+						}
+					]
 				}
 			]
 		},
@@ -2592,25 +2735,63 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\n{\n    \"name\": \"William junior\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
+							"raw": "// NEED LOGIN\n{\n    \"name\": \"William junior\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\",\n        \"complement\": \"\",\n        \"reference\": \"\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/employee/new",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"employee",
-								"new"
-							]
-						}
+						"url": "{{server}}/employee/new"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "create",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"William junior\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/employee/new"
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:06:20 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "47"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": \"0e1c8201-e930-4ec1-9064-6ad21ee64549\"\n}"
+						}
+					]
 				},
 				{
 					"name": "update",
@@ -2625,26 +2806,63 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n",
+							"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"William junior 1\",\r\n    \"cpf\": \"436377998551\",\r\n    \"contact\": \"11963849111\",\r\n    \"email\": \"will1@gmail.com\",\r\n    \"address\": {\r\n        \"street\": \"Rua piedade\",\r\n        \"number\": \"221\",\r\n        \"neighborhood\": \"Jardim Leocadia\",\r\n        \"city\": \"Sorocaba 1\",\r\n        \"state\": \"SP\"\r\n    }\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/employee/update/{{employee_id}}",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"employee",
-								"update",
-								"{{employee_id}}"
-							]
-						}
+						"url": "{{server}}/employee/update/{{employee_id}}"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "update",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"William junior 1\",\r\n    \"cpf\": \"436377998551\",\r\n    \"contact\": \"11963849111\",\r\n    \"email\": \"will1@gmail.com\",\r\n    \"address\": {\r\n        \"street\": \"Rua piedade\",\r\n        \"number\": \"221\",\r\n        \"neighborhood\": \"Jardim Leocadia\",\r\n        \"city\": \"Sorocaba 1\",\r\n        \"state\": \"SP\"\r\n    }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/employee/update/{{employee_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:12:15 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
 				},
 				{
 					"name": "deletar",
@@ -2666,18 +2884,56 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/employee/{{employee_id}}",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"employee",
-								"{{employee_id}}"
-							]
-						}
+						"url": "{{server}}/employee/{{employee_id}}"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "deletar",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/employee/{{employee_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:13:23 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
 				},
 				{
 					"name": "get by id",
@@ -2702,18 +2958,56 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/employee/{{employee_id}}",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"employee",
-								"{{employee_id}}"
-							]
-						}
+						"url": "{{server}}/employee/{{employee_id}}"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "get by id",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/employee/{{employee_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 20:58:54 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "718"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n        \"name\": \"William junior 3\",\n        \"email\": \"will@gmail.com\",\n        \"cpf\": \"43637799855\",\n        \"contact\": {\n            \"id\": \"c2e91e35-5be1-4672-88c0-10e671997db9\",\n            \"created_at\": \"2024-03-04T02:05:30.377637Z\",\n            \"updated_at\": \"2024-03-04T02:05:30.377637Z\",\n            \"object_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"ddd\": \"11\",\n            \"number\": \"963849111\",\n            \"type\": \"Employee\"\n        },\n        \"address\": {\n            \"id\": \"86541456-52aa-4e6b-b56f-d2a40bcba60b\",\n            \"created_at\": \"2024-03-04T02:05:30.37764Z\",\n            \"updated_at\": \"2024-03-04T02:05:30.37764Z\",\n            \"object_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"street\": \"Rua piedade\",\n            \"number\": \"226\",\n            \"complement\": \"\",\n            \"reference\": \"\",\n            \"neighborhood\": \"Jardim Leocadia\",\n            \"city\": \"Sorocaba\",\n            \"state\": \"SP\",\n            \"cep\": \"\",\n            \"delivery_tax\": 0\n        }\n    }\n}"
+						}
+					]
 				},
 				{
 					"name": "get all",
@@ -2738,92 +3032,56 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/employee/all",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"employee",
-								"all"
-							]
-						}
+						"url": "{{server}}/employee/all"
 					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "contact",
-			"item": [
-				{
-					"name": "ftsearch",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "// NEED LOGIN\n{\n    \"query\": \"96384911\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
+					"response": [
+						{
+							"name": "get all",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/employee/all"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 20:59:03 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1430"
 								}
-							}
-						},
-						"url": {
-							"raw": "{{server}}/contact/search",
-							"host": [
-								"{{server}}"
 							],
-							"path": [
-								"contact",
-								"search"
-							]
+							"cookie": [],
+							"body": "{\n    \"data\": [\n        {\n            \"id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"name\": \"William junior 3\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\",\n            \"contact\": {\n                \"id\": \"c2e91e35-5be1-4672-88c0-10e671997db9\",\n                \"created_at\": \"2024-03-04T02:05:30.377637Z\",\n                \"updated_at\": \"2024-03-04T02:05:30.377637Z\",\n                \"object_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n                \"ddd\": \"11\",\n                \"number\": \"963849111\",\n                \"type\": \"Employee\"\n            },\n            \"address\": {\n                \"id\": \"86541456-52aa-4e6b-b56f-d2a40bcba60b\",\n                \"created_at\": \"2024-03-04T02:05:30.37764Z\",\n                \"updated_at\": \"2024-03-04T02:05:30.37764Z\",\n                \"object_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n                \"street\": \"Rua piedade\",\n                \"number\": \"226\",\n                \"complement\": \"\",\n                \"reference\": \"\",\n                \"neighborhood\": \"Jardim Leocadia\",\n                \"city\": \"Sorocaba\",\n                \"state\": \"SP\",\n                \"cep\": \"\",\n                \"delivery_tax\": 0\n            }\n        },\n        {\n            \"id\": \"d97f0e43-5fbf-4461-87a0-bf094543c90e\",\n            \"name\": \"William junior\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\",\n            \"contact\": {\n                \"id\": \"5c68229f-3d14-4749-9e31-c7acf35049ff\",\n                \"created_at\": \"2024-03-04T04:11:43.487275Z\",\n                \"updated_at\": \"2024-03-04T04:11:43.487275Z\",\n                \"object_id\": \"d97f0e43-5fbf-4461-87a0-bf094543c90e\",\n                \"ddd\": \"11\",\n                \"number\": \"963849111\",\n                \"type\": \"Employee\"\n            },\n            \"address\": {\n                \"id\": \"a9c5af44-dcce-488d-b880-98419248e930\",\n                \"created_at\": \"2024-03-04T04:11:43.487277Z\",\n                \"updated_at\": \"2024-03-04T04:11:43.487277Z\",\n                \"object_id\": \"d97f0e43-5fbf-4461-87a0-bf094543c90e\",\n                \"street\": \"Rua piedade\",\n                \"number\": \"226\",\n                \"complement\": \"\",\n                \"reference\": \"\",\n                \"neighborhood\": \"Jardim Leocadia\",\n                \"city\": \"Sorocaba\",\n                \"state\": \"SP\",\n                \"cep\": \"\",\n                \"delivery_tax\": 0\n            }\n        }\n    ]\n}"
 						}
-					},
-					"response": []
-				},
-				{
-					"name": "get by id",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{server}}/contact/{{contact_id}}",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"contact",
-								"{{contact_id}}"
-							]
-						}
-					},
-					"response": []
+					]
 				}
 			]
 		},
@@ -2839,7 +3097,10 @@
 								"exec": [
 									"let response = pm.response.json()",
 									"let shift_id = response.data",
-									"pm.collectionVariables.set(\"shift_id\", shift_id)"
+									"",
+									"if (shift_id != null) {",
+									"    pm.collectionVariables.set(\"shift_id\", shift_id)",
+									"}"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -2857,25 +3118,109 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\n{\n    \"attendant_id\": \"{{employee_id}}\",\n    \"day\": \"2024-01-17T20:39:23.107002Z\", // NOW\n    \"start_change\": 10\n}",
+							"raw": "// NEED LOGIN\n{\n    \"attendant_id\": \"{{employee_id}}\",\n    \"start_change\": 10.00\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/shift/open",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"shift",
-								"open"
-							]
-						}
+						"url": "{{server}}/shift/open"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "open shift",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"attendant_id\": \"{{employee_id}}\",\n    \"start_change\": 10.00\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/shift/open"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:01:10 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "47"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": \"1778ada8-189a-4474-9a1d-361074fed780\"\n}"
+						},
+						{
+							"name": "start change 0",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"attendant_id\": \"{{employee_id}}\",\n    \"start_change\": 0\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/shift/open"
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:01:55 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "48"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"start change must be higher than 0\"\n}"
+						}
+					]
 				},
 				{
 					"name": "get by id",
@@ -2912,18 +3257,142 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/shift/{{shift_id}}",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"shift",
-								"{{shift_id}}"
-							]
-						}
+						"url": "{{server}}/shift/{{shift_id}}"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "get by id",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/shift/{{shift_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:02:14 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "493"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"id\": \"1778ada8-189a-4474-9a1d-361074fed780\",\n        \"created_at\": \"2024-04-24T21:01:10.881656Z\",\n        \"updated_at\": \"2024-04-24T21:01:10.881656Z\",\n        \"opened_at\": \"2024-04-24T21:01:10.88172Z\",\n        \"current_order_number\": 0,\n        \"start_change\": 10,\n        \"attendant_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n        \"attendant\": {\n            \"id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"created_at\": \"2024-03-04T02:05:30.377557Z\",\n            \"updated_at\": \"2024-03-04T02:05:30.377557Z\",\n            \"name\": \"William junior 3\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\"\n        }\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "get current",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "id-token",
+								"value": "{{IDToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/shift/current"
+					},
+					"response": [
+						{
+							"name": "get current",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/shift/current"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:00:42 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "493"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"id\": \"90be08d2-0676-4bff-8880-94018e883963\",\n        \"created_at\": \"2024-03-04T02:05:46.229636Z\",\n        \"updated_at\": \"2024-03-04T02:05:46.229636Z\",\n        \"opened_at\": \"2024-03-04T02:05:46.22965Z\",\n        \"current_order_number\": 4,\n        \"start_change\": 10,\n        \"attendant_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n        \"attendant\": {\n            \"id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"created_at\": \"2024-03-04T02:05:30.377557Z\",\n            \"updated_at\": \"2024-03-04T02:05:30.377557Z\",\n            \"name\": \"William junior 3\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\"\n        }\n    }\n}"
+						}
+					]
 				},
 				{
 					"name": "close shift",
@@ -2945,18 +3414,102 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/shift/close",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"shift",
-								"close"
-							]
-						}
+						"url": "{{server}}/shift/close"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "close shift",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"end_change\": 20\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/shift/close"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:02:33 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						},
+						{
+							"name": "already closed",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"end_change\": 20\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/shift/close"
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:02:44 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "34"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"shift already closed\"\n}"
+						}
+					]
 				}
 			]
 		},
@@ -2973,8 +3526,11 @@
 									"let response = pm.response.json()",
 									"let company_id = response.data.company_id",
 									"let schema = response.data.schema",
-									"pm.collectionVariables.set(\"company_id\", company_id)",
-									"pm.collectionVariables.set(\"schema\", schema)"
+									"",
+									"if (company_id != null && schema != null) {",
+									"    pm.collectionVariables.set(\"company_id\", company_id)",
+									"    pm.collectionVariables.set(\"schema_name\", schema)",
+									"}"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -2993,25 +3549,64 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// DON'T NEED LOGIN\n{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"williamjunior68@gmail.com\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"],\n    \"trade_name\": \"ibiti\"\n}",
+							"raw": "// DON'T NEED LOGIN\n{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"williamjunior69@gmail.com\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"],\n    \"trade_name\": \"ibiti\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/company/new",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"company",
-								"new"
-							]
-						}
+						"url": "{{server}}/company/new"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "new",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// DON'T NEED LOGIN\n{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"williamjunior69@gmail.com\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"],\n    \"trade_name\": \"ibiti\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/company/new"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:31:45 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "94"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"company_id\": \"33f72461-8a48-4221-9dba-f001c0308546\",\n        \"schema\": \"loja_ibiti_ljyy1fbig\"\n    }\n}"
+						}
+					]
 				},
 				{
 					"name": "get",
@@ -3053,7 +3648,69 @@
 							]
 						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "get",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{server}}/company",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"company"
+									],
+									"query": [
+										{
+											"key": "schema",
+											"value": "",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:18:09 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "604"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"schema_name\": \"loja_ibiti__2qititsr\",\n        \"business_name\": \"GAZALTECH CONSULTORIA DE TI LTDA\",\n        \"trade_name\": \"ibiti\",\n        \"cnpj\": \"46.607.184/0001-53\",\n        \"email\": \"williamjunior68@gmail.com\",\n        \"contacts\": [\n            \"(11)96384-9111\",\n            \"(11)4714-1489\"\n        ],\n        \"address\": {\n            \"id\": \"9ac32ec6-1415-4352-be07-67b862fd1706\",\n            \"created_at\": \"2024-02-19T02:58:47.898633Z\",\n            \"updated_at\": \"2024-02-19T02:58:47.898633Z\",\n            \"object_id\": \"75dd51db-9ee2-4f5f-a834-e74f75243ced\",\n            \"street\": \"RUA GABRIELLA CORRA\",\n            \"number\": \"672\",\n            \"complement\": \"\",\n            \"reference\": \"\",\n            \"neighborhood\": \"PARQUE IBITI RESERVA\",\n            \"city\": \"SOROCABA\",\n            \"state\": \"SP\",\n            \"cep\": \"18.086-757\",\n            \"delivery_tax\": 0\n        }\n    }\n}"
+						}
+					]
 				},
 				{
 					"name": "add user to company",
@@ -3080,26 +3737,109 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\n{\n    \"email\": \"williamjunior68@gmail.com\"\n}",
+							"raw": "// NEED LOGIN\n{\n    \"email\": \"{{user_email}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/company/add/user",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"company",
-								"add",
-								"user"
-							]
-						}
+						"url": "{{server}}/company/add/user"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "add user to company",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"email\": \"williamjunior68@gmail.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/company/add/user"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:28:27 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						},
+						{
+							"name": "already added",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"email\": \"williamjunior68@gmail.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/company/add/user"
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:28:40 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "43"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"user already added to company\"\n}"
+						}
+					]
 				},
 				{
 					"name": "remove user to company",
@@ -3126,26 +3866,109 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\n{\n    \"email\": \"williamjunior68@gmail.com\"\n}",
+							"raw": "// NEED LOGIN\n{\n    \"email\": \"{{user_email}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/company/remove/user",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"company",
-								"remove",
-								"user"
-							]
-						}
+						"url": "{{server}}/company/remove/user"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "remove user to company",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"email\": \"williamjunior69@gmail.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/company/remove/user"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:30:17 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						},
+						{
+							"name": "already removed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"email\": \"williamjunior68@gmail.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/company/remove/user"
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:29:57 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "47"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"user already removed from company\"\n}"
+						}
+					]
 				}
 			]
 		},
@@ -3160,10 +3983,10 @@
 							"script": {
 								"exec": [
 									"let response = pm.response.json()",
-									"let accessToken = response.data",
+									"let user_id = response.data",
 									"",
-									"if (accessToken != null) {",
-									"    pm.collectionVariables.set(\"accessToken\", accessToken)",
+									"if (user_id != null) {",
+									"    pm.collectionVariables.set(\"user_id\", user_id)",
 									"}"
 								],
 								"type": "text/javascript",
@@ -3183,25 +4006,205 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"williamjunior67@gmail.com\",\n    \"password\": \"teste\"\n}",
+							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/user/new",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"user",
-								"new"
-							]
-						}
+						"url": "{{server}}/user/new"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "create",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"williamjunior70@gmail.com\",\n    \"password\": \"{{user_password}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/user/new"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:06:13 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "47"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": \"f7d30622-0170-4179-8c8b-59eba172e860\"\n}"
+						},
+						{
+							"name": "user already exists",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"williamjunior70@gmail.com\",\n    \"password\": \"{{user_password}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/user/new"
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:06:42 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "33"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"user already exists\"\n}"
+						},
+						{
+							"name": "invalid pass 1",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"williamjunior71@gmail.com\",\n    \"password\": \"1\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/user/new"
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:07:05 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "57"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"password must be at least 8 characters long\"\n}"
+						},
+						{
+							"name": "invalid pass 2",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "",
+										"value": "",
+										"type": "text",
+										"disabled": true
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"williamjunior71@gmail.com\",\n    \"password\": \"11111111\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/user/new"
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:07:28 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "65"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"password must contain at least one uppercase letter\"\n}"
+						}
+					]
 				},
 				{
 					"name": "update password",
@@ -3210,12 +4213,23 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"let request = pm.request.json()\r",
-									"let new_password = request.new_password\r",
-									"\r",
-									"if (new_password != null) {\r",
-									"    pm.collectionVariables.set(\"user_password\", new_password)\r",
-									"}"
+									"let pl = JSON.parse(pm.request.body.toString());",
+									"let new_password = pl.new_password;",
+									"",
+									"if (new_password != null && pm.response.code == 200) {",
+									"    pm.collectionVariables.set(\"user_password\", new_password)",
+									"}",
+									"",
+									"pm.test(\"Response status code is 200\", function () {",
+									"    pm.expect(pm.response.code).to.equal(200);",
+									"});",
+									"",
+									"pm.test(\"Message field is present in the response\", function () {",
+									"  const responseData = pm.response.json();",
+									"  pm.expect(responseData).to.exist;",
+									"});",
+									"",
+									""
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -3233,25 +4247,109 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"williamjunior67@gmail.com\",\n    \"old_password\": \"teste\",\n    \"new_password\": \"teste!\"\n}",
+							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"old_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass1!\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/user/update",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"user",
-								"update"
-							]
-						}
+						"url": "{{server}}/user/update"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "update password",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"old_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass2!\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/user/update"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:10:58 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						},
+						{
+							"name": "same password",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"old_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass2!\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/user/update"
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:11:14 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "40"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"must be different password\"\n}"
+						}
+					]
 				},
 				{
 					"name": "login",
@@ -3274,25 +4372,57 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"williamjunior68@gmail.com\",\n    \"password\": \"teste\"\n    \n}",
+							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n    \n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/user/login",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"user",
-								"login"
-							]
-						}
+						"url": "{{server}}/user/login"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "login",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n    \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/user/login"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:12:57 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "712"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdmFpbGFibGVfdXNlcl9zY2hlbWFzIjpbImxvamFfaWJpdGlfXzJxaXRpdHNyIl0sImV4cCI6MTcxMzk4NjI3Nywic3ViIjoiYWNjZXNzLXRva2VuIiwidXNlcl9lbWFpbCI6IndpbGxpYW1qdW5pb3I2OUBnbWFpbC5jb20iLCJ1c2VyX2lkIjoiNTQ0MjNlZDAtZTc5Mi00MzFhLTg3ZjQtYmIyMmNjODI3MWQ5In0._VJbvBqsUCJZwf1EUeM7gV2-xwLb9wzRjNS-U8RuE6k\",\n        \"companies\": [\n            {\n                \"id\": \"b7e5bf15-d59e-44d0-88f8-7af24e6e058a\",\n                \"created_at\": \"2024-02-19T02:59:00.365608Z\",\n                \"updated_at\": \"2024-02-19T02:59:00.365608Z\",\n                \"schema_name\": \"loja_ibiti__2qititsr\",\n                \"business_name\": \"GAZALTECH CONSULTORIA DE TI LTDA\",\n                \"trade_name\": \"ibiti\",\n                \"cnpj\": \"46.607.184/0001-53\",\n                \"email\": \"williamjunior68@gmail.com\",\n                \"contacts\": [\n                    \"(11)96384-9111\",\n                    \"(11)4714-1489\"\n                ]\n            }\n        ]\n    }\n}"
+						}
+					]
 				},
 				{
 					"name": "access",
@@ -3302,8 +4432,11 @@
 							"script": {
 								"exec": [
 									"let response = pm.response.json()",
-									"let IDToken = response.data",
-									"pm.collectionVariables.set(\"IDToken\", IDToken)"
+									"let iDToken = response.data",
+									"",
+									"if (iDToken != null) {",
+									"    pm.collectionVariables.set(\"IDToken\", iDToken);",
+									"}"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -3321,25 +4454,109 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\n{\n    \"schema\": \"loja_ibiti__2qititsr\"\n    \n}",
+							"raw": "// NEED LOGIN\n{\n    \"schema\": \"{{schema_name}}\"\n    \n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/user/access",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"user",
-								"access"
-							]
-						}
+						"url": "{{server}}/user/access"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "access",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "access-token",
+										"value": "{{accessToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"schema\": \"loja_ibiti__2qititsr\"\n    \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/user/access"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:13:10 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "312"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXJyZW50X3NjaGVtYSI6ImxvamFfaWJpdGlfXzJxaXRpdHNyIiwiZXhwIjoxNzE0MDA3NTkwLCJzdWIiOiJpZC10b2tlbiIsInVzZXJfZW1haWwiOiJ3aWxsaWFtanVuaW9yNjlAZ21haWwuY29tIiwidXNlcl9pZCI6IjU0NDIzZWQwLWU3OTItNDMxYS04N2Y0LWJiMjJjYzgyNzFkOSJ9.EE7pjkvlm30BUTyZRhJich3zwphXekhhSM9krGWpOTI\"\n}"
+						},
+						{
+							"name": "invalid schema",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "access-token",
+										"value": "{{accessToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"schema\": \"invalido\"\n    \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/user/access"
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:13:25 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "50"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"schema not found in schemas in token\"\n}"
+						}
+					]
 				},
 				{
 					"name": "delete",
@@ -3348,9 +4565,7 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"let response = pm.response.json()",
-									"let IDToken = response.data",
-									"pm.collectionVariables.set(\"IDToken\", IDToken)"
+									""
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -3368,24 +4583,63 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"williamjunior67@gmail.com\",\n    \"password\": \"teste\"\n}",
+							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/user",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"user"
-							]
-						}
+						"url": "{{server}}/user"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "delete",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "access-token",
+										"value": "{{accessToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/user"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:03:19 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
 				}
 			]
 		},
@@ -3400,8 +4654,11 @@
 							"script": {
 								"exec": [
 									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"table_id\", task_id)"
+									"let table_id = response.data",
+									"",
+									"if (table_id != null) {",
+									"    pm.collectionVariables.set(\"table_id\", table_id)",
+									"}"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -3426,18 +4683,56 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/table/new",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"table",
-								"new"
-							]
-						}
+						"url": "{{server}}/table/new"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "create",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"Mesa 1\",\n    \"is_available\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/table/new"
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:33:02 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "47"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": \"cb091549-dc1d-4b05-a335-fc8ffb0eabdd\"\n}"
+						}
+					]
 				},
 				{
 					"name": "get by id",
@@ -3462,18 +4757,56 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/table/{{table_id}}",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"table",
-								"{{table_id}}"
-							]
-						}
+						"url": "{{server}}/table/{{table_id}}"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "get by id",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/table/{{table_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:33:38 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "176"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"id\": \"cb091549-dc1d-4b05-a335-fc8ffb0eabdd\",\n        \"created_at\": \"2024-04-24T19:33:02.841733Z\",\n        \"updated_at\": \"2024-04-24T19:33:02.841733Z\",\n        \"name\": \"Mesa 1\",\n        \"is_available\": true\n    }\n}"
+						}
+					]
 				},
 				{
 					"name": "delete by id",
@@ -3495,18 +4828,56 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/table/{{table_id}}",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"table",
-								"{{table_id}}"
-							]
-						}
+						"url": "{{server}}/table/{{table_id}}"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "delete by id",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/table/{{table_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 20:37:16 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
 				},
 				{
 					"name": "get all",
@@ -3531,18 +4902,56 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{server}}/table/all",
-							"host": [
-								"{{server}}"
-							],
-							"path": [
-								"table",
-								"all"
-							]
-						}
+						"url": "{{server}}/table/all"
 					},
-					"response": []
+					"response": [
+						{
+							"name": "get all",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "id-token",
+										"value": "{{IDToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/table/all"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:33:49 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "346"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": [\n        {\n            \"id\": \"a4969c3e-60f4-467f-8db6-8e2acdf5ee36\",\n            \"created_at\": \"2024-04-24T19:32:58.505304Z\",\n            \"updated_at\": \"2024-04-24T19:32:58.505304Z\",\n            \"name\": \"Mesa 1\",\n            \"is_available\": true\n        },\n        {\n            \"id\": \"cb091549-dc1d-4b05-a335-fc8ffb0eabdd\",\n            \"created_at\": \"2024-04-24T19:33:02.841733Z\",\n            \"updated_at\": \"2024-04-24T19:33:02.841733Z\",\n            \"name\": \"Mesa 1\",\n            \"is_available\": true\n        }\n    ]\n}"
+						}
+					]
 				}
 			]
 		}
@@ -3664,6 +5073,22 @@
 			"key": "additional_item_id",
 			"value": "",
 			"type": "string"
+		},
+		{
+			"key": "user_password",
+			"value": ""
+		},
+		{
+			"key": "user_id",
+			"value": ""
+		},
+		{
+			"key": "user_email",
+			"value": "williamjunior70@gmail.com"
+		},
+		{
+			"key": "schema_name",
+			"value": "loja_ibiti__2qititsr"
 		}
 	]
 }
