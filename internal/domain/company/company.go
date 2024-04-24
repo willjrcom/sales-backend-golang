@@ -18,7 +18,7 @@ type Company struct {
 }
 
 type CompanyCommonAttributes struct {
-	SchemaName   string                 `bun:"schema_name,notnull"`
+	SchemaName   string                 `bun:"schema_name,notnull" json:"schema_name"`
 	BusinessName string                 `bun:"business_name,notnull" json:"business_name"`
 	TradeName    string                 `bun:"trade_name,notnull" json:"trade_name"`
 	Cnpj         string                 `bun:"cnpj,notnull" json:"cnpj"`
