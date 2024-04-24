@@ -67,3 +67,7 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.CloseShift) (err
 func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IdRequest) (shift *shiftentity.Shift, err error) {
 	return s.r.GetShiftByID(ctx, dtoID.ID.String())
 }
+
+func (s *Service) GetOpenedShift(ctx context.Context) (shift *shiftentity.Shift, err error) {
+	return s.r.GetOpenedShift(ctx)
+}
