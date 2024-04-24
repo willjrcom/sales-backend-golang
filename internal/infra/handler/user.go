@@ -31,7 +31,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 		c.Post("/update", h.handlerUpdateUser)
 		c.Post("/login", h.handlerLoginUser)
 		c.Post("/access", h.handlerAccess)
-		c.Delete("", h.handlerDeleteUser)
+		c.Delete("/", h.handlerDeleteUser)
 	})
 
 	unprotectedRoutes := []string{
