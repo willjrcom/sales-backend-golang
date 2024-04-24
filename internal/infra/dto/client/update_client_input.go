@@ -17,7 +17,7 @@ type UpdateClientInput struct {
 }
 
 func (r *UpdateClientInput) validate() error {
-	if r.Email != nil && strings.Contains(*r.Email, "@") {
+	if r.Email != nil && !strings.Contains(*r.Email, "@") {
 		return ErrInvalidEmail
 	}
 
@@ -40,6 +40,16 @@ func (r *UpdateClientInput) UpdateModel(client *cliententity.Client) error {
 	}
 	if r.Birthday != nil {
 		client.Birthday = r.Birthday
+	}
+	if r.Contact != nil {
+		if err := client.AddContact(r.Contact, personentity.ContactTypeEmployee); err != nil {
+			return err
+		}
+	}
+	if r.Address != nil {
+		if err := client.AddAddress(&r.Address.AddressCommonAttributes); err != nil {
+			return err
+		}
 	}
 
 	return nil

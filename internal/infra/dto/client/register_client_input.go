@@ -2,6 +2,7 @@ package clientdto
 
 import (
 	"errors"
+	"strings"
 
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
@@ -26,6 +27,10 @@ func (r *RegisterClientInput) validate() error {
 	}
 	if r.Address == nil {
 		return ErrAddressRequired
+	}
+
+	if r.Email != nil && !strings.Contains(*r.Email, "@") {
+		return ErrInvalidEmail
 	}
 
 	return nil

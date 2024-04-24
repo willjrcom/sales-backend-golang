@@ -2,6 +2,7 @@ package employeedto
 
 import (
 	"errors"
+	"strings"
 
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
@@ -26,6 +27,10 @@ func (r *RegisterEmployeeInput) validate() error {
 	}
 	if r.Address == nil {
 		return ErrAddressRequired
+	}
+
+	if r.Email != nil && !strings.Contains(*r.Email, "@") {
+		return ErrInvalidEmail
 	}
 
 	return nil
