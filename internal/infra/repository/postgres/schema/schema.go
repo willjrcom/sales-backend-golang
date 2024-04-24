@@ -29,9 +29,5 @@ func (r *SchemaRepositoryBun) NewSchema(ctx context.Context) error {
 		return err
 	}
 
-	if err := setupFtSearch(ctx, r.db); err != nil {
-		return err
-	}
-
 	return nil
 }

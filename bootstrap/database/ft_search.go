@@ -1,4 +1,4 @@
-package schemarepositorybun
+package database
 
 import (
 	"errors"
@@ -7,7 +7,11 @@ import (
 	"golang.org/x/net/context"
 )
 
-func setupFtSearch(ctx context.Context, db *bun.DB) error {
+func SetupContactFtSearch(ctx context.Context, db *bun.DB) error {
+	if err := ChangeSchema(ctx, db); err != nil {
+		return err
+	}
+
 	column := `
 		ALTER TABLE contacts ADD COLUMN IF NOT EXISTS ts tsvector
 		GENERATED ALWAYS AS (

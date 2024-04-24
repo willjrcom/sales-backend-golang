@@ -181,6 +181,14 @@ func LoadAllSchemas(ctx context.Context, db *bun.DB) error {
 		if err := LoadCompanyModels(ctx, db); err != nil {
 			return err
 		}
+
+		if _, err := db.QueryContext(ctx, "CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_contact ON contacts (ddd, number);"); err != nil {
+			return err
+		}
+
+		if err := SetupContactFtSearch(ctx, db); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -227,6 +235,7 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*tableentity.Table)(nil))
 	db.RegisterModel((*shiftentity.Shift)(nil))
 	db.RegisterModel((*companyentity.Company)(nil))
+
 	return nil
 }
 
