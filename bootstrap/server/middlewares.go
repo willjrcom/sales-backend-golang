@@ -46,10 +46,10 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 				return
 			}
 
-			token, error := jwtservice.ValidateToken(ctx, tokenString)
+			token, err := jwtservice.ValidateToken(ctx, tokenString)
 
-			if error != nil {
-				jsonpkg.ResponseJson(w, r, http.StatusUnauthorized, jsonpkg.Error{Message: error.Error()})
+			if err != nil {
+				jsonpkg.ResponseJson(w, r, http.StatusUnauthorized, jsonpkg.Error{Message: err.Error()})
 				return
 			}
 
