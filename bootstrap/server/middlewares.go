@@ -19,10 +19,19 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 
 		// Verificar se a URL atual está na lista de URLs afetados
 		shouldValidate := true
-		for _, url := range c.UnprotectedRoutes {
-			if strings.Contains(r.URL.Path, url) {
-				shouldValidate = false
-				break
+		unprotectUserDelete := r.Method == http.MethodDelete && strings.HasSuffix(r.URL.Path, "/user")
+
+		if unprotectUserDelete {
+			shouldValidate = false
+		}
+
+		if shouldValidate {
+			for _, url := range c.UnprotectedRoutes {
+
+				if strings.Contains(r.URL.Path, url) || unprotectUserDelete {
+					shouldValidate = false
+					break
+				}
 			}
 		}
 
