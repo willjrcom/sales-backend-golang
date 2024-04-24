@@ -9,7 +9,6 @@ import (
 
 var (
 	ErrEmailInvalid             = errors.New("email is invalid")
-	ErrPasswordInvalid          = errors.New("password is invalid")
 	ErrMustHaveAtLeastOneSchema = errors.New("must have at least one schema")
 )
 
@@ -23,8 +22,8 @@ func (u *CreateUserInput) validate() error {
 		return ErrEmailInvalid
 	}
 
-	if !utils.IsValidPassword(u.Password) && !u.GeneratePassword {
-		return ErrPasswordInvalid
+	if err := utils.ValidatePassword(u.Password); err != nil && !u.GeneratePassword {
+		return err
 	}
 
 	return nil

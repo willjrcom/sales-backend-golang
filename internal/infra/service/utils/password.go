@@ -1,29 +1,32 @@
 package utils
 
-import "regexp"
+import (
+	"errors"
+	"regexp"
+)
 
-func IsValidPassword(password string) bool {
+func ValidatePassword(password string) error {
 	if len(password) < 8 {
-		return false
+		return errors.New("password must be at least 8 characters long")
 	}
 
 	if !containsUppercase(password) {
-		return false
+		return errors.New("password must contain at least one uppercase letter")
 	}
 
 	if !containsLowercase(password) {
-		return false
+		return errors.New("password must contain at least one lowercase letter")
 	}
 
 	if !containsDigit(password) {
-		return false
+		return errors.New("password must contain at least one digit")
 	}
 
 	if !containsSymbol(password) {
-		return false
+		return errors.New("password must contain at least one symbol")
 	}
 
-	return true
+	return nil
 }
 
 func containsUppercase(s string) bool {

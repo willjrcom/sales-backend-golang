@@ -1,6 +1,7 @@
 package userrepositorybun
 
 import (
+	"errors"
 	"sync"
 
 	"github.com/google/uuid"
@@ -49,7 +50,16 @@ func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *companyentity.
 	return nil
 }
 
-func (r *UserRepositoryBun) DeleteUser(ctx context.Context, user *companyentity.User) error {
+func (r *UserRepositoryBun) LoginAndDeleteUser(ctx context.Context, user *companyentity.User) error {
+	userLogged, err := r.LoginUser(ctx, user)
+	if err != nil {
+		return err
+	}
+
+	if userLogged == nil {
+		return errors.New("invalid email or password")
+	}
+
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -57,7 +67,7 @@ func (r *UserRepositoryBun) DeleteUser(ctx context.Context, user *companyentity.
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&companyentity.User{}).Where("u.email = ? AND u.hash = ?", user.Email, user.Hash).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&companyentity.User{}).Where("u.email = ?", user.Email).Exec(ctx); err != nil {
 		return err
 	}
 

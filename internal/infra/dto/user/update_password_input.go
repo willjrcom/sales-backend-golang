@@ -26,8 +26,8 @@ func (r *UpdatePasswordInput) validate() error {
 		return ErrMustBeDifferentPassword
 	}
 
-	if !utils.IsValidPassword(r.NewPassword) {
-		return ErrPasswordInvalid
+	if err := utils.ValidatePassword(r.NewPassword); err != nil {
+		return err
 	}
 
 	return nil

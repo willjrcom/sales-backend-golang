@@ -13,6 +13,12 @@ import (
 	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
 )
 
+var (
+	ErrUserAlreadyExists = errors.New("user already exists")
+	ErrInvalidEmail      = errors.New("invalid email")
+	ErrInvalidPassword   = errors.New("invalid password")
+)
+
 type Service struct {
 	r companyentity.UserRepository
 }
@@ -26,6 +32,10 @@ func (s *Service) CreateUser(ctx context.Context, dto *userdto.CreateUserInput) 
 
 	if err != nil {
 		return uuid.Nil, err
+	}
+
+	if id, _ := s.r.GetIDByEmail(ctx, user.Email); id != uuid.Nil {
+		return uuid.Nil, ErrUserAlreadyExists
 	}
 
 	hash, err := bcryptservice.HashPassword(dto.Password)
@@ -45,9 +55,13 @@ func (s *Service) UpdateUser(ctx context.Context, dto *userdto.UpdatePasswordInp
 		return err
 	}
 
+	if id, _ := s.r.GetIDByEmail(ctx, user.Email); id == uuid.Nil {
+		return ErrInvalidEmail
+	}
+
 	userLoggedIn, err := s.r.LoginUser(ctx, user)
 	if err != nil {
-		return err
+		return ErrInvalidPassword
 	}
 
 	hash, err := bcryptservice.HashPassword(dto.NewPassword)
@@ -128,15 +142,5 @@ func (s *Service) DeleteUser(ctx context.Context, dto *userdto.DeleteUserInput) 
 		return err
 	}
 
-	userLogged, err := s.r.LoginUser(ctx, user)
-
-	if err != nil {
-		return err
-	}
-
-	if userLogged == nil {
-		return errors.New("invalid email or password")
-	}
-
-	return s.r.DeleteUser(ctx, user)
+	return s.r.LoginAndDeleteUser(ctx, user)
 }

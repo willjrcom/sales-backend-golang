@@ -35,9 +35,12 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 	})
 
 	unprotectedRoutes := []string{
+		fmt.Sprintf("%s/new", route),
 		fmt.Sprintf("%s/login", route),
 		fmt.Sprintf("%s/access", route),
+		fmt.Sprintf("%s/update", route),
 	}
+
 	return handler.NewHandler(route, c, unprotectedRoutes...)
 }
 

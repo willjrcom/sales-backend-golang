@@ -14,8 +14,8 @@ func (u *LoginUserInput) validate() error {
 		return ErrEmailInvalid
 	}
 
-	if !utils.IsValidPassword(u.Password) && u.Password != "12345" {
-		return ErrPasswordInvalid
+	if err := utils.ValidatePassword(u.Password); err != nil && u.Password != "12345" {
+		return err
 	}
 
 	return nil

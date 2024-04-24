@@ -14,8 +14,8 @@ func (u *DeleteUserInput) validate() error {
 		return ErrEmailInvalid
 	}
 
-	if !utils.IsValidPassword(u.Password) {
-		return ErrPasswordInvalid
+	if err := utils.ValidatePassword(u.Password); err != nil {
+		return err
 	}
 
 	return nil
