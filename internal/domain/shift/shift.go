@@ -19,7 +19,6 @@ type Shift struct {
 
 type ShiftCommonAttributes struct {
 	CurrentOrderNumber int                      `bun:"current_order_number,notnull" json:"current_order_number"`
-	Day                *time.Time               `bun:"day,notnull" json:"day"`
 	Orders             []orderentity.Order      `bun:"rel:has-many,join:id=shift_id" json:"orders,omitempty"`
 	Redeems            []string                 `bun:"redeems,type:json" json:"redeems,omitempty"`
 	StartChange        float32                  `bun:"start_change" json:"start_change"`
@@ -33,11 +32,10 @@ type OrderTimeLogs struct {
 	ClosedAt *time.Time `bun:"finished_at" json:"finished_at,omitempty"`
 }
 
-func (s *Shift) OpenShift() (err error) {
+func (s *Shift) OpenShift() {
 	s.CurrentOrderNumber = 0
 	s.OpenedAt = &time.Time{}
 	*s.OpenedAt = time.Now()
-	return nil
 }
 
 func (s *Shift) CloseShift(endChange float32) (err error) {
