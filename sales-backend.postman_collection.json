@@ -123,7 +123,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
+									"raw": "// NEED LOGIN\r\n{}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -140,7 +140,7 @@
 										"header": [
 											{
 												"key": "id-token",
-												"value": "{{IDToken}}",
+												"value": "",
 												"type": "text"
 											}
 										],
@@ -153,7 +153,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/product/{{product_id}}"
+										"url": "http://localhost:8080/product/"
 									},
 									"status": "OK",
 									"code": 200,
@@ -197,7 +197,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
+									"raw": "// NEED LOGIN\r\n{}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -214,7 +214,7 @@
 										"header": [
 											{
 												"key": "id-token",
-												"value": "{{IDToken}}",
+												"value": "",
 												"type": "text"
 											}
 										],
@@ -227,7 +227,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/product/all"
+										"url": "http://localhost:8080/product/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -362,7 +362,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
+									"raw": "// NEED LOGIN\r\n{}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -379,7 +379,7 @@
 										"header": [
 											{
 												"key": "id-token",
-												"value": "{{IDToken}}",
+												"value": "",
 												"type": "text"
 											}
 										],
@@ -392,7 +392,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/{{category_product_id}}"
+										"url": "http://localhost:8080/category-product/"
 									},
 									"status": "OK",
 									"code": 200,
@@ -436,7 +436,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
+									"raw": "// NEED LOGIN\r\n{}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -453,7 +453,7 @@
 										"header": [
 											{
 												"key": "id-token",
-												"value": "{{IDToken}}",
+												"value": "",
 												"type": "text"
 											}
 										],
@@ -466,7 +466,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/all"
+										"url": "http://localhost:8080/category-product/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -990,7 +990,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
+									"raw": "// NEED LOGIN\r\n{}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1076,7 +1076,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
+									"raw": "// NEED LOGIN\r\n{}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2192,7 +2192,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
+									"raw": "// NEED LOGIN\r\n{}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2500,7 +2500,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n",
+							"raw": "// NEED LOGIN\r\n{}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2574,7 +2574,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n",
+							"raw": "// NEED LOGIN\r\n{}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2951,7 +2951,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n",
+							"raw": "// NEED LOGIN\r\n{}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3025,7 +3025,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n",
+							"raw": "// NEED LOGIN\r\n{}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3250,7 +3250,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n",
+							"raw": "// NEED LOGIN\r\n{}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3336,7 +3336,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n",
+							"raw": "// NEED LOGIN\r\n{}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3624,7 +3624,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n",
+							"raw": "// NEED LOGIN\r\n{}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4454,7 +4454,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\n{\n    \"schema\": \"{{schema_name}}\"\n    \n}",
+							"raw": "// NEED LOGIN\n{\n    \"schema\": \"{{schema_name}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4750,7 +4750,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n",
+							"raw": "// NEED LOGIN\r\n{}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4895,7 +4895,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n",
+							"raw": "// NEED LOGIN\r\n{}",
 							"options": {
 								"raw": {
 									"language": "json"
