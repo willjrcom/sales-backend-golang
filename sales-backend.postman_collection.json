@@ -35,11 +35,6 @@
 								"method": "POST",
 								"header": [
 									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									},
-									{
 										"key": "Content-Type",
 										"value": "multipart/form-data",
 										"type": "text",
@@ -63,13 +58,7 @@
 							"name": "update",
 							"request": {
 								"method": "PATCH",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"code\": \"a12\",\n    \"name\": \"Pizza de Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 15.0,\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
@@ -87,13 +76,7 @@
 							"name": "delete",
 							"request": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -114,13 +97,7 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n{}",
@@ -140,7 +117,7 @@
 										"header": [
 											{
 												"key": "id-token",
-												"value": "",
+												"value": "{{IDToken}}",
 												"type": "text"
 											}
 										],
@@ -153,7 +130,7 @@
 												}
 											}
 										},
-										"url": "http://localhost:8080/product/"
+										"url": "{{server}}/product/{{product_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -188,13 +165,7 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n{}",
@@ -214,7 +185,7 @@
 										"header": [
 											{
 												"key": "id-token",
-												"value": "",
+												"value": "{{IDToken}}",
 												"type": "text"
 											}
 										],
@@ -227,7 +198,7 @@
 												}
 											}
 										},
-										"url": "http://localhost:8080/product/all"
+										"url": "{{server}}/product/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -278,13 +249,7 @@
 							],
 							"request": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"name\": \"Pizza\",\n    \"category_to_additional\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ]\n}",
@@ -302,13 +267,7 @@
 							"name": "update",
 							"request": {
 								"method": "PATCH",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"removable_items\": [\"cebola\", \"tomate\"]\n}",
@@ -326,13 +285,7 @@
 							"name": "deletar",
 							"request": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -353,13 +306,7 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n{}",
@@ -379,7 +326,7 @@
 										"header": [
 											{
 												"key": "id-token",
-												"value": "",
+												"value": "{{IDToken}}",
 												"type": "text"
 											}
 										],
@@ -392,7 +339,7 @@
 												}
 											}
 										},
-										"url": "http://localhost:8080/category-product/"
+										"url": "{{server}}/category-product/{{category_product_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -427,13 +374,7 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n{}",
@@ -453,7 +394,7 @@
 										"header": [
 											{
 												"key": "id-token",
-												"value": "",
+												"value": "{{IDToken}}",
 												"type": "text"
 											}
 										],
@@ -466,7 +407,7 @@
 												}
 											}
 										},
-										"url": "http://localhost:8080/category-product/all"
+										"url": "{{server}}/category-product/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -517,13 +458,7 @@
 							],
 							"request": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"name\": \"P\",\n    \"active\": \"false\",\n    \"category_id\": \"{{category_product_id}}\"\n}",
@@ -541,13 +476,7 @@
 							"name": "update",
 							"request": {
 								"method": "PATCH",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"name\": \"G\",\n    \"active\": \"true\"\n}",
@@ -565,13 +494,7 @@
 							"name": "deletar",
 							"request": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -608,13 +531,7 @@
 							],
 							"request": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"name\": \"Prensar\",\n    \"order\": 3,\n    \"ideal_time\": \"3m30s\", // Must be add \"m\" on minute and add \"s\" on second\n    \"experimental_error\": \"30s\", // Must be add \"m\" on minute and add \"s\" on second\n    \"category_id\": \"{{category_product_id}}\"\n}",
@@ -632,13 +549,7 @@
 							"name": "update",
 							"request": {
 								"method": "PATCH",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n",
@@ -656,13 +567,7 @@
 							"name": "deletar",
 							"request": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -699,13 +604,7 @@
 							],
 							"request": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"quantity\": 2,\n    \"category_id\": \"{{category_product_id}}\"\n}",
@@ -723,13 +622,7 @@
 							"name": "update",
 							"request": {
 								"method": "PATCH",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"quantity\": \"2.5\"\n}",
@@ -747,13 +640,7 @@
 							"name": "deletar",
 							"request": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -796,13 +683,7 @@
 									],
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\r\n",
@@ -832,13 +713,7 @@
 									],
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\r\n",
@@ -868,13 +743,7 @@
 									],
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\r\n",
@@ -904,13 +773,7 @@
 									],
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\r\n",
@@ -940,13 +803,7 @@
 									],
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\r\n",
@@ -981,13 +838,7 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n{}",
@@ -1067,13 +918,7 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n{}",
@@ -1138,13 +983,7 @@
 							"name": "update observation",
 							"request": {
 								"method": "PUT",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"observation\": \"entregar as 9h\"\n}",
@@ -1162,13 +1001,7 @@
 							"name": "add payment",
 							"request": {
 								"method": "PUT",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"is_paid\": true,\n    \"total_paid\": 10,\n    \"change\": 0.0,\n    \"method\": \"MasterCard\",\n    \"order_id\": \"{{order_id}}\"\n}",
@@ -1186,13 +1019,7 @@
 							"name": "update schedule",
 							"request": {
 								"method": "PUT",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"start_at\": \"2024-01-17T20:39:23.107002Z\" // Must be after now\n}",
@@ -1232,13 +1059,7 @@
 									],
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\n{\n    \"client_id\": \"{{client_id}}\"\n}",
@@ -1268,13 +1089,7 @@
 									],
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\n{\n    \"driver_id\": \"{{employee_id}}\"\n}",
@@ -1304,13 +1119,7 @@
 									],
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\n{\n    \"client_id\": \"{{client_id}}\"\n}",
@@ -1342,13 +1151,7 @@
 							],
 							"request": {
 								"method": "PUT",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"driver_id\": \"{{employee_id}}\"\n}",
@@ -1378,13 +1181,7 @@
 							],
 							"request": {
 								"method": "PUT",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"address_id\": \"a9c5af44-dcce-488d-b880-98419248e930\"\n}",
@@ -1417,13 +1214,7 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN",
@@ -1507,13 +1298,7 @@
 							],
 							"request": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"name\": \"Mesa 1 - nome do cliente\",\n    \"waiter_id\": \"{{employee_id}}\",\n    \"order_id\": \"{{order_id}}\",\n    \"table_id\": \"{{table_id}}\"\n\n}",
@@ -1531,13 +1316,7 @@
 							"name": "delete by id",
 							"request": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -1558,13 +1337,7 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -1585,13 +1358,7 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -1631,13 +1398,7 @@
 									],
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\n{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\"\n}",
@@ -1671,13 +1432,7 @@
 									],
 									"request": {
 										"method": "DELETE",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\n{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\"\n}",
@@ -1713,13 +1468,7 @@
 							],
 							"request": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"order_id\": \"{{order_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"quantity_id\": \"{{quantity_category_id}}\"\n}",
@@ -1737,13 +1486,7 @@
 							"name": "delete",
 							"request": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -1769,13 +1512,7 @@
 									"name": "start",
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\r\n",
@@ -1793,13 +1530,7 @@
 									"name": "ready",
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\r\n",
@@ -1817,13 +1548,7 @@
 									"name": "cancel",
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\r\n",
@@ -1846,13 +1571,7 @@
 									"name": "add complement",
 									"request": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\r\n",
@@ -1870,13 +1589,7 @@
 									"name": "delete complement",
 									"request": {
 										"method": "DELETE",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\r\n",
@@ -1899,13 +1612,7 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -1923,13 +1630,7 @@
 							"name": "get all",
 							"request": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"status\": \"Pending\"\n}",
@@ -1994,13 +1695,7 @@
 							"name": "by orderID and status",
 							"request": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"status\": \"Pending\",\n    \"order_id\": \"{{order_id}}\"\n}",
@@ -2065,13 +1760,7 @@
 							"name": "delete",
 							"request": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -2108,13 +1797,7 @@
 							],
 							"request": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"employee_id\": \"{{employee_id}}\",\n    \"item_id\": \"{{item_id}}\",\n    \"process_rule_id\": \"{{process_rule_category_id}}\"\n}",
@@ -2132,13 +1815,7 @@
 							"name": "update",
 							"request": {
 								"method": "PATCH",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"name\": \"Cortar pão\",\n    \"order\": 0,\n    \"ideal_time\": \"\",\n    \"experimental_error\": \"\"\n}",
@@ -2156,13 +1833,7 @@
 							"name": "deletar",
 							"request": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -2183,13 +1854,7 @@
 							},
 							"request": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n{}",
@@ -2275,13 +1940,7 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\n{\n    \"name\": \"William junior 3\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\",\n        \"complement\": \"\",\n        \"reference\": \"\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
@@ -2346,13 +2005,7 @@
 					"name": "update",
 					"request": {
 						"method": "PATCH",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"William junior\",\r\n    \"contact\": \"11963849111\",\r\n    \"address\": {\r\n        \"street\": \"Rua piedade\",\r\n        \"number\": \"221\",\r\n        \"neighborhood\": \"Jardim Leocadia\",\r\n        \"city\": \"Sorocaba\",\r\n        \"state\": \"SP\",\r\n        \"complement\": \"\",\r\n        \"reference\": \"\"\r\n    },\r\n    \"cpf\": \"43637799855\",\r\n    \"email\": \"will@gmail.com\"\r\n}",
@@ -2417,13 +2070,7 @@
 					"name": "deletar",
 					"request": {
 						"method": "DELETE",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n",
@@ -2491,13 +2138,7 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n{}",
@@ -2565,13 +2206,7 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n{}",
@@ -2636,13 +2271,7 @@
 					"name": "get by contact",
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\n{\n    \"ddd\": \"11\",\n    \"number\": \"963849111\"\n}",
@@ -2726,13 +2355,7 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\n{\n    \"name\": \"William junior\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\",\n        \"complement\": \"\",\n        \"reference\": \"\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
@@ -2797,13 +2420,7 @@
 					"name": "update",
 					"request": {
 						"method": "PATCH",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"William junior 1\",\r\n    \"cpf\": \"436377998551\",\r\n    \"contact\": \"11963849111\",\r\n    \"email\": \"will1@gmail.com\",\r\n    \"address\": {\r\n        \"street\": \"Rua piedade\",\r\n        \"number\": \"221\",\r\n        \"neighborhood\": \"Jardim Leocadia\",\r\n        \"city\": \"Sorocaba 1\",\r\n        \"state\": \"SP\"\r\n    }\r\n}",
@@ -2868,13 +2485,7 @@
 					"name": "deletar",
 					"request": {
 						"method": "DELETE",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n",
@@ -2942,13 +2553,7 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n{}",
@@ -3016,13 +2621,7 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n{}",
@@ -3109,13 +2708,7 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\n{\n    \"attendant_id\": \"{{employee_id}}\",\n    \"start_change\": 10.00\n}",
@@ -3241,13 +2834,7 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n{}",
@@ -3327,13 +2914,7 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n{}",
@@ -3398,13 +2979,7 @@
 					"name": "close shift",
 					"request": {
 						"method": "PUT",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\n{\n    \"end_change\": 20\n}",
@@ -3539,14 +3114,7 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "",
-								"value": "",
-								"type": "text",
-								"disabled": true
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// DON'T NEED LOGIN\n{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"williamjunior69@gmail.com\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"],\n    \"trade_name\": \"ibiti\"\n}",
@@ -3615,13 +3183,7 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n{}",
@@ -3728,13 +3290,7 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\n{\n    \"email\": \"{{user_email}}\"\n}",
@@ -3857,13 +3413,7 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\n{\n    \"email\": \"{{user_email}}\"\n}",
@@ -4229,7 +3779,15 @@
 									"  pm.expect(responseData).to.exist;",
 									"});",
 									"",
-									""
+									"var template = `",
+									"<p>No data available to visualize</p>",
+									"`;",
+									"",
+									"function constructVisualizerPayload() {",
+									"    return {response: \"foi\"};",
+									"}",
+									"",
+									"pm.visualizer.set(template, constructVisualizerPayload());"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -4238,23 +3796,17 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"old_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass1!\"\n}",
+							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"current_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass2!\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
 								}
 							}
 						},
-						"url": "{{server}}/user/update"
+						"url": "{{server}}/user/update-password"
 					},
 					"response": [
 						{
@@ -4445,13 +3997,7 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "access-token",
-								"value": "{{accessToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\n{\n    \"schema\": \"{{schema_name}}\"\n}",
@@ -4574,13 +4120,7 @@
 					],
 					"request": {
 						"method": "DELETE",
-						"header": [
-							{
-								"key": "access-token",
-								"value": "{{accessToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
@@ -4667,13 +4207,7 @@
 					],
 					"request": {
 						"method": "POST",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\n{\n    \"name\": \"Mesa 1\",\n    \"is_available\": true\n}",
@@ -4741,13 +4275,7 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n{}",
@@ -4812,13 +4340,7 @@
 					"name": "delete by id",
 					"request": {
 						"method": "DELETE",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n",
@@ -4886,13 +4408,7 @@
 					},
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "id-token",
-								"value": "{{IDToken}}",
-								"type": "text"
-							}
-						],
+						"header": [],
 						"body": {
 							"mode": "raw",
 							"raw": "// NEED LOGIN\r\n{}",
@@ -4956,6 +4472,13 @@
 			]
 		}
 	],
+	"auth": {
+		"type": "apikey",
+		"apikey": {
+			"value": "{{IDToken}}",
+			"key": "id-token"
+		}
+	},
 	"event": [
 		{
 			"listen": "prerequest",
