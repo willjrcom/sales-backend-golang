@@ -12,9 +12,9 @@ var (
 )
 
 type UpdatePasswordInput struct {
-	Email       string `json:"email"`
-	OldPassword string `json:"old_password"`
-	NewPassword string `json:"new_password"`
+	Email           string `json:"email"`
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
 }
 
 func (r *UpdatePasswordInput) validate() error {
@@ -22,7 +22,7 @@ func (r *UpdatePasswordInput) validate() error {
 		return ErrEmailInvalid
 	}
 
-	if r.OldPassword == r.NewPassword {
+	if r.CurrentPassword == r.NewPassword {
 		return ErrMustBeDifferentPassword
 	}
 
@@ -40,7 +40,7 @@ func (r *UpdatePasswordInput) ToModel() (*companyentity.User, error) {
 
 	userCommonAttributes := companyentity.UserCommonAttributes{
 		Email:    r.Email,
-		Password: r.OldPassword,
+		Password: r.CurrentPassword,
 	}
 
 	return companyentity.NewUser(userCommonAttributes), nil

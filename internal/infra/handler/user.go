@@ -28,7 +28,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerNewUser)
-		c.Post("/update", h.handlerUpdateUser)
+		c.Post("/update-password", h.handlerUpdateUser)
 		c.Post("/login", h.handlerLoginUser)
 		c.Post("/access", h.handlerAccess)
 		c.Delete("/", h.handlerDeleteUser)
@@ -38,7 +38,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 		fmt.Sprintf("%s/new", route),
 		fmt.Sprintf("%s/login", route),
 		fmt.Sprintf("%s/access", route),
-		fmt.Sprintf("%s/update", route),
+		fmt.Sprintf("%s/update-password", route),
 	}
 
 	return handler.NewHandler(route, c, unprotectedRoutes...)
