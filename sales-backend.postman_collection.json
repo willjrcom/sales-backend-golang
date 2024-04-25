@@ -3117,7 +3117,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// DON'T NEED LOGIN\n{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"williamjunior69@gmail.com\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"],\n    \"trade_name\": \"ibiti\"\n}",
+							"raw": "// DONT NEED LOGIN\n{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"williamjunior69@gmail.com\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"],\n    \"trade_name\": \"ibiti\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3141,7 +3141,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// DON'T NEED LOGIN\n{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"williamjunior69@gmail.com\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"],\n    \"trade_name\": \"ibiti\"\n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"williamjunior69@gmail.com\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"],\n    \"trade_name\": \"ibiti\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3556,7 +3556,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
+							"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3580,7 +3580,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"williamjunior70@gmail.com\",\n    \"password\": \"{{user_password}}\"\n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"williamjunior70@gmail.com\",\n    \"password\": \"{{user_password}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3627,7 +3627,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"williamjunior70@gmail.com\",\n    \"password\": \"{{user_password}}\"\n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"williamjunior70@gmail.com\",\n    \"password\": \"{{user_password}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3674,7 +3674,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"williamjunior71@gmail.com\",\n    \"password\": \"1\"\n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"williamjunior71@gmail.com\",\n    \"password\": \"1\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3721,7 +3721,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"williamjunior71@gmail.com\",\n    \"password\": \"11111111\"\n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"williamjunior71@gmail.com\",\n    \"password\": \"11111111\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3799,7 +3799,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"current_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass2!\"\n}",
+							"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"current_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass2!\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3822,7 +3822,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"old_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass2!\"\n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"old_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass2!\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3868,7 +3868,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"old_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass2!\"\n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"old_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass2!\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3924,7 +3924,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n    \n}",
+							"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n    \n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3941,7 +3941,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n    \n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n    \n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4123,7 +4123,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
+							"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4146,7 +4146,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// DON'T NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
