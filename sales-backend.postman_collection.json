@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "9ba14927-a0bb-494d-9a5d-dd205a34a46d",
+		"_postman_id": "f9967316-c7c9-4d7a-9316-21b29849c65c",
 		"name": "sales-backend",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "28610432"
@@ -20,8 +20,11 @@
 									"script": {
 										"exec": [
 											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"product_id\", task_id)"
+											"let product_id = response.data",
+											"",
+											"if (product_id != null) {",
+											"    pm.collectionVariables.set(\"product_id\", product_id)",
+											"}"
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -114,23 +117,8 @@
 									"name": "get by id",
 									"originalRequest": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": "{{server}}/product/{{product_id}}"
+										"header": [],
+										"url": "{{server}}/product/"
 									},
 									"status": "OK",
 									"code": 200,
@@ -182,22 +170,7 @@
 									"name": "get all",
 									"originalRequest": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
+										"header": [],
 										"url": "{{server}}/product/all"
 									},
 									"status": "OK",
@@ -239,8 +212,11 @@
 									"script": {
 										"exec": [
 											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"category_product_id\", task_id)"
+											"let category_product_id = response.data",
+											"",
+											"if (category_product_id != null) {",
+											"    pm.collectionVariables.set(\"category_product_id\", category_product_id)",
+											"}"
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -323,23 +299,8 @@
 									"name": "get by id",
 									"originalRequest": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": "{{server}}/category-product/{{category_product_id}}"
+										"header": [],
+										"url": "{{server}}/category-product/"
 									},
 									"status": "OK",
 									"code": 200,
@@ -391,22 +352,7 @@
 									"name": "get all",
 									"originalRequest": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
+										"header": [],
 										"url": "{{server}}/category-product/all"
 									},
 									"status": "OK",
@@ -448,8 +394,11 @@
 									"script": {
 										"exec": [
 											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"size_category_id\", task_id)"
+											"let size_category_id = response.data",
+											"",
+											"if (size_category_id != null) {",
+											"    pm.collectionVariables.set(\"size_category_id\", size_category_id)",
+											"}"
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -521,8 +470,11 @@
 									"script": {
 										"exec": [
 											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"process_rule_category_id\", task_id)"
+											"let process_rule_category_id = response.data",
+											"",
+											"if (process_rule_category_id != null) {",
+											"    pm.collectionVariables.set(\"process_rule_category_id\", process_rule_category_id)",
+											"}"
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -594,8 +546,11 @@
 									"script": {
 										"exec": [
 											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"quantity_category_id\", task_id)"
+											"let quantity_category_id = response.data",
+											"",
+											"if (quantity_category_id != null) {",
+											"    pm.collectionVariables.set(\"quantity_category_id\", quantity_category_id)",
+											"}"
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -855,22 +810,7 @@
 									"name": "get by id",
 									"originalRequest": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
+										"header": [],
 										"url": "{{server}}/order/{{order_id}}"
 									},
 									"status": "OK",
@@ -935,22 +875,7 @@
 									"name": "get all",
 									"originalRequest": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
+										"header": [],
 										"url": "{{server}}/order/all"
 									},
 									"status": "OK",
@@ -1049,8 +974,11 @@
 											"script": {
 												"exec": [
 													"let response = pm.response.json()",
-													"let task_id = response.data",
-													"pm.collectionVariables.set(\"order_delivery_id\", task_id)"
+													"let order_delivery_id = response.data",
+													"",
+													"if (order_delivery_id != null) {",
+													"    pm.collectionVariables.set(\"order_delivery_id\", order_delivery_id)",
+													"}"
 												],
 												"type": "text/javascript",
 												"packages": {}
@@ -1231,22 +1159,7 @@
 									"name": "get all",
 									"originalRequest": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
+										"header": [],
 										"url": "{{server}}/delivery-order/all"
 									},
 									"status": "OK",
@@ -1288,8 +1201,11 @@
 									"script": {
 										"exec": [
 											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"table_order_id\", task_id)"
+											"let table_order_id = response.data",
+											"",
+											"if (table_order_id != null) {",
+											"    pm.collectionVariables.set(\"table_order_id\", table_order_id)",
+											"}"
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -1388,8 +1304,11 @@
 											"script": {
 												"exec": [
 													"let response = pm.response.json()",
-													"let item_id = response.data",
-													"pm.collectionVariables.set(\"additional_item_id\", item_id)"
+													"let additional_item_id = response.data",
+													"",
+													"if (additional_item_id != null) {",
+													"    pm.collectionVariables.set(\"additional_item_id\", additional_item_id)",
+													"}"
 												],
 												"type": "text/javascript",
 												"packages": {}
@@ -1414,22 +1333,6 @@
 								},
 								{
 									"name": "delete additional",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"let response = pm.response.json()",
-													"let item_id = response.data.item_id",
-													"let group_item_id = response.data.group_item_id",
-													"pm.collectionVariables.set(\"item_id\", item_id)",
-													"pm.collectionVariables.set(\"group_item_id\", group_item_id)"
-												],
-												"type": "text/javascript",
-												"packages": {}
-											}
-										}
-									],
 									"request": {
 										"method": "DELETE",
 										"header": [],
@@ -1458,8 +1361,11 @@
 											"let response = pm.response.json()",
 											"let item_id = response.data.item_id",
 											"let group_item_id = response.data.group_item_id",
-											"pm.collectionVariables.set(\"item_id\", item_id)",
-											"pm.collectionVariables.set(\"group_item_id\", group_item_id)"
+											"",
+											"if (item_id != null && group_item_id != null) {",
+											"    pm.collectionVariables.set(\"item_id\", item_id)",
+											"    pm.collectionVariables.set(\"group_item_id\", group_item_id)",
+											"}"
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -1647,13 +1553,7 @@
 									"name": "get all",
 									"originalRequest": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\n{\n    \"status\": \"Pending\"\n}",
@@ -1712,13 +1612,7 @@
 									"name": "by orderID and status",
 									"originalRequest": {
 										"method": "POST",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
+										"header": [],
 										"body": {
 											"mode": "raw",
 											"raw": "// NEED LOGIN\n{\n    \"status\": \"Pending\",\n    \"order_id\": \"{{order_id}}\"\n}",
@@ -1787,8 +1681,11 @@
 									"script": {
 										"exec": [
 											"let response = pm.response.json()",
-											"let task_id = response.data",
-											"pm.collectionVariables.set(\"process_category_id\", task_id)"
+											"let process_category_id = response.data",
+											"",
+											"if (process_category_id != null) {",
+											"    pm.collectionVariables.set(\"process_category_id\", process_category_id)",
+											"}"
 										],
 										"type": "text/javascript",
 										"packages": {}
@@ -1871,22 +1768,7 @@
 									"name": "get all",
 									"originalRequest": {
 										"method": "GET",
-										"header": [
-											{
-												"key": "id-token",
-												"value": "{{IDToken}}",
-												"type": "text"
-											}
-										],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
+										"header": [],
 										"url": "{{server}}/process/all"
 									},
 									"status": "OK",
@@ -1930,8 +1812,11 @@
 							"script": {
 								"exec": [
 									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"client_id\", task_id)"
+									"let client_id = response.data",
+									"",
+									"if (client_id != null) {",
+									"    pm.collectionVariables.set(\"client_id\", client_id)",
+									"}"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -1957,13 +1842,7 @@
 							"name": "create",
 							"originalRequest": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"name\": \"William junior 3\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\",\n        \"complement\": \"\",\n        \"reference\": \"\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
@@ -2022,13 +1901,7 @@
 							"name": "update",
 							"originalRequest": {
 								"method": "PATCH",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"William junior\",\r\n    \"contact\": \"11963849112\",\r\n    \"address\": {\r\n        \"street\": \"Rua piedade\",\r\n        \"number\": \"221\",\r\n        \"neighborhood\": \"Jardim Leocadia\",\r\n        \"city\": \"Sorocaba\",\r\n        \"state\": \"SP\",\r\n        \"complement\": \"\",\r\n        \"reference\": \"\"\r\n    },\r\n    \"cpf\": \"43637799855\",\r\n    \"email\": \"will@gmail.com\"\r\n}",
@@ -2087,13 +1960,7 @@
 							"name": "deletar",
 							"originalRequest": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -2155,22 +2022,7 @@
 							"name": "get by id",
 							"originalRequest": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
+								"header": [],
 								"url": "{{server}}/client/{{client_id}}"
 							},
 							"status": "OK",
@@ -2223,22 +2075,7 @@
 							"name": "get all",
 							"originalRequest": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
+								"header": [],
 								"url": "{{server}}/client/all"
 							},
 							"status": "OK",
@@ -2288,13 +2125,7 @@
 							"name": "get by contact",
 							"originalRequest": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"ddd\": \"11\",\n    \"number\": \"963849111\"\n}",
@@ -2345,8 +2176,11 @@
 							"script": {
 								"exec": [
 									"let response = pm.response.json()",
-									"let task_id = response.data",
-									"pm.collectionVariables.set(\"employee_id\", task_id)"
+									"let employee_id = response.data",
+									"",
+									"if (employee_id != null) {",
+									"    pm.collectionVariables.set(\"employee_id\", employee_id)",
+									"}"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -2372,13 +2206,7 @@
 							"name": "create",
 							"originalRequest": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"name\": \"William junior\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
@@ -2437,13 +2265,7 @@
 							"name": "update",
 							"originalRequest": {
 								"method": "PATCH",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"William junior 1\",\r\n    \"cpf\": \"436377998551\",\r\n    \"contact\": \"11963849111\",\r\n    \"email\": \"will1@gmail.com\",\r\n    \"address\": {\r\n        \"street\": \"Rua piedade\",\r\n        \"number\": \"221\",\r\n        \"neighborhood\": \"Jardim Leocadia\",\r\n        \"city\": \"Sorocaba 1\",\r\n        \"state\": \"SP\"\r\n    }\r\n}",
@@ -2502,13 +2324,7 @@
 							"name": "deletar",
 							"originalRequest": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -2570,22 +2386,7 @@
 							"name": "get by id",
 							"originalRequest": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
+								"header": [],
 								"url": "{{server}}/employee/{{employee_id}}"
 							},
 							"status": "OK",
@@ -2638,22 +2439,7 @@
 							"name": "get all",
 							"originalRequest": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
+								"header": [],
 								"url": "{{server}}/employee/all"
 							},
 							"status": "OK",
@@ -2725,13 +2511,7 @@
 							"name": "open shift",
 							"originalRequest": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"attendant_id\": \"{{employee_id}}\",\n    \"start_change\": 10.00\n}",
@@ -2771,13 +2551,7 @@
 							"name": "start change 0",
 							"originalRequest": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"attendant_id\": \"{{employee_id}}\",\n    \"start_change\": 0\n}",
@@ -2851,22 +2625,7 @@
 							"name": "get by id",
 							"originalRequest": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
+								"header": [],
 								"url": "{{server}}/shift/{{shift_id}}"
 							},
 							"status": "OK",
@@ -2931,22 +2690,7 @@
 							"name": "get current",
 							"originalRequest": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
+								"header": [],
 								"url": "{{server}}/shift/current"
 							},
 							"status": "OK",
@@ -2996,13 +2740,7 @@
 							"name": "close shift",
 							"originalRequest": {
 								"method": "PUT",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"end_change\": 20\n}",
@@ -3042,13 +2780,7 @@
 							"name": "already closed",
 							"originalRequest": {
 								"method": "PUT",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"end_change\": 20\n}",
@@ -3113,6 +2845,9 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -3215,22 +2950,7 @@
 							"name": "get",
 							"originalRequest": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
+								"header": [],
 								"url": {
 									"raw": "{{server}}/company",
 									"host": [
@@ -3307,13 +3027,7 @@
 							"name": "add user to company",
 							"originalRequest": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"email\": \"williamjunior68@gmail.com\"\n}",
@@ -3353,13 +3067,7 @@
 							"name": "already added",
 							"originalRequest": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"email\": \"williamjunior68@gmail.com\"\n}",
@@ -3430,13 +3138,7 @@
 							"name": "remove user to company",
 							"originalRequest": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"email\": \"williamjunior69@gmail.com\"\n}",
@@ -3476,13 +3178,7 @@
 							"name": "already removed",
 							"originalRequest": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"email\": \"williamjunior68@gmail.com\"\n}",
@@ -3545,6 +3241,9 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [
 							{
@@ -3580,7 +3279,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"williamjunior70@gmail.com\",\n    \"password\": \"{{user_password}}\"\n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"williamjunior70@gmail.com\",\n    \"password\": \"\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3795,6 +3494,9 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -3813,16 +3515,10 @@
 							"name": "update password",
 							"originalRequest": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"old_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass2!\"\n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"williamjunior70@gmail.com\",\n    \"old_password\": \"\",\n    \"new_password\": \"Testepass2!\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3859,13 +3555,7 @@
 							"name": "same password",
 							"originalRequest": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"old_password\": \"{{user_password}}\",\n    \"new_password\": \"Testepass2!\"\n}",
@@ -3911,8 +3601,16 @@
 							"script": {
 								"exec": [
 									"let response = pm.response.json()",
+									"",
+									"if (response.message) {",
+									"    return",
+									"}",
+									"",
 									"let accessToken = response.data.accessToken",
-									"pm.collectionVariables.set(\"accessToken\", accessToken)"
+									"",
+									"if (accessToken != null) {",
+									"    pm.collectionVariables.set(\"accessToken\", accessToken)",
+									"}"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -3920,6 +3618,9 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
@@ -3941,7 +3642,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n    \n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"williamjunior70@gmail.com\",\n    \"password\": \"\"\n    \n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3984,10 +3685,10 @@
 							"script": {
 								"exec": [
 									"let response = pm.response.json()",
-									"let iDToken = response.data",
+									"let id_token = response.data",
 									"",
-									"if (iDToken != null) {",
-									"    pm.collectionVariables.set(\"IDToken\", iDToken);",
+									"if (id_token != null) {",
+									"    pm.collectionVariables.set(\"id_token\", id_token);",
 									"}"
 								],
 								"type": "text/javascript",
@@ -4017,7 +3718,7 @@
 								"header": [
 									{
 										"key": "access-token",
-										"value": "{{accessToken}}",
+										"value": "",
 										"type": "text"
 									}
 								],
@@ -4119,6 +3820,9 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "DELETE",
 						"header": [],
 						"body": {
@@ -4140,13 +3844,13 @@
 								"header": [
 									{
 										"key": "access-token",
-										"value": "{{accessToken}}",
+										"value": "",
 										"type": "text"
 									}
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"{{user_email}}\",\n    \"password\": \"{{user_password}}\"\n}",
+									"raw": "// DONT NEED LOGIN\n{\n    \"email\": \"williamjunior70@gmail.com\",\n    \"password\": \"\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4224,13 +3928,7 @@
 							"name": "create",
 							"originalRequest": {
 								"method": "POST",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\n{\n    \"name\": \"Mesa 1\",\n    \"is_available\": true\n}",
@@ -4292,22 +3990,7 @@
 							"name": "get by id",
 							"originalRequest": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
+								"header": [],
 								"url": "{{server}}/table/{{table_id}}"
 							},
 							"status": "OK",
@@ -4357,13 +4040,7 @@
 							"name": "delete by id",
 							"originalRequest": {
 								"method": "DELETE",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
+								"header": [],
 								"body": {
 									"mode": "raw",
 									"raw": "// NEED LOGIN\r\n",
@@ -4425,22 +4102,7 @@
 							"name": "get all",
 							"originalRequest": {
 								"method": "GET",
-								"header": [
-									{
-										"key": "id-token",
-										"value": "{{IDToken}}",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
+								"header": [],
 								"url": "{{server}}/table/all"
 							},
 							"status": "OK",
@@ -4475,7 +4137,7 @@
 	"auth": {
 		"type": "apikey",
 		"apikey": {
-			"value": "{{IDToken}}",
+			"value": "{{id_token}}",
 			"key": "id-token"
 		}
 	},
@@ -4585,7 +4247,7 @@
 			"value": ""
 		},
 		{
-			"key": "IDToken",
+			"key": "id_token",
 			"value": ""
 		},
 		{
@@ -4599,7 +4261,7 @@
 		},
 		{
 			"key": "user_password",
-			"value": ""
+			"value": "Testepass1!"
 		},
 		{
 			"key": "user_id",
@@ -4607,7 +4269,7 @@
 		},
 		{
 			"key": "user_email",
-			"value": "williamjunior70@gmail.com"
+			"value": "williamjunior69@gmail.com"
 		},
 		{
 			"key": "schema_name",
