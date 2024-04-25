@@ -30,6 +30,10 @@ func (s *Service) RegisterProduct(ctx context.Context, dto *productdto.RegisterP
 		return uuid.Nil, err
 	}
 
+	if p, _ := s.rp.GetProductByCode(ctx, product.Code); p != nil {
+		return uuid.Nil, errors.New("code product already exists")
+	}
+
 	if category, err := s.rc.GetCategoryById(ctx, product.CategoryID.String()); err == nil {
 		product.Category = category
 	} else {
@@ -52,6 +56,16 @@ func (s *Service) RegisterProduct(ctx context.Context, dto *productdto.RegisterP
 	}
 
 	return product.ID, nil
+}
+
+func (s *Service) GetProductByCode(ctx context.Context, keys *productdto.Keys) (*productdto.ProductOutput, error) {
+	if product, err := s.rp.GetProductByCode(ctx, keys.Code); err != nil {
+		return nil, err
+	} else {
+		dtoOutput := &productdto.ProductOutput{}
+		dtoOutput.FromModel(product)
+		return dtoOutput, nil
+	}
 }
 
 func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IdRequest, dto *productdto.UpdateProductInput) error {

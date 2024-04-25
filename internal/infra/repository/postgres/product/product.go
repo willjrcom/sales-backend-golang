@@ -80,6 +80,23 @@ func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*
 	return product, nil
 }
 
+func (r *ProductRepositoryBun) GetProductByCode(ctx context.Context, code string) (*productentity.Product, error) {
+	product := &productentity.Product{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(product).Where("product.code = ?", code).Relation("Category").Relation("Size").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return product, nil
+}
+
 func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context) ([]productentity.Product, error) {
 	products := []productentity.Product{}
 

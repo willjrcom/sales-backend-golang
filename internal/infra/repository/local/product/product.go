@@ -60,6 +60,17 @@ func (r *ProductRepositoryLocal) GetProductById(_ context.Context, id string) (*
 	return nil, errProductNotFound
 }
 
+func (r *ProductRepositoryLocal) GetProductByCode(_ context.Context, code string) (*productentity.Product, error) {
+
+	for _, p := range r.products {
+		if p.Code == code {
+			return p, nil
+		}
+	}
+
+	return nil, errProductNotFound
+}
+
 func (r *ProductRepositoryLocal) GetAllProducts(_ context.Context) ([]productentity.Product, error) {
 	products := make([]productentity.Product, 0)
 

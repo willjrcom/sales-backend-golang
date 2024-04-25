@@ -28,6 +28,7 @@ func NewHandlerProduct(productService *productusecases.Service) *handler.Handler
 		c.Patch("/update/{id}", h.handlerUpdateProduct)
 		c.Delete("/{id}", h.handlerDeleteProduct)
 		c.Get("/{id}", h.handlerGetProduct)
+		c.Get("/code/{code}", h.handlerGetProductByCode)
 		c.Get("/all", h.handlerGetAllProducts)
 	})
 
@@ -116,6 +117,27 @@ func (h *handlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Re
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	product, err := h.s.GetProductById(ctx, dtoId)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: product})
+}
+
+func (h *handlerProductImpl) handlerGetProductByCode(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	code := chi.URLParam(r, "code")
+
+	if code == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dto := &productdto.Keys{Code: code}
+
+	product, err := h.s.GetProductByCode(ctx, dto)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
