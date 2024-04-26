@@ -34,10 +34,14 @@ func NewHandlerQuantityCategory(quantityService *quantityusecases.Service) *hand
 
 func (h *handlerQuantityCategoryImpl) handlerRegisterQuantity(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	quantity := &quantitydto.RegisterQuantityInput{}
-	jsonpkg.ParseBody(r, quantity)
 
-	id, err := h.s.RegisterQuantity(ctx, quantity)
+	dtoQuantity := &quantitydto.RegisterQuantityInput{}
+	if err := jsonpkg.ParseBody(r, dtoQuantity); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	id, err := h.s.RegisterQuantity(ctx, dtoQuantity)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -58,10 +62,13 @@ func (h *handlerQuantityCategoryImpl) handlerUpdateQuantity(w http.ResponseWrite
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	Quantity := &quantitydto.UpdateQuantityInput{}
-	jsonpkg.ParseBody(r, Quantity)
+	dtoQuantity := &quantitydto.UpdateQuantityInput{}
+	if err := jsonpkg.ParseBody(r, dtoQuantity); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.UpdateQuantity(ctx, dtoId, Quantity); err != nil {
+	if err := h.s.UpdateQuantity(ctx, dtoId, dtoQuantity); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

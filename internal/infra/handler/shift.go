@@ -36,10 +36,13 @@ func NewHandlerShift(shiftService *shiftusecases.Service) *handler.Handler {
 func (h *handlerShiftImpl) handlerOpenShift(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dto := &shiftdto.OpenShift{}
-	jsonpkg.ParseBody(r, dto)
+	dtoShift := &shiftdto.OpenShift{}
+	if err := jsonpkg.ParseBody(r, dtoShift); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	id, err := h.s.OpenShift(ctx, dto)
+	id, err := h.s.OpenShift(ctx, dtoShift)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -51,10 +54,13 @@ func (h *handlerShiftImpl) handlerOpenShift(w http.ResponseWriter, r *http.Reque
 func (h *handlerShiftImpl) handlerCloseShift(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dto := &shiftdto.CloseShift{}
-	jsonpkg.ParseBody(r, dto)
+	dtoShift := &shiftdto.CloseShift{}
+	if err := jsonpkg.ParseBody(r, dtoShift); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.CloseShift(ctx, dto); err != nil {
+	if err := h.s.CloseShift(ctx, dtoShift); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

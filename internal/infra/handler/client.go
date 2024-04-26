@@ -41,10 +41,14 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 
 func (h *handlerClientImpl) handlerRegisterClient(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	client := &clientdto.RegisterClientInput{}
-	jsonpkg.ParseBody(r, client)
 
-	id, err := h.s.RegisterClient(ctx, client)
+	dtoClient := &clientdto.RegisterClientInput{}
+	if err := jsonpkg.ParseBody(r, dtoClient); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	id, err := h.s.RegisterClient(ctx, dtoClient)
 
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -66,12 +70,13 @@ func (h *handlerClientImpl) handlerUpdateClient(w http.ResponseWriter, r *http.R
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	client := &clientdto.UpdateClientInput{}
-	jsonpkg.ParseBody(r, client)
+	dtoClient := &clientdto.UpdateClientInput{}
+	if err := jsonpkg.ParseBody(r, dtoClient); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	err := h.s.UpdateClient(ctx, dtoId, client)
-
-	if err != nil {
+	if err := h.s.UpdateClient(ctx, dtoId, dtoClient); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -123,6 +128,7 @@ func (h *handlerClientImpl) handlerGetClientById(w http.ResponseWriter, r *http.
 
 func (h *handlerClientImpl) handlerGetClientByContact(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+
 	dtoContact := &keysdto.KeysInput{}
 	if err := jsonpkg.ParseBody(r, dtoContact); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})

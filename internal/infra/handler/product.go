@@ -45,14 +45,18 @@ func (h *handlerProductImpl) handlerRegisterProduct(w http.ResponseWriter, r *ht
 	// defer file.Close()
 
 	ctx := r.Context()
-	product := &productdto.RegisterProductInput{}
-	jsonpkg.ParseBody(r, product)
+
+	dtoProduct := &productdto.RegisterProductInput{}
+	if err := jsonpkg.ParseBody(r, dtoProduct); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
 	// if file != nil {
 	// 	product.Image = &file
 	// }
 
-	id, err := h.s.RegisterProduct(ctx, product)
+	id, err := h.s.RegisterProduct(ctx, dtoProduct)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -73,10 +77,13 @@ func (h *handlerProductImpl) handlerUpdateProduct(w http.ResponseWriter, r *http
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	product := &productdto.UpdateProductInput{}
-	jsonpkg.ParseBody(r, product)
+	dtoProduct := &productdto.UpdateProductInput{}
+	if err := jsonpkg.ParseBody(r, dtoProduct); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.UpdateProduct(ctx, dtoId, product); err != nil {
+	if err := h.s.UpdateProduct(ctx, dtoId, dtoProduct); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

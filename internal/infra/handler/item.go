@@ -42,10 +42,13 @@ func NewHandlerItem(itemService *itemusecases.Service) *handler.Handler {
 func (h *handlerItemImpl) handlerAddItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	addItem := &itemdto.AddItemOrderInput{}
-	jsonpkg.ParseBody(r, addItem)
+	dtoAddItem := &itemdto.AddItemOrderInput{}
+	if err := jsonpkg.ParseBody(r, dtoAddItem); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	ids, err := h.s.AddItemOrder(ctx, addItem)
+	ids, err := h.s.AddItemOrder(ctx, dtoAddItem)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -146,10 +149,13 @@ func (h *handlerItemImpl) handlerAddAdditionalItem(w http.ResponseWriter, r *htt
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	addAdditionalItem := &itemdto.AddAdditionalItemOrderInput{}
-	jsonpkg.ParseBody(r, addAdditionalItem)
+	dtoAddAdditionalItem := &itemdto.AddAdditionalItemOrderInput{}
+	if err := jsonpkg.ParseBody(r, dtoAddAdditionalItem); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	additionalId, err := h.s.AddAdditionalItemOrder(ctx, dtoId, addAdditionalItem)
+	additionalId, err := h.s.AddAdditionalItemOrder(ctx, dtoId, dtoAddAdditionalItem)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

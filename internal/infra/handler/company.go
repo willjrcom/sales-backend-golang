@@ -40,10 +40,13 @@ func NewHandlerCompany(companyService *companyusecases.Service) *handler.Handler
 func (h *handlerCompanyImpl) handlerNewCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	company := &companydto.CompanyInput{}
-	jsonpkg.ParseBody(r, company)
+	dtoCompany := &companydto.CompanyInput{}
+	if err := jsonpkg.ParseBody(r, dtoCompany); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	id, schemaName, err := h.s.NewCompany(ctx, company)
+	id, schemaName, err := h.s.NewCompany(ctx, dtoCompany)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -73,10 +76,13 @@ func (h *handlerCompanyImpl) handlerGetCompany(w http.ResponseWriter, r *http.Re
 func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	user := &companydto.UserInput{}
-	jsonpkg.ParseBody(r, user)
+	dtoUser := &companydto.UserInput{}
+	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.AddUserToCompany(ctx, user); err != nil {
+	if err := h.s.AddUserToCompany(ctx, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -87,10 +93,13 @@ func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *h
 func (h *handlerCompanyImpl) handlerRemoveUserFromCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	user := &companydto.UserInput{}
-	jsonpkg.ParseBody(r, user)
+	dtoUser := &companydto.UserInput{}
+	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.RemoveUserFromCompany(ctx, user); err != nil {
+	if err := h.s.RemoveUserFromCompany(ctx, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

@@ -34,10 +34,14 @@ func NewHandlerSizeCategory(sizeService *sizeusecases.Service) *handler.Handler 
 
 func (h *handlerSizeCategoryImpl) handlerRegisterSize(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	size := &sizedto.RegisterSizeInput{}
-	jsonpkg.ParseBody(r, size)
 
-	id, err := h.s.RegisterSize(ctx, size)
+	dtoSize := &sizedto.RegisterSizeInput{}
+	if err := jsonpkg.ParseBody(r, dtoSize); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	id, err := h.s.RegisterSize(ctx, dtoSize)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -58,10 +62,13 @@ func (h *handlerSizeCategoryImpl) handlerUpdateSize(w http.ResponseWriter, r *ht
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	Size := &sizedto.UpdateSizeInput{}
-	jsonpkg.ParseBody(r, Size)
+	dtoSize := &sizedto.UpdateSizeInput{}
+	if err := jsonpkg.ParseBody(r, dtoSize); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.UpdateSize(ctx, dtoId, Size); err != nil {
+	if err := h.s.UpdateSize(ctx, dtoId, dtoSize); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

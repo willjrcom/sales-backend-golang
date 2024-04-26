@@ -43,8 +43,11 @@ func NewHandlerOrder(orderService *orderusecases.Service) *handler.Handler {
 func (h *handlerOrderImpl) handlerCreateOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	order := &orderdto.CreateOrderInput{}
-	jsonpkg.ParseBody(r, order)
+	dtoOrder := &orderdto.CreateOrderInput{}
+	if err := jsonpkg.ParseBody(r, dtoOrder); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
 	id, err := h.s.CreateDefaultOrder(ctx)
 	if err != nil {
@@ -100,10 +103,13 @@ func (h *handlerOrderImpl) handlerUpdateObservation(w http.ResponseWriter, r *ht
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	observation := &orderdto.UpdateObservationOrder{}
-	jsonpkg.ParseBody(r, observation)
+	dtoObservation := &orderdto.UpdateObservationOrder{}
+	if err := jsonpkg.ParseBody(r, dtoObservation); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.UpdateOrderObservation(ctx, dtoId, observation); err != nil {
+	if err := h.s.UpdateOrderObservation(ctx, dtoId, dtoObservation); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -123,10 +129,13 @@ func (h *handlerOrderImpl) handlerUpdatePaymentMethod(w http.ResponseWriter, r *
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	payment := &orderdto.AddPaymentMethod{}
-	jsonpkg.ParseBody(r, payment)
+	dtoPayment := &orderdto.AddPaymentMethod{}
+	if err := jsonpkg.ParseBody(r, dtoPayment); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.AddPayment(ctx, dtoId, payment); err != nil {
+	if err := h.s.AddPayment(ctx, dtoId, dtoPayment); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -246,10 +255,13 @@ func (h *handlerOrderImpl) handlerScheduleOrder(w http.ResponseWriter, r *http.R
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	observation := &orderdto.UpdateScheduleOrder{}
-	jsonpkg.ParseBody(r, observation)
+	dtoObservation := &orderdto.UpdateScheduleOrder{}
+	if err := jsonpkg.ParseBody(r, dtoObservation); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.UpdateScheduleOrder(ctx, dtoId, observation); err != nil {
+	if err := h.s.UpdateScheduleOrder(ctx, dtoId, dtoObservation); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

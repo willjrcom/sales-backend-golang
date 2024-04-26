@@ -35,10 +35,14 @@ func NewHandlerTable(orderService *tableusecases.Service) *handler.Handler {
 
 func (h *handlerTableImpl) handlerRegisterTable(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	table := &tabledto.CreateTableInput{}
-	jsonpkg.ParseBody(r, table)
 
-	id, err := h.s.CreateTable(ctx, table)
+	dtoTable := &tabledto.CreateTableInput{}
+	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	id, err := h.s.CreateTable(ctx, dtoTable)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

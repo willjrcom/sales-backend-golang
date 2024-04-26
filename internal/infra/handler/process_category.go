@@ -34,10 +34,14 @@ func NewHandlerProcessRuleCategory(processRuleService *processusecases.Service) 
 
 func (h *handlerProcessRuleCategoryImpl) handlerRegisterProcessRule(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	processRule := &processdto.RegisterProcessRuleInput{}
-	jsonpkg.ParseBody(r, processRule)
 
-	id, err := h.s.RegisterProcessRule(ctx, processRule)
+	dtoProcessRule := &processdto.RegisterProcessRuleInput{}
+	if err := jsonpkg.ParseBody(r, dtoProcessRule); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	id, err := h.s.RegisterProcessRule(ctx, dtoProcessRule)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -58,10 +62,13 @@ func (h *handlerProcessRuleCategoryImpl) handlerUpdateProcessRule(w http.Respons
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	ProcessRule := &processdto.UpdateProcessRuleInput{}
-	jsonpkg.ParseBody(r, ProcessRule)
+	dtoProcessRule := &processdto.UpdateProcessRuleInput{}
+	if err := jsonpkg.ParseBody(r, dtoProcessRule); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.UpdateProcessRule(ctx, dtoId, ProcessRule); err != nil {
+	if err := h.s.UpdateProcessRule(ctx, dtoId, dtoProcessRule); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

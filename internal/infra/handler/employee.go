@@ -36,10 +36,14 @@ func NewHandlerEmployee(employeeService *employeeusecases.Service) *handler.Hand
 
 func (h *handlerEmployeeImpl) handlerRegisterEmployee(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	employee := &employeedto.RegisterEmployeeInput{}
-	jsonpkg.ParseBody(r, employee)
 
-	id, err := h.s.RegisterEmployee(ctx, employee)
+	dtoEmployee := &employeedto.RegisterEmployeeInput{}
+	if err := jsonpkg.ParseBody(r, dtoEmployee); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	id, err := h.s.RegisterEmployee(ctx, dtoEmployee)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -60,10 +64,13 @@ func (h *handlerEmployeeImpl) handlerUpdateEmployee(w http.ResponseWriter, r *ht
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	employee := &employeedto.UpdateEmployeeInput{}
-	jsonpkg.ParseBody(r, employee)
+	dtoEmployee := &employeedto.UpdateEmployeeInput{}
+	if err := jsonpkg.ParseBody(r, dtoEmployee); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.UpdateEmployee(ctx, dtoId, employee); err != nil {
+	if err := h.s.UpdateEmployee(ctx, dtoId, dtoEmployee); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

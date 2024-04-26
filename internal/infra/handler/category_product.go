@@ -40,10 +40,14 @@ func NewHandlerCategoryProduct(categoryService *categoryproductusecases.Service)
 
 func (h *handlerCategoryProductImpl) handlerRegisterCategoryProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	category := &categorydto.RegisterCategoryInput{}
-	jsonpkg.ParseBody(r, category)
 
-	id, err := h.s.RegisterCategory(ctx, category)
+	dtoCategory := &categorydto.RegisterCategoryInput{}
+	if err := jsonpkg.ParseBody(r, dtoCategory); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	id, err := h.s.RegisterCategory(ctx, dtoCategory)
 
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -64,12 +68,13 @@ func (h *handlerCategoryProductImpl) handlerUpdateCategoryProduct(w http.Respons
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	category := &categorydto.UpdateCategoryInput{}
-	jsonpkg.ParseBody(r, category)
+	dtoCategory := &categorydto.UpdateCategoryInput{}
+	if err := jsonpkg.ParseBody(r, dtoCategory); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	err := h.s.UpdateCategory(ctx, dtoId, category)
-
-	if err != nil {
+	if err := h.s.UpdateCategory(ctx, dtoId, dtoCategory); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -79,7 +84,6 @@ func (h *handlerCategoryProductImpl) handlerUpdateCategoryProduct(w http.Respons
 
 func (h *handlerCategoryProductImpl) handlerDeleteCategoryProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
@@ -89,9 +93,7 @@ func (h *handlerCategoryProductImpl) handlerDeleteCategoryProduct(w http.Respons
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	err := h.s.DeleteCategoryById(ctx, dtoId)
-
-	if err != nil {
+	if err := h.s.DeleteCategoryById(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

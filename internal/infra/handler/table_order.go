@@ -37,10 +37,13 @@ func NewHandlerTableOrder(orderService *tableorderusecases.Service) *handler.Han
 
 func (h *handlerTableOrderImpl) handlerRegisterTableOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	table := &tableorderdto.CreateTableOrderInput{}
-	jsonpkg.ParseBody(r, table)
+	dtoTable := &tableorderdto.CreateTableOrderInput{}
+	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	id, err := h.s.CreateTableOrder(ctx, table)
+	id, err := h.s.CreateTableOrder(ctx, dtoTable)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -81,10 +84,13 @@ func (h *handlerTableOrderImpl) handlerChangeTable(w http.ResponseWriter, r *htt
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	table := &tableorderdto.UpdateTableOrderInput{}
-	jsonpkg.ParseBody(r, table)
+	dtoTable := &tableorderdto.UpdateTableOrderInput{}
+	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.ChangeTable(ctx, dtoId, table); err != nil {
+	if err := h.s.ChangeTable(ctx, dtoId, dtoTable); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

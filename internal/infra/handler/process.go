@@ -35,10 +35,14 @@ func NewHandlerProcess(processService *processusecases.Service) *handler.Handler
 
 func (h *handlerProcessImpl) handlerRegisterProcess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	process := &processdto.CreateProcessInput{}
-	jsonpkg.ParseBody(r, process)
 
-	id, err := h.s.RegisterProcess(ctx, process)
+	dtoProcess := &processdto.CreateProcessInput{}
+	if err := jsonpkg.ParseBody(r, dtoProcess); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	id, err := h.s.RegisterProcess(ctx, dtoProcess)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

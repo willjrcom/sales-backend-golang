@@ -47,10 +47,13 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	user := &userdto.CreateUserInput{}
-	jsonpkg.ParseBody(r, user)
+	dtoUser := &userdto.CreateUserInput{}
+	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	id, err := h.s.CreateUser(ctx, user)
+	id, err := h.s.CreateUser(ctx, dtoUser)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -62,10 +65,13 @@ func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request)
 func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	user := &userdto.UpdatePasswordInput{}
-	jsonpkg.ParseBody(r, user)
+	dtoUser := &userdto.UpdatePasswordInput{}
+	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.UpdateUser(ctx, user); err != nil {
+	if err := h.s.UpdateUser(ctx, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -76,10 +82,13 @@ func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Reque
 func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	user := &userdto.LoginUserInput{}
-	jsonpkg.ParseBody(r, user)
+	dtoUser := &userdto.LoginUserInput{}
+	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	token, err := h.s.LoginUser(ctx, user)
+	token, err := h.s.LoginUser(ctx, dtoUser)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -98,10 +107,13 @@ func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	schema := &userdto.AccessCompanyInput{}
-	jsonpkg.ParseBody(r, schema)
+	dtoSchema := &userdto.AccessCompanyInput{}
+	if err := jsonpkg.ParseBody(r, dtoSchema); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	token, err := h.s.Access(ctx, schema, accessToken)
+	token, err := h.s.Access(ctx, dtoSchema, accessToken)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -113,10 +125,13 @@ func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) 
 func (h *handlerUserImpl) handlerDeleteUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	user := &userdto.DeleteUserInput{}
-	jsonpkg.ParseBody(r, user)
+	dtoUser := &userdto.DeleteUserInput{}
+	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
 
-	if err := h.s.DeleteUser(ctx, user); err != nil {
+	if err := h.s.DeleteUser(ctx, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
