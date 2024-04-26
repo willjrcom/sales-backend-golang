@@ -37,7 +37,7 @@ func TestMain(m *testing.M) {
 
 	// Service
 	productService = NewService(rp, rc)
-	sizeService = sizeusecases.NewService(rs)
+	sizeService = sizeusecases.NewService(rs, rc)
 
 	exitCode := m.Run()
 

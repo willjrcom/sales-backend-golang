@@ -98,7 +98,7 @@ var HttpserverCmd = &cobra.Command{
 		// Load services
 		productService := productusecases.NewService(productRepo, categoryRepo)
 		categoryProductService := categoryproductusecases.NewService(categoryRepo)
-		sizeService := sizeusecases.NewService(sizeRepo)
+		sizeService := sizeusecases.NewService(sizeRepo, categoryRepo)
 		quantityService := quantityusecases.NewService(quantityRepo)
 		processRuleService := processRuleusecases.NewService(processRuleRepo)
 

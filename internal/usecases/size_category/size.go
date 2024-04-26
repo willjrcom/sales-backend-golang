@@ -15,11 +15,12 @@ var (
 )
 
 type Service struct {
-	r productentity.SizeRepository
+	rs productentity.SizeRepository
+	rc productentity.CategoryRepository
 }
 
-func NewService(c productentity.SizeRepository) *Service {
-	return &Service{r: c}
+func NewService(rs productentity.SizeRepository, rc productentity.CategoryRepository) *Service {
+	return &Service{rs: rs, rc: rc}
 }
 
 func (s *Service) RegisterSize(ctx context.Context, dto *sizedto.RegisterSizeInput) (uuid.UUID, error) {
@@ -29,7 +30,17 @@ func (s *Service) RegisterSize(ctx context.Context, dto *sizedto.RegisterSizeInp
 		return uuid.Nil, err
 	}
 
-	err = s.r.RegisterSize(ctx, size)
+	category, err := s.rc.GetCategoryById(ctx, size.CategoryID.String())
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if err = productentity.ValidateDuplicateSizes(size.Name, category.Sizes); err != nil {
+		return uuid.Nil, err
+	}
+
+	err = s.rs.RegisterSize(ctx, size)
 
 	if err != nil {
 		return uuid.Nil, err
@@ -39,7 +50,7 @@ func (s *Service) RegisterSize(ctx context.Context, dto *sizedto.RegisterSizeInp
 }
 
 func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IdRequest, dto *sizedto.UpdateSizeInput) error {
-	size, err := s.r.GetSizeById(ctx, dtoId.ID.String())
+	size, err := s.rs.GetSizeById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
@@ -49,7 +60,17 @@ func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IdRequest, dt
 		return err
 	}
 
-	if err = s.r.UpdateSize(ctx, size); err != nil {
+	category, err := s.rc.GetCategoryById(ctx, size.CategoryID.String())
+
+	if err != nil {
+		return err
+	}
+
+	if err = productentity.ValidateUpdateSize(size, category.Sizes); err != nil {
+		return err
+	}
+
+	if err = s.rs.UpdateSize(ctx, size); err != nil {
 		return err
 	}
 
@@ -57,21 +78,13 @@ func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IdRequest, dt
 }
 
 func (s *Service) DeleteSize(ctx context.Context, dto *entitydto.IdRequest) error {
-	if _, err := s.r.GetSizeById(ctx, dto.ID.String()); err != nil {
+	if _, err := s.rs.GetSizeById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
-	if err := s.r.DeleteSize(ctx, dto.ID.String()); err != nil {
+	if err := s.rs.DeleteSize(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func (s *Service) GetSizeById(ctx context.Context, dto *entitydto.IdRequest) (*productentity.Size, error) {
-	if size, err := s.r.GetSizeById(ctx, dto.ID.String()); err != nil {
-		return nil, err
-	} else {
-		return size, nil
-	}
 }
