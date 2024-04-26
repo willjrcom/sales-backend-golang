@@ -35,6 +35,18 @@ type DeliveryTimeLogs struct {
 	DeliveredAt *time.Time `bun:"delivered_at" json:"delivered_at,omitempty"`
 }
 
+func NewDeliveryOrder(clientID uuid.UUID) *DeliveryOrder {
+	orderCommonAttributes := DeliveryOrderCommonAttributes{
+		ClientID: clientID,
+		Status:   DeliveryOrderStatusPending,
+	}
+
+	return &DeliveryOrder{
+		Entity:                        entity.NewEntity(),
+		DeliveryOrderCommonAttributes: orderCommonAttributes,
+	}
+}
+
 func (d *DeliveryOrder) LaunchDelivery(driverID uuid.UUID) {
 	*d.DriverID = driverID
 	d.LaunchedAt = &time.Time{}

@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
@@ -31,13 +30,5 @@ func (o *CreateDeliveryOrderInput) ToModel() (*orderentity.DeliveryOrder, error)
 		return nil, err
 	}
 
-	orderCommonAttributes := orderentity.DeliveryOrderCommonAttributes{
-		ClientID: o.ClientID,
-		Status:   orderentity.DeliveryOrderStatusPending,
-	}
-
-	return &orderentity.DeliveryOrder{
-		Entity:                        entity.NewEntity(),
-		DeliveryOrderCommonAttributes: orderCommonAttributes,
-	}, nil
+	return orderentity.NewDeliveryOrder(o.ClientID), nil
 }

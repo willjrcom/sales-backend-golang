@@ -39,6 +39,7 @@ import (
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	itemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/item"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
+	pickuporderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/pickup_order"
 	processusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process"
 	processRuleusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_category"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
@@ -82,6 +83,7 @@ var HttpserverCmd = &cobra.Command{
 
 		orderRepo := orderrepositorybun.NewOrderRepositoryBun(db)
 		deliveryOrderRepo := orderrepositorybun.NewDeliveryOrderRepositoryBun(db)
+		pickupOrderRepo := orderrepositorybun.NewPickupOrderRepositoryBun(db)
 		tableOrderRepo := orderrepositorybun.NewTableOrderRepositoryBun(db)
 		processRepo := processrepositorybun.NewProcessRepositoryBun(db)
 		itemRepo := itemrepositorybun.NewItemRepositoryBun(db)
@@ -107,6 +109,7 @@ var HttpserverCmd = &cobra.Command{
 		contactService := contactusecases.NewService(contactRepo)
 
 		orderService := orderusecases.NewService(orderRepo, shiftRepo)
+		pickupOrderService := pickuporderusecases.NewService(pickupOrderRepo, orderService)
 		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo, employeeRepo, orderService)
 		tableOrderService := tableorderusecases.NewService(tableOrderRepo, tableRepo, orderService)
 		processService := processusecases.NewService(processRepo)
@@ -132,6 +135,7 @@ var HttpserverCmd = &cobra.Command{
 		contactHandler := handlerimpl.NewHandlerContactPerson(contactService)
 
 		orderHandler := handlerimpl.NewHandlerOrder(orderService)
+		pickupOrderHandler := handlerimpl.NewHandlerPickupOrder(pickupOrderService)
 		deliveryOrderHandler := handlerimpl.NewHandlerDeliveryOrder(deliveryOrderService)
 		tableOrderHandler := handlerimpl.NewHandlerTableOrder(tableOrderService)
 		processHandler := handlerimpl.NewHandlerProcess(processService)
@@ -155,6 +159,7 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(contactHandler)
 
 		server.AddHandler(orderHandler)
+		server.AddHandler(pickupOrderHandler)
 		server.AddHandler(deliveryOrderHandler)
 		server.AddHandler(tableOrderHandler)
 		server.AddHandler(processHandler)

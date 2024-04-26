@@ -12,6 +12,14 @@ type OrderRepository interface {
 	AddPaymentOrder(ctx context.Context, payment *PaymentOrder) error
 }
 
+type PickupOrderRepository interface {
+	CreatePickupOrder(ctx context.Context, pickup *PickupOrder) error
+	UpdatePickupOrder(ctx context.Context, pickup *PickupOrder) error
+	DeletePickupOrder(ctx context.Context, id string) error
+	GetPickupById(ctx context.Context, id string) (*PickupOrder, error)
+	GetAllPickups(ctx context.Context) ([]PickupOrder, error)
+}
+
 type DeliveryOrderRepository interface {
 	CreateDeliveryOrder(ctx context.Context, delivery *DeliveryOrder) error
 	UpdateDeliveryOrder(ctx context.Context, delivery *DeliveryOrder) error

@@ -90,7 +90,7 @@ func (r *DeliveryOrderRepositoryBun) GetDeliveryById(ctx context.Context, id str
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(delivery).Where("id = ?", id).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(delivery).Where("id = ?", id).Relation("Client").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
 		return nil, err
 	}
 
