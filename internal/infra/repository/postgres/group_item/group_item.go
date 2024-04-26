@@ -123,6 +123,24 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 	return item, nil
 }
 
+func (r *GroupItemRepositoryBun) GetGroupByIDWithCategoryComplete(ctx context.Context, id string) (*groupitementity.GroupItem, error) {
+	item := &groupitementity.GroupItem{}
+	r.mu.TryLock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	query := r.db.NewSelect().Model(item).Where("group_item.id = ?", id).Relation("Category.AdditionalCategories")
+
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return item, nil
+}
+
 func (r *GroupItemRepositoryBun) GetGroupsByStatus(ctx context.Context, status groupitementity.StatusGroupItem) ([]groupitementity.GroupItem, error) {
 	items := []groupitementity.GroupItem{}
 

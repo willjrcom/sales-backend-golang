@@ -41,7 +41,7 @@ func (r *DeliveryOrderRepositoryBun) UpdateDeliveryOrder(ctx context.Context, de
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(delivery).WherePK().Where("id = ?", delivery.ID).Exec(ctx); err != nil {
+	if _, err := r.db.NewUpdate().Model(delivery).Where("id = ?", delivery.ID).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -90,7 +90,7 @@ func (r *DeliveryOrderRepositoryBun) GetDeliveryById(ctx context.Context, id str
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(delivery).Where("id = ?", id).Relation("Client").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(delivery).Where("delivery.id = ?", id).Relation("Client.Address").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
 		return nil, err
 	}
 

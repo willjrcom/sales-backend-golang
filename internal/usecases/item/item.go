@@ -148,7 +148,7 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest)
 }
 
 func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdRequest, dtoAdditional *itemdto.AddAdditionalItemOrderInput) (id uuid.UUID, err error) {
-	productID, quantity, err := dtoAdditional.ToModel()
+	productID, quantityID, err := dtoAdditional.ToModel()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -170,13 +170,40 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 		return uuid.Nil, errors.New("product not found: " + err.Error())
 	}
 
-	itemAdditional := itementity.NewItem(productAdditional.Name, productAdditional.Price, float64(quantity), item.Size, item.Status)
+	groupItem, err := s.rgi.GetGroupByIDWithCategoryComplete(ctx, item.GroupItemID.String())
+	if err != nil {
+		return uuid.Nil, errors.New("group item not found: " + err.Error())
+	}
+
+	found := false
+	for _, additionalCategory := range groupItem.Category.AdditionalCategories {
+		if additionalCategory.ID == productAdditional.CategoryID {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return uuid.Nil, errors.New("category product and additional not match")
+	}
+
+	quantity, err := s.rq.GetQuantityById(ctx, quantityID.String())
+
+	if err != nil {
+		return uuid.Nil, errors.New("quantity not found: " + err.Error())
+	}
+
+	if productAdditional.CategoryID != quantity.CategoryID {
+		return uuid.Nil, errors.New("category product and quantity not match")
+	}
+
+	itemAdditional := itementity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, item.Status)
 
 	if err = s.ri.AddAdditionalItem(ctx, item.ID, itemAdditional); err != nil {
 		return uuid.Nil, errors.New("add additional item error: " + err.Error())
 	}
 
-	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
+	groupItem, err = s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
 
 	if err != nil {
 		return uuid.Nil, errors.New("group item not found: " + err.Error())

@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
@@ -15,8 +14,7 @@ var (
 )
 
 type CreateTableOrderInput struct {
-	WaiterID uuid.UUID `json:"waiter_id"`
-	TableID  uuid.UUID `json:"table_id"`
+	orderentity.TableOrderCommonAttributes
 }
 
 func (o *CreateTableOrderInput) validate() error {
@@ -36,15 +34,5 @@ func (o *CreateTableOrderInput) ToModel() (*orderentity.TableOrder, error) {
 		return nil, err
 	}
 
-	tableCommonAttributes := orderentity.TableOrderCommonAttributes{
-		WaiterID: o.WaiterID,
-		TableID:  o.TableID,
-	}
-
-	table := &orderentity.TableOrder{
-		Entity:                     entity.NewEntity(),
-		TableOrderCommonAttributes: tableCommonAttributes,
-	}
-
-	return table, nil
+	return orderentity.NewTable(o.TableOrderCommonAttributes), nil
 }

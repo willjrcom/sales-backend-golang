@@ -53,7 +53,7 @@ func (s *Service) FinishDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRe
 	return nil
 }
 
-func (s *Service) UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.IdRequest, dto *deliveryorderdto.UpdateDeliveryOrder) error {
+func (s *Service) UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.IdRequest) error {
 	deliveryOrder, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 
 	if err != nil {
@@ -68,15 +68,7 @@ func (s *Service) UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.Id
 		return ErrOrderLaunched
 	}
 
-	address, err := s.ra.GetAddressById(ctx, dto.AddressID.String())
-
-	if err != nil {
-		return err
-	}
-
-	if err := dto.UpdateModel(deliveryOrder, address); err != nil {
-		return err
-	}
+	deliveryOrder.AddressID = deliveryOrder.Client.Address.ID
 
 	if err := s.rdo.UpdateDeliveryOrder(ctx, deliveryOrder); err != nil {
 		return err

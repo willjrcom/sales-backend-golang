@@ -13,7 +13,7 @@ import (
 
 type DeliveryOrder struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:delivery_orders"`
+	bun.BaseModel `bun:"table:delivery_orders,alias:delivery"`
 	DeliveryTimeLogs
 	DeliveryOrderCommonAttributes
 }

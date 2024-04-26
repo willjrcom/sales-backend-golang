@@ -115,7 +115,9 @@ func (i *GroupItem) CancelGroupItem() {
 	i.CanceledAt = &time.Time{}
 	*i.CanceledAt = time.Now()
 
-	i.ComplementItem.CancelItem()
+	if i.ComplementItemID != nil {
+		i.ComplementItem.CancelItem()
+	}
 }
 
 func (i *GroupItem) CalculateTotalPrice() {

@@ -15,6 +15,7 @@ var (
 	ErrOrderMustBeFinishedOrCanceled = errors.New("order must be canceled or finished")
 	ErrOrderWithoutItems             = errors.New("order must have at least one item")
 	ErrOrderMustBePending            = errors.New("order must be pending")
+	ErrOrderMustBeCanceled           = errors.New("order must be canceled")
 	ErrOrderMustBeArchived           = errors.New("order must be archived")
 	ErrOrderAlreadyFinished          = errors.New("order already finished")
 	ErrOrderAlreadyCanceled          = errors.New("order already canceled")
@@ -95,6 +96,14 @@ func (o *Order) PendingOrder() (err error) {
 		return ErrOrderAlreadyFinished
 	}
 
+	if o.Status == OrderStatusCanceled {
+		return ErrOrderAlreadyCanceled
+	}
+
+	if o.Status == OrderStatusArchived {
+		return ErrOrderAlreadyArchived
+	}
+
 	if len(o.Groups) == 0 {
 		return ErrOrderWithoutItems
 	}
@@ -155,8 +164,8 @@ func (o *Order) CancelOrder() (err error) {
 }
 
 func (o *Order) ArchiveOrder() (err error) {
-	if o.Status != OrderStatusFinished && o.Status != OrderStatusCanceled {
-		return ErrOrderMustBeFinishedOrCanceled
+	if o.Status != OrderStatusCanceled {
+		return ErrOrderMustBeCanceled
 	}
 
 	if o.Status == OrderStatusArchived {
@@ -179,7 +188,7 @@ func (o *Order) UnarchiveOrder() (err error) {
 		return
 	}
 
-	o.Status = OrderStatusFinished
+	o.Status = OrderStatusCanceled
 	return
 }
 

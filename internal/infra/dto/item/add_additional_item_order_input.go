@@ -8,7 +8,7 @@ import (
 
 type AddAdditionalItemOrderInput struct {
 	ProductID uuid.UUID `json:"product_id"`
-	Quantity  int       `json:"quantity"`
+	Quantity  uuid.UUID `json:"quantity_id"`
 }
 
 func (a *AddAdditionalItemOrderInput) validate() error {
@@ -16,14 +16,14 @@ func (a *AddAdditionalItemOrderInput) validate() error {
 		return errors.New("product id is required")
 	}
 
-	if a.Quantity == 0 {
-		return errors.New("quantity is required")
+	if a.Quantity == uuid.Nil {
+		return errors.New("quantity id is required")
 	}
 
 	return nil
 }
 
-func (a *AddAdditionalItemOrderInput) ToModel() (productID uuid.UUID, quantity int, err error) {
+func (a *AddAdditionalItemOrderInput) ToModel() (productID uuid.UUID, quantity uuid.UUID, err error) {
 	if err = a.validate(); err != nil {
 		return
 	}

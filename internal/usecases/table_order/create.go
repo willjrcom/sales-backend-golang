@@ -34,7 +34,9 @@ func (s *Service) CreateTableOrder(ctx context.Context, dto *tableorderdto.Creat
 
 	table.LockTable()
 
-	tableOrder.Name = table.Name
+	if tableOrder.Name != "" {
+		tableOrder.Name = table.Name + " - " + tableOrder.Name
+	}
 
 	if err = s.rto.CreateTableOrder(ctx, tableOrder); err != nil {
 		return nil, err

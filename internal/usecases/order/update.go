@@ -58,6 +58,13 @@ func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IdRequest) (er
 		return err
 	}
 
+	for _, groupItem := range order.Groups {
+		dtoID := entitydto.NewIdRequest(groupItem.ID)
+		if err = s.rgi.CancelGroupItem(ctx, dtoID); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
