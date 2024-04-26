@@ -3,28 +3,27 @@ package pickuporderusecases
 import (
 	"context"
 
-	"github.com/google/uuid"
 	pickuporderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/pickup_order"
 )
 
-func (s *Service) CreatePickupOrder(ctx context.Context, dto *pickuporderdto.CreatePickupOrderInput) (uuid.UUID, error) {
+func (s *Service) CreatePickupOrder(ctx context.Context, dto *pickuporderdto.CreatePickupOrderInput) (*pickuporderdto.PickupIDAndOrderIDOutput, error) {
 	pickupOrder, err := dto.ToModel()
 
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	orderID, err := s.os.CreateDefaultOrder(ctx)
 
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	pickupOrder.OrderID = orderID
 
 	if err = s.rp.CreatePickupOrder(ctx, pickupOrder); err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
-	return pickupOrder.ID, nil
+	return pickuporderdto.NewOutput(pickupOrder.ID, orderID), nil
 }

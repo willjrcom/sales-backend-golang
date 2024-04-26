@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/google/uuid"
 	tableorderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/table_order"
 )
 
@@ -12,17 +11,17 @@ var (
 	ErrTableIsNotAvailable = errors.New("table is not available")
 )
 
-func (s *Service) CreateTableOrder(ctx context.Context, dto *tableorderdto.CreateTableOrderInput) (uuid.UUID, error) {
+func (s *Service) CreateTableOrder(ctx context.Context, dto *tableorderdto.CreateTableOrderInput) (*tableorderdto.TableIDAndOrderIDOutput, error) {
 	tableOrder, err := dto.ToModel()
 
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	orderID, err := s.os.CreateDefaultOrder(ctx)
 
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	tableOrder.OrderID = orderID
@@ -30,7 +29,7 @@ func (s *Service) CreateTableOrder(ctx context.Context, dto *tableorderdto.Creat
 	table, err := s.rt.GetTableById(ctx, tableOrder.TableID.String())
 
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	table.LockTable()
@@ -38,12 +37,12 @@ func (s *Service) CreateTableOrder(ctx context.Context, dto *tableorderdto.Creat
 	tableOrder.Name = table.Name
 
 	if err = s.rto.CreateTableOrder(ctx, tableOrder); err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	if err = s.rt.UpdateTable(ctx, table); err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
-	return tableOrder.ID, nil
+	return tableorderdto.NewOutput(tableOrder.TableID, orderID), nil
 }

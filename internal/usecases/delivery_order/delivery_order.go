@@ -3,7 +3,6 @@ package deliveryorderusecases
 import (
 	"context"
 
-	"github.com/google/uuid"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
@@ -21,7 +20,7 @@ type IService interface {
 }
 
 type ICreateService interface {
-	CreateDeliveryOrder(ctx context.Context, dto *deliveryorderdto.CreateDeliveryOrderInput) (uuid.UUID, error)
+	CreateDeliveryOrder(ctx context.Context, dto *deliveryorderdto.CreateDeliveryOrderInput) (*deliveryorderdto.DeliveryIDAndOrderIDOutput, error)
 }
 
 type IGetService interface {

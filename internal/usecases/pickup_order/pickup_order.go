@@ -3,7 +3,6 @@ package pickuporderusecases
 import (
 	"context"
 
-	"github.com/google/uuid"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	pickuporderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/pickup_order"
@@ -18,7 +17,7 @@ type IService interface {
 }
 
 type ICreateService interface {
-	CreatePickupOrder(ctx context.Context, dto *pickuporderdto.CreatePickupOrderInput) (uuid.UUID, error)
+	CreatePickupOrder(ctx context.Context, dto *pickuporderdto.CreatePickupOrderInput) (*pickuporderdto.PickupIDAndOrderIDOutput, error)
 }
 
 type IGetService interface {
