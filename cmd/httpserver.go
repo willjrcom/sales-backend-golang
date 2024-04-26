@@ -99,7 +99,7 @@ var HttpserverCmd = &cobra.Command{
 		productService := productusecases.NewService(productRepo, categoryRepo)
 		categoryProductService := categoryproductusecases.NewService(categoryRepo)
 		sizeService := sizeusecases.NewService(sizeRepo, categoryRepo)
-		quantityService := quantityusecases.NewService(quantityRepo)
+		quantityService := quantityusecases.NewService(quantityRepo, categoryRepo)
 		processRuleService := processRuleusecases.NewService(processRuleRepo)
 
 		clientService := clientusecases.NewService(clientRepo, contactRepo)

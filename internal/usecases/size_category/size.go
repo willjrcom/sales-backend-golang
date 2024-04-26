@@ -2,16 +2,11 @@ package sizeusecases
 
 import (
 	"context"
-	"errors"
 
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size_category"
-)
-
-var (
-	ErrSizeIsUsed = errors.New("size is used in products")
 )
 
 type Service struct {

@@ -2,7 +2,6 @@ package quantityusecases
 
 import (
 	"context"
-	"errors"
 
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
@@ -10,16 +9,13 @@ import (
 	quantitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/quantity_category"
 )
 
-var (
-	ErrQuantityIsUsed = errors.New("quantity is used in products")
-)
-
 type Service struct {
-	r productentity.QuantityRepository
+	rq productentity.QuantityRepository
+	rc productentity.CategoryRepository
 }
 
-func NewService(c productentity.QuantityRepository) *Service {
-	return &Service{r: c}
+func NewService(rq productentity.QuantityRepository, rc productentity.CategoryRepository) *Service {
+	return &Service{rq: rq, rc: rc}
 }
 
 func (s *Service) RegisterQuantity(ctx context.Context, dto *quantitydto.RegisterQuantityInput) (uuid.UUID, error) {
@@ -29,9 +25,17 @@ func (s *Service) RegisterQuantity(ctx context.Context, dto *quantitydto.Registe
 		return uuid.Nil, err
 	}
 
-	err = s.r.RegisterQuantity(ctx, quantity)
+	category, err := s.rc.GetCategoryById(ctx, quantity.CategoryID.String())
 
 	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if err = productentity.ValidateDuplicateQuantities(quantity.Quantity, category.Quantities); err != nil {
+		return uuid.Nil, err
+	}
+
+	if err = s.rq.RegisterQuantity(ctx, quantity); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -39,7 +43,7 @@ func (s *Service) RegisterQuantity(ctx context.Context, dto *quantitydto.Registe
 }
 
 func (s *Service) UpdateQuantity(ctx context.Context, dtoId *entitydto.IdRequest, dto *quantitydto.UpdateQuantityInput) error {
-	quantity, err := s.r.GetQuantityById(ctx, dtoId.ID.String())
+	quantity, err := s.rq.GetQuantityById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
@@ -49,7 +53,17 @@ func (s *Service) UpdateQuantity(ctx context.Context, dtoId *entitydto.IdRequest
 		return err
 	}
 
-	if err = s.r.UpdateQuantity(ctx, quantity); err != nil {
+	category, err := s.rc.GetCategoryById(ctx, quantity.CategoryID.String())
+
+	if err != nil {
+		return err
+	}
+
+	if err = productentity.ValidateUpdateQuantity(quantity, category.Quantities); err != nil {
+		return err
+	}
+
+	if err = s.rq.UpdateQuantity(ctx, quantity); err != nil {
 		return err
 	}
 
@@ -57,11 +71,11 @@ func (s *Service) UpdateQuantity(ctx context.Context, dtoId *entitydto.IdRequest
 }
 
 func (s *Service) DeleteQuantity(ctx context.Context, dto *entitydto.IdRequest) error {
-	if _, err := s.r.GetQuantityById(ctx, dto.ID.String()); err != nil {
+	if _, err := s.rq.GetQuantityById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
-	if err := s.r.DeleteQuantity(ctx, dto.ID.String()); err != nil {
+	if err := s.rq.DeleteQuantity(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
@@ -69,7 +83,7 @@ func (s *Service) DeleteQuantity(ctx context.Context, dto *entitydto.IdRequest) 
 }
 
 func (s *Service) GetQuantityById(ctx context.Context, dto *entitydto.IdRequest) (*productentity.Quantity, error) {
-	if quantity, err := s.r.GetQuantityById(ctx, dto.ID.String()); err != nil {
+	if quantity, err := s.rq.GetQuantityById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		return quantity, nil

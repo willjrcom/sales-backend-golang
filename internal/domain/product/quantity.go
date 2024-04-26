@@ -1,9 +1,15 @@
 package productentity
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+)
+
+var (
+	ErrQuantityAlreadyExists = errors.New("quantity already exists")
 )
 
 type Quantity struct {
@@ -19,4 +25,24 @@ type QuantityCommonAttributes struct {
 
 type PatchQuantity struct {
 	Quantity *float64 `json:"quantity"`
+}
+
+func ValidateDuplicateQuantities(name float64, quantities []Quantity) error {
+	for _, quantity := range quantities {
+		if quantity.Quantity == name {
+			return ErrQuantityAlreadyExists
+		}
+	}
+
+	return nil
+}
+
+func ValidateUpdateQuantity(quantity *Quantity, quantities []Quantity) error {
+	for _, s := range quantities {
+		if s.Quantity == quantity.Quantity && s.ID != quantity.ID {
+			return ErrQuantityAlreadyExists
+		}
+	}
+
+	return nil
 }
