@@ -79,6 +79,10 @@ func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IdRequest,
 		return err
 	}
 
+	if p, _ := s.rp.GetProductByCode(ctx, product.Code); p != nil && p.ID != product.ID {
+		return errors.New("code product already exists")
+	}
+
 	if err := s.rp.UpdateProduct(ctx, product); err != nil {
 		return err
 	}
