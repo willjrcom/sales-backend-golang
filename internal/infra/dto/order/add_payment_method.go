@@ -43,6 +43,5 @@ func (u *AddPaymentMethod) ToModel(order *orderentity.Order) (*orderentity.Payme
 		return nil, err
 	}
 
-	u.OrderID = order.ID
-	return &u.PaymentOrder, nil
+	return orderentity.NewPayment(u.TotalPaid, u.Method, order.ID), nil
 }

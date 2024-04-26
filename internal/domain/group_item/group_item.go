@@ -129,6 +129,7 @@ func (i *GroupItem) CalculateTotalPrice() {
 
 	if i.ComplementItem != nil {
 		i.ComplementItem.Quantity = qtdItems
+		i.ComplementItem.TotalPrice = i.ComplementItem.Price * qtdItems
 		totalPrice += i.ComplementItem.TotalPrice
 	}
 

@@ -188,11 +188,7 @@ func (o *Order) ScheduleOrder(startAt *time.Time) {
 }
 
 func (o *Order) ValidatePayments() error {
-	if o.Status != OrderStatusPending {
-		return ErrOrderMustBePending
-	}
-
-	if o.TotalPayable < o.TotalPaid {
+	if o.TotalPayable <= o.TotalPaid {
 		return ErrOrderPaidMoreThanTotal
 	}
 
@@ -204,39 +200,28 @@ func (o *Order) AddPayment(payment *PaymentOrder) {
 	o.Payments = append(o.Payments, *payment)
 }
 
-func (o *Order) CalculateTotalChange() {
-	totalPaid := 0.00
-
-	for _, payment := range o.Payments {
-		totalPaid += payment.TotalPaid
-	}
-
-	totalToPay := 0.00
-	for _, group := range o.Groups {
-		totalToPay += group.TotalPrice
-	}
-
-	o.TotalPaid = totalPaid
-
-	if totalToPay < totalPaid {
-		o.TotalChange = totalPaid - totalToPay
-	}
-}
-
 func (o *Order) CalculateTotalPrice() {
-	totalPrice := 0.00
-	qtdItems := 0.00
+	o.TotalPayable = 0.00
+	o.QuantityItems = 0.00
 
 	for i := range o.Groups {
 		o.Groups[i].CalculateTotalPrice()
-		totalPrice += o.Groups[i].TotalPrice
-		qtdItems += o.Groups[i].Quantity
+		o.TotalPayable += o.Groups[i].TotalPrice
+		o.QuantityItems += o.Groups[i].Quantity
+	}
+
+	o.TotalPaid = 0.00
+	for _, payment := range o.Payments {
+		o.TotalPaid += payment.TotalPaid
 	}
 
 	if o.Delivery != nil && o.Delivery.DeliveryTax != nil {
-		totalPrice += *o.Delivery.DeliveryTax
+		o.TotalPayable += *o.Delivery.DeliveryTax
 	}
 
-	o.TotalPayable = totalPrice
-	o.QuantityItems = qtdItems
+	if o.TotalPayable < o.TotalPaid {
+		o.TotalChange = o.TotalPaid - o.TotalPayable
+	} else {
+		o.TotalChange = 0
+	}
 }

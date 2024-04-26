@@ -109,12 +109,13 @@ func (s *Service) AddPayment(ctx context.Context, dto *entitydto.IdRequest, dtoP
 	}
 
 	paymentOrder, err := dtoPayment.ToModel(order)
-	order.AddPayment(paymentOrder)
-
 	if err != nil {
 		return err
 	}
 
+	order.AddPayment(paymentOrder)
+
+	order.CalculateTotalPrice()
 	if err := s.ro.AddPaymentOrder(ctx, paymentOrder); err != nil {
 		return err
 	}

@@ -106,8 +106,6 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *orderentity.Or
 }
 
 func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *orderentity.Order) error {
-	order.CalculateTotalChange()
-
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -140,15 +138,6 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order *orderentity.Order, err error) {
 	order = &orderentity.Order{}
 	order.ID = uuid.MustParse(id)
-	relation := ""
-
-	if order.Table != nil {
-		relation = "Table"
-	} else if order.Delivery != nil {
-		relation = "Delivery"
-	} else if order.Pickup != nil {
-		relation = "Pickup"
-	}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -157,17 +146,11 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		return nil, err
 	}
 
-	query := r.db.NewSelect().Model(order).WherePK().Relation("Groups.Items.AdditionalItems").Relation("Attendant").Relation("Payments").Relation("Groups.ComplementItem")
-
-	if relation != "" {
-		query = query.Relation(relation)
-	}
-
-	if err = query.Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(order).WherePK().Relation("Groups.Items.AdditionalItems").Relation("Attendant").Relation("Payments").Relation("Groups.ComplementItem").Relation("Table").Relation("Delivery").Relation("Pickup").Scan(ctx); err != nil {
 		return nil, err
 	}
 
-	order.CalculateTotalChange()
+	order.CalculateTotalPrice()
 	return order, nil
 }
 
@@ -181,12 +164,12 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]orderentity.Or
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&orders).Relation("Groups.Items.AdditionalItems").Relation("Groups.ComplementItem").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&orders).Scan(ctx); err != nil {
 		return nil, err
 	}
 
 	for i := range orders {
-		orders[i].CalculateTotalChange()
+		orders[i].CalculateTotalPrice()
 	}
 
 	return orders, nil

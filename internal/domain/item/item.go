@@ -113,11 +113,11 @@ func (i *Item) CanAddAdditionalItems() bool {
 }
 
 func (i *Item) CalculateTotalPrice() float64 {
-	totalPrice := i.TotalPrice
+	totalPriceItemAndAdditionals := i.TotalPrice
 
 	for _, additionalItem := range i.AdditionalItems {
-		totalPrice += additionalItem.TotalPrice
+		totalPriceItemAndAdditionals += additionalItem.TotalPrice
 	}
 
-	return totalPrice
+	return totalPriceItemAndAdditionals
 }

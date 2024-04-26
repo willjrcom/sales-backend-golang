@@ -94,8 +94,10 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 		return nil, errors.New("update group item error: " + err.Error())
 	}
 
-	if err = s.ri.UpdateItem(ctx, groupItem.ComplementItem); err != nil {
-		return nil, errors.New("update complement item error: " + err.Error())
+	if groupItem.ComplementItemID != nil {
+		if err = s.ri.UpdateItem(ctx, groupItem.ComplementItem); err != nil {
+			return nil, errors.New("update complement item error: " + err.Error())
+		}
 	}
 
 	return itemdto.NewOutput(item.ID, groupItem.ID), nil
