@@ -2,6 +2,7 @@ package processruledto
 
 import (
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
@@ -27,11 +28,11 @@ func (s *RegisterProcessRuleInput) validate() error {
 		return ErrOrderRequired
 	}
 
-	if s.IdealTime == nil {
+	if s.IdealTime == 0 {
 		return ErrIdealTimeRequired
 	}
 
-	if s.ExperimentalError == nil {
+	if s.ExperimentalError == 0 {
 		return ErrExperimentalErrorRequired
 	}
 
@@ -49,8 +50,8 @@ func (s *RegisterProcessRuleInput) ToModel() (*productentity.ProcessRule, error)
 	processRuleCommonAttributes := productentity.ProcessRuleCommonAttributes{
 		Name:              s.Name,
 		Order:             s.Order,
-		IdealTime:         s.IdealTime,
-		ExperimentalError: s.ExperimentalError,
+		IdealTime:         s.IdealTime * time.Second,
+		ExperimentalError: s.ExperimentalError * time.Second,
 		CategoryID:        s.CategoryID,
 	}
 

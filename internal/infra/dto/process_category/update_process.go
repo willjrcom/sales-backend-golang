@@ -1,6 +1,8 @@
 package processruledto
 
 import (
+	"time"
+
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -33,12 +35,12 @@ func (s *UpdateProcessRuleInput) UpdateModel(model *productentity.ProcessRule) (
 		model.Order = *s.Order
 	}
 
-	if s.IdealTime != nil {
-		model.IdealTime = s.IdealTime
+	if s.IdealTime != 0 {
+		model.IdealTime = s.IdealTime * time.Second
 	}
 
-	if s.ExperimentalError != nil {
-		model.ExperimentalError = s.ExperimentalError
+	if s.ExperimentalError != 0 {
+		model.ExperimentalError = s.ExperimentalError * time.Second
 	}
 
 	return nil
