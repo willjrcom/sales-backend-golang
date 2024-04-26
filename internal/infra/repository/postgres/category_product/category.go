@@ -136,7 +136,15 @@ func (r *CategoryProductRepositoryBun) DeleteCategory(ctx context.Context, id st
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model(&productentity.CategoryToAdditional{}).Where("category_additional_id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&productentity.CategoryToAdditional{}).Where("additional_category_id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
 		if errRollBack := tx.Rollback(); errRollBack != nil {
 			return errRollBack
 		}
@@ -158,6 +166,29 @@ func (r *CategoryProductRepositoryBun) GetCategoryById(ctx context.Context, id s
 	}
 
 	if err := r.db.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return category, nil
+}
+
+func (r *CategoryProductRepositoryBun) GetCategoryByName(ctx context.Context, name string, withRelation bool) (*productentity.Category, error) {
+	category := &productentity.Category{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	query := r.db.NewSelect().Model(category).Where("name = ?", name)
+
+	if withRelation {
+		query.Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories")
+	}
+
+	if err := query.Scan(ctx); err != nil {
 		return nil, err
 	}
 

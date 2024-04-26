@@ -18,6 +18,7 @@ type CategoryRepository interface {
 	UpdateCategory(ctx context.Context, category *Category) error
 	DeleteCategory(ctx context.Context, id string) error
 	GetCategoryById(ctx context.Context, id string) (*Category, error)
+	GetCategoryByName(ctx context.Context, name string, withRelation bool) (*Category, error)
 	GetAllCategories(ctx context.Context) ([]Category, error)
 }
 

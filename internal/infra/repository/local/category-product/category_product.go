@@ -55,6 +55,16 @@ func (r *CategoryRepositoryLocal) GetCategoryById(_ context.Context, id string) 
 	return nil, errCategoryProductNotFound
 }
 
+func (r *CategoryRepositoryLocal) GetCategoryByName(_ context.Context, name string, withRelation bool) (*productentity.Category, error) {
+	for _, p := range r.Categoryproducts {
+		if p.Name == name {
+			return p, nil
+		}
+	}
+
+	return nil, errCategoryProductNotFound
+}
+
 func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context) ([]productentity.Category, error) {
 	Categoryproducts := make([]productentity.Category, 0)
 

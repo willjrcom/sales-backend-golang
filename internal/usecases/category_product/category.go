@@ -23,19 +23,23 @@ func NewService(c productentity.CategoryRepository) *Service {
 }
 
 func (s *Service) RegisterCategory(ctx context.Context, dto *categorydto.RegisterCategoryInput) (uuid.UUID, error) {
-	categoryProduct, err := dto.ToModel()
+	category, err := dto.ToModel()
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	err = s.r.RegisterCategory(ctx, categoryProduct)
+	if c, _ := s.r.GetCategoryByName(ctx, category.Name, false); c != nil {
+		return uuid.Nil, errors.New("category name already exists")
+	}
+
+	err = s.r.RegisterCategory(ctx, category)
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	return categoryProduct.ID, nil
+	return category.ID, nil
 }
 
 func (s *Service) UpdateCategory(ctx context.Context, dtoId *entitydto.IdRequest, dto *categorydto.UpdateCategoryInput) error {
@@ -47,6 +51,10 @@ func (s *Service) UpdateCategory(ctx context.Context, dtoId *entitydto.IdRequest
 
 	if err = dto.UpdateModel(category); err != nil {
 		return err
+	}
+
+	if c, _ := s.r.GetCategoryByName(ctx, category.Name, false); c != nil && c.ID != category.ID {
+		return errors.New("category name already exists")
 	}
 
 	if err = s.r.UpdateCategory(ctx, category); err != nil {
