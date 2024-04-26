@@ -43,12 +43,18 @@ type ItemTimeLogs struct {
 	CanceledAt *time.Time `bun:"canceled_at" json:"canceled_at,omitempty"`
 }
 
-func NewItem(itemCommonAttributes ItemCommonAttributes) *Item {
-	itemCommonAttributes.Status = StatusItemStaging
+func NewItem(name string, price float64, quantity float64, size string, status StatusItem) *Item {
+	itemAdditionalCommonAttributes := ItemCommonAttributes{
+		Name:     name + " (" + size + ")",
+		Status:   status,
+		Price:    price * quantity,
+		Size:     size,
+		Quantity: quantity,
+	}
 
 	return &Item{
 		Entity:               entity.NewEntity(),
-		ItemCommonAttributes: itemCommonAttributes,
+		ItemCommonAttributes: itemAdditionalCommonAttributes,
 	}
 }
 

@@ -65,15 +65,7 @@ func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IdReques
 		return ErrSizeMustBeTheSame
 	}
 
-	itemCommonAttributes := itementity.ItemCommonAttributes{
-		Name:     product.Name,
-		Quantity: groupItem.Quantity,
-		Price:    product.Price * groupItem.Quantity,
-		Status:   itementity.StatusItem(groupItem.Status),
-		Size:     groupItem.Size,
-	}
-
-	item := itementity.NewItem(itemCommonAttributes)
+	item := itementity.NewItem(product.Name, product.Price, groupItem.Quantity, groupItem.Size, itementity.StatusItem(groupItem.Status))
 
 	if err = s.ri.AddItem(ctx, item); err != nil {
 		return err

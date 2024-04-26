@@ -41,7 +41,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 	product, err := s.rp.GetProductById(ctx, dto.ProductID.String())
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("product not found: " + err.Error())
 	}
 
 	if product.Category == nil {
@@ -56,7 +56,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 		groupItem, err := s.newGroupItem(ctx, dto.OrderID, product)
 
 		if err != nil {
-			return nil, err
+			return nil, errors.New("new group item error: " + err.Error())
 		}
 
 		dto.GroupItemID = &groupItem.ID
@@ -65,7 +65,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 	groupItem, err := s.rgi.GetGroupByID(ctx, dto.GroupItemID.String(), true)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("group item not found: " + err.Error())
 	}
 
 	if !groupItem.CanAddItems() {
@@ -75,7 +75,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 	quantity, err := s.rq.GetQuantityById(ctx, dto.QuantityID.String())
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New("quantity not found: " + err.Error())
 	}
 
 	item, err := dto.ToModel(product, groupItem, quantity)
@@ -85,19 +85,16 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 	}
 
 	if err = s.ri.AddItem(ctx, item); err != nil {
-		return nil, err
+		return nil, errors.New("add item error: " + err.Error())
 	}
 
 	groupItem.CalculateTotalPrice()
 
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
-		return nil, err
+		return nil, errors.New("update group item error: " + err.Error())
 	}
 
-	return &itemdto.ItemIDAndGroupItemOutput{
-		GroupItemID: groupItem.ID,
-		ItemID:      item.ID,
-	}, nil
+	return itemdto.NewOutput(item.ID, groupItem.ID), nil
 }
 
 func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest) (err error) {
@@ -108,13 +105,13 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest)
 	}
 
 	if err = s.ri.DeleteItem(ctx, dto.ID.String()); err != nil {
-		return err
+		return errors.New("delete item error: " + err.Error())
 	}
 
 	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
 
 	if err != nil {
-		return err
+		return errors.New("group item not found: " + err.Error())
 	}
 
 	if len(groupItem.Items) == 0 {
@@ -128,7 +125,7 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest)
 	groupItem.CalculateTotalPrice()
 
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
-		return err
+		return errors.New("update group itemerror: " + err.Error())
 	}
 
 	return nil
@@ -144,7 +141,7 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 	item, err := s.ri.GetItemById(ctx, dto.ID.String())
 
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, errors.New("item not found: " + err.Error())
 	}
 
 	if !item.CanAddAdditionalItems() {
@@ -154,33 +151,25 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 	productAdditional, err := s.rp.GetProductById(ctx, productID.String())
 
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, errors.New("product not found: " + err.Error())
 	}
 
-	itemAdditionalCommonAttributes := itementity.ItemCommonAttributes{
-		Name:     productAdditional.Name,
-		Status:   item.Status,
-		Price:    productAdditional.Price * float64(quantity),
-		Size:     item.Size,
-		Quantity: float64(quantity),
-	}
-
-	itemAdditional := itementity.NewItem(itemAdditionalCommonAttributes)
+	itemAdditional := itementity.NewItem(productAdditional.Name, productAdditional.Price, float64(quantity), item.Size, item.Status)
 
 	if err = s.ri.AddAdditionalItem(ctx, item.ID, itemAdditional); err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, errors.New("add additional item error: " + err.Error())
 	}
 
 	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
 
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, errors.New("group item not found: " + err.Error())
 	}
 
 	groupItem.CalculateTotalPrice()
 
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, errors.New("update group item error: " + err.Error())
 	}
 
 	return itemAdditional.ID, nil
