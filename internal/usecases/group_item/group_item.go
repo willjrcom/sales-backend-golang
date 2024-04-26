@@ -12,8 +12,10 @@ import (
 )
 
 var (
-	ErrItemsFinished     = errors.New("items already finished")
-	ErrSizeMustBeTheSame = errors.New("size must be the same")
+	ErrItemsFinished              = errors.New("items already finished")
+	ErrSizeMustBeTheSame          = errors.New("size must be the same")
+	ErrComplementItemAlreadyAdded = errors.New("complement item already added")
+	ErrComplementItemNotFound     = errors.New("complement item not found")
 )
 
 type Service struct {
@@ -27,7 +29,14 @@ func NewService(ri itementity.ItemRepository, rgi groupitementity.GroupItemRepos
 }
 
 func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IdRequest) (groupItem *groupitementity.GroupItem, err error) {
-	return s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+	groupItem, err = s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+
+	if err != nil {
+		return nil, err
+	}
+
+	groupItem.CalculateTotalPrice()
+	return
 }
 
 func (s *Service) GetGroupsByStatus(ctx context.Context, dto *groupitemdto.GroupItemByStatusInput) (groups []groupitementity.GroupItem, err error) {
@@ -45,7 +54,13 @@ func (s *Service) DeleteGroupItem(ctx context.Context, dto *entitydto.IdRequest)
 		return err
 	}
 
-	return s.rgi.DeleteGroupItem(ctx, groupItem.ID.String())
+	var complementItemID *string
+	if groupItem.ComplementItemID != nil {
+		complementItemID = new(string)
+		*complementItemID = groupItem.ComplementItemID.String()
+	}
+
+	return s.rgi.DeleteGroupItem(ctx, groupItem.ID.String(), complementItemID)
 }
 
 func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IdRequest, dtoComplement *entitydto.IdRequest) (err error) {
@@ -53,6 +68,10 @@ func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IdReques
 
 	if err != nil {
 		return err
+	}
+
+	if groupItem.ComplementItemID != nil {
+		return ErrComplementItemAlreadyAdded
 	}
 
 	product, err := s.rp.GetProductById(ctx, dtoComplement.ID.String())
@@ -96,6 +115,14 @@ func (s *Service) DeleteComplementItem(ctx context.Context, dto *entitydto.IdReq
 	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
+		return err
+	}
+
+	if groupItem.ComplementItemID == nil {
+		return ErrComplementItemNotFound
+	}
+
+	if err := s.ri.DeleteItem(ctx, groupItem.ComplementItemID.String()); err != nil {
 		return err
 	}
 

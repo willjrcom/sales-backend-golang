@@ -146,6 +146,8 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		relation = "Table"
 	} else if order.Delivery != nil {
 		relation = "Delivery"
+	} else if order.Pickup != nil {
+		relation = "Pickup"
 	}
 
 	r.mu.Lock()

@@ -20,6 +20,7 @@ var (
 	ErrOrderAlreadyCanceled          = errors.New("order already canceled")
 	ErrOrderAlreadyArchived          = errors.New("order already archived")
 	ErrOrderPaidMoreThanTotal        = errors.New("order paid more than total")
+	ErrOrderPaidLessThanTotal        = errors.New("order paid less than total")
 )
 
 type Order struct {
@@ -53,6 +54,7 @@ type OrderDetail struct {
 type OrderType struct {
 	Delivery *DeliveryOrder `bun:"rel:has-one,join:id=order_id" json:"delivery,omitempty"`
 	Table    *TableOrder    `bun:"rel:has-one,join:id=order_id" json:"table,omitempty"`
+	Pickup   *PickupOrder   `bun:"rel:has-one,join:id=order_id" json:"pickup,omitempty"`
 }
 
 type ScheduledOrder struct {
@@ -118,6 +120,15 @@ func (o *Order) FinishOrder() (err error) {
 		return ErrOrderAlreadyFinished
 	}
 
+	totalPaid := 0.00
+	for _, payment := range o.Payments {
+		totalPaid += payment.TotalPaid
+	}
+
+	if totalPaid < o.TotalPayable {
+		return ErrOrderPaidLessThanTotal
+	}
+
 	o.Status = OrderStatusFinished
 	o.FinishedAt = &time.Time{}
 	*o.FinishedAt = time.Now()
@@ -181,16 +192,7 @@ func (o *Order) ValidatePayments() error {
 		return ErrOrderMustBePending
 	}
 
-	totalToPay := 0.00
-	for _, group := range o.Groups {
-		totalToPay += group.Total
-	}
-
-	if o.Delivery != nil {
-		totalToPay += *o.Delivery.DeliveryTax
-	}
-
-	if totalToPay < o.TotalPaid {
+	if o.TotalPayable < o.TotalPaid {
 		return ErrOrderPaidMoreThanTotal
 	}
 
@@ -211,7 +213,7 @@ func (o *Order) CalculateTotalChange() {
 
 	totalToPay := 0.00
 	for _, group := range o.Groups {
-		totalToPay += group.Total
+		totalToPay += group.TotalPrice
 	}
 
 	o.TotalPaid = totalPaid
@@ -223,12 +225,12 @@ func (o *Order) CalculateTotalChange() {
 
 func (o *Order) CalculateTotalPrice() {
 	totalPrice := 0.00
-	qtd := 0.00
+	qtdItems := 0.00
 
 	for i := range o.Groups {
 		o.Groups[i].CalculateTotalPrice()
-		totalPrice += o.Groups[i].Total
-		qtd += o.Groups[i].Quantity
+		totalPrice += o.Groups[i].TotalPrice
+		qtdItems += o.Groups[i].Quantity
 	}
 
 	if o.Delivery != nil && o.Delivery.DeliveryTax != nil {
@@ -236,5 +238,5 @@ func (o *Order) CalculateTotalPrice() {
 	}
 
 	o.TotalPayable = totalPrice
-	o.QuantityItems = qtd
+	o.QuantityItems = qtdItems
 }

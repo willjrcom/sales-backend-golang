@@ -50,7 +50,7 @@ func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *groupit
 	return nil
 }
 
-func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string) error {
+func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string, complementItemID *string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -70,6 +70,16 @@ func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string)
 		}
 
 		return err
+	}
+
+	if complementItemID != nil {
+		if _, err = tx.NewDelete().Model(&itementity.Item{}).Where("id = ?", complementItemID).Exec(ctx); err != nil {
+			if errRoolback := tx.Rollback(); errRoolback != nil {
+				return errRoolback
+			}
+
+			return err
+		}
 	}
 
 	if _, err = tx.NewDelete().Model(&itementity.Item{}).Where("group_item_id = ?", id).Exec(ctx); err != nil {

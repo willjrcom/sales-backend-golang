@@ -36,12 +36,12 @@ type GroupCommonAttributes struct {
 type GroupDetails struct {
 	Size             string                  `bun:"size,notnull" json:"size"`
 	Status           StatusGroupItem         `bun:"status,notnull" json:"status"`
-	Total            float64                 `bun:"total" json:"total"`
+	TotalPrice       float64                 `bun:"total_price" json:"total_price"`
 	Quantity         float64                 `bun:"quantity" json:"quantity"`
 	NeedPrint        bool                    `bun:"need_print" json:"need_print"`
 	CategoryID       uuid.UUID               `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
 	Category         *productentity.Category `bun:"rel:belongs-to" json:"category,omitempty"`
-	ComplementItemID *uuid.UUID              `bun:"column:complement_item_id,type:uuid,notnull" json:"complement_item_id"`
+	ComplementItemID *uuid.UUID              `bun:"column:complement_item_id,type:uuid,notnull" json:",omitempty"`
 	ComplementItem   *itementity.Item        `bun:"rel:belongs-to" json:"complement_item,omitempty"`
 }
 
@@ -123,17 +123,17 @@ func (i *GroupItem) CalculateTotalPrice() {
 	totalPrice := 0.0
 
 	for _, item := range i.Items {
-		totalPrice = item.CalculateTotalPrice()
+		totalPrice += item.CalculateTotalPrice() // item + additionals
 		qtdItems += item.Quantity
-		totalPrice += item.Price
 	}
 
 	if i.ComplementItem != nil {
-		totalPrice += i.ComplementItem.Price
+		i.ComplementItem.Quantity = qtdItems
+		totalPrice += i.ComplementItem.TotalPrice
 	}
 
 	i.GroupDetails.Quantity = qtdItems
-	i.GroupDetails.Total = totalPrice
+	i.GroupDetails.TotalPrice = totalPrice
 }
 
 func (i *GroupItem) CanAddItems() bool {

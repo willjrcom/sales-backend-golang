@@ -45,11 +45,12 @@ type ItemTimeLogs struct {
 
 func NewItem(name string, price float64, quantity float64, size string, status StatusItem) *Item {
 	itemAdditionalCommonAttributes := ItemCommonAttributes{
-		Name:     name + " (" + size + ")",
-		Status:   status,
-		Price:    price * quantity,
-		Size:     size,
-		Quantity: quantity,
+		Name:       name + " (" + size + ")",
+		Status:     status,
+		Price:      price,
+		TotalPrice: price * quantity,
+		Size:       size,
+		Quantity:   quantity,
 	}
 
 	return &Item{
@@ -115,7 +116,7 @@ func (i *Item) CalculateTotalPrice() float64 {
 	totalPrice := i.TotalPrice
 
 	for _, additionalItem := range i.AdditionalItems {
-		totalPrice += additionalItem.Price
+		totalPrice += additionalItem.TotalPrice
 	}
 
 	return totalPrice
