@@ -34,6 +34,7 @@ type ItemCommonAttributes struct {
 	Quantity        float64    `bun:"quantity,notnull" json:"quantity"`
 	GroupItemID     uuid.UUID  `bun:"group_item_id,type:uuid" json:"group_item_id"`
 	AdditionalItems []Item     `bun:"m2m:item_to_additional,join:Item=AdditionalItem" json:"item_to_additional,omitempty"`
+	ProductID       uuid.UUID  `bun:"product_id,type:uuid" json:"product_id"`
 }
 
 type ItemTimeLogs struct {
@@ -43,7 +44,7 @@ type ItemTimeLogs struct {
 	CanceledAt *time.Time `bun:"canceled_at" json:"canceled_at,omitempty"`
 }
 
-func NewItem(name string, price float64, quantity float64, size string, status StatusItem) *Item {
+func NewItem(name string, price float64, quantity float64, size string, status StatusItem, productID uuid.UUID) *Item {
 	itemAdditionalCommonAttributes := ItemCommonAttributes{
 		Name:       name + " (" + size + ")",
 		Status:     status,
@@ -51,6 +52,7 @@ func NewItem(name string, price float64, quantity float64, size string, status S
 		TotalPrice: price * quantity,
 		Size:       size,
 		Quantity:   quantity,
+		ProductID:  productID,
 	}
 
 	return &Item{

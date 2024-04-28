@@ -114,7 +114,7 @@ var HttpserverCmd = &cobra.Command{
 		pickupOrderService := pickuporderusecases.NewService(pickupOrderRepo, orderService)
 		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo, employeeRepo, orderService)
 		tableOrderService := tableorderusecases.NewService(tableOrderRepo, tableRepo, orderService)
-		processService := processusecases.NewService(processRepo)
+		processService := processusecases.NewService(processRepo, itemRepo)
 
 		tableService := tableusecases.NewService(tableRepo)
 		shiftService := shiftusecases.NewService(shiftRepo)

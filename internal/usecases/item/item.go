@@ -197,7 +197,7 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 		return uuid.Nil, errors.New("category product and quantity not match")
 	}
 
-	itemAdditional := itementity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, item.Status)
+	itemAdditional := itementity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, item.Status, productAdditional.ID)
 
 	if err = s.ri.AddAdditionalItem(ctx, item.ID, itemAdditional); err != nil {
 		return uuid.Nil, errors.New("add additional item error: " + err.Error())
