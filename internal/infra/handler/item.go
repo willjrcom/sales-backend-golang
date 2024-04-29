@@ -27,9 +27,6 @@ func NewHandlerItem(itemService *itemusecases.Service) *handler.Handler {
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/add", h.handlerAddItem)
-		c.Post("/start/{id}", h.handlerStartItemByID)
-		c.Post("/ready/{id}", h.handlerReadyItemByID)
-		c.Post("/cancel/{id}", h.handlerCancelItemByID)
 		c.Delete("/{id}", h.handlerDeleteItem)
 		c.Post("/update/{id}/additional", h.handlerAddAdditionalItem)
 		c.Delete("/update/{id}/additional/{id-additional}", h.handlerDeleteAdditionalItem)
@@ -55,66 +52,6 @@ func (h *handlerItemImpl) handlerAddItem(w http.ResponseWriter, r *http.Request)
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: ids})
-}
-
-func (h *handlerItemImpl) handlerStartItemByID(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	id := chi.URLParam(r, "id")
-
-	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
-		return
-	}
-
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
-
-	if err := h.s.StartItem(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
-}
-
-func (h *handlerItemImpl) handlerReadyItemByID(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	id := chi.URLParam(r, "id")
-
-	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
-		return
-	}
-
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
-
-	if err := h.s.ReadyItem(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
-}
-
-func (h *handlerItemImpl) handlerCancelItemByID(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	id := chi.URLParam(r, "id")
-
-	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
-		return
-	}
-
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
-
-	if err := h.s.CancelItem(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerItemImpl) handlerDeleteItem(w http.ResponseWriter, r *http.Request) {

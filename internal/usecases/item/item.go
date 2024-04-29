@@ -72,8 +72,8 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 	if groupItem.OrderID != dto.OrderID {
 		return nil, ErrGroupItemNotBelongsToOrder
 	}
-	if !groupItem.CanAddItems() {
-		return nil, ErrGroupNotStaging
+	if ok, err := groupItem.CanAddItems(); !ok {
+		return nil, err
 	}
 
 	quantity, err := s.rq.GetQuantityById(ctx, dto.QuantityID.String())
@@ -164,10 +164,6 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 		return uuid.Nil, errors.New("item not found: " + err.Error())
 	}
 
-	if !item.CanAddAdditionalItems() {
-		return uuid.Nil, ErrItemNotStagingAndPending
-	}
-
 	productAdditional, err := s.rp.GetProductById(ctx, productID.String())
 
 	if err != nil {
@@ -177,6 +173,10 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 	groupItem, err := s.rgi.GetGroupByIDWithCategoryComplete(ctx, item.GroupItemID.String())
 	if err != nil {
 		return uuid.Nil, errors.New("group item not found: " + err.Error())
+	}
+
+	if ok, err := groupItem.CanAddItems(); !ok {
+		return uuid.Nil, err
 	}
 
 	found := false
@@ -201,7 +201,7 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 		return uuid.Nil, errors.New("category product and quantity not match")
 	}
 
-	itemAdditional := itementity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, item.Status, productAdditional.ID)
+	itemAdditional := itementity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, productAdditional.ID)
 
 	if err = s.ri.AddAdditionalItem(ctx, item.ID, itemAdditional); err != nil {
 		return uuid.Nil, errors.New("add additional item error: " + err.Error())

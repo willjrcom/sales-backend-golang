@@ -70,18 +70,6 @@ func (i *GroupItem) PendingGroupItem() (err error) {
 		return nil
 	}
 
-	for index := range i.Items {
-		if err = i.Items[index].PendingItem(); err != nil {
-			return err
-		}
-	}
-
-	if i.ComplementItem != nil {
-		if err = i.ComplementItem.PendingItem(); err != nil {
-			return err
-		}
-	}
-
 	i.Status = StatusGroupPending
 	i.PendingAt = &time.Time{}
 	*i.PendingAt = time.Now()
@@ -114,10 +102,6 @@ func (i *GroupItem) CancelGroupItem() {
 	i.Status = StatusGroupCanceled
 	i.CanceledAt = &time.Time{}
 	*i.CanceledAt = time.Now()
-
-	if i.ComplementItemID != nil {
-		i.ComplementItem.CancelItem()
-	}
 }
 
 func (i *GroupItem) CalculateTotalPrice() {
@@ -139,10 +123,10 @@ func (i *GroupItem) CalculateTotalPrice() {
 	i.GroupDetails.TotalPrice = totalPrice
 }
 
-func (i *GroupItem) CanAddItems() bool {
+func (i *GroupItem) CanAddItems() (bool, error) {
 	if i.Status != StatusGroupStaging && i.Status != StatusGroupPending {
-		return false
+		return false, errors.New("group not staging or pending")
 	}
 
-	return true
+	return true, nil
 }

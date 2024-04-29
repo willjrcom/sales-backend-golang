@@ -84,7 +84,7 @@ func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IdReques
 		return ErrSizeMustBeTheSame
 	}
 
-	item := itementity.NewItem(product.Name, product.Price, groupItem.Quantity, groupItem.Size, itementity.StatusItem(groupItem.Status), product.ID)
+	item := itementity.NewItem(product.Name, product.Price, groupItem.Quantity, groupItem.Size, product.ID)
 
 	if err = s.ri.AddItem(ctx, item); err != nil {
 		return err
