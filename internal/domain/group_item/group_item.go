@@ -130,3 +130,16 @@ func (i *GroupItem) CanAddItems() (bool, error) {
 
 	return true, nil
 }
+
+func (i *GroupItem) GetProductIDs() ([]uuid.UUID, error) {
+	if len(i.Items) == 0 {
+		return []uuid.UUID{}, errors.New("no items in group")
+	}
+
+	productIDs := []uuid.UUID{}
+	for _, item := range i.Items {
+		productIDs = append(productIDs, item.ProductID)
+	}
+
+	return productIDs, nil
+}

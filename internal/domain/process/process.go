@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
 var (
@@ -21,11 +22,12 @@ type Process struct {
 }
 
 type ProcessCommonAttributes struct {
-	EmployeeID    *uuid.UUID    `bun:"employee_id,type:uuid" json:"employee_id,omitempty"`
-	ProductID     uuid.UUID     `bun:"product_id,type:uuid,notnull" json:"product_id"`
-	ItemID        uuid.UUID     `bun:"item_id,type:uuid,notnull" json:"item_id"`
-	ProcessRuleID uuid.UUID     `bun:"process_rule_id,type:uuid,notnull" json:"process_rule_id"`
-	Status        StatusProcess `bun:"status,notnull" json:"status"`
+	EmployeeID    *uuid.UUID              `bun:"employee_id,type:uuid" json:"employee_id,omitempty"`
+	ProductID     uuid.UUID               `bun:"product_id,type:uuid,notnull" json:"product_id"`
+	GroupItemID   uuid.UUID               `bun:"group_item_id,type:uuid,notnull" json:"group_item_id"`
+	ProcessRuleID uuid.UUID               `bun:"process_rule_id,type:uuid,notnull" json:"process_rule_id"`
+	Status        StatusProcess           `bun:"status,notnull" json:"status"`
+	Products      []productentity.Product `bun:"m2m:process_to_product_to_group_item,join:Process=Product" json:"process_to_product,omitempty"`
 }
 
 type ProcessTimeLogs struct {
@@ -38,9 +40,9 @@ type ProcessTimeLogs struct {
 	TotalPaused       int8          `bun:"total_paused" json:"total_paused"`
 }
 
-func NewProcess(itemID uuid.UUID, processRuleID uuid.UUID) *Process {
+func NewProcess(groupItemID uuid.UUID, processRuleID uuid.UUID) *Process {
 	processCommonAttributes := ProcessCommonAttributes{
-		ItemID:        itemID,
+		GroupItemID:   groupItemID,
 		ProcessRuleID: processRuleID,
 		Status:        ProcessStatusPending,
 	}

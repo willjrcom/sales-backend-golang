@@ -31,6 +31,8 @@ func NewHandlerProcess(processService *processusecases.Service) *handler.Handler
 		c.Post("/finish/{id}", h.handlerFinishProcess)
 		c.Get("/{id}", h.handlerGetProcess)
 		c.Get("/all", h.handlerGetAllProcesses)
+		c.Get("/by-group-item/{id}", h.handlerGetProcessesByGroupItem)
+		c.Get("/by-product/{id}", h.handlerGetProcessesByProduct)
 	})
 
 	return handler.NewHandler("/process", c)
@@ -128,12 +130,13 @@ func (h *handlerProcessImpl) handlerFinishProcess(w http.ResponseWriter, r *http
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.FinishProcess(ctx, dtoId); err != nil {
+	idQueue, err := h.s.FinishProcess(ctx, dtoId)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: idQueue})
 }
 
 func (h *handlerProcessImpl) handlerGetProcess(w http.ResponseWriter, r *http.Request) {
@@ -160,6 +163,46 @@ func (h *handlerProcessImpl) handlerGetAllProcesses(w http.ResponseWriter, r *ht
 	ctx := r.Context()
 
 	processes, err := h.s.GetAllProcesses(ctx)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processes})
+}
+
+func (h *handlerProcessImpl) handlerGetProcessesByGroupItem(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	processes, err := h.s.GetProcessesByGroupItemID(ctx, dtoId)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processes})
+}
+
+func (h *handlerProcessImpl) handlerGetProcessesByProduct(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	processes, err := h.s.GetProcessesByProductID(ctx, dtoId)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

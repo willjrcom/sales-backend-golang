@@ -24,6 +24,7 @@ import (
 	processrulerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/process_rule"
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
 	quantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity_category"
+	queuerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/queue"
 	schemarepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/schema"
 	shiftrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/shift"
 	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size_category"
@@ -44,6 +45,7 @@ import (
 	processRuleusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_category"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity_category"
+	queueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/queue"
 	shiftusecases "github.com/willjrcom/sales-backend-go/internal/usecases/shift"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
 	tableusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table"
@@ -85,9 +87,11 @@ var HttpserverCmd = &cobra.Command{
 		deliveryOrderRepo := orderrepositorybun.NewDeliveryOrderRepositoryBun(db)
 		pickupOrderRepo := orderrepositorybun.NewPickupOrderRepositoryBun(db)
 		tableOrderRepo := orderrepositorybun.NewTableOrderRepositoryBun(db)
-		processRepo := processrepositorybun.NewProcessRepositoryBun(db)
 		itemRepo := itemrepositorybun.NewItemRepositoryBun(db)
 		groupItemRepo := groupitemrepositorybun.NewGroupItemRepositoryBun(db)
+
+		queueRepo := queuerepositorybun.NewQueueRepositoryBun(db)
+		processRepo := processrepositorybun.NewProcessRepositoryBun(db)
 
 		employeeRepo := employeerepositorybun.NewEmployeeRepositoryBun(db)
 		tableRepo := tablerepositorybun.NewTableRepositoryBun(db)
@@ -114,7 +118,9 @@ var HttpserverCmd = &cobra.Command{
 		pickupOrderService := pickuporderusecases.NewService(pickupOrderRepo, orderService)
 		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo, employeeRepo, orderService)
 		tableOrderService := tableorderusecases.NewService(tableOrderRepo, tableRepo, orderService)
-		processService := processusecases.NewService(processRepo, itemRepo)
+
+		queueService := queueusecases.NewService(queueRepo, processRepo)
+		processService := processusecases.NewService(processRepo, groupItemRepo, queueService, processRuleRepo)
 
 		tableService := tableusecases.NewService(tableRepo)
 		shiftService := shiftusecases.NewService(shiftRepo)

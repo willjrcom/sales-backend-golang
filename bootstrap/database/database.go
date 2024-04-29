@@ -223,6 +223,7 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*employeeentity.Employee)(nil))
 
 	db.RegisterModel((*processentity.Process)(nil))
+	db.RegisterModel((*processentity.ProcessToProductToGroupItem)(nil))
 	db.RegisterModel((*itementity.ItemToAdditional)(nil))
 	db.RegisterModel((*itementity.Item)(nil))
 	db.RegisterModel((*groupitementity.GroupItem)(nil))
@@ -315,6 +316,11 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*processentity.Process)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*processentity.ProcessToProductToGroupItem)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}

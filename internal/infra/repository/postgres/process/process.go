@@ -2,6 +2,7 @@ package processrepositorybun
 
 import (
 	"context"
+	"database/sql"
 	"sync"
 
 	"github.com/uptrace/bun"
@@ -26,7 +27,39 @@ func (r *ProcessRepositoryBun) RegisterProcess(ctx context.Context, s *processen
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(s).Exec(ctx); err != nil {
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
+
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.NewInsert().Model(s).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if len(s.Products) != 0 {
+		for _, p := range s.Products {
+			processToProduct := &processentity.ProcessToProductToGroupItem{
+				ProcessID:   s.ID,
+				ProductID:   p.ID,
+				GroupItemID: s.GroupItemID,
+			}
+
+			if _, err := tx.NewInsert().Model(processToProduct).Exec(ctx); err != nil {
+				if errRollBack := tx.Rollback(); errRollBack != nil {
+					return errRollBack
+				}
+
+				return err
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 
@@ -91,6 +124,60 @@ func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]processen
 	}
 
 	if err := r.db.NewSelect().Model(&processes).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return processes, nil
+}
+
+func (r *ProcessRepositoryBun) GetProcessesByProductID(ctx context.Context, id string) ([]processentity.Process, error) {
+	processes := []processentity.Process{}
+	processesToProduct := []processentity.ProcessToProductToGroupItem{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(&processesToProduct).Where("product_id = ?", id).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	processIDs := []string{}
+	for _, p := range processesToProduct {
+		processIDs = append(processIDs, p.ProcessID.String())
+	}
+
+	if err := r.db.NewSelect().Model(&processes).Where("id in (?)", bun.In(processIDs)).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return processes, nil
+}
+
+func (r *ProcessRepositoryBun) GetProcessesByGroupItemID(ctx context.Context, id string) ([]processentity.Process, error) {
+	processes := []processentity.Process{}
+	processesToGroupItem := []processentity.ProcessToProductToGroupItem{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(&processesToGroupItem).Where("group_item_id = ?", id).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	processIDs := []string{}
+	for _, p := range processesToGroupItem {
+		processIDs = append(processIDs, p.ProcessID.String())
+	}
+
+	if err := r.db.NewSelect().Model(&processes).Where("id in (?)", bun.In(processIDs)).Scan(ctx); err != nil {
 		return nil, err
 	}
 

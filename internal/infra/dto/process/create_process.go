@@ -21,7 +21,7 @@ func (s *CreateProcessInput) validate() error {
 		return ErrProcessRuleIDRequired
 	}
 
-	if s.ItemID == uuid.Nil {
+	if s.GroupItemID == uuid.Nil {
 		return ErrItemIDRequired
 	}
 
@@ -33,5 +33,5 @@ func (s *CreateProcessInput) ToModel() (*processentity.Process, error) {
 		return nil, err
 	}
 
-	return processentity.NewProcess(s.ItemID, s.ProcessRuleID), nil
+	return processentity.NewProcess(s.GroupItemID, s.ProcessRuleID), nil
 }
