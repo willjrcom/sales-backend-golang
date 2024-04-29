@@ -39,13 +39,18 @@ func (s *Service) CreateProcess(ctx context.Context, dto *processdto.CreateProce
 	return process.ID, nil
 }
 
-func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IdRequest) error {
+func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IdRequest, dto *processdto.StartProcessInput) error {
+	employeeID, err := dto.ToModel()
+	if err != nil {
+		return err
+	}
+
 	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
 		return err
 	}
 
-	if err := process.StartProcess(); err != nil {
+	if err := process.StartProcess(employeeID); err != nil {
 		return err
 	}
 
@@ -107,18 +112,31 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 	return nil
 }
 
-func (s *Service) GetProcessById(ctx context.Context, dto *entitydto.IdRequest) (*processentity.Process, error) {
+func (s *Service) GetProcessById(ctx context.Context, dto *entitydto.IdRequest) (*processdto.ProcessOutput, error) {
 	if process, err := s.r.GetProcessById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return process, nil
+		processOutput := &processdto.ProcessOutput{}
+		processOutput.FromModel(process)
+		return processOutput, nil
 	}
 }
 
-func (s *Service) GetAllProcesses(ctx context.Context) ([]processentity.Process, error) {
+func (s *Service) GetAllProcesses(ctx context.Context) ([]processdto.ProcessOutput, error) {
 	if process, err := s.r.GetAllProcesses(ctx); err != nil {
 		return nil, err
 	} else {
-		return process, nil
+		return s.processesToOutputs(process), nil
 	}
+}
+
+func (s *Service) processesToOutputs(processes []processentity.Process) []processdto.ProcessOutput {
+	outputs := make([]processdto.ProcessOutput, 0)
+	for _, process := range processes {
+		processOutput := &processdto.ProcessOutput{}
+		processOutput.FromModel(&process)
+		outputs = append(outputs, *processOutput)
+	}
+
+	return outputs
 }

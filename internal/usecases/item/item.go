@@ -14,11 +14,12 @@ import (
 )
 
 var (
-	ErrCategoryNotFound         = errors.New("category not found")
-	ErrSizeNotFound             = errors.New("size not found")
-	ErrSizeMustBeTheSame        = errors.New("size must be the same")
-	ErrGroupNotStaging          = errors.New("group not staging")
-	ErrItemNotStagingAndPending = errors.New("item not staging or pending")
+	ErrCategoryNotFound           = errors.New("category not found")
+	ErrSizeNotFound               = errors.New("size not found")
+	ErrSizeMustBeTheSame          = errors.New("size must be the same")
+	ErrGroupItemNotBelongsToOrder = errors.New("group item not belongs to order")
+	ErrGroupNotStaging            = errors.New("group not staging")
+	ErrItemNotStagingAndPending   = errors.New("item not staging or pending")
 )
 
 type Service struct {
@@ -68,6 +69,9 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 		return nil, errors.New("group item not found: " + err.Error())
 	}
 
+	if groupItem.OrderID != dto.OrderID {
+		return nil, ErrGroupItemNotBelongsToOrder
+	}
 	if !groupItem.CanAddItems() {
 		return nil, ErrGroupNotStaging
 	}

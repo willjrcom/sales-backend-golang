@@ -2,15 +2,20 @@ package processdto
 
 import (
 	"github.com/google/uuid"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	processentity "github.com/willjrcom/sales-backend-go/internal/domain/process"
 )
 
-type ProcessRuleOutput struct {
+type ProcessOutput struct {
 	ID uuid.UUID `json:"id"`
-	productentity.ProcessRuleCommonAttributes
+	processentity.ProcessCommonAttributes
+	processentity.ProcessTimeLogs
+	DurationFormatted string `json:"duration_formatted"`
 }
 
-func (s *ProcessRuleOutput) FromModel(model *productentity.ProcessRule) {
+func (s *ProcessOutput) FromModel(model *processentity.Process) {
 	s.ID = model.ID
-	s.ProcessRuleCommonAttributes = model.ProcessRuleCommonAttributes
+	s.ProcessCommonAttributes = model.ProcessCommonAttributes
+	s.ProcessTimeLogs = model.ProcessTimeLogs
+
+	s.DurationFormatted = model.Duration.String()
 }

@@ -25,10 +25,10 @@ func NewHandlerProcess(processService *processusecases.Service) *handler.Handler
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerCreateProcess)
-		c.Post("/start", h.handlerStartProcess)
-		c.Post("/pause", h.handlerPauseProcess)
-		c.Post("/continue", h.handlerContinueProcess)
-		c.Post("/finish", h.handlerFinishProcess)
+		c.Post("/start/{id}", h.handlerStartProcess)
+		c.Post("/pause/{id}", h.handlerPauseProcess)
+		c.Post("/continue/{id}", h.handlerContinueProcess)
+		c.Post("/finish/{id}", h.handlerFinishProcess)
 		c.Get("/{id}", h.handlerGetProcess)
 		c.Get("/all", h.handlerGetAllProcesses)
 	})
@@ -65,7 +65,13 @@ func (h *handlerProcessImpl) handlerStartProcess(w http.ResponseWriter, r *http.
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.StartProcess(ctx, dtoId); err != nil {
+	dtoStart := &processdto.StartProcessInput{}
+	if err := jsonpkg.ParseBody(r, &dtoStart); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	if err := h.s.StartProcess(ctx, dtoId, dtoStart); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

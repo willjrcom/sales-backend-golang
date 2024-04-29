@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	ErrIItemIDRequired       = errors.New("Item ID is required")
+	ErrItemIDRequired        = errors.New("item ID is required")
 	ErrProcessRuleIDRequired = errors.New("process rule ID is required")
 )
 
@@ -22,7 +22,7 @@ func (s *CreateProcessInput) validate() error {
 	}
 
 	if s.ItemID == uuid.Nil {
-		return ErrIItemIDRequired
+		return ErrItemIDRequired
 	}
 
 	return nil
@@ -32,10 +32,6 @@ func (s *CreateProcessInput) ToModel() (*processentity.Process, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}
-	processCommonAttributes := processentity.ProcessCommonAttributes{
-		ItemID:        s.ItemID,
-		ProcessRuleID: s.ProcessRuleID,
-	}
 
-	return processentity.NewProcess(processCommonAttributes), nil
+	return processentity.NewProcess(s.ItemID, s.ProcessRuleID), nil
 }
