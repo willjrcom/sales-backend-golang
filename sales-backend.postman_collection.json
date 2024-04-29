@@ -295,7 +295,7 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"url": "http://localhost:8080/product/"
+										"url": "{{server}}/product/"
 									},
 									"status": "OK",
 									"code": 200,
@@ -410,7 +410,7 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"url": "http://localhost:8080/product/all"
+										"url": "{{server}}/product/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -662,7 +662,7 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"url": "http://localhost:8080/category-product/"
+										"url": "{{server}}/category-product/"
 									},
 									"status": "OK",
 									"code": 200,
@@ -715,7 +715,7 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"url": "http://localhost:8080/category-product/all"
+										"url": "{{server}}/category-product/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -1011,7 +1011,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"name\": \"Prensar\",\n    \"order\": 3,\n    \"ideal_time\": \"3m30s\", // Must be add \"m\" on minute and add \"s\" on second\n    \"experimental_error\": \"30s\", // Must be add \"m\" on minute and add \"s\" on second\n    \"category_id\": \"{{category_product_id}}\"\n}",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"Rechear\",\n    \"order\": 1,\n    \"ideal_time\": 60, // Second\n    \"experimental_error\": 30, // Second\n    \"category_id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4311,7 +4311,7 @@
 											"let process_category_id = response.data",
 											"",
 											"if (process_category_id != null) {",
-											"    pm.collectionVariables.set(\"process_category_id\", process_category_id)",
+											"    pm.collectionVariables.set(\"process_id\", process_category_id)",
 											"}"
 										],
 										"type": "text/javascript",
@@ -4324,7 +4324,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"employee_id\": \"{{employee_id}}\",\n    \"item_id\": \"{{item_id}}\",\n    \"process_rule_id\": \"{{process_rule_category_id}}\"\n}",
+									"raw": "// NEED LOGIN\n{\n    \"item_id\": \"{{item_id}}\",\n    \"process_rule_id\": \"{{process_rule_category_id}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4341,7 +4341,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"employee_id\": \"{{employee_id}}\",\n    \"item_id\": \"{{item_id}}\",\n    \"process_rule_id\": \"{{process_rule_category_id}}\"\n}",
+											"raw": "// NEED LOGIN\n{\n    \"item_id\": \"{{item_id}}\",\n    \"process_rule_id\": \"{{process_rule_category_id}}\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -4377,55 +4377,54 @@
 							]
 						},
 						{
-							"name": "update",
+							"name": "start",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let process_category_id = response.data",
+											"",
+											"if (process_category_id != null) {",
+											"    pm.collectionVariables.set(\"process_category_id\", process_category_id)",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
 							"request": {
-								"method": "PATCH",
+								"method": "POST",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{}",
+									"raw": "// NEED LOGIN\n{\n    \"employee_id\": \"{{employee_id}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
 										}
 									}
 								},
-								"url": "{{server}}/process/update/{{process_id}}"
-							},
-							"response": []
-						},
-						{
-							"name": "deletar",
-							"request": {
-								"method": "DELETE",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": "{{server}}/process/{{process_id}}"
+								"url": "{{server}}/process/start/{{process_id}}"
 							},
 							"response": [
 								{
-									"name": "deletar",
+									"name": "start",
 									"originalRequest": {
-										"method": "DELETE",
+										"method": "POST",
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n",
+											"raw": "// NEED LOGIN\n{\n    \"employee_id\": \"{{employee_id}}\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
 												}
 											}
 										},
-										"url": "{{server}}/process/{{process_id}}"
+										"url": "{{server}}/process/start/{{process_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -4441,7 +4440,235 @@
 										},
 										{
 											"key": "Date",
-											"value": "Fri, 26 Apr 2024 21:31:45 GMT"
+											"value": "Sun, 28 Apr 2024 23:47:03 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "2"
+										}
+									],
+									"cookie": [],
+									"body": "{}"
+								}
+							]
+						},
+						{
+							"name": "finish",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let process_category_id = response.data",
+											"",
+											"if (process_category_id != null) {",
+											"    pm.collectionVariables.set(\"process_category_id\", process_category_id)",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/process/finish/{{process_id}}"
+							},
+							"response": [
+								{
+									"name": "finish",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/process/finish/{{process_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 29 Apr 2024 00:01:58 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "2"
+										}
+									],
+									"cookie": [],
+									"body": "{}"
+								}
+							]
+						},
+						{
+							"name": "pause",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let process_category_id = response.data",
+											"",
+											"if (process_category_id != null) {",
+											"    pm.collectionVariables.set(\"process_category_id\", process_category_id)",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/process/pause/{{process_id}}"
+							},
+							"response": [
+								{
+									"name": "pause",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/process/pause/{{process_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Sun, 28 Apr 2024 23:47:30 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "2"
+										}
+									],
+									"cookie": [],
+									"body": "{}"
+								}
+							]
+						},
+						{
+							"name": "continue",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let process_category_id = response.data",
+											"",
+											"if (process_category_id != null) {",
+											"    pm.collectionVariables.set(\"process_category_id\", process_category_id)",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/process/continue/{{process_id}}"
+							},
+							"response": [
+								{
+									"name": "pause Copy",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/process/continue/{{process_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 29 Apr 2024 00:02:32 GMT"
 										},
 										{
 											"key": "Content-Length",
@@ -6903,7 +7130,7 @@
 		},
 		{
 			"key": "process_rule_category_id",
-			"value": ""
+			"value": "54ed1234-df6d-4383-b688-c4845a9372e6"
 		},
 		{
 			"key": "data",
@@ -6998,6 +7225,10 @@
 		},
 		{
 			"key": "order_pickup_id",
+			"value": ""
+		},
+		{
+			"key": "process_category_id",
 			"value": ""
 		}
 	]
