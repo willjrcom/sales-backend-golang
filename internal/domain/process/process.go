@@ -29,12 +29,13 @@ type ProcessCommonAttributes struct {
 }
 
 type ProcessTimeLogs struct {
-	StartedAt   *time.Time    `bun:"started_at" json:"started_at,omitempty"`
-	PausedAt    *time.Time    `bun:"paused_at" json:"paused_at,omitempty"`
-	ContinuedAt *time.Time    `bun:"continued_at" json:"continued_at,omitempty"`
-	FinishedAt  *time.Time    `bun:"finished_at" json:"finished_at,omitempty"`
-	Duration    time.Duration `bun:"duration" json:"duration"`
-	TotalPaused int8          `bun:"total_paused" json:"total_paused"`
+	StartedAt         *time.Time    `bun:"started_at" json:"started_at,omitempty"`
+	PausedAt          *time.Time    `bun:"paused_at" json:"paused_at,omitempty"`
+	ContinuedAt       *time.Time    `bun:"continued_at" json:"continued_at,omitempty"`
+	FinishedAt        *time.Time    `bun:"finished_at" json:"finished_at,omitempty"`
+	Duration          time.Duration `bun:"duration" json:"duration"`
+	DurationFormatted string        `bun:"duration_formatted" json:"duration_formatted"`
+	TotalPaused       int8          `bun:"total_paused" json:"total_paused"`
 }
 
 func NewProcess(itemID uuid.UUID, processRuleID uuid.UUID) *Process {
@@ -86,10 +87,12 @@ func (p *Process) FinishProcess() error {
 
 	if p.ContinuedAt != nil {
 		p.Duration += time.Since(*p.ContinuedAt)
+		p.DurationFormatted = p.Duration.String()
 		return nil
 	}
 
 	p.Duration = time.Since(*p.StartedAt)
+	p.DurationFormatted = p.Duration.String()
 	return nil
 }
 
@@ -110,11 +113,13 @@ func (p *Process) PauseProcess() error {
 
 	if p.ContinuedAt != nil {
 		p.Duration += time.Since(*p.ContinuedAt)
+		p.DurationFormatted = p.Duration.String()
 		p.ContinuedAt = nil
 		return nil
 	}
 
 	p.Duration += time.Since(*p.StartedAt)
+	p.DurationFormatted = p.Duration.String()
 	return nil
 }
 

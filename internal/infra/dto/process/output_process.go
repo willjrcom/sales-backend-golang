@@ -9,7 +9,6 @@ type ProcessOutput struct {
 	ID uuid.UUID `json:"id"`
 	processentity.ProcessCommonAttributes
 	processentity.ProcessTimeLogs
-	DurationFormatted string `json:"duration_formatted"`
 }
 
 func (s *ProcessOutput) FromModel(model *processentity.Process) {
