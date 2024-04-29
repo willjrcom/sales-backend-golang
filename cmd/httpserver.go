@@ -112,15 +112,15 @@ var HttpserverCmd = &cobra.Command{
 		employeeService := employeeusecases.NewService(employeeRepo, contactRepo)
 		contactService := contactusecases.NewService(contactRepo)
 
+		queueService := queueusecases.NewService(queueRepo, processRepo)
+		processService := processusecases.NewService(processRepo, groupItemRepo, queueService, processRuleRepo)
+
 		itemService := itemusecases.NewService(itemRepo, groupItemRepo, orderRepo, productRepo, quantityRepo)
 		groupService := groupitemusecases.NewService(itemRepo, groupItemRepo, productRepo)
-		orderService := orderusecases.NewService(orderRepo, shiftRepo, groupService)
+		orderService := orderusecases.NewService(orderRepo, shiftRepo, groupService, processService, processRuleRepo, queueService)
 		pickupOrderService := pickuporderusecases.NewService(pickupOrderRepo, orderService)
 		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo, employeeRepo, orderService)
 		tableOrderService := tableorderusecases.NewService(tableOrderRepo, tableRepo, orderService)
-
-		queueService := queueusecases.NewService(queueRepo, processRepo)
-		processService := processusecases.NewService(processRepo, groupItemRepo, queueService, processRuleRepo)
 
 		tableService := tableusecases.NewService(tableRepo)
 		shiftService := shiftusecases.NewService(shiftRepo)
@@ -145,6 +145,7 @@ var HttpserverCmd = &cobra.Command{
 		deliveryOrderHandler := handlerimpl.NewHandlerDeliveryOrder(deliveryOrderService)
 		tableOrderHandler := handlerimpl.NewHandlerTableOrder(tableOrderService)
 		processHandler := handlerimpl.NewHandlerProcess(processService)
+		queueHandler := handlerimpl.NewHandlerQueue(queueService)
 		itemHandler := handlerimpl.NewHandlerItem(itemService)
 		groupHandler := handlerimpl.NewHandlerGroupItem(groupService)
 
@@ -169,6 +170,7 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(deliveryOrderHandler)
 		server.AddHandler(tableOrderHandler)
 		server.AddHandler(processHandler)
+		server.AddHandler(queueHandler)
 		server.AddHandler(itemHandler)
 		server.AddHandler(groupHandler)
 

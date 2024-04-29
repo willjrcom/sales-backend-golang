@@ -2,6 +2,8 @@ package productentity
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type ProductRepository interface {
@@ -41,4 +43,8 @@ type ProcessRuleRepository interface {
 	UpdateProcessRule(ctx context.Context, ProcessRule *ProcessRule) error
 	DeleteProcessRule(ctx context.Context, id string) error
 	GetProcessRuleById(ctx context.Context, id string) (*ProcessRule, error)
+	GetFirstProcessRuleByCategoryId(ctx context.Context, id string) (*ProcessRule, error)
+	GetMapProcessRulesByFirstOrder(ctx context.Context) (map[uuid.UUID]uuid.UUID, error)
+	GetMapProcessRulesByLastOrder(ctx context.Context) (map[uuid.UUID]uuid.UUID, error)
+	IsLastProcessRuleByID(ctx context.Context, id uuid.UUID) (bool, error)
 }

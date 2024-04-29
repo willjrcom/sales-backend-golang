@@ -2,9 +2,14 @@ package orderusecases
 
 import (
 	"context"
+	"errors"
 
+	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
+	processentity "github.com/willjrcom/sales-backend-go/internal/domain/process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
+	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process"
+	queuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/queue"
 )
 
 func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) error {
@@ -12,6 +17,46 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 
 	if err != nil {
 		return err
+	}
+
+	processRules, err := s.rpr.GetMapProcessRulesByFirstOrder(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, groupItem := range order.Groups {
+		if groupItem.Status != groupitementity.StatusGroupStaging {
+			continue
+		}
+
+		processRuleID, ok := processRules[groupItem.CategoryID]
+		if !ok {
+			return errors.New("process rule not found for category ID: " + groupItem.CategoryID.String())
+		}
+
+		createProcessInput := &processdto.CreateProcessInput{
+			ProcessCommonAttributes: processentity.ProcessCommonAttributes{
+				GroupItemID:   groupItem.ID,
+				ProcessRuleID: processRuleID,
+			},
+		}
+
+		// Create process for each group item
+		if _, err := s.rp.CreateProcess(ctx, createProcessInput); err != nil {
+			return err
+		}
+
+		// Create queue for each group item
+		startQueueInput := &queuedto.StartQueueInput{
+			QueueCommonAttributes: processentity.QueueCommonAttributes{
+				GroupItemID: groupItem.ID,
+			},
+			JoinedAt: *order.PendingAt,
+		}
+
+		if _, err := s.rq.StartQueue(ctx, startQueueInput); err != nil {
+			return err
+		}
 	}
 
 	if err = order.PendingOrder(); err != nil {

@@ -35,7 +35,7 @@ func (s *Service) CreateProcess(ctx context.Context, dto *processdto.CreateProce
 		return uuid.Nil, err
 	}
 
-	productIDs, err := groupItem.GetProductIDs()
+	productIDs, err := groupItem.GetDistinctProductIDs()
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -71,20 +71,6 @@ func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IdRequest, 
 	}
 
 	if err := s.r.UpdateProcess(ctx, process); err != nil {
-		return err
-	}
-
-	processRule, err := s.rpr.GetProcessRuleById(ctx, process.ProcessRuleID.String())
-	if err != nil {
-		return err
-	}
-
-	if processRule.Order == 1 {
-		return nil
-	}
-
-	// Manage Queue
-	if err := s.sq.LeftQueue(ctx, nil, process); err != nil {
 		return err
 	}
 
@@ -125,26 +111,34 @@ func (s *Service) ContinueProcess(ctx context.Context, dtoID *entitydto.IdReques
 	return nil
 }
 
-func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest) (uuid.UUID, error) {
+func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest) error {
 	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
-		return uuid.Nil, err
+		return err
 	}
 
 	if err := process.FinishProcess(); err != nil {
-		return uuid.Nil, err
+		return err
 	}
 
 	if err := s.r.UpdateProcess(ctx, process); err != nil {
-		return uuid.Nil, err
+		return err
 	}
 
-	idQueue, err := s.sq.JoinQueue(ctx, process)
+	lastProcessRule, err := s.rpr.IsLastProcessRuleByID(ctx, process.ProcessRuleID)
 	if err != nil {
-		return uuid.Nil, err
+		return err
 	}
 
-	return idQueue, nil
+	if !lastProcessRule {
+		return nil
+	}
+
+	if err := s.sq.FinishQueue(ctx, process.GroupItemID, *process.FinishedAt); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Service) GetProcessById(ctx context.Context, dto *entitydto.IdRequest) (*processdto.ProcessOutput, error) {

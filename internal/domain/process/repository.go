@@ -19,6 +19,6 @@ type QueueRepository interface {
 	UpdateQueue(ctx context.Context, p *Queue) error
 	DeleteQueue(ctx context.Context, id string) error
 	GetQueueById(ctx context.Context, id string) (*Queue, error)
-	GetQueueByPreviousProcessId(ctx context.Context, id string) (*Queue, error)
-	GetAllQueuees(ctx context.Context) ([]Queue, error)
+	GetQueueByGroupItemId(ctx context.Context, id string) (*Queue, error)
+	GetAllQueues(ctx context.Context) ([]Queue, error)
 }

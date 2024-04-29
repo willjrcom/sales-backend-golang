@@ -41,7 +41,7 @@ type GroupDetails struct {
 	NeedPrint        bool                    `bun:"need_print" json:"need_print"`
 	CategoryID       uuid.UUID               `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
 	Category         *productentity.Category `bun:"rel:belongs-to" json:"category,omitempty"`
-	ComplementItemID *uuid.UUID              `bun:"column:complement_item_id,type:uuid,notnull" json:",omitempty"`
+	ComplementItemID *uuid.UUID              `bun:"column:complement_item_id,type:uuid" json:",omitempty"`
 	ComplementItem   *itementity.Item        `bun:"rel:belongs-to" json:"complement_item,omitempty"`
 }
 
@@ -131,14 +131,20 @@ func (i *GroupItem) CanAddItems() (bool, error) {
 	return true, nil
 }
 
-func (i *GroupItem) GetProductIDs() ([]uuid.UUID, error) {
+func (i *GroupItem) GetDistinctProductIDs() ([]uuid.UUID, error) {
 	if len(i.Items) == 0 {
 		return []uuid.UUID{}, errors.New("no items in group")
 	}
 
 	productIDs := []uuid.UUID{}
+	mapProduct := map[uuid.UUID]uuid.UUID{}
 	for _, item := range i.Items {
+		if _, ok := mapProduct[item.ProductID]; ok {
+			continue
+		}
+
 		productIDs = append(productIDs, item.ProductID)
+		mapProduct[item.ProductID] = item.ProductID
 	}
 
 	return productIDs, nil

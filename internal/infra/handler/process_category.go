@@ -27,6 +27,7 @@ func NewHandlerProcessRuleCategory(processRuleService *processusecases.Service) 
 		c.Post("/new", h.handlerRegisterProcessRule)
 		c.Patch("/update/{id}", h.handlerUpdateProcessRule)
 		c.Delete("/{id}", h.handlerDeleteProcessRule)
+		c.Get("/{id}", h.handlerGetProcessRuleById)
 	})
 
 	return handler.NewHandler("/category-product/process", c)
@@ -94,4 +95,25 @@ func (h *handlerProcessRuleCategoryImpl) handlerDeleteProcessRule(w http.Respons
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerProcessRuleCategoryImpl) handlerGetProcessRuleById(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	processRule, err := h.s.GetProcessRuleById(ctx, dtoId)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processRule})
 }

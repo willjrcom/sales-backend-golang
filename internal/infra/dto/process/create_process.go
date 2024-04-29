@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	ErrItemIDRequired        = errors.New("item ID is required")
+	ErrGroupItemIDRequired   = errors.New("group item ID is required")
 	ErrProcessRuleIDRequired = errors.New("process rule ID is required")
 )
 
@@ -22,7 +22,7 @@ func (s *CreateProcessInput) validate() error {
 	}
 
 	if s.GroupItemID == uuid.Nil {
-		return ErrItemIDRequired
+		return ErrGroupItemIDRequired
 	}
 
 	return nil

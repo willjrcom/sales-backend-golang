@@ -23,7 +23,6 @@ type Process struct {
 
 type ProcessCommonAttributes struct {
 	EmployeeID    *uuid.UUID              `bun:"employee_id,type:uuid" json:"employee_id,omitempty"`
-	ProductID     uuid.UUID               `bun:"product_id,type:uuid,notnull" json:"product_id"`
 	GroupItemID   uuid.UUID               `bun:"group_item_id,type:uuid,notnull" json:"group_item_id"`
 	ProcessRuleID uuid.UUID               `bun:"process_rule_id,type:uuid,notnull" json:"process_rule_id"`
 	Status        StatusProcess           `bun:"status,notnull" json:"status"`

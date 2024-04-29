@@ -1,7 +1,6 @@
 package processentity
 
 import (
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,8 +16,7 @@ type Queue struct {
 }
 
 type QueueCommonAttributes struct {
-	ItemID    uuid.UUID `bun:"column:item_id,type:uuid,notnull" json:"item_id"`
-	ProductID uuid.UUID `bun:"column:product_id,type:uuid,notnull" json:"product_id"`
+	GroupItemID uuid.UUID `bun:"column:group_item_id,type:uuid,notnull" json:"group_item_id"`
 }
 
 type QueueTimeLogs struct {
@@ -28,31 +26,21 @@ type QueueTimeLogs struct {
 	DurationFormatted string        `bun:"duration_formatted" json:"duration_formatted"`
 }
 
-func NewQueue(process *Process) (*Queue, error) {
-	if process.FinishedAt == nil {
-		return nil, errors.New("process must be finished")
-	}
-
+func NewQueue(groupItemID uuid.UUID, joinedAt time.Time) (*Queue, error) {
 	return &Queue{
 		Entity: entity.NewEntity(),
 		QueueCommonAttributes: QueueCommonAttributes{
-			ItemID:    process.GroupItemID,
-			ProductID: process.ProductID,
+			GroupItemID: groupItemID,
 		},
 		QueueTimeLogs: QueueTimeLogs{
-			JoinedAt: *process.FinishedAt,
+			JoinedAt: joinedAt,
 		},
 	}, nil
 }
 
-func (q *Queue) LeftQueue(nextProcess *Process) error {
-	if !q.JoinedAt.Before(*nextProcess.StartedAt) {
-		return errors.New("next process must be started after queue joined")
-	}
-
+func (q *Queue) FinishQueue(finishedAt time.Time) {
 	q.LeftAt = &time.Time{}
-	*q.LeftAt = *nextProcess.StartedAt
-	q.Duration = nextProcess.StartedAt.Sub(q.JoinedAt)
+	*q.LeftAt = finishedAt
+	q.Duration = q.LeftAt.Sub(q.JoinedAt)
 	q.DurationFormatted = q.Duration.String()
-	return nil
 }

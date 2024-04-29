@@ -97,7 +97,24 @@ func (r *QueueRepositoryBun) GetQueueByPreviousProcessId(ctx context.Context, id
 	return queue, nil
 }
 
-func (r *QueueRepositoryBun) GetAllQueuees(ctx context.Context) ([]processentity.Queue, error) {
+func (r *QueueRepositoryBun) GetQueueByGroupItemId(ctx context.Context, id string) (*processentity.Queue, error) {
+	queue := &processentity.Queue{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(queue).Where("group_item_id = ?", id).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return queue, nil
+}
+
+func (r *QueueRepositoryBun) GetAllQueues(ctx context.Context) ([]processentity.Queue, error) {
 	queuees := []processentity.Queue{}
 
 	r.mu.Lock()

@@ -3,6 +3,7 @@ package processrepositorybun
 import (
 	"context"
 	"database/sql"
+	"strings"
 	"sync"
 
 	"github.com/uptrace/bun"
@@ -50,6 +51,10 @@ func (r *ProcessRepositoryBun) RegisterProcess(ctx context.Context, s *processen
 			}
 
 			if _, err := tx.NewInsert().Model(processToProduct).Exec(ctx); err != nil {
+				if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+					continue
+				}
+
 				if errRollBack := tx.Rollback(); errRollBack != nil {
 					return errRollBack
 				}

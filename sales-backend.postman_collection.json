@@ -1011,7 +1011,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"name\": \"Rechear\",\n    \"order\": 1,\n    \"ideal_time\": 60, // Second\n    \"experimental_error\": 30, // Second\n    \"category_id\": \"98fe86e6-ab3a-4cd0-a6f6-01f9a7664ae3\"\n}",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"Rechear\",\n    \"order\": 4,\n    \"ideal_time\": 60, // Second\n    \"experimental_error\": 30, // Second\n    \"category_id\": \"{{category_product_id}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1126,6 +1126,68 @@
 							"name": "deletar",
 							"request": {
 								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/category-product/process/{{process_rule_category_id}}"
+							},
+							"response": [
+								{
+									"name": "deletar",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/category-product/process/{{process_rule_category_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 26 Apr 2024 15:25:17 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "2"
+										}
+									],
+									"cookie": [],
+									"body": "{}"
+								}
+							]
+						},
+						{
+							"name": "get by id",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
 								"header": [],
 								"body": {
 									"mode": "raw",
@@ -4734,6 +4796,349 @@
 							]
 						}
 					]
+				},
+				{
+					"name": "queue",
+					"item": [
+						{
+							"name": "start",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let queue_id = response.data",
+											"",
+											"if (queue_id != null) {",
+											"    pm.collectionVariables.set(\"queue_id\", queue_id)",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"group_item_id\": \"{{group_item_id}}\",\n    \"is_test\": true \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/queue/start"
+							},
+							"response": [
+								{
+									"name": "start",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\n{\n    \"group_item_id\": \"{{group_item_id}}\",\n    \"is_test\": true \n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/queue/start"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 29 Apr 2024 20:31:39 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "47"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": \"dab5d743-53ea-4822-bbc4-6b4dad6e61ed\"\n}"
+								}
+							]
+						},
+						{
+							"name": "finish",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let process_category_id = response.data",
+											"",
+											"if (process_category_id != null) {",
+											"    pm.collectionVariables.set(\"process_category_id\", process_category_id)",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/queue/finish/{{group_item_id}}"
+							},
+							"response": [
+								{
+									"name": "finish",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/queue/finish/{{group_item_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 29 Apr 2024 20:33:27 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "2"
+										}
+									],
+									"cookie": [],
+									"body": "{}"
+								}
+							]
+						},
+						{
+							"name": "get by id",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/queue/{{queue_id}}"
+							},
+							"response": [
+								{
+									"name": "get all",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/queue/{{queue_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 29 Apr 2024 20:33:42 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "336"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": {\n        \"id\": \"dab5d743-53ea-4822-bbc4-6b4dad6e61ed\",\n        \"created_at\": \"2024-04-29T20:31:39.031261Z\",\n        \"updated_at\": \"2024-04-29T20:31:39.031261Z\",\n        \"group_item_id\": \"815603f7-103f-4205-bdc6-0cd7a84f7e48\",\n        \"joined_at\": \"2024-04-29T20:31:39.03126Z\",\n        \"left_at\": \"2024-04-29T20:33:27.342281Z\",\n        \"duration\": 108311021000,\n        \"duration_formatted\": \"1m48.311021s\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "get by group item id",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/queue/by-group-item/{{group_item_id}}"
+							},
+							"response": [
+								{
+									"name": "get by group item id",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/queue/by-group-item/{{group_item_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 29 Apr 2024 20:33:50 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "336"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": {\n        \"id\": \"dab5d743-53ea-4822-bbc4-6b4dad6e61ed\",\n        \"created_at\": \"2024-04-29T20:31:39.031261Z\",\n        \"updated_at\": \"2024-04-29T20:31:39.031261Z\",\n        \"group_item_id\": \"815603f7-103f-4205-bdc6-0cd7a84f7e48\",\n        \"joined_at\": \"2024-04-29T20:31:39.03126Z\",\n        \"left_at\": \"2024-04-29T20:33:27.342281Z\",\n        \"duration\": 108311021000,\n        \"duration_formatted\": \"1m48.311021s\"\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "get all",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/queue/all"
+							},
+							"response": [
+								{
+									"name": "get all",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/queue/all"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 29 Apr 2024 20:34:08 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "338"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": [\n        {\n            \"id\": \"dab5d743-53ea-4822-bbc4-6b4dad6e61ed\",\n            \"created_at\": \"2024-04-29T20:31:39.031261Z\",\n            \"updated_at\": \"2024-04-29T20:31:39.031261Z\",\n            \"group_item_id\": \"815603f7-103f-4205-bdc6-0cd7a84f7e48\",\n            \"joined_at\": \"2024-04-29T20:31:39.03126Z\",\n            \"left_at\": \"2024-04-29T20:33:27.342281Z\",\n            \"duration\": 108311021000,\n            \"duration_formatted\": \"1m48.311021s\"\n        }\n    ]\n}"
+								}
+							]
+						}
+					]
 				}
 			]
 		},
@@ -7229,6 +7634,10 @@
 		},
 		{
 			"key": "process_category_id",
+			"value": ""
+		},
+		{
+			"key": "queue_id",
 			"value": ""
 		}
 	]

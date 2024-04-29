@@ -115,8 +115,12 @@ func (o *Order) PendingOrder() (err error) {
 	}
 
 	o.Status = OrderStatusPending
-	o.PendingAt = &time.Time{}
-	*o.PendingAt = time.Now()
+
+	if o.PendingAt == nil {
+		o.PendingAt = &time.Time{}
+		*o.PendingAt = time.Now()
+	}
+
 	return nil
 }
 
