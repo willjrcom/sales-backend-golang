@@ -37,10 +37,12 @@ func (s *UpdateProcessRuleInput) UpdateModel(model *productentity.ProcessRule) (
 
 	if s.IdealTime != 0 {
 		model.IdealTime = s.IdealTime * time.Second
+		model.IdealTimeFormatted = model.IdealTime.String()
 	}
 
 	if s.ExperimentalError != 0 {
 		model.ExperimentalError = s.ExperimentalError * time.Second
+		model.ExperimentalErrorFormatted = model.ExperimentalError.String()
 	}
 
 	return nil
