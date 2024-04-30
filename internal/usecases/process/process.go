@@ -11,18 +11,20 @@ import (
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process"
 	queuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/queue"
+	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	queueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/queue"
 )
 
 type Service struct {
-	r   processentity.ProcessRepository
-	ri  groupitementity.GroupItemRepository
-	rpr productentity.ProcessRuleRepository
-	sq  *queueusecases.Service
+	r    processentity.ProcessRepository
+	ri   groupitementity.GroupItemRepository
+	rpr  productentity.ProcessRuleRepository
+	sq   *queueusecases.Service
+	rsgi *groupitemusecases.Service
 }
 
-func NewService(c processentity.ProcessRepository, ri groupitementity.GroupItemRepository, sq *queueusecases.Service, rpr productentity.ProcessRuleRepository) *Service {
-	return &Service{r: c, ri: ri, sq: sq, rpr: rpr}
+func NewService(c processentity.ProcessRepository, ri groupitementity.GroupItemRepository, sq *queueusecases.Service, rpr productentity.ProcessRuleRepository, rsgi *groupitemusecases.Service) *Service {
+	return &Service{r: c, ri: ri, sq: sq, rpr: rpr, rsgi: rsgi}
 }
 
 func (s *Service) CreateProcess(ctx context.Context, dto *processdto.CreateProcessInput) (uuid.UUID, error) {
@@ -65,6 +67,18 @@ func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IdRequest, 
 	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
 		return err
+	}
+
+	processRule, err := s.rpr.GetProcessRuleById(ctx, process.ProcessRuleID.String())
+	if err != nil {
+		return err
+	}
+
+	if processRule.Order == 1 {
+		entityDtoID := entitydto.NewIdRequest(process.GroupItemID)
+		if err := s.rsgi.StartGroupItem(ctx, entityDtoID); err != nil {
+			return err
+		}
 	}
 
 	if err := process.StartProcess(employeeID); err != nil {
@@ -137,6 +151,11 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 
 	// Processes finished
 	if last {
+		entityDtoID := &entitydto.IdRequest{ID: process.GroupItemID}
+		if err := s.rsgi.ReadyGroupItem(ctx, entityDtoID); err != nil {
+			return uuid.Nil, err
+		}
+
 		return uuid.Nil, nil
 	}
 

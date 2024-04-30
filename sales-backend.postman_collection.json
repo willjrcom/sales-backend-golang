@@ -46,7 +46,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"code\": \"p121\", // UNIQUE\n    \"name\": \"Pizza Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 30.0,\n    \"cost\": 10.0, // Must be lower than or equal price\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": false\n}",
+									"raw": "// NEED LOGIN\n{\n    \"code\": \"b13\", // UNIQUE\n    \"name\": \"Pizza Frango com catupiry\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 10.0, // Must be lower than or equal price\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -772,7 +772,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"name\": \"M\",\n    \"active\": \"false\",\n    \"category_id\": \"{{category_product_id}}\"\n}",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"G\",\n    \"active\": true,\n    \"category_id\": \"{{category_product_id}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -7521,7 +7521,7 @@
 		},
 		{
 			"key": "size_category_id",
-			"value": "01014059-5db1-48a7-8c47-f8a599d3edda"
+			"value": "958df42f-cedd-4872-8dcb-55643b5ca599"
 		},
 		{
 			"key": "process_rule_category_id",

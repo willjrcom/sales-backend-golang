@@ -112,12 +112,13 @@ var HttpserverCmd = &cobra.Command{
 		employeeService := employeeusecases.NewService(employeeRepo, contactRepo)
 		contactService := contactusecases.NewService(contactRepo)
 
-		queueService := queueusecases.NewService(queueRepo, processRepo)
-		processService := processusecases.NewService(processRepo, groupItemRepo, queueService, processRuleRepo)
-
 		itemService := itemusecases.NewService(itemRepo, groupItemRepo, orderRepo, productRepo, quantityRepo)
-		groupService := groupitemusecases.NewService(itemRepo, groupItemRepo, productRepo)
-		orderService := orderusecases.NewService(orderRepo, shiftRepo, groupService, processService, processRuleRepo, queueService)
+		groupItemService := groupitemusecases.NewService(itemRepo, groupItemRepo, productRepo)
+
+		queueService := queueusecases.NewService(queueRepo, processRepo)
+		processService := processusecases.NewService(processRepo, groupItemRepo, queueService, processRuleRepo, groupItemService)
+
+		orderService := orderusecases.NewService(orderRepo, shiftRepo, groupItemService, processService, processRuleRepo, queueService)
 		pickupOrderService := pickuporderusecases.NewService(pickupOrderRepo, orderService)
 		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo, employeeRepo, orderService)
 		tableOrderService := tableorderusecases.NewService(tableOrderRepo, tableRepo, orderService)
@@ -147,7 +148,7 @@ var HttpserverCmd = &cobra.Command{
 		processHandler := handlerimpl.NewHandlerProcess(processService)
 		queueHandler := handlerimpl.NewHandlerQueue(queueService)
 		itemHandler := handlerimpl.NewHandlerItem(itemService)
-		groupHandler := handlerimpl.NewHandlerGroupItem(groupService)
+		groupItemHandler := handlerimpl.NewHandlerGroupItem(groupItemService)
 
 		tableHandler := handlerimpl.NewHandlerTable(tableService)
 		shiftHandler := handlerimpl.NewHandlerShift(shiftService)
@@ -172,7 +173,7 @@ var HttpserverCmd = &cobra.Command{
 		server.AddHandler(processHandler)
 		server.AddHandler(queueHandler)
 		server.AddHandler(itemHandler)
-		server.AddHandler(groupHandler)
+		server.AddHandler(groupItemHandler)
 
 		server.AddHandler(tableHandler)
 		server.AddHandler(shiftHandler)
