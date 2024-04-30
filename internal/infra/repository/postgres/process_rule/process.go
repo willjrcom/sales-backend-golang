@@ -122,6 +122,23 @@ func (r *ProcessRuleCategoryRepositoryBun) GetMapProcessRulesByFirstOrder(ctx co
 	return mapProcesses, nil
 }
 
+func (r *ProcessRuleCategoryRepositoryBun) GetProcessRuleByCategoryIdAndOrder(ctx context.Context, id string, order int8) (*productentity.ProcessRule, error) {
+	processRule := &productentity.ProcessRule{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(processRule).Where("category_id = ? and \"order\" = ?", id, order).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return processRule, nil
+}
+
 func (r *ProcessRuleCategoryRepositoryBun) GetMapProcessRulesByLastOrder(ctx context.Context) (map[uuid.UUID]uuid.UUID, error) {
 	processRulesSubquery := []productentity.ProcessRule{}
 	processRules := []productentity.ProcessRule{}
@@ -157,8 +174,12 @@ func (r *ProcessRuleCategoryRepositoryBun) GetMapProcessRulesByLastOrder(ctx con
 		return nil, err
 	}
 
-	for _, processRule := range processRulesSubquery {
-		mapProcesses[processRule.CategoryID] = processRule.ID
+	for _, processRule := range processRules {
+		if processRule.ID == uuid.Nil {
+			continue
+		}
+
+		mapProcesses[processRule.ID] = processRule.CategoryID
 	}
 
 	return mapProcesses, nil
@@ -170,5 +191,9 @@ func (r *ProcessRuleCategoryRepositoryBun) IsLastProcessRuleByID(ctx context.Con
 		return false, err
 	}
 
-	return mapProcessRules[id] == uuid.Nil, nil
+	if _, exists := mapProcessRules[id]; exists {
+		return true, nil
+	}
+
+	return false, nil
 }

@@ -130,12 +130,13 @@ func (h *handlerProcessImpl) handlerFinishProcess(w http.ResponseWriter, r *http
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.FinishProcess(ctx, dtoId); err != nil {
+	nexProcessID, err := h.s.FinishProcess(ctx, dtoId)
+	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: nexProcessID})
 }
 
 func (h *handlerProcessImpl) handlerGetProcess(w http.ResponseWriter, r *http.Request) {

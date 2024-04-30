@@ -116,18 +116,28 @@ func (s *Service) ContinueProcess(ctx context.Context, dtoID *entitydto.IdReques
 	return nil
 }
 
-func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest) error {
+func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest) (nextProcessID uuid.UUID, err error) {
 	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
 	if err := process.FinishProcess(); err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
 	if err := s.r.UpdateProcess(ctx, process); err != nil {
-		return err
+		return uuid.Nil, err
+	}
+
+	last, err := s.rpr.IsLastProcessRuleByID(ctx, process.ProcessRuleID)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	// Processes finished
+	if last {
+		return uuid.Nil, nil
 	}
 
 	startQueueInput := &queuedto.StartQueueInput{
@@ -138,10 +148,33 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 	}
 
 	if _, err := s.sq.StartQueue(ctx, startQueueInput); err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
-	return nil
+	processRule, err := s.rpr.GetProcessRuleById(ctx, process.ProcessRuleID.String())
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	nextProcessRule, err := s.rpr.GetProcessRuleByCategoryIdAndOrder(ctx, processRule.CategoryID.String(), processRule.Order+1)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	// Create next process
+	createProcessInput := &processdto.CreateProcessInput{
+		ProcessCommonAttributes: processentity.ProcessCommonAttributes{
+			GroupItemID:   process.GroupItemID,
+			ProcessRuleID: nextProcessRule.ID,
+		},
+	}
+
+	nextProcessID, err = s.CreateProcess(ctx, createProcessInput)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return nextProcessID, nil
 }
 
 func (s *Service) GetProcessById(ctx context.Context, dto *entitydto.IdRequest) (*processdto.ProcessOutput, error) {
