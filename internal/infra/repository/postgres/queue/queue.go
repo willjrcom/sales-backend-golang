@@ -80,7 +80,7 @@ func (r *QueueRepositoryBun) GetQueueById(ctx context.Context, id string) (*proc
 	return queue, nil
 }
 
-func (r *QueueRepositoryBun) GetQueueByPreviousProcessId(ctx context.Context, id string) (*processentity.Queue, error) {
+func (r *QueueRepositoryBun) GetOpenedQueueByGroupItemId(ctx context.Context, id string) (*processentity.Queue, error) {
 	queue := &processentity.Queue{}
 
 	r.mu.Lock()
@@ -90,15 +90,15 @@ func (r *QueueRepositoryBun) GetQueueByPreviousProcessId(ctx context.Context, id
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(queue).Where("previous_process_id = ?", id).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(queue).Where("group_item_id = ? AND left_at IS NULL", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
 	return queue, nil
 }
 
-func (r *QueueRepositoryBun) GetQueueByGroupItemId(ctx context.Context, id string) (*processentity.Queue, error) {
-	queue := &processentity.Queue{}
+func (r *QueueRepositoryBun) GetQueuesByGroupItemId(ctx context.Context, id string) ([]processentity.Queue, error) {
+	queues := []processentity.Queue{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -107,11 +107,11 @@ func (r *QueueRepositoryBun) GetQueueByGroupItemId(ctx context.Context, id strin
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(queue).Where("group_item_id = ?", id).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&queues).Where("group_item_id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
-	return queue, nil
+	return queues, nil
 }
 
 func (r *QueueRepositoryBun) GetAllQueues(ctx context.Context) ([]processentity.Queue, error) {

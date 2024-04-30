@@ -16,7 +16,8 @@ type Queue struct {
 }
 
 type QueueCommonAttributes struct {
-	GroupItemID uuid.UUID `bun:"column:group_item_id,type:uuid,notnull" json:"group_item_id"`
+	GroupItemID   uuid.UUID  `bun:"column:group_item_id,type:uuid,notnull" json:"group_item_id"`
+	ProcessRuleID *uuid.UUID `bun:"column:process_rule_id,type:uuid,notnull" json:"process_rule_id,omitempty"`
 }
 
 type QueueTimeLogs struct {
@@ -33,12 +34,14 @@ func NewQueue(groupItemID uuid.UUID, joinedAt time.Time) (*Queue, error) {
 			GroupItemID: groupItemID,
 		},
 		QueueTimeLogs: QueueTimeLogs{
-			JoinedAt: joinedAt,
+			JoinedAt:          joinedAt,
+			DurationFormatted: "0s",
 		},
 	}, nil
 }
 
-func (q *Queue) FinishQueue(finishedAt time.Time) {
+func (q *Queue) FinishQueue(processRuleID uuid.UUID, finishedAt time.Time) {
+	q.ProcessRuleID = &processRuleID
 	q.LeftAt = &time.Time{}
 	*q.LeftAt = finishedAt
 	q.Duration = q.LeftAt.Sub(q.JoinedAt)

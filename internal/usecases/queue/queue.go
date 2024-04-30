@@ -2,7 +2,6 @@ package queueusecases
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 	processentity "github.com/willjrcom/sales-backend-go/internal/domain/process"
@@ -20,12 +19,12 @@ func NewService(c processentity.QueueRepository, rp processentity.ProcessReposit
 }
 
 func (s *Service) StartQueue(ctx context.Context, dto *queuedto.StartQueueInput) (uuid.UUID, error) {
-	groupItemID, startedAt, err := dto.ToModel()
+	groupItemID, joinedAt, err := dto.ToModel()
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	queue, err := processentity.NewQueue(groupItemID, *startedAt)
+	queue, err := processentity.NewQueue(groupItemID, *joinedAt)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -37,13 +36,13 @@ func (s *Service) StartQueue(ctx context.Context, dto *queuedto.StartQueueInput)
 	return queue.ID, nil
 }
 
-func (s *Service) FinishQueue(ctx context.Context, groupItemID uuid.UUID, finishedAt time.Time) error {
-	queue, err := s.r.GetQueueByGroupItemId(ctx, groupItemID.String())
+func (s *Service) FinishQueue(ctx context.Context, process *processentity.Process) error {
+	queue, err := s.r.GetOpenedQueueByGroupItemId(ctx, process.GroupItemID.String())
 	if err != nil {
 		return err
 	}
 
-	queue.FinishQueue(finishedAt)
+	queue.FinishQueue(process.ProcessRuleID, *process.StartedAt)
 
 	if err := s.r.UpdateQueue(ctx, queue); err != nil {
 		return err
@@ -53,18 +52,18 @@ func (s *Service) FinishQueue(ctx context.Context, groupItemID uuid.UUID, finish
 }
 
 func (s *Service) GetQueueById(ctx context.Context, dto *entitydto.IdRequest) (*processentity.Queue, error) {
-	if process, err := s.r.GetQueueById(ctx, dto.ID.String()); err != nil {
+	if queue, err := s.r.GetQueueById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return process, nil
+		return queue, nil
 	}
 }
 
-func (s *Service) GetQueueByGroupItemId(ctx context.Context, dto *entitydto.IdRequest) (*processentity.Queue, error) {
-	if process, err := s.r.GetQueueByGroupItemId(ctx, dto.ID.String()); err != nil {
+func (s *Service) GetQueuesByGroupItemId(ctx context.Context, dto *entitydto.IdRequest) ([]processentity.Queue, error) {
+	if queues, err := s.r.GetQueuesByGroupItemId(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return process, nil
+		return queues, nil
 	}
 }
 

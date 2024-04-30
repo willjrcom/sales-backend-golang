@@ -10,6 +10,7 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process"
+	queuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/queue"
 	queueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/queue"
 )
 
@@ -74,6 +75,10 @@ func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IdRequest, 
 		return err
 	}
 
+	if err := s.sq.FinishQueue(ctx, process); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -125,16 +130,14 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 		return err
 	}
 
-	lastProcessRule, err := s.rpr.IsLastProcessRuleByID(ctx, process.ProcessRuleID)
-	if err != nil {
-		return err
+	startQueueInput := &queuedto.StartQueueInput{
+		QueueCommonAttributes: processentity.QueueCommonAttributes{
+			GroupItemID: process.GroupItemID,
+		},
+		JoinedAt: *process.FinishedAt,
 	}
 
-	if !lastProcessRule {
-		return nil
-	}
-
-	if err := s.sq.FinishQueue(ctx, process.GroupItemID, *process.FinishedAt); err != nil {
+	if _, err := s.sq.StartQueue(ctx, startQueueInput); err != nil {
 		return err
 	}
 

@@ -2,11 +2,11 @@ package handlerimpl
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
+	processentity "github.com/willjrcom/sales-backend-go/internal/domain/process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	queuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/queue"
 	queueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/queue"
@@ -28,7 +28,7 @@ func NewHandlerQueue(queueService *queueusecases.Service) *handler.Handler {
 		c.Post("/start", h.handlerStartQueue)
 		c.Post("/finish/{id}", h.handlerFinishQueue)
 		c.Get("/{id}", h.handlerGetQueueByID)
-		c.Get("/by-group-item/{id}", h.handlerGetQueueByGroupItemId)
+		c.Get("/by-group-item/{id}", h.handlerGetQueuesByGroupItemId)
 		c.Get("/all", h.handlerGetAllQueues)
 	})
 
@@ -55,16 +55,14 @@ func (h *handlerQueueImpl) handlerStartQueue(w http.ResponseWriter, r *http.Requ
 
 func (h *handlerQueueImpl) handlerFinishQueue(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id := chi.URLParam(r, "id")
 
-	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+	process := &processentity.Process{}
+	if err := jsonpkg.ParseBody(r, process); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
-
-	if err := h.s.FinishQueue(ctx, dtoId.ID, time.Now()); err != nil {
+	if err := h.s.FinishQueue(ctx, process); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -92,7 +90,7 @@ func (h *handlerQueueImpl) handlerGetQueueByID(w http.ResponseWriter, r *http.Re
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: queue})
 }
 
-func (h *handlerQueueImpl) handlerGetQueueByGroupItemId(w http.ResponseWriter, r *http.Request) {
+func (h *handlerQueueImpl) handlerGetQueuesByGroupItemId(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
 
@@ -103,13 +101,13 @@ func (h *handlerQueueImpl) handlerGetQueueByGroupItemId(w http.ResponseWriter, r
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	queue, err := h.s.GetQueueByGroupItemId(ctx, dtoId)
+	queues, err := h.s.GetQueuesByGroupItemId(ctx, dtoId)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: queue})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: queues})
 }
 
 func (h *handlerQueueImpl) handlerGetAllQueues(w http.ResponseWriter, r *http.Request) {

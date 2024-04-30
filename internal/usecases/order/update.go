@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
 	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
 	processentity "github.com/willjrcom/sales-backend-go/internal/domain/process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -24,10 +25,14 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 		return err
 	}
 
+	groupItemIDs := []uuid.UUID{}
 	for _, groupItem := range order.Groups {
 		if groupItem.Status != groupitementity.StatusGroupStaging {
 			continue
 		}
+
+		// Append only Staging group items
+		groupItemIDs = append(groupItemIDs, groupItem.ID)
 
 		processRuleID, ok := processRules[groupItem.CategoryID]
 		if !ok {
@@ -45,11 +50,17 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 		if _, err := s.rp.CreateProcess(ctx, createProcessInput); err != nil {
 			return err
 		}
+	}
 
-		// Create queue for each group item
+	if err = order.PendingOrder(); err != nil {
+		return err
+	}
+
+	// Create queue for each group item
+	for _, groupItemID := range groupItemIDs {
 		startQueueInput := &queuedto.StartQueueInput{
 			QueueCommonAttributes: processentity.QueueCommonAttributes{
-				GroupItemID: groupItem.ID,
+				GroupItemID: groupItemID,
 			},
 			JoinedAt: *order.PendingAt,
 		}
@@ -57,10 +68,6 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 		if _, err := s.rq.StartQueue(ctx, startQueueInput); err != nil {
 			return err
 		}
-	}
-
-	if err = order.PendingOrder(); err != nil {
-		return err
 	}
 
 	if err := s.ro.PendingOrder(ctx, order); err != nil {
