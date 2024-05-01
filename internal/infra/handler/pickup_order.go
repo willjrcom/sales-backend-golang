@@ -25,8 +25,8 @@ func NewHandlerPickupOrder(orderService pickuporderusecases.IService) *handler.H
 		c.Post("/new", h.handlerRegisterPickupOrder)
 		c.Get("/{id}", h.handlerGetPickupById)
 		c.Get("/all", h.handlerGetAllPickups)
-		c.Post("/update/pending/{id}", h.handlerPendingOrder)
-		c.Post("/update/launch/{id}", h.handlerLaunchOrder)
+		c.Post("/update/pend/{id}", h.handlerPendingOrder)
+		c.Post("/update/ready/{id}", h.handlerReadyOrder)
 	})
 
 	return handler.NewHandler("/pickup-order", c)
@@ -103,7 +103,7 @@ func (h *handlerPickupOrderImpl) handlerPendingOrder(w http.ResponseWriter, r *h
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerPickupOrderImpl) handlerLaunchOrder(w http.ResponseWriter, r *http.Request) {
+func (h *handlerPickupOrderImpl) handlerReadyOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -115,7 +115,7 @@ func (h *handlerPickupOrderImpl) handlerLaunchOrder(w http.ResponseWriter, r *ht
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.IService.LaunchOrder(ctx, dtoId); err != nil {
+	if err := h.IService.ReadyOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

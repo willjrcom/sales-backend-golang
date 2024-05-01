@@ -121,6 +121,15 @@ func (o *Order) PendingOrder() (err error) {
 		*o.PendingAt = time.Now()
 	}
 
+	if o.Delivery != nil {
+		if err := o.Delivery.Pending(); err != nil {
+			return err
+		}
+	} else if o.Pickup != nil {
+		if err := o.Pickup.Pend(); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

@@ -10,9 +10,8 @@ import (
 )
 
 var (
-	ErrPickupOrderNotReady       = errors.New("pickup order not ready")
-	ErrPickupOrderAlreadyPending = errors.New("pickup order already pending")
-	ErrPickupOrderAlreadyReady   = errors.New("pickup order already ready")
+	ErrPickupOrderMustBeStaging = errors.New("pickup order must be staging")
+	ErrPickupOrderMustBePending = errors.New("pickup order must be pending")
 )
 
 type PickupOrder struct {
@@ -45,9 +44,9 @@ func NewPickupOrder(name string) *PickupOrder {
 	}
 }
 
-func (d *PickupOrder) Pending() error {
-	if d.Status == PickupOrderStatusPending {
-		return ErrPickupOrderAlreadyPending
+func (d *PickupOrder) Pend() error {
+	if d.Status != PickupOrderStatusStaging {
+		return ErrPickupOrderMustBeStaging
 	}
 
 	d.PendingAt = &time.Time{}
@@ -56,9 +55,9 @@ func (d *PickupOrder) Pending() error {
 	return nil
 }
 
-func (d *PickupOrder) Launch() error {
-	if d.Status == PickupOrderStatusReady {
-		return ErrPickupOrderAlreadyReady
+func (d *PickupOrder) Ready() error {
+	if d.Status != PickupOrderStatusPending {
+		return ErrPickupOrderMustBePending
 	}
 
 	d.ReadyAt = &time.Time{}

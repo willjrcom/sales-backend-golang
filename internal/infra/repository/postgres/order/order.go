@@ -94,6 +94,25 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *orderentity.Or
 		}
 	}
 
+	if p.Delivery != nil {
+		if _, err = tx.NewUpdate().Model(p.Delivery).WherePK().Exec(ctx); err != nil {
+			if errRoolback := tx.Rollback(); errRoolback != nil {
+				return errRoolback
+			}
+
+			return err
+		}
+
+	} else if p.Pickup != nil {
+		if _, err = tx.NewUpdate().Model(p.Pickup).WherePK().Exec(ctx); err != nil {
+			if errRoolback := tx.Rollback(); errRoolback != nil {
+				return errRoolback
+			}
+
+			return err
+		}
+	}
+
 	if err := tx.Commit(); err != nil {
 		if errRoolback := tx.Rollback(); errRoolback != nil {
 			return errRoolback
