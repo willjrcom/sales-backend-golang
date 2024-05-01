@@ -2328,7 +2328,118 @@
 							"name": "status",
 							"item": [
 								{
-									"name": "launch",
+									"name": "pend",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													""
+												],
+												"type": "text/javascript",
+												"packages": {}
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/delivery-order/update/pend/{{order_delivery_id}}"
+									},
+									"response": [
+										{
+											"name": "pend",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "// NEED LOGIN\n{}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": "{{server}}/delivery-order/update/pens/{{order_delivery_id}}"
+											},
+											"status": "OK",
+											"code": 200,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json; charset=utf-8"
+												},
+												{
+													"key": "Vary",
+													"value": "Origin"
+												},
+												{
+													"key": "Date",
+													"value": "Wed, 01 May 2024 21:07:04 GMT"
+												},
+												{
+													"key": "Content-Length",
+													"value": "2"
+												}
+											],
+											"cookie": [],
+											"body": "{}"
+										},
+										{
+											"name": "must be staging",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "// NEED LOGIN\n{}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": "{{server}}/delivery-order/update/pend/{{order_delivery_id}}"
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json; charset=utf-8"
+												},
+												{
+													"key": "Vary",
+													"value": "Origin"
+												},
+												{
+													"key": "Date",
+													"value": "Wed, 01 May 2024 21:23:51 GMT"
+												},
+												{
+													"key": "Content-Length",
+													"value": "44"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"message\": \"delivery order must be staging\"\n}"
+										}
+									]
+								},
+								{
+									"name": "ship",
 									"event": [
 										{
 											"listen": "test",
@@ -2353,7 +2464,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/delivery-order/update/launch/{{order_delivery_id}}"
+										"url": "{{server}}/delivery-order/update/ship/{{order_delivery_id}}"
 									},
 									"response": [
 										{
@@ -2395,11 +2506,51 @@
 											],
 											"cookie": [],
 											"body": "{}"
+										},
+										{
+											"name": "must be pending",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "// NEED LOGIN\n{\n    \"driver_id\": \"{{employee_id}}\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": "{{server}}/delivery-order/update/ship/{{order_delivery_id}}"
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json; charset=utf-8"
+												},
+												{
+													"key": "Vary",
+													"value": "Origin"
+												},
+												{
+													"key": "Date",
+													"value": "Wed, 01 May 2024 21:24:05 GMT"
+												},
+												{
+													"key": "Content-Length",
+													"value": "44"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"message\": \"delivery order must be pending\"\n}"
 										}
 									]
 								},
 								{
-									"name": "finish",
+									"name": "must be shipped",
 									"event": [
 										{
 											"listen": "test",
@@ -2424,7 +2575,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/delivery-order/update/finish/{{order_delivery_id}}"
+										"url": "{{server}}/delivery-order/update/delivery/{{order_delivery_id}}"
 									},
 									"response": [
 										{
@@ -2790,7 +2941,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/pickup-order/update/launch/{{order_pickup_id}}"
+										"url": "{{server}}/pickup-order/update/pend/{{order_pickup_id}}"
 									},
 									"response": [
 										{
@@ -2876,7 +3027,7 @@
 									]
 								},
 								{
-									"name": "pickup",
+									"name": "ready",
 									"event": [
 										{
 											"listen": "test",
@@ -2901,7 +3052,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/pickup-order/update/pickup/{{order_pickup_id}}"
+										"url": "{{server}}/pickup-order/update/ready/{{order_pickup_id}}"
 									},
 									"response": [
 										{
