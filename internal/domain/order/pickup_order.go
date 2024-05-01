@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	ErrPickupOrderNotReady        = errors.New("pickup order not ready")
-	ErrPickupOrderAlreadyReady    = errors.New("pickup order already ready")
-	ErrPickupOrderAlreadyPickedup = errors.New("pickup order already pickedup")
+	ErrPickupOrderNotReady       = errors.New("pickup order not ready")
+	ErrPickupOrderAlreadyPending = errors.New("pickup order already pending")
+	ErrPickupOrderAlreadyReady   = errors.New("pickup order already ready")
 )
 
 type PickupOrder struct {
@@ -29,14 +29,14 @@ type PickupOrderCommonAttributes struct {
 }
 
 type PickupTimeLogs struct {
-	ReadyAt    *time.Time `bun:"ready_at" json:"ready_at,omitempty"`
-	PickedupAt *time.Time `bun:"pickedup_at" json:"pickedup_at,omitempty"`
+	PendingAt *time.Time `bun:"pending_at" json:"pending_at,omitempty"`
+	ReadyAt   *time.Time `bun:"ready_at" json:"ready_at,omitempty"`
 }
 
 func NewPickupOrder(name string) *PickupOrder {
 	pickupOrderCommonAttributes := PickupOrderCommonAttributes{
 		Name:   name,
-		Status: PickupOrderStatusPending,
+		Status: PickupOrderStatusStaging,
 	}
 
 	return &PickupOrder{
@@ -45,32 +45,24 @@ func NewPickupOrder(name string) *PickupOrder {
 	}
 }
 
+func (d *PickupOrder) Pending() error {
+	if d.Status == PickupOrderStatusPending {
+		return ErrPickupOrderAlreadyPending
+	}
+
+	d.PendingAt = &time.Time{}
+	*d.PendingAt = time.Now()
+	d.Status = PickupOrderStatusPending
+	return nil
+}
+
 func (d *PickupOrder) Launch() error {
 	if d.Status == PickupOrderStatusReady {
 		return ErrPickupOrderAlreadyReady
 	}
 
-	if d.Status == PickupOrderStatusPickedup {
-		return ErrPickupOrderAlreadyPickedup
-	}
-
 	d.ReadyAt = &time.Time{}
 	*d.ReadyAt = time.Now()
 	d.Status = PickupOrderStatusReady
-	return nil
-}
-
-func (d *PickupOrder) PickUp() error {
-	if d.Status == PickupOrderStatusPickedup {
-		return ErrPickupOrderAlreadyPickedup
-	}
-
-	if d.Status != PickupOrderStatusReady {
-		return ErrPickupOrderNotReady
-	}
-
-	d.PickedupAt = &time.Time{}
-	*d.PickedupAt = time.Now()
-	d.Status = PickupOrderStatusPickedup
 	return nil
 }

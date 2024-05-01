@@ -25,8 +25,8 @@ func NewHandlerPickupOrder(orderService pickuporderusecases.IService) *handler.H
 		c.Post("/new", h.handlerRegisterPickupOrder)
 		c.Get("/{id}", h.handlerGetPickupById)
 		c.Get("/all", h.handlerGetAllPickups)
+		c.Post("/update/pending/{id}", h.handlerPendingOrder)
 		c.Post("/update/launch/{id}", h.handlerLaunchOrder)
-		c.Post("/update/pickup/{id}", h.handlerPickupOrder)
 	})
 
 	return handler.NewHandler("/pickup-order", c)
@@ -83,6 +83,26 @@ func (h *handlerPickupOrderImpl) handlerGetAllPickups(w http.ResponseWriter, r *
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
 }
 
+func (h *handlerPickupOrderImpl) handlerPendingOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.IService.PendingOrder(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
 func (h *handlerPickupOrderImpl) handlerLaunchOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -96,26 +116,6 @@ func (h *handlerPickupOrderImpl) handlerLaunchOrder(w http.ResponseWriter, r *ht
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if err := h.IService.LaunchOrder(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
-}
-
-func (h *handlerPickupOrderImpl) handlerPickupOrder(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	id := chi.URLParam(r, "id")
-
-	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
-		return
-	}
-
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
-
-	if err := h.IService.PickupOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

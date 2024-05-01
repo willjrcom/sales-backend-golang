@@ -6,14 +6,14 @@ import (
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 )
 
-func (s *Service) LaunchOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
+func (s *Service) PendingOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
 	pickupOrder, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if err := pickupOrder.Launch(); err != nil {
+	if err := pickupOrder.Pending(); err != nil {
 		return err
 	}
 
@@ -24,14 +24,14 @@ func (s *Service) LaunchOrder(ctx context.Context, dtoID *entitydto.IdRequest) (
 	return nil
 }
 
-func (s *Service) PickupOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
+func (s *Service) LaunchOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
 	pickupOrder, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if err := pickupOrder.PickUp(); err != nil {
+	if err := pickupOrder.Launch(); err != nil {
 		return err
 	}
 

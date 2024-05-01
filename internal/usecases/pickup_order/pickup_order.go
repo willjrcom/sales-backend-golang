@@ -27,8 +27,8 @@ type IGetService interface {
 }
 
 type IUpdateService interface {
+	PendingOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
 	LaunchOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
-	PickupOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
 }
 
 type IStatusService interface {

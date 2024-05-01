@@ -25,8 +25,9 @@ func NewHandlerDeliveryOrder(orderService deliveryorderusecases.IService) *handl
 		c.Post("/new", h.handlerRegisterDeliveryOrder)
 		c.Get("/{id}", h.handlerGetDeliveryById)
 		c.Get("/all", h.handlerGetAllDeliveries)
-		c.Post("/update/launch/{id}", h.handlerLaunchDeliveryOrder)
-		c.Post("/update/finish/{id}", h.handlerFinishDeliveryOrder)
+		c.Post("/update/pend/{id}", h.handlerPendDeliveryOrder)
+		c.Post("/update/ship/{id}", h.handlerShipDeliveryOrder)
+		c.Post("/update/delivery/{id}", h.handlerDeliveryOrder)
 		c.Put("/update/driver/{id}", h.handlerUpdateDriver)
 		c.Put("/update/address/{id}", h.handlerUpdateDeliveryAddress)
 	})
@@ -85,7 +86,27 @@ func (h *handlerDeliveryOrderImpl) handlerGetAllDeliveries(w http.ResponseWriter
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
 }
 
-func (h *handlerDeliveryOrderImpl) handlerLaunchDeliveryOrder(w http.ResponseWriter, r *http.Request) {
+func (h *handlerDeliveryOrderImpl) handlerPendDeliveryOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.IService.PendDeliveryOrder(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerDeliveryOrderImpl) handlerShipDeliveryOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -103,7 +124,7 @@ func (h *handlerDeliveryOrderImpl) handlerLaunchDeliveryOrder(w http.ResponseWri
 		return
 	}
 
-	if err := h.IService.LaunchDeliveryOrder(ctx, dtoId, dtoDelivery); err != nil {
+	if err := h.IService.ShipDeliveryOrder(ctx, dtoId, dtoDelivery); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -111,7 +132,7 @@ func (h *handlerDeliveryOrderImpl) handlerLaunchDeliveryOrder(w http.ResponseWri
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerDeliveryOrderImpl) handlerFinishDeliveryOrder(w http.ResponseWriter, r *http.Request) {
+func (h *handlerDeliveryOrderImpl) handlerDeliveryOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -123,7 +144,7 @@ func (h *handlerDeliveryOrderImpl) handlerFinishDeliveryOrder(w http.ResponseWri
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.IService.FinishDeliveryOrder(ctx, dtoId); err != nil {
+	if err := h.IService.DeliveryOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

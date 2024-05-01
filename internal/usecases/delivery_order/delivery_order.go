@@ -32,8 +32,9 @@ type IGetService interface {
 }
 
 type IUpdateService interface {
-	LaunchDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest, dtoDriver *deliveryorderdto.UpdateDriverOrder) (err error)
-	FinishDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
+	PendDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
+	ShipDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest, dtoDriver *deliveryorderdto.UpdateDriverOrder) (err error)
+	DeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
 	UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
 	UpdateDeliveryDriver(ctx context.Context, dto *entitydto.IdRequest, deliveryOrder *deliveryorderdto.UpdateDriverOrder) (err error)
 }

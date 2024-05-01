@@ -13,7 +13,25 @@ var (
 	ErrOrderDelivered = errors.New("order already delivered")
 )
 
-func (s *Service) LaunchDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest, dtoDriver *deliveryorderdto.UpdateDriverOrder) (err error) {
+func (s *Service) PendDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
+	deliveryOrder, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	if err := deliveryOrder.Pending(); err != nil {
+		return err
+	}
+
+	if err = s.rdo.UpdateDeliveryOrder(ctx, deliveryOrder); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) ShipDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest, dtoDriver *deliveryorderdto.UpdateDriverOrder) (err error) {
 	deliveryOrder, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 
 	if err != nil {
@@ -28,7 +46,9 @@ func (s *Service) LaunchDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRe
 		return err
 	}
 
-	deliveryOrder.LaunchDelivery(*deliveryOrder.DriverID)
+	if err := deliveryOrder.Ship(*deliveryOrder.DriverID); err != nil {
+		return err
+	}
 
 	if err = s.rdo.UpdateDeliveryOrder(ctx, deliveryOrder); err != nil {
 		return err
@@ -37,14 +57,16 @@ func (s *Service) LaunchDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRe
 	return nil
 }
 
-func (s *Service) FinishDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
+func (s *Service) DeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
 	deliveryOrder, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	deliveryOrder.FinishDelivery()
+	if err := deliveryOrder.Delivery(); err != nil {
+		return err
+	}
 
 	if err = s.rdo.UpdateDeliveryOrder(ctx, deliveryOrder); err != nil {
 		return err
@@ -64,7 +86,7 @@ func (s *Service) UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.Id
 		return ErrOrderDelivered
 	}
 
-	if deliveryOrder.LaunchedAt != nil {
+	if deliveryOrder.ShippedAt != nil {
 		return ErrOrderLaunched
 	}
 

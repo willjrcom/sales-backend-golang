@@ -3,15 +3,15 @@ package orderentity
 type StatusPickupOrder string
 
 const (
-	PickupOrderStatusPending  StatusPickupOrder = "Pending"
-	PickupOrderStatusReady    StatusPickupOrder = "Ready"
-	PickupOrderStatusPickedup StatusPickupOrder = "Picked up"
+	PickupOrderStatusStaging StatusPickupOrder = "Staging"
+	PickupOrderStatusPending StatusPickupOrder = "Pending"
+	PickupOrderStatusReady   StatusPickupOrder = "Ready"
 )
 
 func GetAllPickupStatus() []StatusPickupOrder {
 	return []StatusPickupOrder{
+		PickupOrderStatusStaging,
 		PickupOrderStatusPending,
 		PickupOrderStatusReady,
-		PickupOrderStatusPickedup,
 	}
 }

@@ -1,6 +1,7 @@
 package orderentity
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,6 +10,12 @@ import (
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+)
+
+var (
+	ErrDeliveryOrderMustBeStaging = errors.New("delivery order must be staging")
+	ErrDeliveryOrderMustBePending = errors.New("delivery order must be pending")
+	ErrDeliveryOrderMustBeShipped = errors.New("delivery order must be shipped")
 )
 
 type DeliveryOrder struct {
@@ -31,14 +38,15 @@ type DeliveryOrderCommonAttributes struct {
 }
 
 type DeliveryTimeLogs struct {
-	LaunchedAt  *time.Time `bun:"launched_at" json:"launched_at,omitempty"`
+	PendingAt   *time.Time `bun:"pending_at" json:"pending_at,omitempty"`
+	ShippedAt   *time.Time `bun:"shipped_at" json:"shipped_at,omitempty"`
 	DeliveredAt *time.Time `bun:"delivered_at" json:"delivered_at,omitempty"`
 }
 
 func NewDeliveryOrder(clientID uuid.UUID) *DeliveryOrder {
 	orderCommonAttributes := DeliveryOrderCommonAttributes{
 		ClientID: clientID,
-		Status:   DeliveryOrderStatusPending,
+		Status:   DeliveryOrderStatusStaging,
 	}
 
 	return &DeliveryOrder{
@@ -47,15 +55,35 @@ func NewDeliveryOrder(clientID uuid.UUID) *DeliveryOrder {
 	}
 }
 
-func (d *DeliveryOrder) LaunchDelivery(driverID uuid.UUID) {
-	*d.DriverID = driverID
-	d.LaunchedAt = &time.Time{}
-	*d.LaunchedAt = time.Now()
-	d.Status = DeliveryOrderStatusShipped
+func (d *DeliveryOrder) Pending() error {
+	if d.Status != DeliveryOrderStatusStaging {
+		return ErrDeliveryOrderMustBeStaging
+	}
+	d.PendingAt = &time.Time{}
+	*d.PendingAt = time.Now()
+	d.Status = DeliveryOrderStatusPending
+	return nil
 }
 
-func (d *DeliveryOrder) FinishDelivery() {
+func (d *DeliveryOrder) Ship(driverID uuid.UUID) error {
+	if d.Status != DeliveryOrderStatusPending {
+		return ErrDeliveryOrderMustBePending
+	}
+
+	*d.DriverID = driverID
+	d.ShippedAt = &time.Time{}
+	*d.ShippedAt = time.Now()
+	d.Status = DeliveryOrderStatusShipped
+	return nil
+}
+
+func (d *DeliveryOrder) Delivery() error {
+	if d.Status != DeliveryOrderStatusShipped {
+		return ErrDeliveryOrderMustBeShipped
+	}
+
 	d.DeliveredAt = &time.Time{}
 	*d.DeliveredAt = time.Now()
 	d.Status = DeliveryOrderStatusDelivered
+	return nil
 }
