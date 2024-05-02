@@ -28,6 +28,7 @@ func (s *Service) CreateDeliveryOrder(ctx context.Context, dto *deliveryorderdto
 	}
 
 	delivery.AddressID = client.Address.ID
+	delivery.DeliveryTax = &client.Address.DeliveryTax
 
 	if err = s.rdo.CreateDeliveryOrder(ctx, delivery); err != nil {
 		return nil, err
