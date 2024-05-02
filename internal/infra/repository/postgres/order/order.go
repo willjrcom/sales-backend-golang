@@ -8,6 +8,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
+	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
@@ -156,7 +158,110 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&orderentity.Order{}).Where("id = ?", id).Exec(ctx); err != nil {
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
+
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&orderentity.Order{}).Where("id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&orderentity.DeliveryOrder{}).Where("order_id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&orderentity.PickupOrder{}).Where("order_id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&orderentity.TableOrder{}).Where("order_id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&orderentity.PaymentOrder{}).Where("order_id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	groupItems := []groupitementity.GroupItem{}
+	if err := tx.NewSelect().Model(&groupItems).Where("order_id = ?", id).Relation("ComplementItem").Relation("Items.AdditionalItems").Scan(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&groupitementity.GroupItem{}).Where("order_id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	for _, groupItem := range groupItems {
+		if groupItem.ComplementItem != nil {
+			if _, err := tx.NewDelete().Model(groupItem.ComplementItem).WherePK().Exec(ctx); err != nil {
+				if errRollBack := tx.Rollback(); errRollBack != nil {
+					return errRollBack
+				}
+
+				return err
+			}
+		}
+
+		for _, item := range groupItem.Items {
+			if _, err := tx.NewDelete().Model(&item).WherePK().Exec(ctx); err != nil {
+				if errRollBack := tx.Rollback(); errRollBack != nil {
+					return errRollBack
+				}
+
+				return err
+			}
+
+			if _, err := tx.NewDelete().Model(&itementity.ItemToAdditional{}).Where("item_id = ?", item.ID).Exec(ctx); err != nil {
+				if errRollBack := tx.Rollback(); errRollBack != nil {
+					return errRollBack
+				}
+
+				return err
+			}
+
+			for _, additionalItem := range item.AdditionalItems {
+				if _, err := tx.NewDelete().Model(&additionalItem).WherePK().Exec(ctx); err != nil {
+					if errRollBack := tx.Rollback(); errRollBack != nil {
+						return errRollBack
+					}
+
+					return err
+				}
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 

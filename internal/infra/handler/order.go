@@ -35,6 +35,7 @@ func NewHandlerOrder(orderService *orderusecases.Service) *handler.Handler {
 		c.Post("/cancel/{id}", h.handlerCancelOrder)
 		c.Post("/archive/{id}", h.handlerArchiveOrder)
 		c.Post("/unarchive/{id}", h.handlerUnarchiveOrder)
+		c.Delete("/{id}", h.handlerDeleteOrder)
 	})
 
 	return handler.NewHandler("/order", c)
@@ -262,6 +263,26 @@ func (h *handlerOrderImpl) handlerScheduleOrder(w http.ResponseWriter, r *http.R
 	}
 
 	if err := h.s.UpdateScheduleOrder(ctx, dtoId, dtoObservation); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerOrderImpl) handlerDeleteOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.s.DeleteOrderByID(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
