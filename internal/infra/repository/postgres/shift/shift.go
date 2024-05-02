@@ -90,7 +90,7 @@ func (r *ShiftRepositoryBun) GetOpenedShift(ctx context.Context) (*shiftentity.S
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(shift).Where("shift.closed_at is NULL").Relation("Attendant").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(shift).Where("shift.closed_at is NULL AND shift.end_change is NULL").Relation("Attendant").Scan(ctx); err != nil {
 		return nil, err
 	}
 

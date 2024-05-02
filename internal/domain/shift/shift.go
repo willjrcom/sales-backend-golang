@@ -29,7 +29,7 @@ type ShiftCommonAttributes struct {
 
 type OrderTimeLogs struct {
 	OpenedAt *time.Time `bun:"opened_at" json:"opened_at,omitempty"`
-	ClosedAt *time.Time `bun:"finished_at" json:"finished_at,omitempty"`
+	ClosedAt *time.Time `bun:"closed_at" json:"closed_at,omitempty"`
 }
 
 func (s *Shift) OpenShift() {

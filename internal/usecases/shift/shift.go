@@ -12,6 +12,7 @@ import (
 
 var (
 	ErrShiftAlreadyClosed = errors.New("shift already closed")
+	ErrShiftAlreadyOpened = errors.New("shift already opened")
 )
 
 type Service struct {
@@ -27,6 +28,10 @@ func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.OpenShift) (id uu
 
 	if err != nil {
 		return uuid.Nil, err
+	}
+
+	if openedShift, _ := s.r.GetOpenedShift(ctx); openedShift != nil {
+		return uuid.Nil, ErrShiftAlreadyOpened
 	}
 
 	shift.OpenShift()
@@ -70,4 +75,8 @@ func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IdRequest) 
 
 func (s *Service) GetOpenedShift(ctx context.Context) (shift *shiftentity.Shift, err error) {
 	return s.r.GetOpenedShift(ctx)
+}
+
+func (s *Service) GetAllShifts(ctx context.Context) (shift []shiftentity.Shift, err error) {
+	return s.r.GetAllShifts(ctx)
 }
