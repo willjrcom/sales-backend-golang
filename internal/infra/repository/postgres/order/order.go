@@ -111,6 +111,15 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *orderentity.Or
 
 			return err
 		}
+
+	} else if p.Table != nil {
+		if _, err = tx.NewUpdate().Model(p.Table).WherePK().Exec(ctx); err != nil {
+			if errRoolback := tx.Rollback(); errRoolback != nil {
+				return errRoolback
+			}
+		}
+
+		return err
 	}
 
 	if err := tx.Commit(); err != nil {

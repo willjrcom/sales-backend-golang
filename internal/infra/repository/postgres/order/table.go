@@ -75,11 +75,28 @@ func (r *TableOrderRepositoryBun) GetTableOrderById(ctx context.Context, id stri
 		return nil, err
 	}
 
-	if err = r.db.NewSelect().Model(table).WherePK().Relation("Waiter").Scan(ctx); err != nil {
+	if err = r.db.NewSelect().Model(table).WherePK().Scan(ctx); err != nil {
 		return nil, err
 	}
 
 	return table, err
+}
+
+func (r *TableOrderRepositoryBun) GetPendingTableOrdersByTableId(ctx context.Context, id string) (tables []orderentity.TableOrder, err error) {
+	tables = []orderentity.TableOrder{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(&tables).Where("table_id = ? AND status = ?", id, orderentity.TableOrderStatusPending).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return tables, err
 }
 
 func (r *TableOrderRepositoryBun) GetAllTableOrders(ctx context.Context) (tables []orderentity.TableOrder, err error) {
@@ -92,7 +109,7 @@ func (r *TableOrderRepositoryBun) GetAllTableOrders(ctx context.Context) (tables
 		return nil, err
 	}
 
-	if err = r.db.NewSelect().Model(&tables).Relation("Waiter").Scan(ctx); err != nil {
+	if err = r.db.NewSelect().Model(&tables).Scan(ctx); err != nil {
 		return nil, err
 	}
 

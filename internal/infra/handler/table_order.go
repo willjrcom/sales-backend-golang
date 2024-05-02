@@ -26,7 +26,7 @@ func NewHandlerTableOrder(orderService *tableorderusecases.Service) *handler.Han
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterTableOrder)
 		c.Post("/update/change-table/{id}", h.handlerChangeTable)
-		c.Post("/update/finish/{id}", h.handlerFinishTableOrder)
+		c.Post("/update/close/{id}", h.handlerCloseTableOrder)
 		c.Delete("/{id}", h.handlerDeleteTableOrderById)
 		c.Get("/{id}", h.handlerGetTableOrderById)
 		c.Get("/all", h.handlerGetAllTables)
@@ -98,7 +98,7 @@ func (h *handlerTableOrderImpl) handlerChangeTable(w http.ResponseWriter, r *htt
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerTableOrderImpl) handlerFinishTableOrder(w http.ResponseWriter, r *http.Request) {
+func (h *handlerTableOrderImpl) handlerCloseTableOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -110,7 +110,7 @@ func (h *handlerTableOrderImpl) handlerFinishTableOrder(w http.ResponseWriter, r
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.FinishTableOrder(ctx, dtoId); err != nil {
+	if err := h.s.CloseTableOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

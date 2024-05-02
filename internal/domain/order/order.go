@@ -122,14 +122,19 @@ func (o *Order) PendingOrder() (err error) {
 	}
 
 	if o.Delivery != nil {
-		if err := o.Delivery.Pending(); err != nil {
+		if err := o.Delivery.Pend(); err != nil {
 			return err
 		}
 	} else if o.Pickup != nil {
 		if err := o.Pickup.Pend(); err != nil {
 			return err
 		}
+	} else if o.Table != nil {
+		if err := o.Table.Pend(); err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 

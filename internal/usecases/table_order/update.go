@@ -19,7 +19,7 @@ func (s *Service) ChangeTable(ctx context.Context, dtoTableOrder *entitydto.IdRe
 		return err
 	}
 
-	if !newTable.IsAvailable {
+	if !newTable.IsAvailable && !dtoNew.ForceUpdate {
 		return ErrTableNotAvailableToChange
 	}
 
@@ -29,16 +29,27 @@ func (s *Service) ChangeTable(ctx context.Context, dtoTableOrder *entitydto.IdRe
 		return err
 	}
 
+	if tableOrder.TableID == newTable.ID {
+		return errors.New("table order is already in this table")
+	}
+
 	table, err := s.rt.GetTableById(ctx, tableOrder.TableID.String())
 
 	if err != nil {
 		return err
 	}
 
-	table.UnlockTable()
-
-	if err = s.rt.UpdateTable(ctx, table); err != nil {
+	tablesOrdersTogether, err := s.rto.GetPendingTableOrdersByTableId(ctx, tableOrder.TableID.String())
+	if err != nil {
 		return err
+	}
+
+	if len(tablesOrdersTogether) == 1 {
+		table.UnlockTable()
+
+		if err = s.rt.UpdateTable(ctx, table); err != nil {
+			return err
+		}
 	}
 
 	newTable.LockTable()
@@ -47,20 +58,40 @@ func (s *Service) ChangeTable(ctx context.Context, dtoTableOrder *entitydto.IdRe
 		return err
 	}
 
-	tableOrder.TableID = dtoNew.TableID
+	tableOrder.TableID = newTable.ID
 
 	return s.rto.UpdateTableOrder(ctx, tableOrder)
 
 }
 
-func (s *Service) FinishTableOrder(ctx context.Context, dtoID *entitydto.IdRequest) error {
-	table, err := s.rt.GetTableById(ctx, dtoID.ID.String())
+func (s *Service) CloseTableOrder(ctx context.Context, dtoID *entitydto.IdRequest) error {
+	tableOrder, err := s.rto.GetTableOrderById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	table.UnlockTable()
+	if err := tableOrder.Close(); err != nil {
+		return err
+	}
 
-	return s.rt.UpdateTable(ctx, table)
+	table, err := s.rt.GetTableById(ctx, tableOrder.TableID.String())
+	if err != nil {
+		return err
+	}
+
+	tablesOrdersTogether, err := s.rto.GetPendingTableOrdersByTableId(ctx, tableOrder.TableID.String())
+
+	if err != nil {
+		return err
+	}
+
+	if len(tablesOrdersTogether) == 1 {
+		table.UnlockTable()
+		if err := s.rt.UpdateTable(ctx, table); err != nil {
+			return err
+		}
+	}
+
+	return s.rto.UpdateTableOrder(ctx, tableOrder)
 }

@@ -55,7 +55,7 @@ func NewDeliveryOrder(clientID uuid.UUID) *DeliveryOrder {
 	}
 }
 
-func (d *DeliveryOrder) Pending() error {
+func (d *DeliveryOrder) Pend() error {
 	if d.Status != DeliveryOrderStatusStaging {
 		return ErrDeliveryOrderMustBeStaging
 	}

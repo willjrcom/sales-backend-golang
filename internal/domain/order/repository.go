@@ -33,5 +33,6 @@ type TableOrderRepository interface {
 	UpdateTableOrder(ctx context.Context, table *TableOrder) error
 	DeleteTableOrder(ctx context.Context, id string) error
 	GetTableOrderById(ctx context.Context, id string) (*TableOrder, error)
+	GetPendingTableOrdersByTableId(ctx context.Context, id string) ([]TableOrder, error)
 	GetAllTableOrders(ctx context.Context) ([]TableOrder, error)
 }

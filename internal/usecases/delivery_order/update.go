@@ -20,7 +20,7 @@ func (s *Service) PendDeliveryOrder(ctx context.Context, dtoID *entitydto.IdRequ
 		return err
 	}
 
-	if err := deliveryOrder.Pending(); err != nil {
+	if err := deliveryOrder.Pend(); err != nil {
 		return err
 	}
 
