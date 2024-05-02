@@ -20,8 +20,16 @@ func (s *UpdateTableOrderInput) ToModel() (model *orderentity.TableOrder, err er
 
 	tableCommonAttributes := orderentity.TableOrderCommonAttributes{}
 
+	if s.Name != "" {
+		tableCommonAttributes.Name = s.Name
+	}
+
+	if s.Contact != "" {
+		tableCommonAttributes.Contact = s.Contact
+	}
+
 	if s.TableID != uuid.Nil {
-		model.TableID = s.TableID
+		tableCommonAttributes.TableID = s.TableID
 	}
 
 	return &orderentity.TableOrder{
