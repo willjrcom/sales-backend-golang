@@ -9,9 +9,10 @@ import (
 )
 
 var (
-	ErrNameRequired    = errors.New("name is required")
-	ErrAddressRequired = errors.New("address is required")
-	ErrContactRequired = errors.New("contact is required")
+	ErrNameRequired        = errors.New("name is required")
+	ErrAddressRequired     = errors.New("address is required")
+	ErrContactRequired     = errors.New("contact is required")
+	ErrDeliveryTaxRequired = errors.New("delivery tax is required")
 )
 
 type RegisterClientInput struct {
@@ -27,6 +28,10 @@ func (r *RegisterClientInput) validate() error {
 	}
 	if r.Address == nil {
 		return ErrAddressRequired
+	}
+
+	if r.Address != nil && r.Address.DeliveryTax <= 0 {
+		return ErrDeliveryTaxRequired
 	}
 
 	if r.Email != nil && !strings.Contains(*r.Email, "@") {

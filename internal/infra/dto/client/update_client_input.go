@@ -21,6 +21,10 @@ func (r *UpdateClientInput) validate() error {
 		return ErrInvalidEmail
 	}
 
+	if r.Address != nil && r.Address.DeliveryTax <= 0 {
+		return ErrDeliveryTaxRequired
+	}
+
 	return nil
 }
 
