@@ -8,9 +8,8 @@ import (
 )
 
 var (
-	ErrOrderIDRequired  = errors.New("order id is required")
-	ErrWaiterIDRequired = errors.New("waiter_id is required")
-	ErrTableIDRequired  = errors.New("table_id is required")
+	ErrOrderIDRequired = errors.New("order id is required")
+	ErrTableIDRequired = errors.New("table_id is required")
 )
 
 type CreateTableOrderInput struct {
@@ -18,8 +17,8 @@ type CreateTableOrderInput struct {
 }
 
 func (o *CreateTableOrderInput) validate() error {
-	if o.WaiterID == uuid.Nil {
-		return ErrWaiterIDRequired
+	if o.OrderID == uuid.Nil {
+		return ErrOrderIDRequired
 	}
 
 	if o.TableID == uuid.Nil {

@@ -46,5 +46,5 @@ func (s *Service) CreateTableOrder(ctx context.Context, dto *tableorderdto.Creat
 		return nil, err
 	}
 
-	return tableorderdto.NewOutput(tableOrder.TableID, orderID), nil
+	return tableorderdto.NewOutput(tableOrder.ID, orderID), nil
 }

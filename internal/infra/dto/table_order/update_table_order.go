@@ -20,10 +20,6 @@ func (s *UpdateTableOrderInput) ToModel() (model *orderentity.TableOrder, err er
 
 	tableCommonAttributes := orderentity.TableOrderCommonAttributes{}
 
-	if s.WaiterID != uuid.Nil {
-		model.WaiterID = s.WaiterID
-	}
-
 	if s.TableID != uuid.Nil {
 		model.TableID = s.TableID
 	}
