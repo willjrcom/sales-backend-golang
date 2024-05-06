@@ -13,5 +13,4 @@ RUN go install
 RUN apt-get install apt-transport-https
 RUN apt-get update
 
-CMD ["/httpserver"]
 EXPOSE 8080
