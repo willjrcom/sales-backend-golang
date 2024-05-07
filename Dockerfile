@@ -1,17 +1,26 @@
-FROM golang:1.21
+# Usamos uma imagem base do Go para compilar nosso código
+FROM golang:1.21 AS builder
 
-ENV API=/go/src/sales-backend-golang \
-	GO111MODULE=on \
-	environment=dev \
-	GOPRIVATE="github.com/willjrcom"
+# Define o diretório de trabalho dentro do contêiner
+WORKDIR /app
 
-WORKDIR $API
-COPY . $API/
-RUN go mod download
-RUN go install
+# Copia o código fonte para o contêiner
+COPY . .
 
-RUN apt-get install apt-transport-https
-RUN apt-get update
+# Compila o código Go em um binário
+RUN go build -o main .
 
-CMD ["httpserver", "--environment prod"]
+# Agora usamos uma imagem mais leve para executar nosso aplicativo compilado
+FROM alpine:latest
+
+# Define o diretório de trabalho dentro do contêiner
+WORKDIR /app
+
+# Copia o binário compilado do estágio anterior para o contêiner
+COPY --from=builder /app/main .
+
+# Define a porta em que o servidor vai escutar
 EXPOSE 8080
+
+# Executa o binário do servidor com os argumentos desejados
+CMD ["./main", "httpserver", "-e", "prod"]
