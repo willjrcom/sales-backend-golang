@@ -16,7 +16,8 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
-	rootCmd.PersistentFlags().StringP("port", "p", ":8080", "the port to connect to server")
+	cmd.HttpserverCmd.PersistentFlags().StringP("port", "p", ":8080", "the port to connect to server")
+	cmd.HttpserverCmd.PersistentFlags().StringP("environment", "e", "dev", "the environment to run the server in")
 	rootCmd.AddCommand(cmd.HttpserverCmd)
 
 	ctx := context.Background()

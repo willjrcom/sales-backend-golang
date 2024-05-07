@@ -29,24 +29,40 @@ import (
 	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
 )
 
-var (
-	username = "admin"
-	password = "admin"
-	host     = "localhost"
-	port     = "5432"
-	dbName   = "sales-db"
-)
+type Environment string
+
+func ConnectLocalDB(ctx context.Context) string {
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		"admin",
+		"admin",
+		"localhost",
+		"5432",
+		"sales-db",
+	)
+}
+
+func ConnectRdsDB(ctx context.Context) string {
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?",
+		"postgres",
+		"48279111",
+		"sales-backend-db1.c7ou20us0aar.us-east-1.rds.amazonaws.com",
+		"5432",
+		"salesBackendDB",
+	)
+}
 
 func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 	// Prepare connection string parameterized
-	connectionParams := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		username,
-		password,
-		host,
-		port,
-		dbName,
-	)
+	connectionParams := ""
+	environment := ctx.Value(Environment("environment"))
+	fmt.Print(environment)
+	if environment == "prod" {
+		connectionParams = ConnectRdsDB(ctx)
+	} else {
+		connectionParams = ConnectLocalDB(ctx)
+	}
 
 	// Connect to database doing a PING
 	db := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(connectionParams), pgdriver.WithTimeout(time.Second*30)))
@@ -54,6 +70,7 @@ func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 	// Verifique se o banco de dados já existe.
 	if err := db.Ping(); err != nil {
 		log.Printf("erro ao conectar ao banco de dados: %v", err)
+		return nil, err
 	}
 
 	// set connection settings

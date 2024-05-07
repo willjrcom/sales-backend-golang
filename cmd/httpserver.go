@@ -60,9 +60,10 @@ var HttpserverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, _ []string) {
 		cmd.Println("httpserver called")
 		port, _ := cmd.Flags().GetString("port")
+		environment, _ := cmd.Flags().GetString("environment")
 
 		flag.Parse()
-		ctx := context.Background()
+		ctx := context.WithValue(context.Background(), database.Environment("environment"), environment)
 		server := server.NewServerChi()
 
 		// Load database
