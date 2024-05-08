@@ -16,6 +16,7 @@ import (
 	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category-product"
 	productrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
 	sizerepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/size_category"
+	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size_category"
 )
@@ -34,9 +35,10 @@ func TestMain(m *testing.M) {
 	rp := productrepositorylocal.NewProductRepositoryLocal()
 	rc := categoryrepositorylocal.NewCategoryRepositoryLocal()
 	rs := sizerepositorylocal.NewSizeRepositoryLocal()
+	s3Service := s3service.NewS3Client()
 
 	// Service
-	productService = NewService(rp, rc)
+	productService = NewService(rp, rc, s3Service)
 	sizeService = sizeusecases.NewService(rs, rc)
 
 	exitCode := m.Run()
