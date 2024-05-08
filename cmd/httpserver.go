@@ -31,6 +31,7 @@ import (
 	tablerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/table"
 	userrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/user"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
+	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 	categoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/category_product"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
@@ -65,6 +66,8 @@ var HttpserverCmd = &cobra.Command{
 		flag.Parse()
 		ctx := context.WithValue(context.Background(), database.Environment("environment"), environment)
 		server := server.NewServerChi()
+
+		s3Service := s3service.NewS3Client()
 
 		// Load database
 		db, err := database.NewPostgreSQLConnection(ctx)
@@ -103,7 +106,7 @@ var HttpserverCmd = &cobra.Command{
 		userRepo := userrepositorybun.NewUserRepositoryBun(db)
 
 		// Load services
-		productService := productusecases.NewService(productRepo, categoryRepo)
+		productService := productusecases.NewService(productRepo, categoryRepo, s3Service)
 		categoryProductService := categoryproductusecases.NewService(categoryRepo)
 		sizeService := sizeusecases.NewService(sizeRepo, categoryRepo)
 		quantityService := quantityusecases.NewService(quantityRepo, categoryRepo)

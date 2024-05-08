@@ -10,7 +10,10 @@
 
         fetch('http://localhost:8080/product/new', {
             method: 'POST',
-            body: formData
+            body: formData,
+            headers: {
+                "id-token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXJyZW50X3NjaGVtYSI6ImxvamFfaWJpdGlfXzJxaXRpdHNyIiwiZXhwIjoxNzE1MTk0MjY3LCJzdWIiOiJpZC10b2tlbiIsInVzZXJfZW1haWwiOiJ3aWxsaWFtanVuaW9yNjlAZ21haWwuY29tIiwidXNlcl9pZCI6IjNkNDdlYjdkLTNjMjgtNDI5Mi05OWIzLTE5YWJkNDM3N2ZmMCJ9.c9v1LZtcTp2UqjKkOSQG_ZkloaBxnESpGgwJMiYy_ZA"
+            }
         })
         .then(response => response.json())
         .then(data => {

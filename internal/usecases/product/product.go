@@ -8,6 +8,7 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
+	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
 var (
@@ -15,12 +16,13 @@ var (
 )
 
 type Service struct {
-	rp productentity.ProductRepository
-	rc productentity.CategoryRepository
+	rp        productentity.ProductRepository
+	rc        productentity.CategoryRepository
+	S3Service *s3service.S3Client
 }
 
-func NewService(r productentity.ProductRepository, c productentity.CategoryRepository) *Service {
-	return &Service{rp: r, rc: c}
+func NewService(r productentity.ProductRepository, c productentity.CategoryRepository, s3 *s3service.S3Client) *Service {
+	return &Service{rp: r, rc: c, S3Service: s3}
 }
 
 func (s *Service) RegisterProduct(ctx context.Context, dto *productdto.RegisterProductInput) (uuid.UUID, error) {
@@ -43,13 +45,6 @@ func (s *Service) RegisterProduct(ctx context.Context, dto *productdto.RegisterP
 	if exists, err := product.FindSizeInCategory(); !exists {
 		return uuid.Nil, err
 	}
-
-	// imagePath, err := s3.UploadToS3(dto.Image)
-	// if err != nil {
-	// 	fmt.Printf("Erro ao fazer upload: %v\n", err)
-	// }
-
-	// product.ImagePath = imagePath
 
 	if err := s.rp.RegisterProduct(ctx, product); err != nil {
 		return uuid.Nil, err
@@ -91,12 +86,20 @@ func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IdRequest,
 }
 
 func (s *Service) DeleteProductById(ctx context.Context, dto *entitydto.IdRequest) error {
-	if _, err := s.rp.GetProductById(ctx, dto.ID.String()); err != nil {
+	product, err := s.rp.GetProductById(ctx, dto.ID.String())
+
+	if err != nil {
 		return err
 	}
 
 	if err := s.rp.DeleteProduct(ctx, dto.ID.String()); err != nil {
 		return err
+	}
+
+	if product.ImagePath != nil {
+		if err := s.S3Service.DeleteObject(*product.ImagePath); err != nil {
+			return err
+		}
 	}
 
 	return nil
