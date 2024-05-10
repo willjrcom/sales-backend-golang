@@ -35,6 +35,14 @@ func (s *UpdateProcessRuleInput) UpdateModel(model *productentity.ProcessRule) (
 		model.Order = *s.Order
 	}
 
+	if s.Description != "" {
+		model.Description = s.Description
+	}
+
+	if s.ImagePath != nil {
+		model.ImagePath = s.ImagePath
+	}
+
 	if s.IdealTime != 0 {
 		model.IdealTime = s.IdealTime * time.Second
 		model.IdealTimeFormatted = model.IdealTime.String()
