@@ -16,7 +16,7 @@ var (
 
 type OrderPickup struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:pickup_orders"`
+	bun.BaseModel `bun:"table:order_pickups,alias:pickup"`
 	PickupTimeLogs
 	OrderPickupCommonAttributes
 }

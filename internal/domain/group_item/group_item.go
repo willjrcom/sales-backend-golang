@@ -22,7 +22,7 @@ var (
 
 type GroupItem struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:group_items"`
+	bun.BaseModel `bun:"table:order_group_items"`
 	GroupCommonAttributes
 }
 

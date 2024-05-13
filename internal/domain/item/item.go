@@ -17,7 +17,7 @@ var (
 
 type Item struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:items"`
+	bun.BaseModel `bun:"table:order_items"`
 	ItemCommonAttributes
 }
 

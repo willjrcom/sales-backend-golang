@@ -10,7 +10,7 @@ import (
 
 type PaymentOrder struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:payment_orders,alias:payment"`
+	bun.BaseModel `bun:"table:order_payments,alias:payment"`
 	PaymentTimeLogs
 	PaymentCommonAttributes
 }
