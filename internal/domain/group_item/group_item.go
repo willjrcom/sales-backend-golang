@@ -34,15 +34,15 @@ type GroupCommonAttributes struct {
 }
 
 type GroupDetails struct {
-	Size             string                  `bun:"size,notnull" json:"size"`
-	Status           StatusGroupItem         `bun:"status,notnull" json:"status"`
-	TotalPrice       float64                 `bun:"total_price" json:"total_price"`
-	Quantity         float64                 `bun:"quantity" json:"quantity"`
-	NeedPrint        bool                    `bun:"need_print" json:"need_print"`
-	CategoryID       uuid.UUID               `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
-	Category         *productentity.Category `bun:"rel:belongs-to" json:"category,omitempty"`
-	ComplementItemID *uuid.UUID              `bun:"column:complement_item_id,type:uuid" json:",omitempty"`
-	ComplementItem   *itementity.Item        `bun:"rel:belongs-to" json:"complement_item,omitempty"`
+	Size             string                         `bun:"size,notnull" json:"size"`
+	Status           StatusGroupItem                `bun:"status,notnull" json:"status"`
+	TotalPrice       float64                        `bun:"total_price" json:"total_price"`
+	Quantity         float64                        `bun:"quantity" json:"quantity"`
+	NeedPrint        bool                           `bun:"need_print" json:"need_print"`
+	CategoryID       uuid.UUID                      `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
+	Category         *productentity.ProductCategory `bun:"rel:belongs-to" json:"category,omitempty"`
+	ComplementItemID *uuid.UUID                     `bun:"column:complement_item_id,type:uuid" json:",omitempty"`
+	ComplementItem   *itementity.Item               `bun:"rel:belongs-to" json:"complement_item,omitempty"`
 }
 
 type GroupItemTimeLogs struct {

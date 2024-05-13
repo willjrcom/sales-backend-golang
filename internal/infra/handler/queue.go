@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
-	processentity "github.com/willjrcom/sales-backend-go/internal/domain/process"
+	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	queuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/queue"
 	queueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/queue"
@@ -56,7 +56,7 @@ func (h *handlerQueueImpl) handlerStartQueue(w http.ResponseWriter, r *http.Requ
 func (h *handlerQueueImpl) handlerFinishQueue(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	process := &processentity.Process{}
+	process := &orderprocessentity.Process{}
 	if err := jsonpkg.ParseBody(r, process); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

@@ -20,16 +20,14 @@ type CompanyCategoryCommonAttributes struct {
 	CompanyCategoryAdvertising []advertisingentity.Advertising `bun:"m2m:company_category_to_advertising,join:CompanyCategory=Sponsor" json:"company_category_to_advertising,omitempty"`
 }
 
-type PatchCategory struct {
-	Name                       *string                         `json:"name"`
-	ImagePath                  *string                         `json:"image_path"`
-	CompanyCategorySponsor     []sponsorentity.Sponsor         `json:"company_category_to_sponsor,omitempty"`
-	CompanyCategoryAdvertising []advertisingentity.Advertising `json:"company_category_to_advertising,omitempty"`
+type PatchCompanyCategory struct {
+	Name      *string `json:"name"`
+	ImagePath *string `json:"image_path"`
 }
 
-func NewCategory(categoryCommonAttributes CompanyCategoryCommonAttributes) *CompanyCategory {
+func NewCategory(companyCategoryCommonAttributes CompanyCategoryCommonAttributes) *CompanyCategory {
 	return &CompanyCategory{
 		Entity:                          entity.NewEntity(),
-		CompanyCategoryCommonAttributes: categoryCommonAttributes,
+		CompanyCategoryCommonAttributes: companyCategoryCommonAttributes,
 	}
 }

@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	ErrCategoryNotFound = errors.New("category not found")
+	ErrCategoryNotFound = errors.New("product category not found")
 	ErrSizeIsInvalid    = errors.New("size is invalid")
 )
 
@@ -20,18 +20,18 @@ type Product struct {
 }
 
 type ProductCommonAttributes struct {
-	Code        string    `bun:"code,unique,notnull" json:"code"`
-	Name        string    `bun:"name,notnull" json:"name"`
-	Flavors     []string  `bun:"flavors,type:jsonb" json:"flavors,omitempty"`
-	ImagePath   *string   `bun:"image_path" json:"image_path"`
-	Description string    `bun:"description" json:"description"`
-	Price       float64   `bun:"price,notnull" json:"price"`
-	Cost        float64   `bun:"cost" json:"cost"`
-	IsAvailable bool      `bun:"is_available" json:"is_available"`
-	CategoryID  uuid.UUID `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
-	Category    *Category `bun:"rel:belongs-to" json:"category,omitempty"`
-	SizeID      uuid.UUID `bun:"column:size_id,type:uuid,notnull" json:"size_id"`
-	Size        *Size     `bun:"rel:belongs-to" json:"size,omitempty"`
+	Code        string           `bun:"code,unique,notnull" json:"code"`
+	Name        string           `bun:"name,notnull" json:"name"`
+	Flavors     []string         `bun:"flavors,type:jsonb" json:"flavors,omitempty"`
+	ImagePath   *string          `bun:"image_path" json:"image_path"`
+	Description string           `bun:"description" json:"description"`
+	Price       float64          `bun:"price,notnull" json:"price"`
+	Cost        float64          `bun:"cost" json:"cost"`
+	IsAvailable bool             `bun:"is_available" json:"is_available"`
+	CategoryID  uuid.UUID        `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
+	Category    *ProductCategory `bun:"rel:belongs-to" json:"category,omitempty"`
+	SizeID      uuid.UUID        `bun:"column:size_id,type:uuid,notnull" json:"size_id"`
+	Size        *Size            `bun:"rel:belongs-to" json:"size,omitempty"`
 }
 
 type PatchProduct struct {

@@ -6,10 +6,10 @@ import (
 
 	"github.com/google/uuid"
 	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
-	processentity "github.com/willjrcom/sales-backend-go/internal/domain/process"
+	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
-	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process"
+	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
 	queuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/queue"
 )
 
@@ -40,7 +40,7 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 		}
 
 		createProcessInput := &processdto.CreateProcessInput{
-			ProcessCommonAttributes: processentity.ProcessCommonAttributes{
+			ProcessCommonAttributes: orderprocessentity.ProcessCommonAttributes{
 				GroupItemID:   groupItem.ID,
 				ProcessRuleID: processRuleID,
 			},
@@ -59,7 +59,7 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 	// Create queue for each group item
 	for _, groupItemID := range groupItemIDs {
 		startQueueInput := &queuedto.StartQueueInput{
-			QueueCommonAttributes: processentity.QueueCommonAttributes{
+			QueueCommonAttributes: orderprocessentity.QueueCommonAttributes{
 				GroupItemID: groupItemID,
 			},
 			JoinedAt: *order.PendingAt,

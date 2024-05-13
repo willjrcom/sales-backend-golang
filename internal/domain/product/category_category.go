@@ -5,12 +5,12 @@ import (
 	"github.com/uptrace/bun"
 )
 
-type CategoryToAdditional struct {
-	bun.BaseModel        `bun:"table:category_to_additional"`
-	CategoryID           uuid.UUID `bun:"type:uuid,pk"`
-	Category             *Category `bun:"rel:belongs-to,join:category_id=id"`
-	AdditionalCategoryID uuid.UUID `bun:"type:uuid,pk"`
-	AdditionalCategory   *Category `bun:"rel:belongs-to,join:additional_category_id=id"`
+type ProductCategoryToAdditional struct {
+	bun.BaseModel        `bun:"table:product_category_to_additional"`
+	CategoryID           uuid.UUID        `bun:"type:uuid,pk"`
+	Category             *ProductCategory `bun:"rel:belongs-to,join:category_id=id"`
+	AdditionalCategoryID uuid.UUID        `bun:"type:uuid,pk"`
+	AdditionalCategory   *ProductCategory `bun:"rel:belongs-to,join:additional_category_id=id"`
 }
 
 type CategoryRelation struct {

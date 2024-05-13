@@ -123,7 +123,7 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 	return item, nil
 }
 
-func (r *GroupItemRepositoryBun) GetGroupByIDWithCategoryComplete(ctx context.Context, id string) (*groupitementity.GroupItem, error) {
+func (r *GroupItemRepositoryBun) GetGroupByIDWithFullCategory(ctx context.Context, id string) (*groupitementity.GroupItem, error) {
 	item := &groupitementity.GroupItem{}
 	r.mu.TryLock()
 	defer r.mu.Unlock()

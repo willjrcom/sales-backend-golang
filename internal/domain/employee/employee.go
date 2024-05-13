@@ -11,5 +11,5 @@ type Employee struct {
 	bun.BaseModel `bun:"table:employees"`
 	personentity.Person
 	UserID *uuid.UUID          `bun:"column:user_id,type:uuid" json:"user_id,omitempty"`
-	User   *companyentity.User `bun:"rel:belongs-to" json:"category,omitempty"`
+	User   *companyentity.User `bun:"rel:belongs-to" json:"user,omitempty"`
 }

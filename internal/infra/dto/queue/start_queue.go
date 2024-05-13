@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	processentity "github.com/willjrcom/sales-backend-go/internal/domain/process"
+	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 )
 
 var (
@@ -13,7 +13,7 @@ var (
 )
 
 type StartQueueInput struct {
-	processentity.QueueCommonAttributes
+	orderprocessentity.QueueCommonAttributes
 	JoinedAt time.Time `json:"joined_at"`
 	IsTest   bool      `json:"is_test"`
 }

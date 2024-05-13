@@ -6,7 +6,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	processentity "github.com/willjrcom/sales-backend-go/internal/domain/process"
+	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 )
 
 type QueueRepositoryBun struct {
@@ -18,7 +18,7 @@ func NewQueueRepositoryBun(db *bun.DB) *QueueRepositoryBun {
 	return &QueueRepositoryBun{db: db}
 }
 
-func (r *QueueRepositoryBun) RegisterQueue(ctx context.Context, s *processentity.Queue) error {
+func (r *QueueRepositoryBun) RegisterQueue(ctx context.Context, s *orderprocessentity.Queue) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -33,7 +33,7 @@ func (r *QueueRepositoryBun) RegisterQueue(ctx context.Context, s *processentity
 	return nil
 }
 
-func (r *QueueRepositoryBun) UpdateQueue(ctx context.Context, s *processentity.Queue) error {
+func (r *QueueRepositoryBun) UpdateQueue(ctx context.Context, s *orderprocessentity.Queue) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -56,15 +56,15 @@ func (r *QueueRepositoryBun) DeleteQueue(ctx context.Context, id string) error {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&processentity.Queue{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&orderprocessentity.Queue{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *QueueRepositoryBun) GetQueueById(ctx context.Context, id string) (*processentity.Queue, error) {
-	queue := &processentity.Queue{}
+func (r *QueueRepositoryBun) GetQueueById(ctx context.Context, id string) (*orderprocessentity.Queue, error) {
+	queue := &orderprocessentity.Queue{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -80,8 +80,8 @@ func (r *QueueRepositoryBun) GetQueueById(ctx context.Context, id string) (*proc
 	return queue, nil
 }
 
-func (r *QueueRepositoryBun) GetOpenedQueueByGroupItemId(ctx context.Context, id string) (*processentity.Queue, error) {
-	queue := &processentity.Queue{}
+func (r *QueueRepositoryBun) GetOpenedQueueByGroupItemId(ctx context.Context, id string) (*orderprocessentity.Queue, error) {
+	queue := &orderprocessentity.Queue{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -97,8 +97,8 @@ func (r *QueueRepositoryBun) GetOpenedQueueByGroupItemId(ctx context.Context, id
 	return queue, nil
 }
 
-func (r *QueueRepositoryBun) GetQueuesByGroupItemId(ctx context.Context, id string) ([]processentity.Queue, error) {
-	queues := []processentity.Queue{}
+func (r *QueueRepositoryBun) GetQueuesByGroupItemId(ctx context.Context, id string) ([]orderprocessentity.Queue, error) {
+	queues := []orderprocessentity.Queue{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -114,8 +114,8 @@ func (r *QueueRepositoryBun) GetQueuesByGroupItemId(ctx context.Context, id stri
 	return queues, nil
 }
 
-func (r *QueueRepositoryBun) GetAllQueues(ctx context.Context) ([]processentity.Queue, error) {
-	queuees := []processentity.Queue{}
+func (r *QueueRepositoryBun) GetAllQueues(ctx context.Context) ([]orderprocessentity.Queue, error) {
+	queuees := []orderprocessentity.Queue{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

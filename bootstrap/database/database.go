@@ -21,8 +21,8 @@ import (
 	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
 	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
-	processentity "github.com/willjrcom/sales-backend-go/internal/domain/process"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
@@ -227,10 +227,10 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 
 	db.RegisterModel((*entity.Entity)(nil))
 
-	db.RegisterModel((*productentity.CategoryToAdditional)(nil))
+	db.RegisterModel((*productentity.ProductCategoryToAdditional)(nil))
 	db.RegisterModel((*productentity.Size)(nil))
 	db.RegisterModel((*productentity.Quantity)(nil))
-	db.RegisterModel((*productentity.Category)(nil))
+	db.RegisterModel((*productentity.ProductCategory)(nil))
 	db.RegisterModel((*productentity.ProcessRule)(nil))
 	db.RegisterModel((*productentity.Product)(nil))
 
@@ -239,9 +239,9 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*cliententity.Client)(nil))
 	db.RegisterModel((*employeeentity.Employee)(nil))
 
-	db.RegisterModel((*processentity.ProcessToProductToGroupItem)(nil))
-	db.RegisterModel((*processentity.Process)(nil))
-	db.RegisterModel((*processentity.Queue)(nil))
+	db.RegisterModel((*orderprocessentity.ProcessToProductToGroupItem)(nil))
+	db.RegisterModel((*orderprocessentity.Process)(nil))
+	db.RegisterModel((*orderprocessentity.Queue)(nil))
 	db.RegisterModel((*itementity.ItemToAdditional)(nil))
 	db.RegisterModel((*itementity.Item)(nil))
 	db.RegisterModel((*groupitementity.GroupItem)(nil))
@@ -283,12 +283,12 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.CategoryToAdditional)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProductCategoryToAdditional)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Category)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProductCategory)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}
@@ -333,12 +333,12 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*processentity.Process)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.Process)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*processentity.Queue)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.Queue)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}
@@ -348,7 +348,7 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*processentity.ProcessToProductToGroupItem)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.ProcessToProductToGroupItem)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}

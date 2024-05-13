@@ -16,12 +16,12 @@ type ProductRepository interface {
 }
 
 type CategoryRepository interface {
-	RegisterCategory(ctx context.Context, category *Category) error
-	UpdateCategory(ctx context.Context, category *Category) error
+	RegisterCategory(ctx context.Context, category *ProductCategory) error
+	UpdateCategory(ctx context.Context, category *ProductCategory) error
 	DeleteCategory(ctx context.Context, id string) error
-	GetCategoryById(ctx context.Context, id string) (*Category, error)
-	GetCategoryByName(ctx context.Context, name string, withRelation bool) (*Category, error)
-	GetAllCategories(ctx context.Context) ([]Category, error)
+	GetCategoryById(ctx context.Context, id string) (*ProductCategory, error)
+	GetCategoryByName(ctx context.Context, name string, withRelation bool) (*ProductCategory, error)
+	GetAllCategories(ctx context.Context) ([]ProductCategory, error)
 }
 
 type SizeRepository interface {
