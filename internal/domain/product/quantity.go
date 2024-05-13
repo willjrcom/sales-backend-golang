@@ -14,7 +14,7 @@ var (
 
 type Quantity struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:quantities"`
+	bun.BaseModel `bun:"table:product_category_quantities"`
 	QuantityCommonAttributes
 }
 

@@ -8,16 +8,16 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	queuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/queue"
-	queueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/queue"
+	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
+	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
 type handlerQueueImpl struct {
-	s *queueusecases.Service
+	s *orderqueueusecases.Service
 }
 
-func NewHandlerQueue(queueService *queueusecases.Service) *handler.Handler {
+func NewHandlerQueue(queueService *orderqueueusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerQueueImpl{
@@ -38,7 +38,7 @@ func NewHandlerQueue(queueService *queueusecases.Service) *handler.Handler {
 func (h *handlerQueueImpl) handlerStartQueue(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoQueue := &queuedto.StartQueueInput{}
+	dtoQueue := &orderqueuedto.StartQueueInput{}
 	if err := jsonpkg.ParseBody(r, dtoQueue); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -56,7 +56,7 @@ func (h *handlerQueueImpl) handlerStartQueue(w http.ResponseWriter, r *http.Requ
 func (h *handlerQueueImpl) handlerFinishQueue(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	process := &orderprocessentity.Process{}
+	process := &orderprocessentity.OrderProcess{}
 	if err := jsonpkg.ParseBody(r, process); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

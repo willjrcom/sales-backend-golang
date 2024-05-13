@@ -239,9 +239,9 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*cliententity.Client)(nil))
 	db.RegisterModel((*employeeentity.Employee)(nil))
 
-	db.RegisterModel((*orderprocessentity.ProcessToProductToGroupItem)(nil))
-	db.RegisterModel((*orderprocessentity.Process)(nil))
-	db.RegisterModel((*orderprocessentity.Queue)(nil))
+	db.RegisterModel((*orderprocessentity.OrderProcessToProductToGroupItem)(nil))
+	db.RegisterModel((*orderprocessentity.OrderProcess)(nil))
+	db.RegisterModel((*orderprocessentity.OrderQueue)(nil))
 	db.RegisterModel((*itementity.ItemToAdditional)(nil))
 	db.RegisterModel((*itementity.Item)(nil))
 	db.RegisterModel((*groupitementity.GroupItem)(nil))
@@ -333,12 +333,12 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.Process)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.OrderProcess)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.Queue)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.OrderQueue)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}
@@ -348,7 +348,7 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.ProcessToProductToGroupItem)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.OrderProcessToProductToGroupItem)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}

@@ -20,7 +20,7 @@ func NewProcessRepositoryBun(db *bun.DB) *ProcessRepositoryBun {
 	return &ProcessRepositoryBun{db: db}
 }
 
-func (r *ProcessRepositoryBun) RegisterProcess(ctx context.Context, s *orderprocessentity.Process) error {
+func (r *ProcessRepositoryBun) RegisterProcess(ctx context.Context, s *orderprocessentity.OrderProcess) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -44,7 +44,7 @@ func (r *ProcessRepositoryBun) RegisterProcess(ctx context.Context, s *orderproc
 
 	if len(s.Products) != 0 {
 		for _, p := range s.Products {
-			processToProduct := &orderprocessentity.ProcessToProductToGroupItem{
+			processToProduct := &orderprocessentity.OrderProcessToProductToGroupItem{
 				ProcessID:   s.ID,
 				ProductID:   p.ID,
 				GroupItemID: s.GroupItemID,
@@ -71,7 +71,7 @@ func (r *ProcessRepositoryBun) RegisterProcess(ctx context.Context, s *orderproc
 	return nil
 }
 
-func (r *ProcessRepositoryBun) UpdateProcess(ctx context.Context, s *orderprocessentity.Process) error {
+func (r *ProcessRepositoryBun) UpdateProcess(ctx context.Context, s *orderprocessentity.OrderProcess) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -94,15 +94,15 @@ func (r *ProcessRepositoryBun) DeleteProcess(ctx context.Context, id string) err
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&orderprocessentity.Process{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&orderprocessentity.OrderProcess{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *ProcessRepositoryBun) GetProcessById(ctx context.Context, id string) (*orderprocessentity.Process, error) {
-	process := &orderprocessentity.Process{}
+func (r *ProcessRepositoryBun) GetProcessById(ctx context.Context, id string) (*orderprocessentity.OrderProcess, error) {
+	process := &orderprocessentity.OrderProcess{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -118,8 +118,8 @@ func (r *ProcessRepositoryBun) GetProcessById(ctx context.Context, id string) (*
 	return process, nil
 }
 
-func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]orderprocessentity.Process, error) {
-	processes := []orderprocessentity.Process{}
+func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]orderprocessentity.OrderProcess, error) {
+	processes := []orderprocessentity.OrderProcess{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -135,9 +135,9 @@ func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]orderproc
 	return processes, nil
 }
 
-func (r *ProcessRepositoryBun) GetProcessesByProductID(ctx context.Context, id string) ([]orderprocessentity.Process, error) {
-	processes := []orderprocessentity.Process{}
-	processesToProduct := []orderprocessentity.ProcessToProductToGroupItem{}
+func (r *ProcessRepositoryBun) GetProcessesByProductID(ctx context.Context, id string) ([]orderprocessentity.OrderProcess, error) {
+	processes := []orderprocessentity.OrderProcess{}
+	processesToProduct := []orderprocessentity.OrderProcessToProductToGroupItem{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -162,9 +162,9 @@ func (r *ProcessRepositoryBun) GetProcessesByProductID(ctx context.Context, id s
 	return processes, nil
 }
 
-func (r *ProcessRepositoryBun) GetProcessesByGroupItemID(ctx context.Context, id string) ([]orderprocessentity.Process, error) {
-	processes := []orderprocessentity.Process{}
-	processesToGroupItem := []orderprocessentity.ProcessToProductToGroupItem{}
+func (r *ProcessRepositoryBun) GetProcessesByGroupItemID(ctx context.Context, id string) ([]orderprocessentity.OrderProcess, error) {
+	processes := []orderprocessentity.OrderProcess{}
+	processesToGroupItem := []orderprocessentity.OrderProcessToProductToGroupItem{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

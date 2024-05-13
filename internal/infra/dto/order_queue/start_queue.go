@@ -1,4 +1,4 @@
-package queuedto
+package orderqueuedto
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ var (
 )
 
 type StartQueueInput struct {
-	orderprocessentity.QueueCommonAttributes
+	orderprocessentity.OrderQueueCommonAttributes
 	JoinedAt time.Time `json:"joined_at"`
 	IsTest   bool      `json:"is_test"`
 }

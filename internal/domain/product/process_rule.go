@@ -10,7 +10,7 @@ import (
 
 type ProcessRule struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:process_rules,alias:pr"`
+	bun.BaseModel `bun:"table:product_category_process_rules,alias:pr"`
 	ProcessRuleCommonAttributes
 }
 

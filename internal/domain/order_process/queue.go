@@ -8,39 +8,39 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
-type Queue struct {
+type OrderQueue struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:queues"`
-	QueueCommonAttributes
-	QueueTimeLogs
+	bun.BaseModel `bun:"table:order_queues"`
+	OrderQueueCommonAttributes
+	OrderQueueTimeLogs
 }
 
-type QueueCommonAttributes struct {
+type OrderQueueCommonAttributes struct {
 	GroupItemID   uuid.UUID  `bun:"column:group_item_id,type:uuid,notnull" json:"group_item_id"`
 	ProcessRuleID *uuid.UUID `bun:"column:process_rule_id,type:uuid,notnull" json:"process_rule_id,omitempty"`
 }
 
-type QueueTimeLogs struct {
+type OrderQueueTimeLogs struct {
 	JoinedAt          time.Time     `bun:"joined_at" json:"joined_at,omitempty"`
 	LeftAt            *time.Time    `bun:"left_at" json:"left_at,omitempty"`
 	Duration          time.Duration `bun:"duration" json:"duration"`
 	DurationFormatted string        `bun:"duration_formatted" json:"duration_formatted"`
 }
 
-func NewQueue(groupItemID uuid.UUID, joinedAt time.Time) (*Queue, error) {
-	return &Queue{
+func NewOrderQueue(groupItemID uuid.UUID, joinedAt time.Time) (*OrderQueue, error) {
+	return &OrderQueue{
 		Entity: entity.NewEntity(),
-		QueueCommonAttributes: QueueCommonAttributes{
+		OrderQueueCommonAttributes: OrderQueueCommonAttributes{
 			GroupItemID: groupItemID,
 		},
-		QueueTimeLogs: QueueTimeLogs{
+		OrderQueueTimeLogs: OrderQueueTimeLogs{
 			JoinedAt:          joinedAt,
 			DurationFormatted: "0s",
 		},
 	}, nil
 }
 
-func (q *Queue) FinishQueue(processRuleID uuid.UUID, finishedAt time.Time) {
+func (q *OrderQueue) Finish(processRuleID uuid.UUID, finishedAt time.Time) {
 	q.ProcessRuleID = &processRuleID
 	q.LeftAt = &time.Time{}
 	*q.LeftAt = finishedAt

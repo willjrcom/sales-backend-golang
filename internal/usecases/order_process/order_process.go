@@ -10,20 +10,20 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
-	queuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/queue"
+	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
-	queueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/queue"
+	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 )
 
 type Service struct {
 	r    orderprocessentity.ProcessRepository
 	ri   groupitementity.GroupItemRepository
 	rpr  productentity.ProcessRuleRepository
-	sq   *queueusecases.Service
+	sq   *orderqueueusecases.Service
 	rsgi *groupitemusecases.Service
 }
 
-func NewService(c orderprocessentity.ProcessRepository, ri groupitementity.GroupItemRepository, sq *queueusecases.Service, rpr productentity.ProcessRuleRepository, rsgi *groupitemusecases.Service) *Service {
+func NewService(c orderprocessentity.ProcessRepository, ri groupitementity.GroupItemRepository, sq *orderqueueusecases.Service, rpr productentity.ProcessRuleRepository, rsgi *groupitemusecases.Service) *Service {
 	return &Service{r: c, ri: ri, sq: sq, rpr: rpr, rsgi: rsgi}
 }
 
@@ -159,8 +159,8 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 		return uuid.Nil, nil
 	}
 
-	startQueueInput := &queuedto.StartQueueInput{
-		QueueCommonAttributes: orderprocessentity.QueueCommonAttributes{
+	startQueueInput := &orderqueuedto.StartQueueInput{
+		OrderQueueCommonAttributes: orderprocessentity.OrderQueueCommonAttributes{
 			GroupItemID: process.GroupItemID,
 		},
 		JoinedAt: *process.FinishedAt,
@@ -182,7 +182,7 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 
 	// Create next process
 	createProcessInput := &orderprocessdto.CreateProcessInput{
-		ProcessCommonAttributes: orderprocessentity.ProcessCommonAttributes{
+		OrderProcessCommonAttributes: orderprocessentity.OrderProcessCommonAttributes{
 			GroupItemID:   process.GroupItemID,
 			ProcessRuleID: nextProcessRule.ID,
 		},
@@ -230,7 +230,7 @@ func (s *Service) GetProcessesByGroupItemID(ctx context.Context, dtoID *entitydt
 	}
 }
 
-func (s *Service) processesToOutputs(processes []orderprocessentity.Process) []orderprocessdto.ProcessOutput {
+func (s *Service) processesToOutputs(processes []orderprocessentity.OrderProcess) []orderprocessdto.ProcessOutput {
 	outputs := make([]orderprocessdto.ProcessOutput, 0)
 	for _, process := range processes {
 		processOutput := &orderprocessdto.ProcessOutput{}

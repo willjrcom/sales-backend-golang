@@ -7,10 +7,10 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
-type ProcessToProductToGroupItem struct {
+type OrderProcessToProductToGroupItem struct {
 	bun.BaseModel `bun:"table:process_to_product_to_group_item"`
 	ProcessID     uuid.UUID                  `bun:"type:uuid,pk"`
-	Process       *Process                   `bun:"rel:belongs-to,join:process_id=id"`
+	Process       *OrderProcess              `bun:"rel:belongs-to,join:process_id=id"`
 	ProductID     uuid.UUID                  `bun:"type:uuid,pk"`
 	Product       *productentity.Product     `bun:"rel:belongs-to,join:product_id=id"`
 	GroupItemID   uuid.UUID                  `bun:"type:uuid,pk"`

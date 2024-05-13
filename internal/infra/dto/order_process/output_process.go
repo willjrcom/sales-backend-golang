@@ -7,14 +7,14 @@ import (
 
 type ProcessOutput struct {
 	ID uuid.UUID `json:"id"`
-	orderprocessentity.ProcessCommonAttributes
-	orderprocessentity.ProcessTimeLogs
+	orderprocessentity.OrderProcessCommonAttributes
+	orderprocessentity.OrderProcessTimeLogs
 }
 
-func (s *ProcessOutput) FromModel(model *orderprocessentity.Process) {
+func (s *ProcessOutput) FromModel(model *orderprocessentity.OrderProcess) {
 	s.ID = model.ID
-	s.ProcessCommonAttributes = model.ProcessCommonAttributes
-	s.ProcessTimeLogs = model.ProcessTimeLogs
+	s.OrderProcessCommonAttributes = model.OrderProcessCommonAttributes
+	s.OrderProcessTimeLogs = model.OrderProcessTimeLogs
 
 	s.DurationFormatted = model.Duration.String()
 }

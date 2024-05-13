@@ -13,7 +13,7 @@ var (
 )
 
 type CreateProcessInput struct {
-	orderprocessentity.ProcessCommonAttributes
+	orderprocessentity.OrderProcessCommonAttributes
 }
 
 func (s *CreateProcessInput) validate() error {
@@ -28,10 +28,10 @@ func (s *CreateProcessInput) validate() error {
 	return nil
 }
 
-func (s *CreateProcessInput) ToModel() (*orderprocessentity.Process, error) {
+func (s *CreateProcessInput) ToModel() (*orderprocessentity.OrderProcess, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}
 
-	return orderprocessentity.NewProcess(s.GroupItemID, s.ProcessRuleID), nil
+	return orderprocessentity.NewOrderProcess(s.GroupItemID, s.ProcessRuleID), nil
 }

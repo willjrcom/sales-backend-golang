@@ -14,7 +14,7 @@ var (
 
 type Size struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:sizes"`
+	bun.BaseModel `bun:"table:product_category_sizes"`
 	SizeCommonAttributes
 }
 

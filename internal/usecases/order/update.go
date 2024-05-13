@@ -9,8 +9,8 @@ import (
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
-	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
-	queuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/queue"
+	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
+	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
 )
 
 func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) error {
@@ -39,8 +39,8 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 			return errors.New("process rule not found for category ID: " + groupItem.CategoryID.String())
 		}
 
-		createProcessInput := &processdto.CreateProcessInput{
-			ProcessCommonAttributes: orderprocessentity.ProcessCommonAttributes{
+		createProcessInput := &orderprocessdto.CreateProcessInput{
+			OrderProcessCommonAttributes: orderprocessentity.OrderProcessCommonAttributes{
 				GroupItemID:   groupItem.ID,
 				ProcessRuleID: processRuleID,
 			},
@@ -58,8 +58,8 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 
 	// Create queue for each group item
 	for _, groupItemID := range groupItemIDs {
-		startQueueInput := &queuedto.StartQueueInput{
-			QueueCommonAttributes: orderprocessentity.QueueCommonAttributes{
+		startQueueInput := &orderqueuedto.StartQueueInput{
+			OrderQueueCommonAttributes: orderprocessentity.OrderQueueCommonAttributes{
 				GroupItemID: groupItemID,
 			},
 			JoinedAt: *order.PendingAt,

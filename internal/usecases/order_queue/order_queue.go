@@ -1,4 +1,4 @@
-package queueusecases
+package orderqueueusecases
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	queuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/queue"
+	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
 )
 
 type Service struct {
@@ -18,13 +18,13 @@ func NewService(c orderprocessentity.QueueRepository, rp orderprocessentity.Proc
 	return &Service{r: c, rp: rp}
 }
 
-func (s *Service) StartQueue(ctx context.Context, dto *queuedto.StartQueueInput) (uuid.UUID, error) {
+func (s *Service) StartQueue(ctx context.Context, dto *orderqueuedto.StartQueueInput) (uuid.UUID, error) {
 	groupItemID, joinedAt, err := dto.ToModel()
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	queue, err := orderprocessentity.NewQueue(groupItemID, *joinedAt)
+	queue, err := orderprocessentity.NewOrderQueue(groupItemID, *joinedAt)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -36,13 +36,13 @@ func (s *Service) StartQueue(ctx context.Context, dto *queuedto.StartQueueInput)
 	return queue.ID, nil
 }
 
-func (s *Service) FinishQueue(ctx context.Context, process *orderprocessentity.Process) error {
+func (s *Service) FinishQueue(ctx context.Context, process *orderprocessentity.OrderProcess) error {
 	queue, err := s.r.GetOpenedQueueByGroupItemId(ctx, process.GroupItemID.String())
 	if err != nil {
 		return err
 	}
 
-	queue.FinishQueue(process.ProcessRuleID, *process.StartedAt)
+	queue.Finish(process.ProcessRuleID, *process.StartedAt)
 
 	if err := s.r.UpdateQueue(ctx, queue); err != nil {
 		return err
@@ -51,7 +51,7 @@ func (s *Service) FinishQueue(ctx context.Context, process *orderprocessentity.P
 	return nil
 }
 
-func (s *Service) GetQueueById(ctx context.Context, dto *entitydto.IdRequest) (*orderprocessentity.Queue, error) {
+func (s *Service) GetQueueById(ctx context.Context, dto *entitydto.IdRequest) (*orderprocessentity.OrderQueue, error) {
 	if queue, err := s.r.GetQueueById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
@@ -59,7 +59,7 @@ func (s *Service) GetQueueById(ctx context.Context, dto *entitydto.IdRequest) (*
 	}
 }
 
-func (s *Service) GetQueuesByGroupItemId(ctx context.Context, dto *entitydto.IdRequest) ([]orderprocessentity.Queue, error) {
+func (s *Service) GetQueuesByGroupItemId(ctx context.Context, dto *entitydto.IdRequest) ([]orderprocessentity.OrderQueue, error) {
 	if queues, err := s.r.GetQueuesByGroupItemId(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
@@ -67,7 +67,7 @@ func (s *Service) GetQueuesByGroupItemId(ctx context.Context, dto *entitydto.IdR
 	}
 }
 
-func (s *Service) GetAllQueues(ctx context.Context) ([]orderprocessentity.Queue, error) {
+func (s *Service) GetAllQueues(ctx context.Context) ([]orderprocessentity.OrderQueue, error) {
 	if queue, err := s.r.GetAllQueues(ctx); err != nil {
 		return nil, err
 	} else {

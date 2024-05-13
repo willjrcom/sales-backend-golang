@@ -14,14 +14,14 @@ var (
 	ErrMustBeStarted = errors.New("process must be started")
 )
 
-type Process struct {
+type OrderProcess struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:processes"`
-	ProcessTimeLogs
-	ProcessCommonAttributes
+	bun.BaseModel `bun:"table:order_processes"`
+	OrderProcessTimeLogs
+	OrderProcessCommonAttributes
 }
 
-type ProcessCommonAttributes struct {
+type OrderProcessCommonAttributes struct {
 	EmployeeID    *uuid.UUID              `bun:"employee_id,type:uuid" json:"employee_id,omitempty"`
 	GroupItemID   uuid.UUID               `bun:"group_item_id,type:uuid,notnull" json:"group_item_id"`
 	ProcessRuleID uuid.UUID               `bun:"process_rule_id,type:uuid,notnull" json:"process_rule_id"`
@@ -29,7 +29,7 @@ type ProcessCommonAttributes struct {
 	Products      []productentity.Product `bun:"m2m:process_to_product_to_group_item,join:Process=Product" json:"process_to_product,omitempty"`
 }
 
-type ProcessTimeLogs struct {
+type OrderProcessTimeLogs struct {
 	StartedAt         *time.Time    `bun:"started_at" json:"started_at,omitempty"`
 	PausedAt          *time.Time    `bun:"paused_at" json:"paused_at,omitempty"`
 	ContinuedAt       *time.Time    `bun:"continued_at" json:"continued_at,omitempty"`
@@ -39,21 +39,21 @@ type ProcessTimeLogs struct {
 	TotalPaused       int8          `bun:"total_paused" json:"total_paused"`
 }
 
-func NewProcess(groupItemID uuid.UUID, processRuleID uuid.UUID) *Process {
-	processCommonAttributes := ProcessCommonAttributes{
+func NewOrderProcess(groupItemID uuid.UUID, processRuleID uuid.UUID) *OrderProcess {
+	orderProcessCommonAttributes := OrderProcessCommonAttributes{
 		GroupItemID:   groupItemID,
 		ProcessRuleID: processRuleID,
 		Status:        ProcessStatusPending,
 	}
 
-	return &Process{
-		Entity:                  entity.NewEntity(),
-		ProcessCommonAttributes: processCommonAttributes,
-		ProcessTimeLogs:         ProcessTimeLogs{},
+	return &OrderProcess{
+		Entity:                       entity.NewEntity(),
+		OrderProcessCommonAttributes: orderProcessCommonAttributes,
+		OrderProcessTimeLogs:         OrderProcessTimeLogs{},
 	}
 }
 
-func (p *Process) StartProcess(employeeID uuid.UUID) error {
+func (p *OrderProcess) StartProcess(employeeID uuid.UUID) error {
 	if p.StartedAt != nil {
 		return errors.New("process already started")
 	}
@@ -69,7 +69,7 @@ func (p *Process) StartProcess(employeeID uuid.UUID) error {
 	return nil
 }
 
-func (p *Process) FinishProcess() error {
+func (p *OrderProcess) FinishProcess() error {
 	if p.StartedAt == nil {
 		return ErrMustBeStarted
 	}
@@ -97,7 +97,7 @@ func (p *Process) FinishProcess() error {
 	return nil
 }
 
-func (p *Process) PauseProcess() error {
+func (p *OrderProcess) PauseProcess() error {
 	if p.StartedAt == nil {
 		return ErrMustBeStarted
 	}
@@ -124,7 +124,7 @@ func (p *Process) PauseProcess() error {
 	return nil
 }
 
-func (p *Process) ContinueProcess() error {
+func (p *OrderProcess) ContinueProcess() error {
 	if p.StartedAt == nil {
 		return ErrMustBeStarted
 	}

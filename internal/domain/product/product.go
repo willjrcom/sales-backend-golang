@@ -15,7 +15,7 @@ var (
 
 type Product struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:products"`
+	bun.BaseModel `bun:"table:product_category_products"`
 	ProductCommonAttributes
 }
 

@@ -5,21 +5,21 @@ import (
 )
 
 type ProcessRepository interface {
-	RegisterProcess(ctx context.Context, p *Process) error
-	UpdateProcess(ctx context.Context, p *Process) error
+	RegisterProcess(ctx context.Context, p *OrderProcess) error
+	UpdateProcess(ctx context.Context, p *OrderProcess) error
 	DeleteProcess(ctx context.Context, id string) error
-	GetProcessById(ctx context.Context, id string) (*Process, error)
-	GetAllProcesses(ctx context.Context) ([]Process, error)
-	GetProcessesByProductID(ctx context.Context, id string) ([]Process, error)
-	GetProcessesByGroupItemID(ctx context.Context, id string) ([]Process, error)
+	GetProcessById(ctx context.Context, id string) (*OrderProcess, error)
+	GetAllProcesses(ctx context.Context) ([]OrderProcess, error)
+	GetProcessesByProductID(ctx context.Context, id string) ([]OrderProcess, error)
+	GetProcessesByGroupItemID(ctx context.Context, id string) ([]OrderProcess, error)
 }
 
 type QueueRepository interface {
-	RegisterQueue(ctx context.Context, p *Queue) error
-	UpdateQueue(ctx context.Context, p *Queue) error
+	RegisterQueue(ctx context.Context, p *OrderQueue) error
+	UpdateQueue(ctx context.Context, p *OrderQueue) error
 	DeleteQueue(ctx context.Context, id string) error
-	GetQueueById(ctx context.Context, id string) (*Queue, error)
-	GetOpenedQueueByGroupItemId(ctx context.Context, id string) (*Queue, error)
-	GetQueuesByGroupItemId(ctx context.Context, id string) ([]Queue, error)
-	GetAllQueues(ctx context.Context) ([]Queue, error)
+	GetQueueById(ctx context.Context, id string) (*OrderQueue, error)
+	GetOpenedQueueByGroupItemId(ctx context.Context, id string) (*OrderQueue, error)
+	GetQueuesByGroupItemId(ctx context.Context, id string) ([]OrderQueue, error)
+	GetAllQueues(ctx context.Context) ([]OrderQueue, error)
 }

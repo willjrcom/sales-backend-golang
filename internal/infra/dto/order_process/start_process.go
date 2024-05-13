@@ -12,7 +12,7 @@ var (
 )
 
 type StartProcessInput struct {
-	orderprocessentity.ProcessCommonAttributes
+	orderprocessentity.OrderProcessCommonAttributes
 }
 
 func (s *StartProcessInput) validate() error {
