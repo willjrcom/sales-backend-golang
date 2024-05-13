@@ -35,7 +35,7 @@ func NewHandlerProcess(processService *orderprocessusecases.Service) *handler.Ha
 		c.Get("/by-product/{id}", h.handlerGetProcessesByProduct)
 	})
 
-	return handler.NewHandler("/process", c)
+	return handler.NewHandler("/order-process", c)
 }
 
 func (h *handlerProcessImpl) handlerCreateProcess(w http.ResponseWriter, r *http.Request) {

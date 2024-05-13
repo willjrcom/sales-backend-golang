@@ -32,7 +32,7 @@ func NewHandlerOrderTable(orderService *ordertableusecases.Service) *handler.Han
 		c.Get("/all", h.handlerGetAllTables)
 	})
 
-	return handler.NewHandler("/table-order", c)
+	return handler.NewHandler("/order-table", c)
 }
 
 func (h *handlerOrderTableImpl) handlerRegisterOrderTable(w http.ResponseWriter, r *http.Request) {

@@ -29,7 +29,7 @@ func NewHandlerOrderPickup(orderService orderpickupusecases.IService) *handler.H
 		c.Post("/update/ready/{id}", h.handlerReadyOrder)
 	})
 
-	return handler.NewHandler("/pickup-order", c)
+	return handler.NewHandler("/order-pickup", c)
 }
 
 func (h *handlerOrderPickupImpl) handlerRegisterOrderPickup(w http.ResponseWriter, r *http.Request) {

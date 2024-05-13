@@ -32,7 +32,7 @@ func NewHandlerQueue(queueService *orderqueueusecases.Service) *handler.Handler 
 		c.Get("/all", h.handlerGetAllQueues)
 	})
 
-	return handler.NewHandler("/queue", c)
+	return handler.NewHandler("/order-queue", c)
 }
 
 func (h *handlerQueueImpl) handlerStartQueue(w http.ResponseWriter, r *http.Request) {
