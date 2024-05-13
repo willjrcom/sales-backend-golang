@@ -1,18 +1,18 @@
-package tableorderusecases
+package ordertableusecases
 
 import (
 	"context"
 	"errors"
 
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	tableorderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/table_order"
+	ordertabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_table"
 )
 
 var (
 	ErrTableNotAvailableToChange = errors.New("table not available to change")
 )
 
-func (s *Service) ChangeTable(ctx context.Context, dtoTableOrder *entitydto.IdRequest, dtoNew *tableorderdto.UpdateTableOrderInput) error {
+func (s *Service) ChangeTable(ctx context.Context, dtoOrderTable *entitydto.IdRequest, dtoNew *ordertabledto.UpdateOrderTableInput) error {
 	newTable, err := s.rt.GetTableById(ctx, dtoNew.TableID.String())
 
 	if err != nil {
@@ -23,23 +23,23 @@ func (s *Service) ChangeTable(ctx context.Context, dtoTableOrder *entitydto.IdRe
 		return ErrTableNotAvailableToChange
 	}
 
-	tableOrder, err := s.rto.GetTableOrderById(ctx, dtoTableOrder.ID.String())
+	orderTable, err := s.rto.GetOrderTableById(ctx, dtoOrderTable.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if tableOrder.TableID == newTable.ID {
+	if orderTable.TableID == newTable.ID {
 		return errors.New("table order is already in this table")
 	}
 
-	table, err := s.rt.GetTableById(ctx, tableOrder.TableID.String())
+	table, err := s.rt.GetTableById(ctx, orderTable.TableID.String())
 
 	if err != nil {
 		return err
 	}
 
-	tablesOrdersTogether, err := s.rto.GetPendingTableOrdersByTableId(ctx, tableOrder.TableID.String())
+	tablesOrdersTogether, err := s.rto.GetPendingOrderTablesByTableId(ctx, orderTable.TableID.String())
 	if err != nil {
 		return err
 	}
@@ -58,29 +58,29 @@ func (s *Service) ChangeTable(ctx context.Context, dtoTableOrder *entitydto.IdRe
 		return err
 	}
 
-	tableOrder.TableID = newTable.ID
+	orderTable.TableID = newTable.ID
 
-	return s.rto.UpdateTableOrder(ctx, tableOrder)
+	return s.rto.UpdateOrderTable(ctx, orderTable)
 
 }
 
-func (s *Service) CloseTableOrder(ctx context.Context, dtoID *entitydto.IdRequest) error {
-	tableOrder, err := s.rto.GetTableOrderById(ctx, dtoID.ID.String())
+func (s *Service) CloseOrderTable(ctx context.Context, dtoID *entitydto.IdRequest) error {
+	orderTable, err := s.rto.GetOrderTableById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if err := tableOrder.Close(); err != nil {
+	if err := orderTable.Close(); err != nil {
 		return err
 	}
 
-	table, err := s.rt.GetTableById(ctx, tableOrder.TableID.String())
+	table, err := s.rt.GetTableById(ctx, orderTable.TableID.String())
 	if err != nil {
 		return err
 	}
 
-	tablesOrdersTogether, err := s.rto.GetPendingTableOrdersByTableId(ctx, tableOrder.TableID.String())
+	tablesOrdersTogether, err := s.rto.GetPendingOrderTablesByTableId(ctx, orderTable.TableID.String())
 
 	if err != nil {
 		return err
@@ -93,5 +93,5 @@ func (s *Service) CloseTableOrder(ctx context.Context, dtoID *entitydto.IdReques
 		}
 	}
 
-	return s.rto.UpdateTableOrder(ctx, tableOrder)
+	return s.rto.UpdateOrderTable(ctx, orderTable)
 }

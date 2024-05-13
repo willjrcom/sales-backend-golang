@@ -1,4 +1,4 @@
-package tableorderdto
+package ordertabledto
 
 import "github.com/google/uuid"
 

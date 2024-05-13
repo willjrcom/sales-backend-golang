@@ -7,43 +7,43 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	tableorderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/table_order"
-	tableorderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table_order"
+	ordertabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_table"
+	ordertableusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_table"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
-type handlerTableOrderImpl struct {
-	s *tableorderusecases.Service
+type handlerOrderTableImpl struct {
+	s *ordertableusecases.Service
 }
 
-func NewHandlerTableOrder(orderService *tableorderusecases.Service) *handler.Handler {
+func NewHandlerOrderTable(orderService *ordertableusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
-	h := &handlerTableOrderImpl{
+	h := &handlerOrderTableImpl{
 		s: orderService,
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterTableOrder)
+		c.Post("/new", h.handlerRegisterOrderTable)
 		c.Post("/update/change-table/{id}", h.handlerChangeTable)
-		c.Post("/update/close/{id}", h.handlerCloseTableOrder)
-		c.Delete("/{id}", h.handlerDeleteTableOrderById)
-		c.Get("/{id}", h.handlerGetTableOrderById)
+		c.Post("/update/close/{id}", h.handlerCloseOrderTable)
+		c.Delete("/{id}", h.handlerDeleteOrderTableById)
+		c.Get("/{id}", h.handlerGetOrderTableById)
 		c.Get("/all", h.handlerGetAllTables)
 	})
 
 	return handler.NewHandler("/table-order", c)
 }
 
-func (h *handlerTableOrderImpl) handlerRegisterTableOrder(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderTableImpl) handlerRegisterOrderTable(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	dtoTable := &tableorderdto.CreateTableOrderInput{}
+	dtoTable := &ordertabledto.CreateOrderTableInput{}
 	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	id, err := h.s.CreateTableOrder(ctx, dtoTable)
+	id, err := h.s.CreateOrderTable(ctx, dtoTable)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -52,7 +52,7 @@ func (h *handlerTableOrderImpl) handlerRegisterTableOrder(w http.ResponseWriter,
 	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
-func (h *handlerTableOrderImpl) handlerDeleteTableOrderById(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderTableImpl) handlerDeleteOrderTableById(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -64,7 +64,7 @@ func (h *handlerTableOrderImpl) handlerDeleteTableOrderById(w http.ResponseWrite
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.DeleteTableOrder(ctx, dtoId); err != nil {
+	if err := h.s.DeleteOrderTable(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -72,7 +72,7 @@ func (h *handlerTableOrderImpl) handlerDeleteTableOrderById(w http.ResponseWrite
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerTableOrderImpl) handlerChangeTable(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderTableImpl) handlerChangeTable(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -84,7 +84,7 @@ func (h *handlerTableOrderImpl) handlerChangeTable(w http.ResponseWriter, r *htt
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	dtoTable := &tableorderdto.UpdateTableOrderInput{}
+	dtoTable := &ordertabledto.UpdateOrderTableInput{}
 	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -98,7 +98,7 @@ func (h *handlerTableOrderImpl) handlerChangeTable(w http.ResponseWriter, r *htt
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerTableOrderImpl) handlerCloseTableOrder(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderTableImpl) handlerCloseOrderTable(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -110,7 +110,7 @@ func (h *handlerTableOrderImpl) handlerCloseTableOrder(w http.ResponseWriter, r 
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.CloseTableOrder(ctx, dtoId); err != nil {
+	if err := h.s.CloseOrderTable(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
@@ -118,7 +118,7 @@ func (h *handlerTableOrderImpl) handlerCloseTableOrder(w http.ResponseWriter, r 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerTableOrderImpl) handlerGetTableOrderById(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderTableImpl) handlerGetOrderTableById(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -139,7 +139,7 @@ func (h *handlerTableOrderImpl) handlerGetTableOrderById(w http.ResponseWriter, 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: table})
 }
 
-func (h *handlerTableOrderImpl) handlerGetAllTables(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderTableImpl) handlerGetAllTables(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	orders, err := h.s.GetAllTables(ctx)

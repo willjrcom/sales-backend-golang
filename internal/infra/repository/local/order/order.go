@@ -71,11 +71,11 @@ func (r *OrderRepositoryLocal) DeleteOrderDelivery(ctx context.Context, id strin
 	return nil
 }
 
-func (r *OrderRepositoryLocal) UpdateTableOrder(ctx context.Context, table *orderentity.TableOrder) error {
+func (r *OrderRepositoryLocal) UpdateOrderTable(ctx context.Context, table *orderentity.OrderTable) error {
 	return nil
 }
 
-func (r *OrderRepositoryLocal) DeleteTableOrder(ctx context.Context, id string) error {
+func (r *OrderRepositoryLocal) DeleteOrderTable(ctx context.Context, id string) error {
 	return nil
 }
 

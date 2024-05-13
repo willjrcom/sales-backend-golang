@@ -10,16 +10,16 @@ import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
-type TableOrderRepositoryBun struct {
+type OrderTableRepositoryBun struct {
 	mu sync.Mutex
 	db *bun.DB
 }
 
-func NewTableOrderRepositoryBun(db *bun.DB) *TableOrderRepositoryBun {
-	return &TableOrderRepositoryBun{db: db}
+func NewOrderTableRepositoryBun(db *bun.DB) *OrderTableRepositoryBun {
+	return &OrderTableRepositoryBun{db: db}
 }
 
-func (r *TableOrderRepositoryBun) CreateTableOrder(ctx context.Context, table *orderentity.TableOrder) error {
+func (r *OrderTableRepositoryBun) CreateOrderTable(ctx context.Context, table *orderentity.OrderTable) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -34,7 +34,7 @@ func (r *TableOrderRepositoryBun) CreateTableOrder(ctx context.Context, table *o
 	return nil
 }
 
-func (r *TableOrderRepositoryBun) UpdateTableOrder(ctx context.Context, table *orderentity.TableOrder) error {
+func (r *OrderTableRepositoryBun) UpdateOrderTable(ctx context.Context, table *orderentity.OrderTable) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -49,7 +49,7 @@ func (r *TableOrderRepositoryBun) UpdateTableOrder(ctx context.Context, table *o
 	return nil
 }
 
-func (r *TableOrderRepositoryBun) DeleteTableOrder(ctx context.Context, id string) error {
+func (r *OrderTableRepositoryBun) DeleteOrderTable(ctx context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -57,15 +57,15 @@ func (r *TableOrderRepositoryBun) DeleteTableOrder(ctx context.Context, id strin
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&orderentity.TableOrder{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&orderentity.OrderTable{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *TableOrderRepositoryBun) GetTableOrderById(ctx context.Context, id string) (table *orderentity.TableOrder, err error) {
-	table = &orderentity.TableOrder{}
+func (r *OrderTableRepositoryBun) GetOrderTableById(ctx context.Context, id string) (table *orderentity.OrderTable, err error) {
+	table = &orderentity.OrderTable{}
 	table.ID = uuid.MustParse(id)
 
 	r.mu.Lock()
@@ -82,8 +82,8 @@ func (r *TableOrderRepositoryBun) GetTableOrderById(ctx context.Context, id stri
 	return table, err
 }
 
-func (r *TableOrderRepositoryBun) GetPendingTableOrdersByTableId(ctx context.Context, id string) (tables []orderentity.TableOrder, err error) {
-	tables = []orderentity.TableOrder{}
+func (r *OrderTableRepositoryBun) GetPendingOrderTablesByTableId(ctx context.Context, id string) (tables []orderentity.OrderTable, err error) {
+	tables = []orderentity.OrderTable{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -92,15 +92,15 @@ func (r *TableOrderRepositoryBun) GetPendingTableOrdersByTableId(ctx context.Con
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&tables).Where("table_id = ? AND status = ?", id, orderentity.TableOrderStatusPending).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&tables).Where("table_id = ? AND status = ?", id, orderentity.OrderTableStatusPending).Scan(ctx); err != nil {
 		return nil, err
 	}
 
 	return tables, err
 }
 
-func (r *TableOrderRepositoryBun) GetAllTableOrders(ctx context.Context) (tables []orderentity.TableOrder, err error) {
-	tables = make([]orderentity.TableOrder, 0)
+func (r *OrderTableRepositoryBun) GetAllOrderTables(ctx context.Context) (tables []orderentity.OrderTable, err error) {
+	tables = make([]orderentity.OrderTable, 0)
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

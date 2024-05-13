@@ -15,7 +15,7 @@ type Table struct {
 type TableCommonAttributes struct {
 	Name        string                   `bun:"name,notnull" json:"name"`
 	IsAvailable bool                     `bun:"is_available" json:"is_available"`
-	Orders      []orderentity.TableOrder `bun:"rel:has-many,join:id=table_id" json:"orders,omitempty"`
+	Orders      []orderentity.OrderTable `bun:"rel:has-many,join:id=table_id" json:"orders,omitempty"`
 }
 
 func (t *Table) LockTable() {

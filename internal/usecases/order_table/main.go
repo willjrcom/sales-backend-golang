@@ -1,4 +1,4 @@
-package tableorderusecases
+package ordertableusecases
 
 import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
@@ -7,11 +7,11 @@ import (
 )
 
 type Service struct {
-	rto orderentity.TableOrderRepository
+	rto orderentity.OrderTableRepository
 	rt  tableentity.TableRepository
 	os  *orderusecases.Service
 }
 
-func NewService(rto orderentity.TableOrderRepository, rt tableentity.TableRepository, os *orderusecases.Service) *Service {
+func NewService(rto orderentity.OrderTableRepository, rt tableentity.TableRepository, os *orderusecases.Service) *Service {
 	return &Service{rto: rto, rt: rt, os: os}
 }

@@ -188,7 +188,7 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model(&orderentity.TableOrder{}).Where("order_id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&orderentity.OrderTable{}).Where("order_id = ?", id).Exec(ctx); err != nil {
 		if errRollBack := tx.Rollback(); errRollBack != nil {
 			return errRollBack
 		}

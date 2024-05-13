@@ -1,4 +1,4 @@
-package tableorderdto
+package ordertabledto
 
 import (
 	"errors"
@@ -12,11 +12,11 @@ var (
 	ErrTableIDRequired = errors.New("table_id is required")
 )
 
-type CreateTableOrderInput struct {
-	orderentity.TableOrderCommonAttributes
+type CreateOrderTableInput struct {
+	orderentity.OrderTableCommonAttributes
 }
 
-func (o *CreateTableOrderInput) validate() error {
+func (o *CreateOrderTableInput) validate() error {
 	if o.OrderID == uuid.Nil {
 		return ErrOrderIDRequired
 	}
@@ -28,10 +28,10 @@ func (o *CreateTableOrderInput) validate() error {
 	return nil
 }
 
-func (o *CreateTableOrderInput) ToModel() (*orderentity.TableOrder, error) {
+func (o *CreateOrderTableInput) ToModel() (*orderentity.OrderTable, error) {
 	if err := o.validate(); err != nil {
 		return nil, err
 	}
 
-	return orderentity.NewTable(o.TableOrderCommonAttributes), nil
+	return orderentity.NewTable(o.OrderTableCommonAttributes), nil
 }

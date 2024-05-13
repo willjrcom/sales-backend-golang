@@ -28,11 +28,11 @@ type OrderDeliveryRepository interface {
 	GetAllDeliveries(ctx context.Context) ([]OrderDelivery, error)
 }
 
-type TableOrderRepository interface {
-	CreateTableOrder(ctx context.Context, table *TableOrder) error
-	UpdateTableOrder(ctx context.Context, table *TableOrder) error
-	DeleteTableOrder(ctx context.Context, id string) error
-	GetTableOrderById(ctx context.Context, id string) (*TableOrder, error)
-	GetPendingTableOrdersByTableId(ctx context.Context, id string) ([]TableOrder, error)
-	GetAllTableOrders(ctx context.Context) ([]TableOrder, error)
+type OrderTableRepository interface {
+	CreateOrderTable(ctx context.Context, table *OrderTable) error
+	UpdateOrderTable(ctx context.Context, table *OrderTable) error
+	DeleteOrderTable(ctx context.Context, id string) error
+	GetOrderTableById(ctx context.Context, id string) (*OrderTable, error)
+	GetPendingOrderTablesByTableId(ctx context.Context, id string) ([]OrderTable, error)
+	GetAllOrderTables(ctx context.Context) ([]OrderTable, error)
 }
