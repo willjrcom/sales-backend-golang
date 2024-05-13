@@ -21,7 +21,7 @@ func NewSizeRepositoryLocal() *SizeRepositoryLocal {
 	return &SizeRepositoryLocal{sizes: make(map[uuid.UUID]*productentity.Size)}
 }
 
-func (r *SizeRepositoryLocal) RegisterSize(_ context.Context, p *productentity.Size) error {
+func (r *SizeRepositoryLocal) CreateSize(_ context.Context, p *productentity.Size) error {
 
 	if _, ok := r.sizes[p.ID]; ok {
 		return errSizeExists

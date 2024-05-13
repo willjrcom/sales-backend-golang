@@ -18,7 +18,7 @@ func NewQuantityRepositoryBun(db *bun.DB) *QuantityRepositoryBun {
 	return &QuantityRepositoryBun{db: db}
 }
 
-func (r *QuantityRepositoryBun) RegisterQuantity(ctx context.Context, s *productentity.Quantity) error {
+func (r *QuantityRepositoryBun) CreateQuantity(ctx context.Context, s *productentity.Quantity) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

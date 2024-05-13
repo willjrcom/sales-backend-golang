@@ -13,7 +13,7 @@ func NewEmployeeRepositoryLocal() *EmployeeRepositoryLocal {
 	return &EmployeeRepositoryLocal{}
 }
 
-func (r *EmployeeRepositoryLocal) RegisterEmployee(ctx context.Context, p *employeeentity.Employee) error {
+func (r *EmployeeRepositoryLocal) CreateEmployee(ctx context.Context, p *employeeentity.Employee) error {
 	return nil
 }
 

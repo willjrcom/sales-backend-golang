@@ -14,11 +14,11 @@ var (
 	ErrContactRequired = errors.New("contact is required")
 )
 
-type RegisterEmployeeInput struct {
+type CreateEmployeeInput struct {
 	personentity.PatchPerson
 }
 
-func (r *RegisterEmployeeInput) validate() error {
+func (r *CreateEmployeeInput) validate() error {
 	if r.Name == nil || *r.Name == "" {
 		return ErrNameRequired
 	}
@@ -36,7 +36,7 @@ func (r *RegisterEmployeeInput) validate() error {
 	return nil
 }
 
-func (r *RegisterEmployeeInput) ToModel() (*employeeentity.Employee, error) {
+func (r *CreateEmployeeInput) ToModel() (*employeeentity.Employee, error) {
 	if err := r.validate(); err != nil {
 		return nil, err
 	}

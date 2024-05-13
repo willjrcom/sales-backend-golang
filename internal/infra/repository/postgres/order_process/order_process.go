@@ -20,7 +20,7 @@ func NewProcessRepositoryBun(db *bun.DB) *ProcessRepositoryBun {
 	return &ProcessRepositoryBun{db: db}
 }
 
-func (r *ProcessRepositoryBun) RegisterProcess(ctx context.Context, s *orderprocessentity.OrderProcess) error {
+func (r *ProcessRepositoryBun) CreateProcess(ctx context.Context, s *orderprocessentity.OrderProcess) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

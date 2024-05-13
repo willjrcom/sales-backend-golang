@@ -22,7 +22,7 @@ func NewHandlerOrderPickup(orderService orderpickupusecases.IService) *handler.H
 	h := &handlerOrderPickupImpl{orderService}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterOrderPickup)
+		c.Post("/new", h.handlerCreateOrderPickup)
 		c.Get("/{id}", h.handlerGetPickupById)
 		c.Get("/all", h.handlerGetAllPickups)
 		c.Post("/update/pend/{id}", h.handlerPendingOrder)
@@ -32,7 +32,7 @@ func NewHandlerOrderPickup(orderService orderpickupusecases.IService) *handler.H
 	return handler.NewHandler("/order-pickup", c)
 }
 
-func (h *handlerOrderPickupImpl) handlerRegisterOrderPickup(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderPickupImpl) handlerCreateOrderPickup(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	dtoPickup := &orderpickupdto.CreateOrderPickupInput{}

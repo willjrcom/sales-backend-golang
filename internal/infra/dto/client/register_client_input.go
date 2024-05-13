@@ -15,11 +15,11 @@ var (
 	ErrDeliveryTaxRequired = errors.New("delivery tax is required")
 )
 
-type RegisterClientInput struct {
+type CreateClientInput struct {
 	personentity.PatchPerson
 }
 
-func (r *RegisterClientInput) validate() error {
+func (r *CreateClientInput) validate() error {
 	if r.Name == nil || *r.Name == "" {
 		return ErrNameRequired
 	}
@@ -41,7 +41,7 @@ func (r *RegisterClientInput) validate() error {
 	return nil
 }
 
-func (r *RegisterClientInput) ToModel() (*cliententity.Client, error) {
+func (r *CreateClientInput) ToModel() (*cliententity.Client, error) {
 	if err := r.validate(); err != nil {
 		return nil, err
 	}

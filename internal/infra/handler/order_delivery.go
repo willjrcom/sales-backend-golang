@@ -22,7 +22,7 @@ func NewHandlerOrderDelivery(orderService orderdeliveryusecases.IService) *handl
 	h := &handlerOrderDeliveryImpl{orderService}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterOrderDelivery)
+		c.Post("/new", h.handlerCreateOrderDelivery)
 		c.Get("/{id}", h.handlerGetDeliveryById)
 		c.Get("/all", h.handlerGetAllDeliveries)
 		c.Post("/update/pend/{id}", h.handlerPendOrderDelivery)
@@ -35,7 +35,7 @@ func NewHandlerOrderDelivery(orderService orderdeliveryusecases.IService) *handl
 	return handler.NewHandler("/order-delivery", c)
 }
 
-func (h *handlerOrderDeliveryImpl) handlerRegisterOrderDelivery(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderDeliveryImpl) handlerCreateOrderDelivery(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	dtoDelivery := &orderdeliverydto.CreateOrderDeliveryInput{}

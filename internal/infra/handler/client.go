@@ -27,7 +27,7 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 	route := "/client"
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterClient)
+		c.Post("/new", h.handlerCreateClient)
 		c.Patch("/update/{id}", h.handlerUpdateClient)
 		c.Delete("/{id}", h.handlerDeleteClient)
 		c.Get("/{id}", h.handlerGetClientById)
@@ -39,16 +39,16 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 	return handler.NewHandler(route, c, unprotectedRoutes...)
 }
 
-func (h *handlerClientImpl) handlerRegisterClient(w http.ResponseWriter, r *http.Request) {
+func (h *handlerClientImpl) handlerCreateClient(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoClient := &clientdto.RegisterClientInput{}
+	dtoClient := &clientdto.CreateClientInput{}
 	if err := jsonpkg.ParseBody(r, dtoClient); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	id, err := h.s.RegisterClient(ctx, dtoClient)
+	id, err := h.s.CreateClient(ctx, dtoClient)
 
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})

@@ -17,14 +17,14 @@ func NewService(r orderentity.DeliveryDriverRepository) *Service {
 	return &Service{r: r}
 }
 
-func (s *Service) RegisterDeliveryDriver(ctx context.Context, dto *deliverydriverdto.RegisterDeliveryDriverInput) (uuid.UUID, error) {
+func (s *Service) CreateDeliveryDriver(ctx context.Context, dto *deliverydriverdto.CreateDeliveryDriverInput) (uuid.UUID, error) {
 	size, err := dto.ToModel()
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	err = s.r.RegisterDeliveryDriver(ctx, size)
+	err = s.r.CreateDeliveryDriver(ctx, size)
 
 	if err != nil {
 		return uuid.Nil, err

@@ -24,7 +24,7 @@ func NewHandlerProduct(productService *productcategoryproductusecases.Service) *
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterProduct)
+		c.Post("/new", h.handlerCreateProduct)
 		c.Patch("/update/{id}", h.handlerUpdateProduct)
 		c.Delete("/{id}", h.handlerDeleteProduct)
 		c.Get("/{id}", h.handlerGetProduct)
@@ -35,7 +35,7 @@ func NewHandlerProduct(productService *productcategoryproductusecases.Service) *
 	return handler.NewHandler("/product", c)
 }
 
-func (h *handlerProductImpl) handlerRegisterProduct(w http.ResponseWriter, r *http.Request) {
+func (h *handlerProductImpl) handlerCreateProduct(w http.ResponseWriter, r *http.Request) {
 	// file, _, err := r.FormFile("image")
 	// if err != nil && err.Error() != "http: no such file" {
 	// 	jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
@@ -46,7 +46,7 @@ func (h *handlerProductImpl) handlerRegisterProduct(w http.ResponseWriter, r *ht
 
 	ctx := r.Context()
 
-	dtoProduct := &productcategoryproductdto.RegisterProductInput{}
+	dtoProduct := &productcategoryproductdto.CreateProductInput{}
 	if err := jsonpkg.ParseBody(r, dtoProduct); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -56,7 +56,7 @@ func (h *handlerProductImpl) handlerRegisterProduct(w http.ResponseWriter, r *ht
 	// 	product.Image = &file
 	// }
 
-	id, err := h.s.RegisterProduct(ctx, dtoProduct)
+	id, err := h.s.CreateProduct(ctx, dtoProduct)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

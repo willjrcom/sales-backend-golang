@@ -5,7 +5,7 @@ import (
 )
 
 type ProcessRepository interface {
-	RegisterProcess(ctx context.Context, p *OrderProcess) error
+	CreateProcess(ctx context.Context, p *OrderProcess) error
 	UpdateProcess(ctx context.Context, p *OrderProcess) error
 	DeleteProcess(ctx context.Context, id string) error
 	GetProcessById(ctx context.Context, id string) (*OrderProcess, error)
@@ -15,7 +15,7 @@ type ProcessRepository interface {
 }
 
 type QueueRepository interface {
-	RegisterQueue(ctx context.Context, p *OrderQueue) error
+	CreateQueue(ctx context.Context, p *OrderQueue) error
 	UpdateQueue(ctx context.Context, p *OrderQueue) error
 	DeleteQueue(ctx context.Context, id string) error
 	GetQueueById(ctx context.Context, id string) (*OrderQueue, error)

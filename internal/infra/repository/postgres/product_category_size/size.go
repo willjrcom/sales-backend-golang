@@ -18,7 +18,7 @@ func NewSizeRepositoryBun(db *bun.DB) *SizeRepositoryBun {
 	return &SizeRepositoryBun{db: db}
 }
 
-func (r *SizeRepositoryBun) RegisterSize(ctx context.Context, s *productentity.Size) error {
+func (r *SizeRepositoryBun) CreateSize(ctx context.Context, s *productentity.Size) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

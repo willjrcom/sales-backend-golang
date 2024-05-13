@@ -18,7 +18,7 @@ func NewDeliveryDriverRepositoryBun(db *bun.DB) *DeliveryDriverRepositoryBun {
 	return &DeliveryDriverRepositoryBun{db: db}
 }
 
-func (r *DeliveryDriverRepositoryBun) RegisterDeliveryDriver(ctx context.Context, s *orderentity.DeliveryDriver) error {
+func (r *DeliveryDriverRepositoryBun) CreateDeliveryDriver(ctx context.Context, s *orderentity.DeliveryDriver) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

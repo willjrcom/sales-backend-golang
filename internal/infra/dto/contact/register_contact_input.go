@@ -13,13 +13,13 @@ var (
 	ErrIDIsEmpty      = errors.New("ID is required")
 )
 
-type RegisterContactInput struct {
+type CreateContactInput struct {
 	ClientID   uuid.UUID `json:"client_id"`
 	EmployeeID uuid.UUID `json:"employee_id"`
 	Contact    string    `json:"contact"`
 }
 
-func (c *RegisterContactInput) validate() error {
+func (c *CreateContactInput) validate() error {
 	if c.Contact == "" {
 		return ErrContactIsEmpty
 	}
@@ -30,7 +30,7 @@ func (c *RegisterContactInput) validate() error {
 	return nil
 }
 
-func (c *RegisterContactInput) ToModel() (*personentity.Contact, error) {
+func (c *CreateContactInput) ToModel() (*personentity.Contact, error) {
 	if err := c.validate(); err != nil {
 		return nil, err
 	}

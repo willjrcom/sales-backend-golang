@@ -18,7 +18,7 @@ func NewAddressRepositoryBun(db *bun.DB) *AddressRepositoryBun {
 	return &AddressRepositoryBun{db: db}
 }
 
-func (r *AddressRepositoryBun) RegisterAddress(ctx context.Context, c *addressentity.Address) error {
+func (r *AddressRepositoryBun) CreateAddress(ctx context.Context, c *addressentity.Address) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

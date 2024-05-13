@@ -51,7 +51,7 @@ func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.Create
 		})
 	}
 
-	if err := s.r.RegisterProcess(ctx, process); err != nil {
+	if err := s.r.CreateProcess(ctx, process); err != nil {
 		return uuid.Nil, err
 	}
 

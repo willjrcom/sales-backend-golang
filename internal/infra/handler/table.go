@@ -24,7 +24,7 @@ func NewHandlerTable(orderService *tableusecases.Service) *handler.Handler {
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterTable)
+		c.Post("/new", h.handlerCreateTable)
 		c.Delete("/{id}", h.handlerDeleteTableById)
 		c.Get("/{id}", h.handlerGetTableById)
 		c.Get("/all", h.handlerGetAllTables)
@@ -33,7 +33,7 @@ func NewHandlerTable(orderService *tableusecases.Service) *handler.Handler {
 	return handler.NewHandler("/table", c)
 }
 
-func (h *handlerTableImpl) handlerRegisterTable(w http.ResponseWriter, r *http.Request) {
+func (h *handlerTableImpl) handlerCreateTable(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	dtoTable := &tabledto.CreateTableInput{}

@@ -22,14 +22,14 @@ func NewService(rcliente cliententity.Repository, rcontact personentity.ContactR
 	return &Service{rclient: rcliente, rcontact: rcontact}
 }
 
-func (s *Service) RegisterClient(ctx context.Context, dto *clientdto.RegisterClientInput) (uuid.UUID, error) {
+func (s *Service) CreateClient(ctx context.Context, dto *clientdto.CreateClientInput) (uuid.UUID, error) {
 	client, err := dto.ToModel()
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	if err := s.rclient.RegisterClient(ctx, client); err != nil {
+	if err := s.rclient.CreateClient(ctx, client); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -114,7 +114,7 @@ func clientsToDtos(clients []cliententity.Client) []clientdto.ClientOutput {
 	return dtos
 }
 
-func (s *Service) RegisterContactToClient(ctx context.Context, dto *contactdto.RegisterContactInput) (uuid.UUID, error) {
+func (s *Service) CreateContactToClient(ctx context.Context, dto *contactdto.CreateContactInput) (uuid.UUID, error) {
 	contact, err := dto.ToModel()
 
 	if err != nil {
@@ -126,7 +126,7 @@ func (s *Service) RegisterContactToClient(ctx context.Context, dto *contactdto.R
 		return uuid.Nil, err
 	}
 
-	if err := s.rcontact.RegisterContact(ctx, contact); err != nil {
+	if err := s.rcontact.CreateContact(ctx, contact); err != nil {
 		return uuid.Nil, err
 	}
 

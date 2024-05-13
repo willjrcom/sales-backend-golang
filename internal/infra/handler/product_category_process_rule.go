@@ -24,7 +24,7 @@ func NewHandlerProcessRuleCategory(processRuleService *productcategoryprocessuse
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterProcessRule)
+		c.Post("/new", h.handlerCreateProcessRule)
 		c.Patch("/update/{id}", h.handlerUpdateProcessRule)
 		c.Delete("/{id}", h.handlerDeleteProcessRule)
 		c.Get("/{id}", h.handlerGetProcessRuleById)
@@ -33,16 +33,16 @@ func NewHandlerProcessRuleCategory(processRuleService *productcategoryprocessuse
 	return handler.NewHandler(path+"/process-rule", c)
 }
 
-func (h *handlerProcessRuleCategoryImpl) handlerRegisterProcessRule(w http.ResponseWriter, r *http.Request) {
+func (h *handlerProcessRuleCategoryImpl) handlerCreateProcessRule(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoProcessRule := &productcategoryprocessdto.RegisterProcessRuleInput{}
+	dtoProcessRule := &productcategoryprocessdto.CreateProcessRuleInput{}
 	if err := jsonpkg.ParseBody(r, dtoProcessRule); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	id, err := h.s.RegisterProcessRule(ctx, dtoProcessRule)
+	id, err := h.s.CreateProcessRule(ctx, dtoProcessRule)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

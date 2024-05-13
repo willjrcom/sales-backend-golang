@@ -5,7 +5,7 @@ import (
 )
 
 type ContactRepository interface {
-	RegisterContact(ctx context.Context, c *Contact) (err error)
+	CreateContact(ctx context.Context, c *Contact) (err error)
 	UpdateContact(ctx context.Context, c *Contact) (err error)
 	DeleteContact(ctx context.Context, id string) (err error)
 	GetContactById(ctx context.Context, id string) (*Contact, error)

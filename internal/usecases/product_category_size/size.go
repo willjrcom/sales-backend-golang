@@ -18,7 +18,7 @@ func NewService(rs productentity.SizeRepository, rc productentity.CategoryReposi
 	return &Service{rs: rs, rc: rc}
 }
 
-func (s *Service) RegisterSize(ctx context.Context, dto *productcategorysizedto.RegisterSizeInput) (uuid.UUID, error) {
+func (s *Service) CreateSize(ctx context.Context, dto *productcategorysizedto.CreateSizeInput) (uuid.UUID, error) {
 	size, err := dto.ToModel()
 
 	if err != nil {
@@ -35,7 +35,7 @@ func (s *Service) RegisterSize(ctx context.Context, dto *productcategorysizedto.
 		return uuid.Nil, err
 	}
 
-	err = s.rs.RegisterSize(ctx, size)
+	err = s.rs.CreateSize(ctx, size)
 
 	if err != nil {
 		return uuid.Nil, err

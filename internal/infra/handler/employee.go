@@ -24,7 +24,7 @@ func NewHandlerEmployee(employeeService *employeeusecases.Service) *handler.Hand
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterEmployee)
+		c.Post("/new", h.handlerCreateEmployee)
 		c.Patch("/update/{id}", h.handlerUpdateEmployee)
 		c.Delete("/{id}", h.handlerDeleteEmployee)
 		c.Get("/{id}", h.handlerGetEmployee)
@@ -34,16 +34,16 @@ func NewHandlerEmployee(employeeService *employeeusecases.Service) *handler.Hand
 	return handler.NewHandler("/employee", c)
 }
 
-func (h *handlerEmployeeImpl) handlerRegisterEmployee(w http.ResponseWriter, r *http.Request) {
+func (h *handlerEmployeeImpl) handlerCreateEmployee(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoEmployee := &employeedto.RegisterEmployeeInput{}
+	dtoEmployee := &employeedto.CreateEmployeeInput{}
 	if err := jsonpkg.ParseBody(r, dtoEmployee); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	id, err := h.s.RegisterEmployee(ctx, dtoEmployee)
+	id, err := h.s.CreateEmployee(ctx, dtoEmployee)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

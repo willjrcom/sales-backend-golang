@@ -13,11 +13,11 @@ var (
 	ErrCategoryRequired = errors.New("category is required")
 )
 
-type RegisterSizeInput struct {
+type CreateSizeInput struct {
 	productentity.SizeCommonAttributes
 }
 
-func (s *RegisterSizeInput) validate() error {
+func (s *CreateSizeInput) validate() error {
 	if s.Name == "" {
 		return ErrNameRequired
 	}
@@ -32,7 +32,7 @@ func (s *RegisterSizeInput) validate() error {
 	return nil
 }
 
-func (s *RegisterSizeInput) ToModel() (*productentity.Size, error) {
+func (s *CreateSizeInput) ToModel() (*productentity.Size, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}

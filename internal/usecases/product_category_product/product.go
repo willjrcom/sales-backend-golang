@@ -25,7 +25,7 @@ func NewService(r productentity.ProductRepository, c productentity.CategoryRepos
 	return &Service{rp: r, rc: c, S3Service: s3}
 }
 
-func (s *Service) RegisterProduct(ctx context.Context, dto *productcategoryproductdto.RegisterProductInput) (uuid.UUID, error) {
+func (s *Service) CreateProduct(ctx context.Context, dto *productcategoryproductdto.CreateProductInput) (uuid.UUID, error) {
 	product, err := dto.ToModel()
 
 	if err != nil {
@@ -46,7 +46,7 @@ func (s *Service) RegisterProduct(ctx context.Context, dto *productcategoryprodu
 		return uuid.Nil, err
 	}
 
-	if err := s.rp.RegisterProduct(ctx, product); err != nil {
+	if err := s.rp.CreateProduct(ctx, product); err != nil {
 		return uuid.Nil, err
 	}
 

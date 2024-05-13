@@ -29,7 +29,7 @@ func (s *Service) CreateTable(ctx context.Context, dto *tabledto.CreateTableInpu
 		return uuid.Nil, err
 	}
 
-	err = s.r.RegisterTable(ctx, table)
+	err = s.r.CreateTable(ctx, table)
 
 	if err != nil {
 		return uuid.Nil, err

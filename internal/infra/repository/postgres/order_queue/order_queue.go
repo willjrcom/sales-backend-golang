@@ -18,7 +18,7 @@ func NewQueueRepositoryBun(db *bun.DB) *QueueRepositoryBun {
 	return &QueueRepositoryBun{db: db}
 }
 
-func (r *QueueRepositoryBun) RegisterQueue(ctx context.Context, s *orderprocessentity.OrderQueue) error {
+func (r *QueueRepositoryBun) CreateQueue(ctx context.Context, s *orderprocessentity.OrderQueue) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

@@ -46,18 +46,18 @@ func TestMain(m *testing.M) {
 	os.Exit(exitCode)
 }
 
-func TestRegisterProduct(t *testing.T) {
-	dtoCategory := &productcategorydto.RegisterCategoryInput{ProductCategoryCommonAttributes: productentity.ProductCategoryCommonAttributes{Name: "pizza"}}
-	categoryId, err := productCategoryService.RegisterCategory(ctx, dtoCategory)
+func TestCreateProduct(t *testing.T) {
+	dtoCategory := &productcategorydto.CreateCategoryInput{ProductCategoryCommonAttributes: productentity.ProductCategoryCommonAttributes{Name: "pizza"}}
+	categoryId, err := productCategoryService.CreateCategory(ctx, dtoCategory)
 	assert.Nil(t, err)
 	assert.NotNil(t, categoryId)
 
-	dtoSize := &productcategorysizedto.RegisterSizeInput{SizeCommonAttributes: productentity.SizeCommonAttributes{Name: "P"}}
-	sizeId, err := sizeService.RegisterSize(ctx, dtoSize)
+	dtoSize := &productcategorysizedto.CreateSizeInput{SizeCommonAttributes: productentity.SizeCommonAttributes{Name: "P"}}
+	sizeId, err := sizeService.CreateSize(ctx, dtoSize)
 	assert.Nil(t, err)
 	assert.NotNil(t, sizeId)
 
-	dto := &productcategoryproductdto.RegisterProductInput{
+	dto := &productcategoryproductdto.CreateProductInput{
 		ProductCommonAttributes: productentity.ProductCommonAttributes{
 			Code:       "123",
 			Name:       "Test Product",
@@ -68,7 +68,7 @@ func TestRegisterProduct(t *testing.T) {
 		},
 	}
 
-	productId, err := productService.RegisterProduct(ctx, dto)
+	productId, err := productService.CreateProduct(ctx, dto)
 	assert.Nil(t, err)
 
 	dtoId := entitydto.NewIdRequest(productId)
@@ -80,9 +80,9 @@ func TestRegisterProduct(t *testing.T) {
 	assert.Equal(t, product.ID, productId)
 }
 
-func TestRegisterProductError(t *testing.T) {
+func TestCreateProductError(t *testing.T) {
 	// Teste 1 - No Code
-	dto := &productcategoryproductdto.RegisterProductInput{
+	dto := &productcategoryproductdto.CreateProductInput{
 		ProductCommonAttributes: productentity.ProductCommonAttributes{
 			Name:       "Test Product",
 			Cost:       90,
@@ -91,12 +91,12 @@ func TestRegisterProductError(t *testing.T) {
 		},
 	}
 
-	_, err := productService.RegisterProduct(ctx, dto)
+	_, err := productService.CreateProduct(ctx, dto)
 	assert.NotNil(t, err)
 	assert.EqualError(t, err, productcategoryproductdto.ErrCodeRequired.Error())
 
 	// Test 2 - No Name
-	dto = &productcategoryproductdto.RegisterProductInput{
+	dto = &productcategoryproductdto.CreateProductInput{
 		ProductCommonAttributes: productentity.ProductCommonAttributes{
 			Code:       "CODE",
 			Cost:       90,
@@ -105,12 +105,12 @@ func TestRegisterProductError(t *testing.T) {
 		},
 	}
 
-	_, err = productService.RegisterProduct(ctx, dto)
+	_, err = productService.CreateProduct(ctx, dto)
 	assert.NotNil(t, err)
 	assert.EqualError(t, err, productcategoryproductdto.ErrNameRequired.Error())
 
 	// Test 3 - Price greater than cost
-	dto = &productcategoryproductdto.RegisterProductInput{
+	dto = &productcategoryproductdto.CreateProductInput{
 		ProductCommonAttributes: productentity.ProductCommonAttributes{
 			Code:       "CODE",
 			Name:       "Test Product",
@@ -120,12 +120,12 @@ func TestRegisterProductError(t *testing.T) {
 		},
 	}
 
-	_, err = productService.RegisterProduct(ctx, dto)
+	_, err = productService.CreateProduct(ctx, dto)
 	assert.NotNil(t, err)
 	assert.EqualError(t, err, productcategoryproductdto.ErrCostGreaterThanPrice.Error())
 
 	// Test 4 - No category
-	dto = &productcategoryproductdto.RegisterProductInput{
+	dto = &productcategoryproductdto.CreateProductInput{
 		ProductCommonAttributes: productentity.ProductCommonAttributes{
 			Code:  "CODE",
 			Name:  "Test Product",
@@ -134,7 +134,7 @@ func TestRegisterProductError(t *testing.T) {
 		},
 	}
 
-	_, err = productService.RegisterProduct(ctx, dto)
+	_, err = productService.CreateProduct(ctx, dto)
 	assert.NotNil(t, err)
 	assert.EqualError(t, err, productcategoryproductdto.ErrCategoryRequired.Error())
 }

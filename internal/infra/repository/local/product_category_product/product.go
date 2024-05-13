@@ -23,7 +23,7 @@ func NewProductRepositoryLocal() *ProductRepositoryLocal {
 	return &ProductRepositoryLocal{products: make(map[uuid.UUID]*productentity.Product)}
 }
 
-func (r *ProductRepositoryLocal) RegisterProduct(_ context.Context, p *productentity.Product) error {
+func (r *ProductRepositoryLocal) CreateProduct(_ context.Context, p *productentity.Product) error {
 
 	if _, ok := r.products[p.ID]; ok {
 

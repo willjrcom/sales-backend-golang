@@ -20,14 +20,14 @@ func NewService(repository employeeentity.Repository, repositoryContact personen
 	return &Service{re: repository, rc: repositoryContact}
 }
 
-func (s *Service) RegisterEmployee(ctx context.Context, dto *employeedto.RegisterEmployeeInput) (uuid.UUID, error) {
+func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.CreateEmployeeInput) (uuid.UUID, error) {
 	employee, err := dto.ToModel()
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	if err := s.re.RegisterEmployee(ctx, employee); err != nil {
+	if err := s.re.CreateEmployee(ctx, employee); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -92,7 +92,7 @@ func employeesToDtos(employees []employeeentity.Employee) []employeedto.Employee
 	return dtos
 }
 
-func (s *Service) RegisterContactToEmployee(ctx context.Context, dto *contactdto.RegisterContactInput) (uuid.UUID, error) {
+func (s *Service) CreateContactToEmployee(ctx context.Context, dto *contactdto.CreateContactInput) (uuid.UUID, error) {
 	contact, err := dto.ToModel()
 
 	if err != nil {
@@ -104,7 +104,7 @@ func (s *Service) RegisterContactToEmployee(ctx context.Context, dto *contactdto
 		return uuid.Nil, err
 	}
 
-	if err := s.rc.RegisterContact(ctx, contact); err != nil {
+	if err := s.rc.CreateContact(ctx, contact); err != nil {
 		return uuid.Nil, err
 	}
 

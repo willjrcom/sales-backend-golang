@@ -24,7 +24,7 @@ func NewHandlerSize(sizeService *productcategorysizeusecases.Service, path strin
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterSize)
+		c.Post("/new", h.handlerCreateSize)
 		c.Patch("/update/{id}", h.handlerUpdateSize)
 		c.Delete("/{id}", h.handlerDeleteSize)
 	})
@@ -32,16 +32,16 @@ func NewHandlerSize(sizeService *productcategorysizeusecases.Service, path strin
 	return handler.NewHandler(path+"/size", c)
 }
 
-func (h *handlerSizeImpl) handlerRegisterSize(w http.ResponseWriter, r *http.Request) {
+func (h *handlerSizeImpl) handlerCreateSize(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoSize := &productcategorysizedto.RegisterSizeInput{}
+	dtoSize := &productcategorysizedto.CreateSizeInput{}
 	if err := jsonpkg.ParseBody(r, dtoSize); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	id, err := h.s.RegisterSize(ctx, dtoSize)
+	id, err := h.s.CreateSize(ctx, dtoSize)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

@@ -17,12 +17,12 @@ var (
 	ErrSizeRequired         = errors.New("size is required")
 )
 
-type RegisterProductInput struct {
+type CreateProductInput struct {
 	productentity.ProductCommonAttributes
 	Image *multipart.File `json:"image"`
 }
 
-func (p *RegisterProductInput) validate() error {
+func (p *CreateProductInput) validate() error {
 	if p.Code == "" {
 		return ErrCodeRequired
 	}
@@ -42,7 +42,7 @@ func (p *RegisterProductInput) validate() error {
 	return nil
 }
 
-func (p *RegisterProductInput) ToModel() (*productentity.Product, error) {
+func (p *CreateProductInput) ToModel() (*productentity.Product, error) {
 	if err := p.validate(); err != nil {
 		return nil, err
 	}

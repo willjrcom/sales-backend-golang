@@ -21,7 +21,7 @@ func NewProcessRuleRepositoryBun(db *bun.DB) *ProcessRuleRepositoryBun {
 	return &ProcessRuleRepositoryBun{db: db}
 }
 
-func (r *ProcessRuleRepositoryBun) RegisterProcessRule(ctx context.Context, s *productentity.ProcessRule) error {
+func (r *ProcessRuleRepositoryBun) CreateProcessRule(ctx context.Context, s *productentity.ProcessRule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

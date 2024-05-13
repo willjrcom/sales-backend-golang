@@ -16,11 +16,11 @@ var (
 	ErrCategoryRequired          = errors.New("category ID is required")
 )
 
-type RegisterProcessRuleInput struct {
+type CreateProcessRuleInput struct {
 	productentity.ProcessRuleCommonAttributes
 }
 
-func (s *RegisterProcessRuleInput) validate() error {
+func (s *CreateProcessRuleInput) validate() error {
 	if s.Name == "" {
 		return ErrNameRequired
 	}
@@ -43,7 +43,7 @@ func (s *RegisterProcessRuleInput) validate() error {
 	return nil
 }
 
-func (s *RegisterProcessRuleInput) ToModel() (*productentity.ProcessRule, error) {
+func (s *CreateProcessRuleInput) ToModel() (*productentity.ProcessRule, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}

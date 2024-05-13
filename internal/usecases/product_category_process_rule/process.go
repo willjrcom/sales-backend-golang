@@ -22,14 +22,14 @@ func NewService(c productentity.ProcessRuleRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) RegisterProcessRule(ctx context.Context, dto *productcategoryprocessdto.RegisterProcessRuleInput) (uuid.UUID, error) {
+func (s *Service) CreateProcessRule(ctx context.Context, dto *productcategoryprocessdto.CreateProcessRuleInput) (uuid.UUID, error) {
 	processRule, err := dto.ToModel()
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	err = s.r.RegisterProcessRule(ctx, processRule)
+	err = s.r.CreateProcessRule(ctx, processRule)
 
 	if err != nil {
 		return uuid.Nil, err

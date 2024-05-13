@@ -28,7 +28,7 @@ func NewHandlerProductCategory(categoryService *productcategoryusecases.Service)
 	route := "/product-category"
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterProductCategory)
+		c.Post("/new", h.handlerCreateProductCategory)
 		c.Patch("/update/{id}", h.handlerUpdateProductCategory)
 		c.Delete("/{id}", h.handlerDeleteProductCategory)
 		c.Get("/{id}", h.handlerGetProductCategory)
@@ -38,16 +38,16 @@ func NewHandlerProductCategory(categoryService *productcategoryusecases.Service)
 	return handler.NewHandler(route, c)
 }
 
-func (h *handlerProductCategoryImpl) handlerRegisterProductCategory(w http.ResponseWriter, r *http.Request) {
+func (h *handlerProductCategoryImpl) handlerCreateProductCategory(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoCategory := &productcategorydto.RegisterCategoryInput{}
+	dtoCategory := &productcategorydto.CreateCategoryInput{}
 	if err := jsonpkg.ParseBody(r, dtoCategory); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	id, err := h.s.RegisterCategory(ctx, dtoCategory)
+	id, err := h.s.CreateCategory(ctx, dtoCategory)
 
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})

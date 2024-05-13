@@ -24,7 +24,7 @@ func NewHandlerQuantity(quantityService *productcategoryquantityusecases.Service
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterQuantity)
+		c.Post("/new", h.handlerCreateQuantity)
 		c.Patch("/update/{id}", h.handlerUpdateQuantity)
 		c.Delete("/{id}", h.handlerDeleteQuantity)
 	})
@@ -32,16 +32,16 @@ func NewHandlerQuantity(quantityService *productcategoryquantityusecases.Service
 	return handler.NewHandler(path+"/quantity", c)
 }
 
-func (h *handlerQuantityImpl) handlerRegisterQuantity(w http.ResponseWriter, r *http.Request) {
+func (h *handlerQuantityImpl) handlerCreateQuantity(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoQuantity := &productcategoryquantitydto.RegisterQuantityInput{}
+	dtoQuantity := &productcategoryquantitydto.CreateQuantityInput{}
 	if err := jsonpkg.ParseBody(r, dtoQuantity); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	id, err := h.s.RegisterQuantity(ctx, dtoQuantity)
+	id, err := h.s.CreateQuantity(ctx, dtoQuantity)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

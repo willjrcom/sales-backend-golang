@@ -20,7 +20,7 @@ func NewProductCategoryRepositoryBun(db *bun.DB) *ProductCategoryRepositoryBun {
 	return &ProductCategoryRepositoryBun{db: db}
 }
 
-func (r *ProductCategoryRepositoryBun) RegisterCategory(ctx context.Context, cp *productentity.ProductCategory) error {
+func (r *ProductCategoryRepositoryBun) CreateCategory(ctx context.Context, cp *productentity.ProductCategory) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

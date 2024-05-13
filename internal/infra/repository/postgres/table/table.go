@@ -18,7 +18,7 @@ func NewTableRepositoryBun(db *bun.DB) *TableRepositoryBun {
 	return &TableRepositoryBun{db: db}
 }
 
-func (r *TableRepositoryBun) RegisterTable(ctx context.Context, s *tableentity.Table) error {
+func (r *TableRepositoryBun) CreateTable(ctx context.Context, s *tableentity.Table) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

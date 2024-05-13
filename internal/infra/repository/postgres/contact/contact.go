@@ -18,7 +18,7 @@ func NewContactRepositoryBun(ctx context.Context, db *bun.DB) *ContactRepository
 	return &ContactRepositoryBun{db: db}
 }
 
-func (r *ContactRepositoryBun) RegisterContact(ctx context.Context, c *personentity.Contact) error {
+func (r *ContactRepositoryBun) CreateContact(ctx context.Context, c *personentity.Contact) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

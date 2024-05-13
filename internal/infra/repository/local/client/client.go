@@ -13,7 +13,7 @@ func NewClientRepositoryLocal() *ClientRepositoryLocal {
 	return &ClientRepositoryLocal{}
 }
 
-func (r *ClientRepositoryLocal) RegisterClient(ctx context.Context, p *cliententity.Client) error {
+func (r *ClientRepositoryLocal) CreateClient(ctx context.Context, p *cliententity.Client) error {
 	return nil
 }
 

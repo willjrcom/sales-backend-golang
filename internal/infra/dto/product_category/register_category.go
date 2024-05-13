@@ -10,11 +10,11 @@ var (
 	ErrNameIsEmpty = errors.New("name is empty")
 )
 
-type RegisterCategoryInput struct {
+type CreateCategoryInput struct {
 	productentity.ProductCategoryCommonAttributes
 }
 
-func (c *RegisterCategoryInput) validate() error {
+func (c *CreateCategoryInput) validate() error {
 	if c.Name == "" {
 		return ErrNameIsEmpty
 	}
@@ -22,7 +22,7 @@ func (c *RegisterCategoryInput) validate() error {
 	return nil
 }
 
-func (c *RegisterCategoryInput) ToModel() (*productentity.ProductCategory, error) {
+func (c *CreateCategoryInput) ToModel() (*productentity.ProductCategory, error) {
 	if err := c.validate(); err != nil {
 		return nil, err
 	}

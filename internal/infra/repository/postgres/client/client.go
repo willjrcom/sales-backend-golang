@@ -21,7 +21,7 @@ func NewClientRepositoryBun(db *bun.DB) *ClientRepositoryBun {
 	return &ClientRepositoryBun{db: db}
 }
 
-func (r *ClientRepositoryBun) RegisterClient(ctx context.Context, c *cliententity.Client) error {
+func (r *ClientRepositoryBun) CreateClient(ctx context.Context, c *cliententity.Client) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -35,17 +35,17 @@ func (r *ClientRepositoryBun) RegisterClient(ctx context.Context, c *cliententit
 		return err
 	}
 
-	// Register client
+	// Create client
 	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
 
-	// Register contact
+	// Create contact
 	if _, err := tx.NewInsert().Model(c.Contact).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
 
-	// Register addresse
+	// Create addresse
 	if _, err := tx.NewInsert().Model(c.Address).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
@@ -80,7 +80,7 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.
 			return rollback(&tx, err)
 		}
 
-		// Register contact
+		// Create contact
 		if _, err := tx.NewInsert().Model(c.Contact).Exec(ctx); err != nil {
 			return rollback(&tx, err)
 		}
@@ -91,7 +91,7 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.
 			return rollback(&tx, err)
 		}
 
-		// Register addresse
+		// Create addresse
 		if _, err := tx.NewInsert().Model(c.Address).Exec(ctx); err != nil {
 			return rollback(&tx, err)
 		}

@@ -18,7 +18,7 @@ func NewProductRepositoryBun(db *bun.DB) *ProductRepositoryBun {
 	return &ProductRepositoryBun{db: db}
 }
 
-func (r *ProductRepositoryBun) RegisterProduct(ctx context.Context, p *productentity.Product) error {
+func (r *ProductRepositoryBun) CreateProduct(ctx context.Context, p *productentity.Product) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

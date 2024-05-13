@@ -29,7 +29,7 @@ func (s *Service) StartQueue(ctx context.Context, dto *orderqueuedto.StartQueueI
 		return uuid.Nil, err
 	}
 
-	if err := s.r.RegisterQueue(ctx, queue); err != nil {
+	if err := s.r.CreateQueue(ctx, queue); err != nil {
 		return uuid.Nil, err
 	}
 

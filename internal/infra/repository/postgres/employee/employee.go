@@ -20,7 +20,7 @@ func NewEmployeeRepositoryBun(db *bun.DB) *EmployeeRepositoryBun {
 	return &EmployeeRepositoryBun{db: db}
 }
 
-func (r *EmployeeRepositoryBun) RegisterEmployee(ctx context.Context, c *employeeentity.Employee) error {
+func (r *EmployeeRepositoryBun) CreateEmployee(ctx context.Context, c *employeeentity.Employee) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -34,7 +34,7 @@ func (r *EmployeeRepositoryBun) RegisterEmployee(ctx context.Context, c *employe
 		return err
 	}
 
-	// Register employee
+	// Create employee
 	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
 		return rollback(&tx, err)
 	}
@@ -44,7 +44,7 @@ func (r *EmployeeRepositoryBun) RegisterEmployee(ctx context.Context, c *employe
 			return rollback(&tx, err)
 		}
 
-		// Register contact
+		// Create contact
 		if _, err := tx.NewInsert().Model(c.Contact).Exec(ctx); err != nil {
 			return rollback(&tx, err)
 		}
@@ -55,7 +55,7 @@ func (r *EmployeeRepositoryBun) RegisterEmployee(ctx context.Context, c *employe
 			return rollback(&tx, err)
 		}
 
-		// Register addresse
+		// Create addresse
 		if _, err := tx.NewInsert().Model(c.Address).Exec(ctx); err != nil {
 			return rollback(&tx, err)
 		}
@@ -99,7 +99,7 @@ func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeee
 			return rollback(&tx, err)
 		}
 
-		// Register contact
+		// Create contact
 		if _, err := tx.NewInsert().Model(p.Contact).Exec(ctx); err != nil {
 			return rollback(&tx, err)
 		}
@@ -110,7 +110,7 @@ func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeee
 			return rollback(&tx, err)
 		}
 
-		// Register addresse
+		// Create addresse
 		if _, err := tx.NewInsert().Model(p.Address).Exec(ctx); err != nil {
 			return rollback(&tx, err)
 		}

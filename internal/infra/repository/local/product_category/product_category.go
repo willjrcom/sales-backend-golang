@@ -21,7 +21,7 @@ func NewCategoryRepositoryLocal() *CategoryRepositoryLocal {
 	return &CategoryRepositoryLocal{productCategories: make(map[uuid.UUID]*productentity.ProductCategory)}
 }
 
-func (r *CategoryRepositoryLocal) RegisterCategory(_ context.Context, p *productentity.ProductCategory) error {
+func (r *CategoryRepositoryLocal) CreateCategory(_ context.Context, p *productentity.ProductCategory) error {
 	if _, ok := r.productCategories[p.ID]; ok {
 
 		return errProductCategoryAlreadyExists

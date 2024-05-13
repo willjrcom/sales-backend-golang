@@ -15,11 +15,11 @@ var (
 	ErrStateRequired        = errors.New("state is required")
 )
 
-type RegisterAddressInput struct {
+type CreateAddressInput struct {
 	addressentity.PatchAddress
 }
 
-func (a *RegisterAddressInput) validate() error {
+func (a *CreateAddressInput) validate() error {
 	if a.Street == nil {
 		return ErrStreetRequired
 	}
@@ -38,7 +38,7 @@ func (a *RegisterAddressInput) validate() error {
 	return nil
 }
 
-func (a *RegisterAddressInput) ToModel() (*addressentity.Address, error) {
+func (a *CreateAddressInput) ToModel() (*addressentity.Address, error) {
 	if err := a.validate(); err != nil {
 		return nil, err
 	}

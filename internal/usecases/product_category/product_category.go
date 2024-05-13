@@ -22,7 +22,7 @@ func NewService(c productentity.CategoryRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) RegisterCategory(ctx context.Context, dto *productcategorydto.RegisterCategoryInput) (uuid.UUID, error) {
+func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.CreateCategoryInput) (uuid.UUID, error) {
 	category, err := dto.ToModel()
 
 	if err != nil {
@@ -33,7 +33,7 @@ func (s *Service) RegisterCategory(ctx context.Context, dto *productcategorydto.
 		return uuid.Nil, errors.New("category name already exists")
 	}
 
-	err = s.r.RegisterCategory(ctx, category)
+	err = s.r.CreateCategory(ctx, category)
 
 	if err != nil {
 		return uuid.Nil, err

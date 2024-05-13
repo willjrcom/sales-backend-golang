@@ -29,7 +29,7 @@ type OrderDeliveryRepository interface {
 }
 
 type DeliveryDriverRepository interface {
-	RegisterDeliveryDriver(ctx context.Context, DeliveryDriver *DeliveryDriver) error
+	CreateDeliveryDriver(ctx context.Context, DeliveryDriver *DeliveryDriver) error
 	UpdateDeliveryDriver(ctx context.Context, DeliveryDriver *DeliveryDriver) error
 	DeleteDeliveryDriver(ctx context.Context, id string) error
 	GetDeliveryDriverById(ctx context.Context, id string) (*DeliveryDriver, error)

@@ -24,7 +24,7 @@ func NewHandlerDeliveryDriver(sizeService *deliverydriverusecases.Service) *hand
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterDeliveryDriver)
+		c.Post("/new", h.handlerCreateDeliveryDriver)
 		c.Patch("/update/{id}", h.handlerUpdateDeliveryDriver)
 		c.Delete("/{id}", h.handlerDeleteDeliveryDriver)
 		c.Get("/{id}", h.handlerGetDeliveryDriver)
@@ -34,16 +34,16 @@ func NewHandlerDeliveryDriver(sizeService *deliverydriverusecases.Service) *hand
 	return handler.NewHandler("/delivery-driver", c)
 }
 
-func (h *handlerDeliveryDriverImpl) handlerRegisterDeliveryDriver(w http.ResponseWriter, r *http.Request) {
+func (h *handlerDeliveryDriverImpl) handlerCreateDeliveryDriver(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoDeliveryDriver := &deliverydriverdto.RegisterDeliveryDriverInput{}
+	dtoDeliveryDriver := &deliverydriverdto.CreateDeliveryDriverInput{}
 	if err := jsonpkg.ParseBody(r, dtoDeliveryDriver); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	id, err := h.s.RegisterDeliveryDriver(ctx, dtoDeliveryDriver)
+	id, err := h.s.CreateDeliveryDriver(ctx, dtoDeliveryDriver)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

@@ -18,7 +18,7 @@ func NewService(rq productentity.QuantityRepository, rc productentity.CategoryRe
 	return &Service{rq: rq, rc: rc}
 }
 
-func (s *Service) RegisterQuantity(ctx context.Context, dto *productcategoryquantitydto.RegisterQuantityInput) (uuid.UUID, error) {
+func (s *Service) CreateQuantity(ctx context.Context, dto *productcategoryquantitydto.CreateQuantityInput) (uuid.UUID, error) {
 	quantity, err := dto.ToModel()
 
 	if err != nil {
@@ -35,7 +35,7 @@ func (s *Service) RegisterQuantity(ctx context.Context, dto *productcategoryquan
 		return uuid.Nil, err
 	}
 
-	if err = s.rq.RegisterQuantity(ctx, quantity); err != nil {
+	if err = s.rq.CreateQuantity(ctx, quantity); err != nil {
 		return uuid.Nil, err
 	}
 

@@ -24,7 +24,7 @@ func NewHandlerOrderTable(orderService *ordertableusecases.Service) *handler.Han
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterOrderTable)
+		c.Post("/new", h.handlerCreateOrderTable)
 		c.Post("/update/change-table/{id}", h.handlerChangeTable)
 		c.Post("/update/close/{id}", h.handlerCloseOrderTable)
 		c.Delete("/{id}", h.handlerDeleteOrderTableById)
@@ -35,7 +35,7 @@ func NewHandlerOrderTable(orderService *ordertableusecases.Service) *handler.Han
 	return handler.NewHandler("/order-table", c)
 }
 
-func (h *handlerOrderTableImpl) handlerRegisterOrderTable(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderTableImpl) handlerCreateOrderTable(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	dtoTable := &ordertabledto.CreateOrderTableInput{}
 	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {

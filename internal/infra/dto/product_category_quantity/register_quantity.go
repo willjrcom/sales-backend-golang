@@ -13,11 +13,11 @@ var (
 	ErrCategoryRequired = errors.New("category is required")
 )
 
-type RegisterQuantityInput struct {
+type CreateQuantityInput struct {
 	productentity.QuantityCommonAttributes
 }
 
-func (s *RegisterQuantityInput) validate() error {
+func (s *CreateQuantityInput) validate() error {
 	if s.Quantity <= 0 {
 		return ErrQuantityRequired
 	}
@@ -28,7 +28,7 @@ func (s *RegisterQuantityInput) validate() error {
 	return nil
 }
 
-func (s *RegisterQuantityInput) ToModel() (*productentity.Quantity, error) {
+func (s *CreateQuantityInput) ToModel() (*productentity.Quantity, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}
