@@ -25,7 +25,7 @@ func NewHandlerProductCategory(categoryService *productcategoryusecases.Service)
 		s: categoryService,
 	}
 
-	route := "/category-product"
+	route := "/product-category"
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerRegisterProductCategory)
