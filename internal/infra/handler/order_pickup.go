@@ -7,22 +7,22 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	pickuporderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/pickup_order"
-	pickuporderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/pickup_order"
+	orderpickupdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_pickup"
+	orderpickupusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_pickup"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
-type handlerPickupOrderImpl struct {
-	pickuporderusecases.IService
+type handlerOrderPickupImpl struct {
+	orderpickupusecases.IService
 }
 
-func NewHandlerPickupOrder(orderService pickuporderusecases.IService) *handler.Handler {
+func NewHandlerOrderPickup(orderService orderpickupusecases.IService) *handler.Handler {
 	c := chi.NewRouter()
 
-	h := &handlerPickupOrderImpl{orderService}
+	h := &handlerOrderPickupImpl{orderService}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/new", h.handlerRegisterPickupOrder)
+		c.Post("/new", h.handlerRegisterOrderPickup)
 		c.Get("/{id}", h.handlerGetPickupById)
 		c.Get("/all", h.handlerGetAllPickups)
 		c.Post("/update/pend/{id}", h.handlerPendingOrder)
@@ -32,16 +32,16 @@ func NewHandlerPickupOrder(orderService pickuporderusecases.IService) *handler.H
 	return handler.NewHandler("/pickup-order", c)
 }
 
-func (h *handlerPickupOrderImpl) handlerRegisterPickupOrder(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderPickupImpl) handlerRegisterOrderPickup(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoPickup := &pickuporderdto.CreatePickupOrderInput{}
+	dtoPickup := &orderpickupdto.CreateOrderPickupInput{}
 	if err := jsonpkg.ParseBody(r, dtoPickup); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
 	}
 
-	id, err := h.IService.CreatePickupOrder(ctx, dtoPickup)
+	id, err := h.IService.CreateOrderPickup(ctx, dtoPickup)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
@@ -50,7 +50,7 @@ func (h *handlerPickupOrderImpl) handlerRegisterPickupOrder(w http.ResponseWrite
 	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
-func (h *handlerPickupOrderImpl) handlerGetPickupById(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderPickupImpl) handlerGetPickupById(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -71,7 +71,7 @@ func (h *handlerPickupOrderImpl) handlerGetPickupById(w http.ResponseWriter, r *
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: Pickup})
 }
 
-func (h *handlerPickupOrderImpl) handlerGetAllPickups(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderPickupImpl) handlerGetAllPickups(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	orders, err := h.IService.GetAllPickups(ctx)
@@ -83,7 +83,7 @@ func (h *handlerPickupOrderImpl) handlerGetAllPickups(w http.ResponseWriter, r *
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
 }
 
-func (h *handlerPickupOrderImpl) handlerPendingOrder(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderPickupImpl) handlerPendingOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -103,7 +103,7 @@ func (h *handlerPickupOrderImpl) handlerPendingOrder(w http.ResponseWriter, r *h
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerPickupOrderImpl) handlerReadyOrder(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderPickupImpl) handlerReadyOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")

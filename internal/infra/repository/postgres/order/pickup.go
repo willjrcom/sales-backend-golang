@@ -9,16 +9,16 @@ import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
-type PickupOrderRepositoryBun struct {
+type OrderPickupRepositoryBun struct {
 	mu sync.Mutex
 	db *bun.DB
 }
 
-func NewPickupOrderRepositoryBun(db *bun.DB) *PickupOrderRepositoryBun {
-	return &PickupOrderRepositoryBun{db: db}
+func NewOrderPickupRepositoryBun(db *bun.DB) *OrderPickupRepositoryBun {
+	return &OrderPickupRepositoryBun{db: db}
 }
 
-func (r *PickupOrderRepositoryBun) CreatePickupOrder(ctx context.Context, pickupOrder *orderentity.PickupOrder) error {
+func (r *OrderPickupRepositoryBun) CreateOrderPickup(ctx context.Context, orderPickup *orderentity.OrderPickup) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -26,14 +26,14 @@ func (r *PickupOrderRepositoryBun) CreatePickupOrder(ctx context.Context, pickup
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(pickupOrder).Exec(ctx); err != nil {
+	if _, err := r.db.NewInsert().Model(orderPickup).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *PickupOrderRepositoryBun) UpdatePickupOrder(ctx context.Context, pickupOrder *orderentity.PickupOrder) error {
+func (r *OrderPickupRepositoryBun) UpdateOrderPickup(ctx context.Context, orderPickup *orderentity.OrderPickup) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -41,14 +41,14 @@ func (r *PickupOrderRepositoryBun) UpdatePickupOrder(ctx context.Context, pickup
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(pickupOrder).WherePK().Where("id = ?", pickupOrder.ID).Exec(ctx); err != nil {
+	if _, err := r.db.NewUpdate().Model(orderPickup).WherePK().Where("id = ?", orderPickup.ID).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *PickupOrderRepositoryBun) DeletePickupOrder(ctx context.Context, id string) error {
+func (r *OrderPickupRepositoryBun) DeleteOrderPickup(ctx context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -56,15 +56,15 @@ func (r *PickupOrderRepositoryBun) DeletePickupOrder(ctx context.Context, id str
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&orderentity.PickupOrder{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&orderentity.OrderPickup{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *PickupOrderRepositoryBun) GetAllPickups(ctx context.Context) ([]orderentity.PickupOrder, error) {
-	pickups := []orderentity.PickupOrder{}
+func (r *OrderPickupRepositoryBun) GetAllPickups(ctx context.Context) ([]orderentity.OrderPickup, error) {
+	pickups := []orderentity.OrderPickup{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -80,8 +80,8 @@ func (r *PickupOrderRepositoryBun) GetAllPickups(ctx context.Context) ([]orderen
 	return pickups, nil
 }
 
-func (r *PickupOrderRepositoryBun) GetPickupById(ctx context.Context, id string) (*orderentity.PickupOrder, error) {
-	pickupOrder := &orderentity.PickupOrder{}
+func (r *OrderPickupRepositoryBun) GetPickupById(ctx context.Context, id string) (*orderentity.OrderPickup, error) {
+	orderPickup := &orderentity.OrderPickup{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -90,9 +90,9 @@ func (r *PickupOrderRepositoryBun) GetPickupById(ctx context.Context, id string)
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(pickupOrder).Where("id = ?", id).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(orderPickup).Where("id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
-	return pickupOrder, nil
+	return orderPickup, nil
 }

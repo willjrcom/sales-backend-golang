@@ -1,4 +1,4 @@
-package pickuporderdto
+package orderpickupdto
 
 import "github.com/google/uuid"
 

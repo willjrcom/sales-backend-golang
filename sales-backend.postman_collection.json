@@ -2910,7 +2910,7 @@
 					]
 				},
 				{
-					"name": "pickup order",
+					"name": "order pickup",
 					"item": [
 						{
 							"name": "status",
@@ -3022,7 +3022,7 @@
 												}
 											],
 											"cookie": [],
-											"body": "{\n    \"message\": \"pickup order already pickedup\"\n}"
+											"body": "{\n    \"message\": \"order pickup already pickedup\"\n}"
 										}
 									]
 								},
@@ -3133,7 +3133,7 @@
 												}
 											],
 											"cookie": [],
-											"body": "{\n    \"message\": \"pickup order already pickedup\"\n}"
+											"body": "{\n    \"message\": \"order pickup already pickedup\"\n}"
 										}
 									]
 								}

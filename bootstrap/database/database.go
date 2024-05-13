@@ -246,7 +246,7 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*itementity.Item)(nil))
 	db.RegisterModel((*groupitementity.GroupItem)(nil))
 
-	db.RegisterModel((*orderentity.PickupOrder)(nil))
+	db.RegisterModel((*orderentity.OrderPickup)(nil))
 	db.RegisterModel((*orderentity.OrderDelivery)(nil))
 	db.RegisterModel((*orderentity.OrderTable)(nil))
 	db.RegisterModel((*orderentity.PaymentOrder)(nil))
@@ -363,7 +363,7 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.PickupOrder)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.OrderPickup)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}

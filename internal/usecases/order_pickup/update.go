@@ -1,4 +1,4 @@
-package pickuporderusecases
+package orderpickupusecases
 
 import (
 	"context"
@@ -7,17 +7,17 @@ import (
 )
 
 func (s *Service) PendingOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
-	pickupOrder, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
+	orderPickup, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if err := pickupOrder.Pend(); err != nil {
+	if err := orderPickup.Pend(); err != nil {
 		return err
 	}
 
-	if err = s.rp.UpdatePickupOrder(ctx, pickupOrder); err != nil {
+	if err = s.rp.UpdateOrderPickup(ctx, orderPickup); err != nil {
 		return err
 	}
 
@@ -25,17 +25,17 @@ func (s *Service) PendingOrder(ctx context.Context, dtoID *entitydto.IdRequest) 
 }
 
 func (s *Service) ReadyOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
-	pickupOrder, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
+	orderPickup, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if err := pickupOrder.Ready(); err != nil {
+	if err := orderPickup.Ready(); err != nil {
 		return err
 	}
 
-	if err = s.rp.UpdatePickupOrder(ctx, pickupOrder); err != nil {
+	if err = s.rp.UpdateOrderPickup(ctx, orderPickup); err != nil {
 		return err
 	}
 

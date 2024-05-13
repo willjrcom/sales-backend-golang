@@ -55,7 +55,7 @@ type OrderDetail struct {
 type OrderType struct {
 	Delivery *OrderDelivery `bun:"rel:has-one,join:id=order_id" json:"delivery,omitempty"`
 	Table    *OrderTable    `bun:"rel:has-one,join:id=order_id" json:"table,omitempty"`
-	Pickup   *PickupOrder   `bun:"rel:has-one,join:id=order_id" json:"pickup,omitempty"`
+	Pickup   *OrderPickup   `bun:"rel:has-one,join:id=order_id" json:"pickup,omitempty"`
 }
 
 type ScheduledOrder struct {

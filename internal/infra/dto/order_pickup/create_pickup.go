@@ -1,4 +1,4 @@
-package pickuporderdto
+package orderpickupdto
 
 import (
 	"errors"
@@ -10,11 +10,11 @@ var (
 	ErrNameRequired = errors.New("name is required")
 )
 
-type CreatePickupOrderInput struct {
+type CreateOrderPickupInput struct {
 	Name string `json:"name"`
 }
 
-func (o *CreatePickupOrderInput) validate() error {
+func (o *CreateOrderPickupInput) validate() error {
 	if o.Name == "" {
 		return ErrNameRequired
 	}
@@ -22,10 +22,10 @@ func (o *CreatePickupOrderInput) validate() error {
 	return nil
 }
 
-func (o *CreatePickupOrderInput) ToModel() (*orderentity.PickupOrder, error) {
+func (o *CreateOrderPickupInput) ToModel() (*orderentity.OrderPickup, error) {
 	if err := o.validate(); err != nil {
 		return nil, err
 	}
 
-	return orderentity.NewPickupOrder(o.Name), nil
+	return orderentity.NewOrderPickup(o.Name), nil
 }
