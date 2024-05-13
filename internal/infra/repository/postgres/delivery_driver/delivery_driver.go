@@ -73,7 +73,7 @@ func (r *DeliveryDriverRepositoryBun) GetDeliveryDriverById(ctx context.Context,
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(deliveryDriver).Where("id = ?", id).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(deliveryDriver).Where("driver.id = ?", id).Relation("Employee").Relation("OrderDeliveries").Scan(ctx); err != nil {
 		return nil, err
 	}
 

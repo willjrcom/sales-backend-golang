@@ -9,14 +9,14 @@ import (
 
 type DeliveryDriver struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:delivery_drivers"`
+	bun.BaseModel `bun:"table:delivery_drivers,alias:driver"`
 	DeliveryDriverCommonAttributes
 }
 
 type DeliveryDriverCommonAttributes struct {
-	EmployeeID      uuid.UUID                `bun:"column:employee_id,type:uuid,notnull" json:"employee_id"`
+	EmployeeID      uuid.UUID                `bun:"column:employee_id,type:uuid,notnull,unique" json:"employee_id"`
 	Employee        *employeeentity.Employee `bun:"rel:belongs-to" json:"employee,omitempty"`
-	OrderDeliveries []OrderDelivery          `bun:"rel:has-many,join:id=driver_id" json:"order_deliveries,omitempty"`
+	OrderDeliveries []OrderDelivery          `bun:"rel:has-many,join:employee_id=driver_id" json:"order_deliveries,omitempty"`
 }
 
 type PatchDeliveryDriver struct {

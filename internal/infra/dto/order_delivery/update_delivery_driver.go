@@ -12,11 +12,11 @@ var (
 )
 
 type UpdateDriverOrder struct {
-	DriverID *uuid.UUID `json:"driver_id"`
+	DriverID uuid.UUID `json:"driver_id"`
 }
 
 func (u *UpdateDriverOrder) validate() error {
-	if u.DriverID == nil {
+	if u.DriverID == uuid.Nil {
 		return ErrInvalidDriverID
 	}
 	return nil

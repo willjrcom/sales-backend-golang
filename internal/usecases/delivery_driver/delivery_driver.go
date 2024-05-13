@@ -69,7 +69,9 @@ func (s *Service) GetDeliveryDriverByID(ctx context.Context, dto *entitydto.IdRe
 		return nil, err
 	}
 
-	return &deliverydriverdto.DeliveryDriverOutput{DeliveryDriverCommonAttributes: deliveryDriver.DeliveryDriverCommonAttributes}, nil
+	deliveryDriverOutput := &deliverydriverdto.DeliveryDriverOutput{}
+	deliveryDriverOutput.FromModel(deliveryDriver)
+	return deliveryDriverOutput, nil
 }
 
 func (s *Service) GetAllDeliveryDrivers(ctx context.Context) ([]deliverydriverdto.DeliveryDriverOutput, error) {
@@ -80,7 +82,9 @@ func (s *Service) GetAllDeliveryDrivers(ctx context.Context) ([]deliverydriverdt
 
 	deliveryDriversDto := []deliverydriverdto.DeliveryDriverOutput{}
 	for _, deliveryDriver := range deliveryDrivers {
-		deliveryDriversDto = append(deliveryDriversDto, deliverydriverdto.DeliveryDriverOutput{DeliveryDriverCommonAttributes: deliveryDriver.DeliveryDriverCommonAttributes})
+		deliveryDriverOutput := &deliverydriverdto.DeliveryDriverOutput{}
+		deliveryDriverOutput.FromModel(&deliveryDriver)
+		deliveryDriversDto = append(deliveryDriversDto, *deliveryDriverOutput)
 	}
 
 	return deliveryDriversDto, nil

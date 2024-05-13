@@ -46,7 +46,7 @@ func (s *Service) ShipOrderDelivery(ctx context.Context, dtoID *entitydto.IdRequ
 		return err
 	}
 
-	if err := orderDelivery.Ship(*orderDelivery.DriverID); err != nil {
+	if err := orderDelivery.Ship(orderDelivery.DriverID); err != nil {
 		return err
 	}
 
