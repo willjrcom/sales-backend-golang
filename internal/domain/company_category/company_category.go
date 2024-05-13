@@ -16,8 +16,8 @@ type CompanyCategory struct {
 type CompanyCategoryCommonAttributes struct {
 	Name                       string                          `bun:"name,unique,notnull" json:"name"`
 	ImagePath                  string                          `bun:"image_path" json:"image_path"`
-	CompanyCategorySponsor     []sponsorentity.Sponsor         `bun:"m2m:company_category_to_sponsor,join:CategoryCompany=Sponsor" json:"company_category_to_sponsor,omitempty"`
-	CompanyCategoryAdvertising []advertisingentity.Advertising `bun:"m2m:company_category_to_advertising,join:CategoryCompany=Sponsor" json:"company_category_to_advertising,omitempty"`
+	CompanyCategorySponsor     []sponsorentity.Sponsor         `bun:"m2m:company_category_to_sponsor,join:CompanyCategory=Sponsor" json:"company_category_to_sponsor,omitempty"`
+	CompanyCategoryAdvertising []advertisingentity.Advertising `bun:"m2m:company_category_to_advertising,join:CompanyCategory=Sponsor" json:"company_category_to_advertising,omitempty"`
 }
 
 type PatchCategory struct {

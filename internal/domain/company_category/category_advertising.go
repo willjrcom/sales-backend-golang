@@ -8,8 +8,8 @@ import (
 
 type CategoryToAdvertising struct {
 	bun.BaseModel     `bun:"table:category_to_advertising"`
-	CategoryCompanyID uuid.UUID                      `bun:"type:uuid,pk"`
-	CategoryCompany   *CompanyCategory               `bun:"rel:belongs-to,join:category_company_id=id"`
+	CompanyCategoryID uuid.UUID                      `bun:"type:uuid,pk"`
+	CompanyCategory   *CompanyCategory               `bun:"rel:belongs-to,join:company_category_id=id"`
 	AdvertisingID     uuid.UUID                      `bun:"type:uuid,pk"`
 	Advertising       *advertisingentity.Advertising `bun:"rel:belongs-to,join:advertising_id=id"`
 }
