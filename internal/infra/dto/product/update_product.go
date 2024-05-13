@@ -29,11 +29,14 @@ func (p *UpdateProductInput) UpdateModel(product *productentity.Product) (err er
 	if p.Name != nil {
 		product.Name = *p.Name
 	}
+	if p.Flavors != nil {
+		product.Flavors = p.Flavors
+	}
+	if p.ImagePath != nil {
+		product.ImagePath = p.ImagePath
+	}
 	if p.Description != nil {
 		product.Description = *p.Description
-	}
-	if p.SizeID != nil {
-		product.SizeID = *p.SizeID
 	}
 	if p.Price != nil {
 		product.Price = *p.Price
@@ -41,11 +44,14 @@ func (p *UpdateProductInput) UpdateModel(product *productentity.Product) (err er
 	if p.Cost != nil {
 		product.Cost = *p.Cost
 	}
+	if p.IsAvailable != nil {
+		product.IsAvailable = *p.IsAvailable
+	}
 	if p.CategoryID != nil {
 		product.Category.ID = *p.CategoryID
 	}
-	if p.IsAvailable != nil {
-		product.IsAvailable = *p.IsAvailable
+	if p.SizeID != nil {
+		product.SizeID = *p.SizeID
 	}
 
 	if err = p.Validate(product); err != nil {
