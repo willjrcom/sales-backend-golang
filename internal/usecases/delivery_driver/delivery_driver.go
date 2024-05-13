@@ -1,0 +1,87 @@
+package deliverydriverusecases
+
+import (
+	"context"
+
+	"github.com/google/uuid"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	deliverydriverdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/delivery_driver"
+	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+)
+
+type Service struct {
+	r orderentity.DeliveryDriverRepository
+}
+
+func NewService(r orderentity.DeliveryDriverRepository) *Service {
+	return &Service{r: r}
+}
+
+func (s *Service) RegisterDeliveryDriver(ctx context.Context, dto *deliverydriverdto.RegisterDeliveryDriverInput) (uuid.UUID, error) {
+	size, err := dto.ToModel()
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	err = s.r.RegisterDeliveryDriver(ctx, size)
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return size.ID, nil
+}
+
+func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoId *entitydto.IdRequest, dto *deliverydriverdto.UpdateDeliveryDriverInput) error {
+	size, err := s.r.GetDeliveryDriverById(ctx, dtoId.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	if err = dto.UpdateModel(size); err != nil {
+		return err
+	}
+
+	if err = s.r.UpdateDeliveryDriver(ctx, size); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) DeleteDeliveryDriver(ctx context.Context, dto *entitydto.IdRequest) error {
+	if _, err := s.r.GetDeliveryDriverById(ctx, dto.ID.String()); err != nil {
+		return err
+	}
+
+	if err := s.r.DeleteDeliveryDriver(ctx, dto.ID.String()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) GetDeliveryDriverByID(ctx context.Context, dto *entitydto.IdRequest) (*deliverydriverdto.DeliveryDriverOutput, error) {
+	deliveryDriver, err := s.r.GetDeliveryDriverById(ctx, dto.ID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	return &deliverydriverdto.DeliveryDriverOutput{DeliveryDriverCommonAttributes: deliveryDriver.DeliveryDriverCommonAttributes}, nil
+}
+
+func (s *Service) GetAllDeliveryDrivers(ctx context.Context) ([]deliverydriverdto.DeliveryDriverOutput, error) {
+	deliveryDrivers, err := s.r.GetAllDeliveryDrivers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	deliveryDriversDto := []deliverydriverdto.DeliveryDriverOutput{}
+	for _, deliveryDriver := range deliveryDrivers {
+		deliveryDriversDto = append(deliveryDriversDto, deliverydriverdto.DeliveryDriverOutput{DeliveryDriverCommonAttributes: deliveryDriver.DeliveryDriverCommonAttributes})
+	}
+
+	return deliveryDriversDto, nil
+}
