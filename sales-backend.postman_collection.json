@@ -1,13 +1,13 @@
 {
 	"info": {
-		"_postman_id": "dc075aac-521a-4107-a582-68fcd4cafaf1",
+		"_postman_id": "d1e1dd2a-dba5-4f9a-b585-b777cd408f15",
 		"name": "sales-backend",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "28610432"
 	},
 	"item": [
 		{
-			"name": "category product",
+			"name": "product category",
 			"item": [
 				{
 					"name": "product",
@@ -46,7 +46,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"code\": \"b13\", // UNIQUE\n    \"name\": \"Pizza Frango com catupiry\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 10.0, // Must be lower than or equal price\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
+									"raw": "// NEED LOGIN\n{\n    \"code\": \"b13\", // UNIQUE\n    \"name\": \"Pizza Frango com catupiry\",\n    \"flavors\": [\"presunto\", \"calabresa\", \"frango\"],\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 10.0, // Must be lower than or equal price\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -348,15 +348,6 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n{}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": "{{server}}/product/code/{{product_code}}"
 									},
 									"status": "OK",
@@ -789,7 +780,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"name\": \"M\",\n    \"active\": \"false\",\n    \"category_id\": \"{{category_product_id}}\"\n}",
+											"raw": "// NEED LOGIN\n{\n    \"name\": \"M\",\n    \"active\": false,\n    \"category_id\": \"{{category_product_id}}\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -829,7 +820,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"name\": \"P\",\n    \"active\": \"false\",\n    \"category_id\": \"{{category_product_id}}\"\n}",
+											"raw": "// NEED LOGIN\n{\n    \"name\": \"P\",\n    \"active\": false,\n    \"category_id\": \"{{category_product_id}}\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -871,7 +862,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"name\": \"M\",\n    \"active\": \"true\"\n}",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"P\",\n    \"active\": true\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -888,7 +879,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"name\": \"M\",\n    \"active\": \"true\"\n}",
+											"raw": "// NEED LOGIN\n{\n    \"name\": \"M\",\n    \"active\": true\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -2424,7 +2415,7 @@
 					]
 				},
 				{
-					"name": "delivery order",
+					"name": "order delivery",
 					"item": [
 						{
 							"name": "status",
@@ -3012,7 +3003,7 @@
 					]
 				},
 				{
-					"name": "pickup order",
+					"name": "order pickup",
 					"item": [
 						{
 							"name": "status",
@@ -3356,15 +3347,6 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\n{}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": "{{server}}/order-pickup/all"
 									},
 									"status": "OK",
@@ -3396,7 +3378,7 @@
 					]
 				},
 				{
-					"name": "table order",
+					"name": "order table",
 					"item": [
 						{
 							"name": "create",
@@ -3659,15 +3641,6 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n{}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": "{{server}}/order-table/{{table_order_id}}"
 									},
 									"status": "OK",
@@ -3721,15 +3694,6 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n{}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": "{{server}}/order-table/all"
 									},
 									"status": "OK",
@@ -4554,15 +4518,6 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n{}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": "{{server}}/group-item/get/{{group_item_id}}"
 									},
 									"status": "OK",
@@ -5164,15 +5119,6 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n{}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": "{{server}}/order-process/all"
 									},
 									"status": "OK",
@@ -5378,15 +5324,6 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n{}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": "{{server}}/order-queue/{{queue_id}}"
 									},
 									"status": "OK",
@@ -5440,15 +5377,6 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n{}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": "{{server}}/order-queue/by-group-item/{{group_item_id}}"
 									},
 									"status": "OK",
@@ -5502,15 +5430,6 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n{}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": "{{server}}/order-queue/all"
 									},
 									"status": "OK",
