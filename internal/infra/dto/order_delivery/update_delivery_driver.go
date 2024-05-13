@@ -1,4 +1,4 @@
-package deliveryorderdto
+package orderdeliverydto
 
 import (
 	"errors"
@@ -22,7 +22,7 @@ func (u *UpdateDriverOrder) validate() error {
 	return nil
 }
 
-func (u *UpdateDriverOrder) UpdateModel(model *orderentity.DeliveryOrder) error {
+func (u *UpdateDriverOrder) UpdateModel(model *orderentity.OrderDelivery) error {
 	if err := u.validate(); err != nil {
 		return err
 	}

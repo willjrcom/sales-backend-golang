@@ -1,12 +1,12 @@
-package deliveryorderusecases
+package orderdeliveryusecases
 
 import (
 	"context"
 
-	deliveryorderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/delivery"
+	orderdeliverydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_delivery"
 )
 
-func (s *Service) CreateDeliveryOrder(ctx context.Context, dto *deliveryorderdto.CreateDeliveryOrderInput) (*deliveryorderdto.DeliveryIDAndOrderIDOutput, error) {
+func (s *Service) CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto.CreateOrderDeliveryInput) (*orderdeliverydto.DeliveryIDAndOrderIDOutput, error) {
 	delivery, err := dto.ToModel()
 
 	if err != nil {
@@ -30,9 +30,9 @@ func (s *Service) CreateDeliveryOrder(ctx context.Context, dto *deliveryorderdto
 	delivery.AddressID = client.Address.ID
 	delivery.DeliveryTax = &client.Address.DeliveryTax
 
-	if err = s.rdo.CreateDeliveryOrder(ctx, delivery); err != nil {
+	if err = s.rdo.CreateOrderDelivery(ctx, delivery); err != nil {
 		return nil, err
 	}
 
-	return deliveryorderdto.NewOutput(delivery.ID, orderID), nil
+	return orderdeliverydto.NewOutput(delivery.ID, orderID), nil
 }

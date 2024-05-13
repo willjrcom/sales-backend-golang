@@ -1,4 +1,4 @@
-package deliveryorderdto
+package orderdeliverydto
 
 import (
 	"errors"
@@ -13,18 +13,18 @@ var (
 	ErrAddressNotInClient = errors.New("address not in client")
 )
 
-type UpdateDeliveryOrder struct {
+type UpdateOrderDelivery struct {
 	AddressID *uuid.UUID `json:"address_id"`
 }
 
-func (u *UpdateDeliveryOrder) validate() error {
+func (u *UpdateOrderDelivery) validate() error {
 	if u.AddressID == nil {
 		return ErrInvalidAddressID
 	}
 	return nil
 }
 
-func (u *UpdateDeliveryOrder) UpdateModel(model *orderentity.DeliveryOrder, address *addressentity.Address) error {
+func (u *UpdateOrderDelivery) UpdateModel(model *orderentity.OrderDelivery, address *addressentity.Address) error {
 	if err := u.validate(); err != nil {
 		return err
 	}

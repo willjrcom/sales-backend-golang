@@ -20,12 +20,12 @@ type PickupOrderRepository interface {
 	GetAllPickups(ctx context.Context) ([]PickupOrder, error)
 }
 
-type DeliveryOrderRepository interface {
-	CreateDeliveryOrder(ctx context.Context, delivery *DeliveryOrder) error
-	UpdateDeliveryOrder(ctx context.Context, delivery *DeliveryOrder) error
-	DeleteDeliveryOrder(ctx context.Context, id string) error
-	GetDeliveryById(ctx context.Context, id string) (*DeliveryOrder, error)
-	GetAllDeliveries(ctx context.Context) ([]DeliveryOrder, error)
+type OrderDeliveryRepository interface {
+	CreateOrderDelivery(ctx context.Context, delivery *OrderDelivery) error
+	UpdateOrderDelivery(ctx context.Context, delivery *OrderDelivery) error
+	DeleteOrderDelivery(ctx context.Context, id string) error
+	GetDeliveryById(ctx context.Context, id string) (*OrderDelivery, error)
+	GetAllDeliveries(ctx context.Context) ([]OrderDelivery, error)
 }
 
 type TableOrderRepository interface {

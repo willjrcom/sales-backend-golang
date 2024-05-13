@@ -63,11 +63,11 @@ func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context) ([]orderentity.
 	return orders, nil
 }
 
-func (r *OrderRepositoryLocal) UpdateDeliveryOrder(ctx context.Context, delivery *orderentity.DeliveryOrder) error {
+func (r *OrderRepositoryLocal) UpdateOrderDelivery(ctx context.Context, delivery *orderentity.OrderDelivery) error {
 	return nil
 }
 
-func (r *OrderRepositoryLocal) DeleteDeliveryOrder(ctx context.Context, id string) error {
+func (r *OrderRepositoryLocal) DeleteOrderDelivery(ctx context.Context, id string) error {
 	return nil
 }
 

@@ -35,11 +35,11 @@ import (
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 	contactusecases "github.com/willjrcom/sales-backend-go/internal/usecases/contact"
-	deliveryorderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/delivery_order"
 	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	itemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/item"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
+	orderdeliveryusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_delivery"
 	orderprocessusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_process"
 	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 	pickuporderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/pickup_order"
@@ -88,7 +88,7 @@ var HttpserverCmd = &cobra.Command{
 		addressRepo := addressrepositorybun.NewAddressRepositoryBun(db)
 
 		orderRepo := orderrepositorybun.NewOrderRepositoryBun(db)
-		deliveryOrderRepo := orderrepositorybun.NewDeliveryOrderRepositoryBun(db)
+		orderDeliveryRepo := orderrepositorybun.NewOrderDeliveryRepositoryBun(db)
 		pickupOrderRepo := orderrepositorybun.NewPickupOrderRepositoryBun(db)
 		tableOrderRepo := orderrepositorybun.NewTableOrderRepositoryBun(db)
 		itemRepo := itemrepositorybun.NewItemRepositoryBun(db)
@@ -124,7 +124,7 @@ var HttpserverCmd = &cobra.Command{
 
 		orderService := orderusecases.NewService(orderRepo, shiftRepo, groupItemService, processService, processRuleRepo, orderQueueService)
 		pickupOrderService := pickuporderusecases.NewService(pickupOrderRepo, orderService)
-		deliveryOrderService := deliveryorderusecases.NewService(deliveryOrderRepo, addressRepo, clientRepo, orderRepo, employeeRepo, orderService)
+		orderDeliveryService := orderdeliveryusecases.NewService(orderDeliveryRepo, addressRepo, clientRepo, orderRepo, employeeRepo, orderService)
 		tableOrderService := tableorderusecases.NewService(tableOrderRepo, tableRepo, orderService)
 
 		tableService := tableusecases.NewService(tableRepo)
@@ -147,7 +147,7 @@ var HttpserverCmd = &cobra.Command{
 
 		orderHandler := handlerimpl.NewHandlerOrder(orderService)
 		pickupOrderHandler := handlerimpl.NewHandlerPickupOrder(pickupOrderService)
-		deliveryOrderHandler := handlerimpl.NewHandlerDeliveryOrder(deliveryOrderService)
+		orderDeliveryHandler := handlerimpl.NewHandlerOrderDelivery(orderDeliveryService)
 		tableOrderHandler := handlerimpl.NewHandlerTableOrder(tableOrderService)
 		processHandler := handlerimpl.NewHandlerProcess(processService)
 		orderQueueHandler := handlerimpl.NewHandlerQueue(orderQueueService)
@@ -172,7 +172,7 @@ var HttpserverCmd = &cobra.Command{
 
 		server.AddHandler(orderHandler)
 		server.AddHandler(pickupOrderHandler)
-		server.AddHandler(deliveryOrderHandler)
+		server.AddHandler(orderDeliveryHandler)
 		server.AddHandler(tableOrderHandler)
 		server.AddHandler(processHandler)
 		server.AddHandler(orderQueueHandler)

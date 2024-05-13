@@ -1,4 +1,4 @@
-package deliveryorderdto
+package orderdeliverydto
 
 import (
 	"errors"
@@ -13,11 +13,11 @@ var (
 	ErrAddressIDRequired = errors.New("address id is required")
 )
 
-type CreateDeliveryOrderInput struct {
+type CreateOrderDeliveryInput struct {
 	ClientID uuid.UUID `json:"client_id"`
 }
 
-func (o *CreateDeliveryOrderInput) validate() error {
+func (o *CreateOrderDeliveryInput) validate() error {
 	if o.ClientID == uuid.Nil {
 		return ErrClientIDRequired
 	}
@@ -25,10 +25,10 @@ func (o *CreateDeliveryOrderInput) validate() error {
 	return nil
 }
 
-func (o *CreateDeliveryOrderInput) ToModel() (*orderentity.DeliveryOrder, error) {
+func (o *CreateOrderDeliveryInput) ToModel() (*orderentity.OrderDelivery, error) {
 	if err := o.validate(); err != nil {
 		return nil, err
 	}
 
-	return orderentity.NewDeliveryOrder(o.ClientID), nil
+	return orderentity.NewOrderDelivery(o.ClientID), nil
 }

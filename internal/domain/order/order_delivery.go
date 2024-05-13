@@ -13,20 +13,20 @@ import (
 )
 
 var (
-	ErrDeliveryOrderMustBeStaging = errors.New("delivery order must be staging")
-	ErrDeliveryOrderMustBePending = errors.New("delivery order must be pending")
-	ErrDeliveryOrderMustBeShipped = errors.New("delivery order must be shipped")
+	ErrOrderDeliveryMustBeStaging = errors.New("order delivery must be staging")
+	ErrOrderDeliveryMustBePending = errors.New("order delivery must be pending")
+	ErrOrderDeliveryMustBeShipped = errors.New("order delivery must be shipped")
 )
 
-type DeliveryOrder struct {
+type OrderDelivery struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:delivery_orders,alias:delivery"`
+	bun.BaseModel `bun:"table:order_deliveries,alias:delivery"`
 	DeliveryTimeLogs
-	DeliveryOrderCommonAttributes
+	OrderDeliveryCommonAttributes
 }
 
-type DeliveryOrderCommonAttributes struct {
-	Status      StatusDeliveryOrder      `bun:"status" json:"status"`
+type OrderDeliveryCommonAttributes struct {
+	Status      StatusOrderDelivery      `bun:"status" json:"status"`
 	DeliveryTax *float64                 `bun:"delivery_tax" json:"delivery_tax"`
 	ClientID    uuid.UUID                `bun:"column:client_id,type:uuid,notnull" json:"client_id"`
 	Client      *cliententity.Client     `bun:"rel:belongs-to" json:"client"`
@@ -43,47 +43,47 @@ type DeliveryTimeLogs struct {
 	DeliveredAt *time.Time `bun:"delivered_at" json:"delivered_at,omitempty"`
 }
 
-func NewDeliveryOrder(clientID uuid.UUID) *DeliveryOrder {
-	orderCommonAttributes := DeliveryOrderCommonAttributes{
+func NewOrderDelivery(clientID uuid.UUID) *OrderDelivery {
+	orderCommonAttributes := OrderDeliveryCommonAttributes{
 		ClientID: clientID,
-		Status:   DeliveryOrderStatusStaging,
+		Status:   OrderDeliveryStatusStaging,
 	}
 
-	return &DeliveryOrder{
+	return &OrderDelivery{
 		Entity:                        entity.NewEntity(),
-		DeliveryOrderCommonAttributes: orderCommonAttributes,
+		OrderDeliveryCommonAttributes: orderCommonAttributes,
 	}
 }
 
-func (d *DeliveryOrder) Pend() error {
-	if d.Status != DeliveryOrderStatusStaging {
-		return ErrDeliveryOrderMustBeStaging
+func (d *OrderDelivery) Pend() error {
+	if d.Status != OrderDeliveryStatusStaging {
+		return ErrOrderDeliveryMustBeStaging
 	}
 	d.PendingAt = &time.Time{}
 	*d.PendingAt = time.Now()
-	d.Status = DeliveryOrderStatusPending
+	d.Status = OrderDeliveryStatusPending
 	return nil
 }
 
-func (d *DeliveryOrder) Ship(driverID uuid.UUID) error {
-	if d.Status != DeliveryOrderStatusPending {
-		return ErrDeliveryOrderMustBePending
+func (d *OrderDelivery) Ship(driverID uuid.UUID) error {
+	if d.Status != OrderDeliveryStatusPending {
+		return ErrOrderDeliveryMustBePending
 	}
 
 	*d.DriverID = driverID
 	d.ShippedAt = &time.Time{}
 	*d.ShippedAt = time.Now()
-	d.Status = DeliveryOrderStatusShipped
+	d.Status = OrderDeliveryStatusShipped
 	return nil
 }
 
-func (d *DeliveryOrder) Delivery() error {
-	if d.Status != DeliveryOrderStatusShipped {
-		return ErrDeliveryOrderMustBeShipped
+func (d *OrderDelivery) Delivery() error {
+	if d.Status != OrderDeliveryStatusShipped {
+		return ErrOrderDeliveryMustBeShipped
 	}
 
 	d.DeliveredAt = &time.Time{}
 	*d.DeliveredAt = time.Now()
-	d.Status = DeliveryOrderStatusDelivered
+	d.Status = OrderDeliveryStatusDelivered
 	return nil
 }

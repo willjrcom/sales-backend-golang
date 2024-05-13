@@ -1,4 +1,4 @@
-package deliveryorderdto
+package orderdeliverydto
 
 import "github.com/google/uuid"
 

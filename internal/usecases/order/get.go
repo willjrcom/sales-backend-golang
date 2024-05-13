@@ -24,6 +24,6 @@ func (s *Service) GetAllOrders(ctx context.Context) ([]orderentity.Order, error)
 	}
 }
 
-func (s *Service) GetAllDeliveryOrderStatus(ctx context.Context) ([]orderentity.Order, error) {
+func (s *Service) GetAllOrderDeliveryStatus(ctx context.Context) ([]orderentity.Order, error) {
 	return []orderentity.Order{}, nil
 }

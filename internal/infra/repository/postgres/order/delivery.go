@@ -9,16 +9,16 @@ import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
-type DeliveryOrderRepositoryBun struct {
+type OrderDeliveryRepositoryBun struct {
 	mu sync.Mutex
 	db *bun.DB
 }
 
-func NewDeliveryOrderRepositoryBun(db *bun.DB) *DeliveryOrderRepositoryBun {
-	return &DeliveryOrderRepositoryBun{db: db}
+func NewOrderDeliveryRepositoryBun(db *bun.DB) *OrderDeliveryRepositoryBun {
+	return &OrderDeliveryRepositoryBun{db: db}
 }
 
-func (r *DeliveryOrderRepositoryBun) CreateDeliveryOrder(ctx context.Context, delivery *orderentity.DeliveryOrder) error {
+func (r *OrderDeliveryRepositoryBun) CreateOrderDelivery(ctx context.Context, delivery *orderentity.OrderDelivery) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -33,7 +33,7 @@ func (r *DeliveryOrderRepositoryBun) CreateDeliveryOrder(ctx context.Context, de
 	return nil
 }
 
-func (r *DeliveryOrderRepositoryBun) UpdateDeliveryOrder(ctx context.Context, delivery *orderentity.DeliveryOrder) error {
+func (r *OrderDeliveryRepositoryBun) UpdateOrderDelivery(ctx context.Context, delivery *orderentity.OrderDelivery) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -48,7 +48,7 @@ func (r *DeliveryOrderRepositoryBun) UpdateDeliveryOrder(ctx context.Context, de
 	return nil
 }
 
-func (r *DeliveryOrderRepositoryBun) DeleteDeliveryOrder(ctx context.Context, id string) error {
+func (r *OrderDeliveryRepositoryBun) DeleteOrderDelivery(ctx context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -56,15 +56,15 @@ func (r *DeliveryOrderRepositoryBun) DeleteDeliveryOrder(ctx context.Context, id
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&orderentity.DeliveryOrder{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&orderentity.OrderDelivery{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *DeliveryOrderRepositoryBun) GetAllDeliveries(ctx context.Context) ([]orderentity.DeliveryOrder, error) {
-	deliveries := []orderentity.DeliveryOrder{}
+func (r *OrderDeliveryRepositoryBun) GetAllDeliveries(ctx context.Context) ([]orderentity.OrderDelivery, error) {
+	deliveries := []orderentity.OrderDelivery{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -80,8 +80,8 @@ func (r *DeliveryOrderRepositoryBun) GetAllDeliveries(ctx context.Context) ([]or
 	return deliveries, nil
 }
 
-func (r *DeliveryOrderRepositoryBun) GetDeliveryById(ctx context.Context, id string) (*orderentity.DeliveryOrder, error) {
-	delivery := &orderentity.DeliveryOrder{}
+func (r *OrderDeliveryRepositoryBun) GetDeliveryById(ctx context.Context, id string) (*orderentity.OrderDelivery, error) {
+	delivery := &orderentity.OrderDelivery{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
