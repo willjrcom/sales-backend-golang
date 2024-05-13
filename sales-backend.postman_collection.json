@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "f9967316-c7c9-4d7a-9316-21b29849c65c",
+		"_postman_id": "dc075aac-521a-4107-a582-68fcd4cafaf1",
 		"name": "sales-backend",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "28610432"
@@ -3661,7 +3661,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n",
+											"raw": "// NEED LOGIN\r\n{}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -3723,7 +3723,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n",
+											"raw": "// NEED LOGIN\r\n{}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -4556,7 +4556,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n",
+											"raw": "// NEED LOGIN\r\n{}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -7413,7 +7413,7 @@
 									"    return",
 									"}",
 									"",
-									"let accessToken = response.data.accessToken",
+									"let accessToken = response.data.access_token",
 									"",
 									"if (accessToken != null) {",
 									"    pm.collectionVariables.set(\"access-token\", accessToken)",
@@ -7480,7 +7480,7 @@
 								}
 							],
 							"cookie": [],
-							"body": "{\n    \"data\": {\n        \"accessToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdmFpbGFibGVfdXNlcl9zY2hlbWFzIjpbImxvamFfaWJpdGlfXzJxaXRpdHNyIl0sImV4cCI6MTcxMzk4NjI3Nywic3ViIjoiYWNjZXNzLXRva2VuIiwidXNlcl9lbWFpbCI6IndpbGxpYW1qdW5pb3I2OUBnbWFpbC5jb20iLCJ1c2VyX2lkIjoiNTQ0MjNlZDAtZTc5Mi00MzFhLTg3ZjQtYmIyMmNjODI3MWQ5In0._VJbvBqsUCJZwf1EUeM7gV2-xwLb9wzRjNS-U8RuE6k\",\n        \"companies\": [\n            {\n                \"id\": \"b7e5bf15-d59e-44d0-88f8-7af24e6e058a\",\n                \"created_at\": \"2024-02-19T02:59:00.365608Z\",\n                \"updated_at\": \"2024-02-19T02:59:00.365608Z\",\n                \"schema_name\": \"loja_ibiti__2qititsr\",\n                \"business_name\": \"GAZALTECH CONSULTORIA DE TI LTDA\",\n                \"trade_name\": \"ibiti\",\n                \"cnpj\": \"46.607.184/0001-53\",\n                \"email\": \"williamjunior68@gmail.com\",\n                \"contacts\": [\n                    \"(11)96384-9111\",\n                    \"(11)4714-1489\"\n                ]\n            }\n        ]\n    }\n}"
+							"body": "{\n    \"data\": {\n        \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdmFpbGFibGVfdXNlcl9zY2hlbWFzIjpbImxvamFfaWJpdGlfXzJxaXRpdHNyIl0sImV4cCI6MTcxMzk4NjI3Nywic3ViIjoiYWNjZXNzLXRva2VuIiwidXNlcl9lbWFpbCI6IndpbGxpYW1qdW5pb3I2OUBnbWFpbC5jb20iLCJ1c2VyX2lkIjoiNTQ0MjNlZDAtZTc5Mi00MzFhLTg3ZjQtYmIyMmNjODI3MWQ5In0._VJbvBqsUCJZwf1EUeM7gV2-xwLb9wzRjNS-U8RuE6k\",\n        \"companies\": [\n            {\n                \"id\": \"b7e5bf15-d59e-44d0-88f8-7af24e6e058a\",\n                \"created_at\": \"2024-02-19T02:59:00.365608Z\",\n                \"updated_at\": \"2024-02-19T02:59:00.365608Z\",\n                \"schema_name\": \"loja_ibiti__2qititsr\",\n                \"business_name\": \"GAZALTECH CONSULTORIA DE TI LTDA\",\n                \"trade_name\": \"ibiti\",\n                \"cnpj\": \"46.607.184/0001-53\",\n                \"email\": \"williamjunior68@gmail.com\",\n                \"contacts\": [\n                    \"(11)96384-9111\",\n                    \"(11)4714-1489\"\n                ]\n            }\n        ]\n    }\n}"
 						}
 					]
 				},
@@ -7504,6 +7504,9 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "POST",
 						"header": [
 							{
