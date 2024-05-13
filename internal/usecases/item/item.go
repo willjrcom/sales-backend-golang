@@ -30,8 +30,15 @@ type Service struct {
 	rq  productentity.QuantityRepository
 }
 
-func NewService(ri itementity.ItemRepository, rgi groupitementity.GroupItemRepository, ro orderentity.OrderRepository, rp productentity.ProductRepository, rq productentity.QuantityRepository) *Service {
-	return &Service{ri: ri, rgi: rgi, ro: ro, rp: rp, rq: rq}
+func NewService(ri itementity.ItemRepository) *Service {
+	return &Service{ri: ri}
+}
+
+func (s *Service) AddDependencies(rgi groupitementity.GroupItemRepository, ro orderentity.OrderRepository, rp productentity.ProductRepository, rq productentity.QuantityRepository) {
+	s.rgi = rgi
+	s.ro = ro
+	s.rp = rp
+	s.rq = rq
 }
 
 func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInput) (ids *itemdto.ItemIDAndGroupItemOutput, err error) {

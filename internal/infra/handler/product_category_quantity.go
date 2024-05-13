@@ -16,7 +16,7 @@ type handlerQuantityImpl struct {
 	s *productcategoryquantityusecases.Service
 }
 
-func NewHandlerQuantity(quantityService *productcategoryquantityusecases.Service, path string) *handler.Handler {
+func NewHandlerQuantity(quantityService *productcategoryquantityusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerQuantityImpl{
@@ -29,7 +29,7 @@ func NewHandlerQuantity(quantityService *productcategoryquantityusecases.Service
 		c.Delete("/{id}", h.handlerDeleteQuantity)
 	})
 
-	return handler.NewHandler(path+"/quantity", c)
+	return handler.NewHandler("/product-category/quantity", c)
 }
 
 func (h *handlerQuantityImpl) handlerCreateQuantity(w http.ResponseWriter, r *http.Request) {

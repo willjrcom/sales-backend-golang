@@ -17,7 +17,7 @@ type handlerQueueImpl struct {
 	s *orderqueueusecases.Service
 }
 
-func NewHandlerQueue(queueService *orderqueueusecases.Service) *handler.Handler {
+func NewHandlerOrderQueue(queueService *orderqueueusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerQueueImpl{

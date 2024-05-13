@@ -10,10 +10,15 @@ import (
 )
 
 type IService interface {
+	ISetupService
 	ICreateService
 	IGetService
 	IUpdateService
 	IStatusService
+}
+
+type ISetupService interface {
+	AddDependencies(os *orderusecases.Service)
 }
 
 type ICreateService interface {
@@ -40,6 +45,10 @@ type Service struct {
 	os *orderusecases.Service
 }
 
-func NewService(rp orderentity.OrderPickupRepository, os *orderusecases.Service) IService {
-	return &Service{rp: rp, os: os}
+func NewService(rp orderentity.OrderPickupRepository) IService {
+	return &Service{rp: rp}
+}
+
+func (s *Service) AddDependencies(os *orderusecases.Service) {
+	s.os = os
 }

@@ -13,10 +13,14 @@ import (
 )
 
 type IService interface {
+	ISetupService
 	ICreateService
 	IGetService
 	IUpdateService
 	IStatusService
+}
+type ISetupService interface {
+	AddDependencies(ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, re employeeentity.Repository, os *orderusecases.Service)
 }
 
 type ICreateService interface {
@@ -52,6 +56,14 @@ type Service struct {
 	os  *orderusecases.Service
 }
 
-func NewService(rdo orderentity.OrderDeliveryRepository, ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, re employeeentity.Repository, os *orderusecases.Service) IService {
-	return &Service{rdo: rdo, ra: ra, rc: rc, ro: ro, re: re, os: os}
+func NewService(rdo orderentity.OrderDeliveryRepository) IService {
+	return &Service{rdo: rdo}
+}
+
+func (s *Service) AddDependencies(ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, re employeeentity.Repository, os *orderusecases.Service) {
+	s.ra = ra
+	s.rc = rc
+	s.ro = ro
+	s.re = re
+	s.os = os
 }

@@ -19,13 +19,18 @@ var (
 )
 
 type Service struct {
-	ri  itementity.ItemRepository
 	rgi groupitementity.GroupItemRepository
+	ri  itementity.ItemRepository
 	rp  productentity.ProductRepository
 }
 
-func NewService(ri itementity.ItemRepository, rgi groupitementity.GroupItemRepository, rp productentity.ProductRepository) *Service {
-	return &Service{ri: ri, rgi: rgi, rp: rp}
+func NewService(rgi groupitementity.GroupItemRepository) *Service {
+	return &Service{rgi: rgi}
+}
+
+func (s *Service) AddDependencies(ri itementity.ItemRepository, rp productentity.ProductRepository) {
+	s.ri = ri
+	s.rp = rp
 }
 
 func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IdRequest) (groupItem *groupitementity.GroupItem, err error) {

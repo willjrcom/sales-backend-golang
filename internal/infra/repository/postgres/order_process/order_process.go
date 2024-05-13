@@ -16,7 +16,7 @@ type ProcessRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewProcessRepositoryBun(db *bun.DB) *ProcessRepositoryBun {
+func NewOrderProcessRepositoryBun(db *bun.DB) *ProcessRepositoryBun {
 	return &ProcessRepositoryBun{db: db}
 }
 

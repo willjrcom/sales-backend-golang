@@ -16,7 +16,7 @@ type handlerProcessRuleCategoryImpl struct {
 	s *productcategoryprocessusecases.Service
 }
 
-func NewHandlerProcessRuleCategory(processRuleService *productcategoryprocessusecases.Service, path string) *handler.Handler {
+func NewHandlerProcessRuleCategory(processRuleService *productcategoryprocessusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerProcessRuleCategoryImpl{
@@ -30,7 +30,7 @@ func NewHandlerProcessRuleCategory(processRuleService *productcategoryprocessuse
 		c.Get("/{id}", h.handlerGetProcessRuleById)
 	})
 
-	return handler.NewHandler(path+"/process-rule", c)
+	return handler.NewHandler("/product-category/process-rule", c)
 }
 
 func (h *handlerProcessRuleCategoryImpl) handlerCreateProcessRule(w http.ResponseWriter, r *http.Request) {

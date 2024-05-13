@@ -38,8 +38,11 @@ func TestMain(m *testing.M) {
 	s3Service := s3service.NewS3Client()
 
 	// Service
-	productService = NewService(rp, rc, s3Service)
-	sizeService = productcategorysizeusecases.NewService(rs, rc)
+	productService = NewService(rp)
+	sizeService = productcategorysizeusecases.NewService(rs)
+
+	productService.AddDependencies(rc, s3Service)
+	sizeService.AddDependencies(rc)
 
 	exitCode := m.Run()
 

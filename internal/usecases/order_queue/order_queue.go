@@ -14,8 +14,12 @@ type Service struct {
 	rp orderprocessentity.ProcessRepository
 }
 
-func NewService(c orderprocessentity.QueueRepository, rp orderprocessentity.ProcessRepository) *Service {
-	return &Service{r: c, rp: rp}
+func NewService(c orderprocessentity.QueueRepository) *Service {
+	return &Service{r: c}
+}
+
+func (s *Service) AddDependencies(rp orderprocessentity.ProcessRepository) {
+	s.rp = rp
 }
 
 func (s *Service) StartQueue(ctx context.Context, dto *orderqueuedto.StartQueueInput) (uuid.UUID, error) {

@@ -18,8 +18,12 @@ type Service struct {
 	rcontact personentity.ContactRepository
 }
 
-func NewService(rcliente cliententity.Repository, rcontact personentity.ContactRepository) *Service {
-	return &Service{rclient: rcliente, rcontact: rcontact}
+func NewService(rcliente cliententity.Repository) *Service {
+	return &Service{rclient: rcliente}
+}
+
+func (s *Service) AddDependencies(rcontact personentity.ContactRepository) {
+	s.rcontact = rcontact
 }
 
 func (s *Service) CreateClient(ctx context.Context, dto *clientdto.CreateClientInput) (uuid.UUID, error) {

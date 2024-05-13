@@ -16,7 +16,7 @@ type handlerProcessImpl struct {
 	s *orderprocessusecases.Service
 }
 
-func NewHandlerProcess(processService *orderprocessusecases.Service) *handler.Handler {
+func NewHandlerOrderProcess(processService *orderprocessusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerProcessImpl{

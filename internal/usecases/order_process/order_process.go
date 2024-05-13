@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -17,14 +16,19 @@ import (
 
 type Service struct {
 	r    orderprocessentity.ProcessRepository
-	ri   groupitementity.GroupItemRepository
 	rpr  productentity.ProcessRuleRepository
 	sq   *orderqueueusecases.Service
 	rsgi *groupitemusecases.Service
 }
 
-func NewService(c orderprocessentity.ProcessRepository, ri groupitementity.GroupItemRepository, sq *orderqueueusecases.Service, rpr productentity.ProcessRuleRepository, rsgi *groupitemusecases.Service) *Service {
-	return &Service{r: c, ri: ri, sq: sq, rpr: rpr, rsgi: rsgi}
+func NewService(c orderprocessentity.ProcessRepository) *Service {
+	return &Service{r: c}
+}
+
+func (s *Service) AddDependencies(sq *orderqueueusecases.Service, rpr productentity.ProcessRuleRepository, rsgi *groupitemusecases.Service) {
+	s.rpr = rpr
+	s.sq = sq
+	s.rsgi = rsgi
 }
 
 func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.CreateProcessInput) (uuid.UUID, error) {
@@ -33,7 +37,8 @@ func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.Create
 		return uuid.Nil, err
 	}
 
-	groupItem, err := s.ri.GetGroupByID(ctx, process.GroupItemID.String(), true)
+	idRequest := entitydto.NewIdRequest(process.GroupItemID)
+	groupItem, err := s.rsgi.GetGroupByID(ctx, idRequest)
 	if err != nil {
 		return uuid.Nil, err
 	}

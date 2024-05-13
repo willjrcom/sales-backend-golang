@@ -18,6 +18,14 @@ type Service struct {
 	rq  *orderqueueusecases.Service
 }
 
-func NewService(ro orderentity.OrderRepository, rs shiftentity.ShiftRepository, rgi *groupitemusecases.Service, rp *orderprocessusecases.Service, rpr productentity.ProcessRuleRepository, rq *orderqueueusecases.Service) *Service {
-	return &Service{ro: ro, rs: rs, rgi: rgi, rp: rp, rpr: rpr, rq: rq}
+func NewService(ro orderentity.OrderRepository) *Service {
+	return &Service{ro: ro}
+}
+
+func (s *Service) AddDependencies(rs shiftentity.ShiftRepository, rgi *groupitemusecases.Service, rp *orderprocessusecases.Service, rpr productentity.ProcessRuleRepository, rq *orderqueueusecases.Service) {
+	s.rs = rs
+	s.rgi = rgi
+	s.rp = rp
+	s.rpr = rpr
+	s.rq = rq
 }

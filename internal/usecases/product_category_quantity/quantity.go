@@ -14,8 +14,12 @@ type Service struct {
 	rc productentity.CategoryRepository
 }
 
-func NewService(rq productentity.QuantityRepository, rc productentity.CategoryRepository) *Service {
-	return &Service{rq: rq, rc: rc}
+func NewService(rq productentity.QuantityRepository) *Service {
+	return &Service{rq: rq}
+}
+
+func (s *Service) AddDependencies(rc productentity.CategoryRepository) {
+	s.rc = rc
 }
 
 func (s *Service) CreateQuantity(ctx context.Context, dto *productcategoryquantitydto.CreateQuantityInput) (uuid.UUID, error) {

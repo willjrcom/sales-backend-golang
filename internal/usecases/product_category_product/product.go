@@ -21,8 +21,13 @@ type Service struct {
 	S3Service *s3service.S3Client
 }
 
-func NewService(r productentity.ProductRepository, c productentity.CategoryRepository, s3 *s3service.S3Client) *Service {
-	return &Service{rp: r, rc: c, S3Service: s3}
+func NewService(rp productentity.ProductRepository) *Service {
+	return &Service{rp: rp}
+}
+
+func (s *Service) AddDependencies(rc productentity.CategoryRepository, s3 *s3service.S3Client) {
+	s.rc = rc
+	s.S3Service = s3
 }
 
 func (s *Service) CreateProduct(ctx context.Context, dto *productcategoryproductdto.CreateProductInput) (uuid.UUID, error) {

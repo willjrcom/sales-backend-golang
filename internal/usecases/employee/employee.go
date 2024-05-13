@@ -16,8 +16,12 @@ type Service struct {
 	rc personentity.ContactRepository
 }
 
-func NewService(repository employeeentity.Repository, repositoryContact personentity.ContactRepository) *Service {
-	return &Service{re: repository, rc: repositoryContact}
+func NewService(repository employeeentity.Repository) *Service {
+	return &Service{re: repository}
+}
+
+func (s *Service) AddDependencies(repositoryContact personentity.ContactRepository) {
+	s.rc = repositoryContact
 }
 
 func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.CreateEmployeeInput) (uuid.UUID, error) {

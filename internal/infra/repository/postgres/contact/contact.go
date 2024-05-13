@@ -14,7 +14,7 @@ type ContactRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewContactRepositoryBun(ctx context.Context, db *bun.DB) *ContactRepositoryBun {
+func NewContactRepositoryBun(db *bun.DB) *ContactRepositoryBun {
 	return &ContactRepositoryBun{db: db}
 }
 

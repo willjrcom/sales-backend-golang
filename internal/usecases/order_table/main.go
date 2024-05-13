@@ -12,6 +12,11 @@ type Service struct {
 	os  *orderusecases.Service
 }
 
-func NewService(rto orderentity.OrderTableRepository, rt tableentity.TableRepository, os *orderusecases.Service) *Service {
-	return &Service{rto: rto, rt: rt, os: os}
+func NewService(rto orderentity.OrderTableRepository) *Service {
+	return &Service{rto: rto}
+}
+
+func (s *Service) AddDependencies(rt tableentity.TableRepository, os *orderusecases.Service) {
+	s.rt = rt
+	s.os = os
 }

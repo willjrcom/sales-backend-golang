@@ -16,7 +16,7 @@ type handlerSizeImpl struct {
 	s *productcategorysizeusecases.Service
 }
 
-func NewHandlerSize(sizeService *productcategorysizeusecases.Service, path string) *handler.Handler {
+func NewHandlerSize(sizeService *productcategorysizeusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerSizeImpl{
@@ -29,7 +29,7 @@ func NewHandlerSize(sizeService *productcategorysizeusecases.Service, path strin
 		c.Delete("/{id}", h.handlerDeleteSize)
 	})
 
-	return handler.NewHandler(path+"/size", c)
+	return handler.NewHandler("/product-category/size", c)
 }
 
 func (h *handlerSizeImpl) handlerCreateSize(w http.ResponseWriter, r *http.Request) {
