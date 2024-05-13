@@ -474,7 +474,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/new"
+								"url": "{{server}}/product-category/new"
 							},
 							"response": [
 								{
@@ -491,7 +491,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/new"
+										"url": "{{server}}/product-category/new"
 									},
 									"status": "Created",
 									"code": 201,
@@ -533,7 +533,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/update/{{category_product_id}}"
+								"url": "{{server}}/product-category/update/{{category_product_id}}"
 							},
 							"response": [
 								{
@@ -550,7 +550,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/update/{{category_product_id}}"
+										"url": "{{server}}/product-category/update/{{category_product_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -592,7 +592,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/{{category_product_id}}"
+								"url": "{{server}}/product-category/{{category_product_id}}"
 							},
 							"response": [
 								{
@@ -609,7 +609,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/{{category_product_id}}"
+										"url": "{{server}}/product-category/{{category_product_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -654,7 +654,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/{{category_product_id}}"
+								"url": "{{server}}/product-category/{{category_product_id}}"
 							},
 							"response": [
 								{
@@ -662,7 +662,7 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"url": "{{server}}/category-product/"
+										"url": "{{server}}/product-category/"
 									},
 									"status": "OK",
 									"code": 200,
@@ -707,7 +707,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/all"
+								"url": "{{server}}/product-category/all"
 							},
 							"response": [
 								{
@@ -715,7 +715,7 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"url": "{{server}}/category-product/all"
+										"url": "{{server}}/product-category/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -779,7 +779,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/size/new"
+								"url": "{{server}}/product-category/size/new"
 							},
 							"response": [
 								{
@@ -796,7 +796,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/size/new"
+										"url": "{{server}}/product-category/size/new"
 									},
 									"status": "Created",
 									"code": 201,
@@ -836,7 +836,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/size/new"
+										"url": "{{server}}/product-category/size/new"
 									},
 									"status": "Internal Server Error",
 									"code": 500,
@@ -878,7 +878,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/size/update/{{size_category_id}}"
+								"url": "{{server}}/product-category/size/update/{{size_category_id}}"
 							},
 							"response": [
 								{
@@ -895,7 +895,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/size/update/{{size_category_id}}"
+										"url": "{{server}}/product-category/size/update/{{size_category_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -937,7 +937,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/size/{{size_category_id}}"
+								"url": "{{server}}/product-category/size/{{size_category_id}}"
 							},
 							"response": [
 								{
@@ -954,7 +954,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/size/{{size_category_id}}"
+										"url": "{{server}}/product-category/size/{{size_category_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -1018,7 +1018,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/process/new"
+								"url": "{{server}}/product-category/process-rule/new"
 							},
 							"response": [
 								{
@@ -1035,7 +1035,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/process/new"
+										"url": "{{server}}/product-category/process-rule/new"
 									},
 									"status": "Created",
 									"code": 201,
@@ -1077,7 +1077,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/process/update/{{process_rule_category_id}}"
+								"url": "{{server}}/product-category/process-rule/update/{{process_rule_category_id}}"
 							},
 							"response": [
 								{
@@ -1094,7 +1094,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/process/update/{{process_rule_category_id}}"
+										"url": "{{server}}/product-category/process-rule/update/{{process_rule_category_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -1136,7 +1136,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/process/{{process_rule_category_id}}"
+								"url": "{{server}}/product-category/process-rule/{{process_rule_category_id}}"
 							},
 							"response": [
 								{
@@ -1153,7 +1153,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/process/{{process_rule_category_id}}"
+										"url": "{{server}}/product-category/process-rule/{{process_rule_category_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -1198,7 +1198,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/process/{{process_rule_category_id}}"
+								"url": "{{server}}/product-category/process-rule/{{process_rule_category_id}}"
 							},
 							"response": [
 								{
@@ -1215,7 +1215,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/process/{{process_rule_category_id}}"
+										"url": "{{server}}/product-category/process-rule/{{process_rule_category_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -1279,7 +1279,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/quantity/new"
+								"url": "{{server}}/product-category/quantity/new"
 							},
 							"response": [
 								{
@@ -1296,7 +1296,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/quantity/new"
+										"url": "{{server}}/product-category/quantity/new"
 									},
 									"status": "Created",
 									"code": 201,
@@ -1338,7 +1338,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/quantity/update/{{quantity_category_id}}"
+								"url": "{{server}}/product-category/quantity/update/{{quantity_category_id}}"
 							},
 							"response": [
 								{
@@ -1355,7 +1355,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/quantity/update/{{quantity_category_id}}"
+										"url": "{{server}}/product-category/quantity/update/{{quantity_category_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -1397,7 +1397,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/category-product/quantity/{{quantity_category_id}}"
+								"url": "{{server}}/product-category/quantity/{{quantity_category_id}}"
 							},
 							"response": [
 								{
@@ -1414,7 +1414,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/category-product/quantity/{{quantity_category_id}}"
+										"url": "{{server}}/product-category/quantity/{{quantity_category_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -1674,6 +1674,46 @@
 											],
 											"cookie": [],
 											"body": "{\n    \"message\": \"order must be pending\"\n}"
+										},
+										{
+											"name": "finish",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "// NEED LOGIN\r\n{}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": "{{server}}/order/finish/{{order_id}}"
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json; charset=utf-8"
+												},
+												{
+													"key": "Vary",
+													"value": "Origin"
+												},
+												{
+													"key": "Date",
+													"value": "Thu, 02 May 2024 12:15:03 GMT"
+												},
+												{
+													"key": "Content-Length",
+													"value": "40"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"message\": \"order paid less than total\"\n}"
 										}
 									]
 								},
@@ -2143,6 +2183,68 @@
 							]
 						},
 						{
+							"name": "delete by id",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/order/{{order_id}}"
+							},
+							"response": [
+								{
+									"name": "get by id",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"url": "{{server}}/order/{{order_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Wed, 24 Apr 2024 21:50:49 GMT"
+										},
+										{
+											"key": "Transfer-Encoding",
+											"value": "chunked"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": {\n        \"id\": \"c6e8cbf3-5dd5-4017-acbc-cfeea793b608\",\n        \"created_at\": \"2024-03-19T20:11:06.297142Z\",\n        \"updated_at\": \"2024-03-19T20:11:06.297142Z\",\n        \"pending_at\": \"2024-03-20T19:15:39.858307Z\",\n        \"finished_at\": \"2024-03-20T19:33:34.662071Z\",\n        \"total_payable\": 270,\n        \"total_paid\": 0,\n        \"total_change\": 0,\n        \"quantity_items\": 2,\n        \"observation\": \"\",\n        \"attendant_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n        \"attendant\": {\n            \"id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"created_at\": \"2024-03-04T02:05:30.377557Z\",\n            \"updated_at\": \"2024-03-04T02:05:30.377557Z\",\n            \"name\": \"William junior 3\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\"\n        },\n        \"shift_id\": \"90be08d2-0676-4bff-8880-94018e883963\",\n        \"order_number\": 4,\n        \"status\": \"Finished\",\n        \"groups\": [\n            {\n                \"id\": \"f9867ba0-ee62-4a44-83bb-244537a2b44f\",\n                \"created_at\": \"2024-03-19T20:24:39.342752Z\",\n                \"updated_at\": \"2024-03-19T20:24:39.342752Z\",\n                \"size\": \"P\",\n                \"status\": \"Pending\",\n                \"total\": 270,\n                \"quantity\": 2,\n                \"need_print\": false,\n                \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n                \"complement_item_id\": \"d1a851b8-e156-4b15-88d6-cb1b775b7bd0\",\n                \"complement_item\": {\n                    \"id\": \"d1a851b8-e156-4b15-88d6-cb1b775b7bd0\",\n                    \"created_at\": \"2024-03-20T18:48:52.526376Z\",\n                    \"updated_at\": \"2024-03-20T18:48:52.526376Z\",\n                    \"pending_at\": \"2024-03-20T19:15:38.223602Z\",\n                    \"name\": \"Borda Catupiry\",\n                    \"status\": \"Pending\",\n                    \"description\": \"\",\n                    \"observation\": \"\",\n                    \"price\": 60,\n                    \"total_price\": 0,\n                    \"size\": \"P\",\n                    \"quantity\": 2,\n                    \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                },\n                \"pending_at\": \"2024-03-20T19:15:39.858307Z\",\n                \"items\": [\n                    {\n                        \"id\": \"fc1f82b6-4b92-4bda-a7a3-0cf4270afe85\",\n                        \"created_at\": \"2024-03-19T20:24:43.712847Z\",\n                        \"updated_at\": \"2024-03-19T20:24:43.712847Z\",\n                        \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                        \"name\": \"Pizza Presunto (P)\",\n                        \"status\": \"Pending\",\n                        \"description\": \"mussarela e tomate\",\n                        \"observation\": \"\",\n                        \"price\": 60,\n                        \"total_price\": 0,\n                        \"size\": \"P\",\n                        \"quantity\": 2,\n                        \"group_item_id\": \"f9867ba0-ee62-4a44-83bb-244537a2b44f\",\n                        \"item_to_additional\": [\n                            {\n                                \"id\": \"30e15ce1-b654-427a-aa9b-c1ffb86fc44c\",\n                                \"created_at\": \"2024-03-20T18:46:11.773341Z\",\n                                \"updated_at\": \"2024-03-20T18:46:11.773341Z\",\n                                \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                                \"name\": \"Borda Catupiry\",\n                                \"status\": \"Pending\",\n                                \"description\": \"\",\n                                \"observation\": \"\",\n                                \"price\": 60,\n                                \"total_price\": 0,\n                                \"size\": \"P\",\n                                \"quantity\": 2,\n                                \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                            },\n                            {\n                                \"id\": \"b0228e78-bfa8-46fb-b00a-560b4cb8b012\",\n                                \"created_at\": \"2024-03-20T19:02:23.845536Z\",\n                                \"updated_at\": \"2024-03-20T19:02:23.845536Z\",\n                                \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                                \"name\": \"Borda Catupiry\",\n                                \"status\": \"Pending\",\n                                \"description\": \"\",\n                                \"observation\": \"\",\n                                \"price\": 90,\n                                \"total_price\": 0,\n                                \"size\": \"P\",\n                                \"quantity\": 3,\n                                \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                            }\n                        ]\n                    }\n                ],\n                \"order_id\": \"c6e8cbf3-5dd5-4017-acbc-cfeea793b608\"\n            }\n        ]\n    }\n}"
+								}
+							]
+						},
+						{
 							"name": "update observation",
 							"request": {
 								"method": "PUT",
@@ -2208,7 +2310,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"total_paid\": 200,\n    \"method\": \"Dinheiro\"\n}",
+									"raw": "// NEED LOGIN\n{\n    \"total_paid\": 35,\n    \"method\": \"Dinheiro\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2353,7 +2455,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/delivery-order/update/pend/{{order_delivery_id}}"
+										"url": "{{server}}/order-delivery/update/pend/{{order_delivery_id}}"
 									},
 									"response": [
 										{
@@ -2370,7 +2472,7 @@
 														}
 													}
 												},
-												"url": "{{server}}/delivery-order/update/pens/{{order_delivery_id}}"
+												"url": "{{server}}/order-delivery/update/pens/{{order_delivery_id}}"
 											},
 											"status": "OK",
 											"code": 200,
@@ -2410,7 +2512,7 @@
 														}
 													}
 												},
-												"url": "{{server}}/delivery-order/update/pend/{{order_delivery_id}}"
+												"url": "{{server}}/order-delivery/update/pend/{{order_delivery_id}}"
 											},
 											"status": "Internal Server Error",
 											"code": 500,
@@ -2464,7 +2566,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/delivery-order/update/ship/{{order_delivery_id}}"
+										"url": "{{server}}/order-delivery/update/ship/{{order_delivery_id}}"
 									},
 									"response": [
 										{
@@ -2481,7 +2583,7 @@
 														}
 													}
 												},
-												"url": "{{server}}/delivery-order/update/launch/{{order_delivery_id}}"
+												"url": "{{server}}/order-delivery/update/launch/{{order_delivery_id}}"
 											},
 											"status": "OK",
 											"code": 200,
@@ -2521,7 +2623,7 @@
 														}
 													}
 												},
-												"url": "{{server}}/delivery-order/update/ship/{{order_delivery_id}}"
+												"url": "{{server}}/order-delivery/update/ship/{{order_delivery_id}}"
 											},
 											"status": "Internal Server Error",
 											"code": 500,
@@ -2550,7 +2652,7 @@
 									]
 								},
 								{
-									"name": "must be shipped",
+									"name": "delivery",
 									"event": [
 										{
 											"listen": "test",
@@ -2575,7 +2677,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/delivery-order/update/delivery/{{order_delivery_id}}"
+										"url": "{{server}}/order-delivery/update/delivery/{{order_delivery_id}}"
 									},
 									"response": [
 										{
@@ -2592,7 +2694,7 @@
 														}
 													}
 												},
-												"url": "{{server}}/delivery-order/update/finish/{{order_delivery_id}}"
+												"url": "{{server}}/order-delivery/update/finish/{{order_delivery_id}}"
 											},
 											"status": "OK",
 											"code": 200,
@@ -2655,7 +2757,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/delivery-order/new"
+								"url": "{{server}}/order-delivery/new"
 							},
 							"response": [
 								{
@@ -2672,7 +2774,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/delivery-order/new"
+										"url": "{{server}}/order-delivery/new"
 									},
 									"status": "Created",
 									"code": 201,
@@ -2726,7 +2828,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/delivery-order/update/driver/{{order_delivery_id}}"
+								"url": "{{server}}/order-delivery/update/driver/{{order_delivery_id}}"
 							},
 							"response": [
 								{
@@ -2743,7 +2845,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/delivery-order/update/driver/{{order_delivery_id}}"
+										"url": "{{server}}/order-delivery/update/driver/{{order_delivery_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -2797,7 +2899,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/delivery-order/update/address/{{order_delivery_id}}"
+								"url": "{{server}}/order-delivery/update/address/{{order_delivery_id}}"
 							},
 							"response": [
 								{
@@ -2814,7 +2916,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/delivery-order/update/address/{{order_delivery_id}}"
+										"url": "{{server}}/order-delivery/update/address/{{order_delivery_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -2871,7 +2973,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/delivery-order/all"
+								"url": "{{server}}/order-delivery/all"
 							},
 							"response": [
 								{
@@ -2879,7 +2981,7 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"url": "{{server}}/delivery-order/all"
+										"url": "{{server}}/order-delivery/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -2910,7 +3012,7 @@
 					]
 				},
 				{
-					"name": "order pickup",
+					"name": "pickup order",
 					"item": [
 						{
 							"name": "status",
@@ -2941,7 +3043,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/pickup-order/update/pend/{{order_pickup_id}}"
+										"url": "{{server}}/order-pickup/update/pend/{{order_pickup_id}}"
 									},
 									"response": [
 										{
@@ -2958,7 +3060,7 @@
 														}
 													}
 												},
-												"url": "{{server}}/pickup-order/update/launch/{{order_pickup_id}}"
+												"url": "{{server}}/order-pickup/update/launch/{{order_pickup_id}}"
 											},
 											"status": "OK",
 											"code": 200,
@@ -2998,7 +3100,7 @@
 														}
 													}
 												},
-												"url": "{{server}}/pickup-order/update/launch/{{order_pickup_id}}"
+												"url": "{{server}}/order-pickup/update/launch/{{order_pickup_id}}"
 											},
 											"status": "Internal Server Error",
 											"code": 500,
@@ -3022,7 +3124,7 @@
 												}
 											],
 											"cookie": [],
-											"body": "{\n    \"message\": \"order pickup already pickedup\"\n}"
+											"body": "{\n    \"message\": \"pickup order already pickedup\"\n}"
 										}
 									]
 								},
@@ -3052,7 +3154,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/pickup-order/update/ready/{{order_pickup_id}}"
+										"url": "{{server}}/order-pickup/update/ready/{{order_pickup_id}}"
 									},
 									"response": [
 										{
@@ -3069,7 +3171,7 @@
 														}
 													}
 												},
-												"url": "{{server}}/pickup-order/update/pickup/{{order_pickup_id}}"
+												"url": "{{server}}/order-pickup/update/pickup/{{order_pickup_id}}"
 											},
 											"status": "OK",
 											"code": 200,
@@ -3109,7 +3211,7 @@
 														}
 													}
 												},
-												"url": "{{server}}/pickup-order/update/pickup/{{order_pickup_id}}"
+												"url": "{{server}}/order-pickup/update/pickup/{{order_pickup_id}}"
 											},
 											"status": "Internal Server Error",
 											"code": 500,
@@ -3133,7 +3235,7 @@
 												}
 											],
 											"cookie": [],
-											"body": "{\n    \"message\": \"order pickup already pickedup\"\n}"
+											"body": "{\n    \"message\": \"pickup order already pickedup\"\n}"
 										}
 									]
 								}
@@ -3172,7 +3274,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/pickup-order/new"
+								"url": "{{server}}/order-pickup/new"
 							},
 							"response": [
 								{
@@ -3189,7 +3291,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/pickup-order/new"
+										"url": "{{server}}/order-pickup/new"
 									},
 									"status": "Created",
 									"code": 201,
@@ -3246,7 +3348,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/pickup-order/all"
+								"url": "{{server}}/order-pickup/all"
 							},
 							"response": [
 								{
@@ -3263,7 +3365,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/pickup-order/all"
+										"url": "{{server}}/order-pickup/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -3322,14 +3424,14 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"name\": \"Will\",\n    \"contact\": \"(11) 96384-9111\",\n    \"waiter_id\": \"{{employee_id}}\",\n    \"order_id\": \"{{order_id}}\",\n    \"table_id\": \"{{table_id}}\"\n\n}",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"Will\",\n    \"contact\": \"(11) 96384-9111\",\n    \"order_id\": \"{{order_id}}\",\n    \"table_id\": \"{{table_id}}\"\n\n}",
 									"options": {
 										"raw": {
 											"language": "json"
 										}
 									}
 								},
-								"url": "{{server}}/table-order/new"
+								"url": "{{server}}/order-table/new"
 							},
 							"response": [
 								{
@@ -3346,7 +3448,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/table-order/new"
+										"url": "{{server}}/order-table/new"
 									},
 									"status": "Created",
 									"code": 201,
@@ -3375,37 +3477,37 @@
 							]
 						},
 						{
-							"name": "delete by id",
+							"name": "change table",
 							"request": {
-								"method": "DELETE",
+								"method": "POST",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
+									"raw": "// NEED LOGIN\r\n{\r\n    \"table_id\": \"{{table_id}}\",\r\n    \"force_update\": true\r\n}",
 									"options": {
 										"raw": {
 											"language": "json"
 										}
 									}
 								},
-								"url": "{{server}}/table-order/{{table_order_id}}"
+								"url": "{{server}}/order-table/update/change-table/{{table_order_id}}"
 							},
 							"response": [
 								{
-									"name": "delete by id",
+									"name": "change table",
 									"originalRequest": {
-										"method": "DELETE",
+										"method": "POST",
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n",
+											"raw": "// NEED LOGIN\r\n{\r\n    \"table_id\": \"{{table_id}}\",\r\n    \"force_update\": true\r\n}",
 											"options": {
 												"raw": {
 													"language": "json"
 												}
 											}
 										},
-										"url": "{{server}}/table-order/{{table_order_id}}"
+										"url": "{{server}}/order-table/update/change-table/{{table_order_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -3421,7 +3523,106 @@
 										},
 										{
 											"key": "Date",
-											"value": "Fri, 26 Apr 2024 20:50:15 GMT"
+											"value": "Thu, 02 May 2024 18:27:01 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "2"
+										}
+									],
+									"cookie": [],
+									"body": "{}"
+								},
+								{
+									"name": "already in this table",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n{\r\n    \"table_id\": \"{{table_id}}\",\r\n    \"force_update\": true\r\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/order-table/update/change-table/{{table_order_id}}"
+									},
+									"status": "Internal Server Error",
+									"code": 500,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Thu, 02 May 2024 18:29:12 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "50"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"message\": \"table order is already in this table\"\n}"
+								}
+							]
+						},
+						{
+							"name": "close",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/order-table/update/close/{{table_order_id}}"
+							},
+							"response": [
+								{
+									"name": "close",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/order-table/update/close/{{table_order_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Thu, 02 May 2024 18:21:16 GMT"
 										},
 										{
 											"key": "Content-Length",
@@ -3443,14 +3644,14 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n",
+									"raw": "// NEED LOGIN\r\n{}",
 									"options": {
 										"raw": {
 											"language": "json"
 										}
 									}
 								},
-								"url": "{{server}}/table-order/{{table_order_id}}"
+								"url": "{{server}}/order-table/{{table_order_id}}"
 							},
 							"response": [
 								{
@@ -3467,7 +3668,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/table-order/{{table_order_id}}"
+										"url": "{{server}}/order-table/{{table_order_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -3512,7 +3713,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/table-order/all"
+								"url": "{{server}}/order-table/all"
 							},
 							"response": [
 								{
@@ -3529,7 +3730,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/table-order/all"
+										"url": "{{server}}/order-table/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -3554,6 +3755,65 @@
 									],
 									"cookie": [],
 									"body": "{\n    \"data\": [\n        {\n            \"id\": \"1d8f8cb1-b320-4025-bc86-95d13dacca48\",\n            \"created_at\": \"2024-04-26T20:49:30.559231Z\",\n            \"updated_at\": \"2024-04-26T20:49:30.559231Z\",\n            \"name\": \"Mesa 1 - Will\",\n            \"contact\": \"(11) 96384-9111\",\n            \"waiter_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"waiter\": {\n                \"id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n                \"created_at\": \"2024-03-04T02:05:30.377557Z\",\n                \"updated_at\": \"2024-03-04T02:05:30.377557Z\",\n                \"name\": \"William junior 3\",\n                \"email\": \"will@gmail.com\",\n                \"cpf\": \"43637799855\"\n            },\n            \"order_id\": \"29675154-88a8-495b-a304-4ab0cba3ba45\",\n            \"table_id\": \"a4969c3e-60f4-467f-8db6-8e2acdf5ee36\"\n        }\n    ]\n}"
+								}
+							]
+						},
+						{
+							"name": "delete by id",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/order-table/{{table_order_id}}"
+							},
+							"response": [
+								{
+									"name": "delete by id",
+									"originalRequest": {
+										"method": "DELETE",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/order-table/{{table_order_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Fri, 26 Apr 2024 20:50:15 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "2"
+										}
+									],
+									"cookie": [],
+									"body": "{}"
 								}
 							]
 						}
@@ -4544,7 +4804,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/process/new"
+								"url": "{{server}}/order-process/new"
 							},
 							"response": [
 								{
@@ -4561,7 +4821,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/process/new"
+										"url": "{{server}}/order-process/new"
 									},
 									"status": "Created",
 									"code": 201,
@@ -4615,7 +4875,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/process/start/{{process_id}}"
+								"url": "{{server}}/order-process/start/{{process_id}}"
 							},
 							"response": [
 								{
@@ -4632,7 +4892,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/process/start/{{process_id}}"
+										"url": "{{server}}/order-process/start/{{process_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -4692,7 +4952,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/process/finish/{{process_id}}"
+								"url": "{{server}}/order-process/finish/{{process_id}}"
 							},
 							"response": [
 								{
@@ -4709,7 +4969,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/process/finish/{{process_id}}"
+										"url": "{{server}}/order-process/finish/{{process_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -4763,7 +5023,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/process/pause/{{process_id}}"
+								"url": "{{server}}/order-process/pause/{{process_id}}"
 							},
 							"response": [
 								{
@@ -4780,7 +5040,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/process/pause/{{process_id}}"
+										"url": "{{server}}/order-process/pause/{{process_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -4834,7 +5094,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/process/continue/{{process_id}}"
+								"url": "{{server}}/order-process/continue/{{process_id}}"
 							},
 							"response": [
 								{
@@ -4851,7 +5111,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/process/continue/{{process_id}}"
+										"url": "{{server}}/order-process/continue/{{process_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -4896,7 +5156,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/process/all"
+								"url": "{{server}}/order-process/all"
 							},
 							"response": [
 								{
@@ -4913,7 +5173,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/process/all"
+										"url": "{{server}}/order-process/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -4977,7 +5237,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/queue/start"
+								"url": "{{server}}/order-queue/start"
 							},
 							"response": [
 								{
@@ -4994,7 +5254,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/queue/start"
+										"url": "{{server}}/order-queue/start"
 									},
 									"status": "OK",
 									"code": 200,
@@ -5048,7 +5308,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/queue/finish/{{group_item_id}}"
+								"url": "{{server}}/order-queue/finish/{{group_item_id}}"
 							},
 							"response": [
 								{
@@ -5065,7 +5325,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/queue/finish/{{group_item_id}}"
+										"url": "{{server}}/order-queue/finish/{{group_item_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -5110,7 +5370,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/queue/{{queue_id}}"
+								"url": "{{server}}/order-queue/{{queue_id}}"
 							},
 							"response": [
 								{
@@ -5127,7 +5387,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/queue/{{queue_id}}"
+										"url": "{{server}}/order-queue/{{queue_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -5172,7 +5432,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/queue/by-group-item/{{group_item_id}}"
+								"url": "{{server}}/order-queue/by-group-item/{{group_item_id}}"
 							},
 							"response": [
 								{
@@ -5189,7 +5449,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/queue/by-group-item/{{group_item_id}}"
+										"url": "{{server}}/order-queue/by-group-item/{{group_item_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -5234,7 +5494,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/queue/all"
+								"url": "{{server}}/order-queue/all"
 							},
 							"response": [
 								{
@@ -5251,7 +5511,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/queue/all"
+										"url": "{{server}}/order-queue/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -5369,7 +5629,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"William junior\",\r\n    \"contact\": \"11963849111\",\r\n    \"address\": {\r\n        \"street\": \"Rua piedade\",\r\n        \"number\": \"221\",\r\n        \"neighborhood\": \"Jardim Leocadia\",\r\n        \"city\": \"Sorocaba\",\r\n        \"state\": \"SP\",\r\n        \"complement\": \"\",\r\n        \"reference\": \"\"\r\n    },\r\n    \"cpf\": \"43637799855\",\r\n    \"email\": \"will@gmail.com\"\r\n}",
+							"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"William junior\",\r\n    \"contact\": \"11963849111\",\r\n    \"address\": {\r\n        \"street\": \"Rua piedade\",\r\n        \"number\": \"221\",\r\n        \"neighborhood\": \"Jardim Leocadia\",\r\n        \"city\": \"Sorocaba\",\r\n        \"state\": \"SP\",\r\n        \"complement\": \"\",\r\n        \"reference\": \"\",\r\n        \"delivery_tax\": 15\r\n    },\r\n    \"cpf\": \"43637799855\",\r\n    \"email\": \"will@gmail.com\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -6137,6 +6397,71 @@
 					]
 				},
 				{
+					"name": "all",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/shift/all"
+					},
+					"response": [
+						{
+							"name": "get by id",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": "{{server}}/shift/{{shift_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 21:02:14 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "493"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"id\": \"1778ada8-189a-4474-9a1d-361074fed780\",\n        \"created_at\": \"2024-04-24T21:01:10.881656Z\",\n        \"updated_at\": \"2024-04-24T21:01:10.881656Z\",\n        \"opened_at\": \"2024-04-24T21:01:10.88172Z\",\n        \"current_order_number\": 0,\n        \"start_change\": 10,\n        \"attendant_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n        \"attendant\": {\n            \"id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"created_at\": \"2024-03-04T02:05:30.377557Z\",\n            \"updated_at\": \"2024-03-04T02:05:30.377557Z\",\n            \"name\": \"William junior 3\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\"\n        }\n    }\n}"
+						}
+					]
+				},
+				{
 					"name": "get current",
 					"event": [
 						{
@@ -6334,7 +6659,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// DONT NEED LOGIN\n{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"williamjunior69@gmail.com\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"],\n    \"trade_name\": \"ibiti\"\n}",
+							"raw": "// DONT NEED LOGIN\n{\n    \"cnpj\": \"46607184000153\",\n    \"email\": \"{{user_email}}\",\n    \"contacts\": [\"(11)96384-9111\", \"(11)4714-1489\"],\n    \"trade_name\": \"gazaltech\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -7085,15 +7410,13 @@
 									"let response = pm.response.json()",
 									"",
 									"if (response.message) {",
-									"    console.log(false)",
 									"    return",
 									"}",
 									"",
 									"let accessToken = response.data.accessToken",
 									"",
 									"if (accessToken != null) {",
-									"    console.log(true)",
-									"    pm.collectionVariables.set(\"accessToken\", accessToken)",
+									"    pm.collectionVariables.set(\"access-token\", accessToken)",
 									"}"
 								],
 								"type": "text/javascript",
@@ -7185,7 +7508,7 @@
 						"header": [
 							{
 								"key": "access-token",
-								"value": "{{accessToken}}",
+								"value": "{{access-token}}",
 								"type": "text"
 							}
 						],
@@ -7208,7 +7531,7 @@
 								"header": [
 									{
 										"key": "access-token",
-										"value": "",
+										"value": "{{access-token}}",
 										"type": "text"
 									}
 								],
@@ -7254,7 +7577,7 @@
 								"header": [
 									{
 										"key": "access-token",
-										"value": "{{accessToken}}",
+										"value": "{{access-token}}",
 										"type": "text"
 									}
 								],
@@ -7679,10 +8002,6 @@
 			"value": "54ed1234-df6d-4383-b688-c4845a9372e6"
 		},
 		{
-			"key": "data",
-			"value": ""
-		},
-		{
 			"key": "client_id",
 			"value": "241165d5-900b-42c0-bfc1-286a60f61250"
 		},
@@ -7692,24 +8011,20 @@
 			"type": "string"
 		},
 		{
-			"key": "contact_id",
-			"value": ""
-		},
-		{
 			"key": "order_id",
 			"value": "1803501a-5a8d-43f6-90fa-4251546622aa"
 		},
 		{
 			"key": "order_delivery_id",
-			"value": ""
+			"value": "5df9e860-1d75-4515-bdb8-7a34252b2fd1"
 		},
 		{
 			"key": "item_id",
-			"value": ""
+			"value": "4bca53b4-905d-4c60-b1b8-8bd1b9e45261"
 		},
 		{
 			"key": "group_item_id",
-			"value": ""
+			"value": "ba068d1f-07c8-4583-a22d-1a54e284510b"
 		},
 		{
 			"key": "table_id",
@@ -7717,23 +8032,19 @@
 		},
 		{
 			"key": "table_order_id",
-			"value": "1d8f8cb1-b320-4025-bc86-95d13dacca48",
+			"value": "6640cde0-c855-4126-b20d-2b5ebd5cb967",
 			"type": "string"
 		},
 		{
 			"key": "shift_id",
-			"value": ""
+			"value": "920c9451-637c-4385-9718-f3903e851083"
 		},
 		{
 			"key": "company_id",
-			"value": ""
+			"value": "f3c62957-12a9-4da8-ab3c-4326fbd366a0"
 		},
 		{
-			"key": "schema",
-			"value": ""
-		},
-		{
-			"key": "accessToken",
+			"key": "access-token",
 			"value": ""
 		},
 		{
@@ -7742,11 +8053,11 @@
 		},
 		{
 			"key": "process_id",
-			"value": ""
+			"value": "71e1ccf6-0b5e-4ef5-a9b1-60d564453688"
 		},
 		{
 			"key": "additional_item_id",
-			"value": "",
+			"value": "6e3066cb-6467-410f-a389-21da400a05ca",
 			"type": "string"
 		},
 		{
@@ -7755,7 +8066,7 @@
 		},
 		{
 			"key": "user_id",
-			"value": ""
+			"value": "9d75463a-5625-49cb-b864-f559e0e8306c"
 		},
 		{
 			"key": "user_email",
@@ -7771,11 +8082,11 @@
 		},
 		{
 			"key": "order_pickup_id",
-			"value": ""
+			"value": "e41256ad-dee0-4a3d-98b2-9273b73b9650"
 		},
 		{
 			"key": "queue_id",
-			"value": ""
+			"value": "dab5d743-53ea-4822-bbc4-6b4dad6e61ed"
 		}
 	]
 }
