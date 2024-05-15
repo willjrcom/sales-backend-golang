@@ -254,6 +254,9 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*orderentity.Order)(nil))
 
 	db.RegisterModel((*tableentity.Table)(nil))
+	db.RegisterModel((*tableentity.PlaceToTables)(nil))
+	db.RegisterModel((*tableentity.Place)(nil))
+
 	db.RegisterModel((*shiftentity.Shift)(nil))
 	db.RegisterModel((*companyentity.Company)(nil))
 
@@ -398,6 +401,24 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 		mu.Unlock()
 		return err
 	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*tableentity.Place)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*tableentity.PlaceToTables)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	created, err := db.NewCreateIndex().IfNotExists().Model((*tableentity.PlaceToTables)(nil)).Unique().Index("idx_place_id_row_and_column").Column("place_id", "row", "column").Exec(ctx)
+	if err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	fmt.Println(created.RowsAffected())
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*shiftentity.Shift)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()

@@ -5830,6 +5830,288 @@
 			"name": "employee",
 			"item": [
 				{
+					"name": "delivery driver",
+					"item": [
+						{
+							"name": "create",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"let response = pm.response.json()",
+											"let delivery_driver_id = response.data",
+											"",
+											"if (delivery_driver_id != null) {",
+											"    pm.collectionVariables.set(\"delivery_driver_id\", delivery_driver_id)",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"employee_id\": \"{{employee_id}}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/delivery-driver/new"
+							},
+							"response": [
+								{
+									"name": "create",
+									"originalRequest": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\n{\n    \"employee_id\": \"{{employee_id}}\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/delivery-driver/new"
+									},
+									"status": "Created",
+									"code": 201,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 13 May 2024 19:19:27 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "47"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": \"ee2d65e8-5b5d-4c72-a768-c10925a716df\"\n}"
+								}
+							]
+						},
+						{
+							"name": "update",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/delivery-driver/update/{{delivery_driver_id}}"
+							},
+							"response": [
+								{
+									"name": "update",
+									"originalRequest": {
+										"method": "PATCH",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/delivery-driver/update/{{delivery_driver_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 13 May 2024 19:19:41 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "2"
+										}
+									],
+									"cookie": [],
+									"body": "{}"
+								}
+							]
+						},
+						{
+							"name": "deletar",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/delivery-driver/{{delivery_driver_id}}"
+							},
+							"response": []
+						},
+						{
+							"name": "get by id",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/delivery-driver/{{delivery_driver_id}}"
+							},
+							"response": [
+								{
+									"name": "get by id",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/delivery-driver/{{delivery_driver_id}}"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 13 May 2024 19:53:29 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "758"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": {\n        \"id\": \"ee2d65e8-5b5d-4c72-a768-c10925a716df\",\n        \"employee_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n        \"employee\": {\n            \"id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"created_at\": \"2024-03-04T02:05:30.377557Z\",\n            \"updated_at\": \"2024-03-04T02:05:30.377557Z\",\n            \"name\": \"William junior 3\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\"\n        },\n        \"order_deliveries\": [\n            {\n                \"id\": \"02372990-a736-42bc-9fae-b987a7320ce9\",\n                \"created_at\": \"2024-05-13T17:19:59.104436Z\",\n                \"updated_at\": \"2024-05-13T17:19:59.104436Z\",\n                \"status\": \"Staging\",\n                \"delivery_tax\": 15,\n                \"client_id\": \"241165d5-900b-42c0-bfc1-286a60f61250\",\n                \"client\": null,\n                \"address_id\": \"5ee84311-4ef7-4505-a549-fc37242efe0f\",\n                \"address\": null,\n                \"driver_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n                \"driver\": null,\n                \"order_id\": \"9681fd30-0e8d-44f6-933a-b8e743b7dcda\"\n            }\n        ]\n    }\n}"
+								}
+							]
+						},
+						{
+							"name": "get all",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/delivery-driver/all"
+							},
+							"response": [
+								{
+									"name": "get all",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/delivery-driver/all"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Mon, 13 May 2024 19:53:22 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "109"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"data\": [\n        {\n            \"id\": \"ee2d65e8-5b5d-4c72-a768-c10925a716df\",\n            \"employee_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\"\n        }\n    ]\n}"
+								}
+							]
+						}
+					]
+				},
+				{
 					"name": "create",
 					"event": [
 						{
@@ -7867,6 +8149,261 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "place",
+			"item": [
+				{
+					"name": "create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let place_id = response.data",
+									"",
+									"if (place_id != null) {",
+									"    pm.collectionVariables.set(\"place_id\", place_id)",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\n{\n    \"name\": \"Ambiente 1\",\n    \"is_available\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/place/new"
+					},
+					"response": [
+						{
+							"name": "create",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"Mesa 1\",\n    \"is_available\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/place/new"
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:33:02 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "47"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": \"cb091549-dc1d-4b05-a335-fc8ffb0eabdd\"\n}"
+						}
+					]
+				},
+				{
+					"name": "get by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/place/{{place_id}}"
+					},
+					"response": [
+						{
+							"name": "get by id",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": "{{server}}/place/{{place_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:33:38 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "176"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"id\": \"cb091549-dc1d-4b05-a335-fc8ffb0eabdd\",\n        \"created_at\": \"2024-04-24T19:33:02.841733Z\",\n        \"updated_at\": \"2024-04-24T19:33:02.841733Z\",\n        \"name\": \"Mesa 1\",\n        \"is_available\": true\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "delete by id",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/place/{{place_id}}"
+					},
+					"response": [
+						{
+							"name": "delete by id",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/place/{{place_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 20:37:16 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
+				},
+				{
+					"name": "get all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/place/all"
+					},
+					"response": [
+						{
+							"name": "get all",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/place/all"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 15 May 2024 21:33:39 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "200"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": [\n        {\n            \"id\": \"06e66f0c-e006-44e7-a84a-80c204ef5b0d\",\n            \"created_at\": \"2024-05-15T21:33:29.507128Z\",\n            \"updated_at\": \"2024-05-15T21:33:29.507128Z\",\n            \"name\": \"Ambiente 1\",\n            \"image_path\": null,\n            \"is_available\": true\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
 		}
 	],
 	"auth": {
@@ -8009,6 +8546,14 @@
 		{
 			"key": "queue_id",
 			"value": "dab5d743-53ea-4822-bbc4-6b4dad6e61ed"
+		},
+		{
+			"key": "delivery_driver_id",
+			"value": ""
+		},
+		{
+			"key": "place_id",
+			"value": ""
 		}
 	]
 }
