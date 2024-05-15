@@ -9,7 +9,7 @@ import (
 	orderpickupusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_pickup"
 )
 
-func NewOrderPickupModule(db *bun.DB, chi server.ServerChi) (*orderrepositorybun.OrderPickupRepositoryBun, orderpickupusecases.IService, *handler.Handler) {
+func NewOrderPickupModule(db *bun.DB, chi *server.ServerChi) (*orderrepositorybun.OrderPickupRepositoryBun, orderpickupusecases.IService, *handler.Handler) {
 	repository := orderrepositorybun.NewOrderPickupRepositoryBun(db)
 	service := orderpickupusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerOrderPickup(service)

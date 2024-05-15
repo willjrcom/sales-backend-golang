@@ -9,7 +9,7 @@ import (
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 )
 
-func NewCompanyModule(db *bun.DB, chi server.ServerChi) (*companyrepositorybun.CompanyRepositoryBun, *companyusecases.Service, *handler.Handler) {
+func NewCompanyModule(db *bun.DB, chi *server.ServerChi) (*companyrepositorybun.CompanyRepositoryBun, *companyusecases.Service, *handler.Handler) {
 	repository := companyrepositorybun.NewCompanyRepositoryBun(db)
 	service := companyusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerCompany(service)

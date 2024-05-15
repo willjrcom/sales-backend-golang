@@ -9,7 +9,7 @@ import (
 	ordertableusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_table"
 )
 
-func NewOrderTableModule(db *bun.DB, chi server.ServerChi) (*orderrepositorybun.OrderTableRepositoryBun, *ordertableusecases.Service, *handler.Handler) {
+func NewOrderTableModule(db *bun.DB, chi *server.ServerChi) (*orderrepositorybun.OrderTableRepositoryBun, *ordertableusecases.Service, *handler.Handler) {
 	repository := orderrepositorybun.NewOrderTableRepositoryBun(db)
 	service := ordertableusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerOrderTable(service)

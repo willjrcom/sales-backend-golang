@@ -7,7 +7,7 @@ import (
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 )
 
-func NewSchemaModule(db *bun.DB, chi server.ServerChi) (*schemarepositorybun.SchemaRepositoryBun, *headerservice.Service) {
+func NewSchemaModule(db *bun.DB, chi *server.ServerChi) (*schemarepositorybun.SchemaRepositoryBun, *headerservice.Service) {
 	repository := schemarepositorybun.NewSchemaRepositoryBun(db)
 	service := headerservice.NewService(repository)
 	return repository, service

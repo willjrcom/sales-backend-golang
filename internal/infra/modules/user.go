@@ -9,7 +9,7 @@ import (
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 )
 
-func NewUserModule(db *bun.DB, chi server.ServerChi) (*userrepositorybun.UserRepositoryBun, *userusecases.Service, *handler.Handler) {
+func NewUserModule(db *bun.DB, chi *server.ServerChi) (*userrepositorybun.UserRepositoryBun, *userusecases.Service, *handler.Handler) {
 	repository := userrepositorybun.NewUserRepositoryBun(db)
 	service := userusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerUser(service)

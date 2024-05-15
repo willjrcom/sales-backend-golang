@@ -9,7 +9,7 @@ import (
 	productcategorysizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category_size"
 )
 
-func NewProductCategorySizeModule(db *bun.DB, chi server.ServerChi) (*productcategorysizerepositorybun.SizeRepositoryBun, *productcategorysizeusecases.Service, *handler.Handler) {
+func NewProductCategorySizeModule(db *bun.DB, chi *server.ServerChi) (*productcategorysizerepositorybun.SizeRepositoryBun, *productcategorysizeusecases.Service, *handler.Handler) {
 	repository := productcategorysizerepositorybun.NewSizeRepositoryBun(db)
 	service := productcategorysizeusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerSize(service)

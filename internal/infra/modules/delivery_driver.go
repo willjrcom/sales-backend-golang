@@ -9,7 +9,7 @@ import (
 	deliverydriverusecases "github.com/willjrcom/sales-backend-go/internal/usecases/delivery_driver"
 )
 
-func NewDeliveryDriverModule(db *bun.DB, chi server.ServerChi) (*deliverydriverrepositorybun.DeliveryDriverRepositoryBun, *deliverydriverusecases.Service, *handler.Handler) {
+func NewDeliveryDriverModule(db *bun.DB, chi *server.ServerChi) (*deliverydriverrepositorybun.DeliveryDriverRepositoryBun, *deliverydriverusecases.Service, *handler.Handler) {
 	repository := deliverydriverrepositorybun.NewDeliveryDriverRepositoryBun(db)
 	service := deliverydriverusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerDeliveryDriver(service)

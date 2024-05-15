@@ -9,7 +9,7 @@ import (
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 )
 
-func NewClientModule(db *bun.DB, chi server.ServerChi) (*clientrepositorybun.ClientRepositoryBun, *clientusecases.Service, *handler.Handler) {
+func NewClientModule(db *bun.DB, chi *server.ServerChi) (*clientrepositorybun.ClientRepositoryBun, *clientusecases.Service, *handler.Handler) {
 	repository := clientrepositorybun.NewClientRepositoryBun(db)
 	service := clientusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerClient(service)

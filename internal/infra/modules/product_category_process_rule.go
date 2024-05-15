@@ -9,7 +9,7 @@ import (
 	productcategoryprocessruleusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category_process_rule"
 )
 
-func NewProductCategoryProcessRuleModule(db *bun.DB, chi server.ServerChi) (*productcategoryprocessrulerepositorybun.ProcessRuleRepositoryBun, *productcategoryprocessruleusecases.Service, *handler.Handler) {
+func NewProductCategoryProcessRuleModule(db *bun.DB, chi *server.ServerChi) (*productcategoryprocessrulerepositorybun.ProcessRuleRepositoryBun, *productcategoryprocessruleusecases.Service, *handler.Handler) {
 	repository := productcategoryprocessrulerepositorybun.NewProcessRuleRepositoryBun(db)
 	service := productcategoryprocessruleusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerProcessRuleCategory(service)

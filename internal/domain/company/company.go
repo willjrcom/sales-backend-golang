@@ -31,7 +31,7 @@ type CompanyWithUsers struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:companies"`
 	CompanyCommonAttributes
-	Users []*User `bun:"m2m:company_to_users,join:CompanyWithUsers=User" json:"company_users,omitempty"`
+	Users []User `bun:"m2m:company_to_users,join:CompanyWithUsers=User" json:"company_users,omitempty"`
 }
 
 type CompanyToUsers struct {

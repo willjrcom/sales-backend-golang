@@ -9,7 +9,7 @@ import (
 	productcategoryusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category"
 )
 
-func NewProductCategoryModule(db *bun.DB, chi server.ServerChi) (*productcategoryrepositorybun.ProductCategoryRepositoryBun, *productcategoryusecases.Service, *handler.Handler) {
+func NewProductCategoryModule(db *bun.DB, chi *server.ServerChi) (*productcategoryrepositorybun.ProductCategoryRepositoryBun, *productcategoryusecases.Service, *handler.Handler) {
 	repository := productcategoryrepositorybun.NewProductCategoryRepositoryBun(db)
 	service := productcategoryusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerProductCategory(service)

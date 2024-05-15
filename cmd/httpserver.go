@@ -36,7 +36,7 @@ var HttpserverCmd = &cobra.Command{
 			panic(err)
 		}
 
-		modules.MainModules(db, *chi, s3Service)
+		modules.MainModules(db, chi, s3Service)
 
 		if err := chi.StartServer(port); err != nil {
 			panic(err)

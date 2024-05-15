@@ -9,7 +9,7 @@ import (
 	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 )
 
-func NewOrderqueueModule(db *bun.DB, chi server.ServerChi) (*orderqueuerepositorybun.QueueRepositoryBun, *orderqueueusecases.Service, *handler.Handler) {
+func NewOrderqueueModule(db *bun.DB, chi *server.ServerChi) (*orderqueuerepositorybun.QueueRepositoryBun, *orderqueueusecases.Service, *handler.Handler) {
 	repository := orderqueuerepositorybun.NewOrderQueueRepositoryBun(db)
 	service := orderqueueusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerOrderQueue(service)

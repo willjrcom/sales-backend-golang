@@ -9,7 +9,7 @@ import (
 	itemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/item"
 )
 
-func NewItemModule(db *bun.DB, chi server.ServerChi) (*itemrepositorybun.ItemRepositoryBun, *itemusecases.Service, *handler.Handler) {
+func NewItemModule(db *bun.DB, chi *server.ServerChi) (*itemrepositorybun.ItemRepositoryBun, *itemusecases.Service, *handler.Handler) {
 	repository := itemrepositorybun.NewItemRepositoryBun(db)
 	service := itemusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerItem(service)

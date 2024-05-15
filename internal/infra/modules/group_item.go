@@ -9,7 +9,7 @@ import (
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 )
 
-func NewGroupItemModule(db *bun.DB, chi server.ServerChi) (*groupitemrepositorybun.GroupItemRepositoryBun, *groupitemusecases.Service, *handler.Handler) {
+func NewGroupItemModule(db *bun.DB, chi *server.ServerChi) (*groupitemrepositorybun.GroupItemRepositoryBun, *groupitemusecases.Service, *handler.Handler) {
 	repository := groupitemrepositorybun.NewGroupItemRepositoryBun(db)
 	service := groupitemusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerGroupItem(service)

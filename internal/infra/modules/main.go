@@ -6,7 +6,7 @@ import (
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
-func MainModules(db *bun.DB, chi server.ServerChi, s3 *s3service.S3Client) {
+func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	productRepository, productService, _ := NewProductCategoryProductModule(db, chi)
 	productCategoryRepository, _, _ := NewProductCategoryModule(db, chi)
 	_, sizeService, _ := NewProductCategorySizeModule(db, chi)
@@ -32,6 +32,7 @@ func MainModules(db *bun.DB, chi server.ServerChi, s3 *s3service.S3Client) {
 
 	_, orderTableService, _ := NewOrderTableModule(db, chi)
 	tableRepository, _, _ := NewTableModule(db, chi)
+	NewPlaceModule(db, chi)
 
 	_, orderPickupService, _ := NewOrderPickupModule(db, chi)
 

@@ -6,7 +6,7 @@ import (
 	addressrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/address"
 )
 
-func NewAddressModule(db *bun.DB, chi server.ServerChi) *addressrepositorybun.AddressRepositoryBun {
+func NewAddressModule(db *bun.DB, chi *server.ServerChi) *addressrepositorybun.AddressRepositoryBun {
 	repository := addressrepositorybun.NewAddressRepositoryBun(db)
 	return repository
 }

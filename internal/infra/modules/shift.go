@@ -9,7 +9,7 @@ import (
 	shiftusecases "github.com/willjrcom/sales-backend-go/internal/usecases/shift"
 )
 
-func NewShiftModule(db *bun.DB, chi server.ServerChi) (*shiftrepositorybun.ShiftRepositoryBun, *shiftusecases.Service, *handler.Handler) {
+func NewShiftModule(db *bun.DB, chi *server.ServerChi) (*shiftrepositorybun.ShiftRepositoryBun, *shiftusecases.Service, *handler.Handler) {
 	repository := shiftrepositorybun.NewShiftRepositoryBun(db)
 	service := shiftusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerShift(service)
