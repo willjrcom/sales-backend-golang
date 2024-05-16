@@ -458,7 +458,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"name\": \"Pizza\",\n    \"need_print\": true,\n    \"image_path\": \"https://site/imagem.png\",\n    \"removable_ingredients\": [\n        \"cebola\",\n        \"tomate\",\n        \"mussarela\"\n    ],\n    \"category_to_additional\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ]\n}",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"Pizza 1\",\n    \"need_print\": true,\n    \"image_path\": \"https://site/imagem.png\",\n    \"removable_ingredients\": [\n        \"cebola\",\n        \"tomate\",\n        \"mussarela\"\n    ],\n    \"product_category_to_additional\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ],\n    \"product_category_to_complement\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -475,7 +475,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"name\": \"Pizza\",\n    \"need_print\": true,\n    \"image_path\": \"https://site/imagem.png\",\n    \"removable_ingredients\": [\n        \"cebola\",\n        \"tomate\",\n        \"mussarela\"\n    ],\n    \"category_to_additional\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ]\n}",
+											"raw": "// NEED LOGIN\n{\n    \"name\": \"Pizza\",\n    \"need_print\": true,\n    \"image_path\": \"https://site/imagem.png\",\n    \"removable_ingredients\": [\n        \"cebola\",\n        \"tomate\",\n        \"mussarela\"\n    ],\n    \"product_category_to_additional\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ]\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -517,7 +517,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"removable_ingredients\": [\"cebola\", \"tomate\"]\n}",
+									"raw": "// NEED LOGIN\n{\n    \"product_category_to_complement\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ],\n    \"product_category_to_additional\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4429,6 +4429,46 @@
 											],
 											"cookie": [],
 											"body": "{}"
+										},
+										{
+											"name": "invalid complement category",
+											"originalRequest": {
+												"method": "POST",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "// NEED LOGIN\r\n",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": "{{server}}/group-item/update/{{group_item_id}}/complement-item/{{product_id}}"
+											},
+											"status": "Internal Server Error",
+											"code": 500,
+											"_postman_previewlanguage": "json",
+											"header": [
+												{
+													"key": "Content-Type",
+													"value": "application/json; charset=utf-8"
+												},
+												{
+													"key": "Vary",
+													"value": "Origin"
+												},
+												{
+													"key": "Date",
+													"value": "Thu, 16 May 2024 17:48:23 GMT"
+												},
+												{
+													"key": "Content-Length",
+													"value": "66"
+												}
+											],
+											"cookie": [],
+											"body": "{\n    \"message\": \"complement category does not belong to this category\"\n}"
 										}
 									]
 								},
@@ -8422,7 +8462,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\n{\n    \"place_id\": \"{{place_id}}\",\n    \"table_id\": \"{{table_id}}\",\n    \"column\": 4,\n    \"row\": 3\n}",
+							"raw": "// NEED LOGIN\n{\n    \"place_id\": \"{{place_id}}\",\n    \"table_id\": \"{{table_id}}\",\n    \"column\": 3,\n    \"row\": 3\n}",
 							"options": {
 								"raw": {
 									"language": "json"
