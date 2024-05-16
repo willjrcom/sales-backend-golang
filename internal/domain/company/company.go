@@ -35,9 +35,9 @@ type CompanyWithUsers struct {
 }
 
 type CompanyToUsers struct {
-	CompanyWithUsersID uuid.UUID         `bun:"type:uuid,pk"`
+	CompanyWithUsersID uuid.UUID         `bun:"type:uuid,pk" json:"company_with_users_id,omitempty"`
 	CompanyWithUsers   *CompanyWithUsers `bun:"rel:belongs-to,join:company_with_users_id=id" json:"company,omitempty"`
-	UserID             uuid.UUID         `bun:"type:uuid,pk"`
+	UserID             uuid.UUID         `bun:"type:uuid,pk" json:"user_id,omitempty"`
 	User               *User             `bun:"rel:belongs-to,join:user_id=id" json:"user,omitempty"`
 }
 

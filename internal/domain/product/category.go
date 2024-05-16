@@ -29,8 +29,8 @@ type PatchProductCategory struct {
 	ImagePath            *string           `json:"image_path"`
 	NeedPrint            *bool             `json:"need_print"`
 	RemovableIngredients []string          `json:"removable_ingredients"`
-	AdditionalCategories []ProductCategory `json:"product_category_to_additional,omitempty"`
-	ComplementCategories []ProductCategory `json:"product_category_to_complement,omitempty"`
+	AdditionalCategories []ProductCategory `json:"product_category_to_additional"`
+	ComplementCategories []ProductCategory `json:"product_category_to_complement"`
 }
 
 func NewProductCategory(categoryCommonAttributes ProductCategoryCommonAttributes) *ProductCategory {

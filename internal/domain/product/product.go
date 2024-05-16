@@ -47,8 +47,8 @@ type PatchProduct struct {
 	IsAvailable   *bool      `json:"is_available"`
 	CategoryID    *uuid.UUID `json:"category_id"`
 	SizeID        *uuid.UUID `json:"size_id"`
-	IsCombo       bool       `bun:"is_combo,notnull" json:"is_combo"`
-	ComboProducts *[]Product `json:"product_category_to_combo,omitempty"`
+	IsCombo       bool       `json:"is_combo"`
+	ComboProducts *[]Product `json:"product_category_to_combo"`
 }
 
 func NewProduct(productCommonAttributes ProductCommonAttributes) *Product {

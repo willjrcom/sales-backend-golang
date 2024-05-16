@@ -16,7 +16,7 @@ type UserCommonAttributes struct {
 	Email          string             `bun:"column:email,unique,notnull" json:"email"`
 	Password       string             `bun:"-" json:"password"`
 	Hash           string             `bun:"column:hash,notnull" json:"hash"`
-	CompanyToUsers []CompanyToUsers   `bun:"rel:has-many,join:id=user_id"`
+	CompanyToUsers []CompanyToUsers   `bun:"rel:has-many,join:id=user_id" json:"company_users,omitempty"`
 	Companies      []CompanyWithUsers `bun:"-" json:"companies"`
 }
 

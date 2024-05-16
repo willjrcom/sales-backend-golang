@@ -29,8 +29,8 @@ type ProcessRuleCommonAttributes struct {
 type PatchProcessRule struct {
 	Name              *string       `json:"name"`
 	Order             *int8         `json:"order"`
-	Description       string        `bun:"description" json:"description"`
-	ImagePath         *string       `bun:"image_path" json:"image_path"`
+	Description       string        `json:"description"`
+	ImagePath         *string       `json:"image_path"`
 	IdealTime         time.Duration `json:"ideal_time"`
 	ExperimentalError time.Duration `json:"experimental_error"`
 }

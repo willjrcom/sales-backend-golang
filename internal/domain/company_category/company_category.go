@@ -21,8 +21,10 @@ type CompanyCategoryCommonAttributes struct {
 }
 
 type PatchCompanyCategory struct {
-	Name      *string `json:"name"`
-	ImagePath *string `json:"image_path"`
+	Name                       *string                         `json:"name"`
+	ImagePath                  *string                         `json:"image_path"`
+	CompanyCategorySponsor     []sponsorentity.Sponsor         `json:"company_category_to_sponsor"`
+	CompanyCategoryAdvertising []advertisingentity.Advertising `json:"company_category_to_advertising"`
 }
 
 func NewCategory(companyCategoryCommonAttributes CompanyCategoryCommonAttributes) *CompanyCategory {
