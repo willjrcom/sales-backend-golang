@@ -8177,7 +8177,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\n{\n    \"name\": \"Ambiente 1\",\n    \"is_available\": true\n}",
+							"raw": "// NEED LOGIN\n{\n    \"name\": \"Mesanino\",\n    \"is_available\": true\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -8400,6 +8400,228 @@
 							],
 							"cookie": [],
 							"body": "{\n    \"data\": [\n        {\n            \"id\": \"06e66f0c-e006-44e7-a84a-80c204ef5b0d\",\n            \"created_at\": \"2024-05-15T21:33:29.507128Z\",\n            \"updated_at\": \"2024-05-15T21:33:29.507128Z\",\n            \"name\": \"Ambiente 1\",\n            \"image_path\": null,\n            \"is_available\": true\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "add table",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\n{\n    \"place_id\": \"{{place_id}}\",\n    \"table_id\": \"{{table_id}}\",\n    \"column\": 4,\n    \"row\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/place/add/table"
+					},
+					"response": [
+						{
+							"name": "add table",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"place_id\": \"{{place_id}}\",\n    \"table_id\": \"{{table_id}}\",\n    \"column\": 4,\n    \"row\": 3\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/place/add/table"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 16 May 2024 04:14:47 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						},
+						{
+							"name": "place position already used",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"place_id\": \"{{place_id}}\",\n    \"table_id\": \"{{table_id}}\",\n    \"column\": 3,\n    \"row\": 3\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/place/add/table"
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 16 May 2024 04:12:23 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "58"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"place position already used by table: Mesa 2\"\n}"
+						},
+						{
+							"name": "table already used",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"place_id\": \"{{place_id}}\",\n    \"table_id\": \"{{table_id}}\",\n    \"column\": 5,\n    \"row\": 3\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/place/add/table"
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 16 May 2024 04:18:00 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "75"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"table already in place: Mesanino on position: column 4, row 3\"\n}"
+						}
+					]
+				},
+				{
+					"name": "remove table",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\n{\n    \"name\": \"Ambiente 1\",\n    \"is_available\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/place/remove/table/{{table_id}}"
+					},
+					"response": [
+						{
+							"name": "remove table",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"Ambiente 1\",\n    \"is_available\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/place/remove/table/{{table_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 16 May 2024 03:32:32 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
 						}
 					]
 				}
