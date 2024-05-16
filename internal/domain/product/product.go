@@ -20,31 +20,42 @@ type Product struct {
 }
 
 type ProductCommonAttributes struct {
-	Code        string           `bun:"code,unique,notnull" json:"code"`
-	Name        string           `bun:"name,notnull" json:"name"`
-	Flavors     []string         `bun:"flavors,type:jsonb" json:"flavors,omitempty"`
-	ImagePath   *string          `bun:"image_path" json:"image_path"`
-	Description string           `bun:"description" json:"description"`
-	Price       float64          `bun:"price,notnull" json:"price"`
-	Cost        float64          `bun:"cost" json:"cost"`
-	IsAvailable bool             `bun:"is_available" json:"is_available"`
-	CategoryID  uuid.UUID        `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
-	Category    *ProductCategory `bun:"rel:belongs-to" json:"category,omitempty"`
-	SizeID      uuid.UUID        `bun:"column:size_id,type:uuid,notnull" json:"size_id"`
-	Size        *Size            `bun:"rel:belongs-to" json:"size,omitempty"`
+	Code          string           `bun:"code,unique,notnull" json:"code"`
+	Name          string           `bun:"name,notnull" json:"name"`
+	Flavors       []string         `bun:"flavors,type:jsonb" json:"flavors,omitempty"`
+	ImagePath     *string          `bun:"image_path" json:"image_path"`
+	Description   string           `bun:"description" json:"description"`
+	Price         float64          `bun:"price,notnull" json:"price"`
+	Cost          float64          `bun:"cost" json:"cost"`
+	IsAvailable   bool             `bun:"is_available" json:"is_available"`
+	CategoryID    uuid.UUID        `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
+	Category      *ProductCategory `bun:"rel:belongs-to" json:"category,omitempty"`
+	SizeID        uuid.UUID        `bun:"column:size_id,type:uuid,notnull" json:"size_id"`
+	Size          *Size            `bun:"rel:belongs-to" json:"size,omitempty"`
+	IsCombo       bool             `bun:"is_combo,notnull" json:"is_combo"`
+	ComboProducts []Product        `bun:"m2m:product_category_to_combo,join:ComboProduct=Product" json:"product_category_to_combo,omitempty"`
 }
 
 type PatchProduct struct {
-	Code        *string    `json:"code"`
-	Name        *string    `json:"name"`
-	Flavors     []string   `json:"flavors,omitempty"`
-	ImagePath   *string    `json:"image_path"`
-	Description *string    `json:"description"`
-	Price       *float64   `json:"price"`
-	Cost        *float64   `json:"cost"`
-	IsAvailable *bool      `json:"is_available"`
-	CategoryID  *uuid.UUID `json:"category_id"`
-	SizeID      *uuid.UUID `json:"size_id"`
+	Code          *string    `json:"code"`
+	Name          *string    `json:"name"`
+	Flavors       []string   `json:"flavors,omitempty"`
+	ImagePath     *string    `json:"image_path"`
+	Description   *string    `json:"description"`
+	Price         *float64   `json:"price"`
+	Cost          *float64   `json:"cost"`
+	IsAvailable   *bool      `json:"is_available"`
+	CategoryID    *uuid.UUID `json:"category_id"`
+	SizeID        *uuid.UUID `json:"size_id"`
+	IsCombo       bool       `bun:"is_combo,notnull" json:"is_combo"`
+	ComboProducts *[]Product `json:"product_category_to_combo,omitempty"`
+}
+
+func NewProduct(productCommonAttributes ProductCommonAttributes) *Product {
+	return &Product{
+		Entity:                  entity.NewEntity(),
+		ProductCommonAttributes: productCommonAttributes,
+	}
 }
 
 func (p *Product) FindSizeInCategory() (bool, error) {

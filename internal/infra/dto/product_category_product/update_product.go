@@ -53,6 +53,13 @@ func (p *UpdateProductInput) UpdateModel(product *productentity.Product) (err er
 	if p.SizeID != nil {
 		product.SizeID = *p.SizeID
 	}
+	if p.ComboProducts != nil && len(*p.ComboProducts) > 0 {
+		product.ComboProducts = *p.ComboProducts
+		product.IsCombo = true
+	}
+	if p.ComboProducts != nil && len(*p.ComboProducts) <= 0 {
+		product.IsCombo = false
+	}
 
 	if err = p.Validate(product); err != nil {
 		return err

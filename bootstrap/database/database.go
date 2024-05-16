@@ -229,6 +229,7 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 
 	db.RegisterModel((*productentity.ProductCategoryToAdditional)(nil))
 	db.RegisterModel((*productentity.ProductCategoryToComplement)(nil))
+	db.RegisterModel((*productentity.ProductToCombo)(nil))
 	db.RegisterModel((*productentity.Size)(nil))
 	db.RegisterModel((*productentity.Quantity)(nil))
 	db.RegisterModel((*productentity.ProductCategory)(nil))
@@ -294,6 +295,11 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProductCategoryToComplement)(nil)).Exec(ctx); err != nil {
+		mu.Unlock()
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProductToCombo)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}

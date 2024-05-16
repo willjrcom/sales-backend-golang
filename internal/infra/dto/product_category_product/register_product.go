@@ -5,7 +5,6 @@ import (
 	"mime/multipart"
 
 	"github.com/google/uuid"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -47,19 +46,5 @@ func (p *CreateProductInput) ToModel() (*productentity.Product, error) {
 		return nil, err
 	}
 
-	productCommonAttributes := productentity.ProductCommonAttributes{
-		Code:        p.Code,
-		Name:        p.Name,
-		Description: p.Description,
-		SizeID:      p.SizeID,
-		Price:       p.Price,
-		Cost:        p.Cost,
-		CategoryID:  p.CategoryID,
-		IsAvailable: p.IsAvailable,
-	}
-
-	return &productentity.Product{
-		Entity:                  entity.NewEntity(),
-		ProductCommonAttributes: productCommonAttributes,
-	}, nil
+	return productentity.NewProduct(p.ProductCommonAttributes), nil
 }

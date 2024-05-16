@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
@@ -26,7 +27,29 @@ func (r *ProductRepositoryBun) CreateProduct(ctx context.Context, p *productenti
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(p).Exec(ctx); err != nil {
+	tx, err := r.db.Begin()
+
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.NewInsert().Model(p).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if err := r.updateComboProducts(ctx, &tx, p.ID, p.ComboProducts); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 
@@ -41,8 +64,62 @@ func (r *ProductRepositoryBun) UpdateProduct(ctx context.Context, p *productenti
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
+	tx, err := r.db.Begin()
+
+	if err != nil {
 		return err
+	}
+
+	if _, err := r.db.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if err := r.updateComboProducts(ctx, &tx, p.ID, p.ComboProducts); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *ProductRepositoryBun) updateComboProducts(ctx context.Context, tx *bun.Tx, comboID uuid.UUID, comboProducts []productentity.Product) error {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&productentity.ProductToCombo{}).Where("combo_product_id = ?", comboID).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	for _, ac := range comboProducts {
+		comboProduct := &productentity.ProductToCombo{
+			ComboProductID: comboID,
+			ProductID:      ac.ID,
+		}
+
+		if _, err := tx.NewInsert().Model(comboProduct).Exec(ctx); err != nil {
+			if errRollBack := tx.Rollback(); errRollBack != nil {
+				return errRollBack
+			}
+
+			return err
+		}
 	}
 
 	return nil
@@ -73,7 +150,7 @@ func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(product).Where("product.id = ?", id).Relation("Category").Relation("Size").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(product).Where("product.id = ?", id).Relation("Category").Relation("Size").Relation("ComboProducts").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -90,7 +167,7 @@ func (r *ProductRepositoryBun) GetProductByCode(ctx context.Context, code string
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(product).Where("product.code = ?", code).Relation("Category").Relation("Size").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(product).Where("product.code = ?", code).Relation("Category").Relation("Size").Relation("ComboProducts").Scan(ctx); err != nil {
 		return nil, err
 	}
 
