@@ -46,7 +46,7 @@
 								],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"code\": \"b13\", // UNIQUE\n    \"name\": \"Pizza Frango com catupiry\",\n    \"flavors\": [\"presunto\", \"calabresa\", \"frango\"],\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 10.0, // Must be lower than or equal price\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
+									"raw": "// NEED LOGIN\n{\n    \"code\": \"b13\", // UNIQUE\n    \"name\": \"Pizza Frango com catupiry\",\n    \"flavors\": [\"presunto\", \"calabresa\", \"frango\"],\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 10.0, // Must be lower than or equal price\n    \"category_id\": \"{{product_category_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -70,7 +70,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"code\": \"p121\", // UNIQUE\n    \"name\": \"Pizza Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 30.0,\n    \"cost\": 10.0, // Must be lower than or equal price\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": false\n}",
+											"raw": "// NEED LOGIN\n{\n    \"code\": \"p121\", // UNIQUE\n    \"name\": \"Pizza Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 30.0,\n    \"cost\": 10.0, // Must be lower than or equal price\n    \"category_id\": \"{{product_category_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": false\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -117,7 +117,7 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"code\": \"p12\", // UNIQUE\n    \"name\": \"Pizza Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 30.0,\n    \"cost\": 10.0, // Must be lower than or equal price\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": false\n}",
+											"raw": "// NEED LOGIN\n{\n    \"code\": \"p12\", // UNIQUE\n    \"name\": \"Pizza Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 30.0,\n    \"cost\": 10.0, // Must be lower than or equal price\n    \"category_id\": \"{{product_category_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": false\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -159,7 +159,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"code\": \"a12\",\n    \"name\": \"Pizza de Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 15.0,\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
+									"raw": "// NEED LOGIN\n{\n    \"code\": \"a12\",\n    \"name\": \"Pizza de Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 15.0,\n    \"category_id\": \"{{product_category_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -176,7 +176,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"code\": \"a12\",\n    \"name\": \"Pizza de Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 15.0,\n    \"category_id\": \"{{category_product_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
+											"raw": "// NEED LOGIN\n{\n    \"code\": \"a12\",\n    \"name\": \"Pizza de Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 15.0,\n    \"category_id\": \"{{product_category_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -442,10 +442,10 @@
 									"script": {
 										"exec": [
 											"let response = pm.response.json()",
-											"let category_product_id = response.data",
+											"let product_category_id = response.data",
 											"",
-											"if (category_product_id != null) {",
-											"    pm.collectionVariables.set(\"category_product_id\", category_product_id)",
+											"if (product_category_id != null) {",
+											"    pm.collectionVariables.set(\"product_category_id\", product_category_id)",
 											"}"
 										],
 										"type": "text/javascript",
@@ -458,7 +458,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"name\": \"Pizza 1\",\n    \"need_print\": true,\n    \"image_path\": \"https://site/imagem.png\",\n    \"removable_ingredients\": [\n        \"cebola\",\n        \"tomate\",\n        \"mussarela\"\n    ],\n    \"product_category_to_additional\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ],\n    \"product_category_to_complement\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ]\n}",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"Pizza 1\",\n    \"need_print\": true,\n    \"image_path\": \"https://site/imagem.png\",\n    \"removable_ingredients\": [\n        \"cebola\",\n        \"tomate\",\n        \"mussarela\"\n    ],\n    \"product_category_to_additional\": [\n        {\n            \"id\": \"{{product_category_id}}\"\n        }\n    ],\n    \"product_category_to_complement\": [\n        {\n            \"id\": \"{{product_category_id}}\"\n        }\n    ]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -475,7 +475,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"name\": \"Pizza\",\n    \"need_print\": true,\n    \"image_path\": \"https://site/imagem.png\",\n    \"removable_ingredients\": [\n        \"cebola\",\n        \"tomate\",\n        \"mussarela\"\n    ],\n    \"product_category_to_additional\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ]\n}",
+											"raw": "// NEED LOGIN\n{\n    \"name\": \"Pizza\",\n    \"need_print\": true,\n    \"image_path\": \"https://site/imagem.png\",\n    \"removable_ingredients\": [\n        \"cebola\",\n        \"tomate\",\n        \"mussarela\"\n    ],\n    \"product_category_to_additional\": [\n        {\n            \"id\": \"{{product_category_id}}\"\n        }\n    ]\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -517,14 +517,14 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"product_category_to_complement\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ],\n    \"product_category_to_additional\": [\n        {\n            \"id\": \"{{category_product_id}}\"\n        }\n    ]\n}",
+									"raw": "// NEED LOGIN\n{\n    \"product_category_to_complement\": [\n        {\n            \"id\": \"{{product_category_id}}\"\n        }\n    ],\n    \"product_category_to_additional\": [\n        {\n            \"id\": \"{{product_category_id}}\"\n        }\n    ]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
 										}
 									}
 								},
-								"url": "{{server}}/product-category/update/{{category_product_id}}"
+								"url": "{{server}}/product-category/update/{{product_category_id}}"
 							},
 							"response": [
 								{
@@ -541,7 +541,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/product-category/update/{{category_product_id}}"
+										"url": "{{server}}/product-category/update/{{product_category_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -583,7 +583,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/product-category/{{category_product_id}}"
+								"url": "{{server}}/product-category/{{product_category_id}}"
 							},
 							"response": [
 								{
@@ -600,7 +600,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/product-category/{{category_product_id}}"
+										"url": "{{server}}/product-category/{{product_category_id}}"
 									},
 									"status": "OK",
 									"code": 200,
@@ -645,7 +645,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/product-category/{{category_product_id}}"
+								"url": "{{server}}/product-category/{{product_category_id}}"
 							},
 							"response": [
 								{
@@ -763,7 +763,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"name\": \"G\",\n    \"active\": true,\n    \"category_id\": \"{{category_product_id}}\"\n}",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"G\",\n    \"active\": true,\n    \"category_id\": \"{{product_category_id}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -780,7 +780,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"name\": \"M\",\n    \"active\": false,\n    \"category_id\": \"{{category_product_id}}\"\n}",
+											"raw": "// NEED LOGIN\n{\n    \"name\": \"M\",\n    \"active\": false,\n    \"category_id\": \"{{product_category_id}}\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -820,7 +820,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"name\": \"P\",\n    \"active\": false,\n    \"category_id\": \"{{category_product_id}}\"\n}",
+											"raw": "// NEED LOGIN\n{\n    \"name\": \"P\",\n    \"active\": false,\n    \"category_id\": \"{{product_category_id}}\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -1002,7 +1002,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"name\": \"Rechear\",\n    \"order\": 4,\n    \"ideal_time\": 60, // Second\n    \"experimental_error\": 30, // Second\n    \"category_id\": \"{{category_product_id}}\"\n}",
+									"raw": "// NEED LOGIN\n{\n    \"name\": \"Rechear\",\n    \"order\": 4,\n    \"ideal_time\": 60, // Second\n    \"experimental_error\": 30, // Second\n    \"category_id\": \"{{product_category_id}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1019,7 +1019,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"name\": \"Prensar\",\n    \"order\": 3,\n    \"ideal_time\": \"3m30s\", // Must be add \"m\" on minute and add \"s\" on second\n    \"experimental_error\": \"30s\", // Must be add \"m\" on minute and add \"s\" on second\n    \"category_id\": \"{{category_product_id}}\"\n}",
+											"raw": "// NEED LOGIN\n{\n    \"name\": \"Prensar\",\n    \"order\": 3,\n    \"ideal_time\": \"3m30s\", // Must be add \"m\" on minute and add \"s\" on second\n    \"experimental_error\": \"30s\", // Must be add \"m\" on minute and add \"s\" on second\n    \"category_id\": \"{{product_category_id}}\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -1263,7 +1263,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"quantity\": 2,\n    \"category_id\": \"{{category_product_id}}\"\n}",
+									"raw": "// NEED LOGIN\n{\n    \"quantity\": 2,\n    \"category_id\": \"{{product_category_id}}\"\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -1280,7 +1280,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"quantity\": 2,\n    \"category_id\": \"{{category_product_id}}\"\n}",
+											"raw": "// NEED LOGIN\n{\n    \"quantity\": 2,\n    \"category_id\": \"{{product_category_id}}\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -8706,7 +8706,7 @@
 			"value": "de15ecb5-0e96-4564-a605-a909501afefd"
 		},
 		{
-			"key": "category_product_id",
+			"key": "product_category_id",
 			"value": "896bee80-2431-474f-9918-20153fc419b7"
 		},
 		{
