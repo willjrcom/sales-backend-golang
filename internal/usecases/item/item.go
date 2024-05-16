@@ -195,7 +195,7 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 	}
 
 	if !found {
-		return uuid.Nil, errors.New("category product and additional not match")
+		return uuid.Nil, errors.New("additional category does not belong to this category")
 	}
 
 	quantity, err := s.rq.GetQuantityById(ctx, quantityID.String())
@@ -205,7 +205,7 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 	}
 
 	if productAdditional.CategoryID != quantity.CategoryID {
-		return uuid.Nil, errors.New("category product and quantity not match")
+		return uuid.Nil, errors.New("product category and quantity not match")
 	}
 
 	itemAdditional := itementity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, productAdditional.ID)

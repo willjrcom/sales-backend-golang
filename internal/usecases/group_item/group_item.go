@@ -69,7 +69,7 @@ func (s *Service) DeleteGroupItem(ctx context.Context, dto *entitydto.IdRequest)
 }
 
 func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IdRequest, dtoComplement *entitydto.IdRequest) (err error) {
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), false)
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
 		return err
@@ -79,23 +79,36 @@ func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IdReques
 		return ErrComplementItemAlreadyAdded
 	}
 
-	product, err := s.rp.GetProductById(ctx, dtoComplement.ID.String())
+	productComplement, err := s.rp.GetProductById(ctx, dtoComplement.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if groupItem.Size != product.Size.Name {
+	if groupItem.Size != productComplement.Size.Name {
 		return ErrSizeMustBeTheSame
 	}
 
-	item := itementity.NewItem(product.Name, product.Price, groupItem.Quantity, groupItem.Size, product.ID)
+	// Is valid complement to this category
+	found := false
+	for _, complementCategory := range groupItem.Category.ComplementCategories {
+		if productComplement.Category.ID == complementCategory.ID {
+			found = true
+			break
+		}
+	}
 
-	if err = s.ri.AddItem(ctx, item); err != nil {
+	if !found {
+		return errors.New("complement category does not belong to this category")
+	}
+
+	itemComplement := itementity.NewItem(productComplement.Name, productComplement.Price, groupItem.Quantity, groupItem.Size, productComplement.ID)
+
+	if err = s.ri.AddItem(ctx, itemComplement); err != nil {
 		return err
 	}
 
-	groupItem.ComplementItemID = &item.ID
+	groupItem.ComplementItemID = &itemComplement.ID
 
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
 		return err

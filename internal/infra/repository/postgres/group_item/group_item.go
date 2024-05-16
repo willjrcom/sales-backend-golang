@@ -113,7 +113,7 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 	query := r.db.NewSelect().Model(item).Where("group_item.id = ?", id).Relation("Category").Relation("ComplementItem")
 
 	if withRelation {
-		query.Relation("Items.AdditionalItems")
+		query.Relation("Items.AdditionalItems").Relation("Category.ComplementCategories").Relation("Category.AdditionalCategories")
 	}
 
 	if err := query.Scan(ctx); err != nil {
