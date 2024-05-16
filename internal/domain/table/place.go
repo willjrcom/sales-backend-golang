@@ -34,3 +34,12 @@ func NewPlace(placeCommonAttributes PlaceCommonAttributes) *Place {
 		PlaceCommonAttributes: placeCommonAttributes,
 	}
 }
+
+func NewPlaceToTable(placeID, tableID uuid.UUID, column, row int) *PlaceToTables {
+	return &PlaceToTables{
+		PlaceID: placeID,
+		TableID: tableID,
+		Column:  column,
+		Row:     row,
+	}
+}

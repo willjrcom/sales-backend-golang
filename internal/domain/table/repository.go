@@ -1,6 +1,10 @@
 package tableentity
 
-import "context"
+import (
+	"context"
+
+	"github.com/google/uuid"
+)
 
 type TableRepository interface {
 	CreateTable(ctx context.Context, table *Table) error
@@ -16,4 +20,6 @@ type PlaceRepository interface {
 	DeletePlace(ctx context.Context, id string) error
 	GetPlaceById(ctx context.Context, id string) (*Place, error)
 	GetAllPlaces(ctx context.Context) ([]Place, error)
+	AddTableToPlace(ctx context.Context, placeToTables *PlaceToTables) error
+	RemoveTableFromPlace(ctx context.Context, tableID uuid.UUID) error
 }

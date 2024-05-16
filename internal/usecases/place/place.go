@@ -2,11 +2,17 @@ package placeusecases
 
 import (
 	"context"
+	"errors"
+	"strings"
 
 	"github.com/google/uuid"
 	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	placedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/place"
+)
+
+var (
+	ErrPlacePositionIsUsed = errors.New("place position is used in tables")
 )
 
 type Service struct {
@@ -55,4 +61,29 @@ func (s *Service) GetPlaceById(ctx context.Context, dto *entitydto.IdRequest) (*
 
 func (s *Service) GetAllPlaces(ctx context.Context) ([]tableentity.Place, error) {
 	return s.r.GetAllPlaces(ctx)
+}
+
+func (s *Service) AddTableToPlace(ctx context.Context, dto *placedto.AddTableToPlaceInput) error {
+	placeToTable, err := dto.ToModel()
+	if err != nil {
+		return err
+	}
+
+	if err := s.r.AddTableToPlace(ctx, placeToTable); err != nil {
+		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+			return ErrPlacePositionIsUsed
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) RemoveTableFromPlace(ctx context.Context, dto *entitydto.IdRequest) error {
+	if err := s.r.RemoveTableFromPlace(ctx, dto.ID); err != nil {
+		return err
+	}
+
+	return nil
 }

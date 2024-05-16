@@ -28,6 +28,8 @@ func NewHandlerPlace(orderService *placeusecases.Service) *handler.Handler {
 		c.Delete("/{id}", h.handlerDeletePlaceById)
 		c.Get("/{id}", h.handlerGetPlaceById)
 		c.Get("/all", h.handlerGetAllPlaces)
+		c.Post("/add/table", h.handlerAddTableToPlace)
+		c.Delete("/remove/table/{id}", h.handlerRemoveTableFromPlace)
 	})
 
 	return handler.NewHandler("/place", c)
@@ -102,4 +104,41 @@ func (h *handlerPlaceImpl) handlerGetAllPlaces(w http.ResponseWriter, r *http.Re
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: places})
+}
+
+func (h *handlerPlaceImpl) handlerAddTableToPlace(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	dto := &placedto.AddTableToPlaceInput{}
+	if err := jsonpkg.ParseBody(r, dto); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	if err := h.s.AddTableToPlace(ctx, dto); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerPlaceImpl) handlerRemoveTableFromPlace(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.s.RemoveTableFromPlace(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }

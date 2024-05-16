@@ -412,13 +412,10 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	created, err := db.NewCreateIndex().IfNotExists().Model((*tableentity.PlaceToTables)(nil)).Unique().Index("idx_place_id_row_and_column").Column("place_id", "row", "column").Exec(ctx)
-	if err != nil {
+	if _, err := db.NewCreateIndex().IfNotExists().Model((*tableentity.PlaceToTables)(nil)).Unique().Index("idx_place_id_row_and_column").Column("place_id", "row", "column").Exec(ctx); err != nil {
 		mu.Unlock()
 		return err
 	}
-
-	fmt.Println(created.RowsAffected())
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*shiftentity.Shift)(nil)).Exec(ctx); err != nil {
 		mu.Unlock()

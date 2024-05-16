@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
@@ -73,7 +74,7 @@ func (r *PlaceRepositoryBun) GetPlaceById(ctx context.Context, id string) (*tabl
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(place).Where("id = ?", id).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(place).Where("id = ?", id).Relation("Tables").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -90,9 +91,39 @@ func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context) ([]tableentity.Pl
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&places).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&places).Relation("Tables").Scan(ctx); err != nil {
 		return nil, err
 	}
 
 	return places, nil
+}
+
+func (r *PlaceRepositoryBun) AddTableToPlace(ctx context.Context, placeToTables *tableentity.PlaceToTables) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewInsert().Model(placeToTables).Exec(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *PlaceRepositoryBun) RemoveTableFromPlace(ctx context.Context, tableID uuid.UUID) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewDelete().Model(&tableentity.PlaceToTables{}).Where("table_id = ?", tableID).Exec(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }
