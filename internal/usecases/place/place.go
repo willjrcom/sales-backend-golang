@@ -3,6 +3,7 @@ package placeusecases
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
@@ -12,7 +13,11 @@ import (
 )
 
 var (
-	ErrPlacePositionIsUsed = errors.New("place position is used in tables")
+	ErrPlacePositionIsUsed = func(name string) error { return fmt.Errorf("place position already used by table: %s", name) }
+	ErrTableAlreadyInPlace = func(name string, column, row int) error {
+		return fmt.Errorf("table already in place: %s on position: column %d, row %d", name, column, row)
+	}
+	ErrToSearchUsedTable = errors.New("error to search used table")
 )
 
 type Service struct {
@@ -69,9 +74,29 @@ func (s *Service) AddTableToPlace(ctx context.Context, dto *placedto.AddTableToP
 		return err
 	}
 
+	// If place position already used
+	if usedPlacePosition, _ := s.r.GetTableToPlaceByPlaceIDAndPosition(ctx, placeToTable.PlaceID, placeToTable.Column, placeToTable.Row); usedPlacePosition != nil {
+		if usedPlacePosition.TableID == placeToTable.TableID {
+			return nil
+		}
+
+		return ErrPlacePositionIsUsed(usedPlacePosition.Table.Name)
+	}
+
+	// If table ID already used
 	if err := s.r.AddTableToPlace(ctx, placeToTable); err != nil {
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
-			return ErrPlacePositionIsUsed
+			tableFromPlace, err := s.r.GetTableToPlaceByTableID(ctx, placeToTable.TableID)
+			if err != nil {
+				return ErrToSearchUsedTable
+			}
+
+			place, err := s.r.GetPlaceById(ctx, tableFromPlace.PlaceID.String())
+			if err != nil {
+				return ErrToSearchUsedTable
+			}
+
+			return ErrTableAlreadyInPlace(place.Name, tableFromPlace.Column, tableFromPlace.Row)
 		}
 
 		return err

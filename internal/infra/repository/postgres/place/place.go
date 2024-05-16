@@ -113,6 +113,42 @@ func (r *PlaceRepositoryBun) AddTableToPlace(ctx context.Context, placeToTables 
 	return nil
 }
 
+func (r *PlaceRepositoryBun) GetTableToPlaceByTableID(ctx context.Context, tableID uuid.UUID) (*tableentity.PlaceToTables, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	placeToTable := &tableentity.PlaceToTables{}
+
+	if err := r.db.NewSelect().Model(placeToTable).
+		Where("table_id = ?", tableID).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return placeToTable, nil
+}
+
+func (r *PlaceRepositoryBun) GetTableToPlaceByPlaceIDAndPosition(ctx context.Context, placeID uuid.UUID, column, row int) (*tableentity.PlaceToTables, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	placeToTable := &tableentity.PlaceToTables{}
+
+	if err := r.db.NewSelect().Model(placeToTable).
+		Where("place_id = ? AND \"column\" = ? AND row = ?", placeID.String(), column, row).Relation("Table").Relation("Place").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return placeToTable, nil
+}
+
 func (r *PlaceRepositoryBun) RemoveTableFromPlace(ctx context.Context, tableID uuid.UUID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()

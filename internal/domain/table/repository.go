@@ -21,5 +21,7 @@ type PlaceRepository interface {
 	GetPlaceById(ctx context.Context, id string) (*Place, error)
 	GetAllPlaces(ctx context.Context) ([]Place, error)
 	AddTableToPlace(ctx context.Context, placeToTables *PlaceToTables) error
+	GetTableToPlaceByPlaceIDAndPosition(ctx context.Context, placeID uuid.UUID, column, row int) (*PlaceToTables, error)
+	GetTableToPlaceByTableID(ctx context.Context, table uuid.UUID) (*PlaceToTables, error)
 	RemoveTableFromPlace(ctx context.Context, tableID uuid.UUID) error
 }
