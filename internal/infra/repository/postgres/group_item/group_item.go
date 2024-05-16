@@ -132,7 +132,7 @@ func (r *GroupItemRepositoryBun) GetGroupByIDWithFullCategory(ctx context.Contex
 		return nil, err
 	}
 
-	query := r.db.NewSelect().Model(item).Where("group_item.id = ?", id).Relation("Category.AdditionalCategories")
+	query := r.db.NewSelect().Model(item).Where("group_item.id = ?", id).Relation("Category.AdditionalCategories").Relation("Category.ComplementCategories")
 
 	if err := query.Scan(ctx); err != nil {
 		return nil, err

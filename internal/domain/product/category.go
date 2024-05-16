@@ -21,6 +21,7 @@ type ProductCategoryCommonAttributes struct {
 	Products             []Product         `bun:"rel:has-many,join:id=category_id" json:"products,omitempty"`
 	ProcessRules         []ProcessRule     `bun:"rel:has-many,join:id=category_id" json:"process_rules,omitempty"`
 	AdditionalCategories []ProductCategory `bun:"m2m:product_category_to_additional,join:Category=AdditionalCategory" json:"product_category_to_additional,omitempty"`
+	ComplementCategories []ProductCategory `bun:"m2m:product_category_to_complement,join:Category=ComplementCategory" json:"product_category_to_complement,omitempty"`
 }
 
 type PatchProductCategory struct {
@@ -29,6 +30,7 @@ type PatchProductCategory struct {
 	NeedPrint            *bool             `json:"need_print"`
 	RemovableIngredients []string          `json:"removable_ingredients"`
 	AdditionalCategories []ProductCategory `json:"product_category_to_additional,omitempty"`
+	ComplementCategories []ProductCategory `json:"product_category_to_complement,omitempty"`
 }
 
 func NewProductCategory(categoryCommonAttributes ProductCategoryCommonAttributes) *ProductCategory {

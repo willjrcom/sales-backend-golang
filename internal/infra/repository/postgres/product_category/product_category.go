@@ -42,7 +42,27 @@ func (r *ProductCategoryRepositoryBun) CreateCategory(ctx context.Context, cp *p
 		return err
 	}
 
-	return r.updateAdditionalCategories(ctx, tx, cp.ID, cp.AdditionalCategories)
+	if err := r.updateAdditionalCategories(ctx, &tx, cp.ID, cp.AdditionalCategories); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if err := r.updateComplementCategories(ctx, &tx, cp.ID, cp.ComplementCategories); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *ProductCategoryRepositoryBun) UpdateCategory(ctx context.Context, c *productentity.ProductCategory) error {
@@ -67,10 +87,30 @@ func (r *ProductCategoryRepositoryBun) UpdateCategory(ctx context.Context, c *pr
 		return err
 	}
 
-	return r.updateAdditionalCategories(ctx, tx, c.ID, c.AdditionalCategories)
+	if err := r.updateAdditionalCategories(ctx, &tx, c.ID, c.AdditionalCategories); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if err := r.updateComplementCategories(ctx, &tx, c.ID, c.ComplementCategories); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (r *ProductCategoryRepositoryBun) updateAdditionalCategories(ctx context.Context, tx bun.Tx, categoryID uuid.UUID, additionalCategories []productentity.ProductCategory) error {
+func (r *ProductCategoryRepositoryBun) updateAdditionalCategories(ctx context.Context, tx *bun.Tx, categoryID uuid.UUID, additionalCategories []productentity.ProductCategory) error {
 	if err := database.ChangeSchema(ctx, r.db); err != nil {
 
 		return err
@@ -99,8 +139,36 @@ func (r *ProductCategoryRepositoryBun) updateAdditionalCategories(ctx context.Co
 		}
 	}
 
-	if err := tx.Commit(); err != nil {
+	return nil
+}
+
+func (r *ProductCategoryRepositoryBun) updateComplementCategories(ctx context.Context, tx *bun.Tx, categoryID uuid.UUID, complementCategories []productentity.ProductCategory) error {
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+
 		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&productentity.ProductCategoryToComplement{}).Where("category_id = ?", categoryID).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	for _, ac := range complementCategories {
+		categoryToComplement := &productentity.ProductCategoryToComplement{
+			CategoryID:           categoryID,
+			ComplementCategoryID: ac.ID,
+		}
+
+		if _, err := tx.NewInsert().Model(categoryToComplement).Exec(ctx); err != nil {
+			if errRollBack := tx.Rollback(); errRollBack != nil {
+				return errRollBack
+			}
+
+			return err
+		}
 	}
 
 	return nil
@@ -144,6 +212,14 @@ func (r *ProductCategoryRepositoryBun) DeleteCategory(ctx context.Context, id st
 		return err
 	}
 
+	if _, err := tx.NewDelete().Model(&productentity.ProductCategoryToComplement{}).Where("complement_category_id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
 	if err := tx.Commit(); err != nil {
 		if errRollBack := tx.Rollback(); errRollBack != nil {
 			return errRollBack
@@ -165,7 +241,7 @@ func (r *ProductCategoryRepositoryBun) GetCategoryById(ctx context.Context, id s
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Relation("ComplementCategories").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -185,7 +261,7 @@ func (r *ProductCategoryRepositoryBun) GetCategoryByName(ctx context.Context, na
 	query := r.db.NewSelect().Model(category).Where("name = ?", name)
 
 	if withRelation {
-		query.Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories")
+		query.Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Relation("ComplementCategories")
 	}
 
 	if err := query.Scan(ctx); err != nil {
@@ -205,7 +281,7 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context) ([]
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&categories).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&categories).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Relation("ComplementCategories").Scan(ctx); err != nil {
 		return nil, err
 	}
 

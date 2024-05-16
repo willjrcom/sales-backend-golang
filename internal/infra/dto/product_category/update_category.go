@@ -27,5 +27,9 @@ func (c *UpdateCategoryInput) UpdateModel(category *productentity.ProductCategor
 		category.AdditionalCategories = c.AdditionalCategories
 	}
 
+	if c.ComplementCategories != nil {
+		category.ComplementCategories = c.ComplementCategories
+	}
+
 	return nil
 }

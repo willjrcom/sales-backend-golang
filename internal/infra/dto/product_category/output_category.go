@@ -42,5 +42,9 @@ func (c *CategoryOutput) FromModel(model *productentity.ProductCategory) {
 		model.AdditionalCategories = []productentity.ProductCategory{}
 	}
 
+	if len(model.ComplementCategories) == 0 {
+		model.ComplementCategories = []productentity.ProductCategory{}
+	}
+
 	c.ProductCategoryCommonAttributes = model.ProductCategoryCommonAttributes
 }
