@@ -13,16 +13,22 @@ type Place struct {
 }
 
 type PlaceCommonAttributes struct {
-	Name        string  `bun:"name,notnull" json:"name"`
-	ImagePath   *string `bun:"image_path" json:"image_path"`
-	IsAvailable bool    `bun:"is_available" json:"is_available"`
-	Tables      []Table `bun:"m2m:place_to_tables,join:Place=Table" json:"place_tables,omitempty"`
+	Name        string          `bun:"name,notnull" json:"name"`
+	ImagePath   *string         `bun:"image_path" json:"image_path"`
+	IsAvailable bool            `bun:"is_available" json:"is_available"`
+	Tables      []PlaceToTables `bun:"rel:has-many,join:id=place_id" json:"place_tables,omitempty"`
+}
+
+type PatchPlace struct {
+	Name        *string `json:"name"`
+	ImagePath   *string `json:"image_path"`
+	IsAvailable *bool   `json:"is_available"`
 }
 
 type PlaceToTables struct {
-	PlaceID uuid.UUID `bun:"type:uuid,pk"`
+	PlaceID uuid.UUID `bun:"type:uuid,pk" json:"place_id,omitempty"`
 	Place   *Place    `bun:"rel:belongs-to,join:place_id=id" json:"place,omitempty"`
-	TableID uuid.UUID `bun:"type:uuid,pk"`
+	TableID uuid.UUID `bun:"type:uuid,pk" json:"table_id,omitempty"`
 	Table   *Table    `bun:"rel:belongs-to,join:table_id=id" json:"table,omitempty"`
 	Column  int       `bun:"column:column,notnull" json:"column"`
 	Row     int       `bun:"column:row,notnull" json:"row"`

@@ -26,6 +26,7 @@ func NewHandlerPlace(orderService *placeusecases.Service) *handler.Handler {
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerCreatePlace)
 		c.Delete("/{id}", h.handlerDeletePlaceById)
+		c.Patch("/update/{id}", h.handlerUpdatePlaceById)
 		c.Get("/{id}", h.handlerGetPlaceById)
 		c.Get("/all", h.handlerGetAllPlaces)
 		c.Post("/add/table", h.handlerAddTableToPlace)
@@ -92,6 +93,32 @@ func (h *handlerPlaceImpl) handlerGetPlaceById(w http.ResponseWriter, r *http.Re
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: place})
+}
+
+func (h *handlerPlaceImpl) handlerUpdatePlaceById(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	dtoPlace := &placedto.UpdatePlaceInput{}
+	if err := jsonpkg.ParseBody(r, dtoPlace); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	if err := h.s.UpdatePlace(ctx, dtoId, dtoPlace); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerPlaceImpl) handlerGetAllPlaces(w http.ResponseWriter, r *http.Request) {

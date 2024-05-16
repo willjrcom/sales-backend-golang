@@ -74,7 +74,7 @@ func (r *PlaceRepositoryBun) GetPlaceById(ctx context.Context, id string) (*tabl
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(place).Where("id = ?", id).Relation("Tables").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(place).Where("id = ?", id).Relation("Tables.Table").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -91,7 +91,7 @@ func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context) ([]tableentity.Pl
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&places).Relation("Tables").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&places).Relation("Tables.Table").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -123,8 +123,7 @@ func (r *PlaceRepositoryBun) GetTableToPlaceByTableID(ctx context.Context, table
 
 	placeToTable := &tableentity.PlaceToTables{}
 
-	if err := r.db.NewSelect().Model(placeToTable).
-		Where("table_id = ?", tableID).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(placeToTable).Where("table_id = ?", tableID).Scan(ctx); err != nil {
 		return nil, err
 	}
 

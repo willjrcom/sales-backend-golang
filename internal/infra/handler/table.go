@@ -26,6 +26,7 @@ func NewHandlerTable(orderService *tableusecases.Service) *handler.Handler {
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerCreateTable)
 		c.Delete("/{id}", h.handlerDeleteTableById)
+		c.Patch("/update/{id}", h.handlerUpdateTableById)
 		c.Get("/{id}", h.handlerGetTableById)
 		c.Get("/all", h.handlerGetAllTables)
 	})
@@ -90,6 +91,32 @@ func (h *handlerTableImpl) handlerGetTableById(w http.ResponseWriter, r *http.Re
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: table})
+}
+
+func (h *handlerTableImpl) handlerUpdateTableById(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	dtoTable := &tabledto.UpdateTableInput{}
+	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	if err := h.s.UpdateTable(ctx, dtoId, dtoTable); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerTableImpl) handlerGetAllTables(w http.ResponseWriter, r *http.Request) {

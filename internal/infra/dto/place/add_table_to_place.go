@@ -1,4 +1,4 @@
-package tabledto
+package placedto
 
 import (
 	"errors"

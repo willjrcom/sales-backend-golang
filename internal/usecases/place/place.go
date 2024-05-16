@@ -44,6 +44,23 @@ func (s *Service) CreatePlace(ctx context.Context, dto *placedto.CreatePlaceInpu
 	return place.ID, nil
 }
 
+func (s *Service) UpdatePlace(ctx context.Context, dtoId *entitydto.IdRequest, dto *placedto.UpdatePlaceInput) error {
+	place, err := s.r.GetPlaceById(ctx, dtoId.ID.String())
+	if err != nil {
+		return err
+	}
+
+	if err := dto.UpdateModel(place); err != nil {
+		return err
+	}
+
+	if err = s.r.UpdatePlace(ctx, place); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Service) DeletePlace(ctx context.Context, dto *entitydto.IdRequest) error {
 	if _, err := s.r.GetPlaceById(ctx, dto.ID.String()); err != nil {
 		return err

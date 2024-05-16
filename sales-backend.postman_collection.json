@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d1e1dd2a-dba5-4f9a-b585-b777cd408f15",
+		"_postman_id": "f4ff2515-0175-4c12-9710-a108d69b2c49",
 		"name": "sales-backend",
 		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "28610432"
@@ -40,7 +40,6 @@
 									{
 										"key": "Content-Type",
 										"value": "multipart/form-data",
-										"type": "text",
 										"disabled": true
 									}
 								],
@@ -159,7 +158,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"code\": \"a12\",\n    \"name\": \"Pizza de Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 15.0,\n    \"category_id\": \"{{product_category_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
+									"raw": "// NEED LOGIN\n{\n    \"product_category_to_combo\": [\n        {\"id\": \"8133b042-b78d-4844-84ed-8c1d6da25e87\"}\n    ]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -6050,15 +6049,6 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n{}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": "{{server}}/delivery-driver/{{delivery_driver_id}}"
 									},
 									"status": "OK",
@@ -6112,15 +6102,6 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "// NEED LOGIN\r\n{}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
 										"url": "{{server}}/delivery-driver/all"
 									},
 									"status": "OK",
@@ -7297,7 +7278,6 @@
 							{
 								"key": "",
 								"value": "",
-								"type": "text",
 								"disabled": true
 							}
 						],
@@ -7752,8 +7732,7 @@
 						"header": [
 							{
 								"key": "access-token",
-								"value": "{{access-token}}",
-								"type": "text"
+								"value": "{{access-token}}"
 							}
 						],
 						"body": {
@@ -8077,6 +8056,65 @@
 					]
 				},
 				{
+					"name": "update",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"Mesa 1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/table/update/{{table_id}}"
+					},
+					"response": [
+						{
+							"name": "update",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"Mesa 1\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/table/update/{{table_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 16 May 2024 19:24:19 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
+				},
+				{
 					"name": "delete by id",
 					"request": {
 						"method": "DELETE",
@@ -8323,6 +8361,65 @@
 					]
 				},
 				{
+					"name": "update",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"Central\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/place/update/{{place_id}}"
+					},
+					"response": [
+						{
+							"name": "update",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{\r\n    \"name\": \"Central\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/place/update/{{place_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 16 May 2024 19:24:08 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2"
+								}
+							],
+							"cookie": [],
+							"body": "{}"
+						}
+					]
+				},
+				{
 					"name": "delete by id",
 					"request": {
 						"method": "DELETE",
@@ -8406,15 +8503,6 @@
 							"originalRequest": {
 								"method": "GET",
 								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "// NEED LOGIN\r\n{}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
 								"url": "{{server}}/place/all"
 							},
 							"status": "OK",
@@ -8815,7 +8903,7 @@
 		},
 		{
 			"key": "place_id",
-			"value": ""
+			"value": "d5d5a2b3-273f-4b3d-bf58-1be0297af086"
 		}
 	]
 }

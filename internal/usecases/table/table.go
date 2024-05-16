@@ -29,13 +29,28 @@ func (s *Service) CreateTable(ctx context.Context, dto *tabledto.CreateTableInpu
 		return uuid.Nil, err
 	}
 
-	err = s.r.CreateTable(ctx, table)
-
-	if err != nil {
+	if err = s.r.CreateTable(ctx, table); err != nil {
 		return uuid.Nil, err
 	}
 
 	return table.ID, nil
+}
+
+func (s *Service) UpdateTable(ctx context.Context, dtoId *entitydto.IdRequest, dto *tabledto.UpdateTableInput) error {
+	table, err := s.r.GetTableById(ctx, dtoId.ID.String())
+	if err != nil {
+		return err
+	}
+
+	if err := dto.UpdateModel(table); err != nil {
+		return err
+	}
+
+	if err = s.r.UpdateTable(ctx, table); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Service) DeleteTable(ctx context.Context, dto *entitydto.IdRequest) error {

@@ -18,6 +18,11 @@ type TableCommonAttributes struct {
 	Orders      []orderentity.OrderTable `bun:"rel:has-many,join:id=table_id" json:"orders,omitempty"`
 }
 
+type PatchTable struct {
+	Name        *string `json:"name"`
+	IsAvailable *bool   `json:"is_available"`
+}
+
 func (t *Table) LockTable() {
 	t.IsAvailable = false
 }
