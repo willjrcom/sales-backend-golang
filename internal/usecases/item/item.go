@@ -42,6 +42,10 @@ func (s *Service) AddDependencies(rgi groupitementity.GroupItemRepository, ro or
 }
 
 func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInput) (ids *itemdto.ItemIDAndGroupItemOutput, err error) {
+	if err := dto.Validate(); err != nil {
+		return nil, err
+	}
+
 	if _, err := s.ro.GetOrderById(ctx, dto.OrderID.String()); err != nil {
 		return nil, err
 	}

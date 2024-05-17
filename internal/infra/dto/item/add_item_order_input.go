@@ -23,7 +23,7 @@ type AddItemOrderInput struct {
 	Observation string     `json:"observation"`
 }
 
-func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *groupitementity.GroupItem, quantity *productentity.Quantity) error {
+func (a *AddItemOrderInput) Validate() error {
 	if a.OrderID == uuid.Nil {
 		return errors.New("order id is required")
 	}
@@ -36,6 +36,10 @@ func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *
 		return errors.New("quantity id is required")
 	}
 
+	return nil
+}
+
+func (a *AddItemOrderInput) validateInternal(product *productentity.Product, groupItem *groupitementity.GroupItem, quantity *productentity.Quantity) error {
 	if a.QuantityID != quantity.ID {
 		return errors.New("quantity id is invalid")
 	}
@@ -55,7 +59,7 @@ func (a *AddItemOrderInput) validate(product *productentity.Product, groupItem *
 }
 
 func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *groupitementity.GroupItem, quantity *productentity.Quantity) (item *itementity.Item, err error) {
-	if err = a.validate(product, groupItem, quantity); err != nil {
+	if err = a.validateInternal(product, groupItem, quantity); err != nil {
 		return
 	}
 
