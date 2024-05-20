@@ -27,7 +27,7 @@ type S3Client struct {
 func NewS3Client() *S3Client {
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 
 	return &S3Client{

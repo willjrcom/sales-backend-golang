@@ -7,5 +7,7 @@ WORKDIR /app
 # Copie o código-fonte para dentro do contêiner
 COPY . .
 
+RUN brew install librdkafka
+
 # Execute o servidor diretamente
 CMD ["go", "run", "main.go", "httpserver", "-e", "prod"]

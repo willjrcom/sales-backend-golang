@@ -53,7 +53,7 @@ func ConnectRdsDB(ctx context.Context) string {
 	)
 }
 
-func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
+func NewPostgreSQLConnection(ctx context.Context) *bun.DB {
 	// Prepare connection string parameterized
 	connectionParams := ""
 	environment := ctx.Value(Environment("environment"))
@@ -70,7 +70,7 @@ func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 	// Verifique se o banco de dados já existe.
 	if err := db.Ping(); err != nil {
 		log.Printf("erro ao conectar ao banco de dados: %v", err)
-		return nil, err
+		panic(err)
 	}
 
 	// set connection settings
@@ -81,29 +81,29 @@ func NewPostgreSQLConnection(ctx context.Context) (*bun.DB, error) {
 	dbBun := bun.NewDB(db, pgdialect.New())
 
 	if err := LoadAllSchemas(ctx, dbBun); err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.LOST_SCHEMA)
 	if err := CreateSchema(ctx, dbBun); err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
 	if err := CreateSchema(ctx, dbBun); err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	if err := defaultTables(ctx, dbBun); err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	if err := LoadAllSchemas(ctx, dbBun); err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	fmt.Println("Db connected")
-	return dbBun, nil
+	return dbBun
 }
 
 func ChangeSchema(ctx context.Context, db *bun.DB) error {

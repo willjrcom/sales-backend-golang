@@ -6,11 +6,13 @@ package cmd
 import (
 	"context"
 	"flag"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	"github.com/willjrcom/sales-backend-go/internal/infra/modules"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/kafka"
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
@@ -28,15 +30,31 @@ var HttpserverCmd = &cobra.Command{
 		chi := server.NewServerChi()
 
 		s3Service := s3service.NewS3Client()
+		cmd.Println("s3 loaded")
 
 		// Load database
-		db, err := database.NewPostgreSQLConnection(ctx)
+		db := database.NewPostgreSQLConnection(ctx)
+		cmd.Println("db loaded")
 
-		if err != nil {
-			panic(err)
-		}
+		producerKafka := kafka.NewProducer()
+		cmd.Println("kafka producer loaded")
 
-		modules.MainModules(db, chi, s3Service)
+		consumerKafka := kafka.NewConsumer()
+		cmd.Println("kafka consumer loaded")
+
+		// Iniciar a goroutine para flush
+		go func() {
+			for {
+				// Esperar 1 segundo antes de chamar o Flush novamente
+				time.Sleep(10 * time.Second)
+				producerKafka.Flush(int(time.Second) * 15)
+			}
+		}()
+
+		go consumerKafka.ReadMessages("order_process")
+
+		modules.MainModules(db, chi, s3Service, producerKafka)
+		cmd.Println("modules loaded")
 
 		if err := chi.StartServer(port); err != nil {
 			panic(err)
