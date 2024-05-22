@@ -46,7 +46,7 @@ func (c *KafkaConsumer) ReadMessages(topic string) {
 			fmt.Printf("Recebido sinal %v, finalizando...\n", sig)
 			run = false
 		default:
-			msg, err := c.ReadMessage(time.Second * 120)
+			msg, err := c.ReadMessage(-1)
 			if err == nil {
 				process := &orderprocessentity.OrderProcess{}
 				json.Unmarshal(msg.Value, process)

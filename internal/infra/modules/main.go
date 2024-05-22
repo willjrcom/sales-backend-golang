@@ -7,7 +7,7 @@ import (
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
-func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, producerKafka *kafka.KafkaProducer) {
+func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, producerKafka *kafka.KafkaProducer, consumerKafka *kafka.KafkaConsumer) {
 	productRepository, productService, _ := NewProductCategoryProductModule(db, chi)
 	productCategoryRepository, _, _ := NewProductCategoryModule(db, chi)
 	_, sizeService, _ := NewProductCategorySizeModule(db, chi)
@@ -60,5 +60,5 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, prod
 	orderTableService.AddDependencies(tableRepository, orderService)
 	orderPickupService.AddDependencies(orderService)
 
-	companyService.AddDependencies(addressRepository, *schemaService, userRepository, *userService)
+	companyService.AddDependencies(addressRepository, *schemaService, userRepository, *userService, consumerKafka)
 }

@@ -51,9 +51,7 @@ var HttpserverCmd = &cobra.Command{
 			}
 		}()
 
-		go consumerKafka.ReadMessages("order_process")
-
-		modules.MainModules(db, chi, s3Service, producerKafka)
+		modules.MainModules(db, chi, s3Service, producerKafka, consumerKafka)
 		cmd.Println("modules loaded")
 
 		if err := chi.StartServer(port); err != nil {

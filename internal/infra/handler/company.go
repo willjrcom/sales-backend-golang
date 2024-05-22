@@ -29,6 +29,7 @@ func NewHandlerCompany(companyService *companyusecases.Service) *handler.Handler
 		c.Get("/", h.handlerGetCompany)
 		c.Post("/add/user", h.handlerAddUserToCompany)
 		c.Post("/remove/user", h.handlerRemoveUserFromCompany)
+		c.Post("/test", h.handlerTest)
 	})
 
 	unprotectedRoutes := []string{
@@ -100,6 +101,17 @@ func (h *handlerCompanyImpl) handlerRemoveUserFromCompany(w http.ResponseWriter,
 	}
 
 	if err := h.s.RemoveUserFromCompany(ctx, dtoUser); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerCompanyImpl) handlerTest(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	if err := h.s.Test(ctx); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

@@ -13,6 +13,7 @@ import (
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/kafka"
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 )
 
@@ -22,17 +23,19 @@ type Service struct {
 	s  schemaservice.Service
 	u  companyentity.UserRepository
 	us userusecases.Service
+	kc *kafka.KafkaConsumer
 }
 
 func NewService(r companyentity.CompanyRepository) *Service {
 	return &Service{r: r}
 }
 
-func (s *Service) AddDependencies(a addressentity.Repository, ss schemaservice.Service, u companyentity.UserRepository, us userusecases.Service) {
+func (s *Service) AddDependencies(a addressentity.Repository, ss schemaservice.Service, u companyentity.UserRepository, us userusecases.Service, kc *kafka.KafkaConsumer) {
 	s.a = a
 	s.s = ss
 	s.u = u
 	s.us = us
+	s.kc = kc
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) (id uuid.UUID, schemaName *string, err error) {
@@ -151,5 +154,10 @@ func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.Use
 		return err
 	}
 
+	return nil
+}
+
+func (s *Service) Test(ctx context.Context) error {
+	s.kc.ReadMessages("order_process")
 	return nil
 }
