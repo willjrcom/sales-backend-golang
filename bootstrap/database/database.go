@@ -84,21 +84,7 @@ func NewPostgreSQLConnection(ctx context.Context) *bun.DB {
 		panic(err)
 	}
 
-	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.LOST_SCHEMA)
-	if err := CreateSchema(ctx, dbBun); err != nil {
-		panic(err)
-	}
-
-	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
-	if err := CreateSchema(ctx, dbBun); err != nil {
-		panic(err)
-	}
-
 	if err := defaultTables(ctx, dbBun); err != nil {
-		panic(err)
-	}
-
-	if err := LoadAllSchemas(ctx, dbBun); err != nil {
 		panic(err)
 	}
 
@@ -145,6 +131,11 @@ func CreateSchema(ctx context.Context, db *bun.DB) error {
 }
 
 func defaultTables(ctx context.Context, db *bun.DB) error {
+	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
+	if err := CreateSchema(ctx, db); err != nil {
+		panic(err)
+	}
+
 	db.RegisterModel((*companyentity.User)(nil))
 	db.RegisterModel((*companyentity.CompanyToUsers)(nil))
 	db.RegisterModel((*companyentity.CompanyWithUsers)(nil))
@@ -215,13 +206,13 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	mu := sync.Mutex{}
 
 	mu.Lock()
+	defer mu.Unlock()
+
 	if err := CreateSchema(ctx, db); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if err := ChangeSchema(ctx, db); err != nil {
-		mu.Unlock()
 		return err
 	}
 
@@ -269,173 +260,137 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 	mu := sync.Mutex{}
 
 	mu.Lock()
-	if err := CreateSchema(ctx, db); err != nil {
-		mu.Unlock()
-		return err
-	}
+	defer mu.Unlock()
 
 	if err := ChangeSchema(ctx, db); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*entity.Entity)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Size)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProductCategoryToAdditional)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProductCategoryToComplement)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProductToCombo)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProductCategory)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Quantity)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProcessRule)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Product)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*addressentity.Address)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*personentity.Contact)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*personentity.Person)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*cliententity.Client)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*employeeentity.Employee)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.OrderProcess)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.OrderQueue)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*groupitementity.GroupItem)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.OrderProcessToProductToGroupItem)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*itementity.Item)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*itementity.ItemToAdditional)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.OrderPickup)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.OrderDelivery)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.DeliveryDriver)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.OrderTable)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.PaymentOrder)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.Order)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*tableentity.Table)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*tableentity.Place)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*tableentity.PlaceToTables)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateIndex().IfNotExists().Model((*tableentity.PlaceToTables)(nil)).Unique().Index("idx_place_id_row_and_column").Column("place_id", "row", "column").Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*shiftentity.Shift)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.Company)(nil)).Exec(ctx); err != nil {
-		mu.Unlock()
 		return err
 	}
 
