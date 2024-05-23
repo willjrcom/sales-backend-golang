@@ -38,7 +38,7 @@ var HttpserverCmd = &cobra.Command{
 
 		producerKafka := kafka.NewProducer()
 		cmd.Println("kafka producer loaded")
-
+		producerKafka.NewMessage(ctx, "testes", "mensagem")
 		consumerKafka := kafka.NewConsumer()
 		cmd.Println("kafka consumer loaded")
 

@@ -158,6 +158,6 @@ func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.Use
 }
 
 func (s *Service) Test(ctx context.Context) error {
-	s.kc.ReadMessages("order_process")
+	go kafka.ReadMessages("order_process")
 	return nil
 }
