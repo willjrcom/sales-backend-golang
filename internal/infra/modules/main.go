@@ -3,11 +3,10 @@ package modules
 import (
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
-	"github.com/willjrcom/sales-backend-go/internal/infra/service/kafka"
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
-func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, producerKafka *kafka.KafkaProducer, consumerKafka *kafka.KafkaConsumer) {
+func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	productRepository, productService, _ := NewProductCategoryProductModule(db, chi)
 	productCategoryRepository, _, _ := NewProductCategoryModule(db, chi)
 	_, sizeService, _ := NewProductCategorySizeModule(db, chi)
@@ -50,7 +49,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, prod
 	employeeService.AddDependencies(contactRepository)
 
 	orderQueueService.AddDependencies(orderProcessRepository)
-	orderProcessService.AddDependencies(orderQueueService, processRuleRepository, groupItemService, producerKafka)
+	orderProcessService.AddDependencies(orderQueueService, processRuleRepository, groupItemService)
 
 	itemService.AddDependencies(groupItemRepository, orderRepository, productRepository, quantityRepository)
 	groupItemService.AddDependencies(itemRepository, productRepository)
@@ -60,5 +59,5 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, prod
 	orderTableService.AddDependencies(tableRepository, orderService)
 	orderPickupService.AddDependencies(orderService)
 
-	companyService.AddDependencies(addressRepository, *schemaService, userRepository, *userService, consumerKafka)
+	companyService.AddDependencies(addressRepository, *schemaService, userRepository, *userService)
 }

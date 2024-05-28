@@ -16,22 +16,20 @@ import (
 )
 
 type Service struct {
-	r             orderprocessentity.ProcessRepository
-	rpr           productentity.ProcessRuleRepository
-	sq            *orderqueueusecases.Service
-	rsgi          *groupitemusecases.Service
-	producerKafka *kafka.KafkaProducer
+	r    orderprocessentity.ProcessRepository
+	rpr  productentity.ProcessRuleRepository
+	sq   *orderqueueusecases.Service
+	rsgi *groupitemusecases.Service
 }
 
 func NewService(c orderprocessentity.ProcessRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) AddDependencies(sq *orderqueueusecases.Service, rpr productentity.ProcessRuleRepository, rsgi *groupitemusecases.Service, producerKafka *kafka.KafkaProducer) {
+func (s *Service) AddDependencies(sq *orderqueueusecases.Service, rpr productentity.ProcessRuleRepository, rsgi *groupitemusecases.Service) {
 	s.rpr = rpr
 	s.sq = sq
 	s.rsgi = rsgi
-	s.producerKafka = producerKafka
 }
 
 func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.CreateProcessInput) (uuid.UUID, error) {
@@ -63,7 +61,8 @@ func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.Create
 		return uuid.Nil, err
 	}
 
-	if err := s.producerKafka.NewMessage(ctx, "order_process", process); err != nil {
+	producerKafka := kafka.NewProducer()
+	if err := producerKafka.NewMessage(ctx, "order_process", process); err != nil {
 		return uuid.Nil, err
 	}
 
