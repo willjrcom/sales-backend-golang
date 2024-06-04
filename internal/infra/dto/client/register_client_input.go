@@ -30,7 +30,7 @@ func (r *CreateClientInput) validate() error {
 		return ErrAddressRequired
 	}
 
-	if r.Address != nil && r.Address.DeliveryTax <= 0 {
+	if r.Address != nil && r.Address.DeliveryTax != nil {
 		return ErrDeliveryTaxRequired
 	}
 
@@ -68,7 +68,7 @@ func (r *CreateClientInput) ToModel() (*cliententity.Client, error) {
 		return nil, err
 	}
 
-	if err := person.AddAddress(&r.Address.AddressCommonAttributes); err != nil {
+	if err := person.AddAddress(r.Address); err != nil {
 		return nil, err
 	}
 

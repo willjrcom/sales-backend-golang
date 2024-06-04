@@ -64,3 +64,49 @@ func NewAddress(addressCommonAttributes *AddressCommonAttributes) *Address {
 		AddressCommonAttributes: *addressCommonAttributes,
 	}
 }
+
+func NewPatchAddress(patchAddress *PatchAddress, objectID uuid.UUID) *Address {
+	addressCommonAttributes := AddressCommonAttributes{}
+	addressCommonAttributes.ObjectID = objectID
+
+	if patchAddress.Cep != nil {
+		addressCommonAttributes.Cep = *patchAddress.Cep
+	}
+
+	if patchAddress.DeliveryTax != nil {
+		addressCommonAttributes.DeliveryTax = *patchAddress.DeliveryTax
+	}
+
+	if patchAddress.Street != nil {
+		addressCommonAttributes.Street = *patchAddress.Street
+	}
+
+	if patchAddress.Number != nil {
+		addressCommonAttributes.Number = *patchAddress.Number
+	}
+
+	if patchAddress.Complement != nil {
+		addressCommonAttributes.Complement = *patchAddress.Complement
+	}
+
+	if patchAddress.Reference != nil {
+		addressCommonAttributes.Reference = *patchAddress.Reference
+	}
+
+	if patchAddress.Neighborhood != nil {
+		addressCommonAttributes.Neighborhood = *patchAddress.Neighborhood
+	}
+
+	if patchAddress.City != nil {
+		addressCommonAttributes.City = *patchAddress.City
+	}
+
+	if patchAddress.State != nil {
+		addressCommonAttributes.State = *patchAddress.State
+	}
+
+	return &Address{
+		Entity:                  entity.NewEntity(),
+		AddressCommonAttributes: addressCommonAttributes,
+	}
+}

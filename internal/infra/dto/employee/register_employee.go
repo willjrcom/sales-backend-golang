@@ -63,7 +63,7 @@ func (r *CreateEmployeeInput) ToModel() (*employeeentity.Employee, error) {
 		return nil, err
 	}
 
-	if err := person.AddAddress(&r.Address.AddressCommonAttributes); err != nil {
+	if err := person.AddAddress(r.Address); err != nil {
 		return nil, err
 	}
 

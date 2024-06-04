@@ -47,7 +47,7 @@ func (r *UpdateEmployeeInput) UpdateModel(client *employeeentity.Employee) error
 		}
 	}
 	if r.Address != nil {
-		if err := client.AddAddress(&r.Address.AddressCommonAttributes); err != nil {
+		if err := client.AddAddress(r.Address); err != nil {
 			return err
 		}
 	}

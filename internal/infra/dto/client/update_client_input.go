@@ -21,7 +21,7 @@ func (r *UpdateClientInput) validate() error {
 		return ErrInvalidEmail
 	}
 
-	if r.Address != nil && r.Address.DeliveryTax <= 0 {
+	if r.Address != nil && r.Address.DeliveryTax != nil {
 		return ErrDeliveryTaxRequired
 	}
 
@@ -51,7 +51,7 @@ func (r *UpdateClientInput) UpdateModel(client *cliententity.Client) error {
 		}
 	}
 	if r.Address != nil {
-		if err := client.AddAddress(&r.Address.AddressCommonAttributes); err != nil {
+		if err := client.AddAddress(r.Address); err != nil {
 			return err
 		}
 	}
