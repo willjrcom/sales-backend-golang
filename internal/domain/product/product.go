@@ -34,11 +34,6 @@ type ProductCommonAttributes struct {
 	Size        *Size            `bun:"rel:belongs-to" json:"size,omitempty"`
 }
 
-type Combo struct {
-	IsCombo       bool      `bun:"is_combo,notnull" json:"is_combo"`
-	ComboProducts []Product `bun:"m2m:product_category_to_combo,join:ComboProduct=Product" json:"product_category_to_combo,omitempty"`
-}
-
 type PatchProduct struct {
 	Code        *string    `json:"code"`
 	Name        *string    `json:"name"`
