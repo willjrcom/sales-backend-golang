@@ -26,7 +26,7 @@ type PatchPerson struct {
 	Email    *string                     `json:"email"`
 	Cpf      *string                     `json:"cpf"`
 	Birthday *time.Time                  `json:"birthday"`
-	Contact  *string                     `json:"contact"`
+	Contact  *ContactCommonAttributes    `json:"contact"`
 	Address  *addressentity.PatchAddress `json:"address"`
 }
 
@@ -37,21 +37,11 @@ func NewPerson(personCommonAttributes PersonCommonAttributes) *Person {
 	}
 }
 
-func (p *Person) AddContact(contactInput *string, contactType ContactType) error {
-	ddd, number, err := ValidateAndExtractContact(*contactInput)
+func (p *Person) AddContact(contactInput *ContactCommonAttributes, contactType ContactType) error {
+	contactInput.Type = contactType
 
-	if err != nil {
-		return err
-	}
-
-	attributes := ContactCommonAttributes{
-		ObjectID: p.ID,
-		Ddd:      ddd,
-		Number:   number,
-		Type:     contactType,
-	}
-
-	p.Contact = NewContact(attributes)
+	p.Contact = NewContact(contactInput)
+	p.Contact.ObjectID = p.ID
 	return nil
 }
 

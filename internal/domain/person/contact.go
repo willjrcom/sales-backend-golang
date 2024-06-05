@@ -18,13 +18,13 @@ type Contact struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:contacts"`
 	ContactCommonAttributes
+	ObjectID uuid.UUID `bun:"object_id,type:uuid,notnull" json:"object_id"`
 }
 
 type ContactCommonAttributes struct {
-	ObjectID uuid.UUID   `bun:"object_id,type:uuid,notnull" json:"object_id"`
-	Ddd      string      `bun:"ddd,notnull" json:"ddd"`
-	Number   string      `bun:"number,notnull" json:"number"`
-	Type     ContactType `bun:"type,notnull" json:"type"`
+	Ddd    string      `bun:"ddd,notnull" json:"ddd"`
+	Number string      `bun:"number,notnull" json:"number"`
+	Type   ContactType `bun:"type,notnull" json:"type"`
 }
 
 type ContactType string
@@ -41,10 +41,10 @@ func GetAllOrderStatus() []ContactType {
 	}
 }
 
-func NewContact(contactCommonAttributes ContactCommonAttributes) *Contact {
+func NewContact(contactCommonAttributes *ContactCommonAttributes) *Contact {
 	return &Contact{
 		Entity:                  entity.NewEntity(),
-		ContactCommonAttributes: contactCommonAttributes,
+		ContactCommonAttributes: *contactCommonAttributes,
 	}
 }
 

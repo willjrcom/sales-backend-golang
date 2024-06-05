@@ -57,14 +57,16 @@ func (c *CreateContactInput) ToModel() (*personentity.Contact, error) {
 	}
 
 	contactCommonAttributes := personentity.ContactCommonAttributes{
-		ObjectID: id,
-		Ddd:      ddd,
-		Number:   number,
-		Type:     contactType,
+		Ddd:    ddd,
+		Number: number,
+		Type:   contactType,
 	}
 
-	return &personentity.Contact{
+	contact := &personentity.Contact{
 		Entity:                  entity.NewEntity(),
 		ContactCommonAttributes: contactCommonAttributes,
-	}, nil
+	}
+
+	contact.ObjectID = id
+	return contact, nil
 }
