@@ -32,7 +32,7 @@ func (c *ServerChi) newServer() {
 	c.Router = chi.NewRouter()
 	Cors := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"}, // Permitir solicitações apenas a partir deste domínio
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
 	})
