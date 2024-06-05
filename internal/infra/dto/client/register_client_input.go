@@ -30,7 +30,7 @@ func (r *CreateClientInput) validate() error {
 		return ErrAddressRequired
 	}
 
-	if r.Address != nil && r.Address.DeliveryTax != nil {
+	if r.Address != nil && r.Address.DeliveryTax != nil && *r.Address.DeliveryTax == 0 {
 		return ErrDeliveryTaxRequired
 	}
 
