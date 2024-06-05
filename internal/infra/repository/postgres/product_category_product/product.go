@@ -41,14 +41,6 @@ func (r *ProductRepositoryBun) CreateProduct(ctx context.Context, p *productenti
 		return err
 	}
 
-	if err := r.updateComboProducts(ctx, &tx, p.ID, p.ComboProducts); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
-		return err
-	}
-
 	if err := tx.Commit(); err != nil {
 		return err
 	}
@@ -71,14 +63,6 @@ func (r *ProductRepositoryBun) UpdateProduct(ctx context.Context, p *productenti
 	}
 
 	if _, err := r.db.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
-		return err
-	}
-
-	if err := r.updateComboProducts(ctx, &tx, p.ID, p.ComboProducts); err != nil {
 		if errRollBack := tx.Rollback(); errRollBack != nil {
 			return errRollBack
 		}

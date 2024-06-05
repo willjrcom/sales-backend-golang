@@ -4,7 +4,6 @@ import (
 	"errors"
 	"mime/multipart"
 
-	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -17,24 +16,24 @@ var (
 )
 
 type CreateProductInput struct {
-	productentity.ProductCommonAttributes
+	productentity.PatchProduct
 	Image *multipart.File `json:"image"`
 }
 
 func (p *CreateProductInput) validate() error {
-	if p.Code == "" {
+	if p.Code == nil {
 		return ErrCodeRequired
 	}
-	if p.Name == "" {
+	if p.Name == nil {
 		return ErrNameRequired
 	}
-	if p.Price < p.Cost {
+	if p.Price != nil && p.Cost != nil && *p.Price < *p.Cost {
 		return ErrCostGreaterThanPrice
 	}
-	if len(p.CategoryID.String()) == 0 || p.CategoryID == uuid.Nil {
+	if len(p.CategoryID.String()) == 0 || p.CategoryID == nil {
 		return ErrCategoryRequired
 	}
-	if p.SizeID == uuid.Nil {
+	if p.SizeID == nil {
 		return ErrSizeRequired
 	}
 
@@ -46,5 +45,5 @@ func (p *CreateProductInput) ToModel() (*productentity.Product, error) {
 		return nil, err
 	}
 
-	return productentity.NewProduct(p.ProductCommonAttributes), nil
+	return productentity.NewPatchProduct(p.PatchProduct), nil
 }

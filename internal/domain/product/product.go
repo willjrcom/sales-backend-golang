@@ -20,7 +20,6 @@ type Product struct {
 }
 
 type ProductCommonAttributes struct {
-	Combo
 	Code        string           `bun:"code,unique,notnull" json:"code"`
 	Name        string           `bun:"name,notnull" json:"name"`
 	Flavors     []string         `bun:"flavors,type:jsonb" json:"flavors,omitempty"`
@@ -41,21 +40,58 @@ type Combo struct {
 }
 
 type PatchProduct struct {
-	Code          *string    `json:"code"`
-	Name          *string    `json:"name"`
-	Flavors       []string   `json:"flavors,omitempty"`
-	ImagePath     *string    `json:"image_path"`
-	Description   *string    `json:"description"`
-	Price         *float64   `json:"price"`
-	Cost          *float64   `json:"cost"`
-	IsAvailable   *bool      `json:"is_available"`
-	CategoryID    *uuid.UUID `json:"category_id"`
-	SizeID        *uuid.UUID `json:"size_id"`
-	IsCombo       bool       `json:"is_combo"`
-	ComboProducts *[]Product `json:"product_category_to_combo"`
+	Code        *string    `json:"code"`
+	Name        *string    `json:"name"`
+	Flavors     []string   `json:"flavors,omitempty"`
+	ImagePath   *string    `json:"image_path"`
+	Description *string    `json:"description"`
+	Price       *float64   `json:"price"`
+	Cost        *float64   `json:"cost"`
+	IsAvailable *bool      `json:"is_available"`
+	CategoryID  *uuid.UUID `json:"category_id"`
+	SizeID      *uuid.UUID `json:"size_id"`
 }
 
 func NewProduct(productCommonAttributes ProductCommonAttributes) *Product {
+	return &Product{
+		Entity:                  entity.NewEntity(),
+		ProductCommonAttributes: productCommonAttributes,
+	}
+}
+func NewPatchProduct(patchProduct PatchProduct) *Product {
+	productCommonAttributes := ProductCommonAttributes{}
+
+	if patchProduct.Code != nil {
+		productCommonAttributes.Code = *patchProduct.Code
+	}
+	if patchProduct.Name != nil {
+		productCommonAttributes.Name = *patchProduct.Name
+	}
+	if patchProduct.Flavors != nil {
+		productCommonAttributes.Flavors = patchProduct.Flavors
+	}
+	if patchProduct.ImagePath != nil {
+		productCommonAttributes.ImagePath = patchProduct.ImagePath
+	}
+	if patchProduct.Description != nil {
+		productCommonAttributes.Description = *patchProduct.Description
+	}
+	if patchProduct.Price != nil {
+		productCommonAttributes.Price = *patchProduct.Price
+	}
+	if patchProduct.Cost != nil {
+		productCommonAttributes.Cost = *patchProduct.Cost
+	}
+	if patchProduct.IsAvailable != nil {
+		productCommonAttributes.IsAvailable = *patchProduct.IsAvailable
+	}
+	if patchProduct.CategoryID != nil {
+		productCommonAttributes.CategoryID = *patchProduct.CategoryID
+	}
+	if patchProduct.SizeID != nil {
+		productCommonAttributes.SizeID = *patchProduct.SizeID
+	}
+
 	return &Product{
 		Entity:                  entity.NewEntity(),
 		ProductCommonAttributes: productCommonAttributes,

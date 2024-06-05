@@ -61,14 +61,7 @@ func TestCreateProduct(t *testing.T) {
 	assert.NotNil(t, sizeId)
 
 	dto := &productcategoryproductdto.CreateProductInput{
-		ProductCommonAttributes: productentity.ProductCommonAttributes{
-			Code:       "123",
-			Name:       "Test Product",
-			Cost:       100,
-			Price:      100,
-			CategoryID: categoryId,
-			SizeID:     sizeId,
-		},
+		PatchProduct: productentity.PatchProduct{},
 	}
 
 	productId, err := productService.CreateProduct(ctx, dto)
@@ -86,12 +79,7 @@ func TestCreateProduct(t *testing.T) {
 func TestCreateProductError(t *testing.T) {
 	// Teste 1 - No Code
 	dto := &productcategoryproductdto.CreateProductInput{
-		ProductCommonAttributes: productentity.ProductCommonAttributes{
-			Name:       "Test Product",
-			Cost:       90,
-			Price:      100,
-			CategoryID: uuid.New(),
-		},
+		PatchProduct: productentity.PatchProduct{},
 	}
 
 	_, err := productService.CreateProduct(ctx, dto)
@@ -100,12 +88,7 @@ func TestCreateProductError(t *testing.T) {
 
 	// Test 2 - No Name
 	dto = &productcategoryproductdto.CreateProductInput{
-		ProductCommonAttributes: productentity.ProductCommonAttributes{
-			Code:       "CODE",
-			Cost:       90,
-			Price:      100,
-			CategoryID: uuid.New(),
-		},
+		PatchProduct: productentity.PatchProduct{},
 	}
 
 	_, err = productService.CreateProduct(ctx, dto)
@@ -114,13 +97,7 @@ func TestCreateProductError(t *testing.T) {
 
 	// Test 3 - Price greater than cost
 	dto = &productcategoryproductdto.CreateProductInput{
-		ProductCommonAttributes: productentity.ProductCommonAttributes{
-			Code:       "CODE",
-			Name:       "Test Product",
-			Cost:       150,
-			Price:      100,
-			CategoryID: uuid.New(),
-		},
+		PatchProduct: productentity.PatchProduct{},
 	}
 
 	_, err = productService.CreateProduct(ctx, dto)
@@ -129,12 +106,7 @@ func TestCreateProductError(t *testing.T) {
 
 	// Test 4 - No category
 	dto = &productcategoryproductdto.CreateProductInput{
-		ProductCommonAttributes: productentity.ProductCommonAttributes{
-			Code:  "CODE",
-			Name:  "Test Product",
-			Cost:  90,
-			Price: 100,
-		},
+		PatchProduct: productentity.PatchProduct{},
 	}
 
 	_, err = productService.CreateProduct(ctx, dto)
