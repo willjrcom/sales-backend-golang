@@ -1,6 +1,9 @@
 package companyentity
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
@@ -25,6 +28,11 @@ func NewUser(userCommonAttributes UserCommonAttributes) *User {
 		Entity:               entity.NewEntity(),
 		UserCommonAttributes: userCommonAttributes,
 	}
+}
+
+func (u *User) BeforeSelect(ctx context.Context, query *bun.SelectQuery) error {
+	fmt.Println("Before updating:", u.Email)
+	return nil
 }
 
 func (u *User) GetSchemas() []string {

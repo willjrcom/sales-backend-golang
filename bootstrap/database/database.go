@@ -148,6 +148,8 @@ func defaultTables(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
+	var _ bun.BeforeSelectHook = (*companyentity.User)(nil)
+
 	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.CompanyToUsers)(nil)).Exec(ctx); err != nil {
 		return err
 	}
