@@ -10,7 +10,6 @@ import (
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
 	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
-	"github.com/willjrcom/sales-backend-go/internal/infra/service/kafka"
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 )
@@ -61,10 +60,10 @@ func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.Create
 		return uuid.Nil, err
 	}
 
-	producerKafka := kafka.NewProducer()
-	if err := producerKafka.NewMessage(ctx, "order_process", process); err != nil {
-		return uuid.Nil, err
-	}
+	// producerKafka := kafka.NewProducer()
+	// if err := producerKafka.NewMessage(ctx, "order_process", process); err != nil {
+	// 	return uuid.Nil, err
+	// }
 
 	return process.ID, nil
 }

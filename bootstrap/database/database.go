@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -32,11 +33,16 @@ import (
 type Environment string
 
 func ConnectLocalDB(ctx context.Context) string {
+	dbHost := os.Getenv("DB_HOST")
+	if dbHost == "" {
+		dbHost = "localhost" // Valor padrão para desenvolvimento local
+	}
+
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		"admin",
 		"admin",
-		"localhost",
+		dbHost,
 		"5432",
 		"sales-db",
 	)

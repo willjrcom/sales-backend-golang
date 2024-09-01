@@ -69,14 +69,14 @@
 										],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"code\": \"p121\", // UNIQUE\n    \"name\": \"Pizza Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 30.0,\n    \"cost\": 10.0, // Must be lower than or equal price\n    \"category_id\": \"{{product_category_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": false\n}",
+											"raw": "// NEED LOGIN\n{\n    \"code\": \"p121\", // UNIQUE\n    \"name\": \"Pizza Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 30.0,\n    \"cost\": 10.0, // Must be lower than or equal price\n    \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n    \"size_id\": \"958df42f-cedd-4872-8dcb-55643b5ca599\",\n    \"is_available\": false\n}",
 											"options": {
 												"raw": {
 													"language": "json"
 												}
 											}
 										},
-										"url": "{{server}}/product/new"
+										"url": "http://localhost:8080/product/new"
 									},
 									"status": "Created",
 									"code": 201,
@@ -158,7 +158,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "// NEED LOGIN\n{\n    \"product_category_to_combo\": [\n        {\"id\": \"8133b042-b78d-4844-84ed-8c1d6da25e87\"}\n    ]\n}",
+									"raw": "// NEED LOGIN\n{\n    \"product_category_to_combo\": [\n        {\"id\": \"8133b042-b78d-4844-84ed-8c1d6da25e87\"},\n        {\"id\": \"73eaf7d6-dde4-4be6-a29b-b910f04bf808\"}\n    ]\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -175,14 +175,14 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"code\": \"a12\",\n    \"name\": \"Pizza de Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 15.0,\n    \"category_id\": \"{{product_category_id}}\",\n    \"size_id\": \"{{size_category_id}}\",\n    \"is_available\": true\n}",
+											"raw": "// NEED LOGIN\n{\n    \"code\": \"a12\",\n    \"name\": \"Pizza de Presunto\",\n    \"description\": \"mussarela e tomate\",\n    \"price\": 35.0,\n    \"cost\": 15.0,\n    \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n    \"size_id\": \"958df42f-cedd-4872-8dcb-55643b5ca599\",\n    \"is_available\": true\n}",
 											"options": {
 												"raw": {
 													"language": "json"
 												}
 											}
 										},
-										"url": "{{server}}/product/update/{{product_id}}"
+										"url": "http://localhost:8080/product/update/de15ecb5-0e96-4564-a605-a909501afefd"
 									},
 									"status": "OK",
 									"code": 200,
@@ -241,7 +241,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/product/{{product_id}}"
+										"url": "http://localhost:8080/product/de15ecb5-0e96-4564-a605-a909501afefd"
 									},
 									"status": "OK",
 									"code": 200,
@@ -294,7 +294,7 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"url": "{{server}}/product/"
+										"url": "http://localhost:8080/product/"
 									},
 									"status": "OK",
 									"code": 200,
@@ -347,7 +347,7 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"url": "{{server}}/product/code/{{product_code}}"
+										"url": "http://localhost:8080/product/code/p12"
 									},
 									"status": "OK",
 									"code": 200,
@@ -400,7 +400,7 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"url": "{{server}}/product/all"
+										"url": "http://localhost:8080/product/all"
 									},
 									"status": "OK",
 									"code": 200,
@@ -474,14 +474,14 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "// NEED LOGIN\n{\n    \"name\": \"Pizza\",\n    \"need_print\": true,\n    \"image_path\": \"https://site/imagem.png\",\n    \"removable_ingredients\": [\n        \"cebola\",\n        \"tomate\",\n        \"mussarela\"\n    ],\n    \"product_category_to_additional\": [\n        {\n            \"id\": \"{{product_category_id}}\"\n        }\n    ]\n}",
+											"raw": "// NEED LOGIN\n{\n    \"name\": \"Pizza\",\n    \"need_print\": true,\n    \"image_path\": \"https://site/imagem.png\",\n    \"removable_ingredients\": [\n        \"cebola\",\n        \"tomate\",\n        \"mussarela\"\n    ],\n    \"product_category_to_additional\": [\n        {\n            \"id\": \"896bee80-2431-474f-9918-20153fc419b7\"\n        }\n    ]\n}",
 											"options": {
 												"raw": {
 													"language": "json"
 												}
 											}
 										},
-										"url": "{{server}}/product-category/new"
+										"url": "http://localhost:8080/product-category/new"
 									},
 									"status": "Created",
 									"code": 201,
@@ -540,7 +540,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/product-category/update/{{product_category_id}}"
+										"url": "http://localhost:8080/product-category/update/896bee80-2431-474f-9918-20153fc419b7"
 									},
 									"status": "OK",
 									"code": 200,
@@ -599,7 +599,7 @@
 												}
 											}
 										},
-										"url": "{{server}}/product-category/{{product_category_id}}"
+										"url": "http://localhost:8080/product-category/896bee80-2431-474f-9918-20153fc419b7"
 									},
 									"status": "OK",
 									"code": 200,
@@ -652,7 +652,7 @@
 									"originalRequest": {
 										"method": "GET",
 										"header": [],
-										"url": "{{server}}/product-category/"
+										"url": "http://localhost:8080/product-category/"
 									},
 									"status": "OK",
 									"code": 200,
@@ -7244,6 +7244,43 @@
 							"body": "{\n    \"message\": \"user already removed from company\"\n}"
 						}
 					]
+				},
+				{
+					"name": "teste",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let company_id = response.data.company_id",
+									"let schema = response.data.schema",
+									"",
+									"if (company_id != null && schema != null) {",
+									"    pm.collectionVariables.set(\"company_id\", company_id)",
+									"    pm.collectionVariables.set(\"schema_name\", schema)",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/company/test"
+					},
+					"response": []
 				}
 			]
 		},
@@ -8879,7 +8916,7 @@
 		},
 		{
 			"key": "user_email",
-			"value": "williamjunior69@gmail.com"
+			"value": "williamjunior67@gmail.com"
 		},
 		{
 			"key": "schema_name",

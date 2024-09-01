@@ -18,7 +18,7 @@ var (
 type Service struct {
 	rp        productentity.ProductRepository
 	rc        productentity.CategoryRepository
-	S3Service *s3service.S3Client
+	s3Service *s3service.S3Client
 }
 
 func NewService(rp productentity.ProductRepository) *Service {
@@ -27,7 +27,7 @@ func NewService(rp productentity.ProductRepository) *Service {
 
 func (s *Service) AddDependencies(rc productentity.CategoryRepository, s3 *s3service.S3Client) {
 	s.rc = rc
-	s.S3Service = s3
+	s.s3Service = s3
 }
 
 func (s *Service) CreateProduct(ctx context.Context, dto *productcategoryproductdto.CreateProductInput) (uuid.UUID, error) {
@@ -102,7 +102,7 @@ func (s *Service) DeleteProductById(ctx context.Context, dto *entitydto.IdReques
 	}
 
 	if product.ImagePath != nil {
-		if err := s.S3Service.DeleteObject(*product.ImagePath); err != nil {
+		if err := s.s3Service.DeleteObject(*product.ImagePath); err != nil {
 			return err
 		}
 	}

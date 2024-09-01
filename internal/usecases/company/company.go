@@ -13,7 +13,6 @@ import (
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
-	"github.com/willjrcom/sales-backend-go/internal/infra/service/kafka"
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 )
 
@@ -156,6 +155,6 @@ func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.Use
 }
 
 func (s *Service) Test(ctx context.Context) error {
-	go kafka.ReadMessages("order_process")
+	//go kafka.ReadMessages("order_process")
 	return nil
 }

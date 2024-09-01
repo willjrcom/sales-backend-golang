@@ -7,10 +7,11 @@ WORKDIR /go/app
 # Copie o código-fonte para dentro do contêiner
 COPY . .
 
-RUN apt-get update && apt-get install -y librdkafka-dev
+# RUN apt-get update && apt-get install -y librdkafka-dev
 
 # Execute o servidor diretamente
-CMD ["go", "run", "main.go", "httpserver", "-e", "prod"]
+# "-e", "prod"
+CMD go run main.go httpserver
 
 # Video full cycle kafka
 # CMD ["tail", "-f", "/dev/null"]
