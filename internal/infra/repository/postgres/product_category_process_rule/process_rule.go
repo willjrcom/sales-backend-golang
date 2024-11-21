@@ -197,3 +197,20 @@ func (r *ProcessRuleRepositoryBun) IsLastProcessRuleByID(ctx context.Context, id
 
 	return false, nil
 }
+
+func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Context, id string) ([]productentity.ProcessRule, error) {
+	processRules := []productentity.ProcessRule{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(&processRules).Where("category_id = ?", id).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return processRules, nil
+}
