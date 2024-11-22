@@ -27,7 +27,6 @@ func NewHandlerOrderTable(orderService *ordertableusecases.Service) *handler.Han
 		c.Post("/new", h.handlerCreateOrderTable)
 		c.Post("/update/change-table/{id}", h.handlerChangeTable)
 		c.Post("/update/close/{id}", h.handlerCloseOrderTable)
-		c.Delete("/{id}", h.handlerDeleteOrderTableById)
 		c.Get("/{id}", h.handlerGetOrderTableById)
 		c.Get("/all", h.handlerGetAllTables)
 	})
@@ -50,26 +49,6 @@ func (h *handlerOrderTableImpl) handlerCreateOrderTable(w http.ResponseWriter, r
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
-}
-
-func (h *handlerOrderTableImpl) handlerDeleteOrderTableById(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	id := chi.URLParam(r, "id")
-
-	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
-		return
-	}
-
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
-
-	if err := h.s.DeleteOrderTable(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerOrderTableImpl) handlerChangeTable(w http.ResponseWriter, r *http.Request) {

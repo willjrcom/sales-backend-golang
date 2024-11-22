@@ -13,14 +13,12 @@ var (
 )
 
 type CreateOrderTableInput struct {
-	orderentity.OrderTableCommonAttributes
+	Name    string    `bun:"name,notnull" json:"name,omitempty"`
+	Contact string    `bun:"contact,notnull" json:"contact,omitempty"`
+	TableID uuid.UUID `bun:"column:table_id,type:uuid,notnull" json:"table_id"`
 }
 
 func (o *CreateOrderTableInput) validate() error {
-	if o.OrderID == uuid.Nil {
-		return ErrOrderIDRequired
-	}
-
 	if o.TableID == uuid.Nil {
 		return ErrTableIDRequired
 	}
@@ -33,5 +31,10 @@ func (o *CreateOrderTableInput) ToModel() (*orderentity.OrderTable, error) {
 		return nil, err
 	}
 
-	return orderentity.NewTable(o.OrderTableCommonAttributes), nil
+	orderTableCommonAttributes := orderentity.OrderTableCommonAttributes{
+		Name:    o.Name,
+		Contact: o.Contact,
+		TableID: o.TableID,
+	}
+	return orderentity.NewTable(orderTableCommonAttributes), nil
 }
