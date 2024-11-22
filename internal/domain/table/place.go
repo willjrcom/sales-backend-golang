@@ -16,7 +16,7 @@ type PlaceCommonAttributes struct {
 	Name        string          `bun:"name,notnull" json:"name"`
 	ImagePath   *string         `bun:"image_path" json:"image_path"`
 	IsAvailable bool            `bun:"is_available" json:"is_available"`
-	Tables      []PlaceToTables `bun:"rel:has-many,join:id=place_id" json:"place_tables,omitempty"`
+	Tables      []PlaceToTables `bun:"rel:has-many,join:id=place_id" json:"tables,omitempty"`
 }
 
 type PatchPlace struct {
