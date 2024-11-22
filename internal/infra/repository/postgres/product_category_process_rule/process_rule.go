@@ -214,3 +214,20 @@ func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Conte
 
 	return processRules, nil
 }
+
+func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context) ([]productentity.ProcessRule, error) {
+	processRules := []productentity.ProcessRule{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(&processRules).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return processRules, nil
+}

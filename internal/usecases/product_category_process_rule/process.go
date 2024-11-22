@@ -83,3 +83,11 @@ func (s *Service) GetProcessRulesByCategoryId(ctx context.Context, dto *entitydt
 		return processRules, nil
 	}
 }
+
+func (s *Service) GetAllProcessRules(ctx context.Context) ([]productentity.ProcessRule, error) {
+	if processRules, err := s.r.GetAllProcessRules(ctx); err != nil {
+		return nil, err
+	} else {
+		return processRules, nil
+	}
+}
