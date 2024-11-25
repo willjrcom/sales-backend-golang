@@ -198,7 +198,7 @@ func LoadAllSchemas(ctx context.Context, db *bun.DB) error {
 			return err
 		}
 
-		if _, err := db.QueryContext(ctx, "CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_contact ON contacts (ddd, number);"); err != nil {
+		if _, err := db.QueryContext(ctx, "CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_contact ON contacts (ddd, number, type);"); err != nil {
 			return err
 		}
 
