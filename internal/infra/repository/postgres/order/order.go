@@ -297,7 +297,9 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]orderentity.Or
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&orders).Relation("Groups.Items.AdditionalItems").Relation("Attendant").Relation("Payments").Relation("Groups.ComplementItem").Relation("Table").Relation("Delivery.Address").Relation("Pickup").Scan(ctx); err != nil {
+	query := r.db.NewSelect().Model(&orders)
+	query.Relation("Groups.Items.AdditionalItems").Relation("Attendant").Relation("Payments").Relation("Groups.ComplementItem").Relation("Table").Relation("Delivery").Relation("Pickup")
+	if err := query.Scan(ctx); err != nil {
 		return nil, err
 	}
 
