@@ -46,7 +46,7 @@ func (r *UpdateClientInput) UpdateModel(client *cliententity.Client) error {
 		client.Birthday = r.Birthday
 	}
 	if r.Contact != nil {
-		if err := client.AddContact(r.Contact, personentity.ContactTypeEmployee); err != nil {
+		if err := client.AddContact(r.Contact, personentity.ContactTypeClient); err != nil {
 			return err
 		}
 	}
