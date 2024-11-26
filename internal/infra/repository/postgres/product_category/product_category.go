@@ -281,7 +281,7 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context) ([]
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&categories).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Relation("ComplementCategories").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&categories).Relation("Products.Size").Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Relation("ComplementCategories").Scan(ctx); err != nil {
 		return nil, err
 	}
 
