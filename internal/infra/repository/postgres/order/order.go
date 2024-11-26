@@ -279,7 +279,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(order).WherePK().Relation("Groups.Items.AdditionalItems").Relation("Attendant").Relation("Payments").Relation("Groups.ComplementItem").Relation("Table").Relation("Delivery.Address").Relation("Pickup").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(order).WherePK().Relation("Groups.Items.AdditionalItems").Relation("Attendant").Relation("Payments").Relation("Groups.ComplementItem").Relation("Table").Relation("Delivery").Relation("Pickup").Scan(ctx); err != nil {
 		return nil, err
 	}
 
