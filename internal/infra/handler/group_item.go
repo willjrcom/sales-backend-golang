@@ -24,7 +24,7 @@ func NewHandlerGroupItem(itemService *groupitemusecases.Service) *handler.Handle
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Get("/get/{id}", h.handlerGetGroupByID)
+		c.Get("/{id}", h.handlerGetGroupByID)
 		c.Post("/all-by-status", h.handlerGetGroupsByStatus)
 		c.Post("/by-order-id-and-status", h.handlerGetGroupsByOrderIDAndStatus)
 		c.Post("/start/{id}", h.handlerStartGroupByID)

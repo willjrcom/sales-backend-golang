@@ -155,8 +155,10 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest)
 		return errors.New("update group itemerror: " + err.Error())
 	}
 
-	if err = s.ri.UpdateItem(ctx, groupItem.ComplementItem); err != nil {
-		return errors.New("update complement item error: " + err.Error())
+	if groupItem.ComplementItemID != nil {
+		if err = s.ri.UpdateItem(ctx, groupItem.ComplementItem); err != nil {
+			return errors.New("update complement item error: " + err.Error())
+		}
 	}
 
 	return nil
