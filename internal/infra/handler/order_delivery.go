@@ -27,7 +27,7 @@ func NewHandlerOrderDelivery(orderService orderdeliveryusecases.IService) *handl
 		c.Get("/all", h.handlerGetAllDeliveries)
 		c.Post("/update/pend/{id}", h.handlerPendOrderDelivery)
 		c.Post("/update/ship/{id}", h.handlerShipOrderDelivery)
-		c.Post("/update/delivery/{id}", h.handlerOrderDelivery)
+		c.Post("/update/delivery/{id}", h.handlerDeliveryOrderDelivery)
 		c.Put("/update/driver/{id}", h.handlerUpdateDriver)
 		c.Put("/update/address/{id}", h.handlerUpdateDeliveryAddress)
 	})
@@ -132,7 +132,7 @@ func (h *handlerOrderDeliveryImpl) handlerShipOrderDelivery(w http.ResponseWrite
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerOrderDeliveryImpl) handlerOrderDelivery(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderDeliveryImpl) handlerDeliveryOrderDelivery(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")

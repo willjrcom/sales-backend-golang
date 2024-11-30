@@ -27,6 +27,7 @@ func (s *Service) CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto
 		return nil, err
 	}
 
+	delivery.ClientID = client.ID
 	delivery.AddressID = client.Address.ID
 	delivery.DeliveryTax = &client.Address.DeliveryTax
 
