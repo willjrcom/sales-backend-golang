@@ -2,7 +2,7 @@ package orderusecases
 
 import (
 	"context"
-	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
@@ -31,13 +31,14 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 			continue
 		}
 
-		// Append only Staging group items
-		groupItemIDs = append(groupItemIDs, groupItem.ID)
-
 		processRuleID, ok := processRules[groupItem.CategoryID]
 		if !ok {
-			return errors.New("process rule not found for category ID: " + groupItem.CategoryID.String())
+			fmt.Println("process rule not found for category ID: " + groupItem.CategoryID.String())
+			continue
 		}
+
+		// Append only Staging group items
+		groupItemIDs = append(groupItemIDs, groupItem.ID)
 
 		createProcessInput := &orderprocessdto.CreateProcessInput{
 			OrderProcessCommonAttributes: orderprocessentity.OrderProcessCommonAttributes{
