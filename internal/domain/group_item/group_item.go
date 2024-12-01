@@ -14,7 +14,6 @@ import (
 
 var (
 	ErrQuantityNotInteger = errors.New("quantity items in group is not integer")
-	ErrMustStartAt        = errors.New("must send start at time")
 	ErrGroupNotStaging    = errors.New("group not staging")
 	ErrGroupNotPending    = errors.New("group not pending")
 	ErrGroupNotStarted    = errors.New("group not started")
@@ -65,10 +64,6 @@ func NewGroupItem(groupCommonAttributes GroupCommonAttributes) *GroupItem {
 }
 
 func (i *GroupItem) Schedule(startAt *time.Time) (err error) {
-	if startAt == nil {
-		return ErrMustStartAt
-	}
-
 	i.StartAt = startAt
 	return nil
 }
