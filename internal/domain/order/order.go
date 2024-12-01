@@ -41,7 +41,6 @@ type OrderCommonAttributes struct {
 }
 
 type OrderDetail struct {
-	ScheduledOrder
 	TotalPayable  float64                  `bun:"total_payable" json:"total_payable"`
 	TotalPaid     float64                  `bun:"total_paid" json:"total_paid"`
 	TotalChange   float64                  `bun:"total_change" json:"total_change"`
@@ -56,10 +55,6 @@ type OrderType struct {
 	Delivery *OrderDelivery `bun:"rel:has-one,join:id=order_id" json:"delivery,omitempty"`
 	Table    *OrderTable    `bun:"rel:has-one,join:id=order_id" json:"table,omitempty"`
 	Pickup   *OrderPickup   `bun:"rel:has-one,join:id=order_id" json:"pickup,omitempty"`
-}
-
-type ScheduledOrder struct {
-	StartAt *time.Time `bun:"start_at" json:"start_at,omitempty"`
 }
 
 type OrderTimeLogs struct {
@@ -208,10 +203,6 @@ func (o *Order) UnarchiveOrder() (err error) {
 
 	o.Status = OrderStatusCanceled
 	return
-}
-
-func (o *Order) ScheduleOrder(startAt *time.Time) {
-	o.StartAt = startAt
 }
 
 func (o *Order) ValidatePayments() error {

@@ -83,6 +83,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 	if groupItem.OrderID != dto.OrderID {
 		return nil, ErrGroupItemNotBelongsToOrder
 	}
+
 	if ok, err := groupItem.CanAddItems(); !ok {
 		return nil, err
 	}

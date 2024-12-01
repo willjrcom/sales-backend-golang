@@ -1,21 +1,19 @@
-package orderdto
+package groupitemdto
 
 import (
 	"errors"
 	"time"
-
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 var (
 	ErrStartAtIsBeforeNow = errors.New("start at must be before now")
 )
 
-type UpdateScheduleOrder struct {
-	orderentity.ScheduledOrder
+type UpdateScheduleGroupItem struct {
+	StartAt *time.Time `json:"start_at"`
 }
 
-func (o *UpdateScheduleOrder) validate() error {
+func (o *UpdateScheduleGroupItem) validate() error {
 	if o.StartAt != nil && o.StartAt.Before(time.Now()) {
 		return ErrStartAtIsBeforeNow
 	}
@@ -23,7 +21,7 @@ func (o *UpdateScheduleOrder) validate() error {
 	return nil
 }
 
-func (o *UpdateScheduleOrder) ToModel() (*time.Time, error) {
+func (o *UpdateScheduleGroupItem) ToModel() (*time.Time, error) {
 	if err := o.validate(); err != nil {
 		return nil, err
 	}

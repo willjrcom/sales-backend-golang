@@ -14,6 +14,7 @@ import (
 
 var (
 	ErrQuantityNotInteger = errors.New("quantity items in group is not integer")
+	ErrMustStartAt        = errors.New("must send start at time")
 	ErrGroupNotStaging    = errors.New("group not staging")
 	ErrGroupNotPending    = errors.New("group not pending")
 	ErrGroupNotStarted    = errors.New("group not started")
@@ -39,6 +40,7 @@ type GroupDetails struct {
 	TotalPrice       float64                        `bun:"total_price" json:"total_price"`
 	Quantity         float64                        `bun:"quantity" json:"quantity"`
 	NeedPrint        bool                           `bun:"need_print" json:"need_print"`
+	Observation      string                         `bun:"observation" json:"observation"`
 	CategoryID       uuid.UUID                      `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
 	Category         *productentity.ProductCategory `bun:"rel:belongs-to" json:"category,omitempty"`
 	ComplementItemID *uuid.UUID                     `bun:"column:complement_item_id,type:uuid" json:",omitempty"`
@@ -46,6 +48,7 @@ type GroupDetails struct {
 }
 
 type GroupItemTimeLogs struct {
+	StartAt    *time.Time `bun:"start_at" json:"start_at,omitempty"`
 	PendingAt  *time.Time `bun:"pending_at" json:"pending_at,omitempty"`
 	StartedAt  *time.Time `bun:"started_at" json:"started_at,omitempty"`
 	ReadyAt    *time.Time `bun:"ready_at" json:"ready_at,omitempty"`
@@ -59,6 +62,15 @@ func NewGroupItem(groupCommonAttributes GroupCommonAttributes) *GroupItem {
 		Entity:                entity.NewEntity(),
 		GroupCommonAttributes: groupCommonAttributes,
 	}
+}
+
+func (i *GroupItem) Schedule(startAt *time.Time) (err error) {
+	if startAt == nil {
+		return ErrMustStartAt
+	}
+
+	i.StartAt = startAt
+	return nil
 }
 
 func (i *GroupItem) PendingGroupItem() (err error) {
