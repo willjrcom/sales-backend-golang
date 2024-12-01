@@ -8,7 +8,6 @@ import (
 	"github.com/uptrace/bun"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
-	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
@@ -26,15 +25,15 @@ type OrderDelivery struct {
 }
 
 type OrderDeliveryCommonAttributes struct {
-	Status      StatusOrderDelivery      `bun:"status" json:"status"`
-	DeliveryTax *float64                 `bun:"delivery_tax" json:"delivery_tax"`
-	ClientID    uuid.UUID                `bun:"column:client_id,type:uuid,notnull" json:"client_id"`
-	Client      *cliententity.Client     `bun:"rel:belongs-to" json:"client"`
-	AddressID   uuid.UUID                `bun:"column:address_id,type:uuid,notnull" json:"address_id"`
-	Address     *addressentity.Address   `bun:"rel:belongs-to" json:"address"`
-	DriverID    uuid.UUID                `bun:"column:driver_id,type:uuid" json:"driver_id,omitempty"`
-	Driver      *employeeentity.Employee `bun:"rel:belongs-to" json:"driver"`
-	OrderID     uuid.UUID                `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
+	Status      StatusOrderDelivery    `bun:"status" json:"status"`
+	DeliveryTax *float64               `bun:"delivery_tax" json:"delivery_tax"`
+	ClientID    uuid.UUID              `bun:"column:client_id,type:uuid,notnull" json:"client_id"`
+	Client      *cliententity.Client   `bun:"rel:belongs-to" json:"client"`
+	AddressID   uuid.UUID              `bun:"column:address_id,type:uuid,notnull" json:"address_id"`
+	Address     *addressentity.Address `bun:"rel:belongs-to" json:"address"`
+	DriverID    uuid.UUID              `bun:"column:driver_id,type:uuid" json:"driver_id,omitempty"`
+	Driver      *DeliveryDriver        `bun:"rel:belongs-to" json:"driver"`
+	OrderID     uuid.UUID              `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
 }
 
 type DeliveryTimeLogs struct {

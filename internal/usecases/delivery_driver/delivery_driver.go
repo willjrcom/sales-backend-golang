@@ -18,33 +18,33 @@ func NewService(r orderentity.DeliveryDriverRepository) *Service {
 }
 
 func (s *Service) CreateDeliveryDriver(ctx context.Context, dto *deliverydriverdto.CreateDeliveryDriverInput) (uuid.UUID, error) {
-	size, err := dto.ToModel()
+	driver, err := dto.ToModel()
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	err = s.r.CreateDeliveryDriver(ctx, size)
+	err = s.r.CreateDeliveryDriver(ctx, driver)
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	return size.ID, nil
+	return driver.ID, nil
 }
 
 func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoId *entitydto.IdRequest, dto *deliverydriverdto.UpdateDeliveryDriverInput) error {
-	size, err := s.r.GetDeliveryDriverById(ctx, dtoId.ID.String())
+	driver, err := s.r.GetDeliveryDriverById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if err = dto.UpdateModel(size); err != nil {
+	if err = dto.UpdateModel(driver); err != nil {
 		return err
 	}
 
-	if err = s.r.UpdateDeliveryDriver(ctx, size); err != nil {
+	if err = s.r.UpdateDeliveryDriver(ctx, driver); err != nil {
 		return err
 	}
 
