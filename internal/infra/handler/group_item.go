@@ -27,7 +27,7 @@ func NewHandlerGroupItem(itemService *groupitemusecases.Service) *handler.Handle
 		c.Get("/{id}", h.handlerGetGroupByID)
 		c.Post("/all-by-status", h.handlerGetGroupsByStatus)
 		c.Post("/by-order-id-and-status", h.handlerGetGroupsByOrderIDAndStatus)
-		c.Put("/schedule/{id}", h.handlerScheduleGroupByID)
+		c.Post("/schedule/{id}", h.handlerScheduleGroupByID)
 		c.Post("/start/{id}", h.handlerStartGroupByID)
 		c.Post("/ready/{id}", h.handlerReadyGroupByID)
 		c.Post("/cancel/{id}", h.handlerCancelGroupByID)
