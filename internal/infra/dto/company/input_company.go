@@ -2,8 +2,6 @@ package companydto
 
 import (
 	"errors"
-
-	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 )
 
 var (
@@ -12,7 +10,10 @@ var (
 )
 
 type CompanyInput struct {
-	companyentity.CompanyCommonAttributes
+	TradeName string   `json:"trade_name"`
+	Cnpj      string   `json:"cnpj"`
+	Email     string   `json:"email"`
+	Contacts  []string `json:"contacts"`
 }
 
 func (c *CompanyInput) validate() error {
