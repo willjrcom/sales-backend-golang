@@ -10,7 +10,6 @@ import (
 )
 
 var (
-	ErrOrderPickupMustBeStaging = errors.New("order pickup must be staging")
 	ErrOrderPickupMustBePending = errors.New("order pickup must be pending")
 )
 
@@ -46,7 +45,7 @@ func NewOrderPickup(name string) *OrderPickup {
 
 func (d *OrderPickup) Pend() error {
 	if d.Status != OrderPickupStatusStaging {
-		return ErrOrderPickupMustBeStaging
+		return nil
 	}
 
 	d.PendingAt = &time.Time{}
@@ -63,5 +62,14 @@ func (d *OrderPickup) Ready() error {
 	d.ReadyAt = &time.Time{}
 	*d.ReadyAt = time.Now()
 	d.Status = OrderPickupStatusReady
+	return nil
+}
+
+func (d *OrderPickup) UpdateName(name string) error {
+	if name == "" {
+		return errors.New("name is required")
+	}
+
+	d.Name = name
 	return nil
 }

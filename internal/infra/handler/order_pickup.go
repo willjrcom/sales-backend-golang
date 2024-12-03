@@ -27,6 +27,7 @@ func NewHandlerOrderPickup(orderService orderpickupusecases.IService) *handler.H
 		c.Get("/all", h.handlerGetAllPickups)
 		c.Post("/update/pend/{id}", h.handlerPendingOrder)
 		c.Post("/update/ready/{id}", h.handlerReadyOrder)
+		c.Put("/update/name/{id}", h.handlerUpdateName)
 	})
 
 	return handler.NewHandler("/order-pickup", c)
@@ -116,6 +117,32 @@ func (h *handlerOrderPickupImpl) handlerReadyOrder(w http.ResponseWriter, r *htt
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if err := h.IService.ReadyOrder(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerOrderPickupImpl) handlerUpdateName(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	dtoPickup := &orderpickupdto.UpdateOrderPickupInput{}
+	if err := jsonpkg.ParseBody(r, dtoPickup); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	if err := h.IService.UpdateName(ctx, dtoId, dtoPickup); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

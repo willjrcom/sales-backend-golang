@@ -34,6 +34,7 @@ type IGetService interface {
 type IUpdateService interface {
 	PendingOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
 	ReadyOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
+	UpdateName(ctx context.Context, dtoID *entitydto.IdRequest, dtoPickup *orderpickupdto.UpdateOrderPickupInput) (err error)
 }
 
 type IStatusService interface {

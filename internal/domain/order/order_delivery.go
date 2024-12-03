@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	ErrOrderDeliveryMustBeStaging = errors.New("order delivery must be staging")
 	ErrOrderDeliveryMustBePending = errors.New("order delivery must be pending")
 	ErrOrderDeliveryMustBeShipped = errors.New("order delivery must be shipped")
 )
@@ -56,8 +55,9 @@ func NewOrderDelivery(clientID uuid.UUID) *OrderDelivery {
 
 func (d *OrderDelivery) Pend() error {
 	if d.Status != OrderDeliveryStatusStaging {
-		return ErrOrderDeliveryMustBeStaging
+		return nil
 	}
+
 	d.PendingAt = &time.Time{}
 	*d.PendingAt = time.Now()
 	d.Status = OrderDeliveryStatusPending

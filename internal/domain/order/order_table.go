@@ -10,7 +10,6 @@ import (
 )
 
 var (
-	ErrOrderTableMustBeStaging = errors.New("table order must be staging")
 	ErrOrderTableMustBePending = errors.New("table order must be pending")
 )
 
@@ -45,7 +44,7 @@ func NewTable(orderTableCommonAttributes OrderTableCommonAttributes) *OrderTable
 
 func (t *OrderTable) Pend() error {
 	if t.Status != OrderTableStatusStaging {
-		return ErrOrderTableMustBeStaging
+		return nil
 	}
 
 	t.Status = OrderTableStatusPending
