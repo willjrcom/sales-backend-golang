@@ -102,7 +102,7 @@ func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IdReques
 		return errors.New("complement category does not belong to this category")
 	}
 
-	itemComplement := itementity.NewItem(productComplement.Name, productComplement.Price, groupItem.Quantity, groupItem.Size, productComplement.ID)
+	itemComplement := itementity.NewItem(productComplement.Name, productComplement.Price, groupItem.Quantity, groupItem.Size, productComplement.ID, productComplement.CategoryID)
 
 	if err = s.ri.AddItem(ctx, itemComplement); err != nil {
 		return err

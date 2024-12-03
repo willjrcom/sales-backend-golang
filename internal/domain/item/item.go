@@ -30,11 +30,12 @@ type ItemCommonAttributes struct {
 	Size            string    `bun:"size,notnull" json:"size"`
 	Quantity        float64   `bun:"quantity,notnull" json:"quantity"`
 	GroupItemID     uuid.UUID `bun:"group_item_id,type:uuid" json:"group_item_id"`
+	CategoryID      uuid.UUID `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
 	AdditionalItems []Item    `bun:"m2m:item_to_additional,join:Item=AdditionalItem" json:"item_to_additional,omitempty"`
 	ProductID       uuid.UUID `bun:"product_id,type:uuid" json:"product_id"`
 }
 
-func NewItem(name string, price float64, quantity float64, size string, productID uuid.UUID) *Item {
+func NewItem(name string, price float64, quantity float64, size string, productID uuid.UUID, categoryID uuid.UUID) *Item {
 	itemAdditionalCommonAttributes := ItemCommonAttributes{
 		Name:       name + " (" + size + ")",
 		Price:      price,
@@ -42,6 +43,7 @@ func NewItem(name string, price float64, quantity float64, size string, productI
 		Size:       size,
 		Quantity:   quantity,
 		ProductID:  productID,
+		CategoryID: categoryID,
 	}
 
 	return &Item{
