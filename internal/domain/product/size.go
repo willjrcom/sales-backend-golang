@@ -20,14 +20,14 @@ type Size struct {
 
 type SizeCommonAttributes struct {
 	Name       string    `bun:"name" json:"name"`
-	Active     *bool     `bun:"active" json:"active"`
+	IsActive   *bool     `bun:"is_active" json:"is_active"`
 	CategoryID uuid.UUID `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
 	Products   []Product `bun:"rel:has-many,join:id=size_id" json:"products,omitempty"`
 }
 
 type PatchSize struct {
-	Name   *string `json:"name"`
-	Active *bool   `json:"active"`
+	Name     *string `json:"name"`
+	IsActive *bool   `json:"is_active"`
 }
 
 func NewSize(sizeCommonAttributes SizeCommonAttributes) *Size {

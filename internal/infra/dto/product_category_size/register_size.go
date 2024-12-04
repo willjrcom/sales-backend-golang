@@ -15,7 +15,7 @@ var (
 
 type CreateSizeInput struct {
 	Name       string    `json:"name"`
-	Active     *bool     `json:"active"`
+	IsActive   *bool     `json:"is_active"`
 	CategoryID uuid.UUID `json:"category_id"`
 }
 
@@ -26,9 +26,9 @@ func (s *CreateSizeInput) validate() error {
 	if s.CategoryID == uuid.Nil {
 		return ErrCategoryRequired
 	}
-	if s.Active == nil {
-		s.Active = new(bool)
-		*s.Active = true
+	if s.IsActive == nil {
+		s.IsActive = new(bool)
+		*s.IsActive = true
 	}
 
 	return nil
@@ -41,7 +41,7 @@ func (s *CreateSizeInput) ToModel() (*productentity.Size, error) {
 
 	sizeCommonAttributes := productentity.SizeCommonAttributes{
 		Name:       s.Name,
-		Active:     s.Active,
+		IsActive:   s.IsActive,
 		CategoryID: s.CategoryID,
 	}
 

@@ -15,7 +15,7 @@ type UpdateSizeInput struct {
 }
 
 func (s *UpdateSizeInput) validate() error {
-	if s.Name == nil && s.Active == nil {
+	if s.Name == nil && s.IsActive == nil {
 		return ErrNameAndActiveIsEmpty
 	}
 
@@ -29,8 +29,8 @@ func (s *UpdateSizeInput) UpdateModel(model *productentity.Size) (err error) {
 	if s.Name != nil {
 		model.Name = *s.Name
 	}
-	if s.Active != nil {
-		model.Active = s.Active
+	if s.IsActive != nil {
+		model.IsActive = s.IsActive
 	}
 
 	return nil
