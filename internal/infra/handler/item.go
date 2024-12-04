@@ -29,7 +29,7 @@ func NewHandlerItem(itemService *itemusecases.Service) *handler.Handler {
 		c.Post("/add", h.handlerAddItem)
 		c.Delete("/{id}", h.handlerDeleteItem)
 		c.Post("/update/{id}/additional", h.handlerAddAdditionalItem)
-		c.Delete("/update/{id}/additional/{id-additional}", h.handlerDeleteAdditionalItem)
+		c.Delete("/delete/{id-additional}/additional", h.handlerDeleteAdditionalItem)
 	})
 
 	unprotectedRoutes := []string{}
@@ -104,7 +104,7 @@ func (h *handlerItemImpl) handlerAddAdditionalItem(w http.ResponseWriter, r *htt
 func (h *handlerItemImpl) handlerDeleteAdditionalItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	id := chi.URLParam(r, "id")
+	id := chi.URLParam(r, "id-additional")
 
 	if id == "" {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
@@ -113,16 +113,7 @@ func (h *handlerItemImpl) handlerDeleteAdditionalItem(w http.ResponseWriter, r *
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	idAdditional := chi.URLParam(r, "id-additional")
-
-	if idAdditional == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id additional is required"})
-		return
-	}
-
-	dtoIdAdditional := &entitydto.IdRequest{ID: uuid.MustParse(idAdditional)}
-
-	if err := h.s.DeleteAdditionalItemOrder(ctx, dtoId, dtoIdAdditional); err != nil {
+	if err := h.s.DeleteAdditionalItemOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

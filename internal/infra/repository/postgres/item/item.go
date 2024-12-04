@@ -111,7 +111,7 @@ func (r *ItemRepositoryBun) DeleteItem(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *ItemRepositoryBun) DeleteAdditionalItem(ctx context.Context, id uuid.UUID, idAdditional uuid.UUID) error {
+func (r *ItemRepositoryBun) DeleteAdditionalItem(ctx context.Context, idAdditional uuid.UUID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -133,7 +133,7 @@ func (r *ItemRepositoryBun) DeleteAdditionalItem(ctx context.Context, id uuid.UU
 		return err
 	}
 
-	if _, err = tx.NewDelete().Model(&itementity.ItemToAdditional{}).Where("item_id = ? AND additional_item_id = ?", id, idAdditional).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&itementity.ItemToAdditional{}).Where("additional_item_id = ?", idAdditional).Exec(ctx); err != nil {
 		if errRollBack := tx.Rollback(); errRollBack != nil {
 			return errRollBack
 		}

@@ -236,26 +236,8 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 	return itemAdditional.ID, nil
 }
 
-func (s *Service) DeleteAdditionalItemOrder(ctx context.Context, dto *entitydto.IdRequest, dtoAdditional *entitydto.IdRequest) (err error) {
-	item, err := s.ri.GetItemById(ctx, dto.ID.String())
-
-	if err != nil {
-		return err
-	}
-
-	if err = s.ri.DeleteAdditionalItem(ctx, item.ID, dtoAdditional.ID); err != nil {
-		return err
-	}
-
-	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
-
-	if err != nil {
-		return err
-	}
-
-	groupItem.CalculateTotalPrice()
-
-	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
+func (s *Service) DeleteAdditionalItemOrder(ctx context.Context, dtoAdditional *entitydto.IdRequest) (err error) {
+	if err = s.ri.DeleteAdditionalItem(ctx, dtoAdditional.ID); err != nil {
 		return err
 	}
 
