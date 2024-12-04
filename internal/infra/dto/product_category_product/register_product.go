@@ -45,5 +45,5 @@ func (p *CreateProductInput) ToModel() (*productentity.Product, error) {
 		return nil, err
 	}
 
-	return productentity.NewPatchProduct(p.PatchProduct), nil
+	return productentity.UpdateProduct(p.PatchProduct), nil
 }

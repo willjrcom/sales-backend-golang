@@ -14,7 +14,9 @@ var (
 )
 
 type CreateSizeInput struct {
-	productentity.SizeCommonAttributes
+	Name       string    `json:"name"`
+	Active     *bool     `json:"active"`
+	CategoryID uuid.UUID `json:"category_id"`
 }
 
 func (s *CreateSizeInput) validate() error {

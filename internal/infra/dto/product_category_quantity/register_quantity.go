@@ -14,7 +14,8 @@ var (
 )
 
 type CreateQuantityInput struct {
-	productentity.QuantityCommonAttributes
+	Quantity   float64   `json:"quantity"`
+	CategoryID uuid.UUID `json:"category_id"`
 }
 
 func (s *CreateQuantityInput) validate() error {

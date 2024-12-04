@@ -93,3 +93,23 @@ func (s *Service) GetQuantityById(ctx context.Context, dto *entitydto.IdRequest)
 		return quantity, nil
 	}
 }
+
+func (s *Service) AddQuantitiesByValues(ctx context.Context, dto *productcategoryquantitydto.RegisterQuantities) error {
+	quantities, categoryID, err := dto.ToModel()
+	if err != nil {
+		return err
+	}
+
+	for _, quantity := range quantities {
+		newQuantity := productentity.NewQuantity(productentity.QuantityCommonAttributes{
+			Quantity:   quantity,
+			CategoryID: *categoryID,
+		})
+
+		if err := s.rq.CreateQuantity(ctx, newQuantity); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

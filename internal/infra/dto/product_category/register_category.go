@@ -27,14 +27,5 @@ func (c *CreateCategoryInput) ToModel() (*productentity.ProductCategory, error) 
 		return nil, err
 	}
 
-	categoryCommonAttributes := productentity.ProductCategoryCommonAttributes{
-		Name:                 c.Name,
-		AdditionalCategories: c.AdditionalCategories,
-		ComplementCategories: c.ComplementCategories,
-		RemovableIngredients: c.RemovableIngredients,
-		ImagePath:            c.ImagePath,
-		NeedPrint:            c.NeedPrint,
-	}
-
-	return productentity.NewProductCategory(categoryCommonAttributes), nil
+	return productentity.NewProductCategory(c.ProductCategoryCommonAttributes), nil
 }

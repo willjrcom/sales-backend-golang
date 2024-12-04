@@ -55,7 +55,7 @@ func TestCreateProduct(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, categoryId)
 
-	dtoSize := &productcategorysizedto.CreateSizeInput{SizeCommonAttributes: productentity.SizeCommonAttributes{Name: "P"}}
+	dtoSize := &productcategorysizedto.CreateSizeInput{Name: "P"}
 	sizeId, err := sizeService.CreateSize(ctx, dtoSize)
 	assert.Nil(t, err)
 	assert.NotNil(t, sizeId)

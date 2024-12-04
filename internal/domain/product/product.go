@@ -53,7 +53,7 @@ func NewProduct(productCommonAttributes ProductCommonAttributes) *Product {
 		ProductCommonAttributes: productCommonAttributes,
 	}
 }
-func NewPatchProduct(patchProduct PatchProduct) *Product {
+func UpdateProduct(patchProduct PatchProduct) *Product {
 	productCommonAttributes := ProductCommonAttributes{}
 
 	if patchProduct.Code != nil {

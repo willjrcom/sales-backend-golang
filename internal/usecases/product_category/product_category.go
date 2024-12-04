@@ -8,6 +8,10 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
+	productcategoryquantitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category_quantity"
+	productcategorysizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category_size"
+	productcategoryquantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category_quantity"
+	productcategorysizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category_size"
 )
 
 var (
@@ -15,11 +19,18 @@ var (
 )
 
 type Service struct {
-	r productentity.CategoryRepository
+	r  productentity.CategoryRepository
+	sq productcategoryquantityusecases.Service
+	ss productcategorysizeusecases.Service
 }
 
 func NewService(c productentity.CategoryRepository) *Service {
 	return &Service{r: c}
+}
+
+func (s *Service) AddDependencies(sq productcategoryquantityusecases.Service, ss productcategorysizeusecases.Service) {
+	s.ss = ss
+	s.sq = sq
 }
 
 func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.CreateCategoryInput) (uuid.UUID, error) {
@@ -39,6 +50,31 @@ func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.Cr
 		return uuid.Nil, err
 	}
 
+	quantities := []float64{0.3, 0.4, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	sizes := []string{"P", "M", "G"}
+
+	if category.IsAdditional {
+		quantities = []float64{1, 2, 3, 4, 5}
+		sizes = []string{"Padrão"}
+	}
+
+	registerQuantities := &productcategoryquantitydto.RegisterQuantities{
+		Quantities: quantities,
+		CategoryID: category.ID,
+	}
+
+	if err := s.sq.AddQuantitiesByValues(ctx, registerQuantities); err != nil {
+		return category.ID, err
+	}
+
+	registerSizes := &productcategorysizedto.CreateSizes{
+		Sizes:      sizes,
+		CategoryID: category.ID,
+	}
+
+	if err := s.ss.AddSizesByValues(ctx, registerSizes); err != nil {
+		return category.ID, err
+	}
 	return category.ID, nil
 }
 

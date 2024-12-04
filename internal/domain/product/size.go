@@ -30,6 +30,13 @@ type PatchSize struct {
 	Active *bool   `json:"active"`
 }
 
+func NewSize(sizeCommonAttributes SizeCommonAttributes) *Size {
+	return &Size{
+		Entity:               entity.NewEntity(),
+		SizeCommonAttributes: sizeCommonAttributes,
+	}
+}
+
 func ValidateDuplicateSizes(name string, sizes []Size) error {
 	for _, size := range sizes {
 		if size.Name == name {

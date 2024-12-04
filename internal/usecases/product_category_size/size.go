@@ -87,3 +87,22 @@ func (s *Service) DeleteSize(ctx context.Context, dto *entitydto.IdRequest) erro
 
 	return nil
 }
+func (s *Service) AddSizesByValues(ctx context.Context, dto *productcategorysizedto.CreateSizes) error {
+	sizes, categoryID, err := dto.ToModel()
+	if err != nil {
+		return err
+	}
+
+	for _, size := range sizes {
+		newSize := productentity.NewSize(productentity.SizeCommonAttributes{
+			Name:       size,
+			CategoryID: *categoryID,
+		})
+
+		if err := s.rs.CreateSize(ctx, newSize); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

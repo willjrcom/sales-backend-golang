@@ -27,6 +27,13 @@ type PatchQuantity struct {
 	Quantity *float64 `json:"quantity"`
 }
 
+func NewQuantity(quantityCommonAttributes QuantityCommonAttributes) *Quantity {
+	return &Quantity{
+		Entity:                   entity.NewEntity(),
+		QuantityCommonAttributes: quantityCommonAttributes,
+	}
+}
+
 func ValidateDuplicateQuantities(name float64, quantities []Quantity) error {
 	for _, quantity := range quantities {
 		if quantity.Quantity == name {
