@@ -19,6 +19,10 @@ func (c *UpdateCategoryInput) UpdateModel(category *productentity.ProductCategor
 		category.ImagePath = *c.ImagePath
 	}
 
+	if c.NeedPrint != nil {
+		category.NeedPrint = *c.NeedPrint
+	}
+
 	if len(c.RemovableIngredients) != 0 {
 		category.RemovableIngredients = c.RemovableIngredients
 	}

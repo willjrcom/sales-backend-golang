@@ -220,6 +220,30 @@ func (r *ProductCategoryRepositoryBun) DeleteCategory(ctx context.Context, id st
 		return err
 	}
 
+	if _, err := tx.NewDelete().Model(&productentity.Size{}).Where("category_id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&productentity.Quantity{}).Where("category_id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&productentity.ProcessRule{}).Where("category_id = ?", id).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
+		return err
+	}
+
 	if err := tx.Commit(); err != nil {
 		if errRollBack := tx.Rollback(); errRollBack != nil {
 			return errRollBack
