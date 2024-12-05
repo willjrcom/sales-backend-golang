@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	productcategoryprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category_process_rule"
+	productcategoryprocessruledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category_process_rule"
 )
 
 var (
@@ -22,7 +22,7 @@ func NewService(c productentity.ProcessRuleRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) CreateProcessRule(ctx context.Context, dto *productcategoryprocessdto.CreateProcessRuleInput) (uuid.UUID, error) {
+func (s *Service) CreateProcessRule(ctx context.Context, dto *productcategoryprocessruledto.CreateProcessRuleInput) (uuid.UUID, error) {
 	processRule, err := dto.ToModel()
 
 	if err != nil {
@@ -38,7 +38,7 @@ func (s *Service) CreateProcessRule(ctx context.Context, dto *productcategorypro
 	return processRule.ID, nil
 }
 
-func (s *Service) UpdateProcessRule(ctx context.Context, dtoId *entitydto.IdRequest, dto *productcategoryprocessdto.UpdateProcessRuleInput) error {
+func (s *Service) UpdateProcessRule(ctx context.Context, dtoId *entitydto.IdRequest, dto *productcategoryprocessruledto.UpdateProcessRuleInput) error {
 	processRule, err := s.r.GetProcessRuleById(ctx, dtoId.ID.String())
 
 	if err != nil {
@@ -84,10 +84,22 @@ func (s *Service) GetProcessRulesByCategoryId(ctx context.Context, dto *entitydt
 	}
 }
 
-func (s *Service) GetAllProcessRules(ctx context.Context) ([]productentity.ProcessRule, error) {
+func (s *Service) GetAllProcessRules(ctx context.Context) ([]productcategoryprocessruledto.ProcessRuleOutput, error) {
 	if processRules, err := s.r.GetAllProcessRules(ctx); err != nil {
 		return nil, err
 	} else {
-		return processRules, nil
+		return s.processRulesToDto(processRules), nil
 	}
+}
+
+func (s *Service) processRulesToDto(processRules []productentity.ProcessRule) []productcategoryprocessruledto.ProcessRuleOutput {
+	var processRuleDtos []productcategoryprocessruledto.ProcessRuleOutput
+
+	for _, processRule := range processRules {
+		processRuleOutput := productcategoryprocessruledto.ProcessRuleOutput{}
+		processRuleOutput.FromModel(&processRule)
+		processRuleDtos = append(processRuleDtos, processRuleOutput)
+	}
+
+	return processRuleDtos
 }

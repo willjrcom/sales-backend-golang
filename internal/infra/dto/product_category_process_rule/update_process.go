@@ -1,6 +1,9 @@
 package productcategoryprocessruledto
 
 import (
+	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
@@ -35,23 +38,51 @@ func (s *UpdateProcessRuleInput) UpdateModel(model *productentity.ProcessRule) (
 		model.Order = *s.Order
 	}
 
-	if s.Description != "" {
-		model.Description = s.Description
+	if s.Description != nil {
+		model.Description = *s.Description
 	}
 
 	if s.ImagePath != nil {
 		model.ImagePath = s.ImagePath
 	}
 
-	if s.IdealTime != 0 {
-		model.IdealTime = s.IdealTime * time.Second
-		model.IdealTimeFormatted = model.IdealTime.String()
+	if s.IdealTime != nil {
+		model.IdealTime, err = convertToDuration(*s.IdealTime)
+		if err != nil {
+			return err
+		}
 	}
 
-	if s.ExperimentalError != 0 {
-		model.ExperimentalError = s.ExperimentalError * time.Second
-		model.ExperimentalErrorFormatted = model.ExperimentalError.String()
+	if s.ExperimentalError != nil {
+		model.ExperimentalError, err = convertToDuration(*s.ExperimentalError)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
+}
+
+func convertToDuration(timeStr string) (time.Duration, error) {
+	// Dividir a string MM:SS
+	parts := strings.Split(timeStr, ":")
+	if len(parts) != 2 {
+		return 0, fmt.Errorf("invalid format, expected MM:SS")
+	}
+
+	// Converter minutos e segundos para inteiros
+	minutes, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, fmt.Errorf("invalid minutes: %v", err)
+	}
+
+	seconds, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 0, fmt.Errorf("invalid seconds: %v", err)
+	}
+
+	// Calcular o total em nanosegundos
+	duration := time.Duration(minutes)*time.Minute + time.Duration(seconds)*time.Second
+
+	return duration, nil
 }
