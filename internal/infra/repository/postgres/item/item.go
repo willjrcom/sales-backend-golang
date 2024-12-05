@@ -3,6 +3,7 @@ package itemrepositorybun
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"sync"
 
 	"github.com/google/uuid"
@@ -35,7 +36,7 @@ func (r *ItemRepositoryBun) AddItem(ctx context.Context, p *itementity.Item) err
 	return nil
 }
 
-func (r *ItemRepositoryBun) AddAdditionalItem(ctx context.Context, id uuid.UUID, additionalItem *itementity.Item) error {
+func (r *ItemRepositoryBun) AddAdditionalItem(ctx context.Context, id uuid.UUID, productID uuid.UUID, additionalItem *itementity.Item) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -46,11 +47,20 @@ func (r *ItemRepositoryBun) AddAdditionalItem(ctx context.Context, id uuid.UUID,
 	itemToAdditional := &itementity.ItemToAdditional{
 		ItemID:           id,
 		AdditionalItemID: additionalItem.ID,
+		ProductID:        productID,
 	}
 
 	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
 
 	if err != nil {
+		return err
+	}
+
+	if _, err = tx.NewDelete().Model(&itementity.ItemToAdditional{}).Where("item_id = ? AND product_id = ?", id, productID).Exec(ctx); err != nil {
+		if errRollBack := tx.Rollback(); errRollBack != nil {
+			return errRollBack
+		}
+
 		return err
 	}
 
@@ -124,7 +134,7 @@ func (r *ItemRepositoryBun) DeleteAdditionalItem(ctx context.Context, idAddition
 	if err != nil {
 		return err
 	}
-
+	fmt.Println(idAdditional)
 	if _, err = tx.NewDelete().Model(&itementity.Item{}).Where("id = ?", idAdditional).Exec(ctx); err != nil {
 		if errRollBack := tx.Rollback(); errRollBack != nil {
 			return errRollBack

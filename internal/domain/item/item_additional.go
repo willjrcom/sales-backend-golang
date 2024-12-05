@@ -7,10 +7,11 @@ import (
 
 type ItemToAdditional struct {
 	bun.BaseModel    `bun:"table:item_to_additional"`
-	ItemID           uuid.UUID `bun:"type:uuid,pk" json:"item_id"`
+	ItemID           uuid.UUID `bun:"item_id,type:uuid,pk" json:"item_id"`
 	Item             *Item     `bun:"rel:belongs-to,join:item_id=id" json:"item,omitempty"`
 	AdditionalItemID uuid.UUID `bun:"type:uuid,pk" json:"additional_item_id"`
 	AdditionalItem   *Item     `bun:"rel:belongs-to,join:additional_item_id=id" json:"additional_item,omitempty"`
+	ProductID        uuid.UUID `bun:"type:uuid,pk" json:"product_id"`
 }
 
 type ItemRelation struct {
