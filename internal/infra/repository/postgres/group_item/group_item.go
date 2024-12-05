@@ -65,36 +65,24 @@ func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string,
 	}
 
 	if _, err = tx.NewDelete().Model(&groupitementity.GroupItem{}).Where("id = ?", id).Exec(ctx); err != nil {
-		if errRoolback := tx.Rollback(); errRoolback != nil {
-			return errRoolback
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if complementItemID != nil {
 		if _, err = tx.NewDelete().Model(&itementity.Item{}).Where("id = ?", complementItemID).Exec(ctx); err != nil {
-			if errRoolback := tx.Rollback(); errRoolback != nil {
-				return errRoolback
-			}
-
+			tx.Rollback()
 			return err
 		}
 	}
 
 	if _, err = tx.NewDelete().Model(&itementity.Item{}).Where("group_item_id = ?", id).Exec(ctx); err != nil {
-		if errRoolback := tx.Rollback(); errRoolback != nil {
-			return errRoolback
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if err := tx.Commit(); err != nil {
-		if errRoolback := tx.Rollback(); errRoolback != nil {
-			return errRoolback
-		}
-
+		tx.Rollback()
 		return err
 	}
 

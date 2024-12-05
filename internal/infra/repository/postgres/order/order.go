@@ -58,38 +58,26 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *orderentity.Or
 
 	for _, group := range p.Groups {
 		if _, err = tx.NewUpdate().Model(&group).WherePK().Exec(ctx); err != nil {
-			if errRoolback := tx.Rollback(); errRoolback != nil {
-				return errRoolback
-			}
-
+			tx.Rollback()
 			return err
 		}
 
 		for _, item := range group.Items {
 			if _, err = tx.NewUpdate().Model(&item).WherePK().Exec(ctx); err != nil {
-				if errRoolback := tx.Rollback(); errRoolback != nil {
-					return errRoolback
-				}
-
+				tx.Rollback()
 				return err
 			}
 
 			for _, additionalItem := range item.AdditionalItems {
 				if _, err = tx.NewUpdate().Model(&additionalItem).WherePK().Exec(ctx); err != nil {
-					if errRoolback := tx.Rollback(); errRoolback != nil {
-						return errRoolback
-					}
-
+					tx.Rollback()
 					return err
 				}
 			}
 
 			if group.ComplementItemID != nil && group.ComplementItem != nil {
 				if _, err = tx.NewUpdate().Model(group.ComplementItem).WherePK().Exec(ctx); err != nil {
-					if errRoolback := tx.Rollback(); errRoolback != nil {
-						return errRoolback
-					}
-
+					tx.Rollback()
 					return err
 				}
 			}
@@ -98,37 +86,26 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *orderentity.Or
 
 	if p.Delivery != nil {
 		if _, err = tx.NewUpdate().Model(p.Delivery).WherePK().Exec(ctx); err != nil {
-			if errRoolback := tx.Rollback(); errRoolback != nil {
-				return errRoolback
-			}
-
+			tx.Rollback()
 			return err
 		}
 
 	} else if p.Pickup != nil {
 		if _, err = tx.NewUpdate().Model(p.Pickup).WherePK().Exec(ctx); err != nil {
-			if errRoolback := tx.Rollback(); errRoolback != nil {
-				return errRoolback
-			}
-
+			tx.Rollback()
 			return err
 		}
 
 	} else if p.Table != nil {
 		if _, err = tx.NewUpdate().Model(p.Table).WherePK().Exec(ctx); err != nil {
-			if errRoolback := tx.Rollback(); errRoolback != nil {
-				return errRoolback
-			}
+			tx.Rollback()
 		}
 
 		return err
 	}
 
 	if err := tx.Commit(); err != nil {
-		if errRoolback := tx.Rollback(); errRoolback != nil {
-			return errRoolback
-		}
-
+		tx.Rollback()
 		return err
 	}
 
@@ -165,96 +142,63 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 	}
 
 	if _, err := tx.NewDelete().Model(&orderentity.Order{}).Where("id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&orderentity.OrderDelivery{}).Where("order_id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&orderentity.OrderPickup{}).Where("order_id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&orderentity.OrderTable{}).Where("order_id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&orderentity.PaymentOrder{}).Where("order_id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	groupItems := []groupitementity.GroupItem{}
 	if err := tx.NewSelect().Model(&groupItems).Where("order_id = ?", id).Relation("ComplementItem").Relation("Items.AdditionalItems").Scan(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&groupitementity.GroupItem{}).Where("order_id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	for _, groupItem := range groupItems {
 		if groupItem.ComplementItem != nil {
 			if _, err := tx.NewDelete().Model(groupItem.ComplementItem).WherePK().Exec(ctx); err != nil {
-				if errRollBack := tx.Rollback(); errRollBack != nil {
-					return errRollBack
-				}
-
+				tx.Rollback()
 				return err
 			}
 		}
 
 		for _, item := range groupItem.Items {
 			if _, err := tx.NewDelete().Model(&item).WherePK().Exec(ctx); err != nil {
-				if errRollBack := tx.Rollback(); errRollBack != nil {
-					return errRollBack
-				}
-
+				tx.Rollback()
 				return err
 			}
 
 			if _, err := tx.NewDelete().Model(&itementity.ItemToAdditional{}).Where("item_id = ?", item.ID).Exec(ctx); err != nil {
-				if errRollBack := tx.Rollback(); errRollBack != nil {
-					return errRollBack
-				}
-
+				tx.Rollback()
 				return err
 			}
 
 			for _, additionalItem := range item.AdditionalItems {
 				if _, err := tx.NewDelete().Model(&additionalItem).WherePK().Exec(ctx); err != nil {
-					if errRollBack := tx.Rollback(); errRollBack != nil {
-						return errRollBack
-					}
-
+					tx.Rollback()
 					return err
 				}
 			}

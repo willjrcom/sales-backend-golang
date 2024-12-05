@@ -35,26 +35,17 @@ func (r *ProductCategoryRepositoryBun) CreateCategory(ctx context.Context, cp *p
 	}
 
 	if _, err = tx.NewInsert().Model(cp).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if err := r.updateAdditionalCategories(ctx, &tx, cp.ID, cp.AdditionalCategories); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if err := r.updateComplementCategories(ctx, &tx, cp.ID, cp.ComplementCategories); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
@@ -80,26 +71,17 @@ func (r *ProductCategoryRepositoryBun) UpdateCategory(ctx context.Context, c *pr
 	}
 
 	if _, err = tx.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if err := r.updateAdditionalCategories(ctx, &tx, c.ID, c.AdditionalCategories); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if err := r.updateComplementCategories(ctx, &tx, c.ID, c.ComplementCategories); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
@@ -117,10 +99,7 @@ func (r *ProductCategoryRepositoryBun) updateAdditionalCategories(ctx context.Co
 	}
 
 	if _, err := tx.NewDelete().Model(&productentity.ProductCategoryToAdditional{}).Where("category_id = ?", categoryID).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
@@ -131,10 +110,7 @@ func (r *ProductCategoryRepositoryBun) updateAdditionalCategories(ctx context.Co
 		}
 
 		if _, err := tx.NewInsert().Model(categoryToAdditional).Exec(ctx); err != nil {
-			if errRollBack := tx.Rollback(); errRollBack != nil {
-				return errRollBack
-			}
-
+			tx.Rollback()
 			return err
 		}
 	}
@@ -149,10 +125,7 @@ func (r *ProductCategoryRepositoryBun) updateComplementCategories(ctx context.Co
 	}
 
 	if _, err := tx.NewDelete().Model(&productentity.ProductCategoryToComplement{}).Where("category_id = ?", categoryID).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
@@ -163,10 +136,7 @@ func (r *ProductCategoryRepositoryBun) updateComplementCategories(ctx context.Co
 		}
 
 		if _, err := tx.NewInsert().Model(categoryToComplement).Exec(ctx); err != nil {
-			if errRollBack := tx.Rollback(); errRollBack != nil {
-				return errRollBack
-			}
-
+			tx.Rollback()
 			return err
 		}
 	}
@@ -189,66 +159,42 @@ func (r *ProductCategoryRepositoryBun) DeleteCategory(ctx context.Context, id st
 	}
 
 	if _, err := tx.NewDelete().Model(&productentity.ProductCategory{}).Where("id = ?", id).Exec(ctx); err != nil {
-		if errRoolback := tx.Rollback(); errRoolback != nil {
-			return errRoolback
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&productentity.ProductCategoryToAdditional{}).Where("category_id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&productentity.ProductCategoryToAdditional{}).Where("additional_category_id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&productentity.ProductCategoryToComplement{}).Where("complement_category_id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&productentity.Size{}).Where("category_id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&productentity.Quantity{}).Where("category_id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&productentity.ProcessRule{}).Where("category_id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if err := tx.Commit(); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 

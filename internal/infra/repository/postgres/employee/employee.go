@@ -36,44 +36,42 @@ func (r *EmployeeRepositoryBun) CreateEmployee(ctx context.Context, c *employeee
 
 	// Create employee
 	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
-		return rollback(&tx, err)
+		tx.Rollback()
+		return err
 	}
 
 	if c.Contact != nil {
 		if _, err := tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
-			return rollback(&tx, err)
+			tx.Rollback()
+			return err
 		}
 
 		// Create contact
 		if _, err := tx.NewInsert().Model(c.Contact).Exec(ctx); err != nil {
-			return rollback(&tx, err)
+			tx.Rollback()
+			return err
 		}
 	}
 
 	if c.Address != nil {
 		if _, err := tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
-			return rollback(&tx, err)
+			tx.Rollback()
+			return err
 		}
 
 		// Create addresse
 		if _, err := tx.NewInsert().Model(c.Address).Exec(ctx); err != nil {
-			return rollback(&tx, err)
+			tx.Rollback()
+			return err
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return rollback(&tx, err)
-	}
-
-	return nil
-}
-
-func rollback(tx *bun.Tx, err error) error {
-	if err := tx.Rollback(); err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	return err
+	return nil
 }
 
 func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeeentity.Employee) error {
@@ -96,28 +94,33 @@ func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeee
 
 	if p.Contact != nil {
 		if _, err := tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", p.ID).Exec(ctx); err != nil {
-			return rollback(&tx, err)
+			tx.Rollback()
+			return err
 		}
 
 		// Create contact
 		if _, err := tx.NewInsert().Model(p.Contact).Exec(ctx); err != nil {
-			return rollback(&tx, err)
+			tx.Rollback()
+			return err
 		}
 	}
 
 	if p.Address != nil {
 		if _, err := tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", p.ID).Exec(ctx); err != nil {
-			return rollback(&tx, err)
+			tx.Rollback()
+			return err
 		}
 
 		// Create addresse
 		if _, err := tx.NewInsert().Model(p.Address).Exec(ctx); err != nil {
-			return rollback(&tx, err)
+			tx.Rollback()
+			return err
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return rollback(&tx, err)
+		tx.Rollback()
+		return err
 	}
 
 	return nil
@@ -139,17 +142,20 @@ func (r *EmployeeRepositoryBun) DeleteEmployee(ctx context.Context, id string) e
 
 	// Delete employee
 	if _, err = tx.NewDelete().Model(&employeeentity.Employee{}).Where("employee.id = ?", id).Exec(ctx); err != nil {
-		return rollback(&tx, err)
+		tx.Rollback()
+		return err
 	}
 
 	// Delete contact
 	if _, err = tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", id).Exec(ctx); err != nil {
-		return rollback(&tx, err)
+		tx.Rollback()
+		return err
 	}
 
 	// Delete address
 	if _, err = tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", id).Exec(ctx); err != nil {
-		return rollback(&tx, err)
+		tx.Rollback()
+		return err
 	}
 
 	if err := tx.Commit(); err != nil {

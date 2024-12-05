@@ -56,34 +56,22 @@ func (r *ItemRepositoryBun) AddAdditionalItem(ctx context.Context, id uuid.UUID,
 	}
 
 	if _, err = tx.NewDelete().Model(&itementity.ItemToAdditional{}).Where("item_id = ? AND product_id = ?", id, productID).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err = tx.NewInsert().Model(additionalItem).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err = tx.NewInsert().Model(itemToAdditional).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if err := tx.Commit(); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
@@ -121,19 +109,13 @@ func (r *ItemRepositoryBun) DeleteItem(ctx context.Context, id string) error {
 
 	// Apaga o item
 	if _, err := tx.NewDelete().Model(&itementity.Item{}).Where("id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	additionalItems := []itementity.ItemToAdditional{}
 	if err := r.db.NewSelect().Model(&additionalItems).Where("item_id = ?", id).Scan(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
@@ -144,29 +126,20 @@ func (r *ItemRepositoryBun) DeleteItem(ctx context.Context, id string) error {
 
 	// Apaga a relacao do item com additional items
 	if _, err := tx.NewDelete().Model(&itementity.ItemToAdditional{}).Where("item_id = ?", id).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	// Apaga os additional items
 	if len(additionalIds) > 0 {
 		if _, err := tx.NewDelete().Model(&itementity.Item{}).Where("id in (?)", additionalIds).Exec(ctx); err != nil {
-			if errRollBack := tx.Rollback(); errRollBack != nil {
-				return errRollBack
-			}
-
+			tx.Rollback()
 			return err
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
@@ -188,26 +161,17 @@ func (r *ItemRepositoryBun) DeleteAdditionalItem(ctx context.Context, idAddition
 	}
 
 	if _, err = tx.NewDelete().Model(&itementity.Item{}).Where("id = ?", idAdditional).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if _, err = tx.NewDelete().Model(&itementity.ItemToAdditional{}).Where("additional_item_id = ?", idAdditional).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
 	if err := tx.Commit(); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 

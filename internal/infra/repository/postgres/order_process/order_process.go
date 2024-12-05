@@ -35,10 +35,7 @@ func (r *ProcessRepositoryBun) CreateProcess(ctx context.Context, s *orderproces
 	}
 
 	if _, err := tx.NewInsert().Model(s).Exec(ctx); err != nil {
-		if errRollBack := tx.Rollback(); errRollBack != nil {
-			return errRollBack
-		}
-
+		tx.Rollback()
 		return err
 	}
 
@@ -55,10 +52,7 @@ func (r *ProcessRepositoryBun) CreateProcess(ctx context.Context, s *orderproces
 					continue
 				}
 
-				if errRollBack := tx.Rollback(); errRollBack != nil {
-					return errRollBack
-				}
-
+				tx.Rollback()
 				return err
 			}
 		}

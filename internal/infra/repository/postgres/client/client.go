@@ -37,17 +37,20 @@ func (r *ClientRepositoryBun) CreateClient(ctx context.Context, c *cliententity.
 
 	// Create client
 	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
-		return rollback(&tx, err)
+		tx.Rollback()
+		return err
 	}
 
 	// Create contact
 	if _, err := tx.NewInsert().Model(c.Contact).Exec(ctx); err != nil {
-		return rollback(&tx, err)
+		tx.Rollback()
+		return err
 	}
 
 	// Create addresse
 	if _, err := tx.NewInsert().Model(c.Address).Exec(ctx); err != nil {
-		return rollback(&tx, err)
+		tx.Rollback()
+		return err
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -77,28 +80,33 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.
 
 	if c.Contact != nil {
 		if _, err := tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
-			return rollback(&tx, err)
+			tx.Rollback()
+			return err
 		}
 
 		// Create contact
 		if _, err := tx.NewInsert().Model(c.Contact).Exec(ctx); err != nil {
-			return rollback(&tx, err)
+			tx.Rollback()
+			return err
 		}
 	}
 
 	if c.Address != nil {
 		if _, err := tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
-			return rollback(&tx, err)
+			tx.Rollback()
+			return err
 		}
 
 		// Create addresse
 		if _, err := tx.NewInsert().Model(c.Address).Exec(ctx); err != nil {
-			return rollback(&tx, err)
+			tx.Rollback()
+			return err
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		return rollback(&tx, err)
+		tx.Rollback()
+		return err
 	}
 
 	return nil
@@ -120,17 +128,20 @@ func (r *ClientRepositoryBun) DeleteClient(ctx context.Context, id string) error
 
 	// Delete client
 	if _, err = tx.NewDelete().Model(&cliententity.Client{}).Where("id = ?", id).Exec(ctx); err != nil {
-		return rollback(&tx, err)
+		tx.Rollback()
+		return err
 	}
 
 	// Delete contact
 	if _, err = tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", id).Exec(ctx); err != nil {
-		return rollback(&tx, err)
+		tx.Rollback()
+		return err
 	}
 
 	// Delete addresse
 	if _, err = tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", id).Exec(ctx); err != nil {
-		return rollback(&tx, err)
+		tx.Rollback()
+		return err
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -171,12 +182,4 @@ func (r *ClientRepositoryBun) GetAllClients(ctx context.Context) ([]cliententity
 	}
 
 	return clients, nil
-}
-
-func rollback(tx *bun.Tx, err error) error {
-	if errRoolback := tx.Rollback(); errRoolback != nil {
-		return errRoolback
-	}
-
-	return err
 }
