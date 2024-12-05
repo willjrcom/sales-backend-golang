@@ -247,12 +247,15 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*itementity.Item)(nil))
 	db.RegisterModel((*groupitementity.GroupItem)(nil))
 
+	var _ bun.BeforeUpdateHook = (*groupitementity.GroupItem)(nil)
+
 	db.RegisterModel((*orderentity.OrderPickup)(nil))
 	db.RegisterModel((*orderentity.OrderDelivery)(nil))
 	db.RegisterModel((*orderentity.DeliveryDriver)(nil))
 	db.RegisterModel((*orderentity.OrderTable)(nil))
 	db.RegisterModel((*orderentity.PaymentOrder)(nil))
 	db.RegisterModel((*orderentity.Order)(nil))
+	// var _ bun.AfterScanRowHook = (*orderentity.Order)(nil)
 
 	db.RegisterModel((*tableentity.Table)(nil))
 	db.RegisterModel((*tableentity.PlaceToTables)(nil))

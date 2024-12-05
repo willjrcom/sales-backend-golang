@@ -36,11 +36,7 @@ func (s *Service) StartGroupItem(ctx context.Context, dto *entitydto.IdRequest) 
 		return err
 	}
 
-	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
-		return err
-	}
-
-	return nil
+	return s.rgi.UpdateGroupItem(ctx, groupItem)
 }
 
 func (s *Service) ReadyGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
@@ -54,11 +50,7 @@ func (s *Service) ReadyGroupItem(ctx context.Context, dto *entitydto.IdRequest) 
 		return err
 	}
 
-	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
-		return err
-	}
-
-	return nil
+	return s.rgi.UpdateGroupItem(ctx, groupItem)
 }
 
 func (s *Service) CancelGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
@@ -70,9 +62,5 @@ func (s *Service) CancelGroupItem(ctx context.Context, dto *entitydto.IdRequest)
 
 	groupItem.CancelGroupItem()
 
-	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
-		return err
-	}
-
-	return nil
+	return s.rgi.UpdateGroupItem(ctx, groupItem)
 }

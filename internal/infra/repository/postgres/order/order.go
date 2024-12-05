@@ -237,6 +237,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	}
 
 	order.CalculateTotalPrice()
+
 	return order, nil
 }
 
@@ -256,8 +257,8 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]orderentity.Or
 		return nil, err
 	}
 
-	for i := range orders {
-		orders[i].CalculateTotalPrice()
+	for index := range orders {
+		orders[index].CalculateTotalPrice()
 	}
 
 	return orders, nil

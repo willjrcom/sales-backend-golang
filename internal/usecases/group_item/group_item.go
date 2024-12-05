@@ -40,7 +40,6 @@ func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IdRequest) (g
 		return nil, err
 	}
 
-	groupItem.CalculateTotalPrice()
 	return
 }
 
@@ -110,23 +109,7 @@ func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IdReques
 
 	groupItem.ComplementItemID = &itemComplement.ID
 
-	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
-		return err
-	}
-
-	groupItem, err = s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
-
-	if err != nil {
-		return err
-	}
-
-	groupItem.CalculateTotalPrice()
-
-	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
-		return err
-	}
-
-	return nil
+	return s.rgi.UpdateGroupItem(ctx, groupItem)
 }
 
 func (s *Service) DeleteComplementItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
@@ -147,11 +130,5 @@ func (s *Service) DeleteComplementItem(ctx context.Context, dto *entitydto.IdReq
 	groupItem.ComplementItemID = nil
 	groupItem.ComplementItem = nil
 
-	groupItem.CalculateTotalPrice()
-
-	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
-		return err
-	}
-
-	return nil
+	return s.rgi.UpdateGroupItem(ctx, groupItem)
 }

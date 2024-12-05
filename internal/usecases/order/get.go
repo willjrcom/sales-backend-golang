@@ -11,7 +11,6 @@ func (s *Service) GetOrderById(ctx context.Context, dto *entitydto.IdRequest) (*
 	if order, err := s.ro.GetOrderById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		order.CalculateTotalPrice()
 		return order, nil
 	}
 }

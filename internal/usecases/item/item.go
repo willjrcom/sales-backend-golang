@@ -104,13 +104,12 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInp
 		return nil, errors.New("add item error: " + err.Error())
 	}
 
-	groupItem.CalculateTotalPrice()
-
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
 		return nil, errors.New("update group item error: " + err.Error())
 	}
 
 	if groupItem.ComplementItemID != nil {
+		groupItem.ComplementItem.Quantity += item.Quantity
 		if err = s.ri.UpdateItem(ctx, groupItem.ComplementItem); err != nil {
 			return nil, errors.New("update complement item error: " + err.Error())
 		}
@@ -148,12 +147,6 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest)
 		}
 
 		return nil
-	}
-
-	groupItem.CalculateTotalPrice()
-
-	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
-		return errors.New("update group itemerror: " + err.Error())
 	}
 
 	if groupItem.ComplementItemID != nil {
@@ -226,8 +219,6 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 	if err != nil {
 		return uuid.Nil, errors.New("group item not found: " + err.Error())
 	}
-
-	groupItem.CalculateTotalPrice()
 
 	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
 		return uuid.Nil, errors.New("update group item error: " + err.Error())
