@@ -26,7 +26,7 @@ func (s *Service) UpdateScheduleGroupItem(ctx context.Context, dtoId *entitydto.
 }
 
 func (s *Service) StartGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), false)
 
 	if err != nil {
 		return err
@@ -44,7 +44,7 @@ func (s *Service) StartGroupItem(ctx context.Context, dto *entitydto.IdRequest) 
 }
 
 func (s *Service) ReadyGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), false)
 
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func (s *Service) ReadyGroupItem(ctx context.Context, dto *entitydto.IdRequest) 
 }
 
 func (s *Service) CancelGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), false)
 
 	if err != nil {
 		return err

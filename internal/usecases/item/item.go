@@ -184,7 +184,7 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 		return uuid.Nil, errors.New("product not found: " + err.Error())
 	}
 
-	groupItem, err := s.rgi.GetGroupByIDWithFullCategory(ctx, item.GroupItemID.String())
+	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
 	if err != nil {
 		return uuid.Nil, errors.New("group item not found: " + err.Error())
 	}
