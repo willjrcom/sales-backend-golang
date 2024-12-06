@@ -150,6 +150,7 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IdRequest)
 	}
 
 	if groupItem.ComplementItemID != nil {
+		groupItem.ComplementItem.Quantity -= item.Quantity
 		if err = s.ri.UpdateItem(ctx, groupItem.ComplementItem); err != nil {
 			return errors.New("update complement item error: " + err.Error())
 		}
