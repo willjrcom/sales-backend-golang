@@ -132,7 +132,7 @@ func (r *ItemRepositoryBun) DeleteItem(ctx context.Context, id string) error {
 
 	// Apaga os additional items
 	if len(additionalIds) > 0 {
-		if _, err := tx.NewDelete().Model(&itementity.Item{}).Where("id in (?)", additionalIds).Exec(ctx); err != nil {
+		if _, err := tx.NewDelete().Model(&itementity.Item{}).Where("id in (?)", bun.In(additionalIds)).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
