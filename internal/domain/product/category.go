@@ -1,6 +1,8 @@
 package productentity
 
 import (
+	"time"
+
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
@@ -9,6 +11,7 @@ type ProductCategory struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:product_categories"`
 	ProductCategoryCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type ProductCategoryCommonAttributes struct {

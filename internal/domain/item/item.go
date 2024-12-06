@@ -2,6 +2,7 @@ package itementity
 
 import (
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -19,6 +20,7 @@ type Item struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:order_items"`
 	ItemCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type ItemCommonAttributes struct {

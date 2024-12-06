@@ -25,6 +25,7 @@ type GroupItem struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:order_group_items"`
 	GroupCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type GroupCommonAttributes struct {

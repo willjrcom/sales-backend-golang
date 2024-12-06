@@ -2,6 +2,7 @@ package productentity
 
 import (
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -16,6 +17,7 @@ type Size struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:product_category_sizes"`
 	SizeCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type SizeCommonAttributes struct {

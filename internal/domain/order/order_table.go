@@ -18,6 +18,7 @@ type OrderTable struct {
 	bun.BaseModel `bun:"table:order_tables,alias:order_table"`
 	OrderTableCommonAttributes
 	OrderTableTimeLogs
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type OrderTableCommonAttributes struct {

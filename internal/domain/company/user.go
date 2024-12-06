@@ -2,16 +2,19 @@ package companyentity
 
 import (
 	"context"
+	"time"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 type UserValue string
+
 type User struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:users,alias:u"`
 	UserCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type UserCommonAttributes struct {

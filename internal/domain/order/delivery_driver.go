@@ -1,6 +1,8 @@
 package orderentity
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
@@ -11,6 +13,7 @@ type DeliveryDriver struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:delivery_drivers,alias:driver"`
 	DeliveryDriverCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type DeliveryDriverCommonAttributes struct {

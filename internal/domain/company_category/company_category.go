@@ -1,6 +1,8 @@
 package companycategoryentity
 
 import (
+	"time"
+
 	"github.com/uptrace/bun"
 	advertisingentity "github.com/willjrcom/sales-backend-go/internal/domain/advertising"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
@@ -11,6 +13,7 @@ type CompanyCategory struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:company_categories"`
 	CompanyCategoryCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type CompanyCategoryCommonAttributes struct {

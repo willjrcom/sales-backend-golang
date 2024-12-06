@@ -18,6 +18,7 @@ type OrderPickup struct {
 	bun.BaseModel `bun:"table:order_pickups,alias:pickup"`
 	PickupTimeLogs
 	OrderPickupCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type OrderPickupCommonAttributes struct {

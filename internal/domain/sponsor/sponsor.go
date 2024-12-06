@@ -1,6 +1,8 @@
 package sponsorentity
 
 import (
+	"time"
+
 	"github.com/uptrace/bun"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
@@ -10,6 +12,7 @@ type Sponsor struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:sponsors"`
 	SponsorCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type SponsorCommonAttributes struct {

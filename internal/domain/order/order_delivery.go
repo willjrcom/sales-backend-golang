@@ -21,6 +21,7 @@ type OrderDelivery struct {
 	bun.BaseModel `bun:"table:order_deliveries,alias:delivery"`
 	DeliveryTimeLogs
 	OrderDeliveryCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type OrderDeliveryCommonAttributes struct {

@@ -18,6 +18,7 @@ type Coupon struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:coupons"`
 	CouponCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type CouponCommonAttributes struct {

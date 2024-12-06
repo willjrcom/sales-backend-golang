@@ -29,6 +29,7 @@ type Order struct {
 	bun.BaseModel `bun:"table:orders,alias:order"`
 	OrderTimeLogs
 	OrderCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type OrderCommonAttributes struct {

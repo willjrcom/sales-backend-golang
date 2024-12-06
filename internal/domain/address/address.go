@@ -2,6 +2,7 @@ package addressentity
 
 import (
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -12,6 +13,7 @@ type Address struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:addresses"`
 	AddressCommonAttributes
+	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type AddressCommonAttributes struct {
