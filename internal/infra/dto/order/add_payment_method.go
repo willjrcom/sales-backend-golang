@@ -12,7 +12,8 @@ var (
 )
 
 type AddPaymentMethod struct {
-	orderentity.PaymentOrder
+	TotalPaid float64               `json:"total_paid"`
+	Method    orderentity.PayMethod `json:"method"`
 }
 
 func (u *AddPaymentMethod) validate() error {
