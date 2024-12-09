@@ -15,6 +15,7 @@ var (
 	ErrOrderMustBeFinishedOrCanceled = errors.New("order must be canceled or finished")
 	ErrOrderWithoutItems             = errors.New("order must have at least one item")
 	ErrOrderMustBePending            = errors.New("order must be pending")
+	ErrOrderMustBePendingOrReady     = errors.New("order must be pending or ready")
 	ErrOrderMustBeCanceled           = errors.New("order must be canceled")
 	ErrOrderMustBeArchived           = errors.New("order must be archived")
 	ErrOrderAlreadyFinished          = errors.New("order already finished")
@@ -144,12 +145,8 @@ func (o *Order) ReadyOrder() (err error) {
 }
 
 func (o *Order) FinishOrder() (err error) {
-	if o.Status != OrderStatusPending {
-		return ErrOrderMustBePending
-	}
-
-	if o.Status == OrderStatusFinished {
-		return ErrOrderAlreadyFinished
+	if o.Status != OrderStatusReady && o.Status != OrderStatusPending {
+		return ErrOrderMustBePendingOrReady
 	}
 
 	totalPaid := 0.00
