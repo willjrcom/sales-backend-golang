@@ -42,7 +42,7 @@ func (s *Service) ShipOrderDelivery(ctx context.Context, dtoID *entitydto.IdRequ
 		return err
 	}
 
-	if _, err = s.re.GetEmployeeById(ctx, orderDelivery.DriverID.String()); err != nil {
+	if _, err = s.rdd.GetDeliveryDriverById(ctx, orderDelivery.DriverID.String()); err != nil {
 		return err
 	}
 
@@ -110,7 +110,7 @@ func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoID *entitydto.IdR
 		return ErrOrderDelivered
 	}
 
-	if _, err = s.re.GetEmployeeById(ctx, dto.DriverID.String()); err != nil {
+	if _, err = s.rdd.GetDeliveryDriverById(ctx, dto.DriverID.String()); err != nil {
 		return err
 	}
 

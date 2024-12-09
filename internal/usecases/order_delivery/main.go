@@ -5,7 +5,6 @@ import (
 
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
-	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdeliverydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_delivery"
@@ -20,7 +19,7 @@ type IService interface {
 	IStatusService
 }
 type ISetupService interface {
-	AddDependencies(ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, re employeeentity.Repository, os *orderusecases.Service)
+	AddDependencies(ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, os *orderusecases.Service, rdd orderentity.DeliveryDriverRepository)
 }
 
 type ICreateService interface {
@@ -52,18 +51,18 @@ type Service struct {
 	ra  addressentity.Repository
 	rc  cliententity.Repository
 	ro  orderentity.OrderRepository
-	re  employeeentity.Repository
 	os  *orderusecases.Service
+	rdd orderentity.DeliveryDriverRepository
 }
 
 func NewService(rdo orderentity.OrderDeliveryRepository) IService {
 	return &Service{rdo: rdo}
 }
 
-func (s *Service) AddDependencies(ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, re employeeentity.Repository, os *orderusecases.Service) {
+func (s *Service) AddDependencies(ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, os *orderusecases.Service, rdd orderentity.DeliveryDriverRepository) {
 	s.ra = ra
 	s.rc = rc
 	s.ro = ro
-	s.re = re
 	s.os = os
+	s.rdd = rdd
 }
