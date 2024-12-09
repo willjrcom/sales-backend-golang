@@ -30,6 +30,7 @@ func NewHandlerOrder(orderService *orderusecases.Service) *handler.Handler {
 		c.Put("/update/{id}/observation", h.handlerUpdateObservation)
 		c.Put("/update/{id}/payment", h.handlerUpdatePaymentMethod)
 		c.Post("/pending/{id}", h.handlerPendingOrder)
+		c.Post("/ready/{id}", h.handlerReadyOrder)
 		c.Post("/finish/{id}", h.handlerFinishOrder)
 		c.Post("/cancel/{id}", h.handlerCancelOrder)
 		c.Post("/archive/{id}", h.handlerArchiveOrder)
@@ -156,6 +157,26 @@ func (h *handlerOrderImpl) handlerPendingOrder(w http.ResponseWriter, r *http.Re
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.PendingOrder(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerOrderImpl) handlerReadyOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	if err := h.s.ReadyOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

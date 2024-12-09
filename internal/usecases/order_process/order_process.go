@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -19,16 +20,18 @@ type Service struct {
 	rpr  productentity.ProcessRuleRepository
 	sq   *orderqueueusecases.Service
 	rsgi *groupitemusecases.Service
+	ro   orderentity.OrderRepository
 }
 
 func NewService(c orderprocessentity.ProcessRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) AddDependencies(sq *orderqueueusecases.Service, rpr productentity.ProcessRuleRepository, rsgi *groupitemusecases.Service) {
+func (s *Service) AddDependencies(sq *orderqueueusecases.Service, rpr productentity.ProcessRuleRepository, rsgi *groupitemusecases.Service, ro orderentity.OrderRepository) {
 	s.rpr = rpr
 	s.sq = sq
 	s.rsgi = rsgi
+	s.ro = ro
 }
 
 func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.CreateProcessInput) (uuid.UUID, error) {
@@ -166,6 +169,24 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 			return uuid.Nil, err
 		}
 
+		groupItem, err := s.rsgi.GetGroupByID(ctx, entityDtoID)
+		if err != nil {
+			return uuid.Nil, err
+		}
+
+		order, err := s.ro.GetOrderById(ctx, groupItem.OrderID.String())
+		if err != nil {
+			return uuid.Nil, err
+		}
+
+		// Update order status
+		if err := order.ReadyOrder(); err != nil {
+			return uuid.Nil, err
+		}
+
+		if err := s.ro.UpdateOrder(ctx, order); err != nil {
+			return uuid.Nil, err
+		}
 		return uuid.Nil, nil
 	}
 

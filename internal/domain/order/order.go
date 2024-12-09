@@ -134,6 +134,15 @@ func (o *Order) PendingOrder() (err error) {
 	return nil
 }
 
+func (o *Order) ReadyOrder() (err error) {
+	if o.Status != OrderStatusPending {
+		return ErrOrderMustBePending
+	}
+
+	o.Status = OrderStatusReady
+	return nil
+}
+
 func (o *Order) FinishOrder() (err error) {
 	if o.Status != OrderStatusPending {
 		return ErrOrderMustBePending
