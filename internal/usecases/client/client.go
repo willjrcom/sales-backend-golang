@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
@@ -33,6 +34,8 @@ func (s *Service) CreateClient(ctx context.Context, dto *clientdto.CreateClientI
 		return uuid.Nil, err
 	}
 
+	s.UpdateClientWithCoordinates(ctx, client)
+
 	if err := s.rclient.CreateClient(ctx, client); err != nil {
 		return uuid.Nil, err
 	}
@@ -40,9 +43,17 @@ func (s *Service) CreateClient(ctx context.Context, dto *clientdto.CreateClientI
 	return client.ID, nil
 }
 
+func (s *Service) UpdateClientWithCoordinates(ctx context.Context, client *cliententity.Client) {
+	coordinates, _ := addressentity.GetCoordinates(&client.Address.AddressCommonAttributes)
+	if coordinates == nil {
+		return
+	}
+
+	client.Address.AddressCommonAttributes.Coordinates = *coordinates
+}
+
 func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IdRequest, dto *clientdto.UpdateClientInput) error {
 	client, err := s.rclient.GetClientById(ctx, dtoId.ID.String())
-
 	if err != nil {
 		return err
 	}
@@ -50,6 +61,8 @@ func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IdRequest, 
 	if err := dto.UpdateModel(client); err != nil {
 		return err
 	}
+
+	s.UpdateClientWithCoordinates(ctx, client)
 
 	if err := s.rclient.UpdateClient(ctx, client); err != nil {
 		return err

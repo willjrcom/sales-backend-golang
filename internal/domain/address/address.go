@@ -17,28 +17,30 @@ type Address struct {
 }
 
 type AddressCommonAttributes struct {
-	ObjectID     uuid.UUID `bun:"object_id,type:uuid,notnull" json:"object_id"`
-	Street       string    `bun:"street,notnull" json:"street"`
-	Number       string    `bun:"number,notnull" json:"number"`
-	Complement   string    `bun:"complement" json:"complement"`
-	Reference    string    `bun:"reference" json:"reference"`
-	Neighborhood string    `bun:"neighborhood,notnull" json:"neighborhood"`
-	City         string    `bun:"city,notnull" json:"city"`
-	State        string    `bun:"state,notnull" json:"state"`
-	Cep          string    `bun:"cep" json:"cep"`
-	DeliveryTax  float64   `bun:"delivery_tax,notnull" json:"delivery_tax"`
+	ObjectID     uuid.UUID   `bun:"object_id,type:uuid,notnull" json:"object_id"`
+	Street       string      `bun:"street,notnull" json:"street"`
+	Number       string      `bun:"number,notnull" json:"number"`
+	Complement   string      `bun:"complement" json:"complement"`
+	Reference    string      `bun:"reference" json:"reference"`
+	Neighborhood string      `bun:"neighborhood,notnull" json:"neighborhood"`
+	City         string      `bun:"city,notnull" json:"city"`
+	State        string      `bun:"state,notnull" json:"state"`
+	Cep          string      `bun:"cep" json:"cep"`
+	DeliveryTax  float64     `bun:"delivery_tax,notnull" json:"delivery_tax"`
+	Coordinates  Coordinates `bun:"coordinates,type:jsonb" json:"coordinates,omitempty"`
 }
 
 type PatchAddress struct {
-	Street       *string  `json:"street"`
-	Number       *string  `json:"number"`
-	Complement   *string  `json:"complement"`
-	Reference    *string  `json:"reference"`
-	Neighborhood *string  `json:"neighborhood"`
-	City         *string  `json:"city"`
-	State        *string  `json:"state"`
-	Cep          *string  `json:"cep"`
-	DeliveryTax  *float64 `json:"delivery_tax"`
+	Street       *string      `json:"street"`
+	Number       *string      `json:"number"`
+	Complement   *string      `json:"complement"`
+	Reference    *string      `json:"reference"`
+	Neighborhood *string      `json:"neighborhood"`
+	City         *string      `json:"city"`
+	State        *string      `json:"state"`
+	Cep          *string      `json:"cep"`
+	DeliveryTax  *float64     `json:"delivery_tax"`
+	Coordinates  *Coordinates `json:"coordinates,omitempty"`
 }
 
 func (a *Address) Validate() error {
@@ -61,6 +63,12 @@ func (a *Address) Validate() error {
 }
 
 func NewAddress(addressCommonAttributes *AddressCommonAttributes) *Address {
+	coordinates, _ := GetCoordinates(addressCommonAttributes)
+
+	if coordinates != nil {
+		addressCommonAttributes.Coordinates = *coordinates
+	}
+
 	return &Address{
 		Entity:                  entity.NewEntity(),
 		AddressCommonAttributes: *addressCommonAttributes,
@@ -105,6 +113,10 @@ func NewPatchAddress(patchAddress *PatchAddress, objectID uuid.UUID) *Address {
 
 	if patchAddress.State != nil {
 		addressCommonAttributes.State = *patchAddress.State
+	}
+
+	if patchAddress.Coordinates != nil {
+		addressCommonAttributes.Coordinates = *patchAddress.Coordinates
 	}
 
 	return &Address{
