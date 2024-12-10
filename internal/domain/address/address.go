@@ -42,7 +42,7 @@ type PatchAddress struct {
 	Cep          *string      `json:"cep"`
 	DeliveryTax  *float64     `json:"delivery_tax"`
 	Coordinates  *Coordinates `json:"coordinates,omitempty"`
-	AddressType  *AddressType `json:"type"`
+	AddressType  *AddressType `json:"address_type"`
 }
 
 type AddressType string
@@ -134,6 +134,10 @@ func NewPatchAddress(patchAddress *PatchAddress, objectID uuid.UUID) *Address {
 
 	if patchAddress.Coordinates != nil {
 		addressCommonAttributes.Coordinates = *patchAddress.Coordinates
+	}
+
+	if patchAddress.AddressType != nil {
+		addressCommonAttributes.AddressType = *patchAddress.AddressType
 	}
 
 	return &Address{
