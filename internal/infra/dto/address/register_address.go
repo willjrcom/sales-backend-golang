@@ -35,6 +35,11 @@ func (a *CreateAddressInput) validate() error {
 	if a.State == nil {
 		return ErrStateRequired
 	}
+	if a.AddressType == nil {
+		house := addressentity.AddressTypeHouse
+		a.AddressType = &house
+	}
+
 	return nil
 }
 
@@ -52,6 +57,7 @@ func (a *CreateAddressInput) ToModel() (*addressentity.Address, error) {
 		City:         *a.City,
 		State:        *a.State,
 		Cep:          *a.Cep,
+		AddressType:  *a.AddressType,
 	}
 
 	return &addressentity.Address{

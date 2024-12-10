@@ -26,6 +26,7 @@ type AddressCommonAttributes struct {
 	City         string      `bun:"city,notnull" json:"city"`
 	State        string      `bun:"state,notnull" json:"state"`
 	Cep          string      `bun:"cep" json:"cep"`
+	AddressType  AddressType `bun:"address_type,notnull" json:"address_type"`
 	DeliveryTax  float64     `bun:"delivery_tax,notnull" json:"delivery_tax"`
 	Coordinates  Coordinates `bun:"coordinates,type:jsonb" json:"coordinates,omitempty"`
 }
@@ -41,7 +42,19 @@ type PatchAddress struct {
 	Cep          *string      `json:"cep"`
 	DeliveryTax  *float64     `json:"delivery_tax"`
 	Coordinates  *Coordinates `json:"coordinates,omitempty"`
+	AddressType  *AddressType `json:"type"`
 }
+
+type AddressType string
+
+const (
+	AddressTypeHouse       AddressType = "house"
+	AddressTypeApartment   AddressType = "apartment"
+	AddressTypeCondominium AddressType = "condominium"
+	AddressTypeWork        AddressType = "work"
+	AddressTypeHotel       AddressType = "hotel"
+	AddressTypeShed        AddressType = "shed"
+)
 
 func (a *Address) Validate() error {
 	if a.Street == "" {
@@ -59,6 +72,10 @@ func (a *Address) Validate() error {
 	if a.State == "" {
 		return errors.New("state is required")
 	}
+	if a.AddressType == "" {
+		a.AddressType = AddressTypeHouse
+	}
+
 	return nil
 }
 
