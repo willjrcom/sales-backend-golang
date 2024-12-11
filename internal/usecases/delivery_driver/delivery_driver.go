@@ -2,19 +2,26 @@ package deliverydriverusecases
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
+	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	deliverydriverdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/delivery_driver"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 )
 
 type Service struct {
-	r orderentity.DeliveryDriverRepository
+	r  orderentity.DeliveryDriverRepository
+	re employeeentity.Repository
 }
 
 func NewService(r orderentity.DeliveryDriverRepository) *Service {
 	return &Service{r: r}
+}
+
+func (s *Service) AddDependencies(re employeeentity.Repository) {
+	s.re = re
 }
 
 func (s *Service) CreateDeliveryDriver(ctx context.Context, dto *deliverydriverdto.CreateDeliveryDriverInput) (uuid.UUID, error) {
@@ -24,9 +31,17 @@ func (s *Service) CreateDeliveryDriver(ctx context.Context, dto *deliverydriverd
 		return uuid.Nil, err
 	}
 
-	err = s.r.CreateDeliveryDriver(ctx, driver)
+	employee, _ := s.re.GetEmployeeById(ctx, driver.EmployeeID.String())
+	if employee == nil {
+		return uuid.Nil, errors.New("employee not found")
+	}
 
-	if err != nil {
+	oldDeliveryDriver, _ := s.r.GetDeliveryDriverByEmployeeId(ctx, driver.EmployeeID.String())
+	if oldDeliveryDriver != nil {
+		return uuid.Nil, errors.New("delivery driver already exists")
+	}
+
+	if err = s.r.CreateDeliveryDriver(ctx, driver); err != nil {
 		return uuid.Nil, err
 	}
 

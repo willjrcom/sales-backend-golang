@@ -80,6 +80,23 @@ func (r *DeliveryDriverRepositoryBun) GetDeliveryDriverById(ctx context.Context,
 	return deliveryDriver, nil
 }
 
+func (r *DeliveryDriverRepositoryBun) GetDeliveryDriverByEmployeeId(ctx context.Context, id string) (*orderentity.DeliveryDriver, error) {
+	deliveryDriver := &orderentity.DeliveryDriver{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(deliveryDriver).Where("driver.employee_id = ?", id).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return deliveryDriver, nil
+}
+
 func (r *DeliveryDriverRepositoryBun) GetAllDeliveryDrivers(ctx context.Context) ([]orderentity.DeliveryDriver, error) {
 	deliveryDrivers := []orderentity.DeliveryDriver{}
 
