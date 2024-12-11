@@ -22,7 +22,7 @@ type Product struct {
 }
 
 type ProductCommonAttributes struct {
-	Code        string           `bun:"code,unique,notnull" json:"code"`
+	Code        string           `bun:"code,notnull" json:"code"`
 	Name        string           `bun:"name,notnull" json:"name"`
 	Flavors     []string         `bun:"flavors,type:jsonb" json:"flavors,omitempty"`
 	ImagePath   *string          `bun:"image_path" json:"image_path"`

@@ -15,7 +15,7 @@ type ProductCategory struct {
 }
 
 type ProductCategoryCommonAttributes struct {
-	Name                 string            `bun:"name,unique,notnull" json:"name"`
+	Name                 string            `bun:"name,notnull" json:"name"`
 	ImagePath            string            `bun:"image_path" json:"image_path"`
 	NeedPrint            bool              `bun:"need_print,notnull" json:"need_print"`
 	RemovableIngredients []string          `bun:"removable_ingredients,type:jsonb" json:"removable_ingredients,omitempty"`

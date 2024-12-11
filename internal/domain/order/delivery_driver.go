@@ -17,7 +17,7 @@ type DeliveryDriver struct {
 }
 
 type DeliveryDriverCommonAttributes struct {
-	EmployeeID      uuid.UUID                `bun:"column:employee_id,type:uuid,notnull,unique" json:"employee_id"`
+	EmployeeID      uuid.UUID                `bun:"column:employee_id,type:uuid,notnull" json:"employee_id"`
 	Employee        *employeeentity.Employee `bun:"rel:belongs-to" json:"employee,omitempty"`
 	OrderDeliveries []OrderDelivery          `bun:"rel:has-many,join:employee_id=driver_id" json:"order_deliveries,omitempty"`
 }
