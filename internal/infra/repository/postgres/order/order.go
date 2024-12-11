@@ -99,9 +99,8 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *orderentity.Or
 	} else if p.Table != nil {
 		if _, err = tx.NewUpdate().Model(p.Table).WherePK().Exec(ctx); err != nil {
 			tx.Rollback()
+			return err
 		}
-
-		return err
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -253,6 +252,30 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]orderentity.Or
 
 	query := r.db.NewSelect().Model(&orders)
 	query.Relation("Groups.Items.AdditionalItems").Relation("Attendant").Relation("Payments").Relation("Groups.ComplementItem").Relation("Table").Relation("Delivery").Relation("Pickup")
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	for index := range orders {
+		orders[index].CalculateTotalPrice()
+	}
+
+	return orders, nil
+}
+
+func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context) ([]orderentity.Order, error) {
+	orders := []orderentity.Order{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	query := r.db.NewSelect().Model(&orders).Where("delivery.id IS NOT NULL")
+	query.Relation("Delivery.Client").Relation("Delivery.Address").Relation("Delivery.Driver")
+
 	if err := query.Scan(ctx); err != nil {
 		return nil, err
 	}

@@ -27,6 +27,7 @@ func NewHandlerOrder(orderService *orderusecases.Service) *handler.Handler {
 		//c.Post("/new", h.handlerCreateOrder)
 		c.Get("/{id}", h.handlerGetOrderById)
 		c.Get("/all", h.handlerGetAllOrders)
+		c.Get("/all/delivery", h.GetAllOrdersWithDelivery)
 		c.Put("/update/{id}/observation", h.handlerUpdateObservation)
 		c.Put("/update/{id}/payment", h.handlerUpdatePaymentMethod)
 		c.Post("/pending/{id}", h.handlerPendingOrder)
@@ -84,6 +85,18 @@ func (h *handlerOrderImpl) handlerGetAllOrders(w http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 
 	orders, err := h.s.GetAllOrders(ctx)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
+}
+
+func (h *handlerOrderImpl) GetAllOrdersWithDelivery(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	orders, err := h.s.GetAllOrdersWithDelivery(ctx)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

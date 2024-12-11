@@ -23,6 +23,10 @@ func (s *Service) GetAllOrders(ctx context.Context) ([]orderentity.Order, error)
 	}
 }
 
-func (s *Service) GetAllOrderDeliveryStatus(ctx context.Context) ([]orderentity.Order, error) {
-	return []orderentity.Order{}, nil
+func (s *Service) GetAllOrdersWithDelivery(ctx context.Context) ([]orderentity.Order, error) {
+	if orders, err := s.ro.GetAllOrdersWithDelivery(ctx); err != nil {
+		return nil, err
+	} else {
+		return orders, nil
+	}
 }
