@@ -59,7 +59,8 @@ func ConnectRdsDB(ctx context.Context) string {
 	)
 }
 
-func NewPostgreSQLConnection(ctx context.Context) *bun.DB {
+func NewPostgreSQLConnection() *bun.DB {
+	ctx := context.Background()
 	// Prepare connection string parameterized
 	connectionParams := ""
 	environment := ctx.Value(Environment("environment"))

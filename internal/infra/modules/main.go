@@ -7,7 +7,7 @@ import (
 )
 
 func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
-	productRepository, productService, _ := NewProductCategoryProductModule(db, chi)
+	productRepository, _, _ := NewProductCategoryProductModule(db, chi)
 	productCategoryRepository, categoryService, _ := NewProductCategoryModule(db, chi)
 	_, sizeService, _ := NewProductCategorySizeModule(db, chi)
 	quantityRepository, quantityService, _ := NewProductCategoryQuantityModule(db, chi)
@@ -41,7 +41,6 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	userRepository, userService, _ := NewUserModule(db, chi)
 
 	// Dependencies
-	productService.AddDependencies(productCategoryRepository, s3)
 	sizeService.AddDependencies(productCategoryRepository)
 	quantityService.AddDependencies(productCategoryRepository)
 	categoryService.AddDependencies(*quantityService, *sizeService)

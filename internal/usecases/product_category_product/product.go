@@ -8,6 +8,8 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productcategoryproductdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category_product"
+	productcategoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
+	productcategoryproductrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category_product"
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
@@ -21,13 +23,16 @@ type Service struct {
 	s3Service *s3service.S3Client
 }
 
-func NewService(rp productentity.ProductRepository) *Service {
-	return &Service{rp: rp}
-}
-
-func (s *Service) AddDependencies(rc productentity.CategoryRepository, s3 *s3service.S3Client) {
-	s.rc = rc
-	s.s3Service = s3
+func NewService(
+	rp *productcategoryproductrepositorybun.ProductRepositoryBun,
+	rc *productcategoryrepositorybun.ProductCategoryRepositoryBun,
+	s3 *s3service.S3Client,
+) *Service {
+	return &Service{
+		rp:        rp,
+		rc:        rc,
+		s3Service: s3,
+	}
 }
 
 func (s *Service) CreateProduct(ctx context.Context, dto *productcategoryproductdto.CreateProductInput) (uuid.UUID, error) {

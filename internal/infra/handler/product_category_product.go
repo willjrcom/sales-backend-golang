@@ -12,14 +12,14 @@ import (
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
-type handlerProductImpl struct {
+type HandlerProductImpl struct {
 	s *productcategoryproductusecases.Service
 }
 
 func NewHandlerProduct(productService *productcategoryproductusecases.Service) *handler.Handler {
 	c := chi.NewRouter()
 
-	h := &handlerProductImpl{
+	h := &HandlerProductImpl{
 		s: productService,
 	}
 
@@ -35,7 +35,7 @@ func NewHandlerProduct(productService *productcategoryproductusecases.Service) *
 	return handler.NewHandler("/product", c)
 }
 
-func (h *handlerProductImpl) handlerCreateProduct(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerProductImpl) handlerCreateProduct(w http.ResponseWriter, r *http.Request) {
 	// file, _, err := r.FormFile("image")
 	// if err != nil && err.Error() != "http: no such file" {
 	// 	jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
@@ -65,7 +65,7 @@ func (h *handlerProductImpl) handlerCreateProduct(w http.ResponseWriter, r *http
 	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
 }
 
-func (h *handlerProductImpl) handlerUpdateProduct(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerProductImpl) handlerUpdateProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -91,7 +91,7 @@ func (h *handlerProductImpl) handlerUpdateProduct(w http.ResponseWriter, r *http
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerProductImpl) handlerDeleteProduct(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerProductImpl) handlerDeleteProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -111,7 +111,7 @@ func (h *handlerProductImpl) handlerDeleteProduct(w http.ResponseWriter, r *http
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -132,7 +132,7 @@ func (h *handlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Re
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: product})
 }
 
-func (h *handlerProductImpl) handlerGetProductByCode(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerProductImpl) handlerGetProductByCode(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	code := chi.URLParam(r, "code")
@@ -153,7 +153,7 @@ func (h *handlerProductImpl) handlerGetProductByCode(w http.ResponseWriter, r *h
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: product})
 }
 
-func (h *handlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	categories, err := h.s.GetAllProducts(ctx)

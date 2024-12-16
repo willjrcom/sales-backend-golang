@@ -32,16 +32,15 @@ func TestMain(m *testing.M) {
 	ctx = context.Background()
 
 	// Repository
-	rp := productcategoryproductrepositorylocal.NewProductRepositoryLocal()
+	productcategoryproductrepositorylocal.NewProductRepositoryLocal()
 	rc := productcategoryrepositorylocal.NewCategoryRepositoryLocal()
 	rs := productcategorysizerepositorylocal.NewSizeRepositoryLocal()
-	s3Service := s3service.NewS3Client()
+	s3service.NewS3Client()
 
 	// Service
-	productService = NewService(rp)
+	productService, _ = InitializeService()
 	sizeService = productcategorysizeusecases.NewService(rs)
 
-	productService.AddDependencies(rc, s3Service)
 	sizeService.AddDependencies(rc)
 
 	exitCode := m.Run()

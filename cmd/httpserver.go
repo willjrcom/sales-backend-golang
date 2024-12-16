@@ -4,8 +4,8 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"context"
 	"flag"
+	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
@@ -22,16 +22,15 @@ var HttpserverCmd = &cobra.Command{
 		cmd.Println("httpserver called")
 		port, _ := cmd.Flags().GetString("port")
 		environment, _ := cmd.Flags().GetString("environment")
-
+		fmt.Print(environment)
 		flag.Parse()
-		ctx := context.WithValue(context.Background(), database.Environment("environment"), environment)
 		chi := server.NewServerChi()
 
 		s3Service := s3service.NewS3Client()
 		cmd.Println("s3 loaded")
 
 		// Load database
-		db := database.NewPostgreSQLConnection(ctx)
+		db := database.NewPostgreSQLConnection()
 		cmd.Println("db loaded")
 
 		// Iniciar a goroutine para flush

@@ -11,7 +11,11 @@ import (
 
 func NewProductCategoryProductModule(db *bun.DB, chi *server.ServerChi) (*productcategoryproductrepositorybun.ProductRepositoryBun, *productcategoryproductusecases.Service, *handler.Handler) {
 	repository := productcategoryproductrepositorybun.NewProductRepositoryBun(db)
-	service := productcategoryproductusecases.NewService(repository)
+	service, err := productcategoryproductusecases.InitializeService()
+	if err != nil {
+		panic(err)
+	}
+
 	handler := handlerimpl.NewHandlerProduct(service)
 	chi.AddHandler(handler)
 	return repository, service, handler
