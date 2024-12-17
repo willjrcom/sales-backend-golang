@@ -31,7 +31,7 @@ type OrderDeliveryCommonAttributes struct {
 	Client      *cliententity.Client   `bun:"rel:belongs-to" json:"client"`
 	AddressID   uuid.UUID              `bun:"column:address_id,type:uuid,notnull" json:"address_id"`
 	Address     *addressentity.Address `bun:"rel:belongs-to" json:"address"`
-	DriverID    uuid.UUID              `bun:"column:driver_id,type:uuid" json:"driver_id,omitempty"`
+	DriverID    *uuid.UUID             `bun:"column:driver_id,type:uuid" json:"driver_id,omitempty"`
 	Driver      *DeliveryDriver        `bun:"rel:belongs-to" json:"driver"`
 	OrderID     uuid.UUID              `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
 }
@@ -65,7 +65,7 @@ func (d *OrderDelivery) Pend() error {
 	return nil
 }
 
-func (d *OrderDelivery) Ship(driverID uuid.UUID) error {
+func (d *OrderDelivery) Ship(driverID *uuid.UUID) error {
 	if d.Status != OrderDeliveryStatusPending {
 		return ErrOrderDeliveryMustBePending
 	}
