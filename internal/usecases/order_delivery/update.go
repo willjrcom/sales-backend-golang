@@ -31,27 +31,33 @@ func (s *Service) PendOrderDelivery(ctx context.Context, dtoID *entitydto.IdRequ
 	return nil
 }
 
-func (s *Service) ShipOrderDelivery(ctx context.Context, dtoID *entitydto.IdRequest, dtoDriver *orderdeliverydto.UpdateDriverOrder) (err error) {
-	orderDelivery, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
+func (s *Service) ShipOrderDelivery(ctx context.Context, dtoShip *orderdeliverydto.ShipDeliveryOrder) (err error) {
+	if len(dtoShip.DeliveryIDs) == 0 {
+		return errors.New("delivery ids is required")
+	}
+
+	orderDeliveries, err := s.rdo.GetDeliveriesByIds(ctx, dtoShip.DeliveryIDs)
 
 	if err != nil {
 		return err
 	}
 
-	if err = dtoDriver.UpdateModel(orderDelivery); err != nil {
+	if err = dtoShip.UpdateModel(orderDeliveries); err != nil {
 		return err
 	}
 
-	if _, err = s.rdd.GetDeliveryDriverById(ctx, orderDelivery.DriverID.String()); err != nil {
+	if _, err = s.rdd.GetDeliveryDriverById(ctx, dtoShip.DriverID.String()); err != nil {
 		return err
 	}
 
-	if err := orderDelivery.Ship(orderDelivery.DriverID); err != nil {
-		return err
-	}
+	for i := range orderDeliveries {
+		if err := orderDeliveries[i].Ship(&dtoShip.DriverID); err != nil {
+			return err
+		}
 
-	if err = s.rdo.UpdateOrderDelivery(ctx, orderDelivery); err != nil {
-		return err
+		if err := s.rdo.UpdateOrderDelivery(ctx, &orderDeliveries[i]); err != nil {
+			return err
+		}
 	}
 
 	return nil

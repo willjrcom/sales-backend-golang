@@ -26,6 +26,7 @@ type OrderDeliveryRepository interface {
 	UpdateOrderDelivery(ctx context.Context, delivery *OrderDelivery) error
 	DeleteOrderDelivery(ctx context.Context, id string) error
 	GetDeliveryById(ctx context.Context, id string) (*OrderDelivery, error)
+	GetDeliveriesByIds(ctx context.Context, ids []string) ([]OrderDelivery, error)
 	GetAllDeliveries(ctx context.Context) ([]OrderDelivery, error)
 }
 

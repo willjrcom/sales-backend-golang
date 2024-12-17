@@ -96,3 +96,20 @@ func (r *OrderDeliveryRepositoryBun) GetDeliveryById(ctx context.Context, id str
 
 	return delivery, nil
 }
+
+func (r *OrderDeliveryRepositoryBun) GetDeliveriesByIds(ctx context.Context, ids []string) ([]orderentity.OrderDelivery, error) {
+	deliveries := []orderentity.OrderDelivery{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(&deliveries).Where("delivery.id IN (?)", bun.In(ids)).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return deliveries, nil
+}
