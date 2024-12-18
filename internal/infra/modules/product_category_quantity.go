@@ -5,13 +5,13 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
-	productcategoryquantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category_quantity"
-	productcategoryquantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category_quantity"
+	quantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity"
+	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
 )
 
-func NewProductCategoryQuantityModule(db *bun.DB, chi *server.ServerChi) (*productcategoryquantityrepositorybun.QuantityRepositoryBun, *productcategoryquantityusecases.Service, *handler.Handler) {
-	repository := productcategoryquantityrepositorybun.NewQuantityRepositoryBun(db)
-	service := productcategoryquantityusecases.NewService(repository)
+func NewProductCategoryQuantityModule(db *bun.DB, chi *server.ServerChi) (*quantityrepositorybun.QuantityRepositoryBun, *quantityusecases.Service, *handler.Handler) {
+	repository := quantityrepositorybun.NewQuantityRepositoryBun(db)
+	service := quantityusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerQuantity(service)
 	chi.AddHandler(handler)
 	return repository, service, handler

@@ -15,7 +15,7 @@ var (
 
 type Quantity struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:product_category_quantities"`
+	bun.BaseModel `bun:"table:quantities"`
 	QuantityCommonAttributes
 	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }

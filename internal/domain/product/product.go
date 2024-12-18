@@ -16,7 +16,7 @@ var (
 
 type Product struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:product_category_products"`
+	bun.BaseModel `bun:"table:products"`
 	ProductCommonAttributes
 	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }

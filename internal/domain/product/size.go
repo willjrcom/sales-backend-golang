@@ -15,7 +15,7 @@ var (
 
 type Size struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:product_category_sizes"`
+	bun.BaseModel `bun:"table:sizes"`
 	SizeCommonAttributes
 	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }

@@ -8,10 +8,10 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
-	productcategoryquantitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category_quantity"
-	productcategorysizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category_size"
-	productcategoryquantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category_quantity"
-	productcategorysizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category_size"
+	quantitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/quantity"
+	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
+	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
+	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size"
 )
 
 var (
@@ -20,15 +20,15 @@ var (
 
 type Service struct {
 	r  productentity.CategoryRepository
-	sq productcategoryquantityusecases.Service
-	ss productcategorysizeusecases.Service
+	sq quantityusecases.Service
+	ss sizeusecases.Service
 }
 
 func NewService(c productentity.CategoryRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) AddDependencies(sq productcategoryquantityusecases.Service, ss productcategorysizeusecases.Service) {
+func (s *Service) AddDependencies(sq quantityusecases.Service, ss sizeusecases.Service) {
 	s.ss = ss
 	s.sq = sq
 }
@@ -58,7 +58,7 @@ func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.Cr
 		sizes = []string{"Padrão"}
 	}
 
-	registerQuantities := &productcategoryquantitydto.RegisterQuantities{
+	registerQuantities := &quantitydto.RegisterQuantities{
 		Quantities: quantities,
 		CategoryID: category.ID,
 	}
@@ -67,7 +67,7 @@ func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.Cr
 		return category.ID, err
 	}
 
-	registerSizes := &productcategorysizedto.CreateSizes{
+	registerSizes := &sizedto.CreateSizes{
 		Sizes:      sizes,
 		CategoryID: category.ID,
 	}

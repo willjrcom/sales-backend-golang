@@ -3,13 +3,13 @@ package productcategorydto
 import (
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
-	productcategoryprocessruledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category_process_rule"
+	processruledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process_rule"
 )
 
 type CategoryOutput struct {
 	ID uuid.UUID `json:"id"`
 	productentity.ProductCategoryCommonAttributes
-	ProcessRules []productcategoryprocessruledto.ProcessRuleOutput `json:"process_rules,omitempty"`
+	ProcessRules []processruledto.ProcessRuleOutput `json:"process_rules,omitempty"`
 }
 
 func (c *CategoryOutput) FromModel(model *productentity.ProductCategory) {
@@ -30,10 +30,10 @@ func (c *CategoryOutput) FromModel(model *productentity.ProductCategory) {
 	if len(model.ProcessRules) == 0 {
 		model.ProcessRules = []productentity.ProcessRule{}
 	} else {
-		c.ProcessRules = make([]productcategoryprocessruledto.ProcessRuleOutput, len(model.ProcessRules))
+		c.ProcessRules = make([]processruledto.ProcessRuleOutput, len(model.ProcessRules))
 
 		for i, processRule := range model.ProcessRules {
-			c.ProcessRules[i] = productcategoryprocessruledto.ProcessRuleOutput{}
+			c.ProcessRules[i] = processruledto.ProcessRuleOutput{}
 			c.ProcessRules[i].FromModel(&processRule)
 		}
 	}

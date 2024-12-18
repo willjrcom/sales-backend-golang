@@ -5,13 +5,13 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
-	productcategoryproductrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category_product"
-	productcategoryproductusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category_product"
+	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
+	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 )
 
-func NewProductCategoryProductModule(db *bun.DB, chi *server.ServerChi) (*productcategoryproductrepositorybun.ProductRepositoryBun, *productcategoryproductusecases.Service, *handler.Handler) {
-	repository := productcategoryproductrepositorybun.NewProductRepositoryBun(db)
-	service, err := productcategoryproductusecases.InitializeService()
+func NewProductModule(db *bun.DB, chi *server.ServerChi) (*productrepositorybun.ProductRepositoryBun, *productusecases.Service, *handler.Handler) {
+	repository := productrepositorybun.NewProductRepositoryBun(db)
+	service, err := productusecases.InitializeService()
 	if err != nil {
 		panic(err)
 	}
