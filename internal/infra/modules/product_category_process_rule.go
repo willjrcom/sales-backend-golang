@@ -5,7 +5,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
-	processrulerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/processrule"
+	processrulerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/process_rule"
 	processruleusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_rule"
 )
 
