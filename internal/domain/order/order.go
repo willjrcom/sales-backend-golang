@@ -23,6 +23,7 @@ var (
 	ErrOrderAlreadyArchived          = errors.New("order already archived")
 	ErrOrderPaidMoreThanTotal        = errors.New("order paid more than total")
 	ErrOrderPaidLessThanTotal        = errors.New("order paid less than total")
+	ErrDeliveryOrderMustBeDelivered  = errors.New("order delivery must be delivered")
 )
 
 type Order struct {
@@ -147,6 +148,10 @@ func (o *Order) ReadyOrder() (err error) {
 func (o *Order) FinishOrder() (err error) {
 	if o.Status != OrderStatusReady && o.Status != OrderStatusPending {
 		return ErrOrderMustBePendingOrReady
+	}
+
+	if o.Delivery != nil && o.Delivery.Status != OrderDeliveryStatusDelivered {
+		return ErrDeliveryOrderMustBeDelivered
 	}
 
 	totalPaid := 0.00
