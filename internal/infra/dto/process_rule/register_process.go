@@ -2,7 +2,6 @@ package processruledto
 
 import (
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
@@ -17,7 +16,13 @@ var (
 )
 
 type CreateProcessRuleInput struct {
-	productentity.ProcessRuleCommonAttributes
+	Name              string    `json:"name"`
+	Order             int8      `json:"order"`
+	Description       string    `json:"description"`
+	ImagePath         *string   `json:"image_path"`
+	IdealTime         string    `json:"ideal_time"`
+	ExperimentalError string    `json:"experimental_error"`
+	CategoryID        uuid.UUID `json:"category_id"`
 }
 
 func (s *CreateProcessRuleInput) validate() error {
@@ -28,11 +33,11 @@ func (s *CreateProcessRuleInput) validate() error {
 		return ErrOrderRequired
 	}
 
-	if s.IdealTime == 0 {
+	if s.IdealTime == "" {
 		return ErrIdealTimeRequired
 	}
 
-	if s.ExperimentalError == 0 {
+	if s.ExperimentalError == "" {
 		return ErrExperimentalErrorRequired
 	}
 
@@ -48,12 +53,22 @@ func (s *CreateProcessRuleInput) ToModel() (*productentity.ProcessRule, error) {
 		return nil, err
 	}
 	processRuleCommonAttributes := productentity.ProcessRuleCommonAttributes{
-		Name:              s.Name,
-		Order:             s.Order,
-		IdealTime:         s.IdealTime * time.Second,
-		ExperimentalError: s.ExperimentalError * time.Second,
-		CategoryID:        s.CategoryID,
+		Name:       s.Name,
+		Order:      s.Order,
+		CategoryID: s.CategoryID,
 	}
 
+	idealTime, err := convertToDuration(s.IdealTime)
+	if err != nil {
+		return nil, err
+	}
+
+	experimentalError, err := convertToDuration(s.ExperimentalError)
+	if err != nil {
+		return nil, err
+	}
+
+	processRuleCommonAttributes.IdealTime = idealTime
+	processRuleCommonAttributes.ExperimentalError = experimentalError
 	return productentity.NewProcessRule(processRuleCommonAttributes), nil
 }
