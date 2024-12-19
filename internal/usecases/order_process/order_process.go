@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
@@ -11,6 +12,7 @@ import (
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
 	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
+	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 )
@@ -21,17 +23,19 @@ type Service struct {
 	sq   *orderqueueusecases.Service
 	rsgi *groupitemusecases.Service
 	ro   orderentity.OrderRepository
+	se   *employeeusecases.Service
 }
 
 func NewService(c orderprocessentity.ProcessRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) AddDependencies(sq *orderqueueusecases.Service, rpr productentity.ProcessRuleRepository, rsgi *groupitemusecases.Service, ro orderentity.OrderRepository) {
+func (s *Service) AddDependencies(sq *orderqueueusecases.Service, rpr productentity.ProcessRuleRepository, rsgi *groupitemusecases.Service, ro orderentity.OrderRepository, se *employeeusecases.Service) {
 	s.rpr = rpr
 	s.sq = sq
 	s.rsgi = rsgi
 	s.ro = ro
+	s.se = se
 }
 
 func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.CreateProcessInput) (uuid.UUID, error) {
@@ -71,8 +75,9 @@ func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.Create
 	return process.ID, nil
 }
 
-func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IdRequest, dto *orderprocessdto.StartProcessInput) error {
-	employeeID, err := dto.ToModel()
+func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IdRequest) error {
+	user := ctx.Value(companyentity.UserValue("user")).(companyentity.User)
+	employee, err := s.se.GetEmployeeByUserID(ctx, entitydto.NewIdRequest(user.ID))
 	if err != nil {
 		return err
 	}
@@ -94,7 +99,7 @@ func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IdRequest, 
 		}
 	}
 
-	if err := process.StartProcess(employeeID); err != nil {
+	if err := process.StartProcess(employee.ID); err != nil {
 		return err
 	}
 

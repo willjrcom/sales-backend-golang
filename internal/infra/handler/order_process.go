@@ -69,13 +69,7 @@ func (h *handlerProcessImpl) handlerStartProcess(w http.ResponseWriter, r *http.
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	dtoStart := &processdto.StartProcessInput{}
-	if err := jsonpkg.ParseBody(r, &dtoStart); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
-		return
-	}
-
-	if err := h.s.StartProcess(ctx, dtoId, dtoStart); err != nil {
+	if err := h.s.StartProcess(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

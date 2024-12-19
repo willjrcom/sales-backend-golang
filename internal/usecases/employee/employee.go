@@ -78,6 +78,16 @@ func (s *Service) GetEmployeeById(ctx context.Context, dto *entitydto.IdRequest)
 	}
 }
 
+func (s *Service) GetEmployeeByUserID(ctx context.Context, dto *entitydto.IdRequest) (*employeedto.EmployeeOutput, error) {
+	if employee, err := s.re.GetEmployeeByUserID(ctx, dto.ID.String()); err != nil {
+		return nil, err
+	} else {
+		dto := &employeedto.EmployeeOutput{}
+		dto.FromModel(employee)
+		return dto, nil
+	}
+}
+
 func (s *Service) GetAllEmployees(ctx context.Context) ([]employeedto.EmployeeOutput, error) {
 	if employees, err := s.re.GetAllEmployees(ctx); err != nil {
 		return nil, err

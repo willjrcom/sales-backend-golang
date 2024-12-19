@@ -182,6 +182,23 @@ func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) 
 	return employee, nil
 }
 
+func (r *EmployeeRepositoryBun) GetEmployeeByUserID(ctx context.Context, userID string) (*employeeentity.Employee, error) {
+	employee := &employeeentity.Employee{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(employee).Where("employee.user_id = ?", userID).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return employee, nil
+}
+
 func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]employeeentity.Employee, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
