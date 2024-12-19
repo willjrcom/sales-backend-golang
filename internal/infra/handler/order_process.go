@@ -29,6 +29,7 @@ func NewHandlerOrderProcess(processService *orderprocessusecases.Service) *handl
 		c.Post("/pause/{id}", h.handlerPauseProcess)
 		c.Post("/continue/{id}", h.handlerContinueProcess)
 		c.Post("/finish/{id}", h.handlerFinishProcess)
+		c.Post("/cancel/{id}", h.handlerCancelProcess)
 		c.Get("/{id}", h.handlerGetProcess)
 		c.Get("/all", h.handlerGetAllProcesses)
 		c.Get("/by-process-rule/{id}", h.handlerGetProcessesByProcessRuleID)
@@ -138,6 +139,26 @@ func (h *handlerProcessImpl) handlerFinishProcess(w http.ResponseWriter, r *http
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: nexProcessID})
+}
+
+func (h *handlerProcessImpl) handlerCancelProcess(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	err := h.s.CancelProcess(ctx, dtoId)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: nil})
 }
 
 func (h *handlerProcessImpl) handlerGetProcess(w http.ResponseWriter, r *http.Request) {

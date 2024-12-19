@@ -227,6 +227,23 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 	return nextProcessID, nil
 }
 
+func (s *Service) CancelProcess(ctx context.Context, dtoID *entitydto.IdRequest) error {
+	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
+	if err != nil {
+		return err
+	}
+
+	if err := process.CancelProcess(); err != nil {
+		return err
+	}
+
+	if err := s.r.UpdateProcess(ctx, process); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Service) GetProcessById(ctx context.Context, dto *entitydto.IdRequest) (*orderprocessdto.ProcessOutput, error) {
 	if process, err := s.r.GetProcessById(ctx, dto.ID.String()); err != nil {
 		return nil, err

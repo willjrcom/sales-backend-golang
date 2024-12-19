@@ -36,6 +36,7 @@ type OrderProcessTimeLogs struct {
 	PausedAt          *time.Time    `bun:"paused_at" json:"paused_at,omitempty"`
 	ContinuedAt       *time.Time    `bun:"continued_at" json:"continued_at,omitempty"`
 	FinishedAt        *time.Time    `bun:"finished_at" json:"finished_at,omitempty"`
+	CanceledAt        *time.Time    `bun:"canceled_at" json:"canceled_at,omitempty"`
 	Duration          time.Duration `bun:"duration" json:"duration"`
 	DurationFormatted string        `bun:"duration_formatted" json:"duration_formatted"`
 	TotalPaused       int8          `bun:"total_paused" json:"total_paused"`
@@ -143,5 +144,12 @@ func (p *OrderProcess) ContinueProcess() error {
 	*p.ContinuedAt = time.Now().UTC()
 	p.Status = ProcessStatusContinued
 	p.PausedAt = nil
+	return nil
+}
+
+func (p *OrderProcess) CancelProcess() error {
+	p.CanceledAt = &time.Time{}
+	*p.CanceledAt = time.Now().UTC()
+	p.Status = ProcessStatusCanceled
 	return nil
 }

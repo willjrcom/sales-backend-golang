@@ -8,6 +8,7 @@ const (
 	ProcessStatusFinished  StatusProcess = "Finished"
 	ProcessStatusPaused    StatusProcess = "Paused"
 	ProcessStatusContinued StatusProcess = "Continued"
+	ProcessStatusCanceled  StatusProcess = "Canceled"
 )
 
 func GetAllDeliveryStatus() []StatusProcess {
@@ -17,5 +18,6 @@ func GetAllDeliveryStatus() []StatusProcess {
 		ProcessStatusFinished,
 		ProcessStatusPaused,
 		ProcessStatusContinued,
+		ProcessStatusCanceled,
 	}
 }
