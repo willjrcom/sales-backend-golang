@@ -17,7 +17,7 @@ var (
 
 type OrderProcess struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:order_processes"`
+	bun.BaseModel `bun:"table:order_processes,alias:process"`
 	OrderProcessTimeLogs
 	OrderProcessCommonAttributes
 }

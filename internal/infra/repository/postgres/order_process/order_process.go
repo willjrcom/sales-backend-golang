@@ -105,7 +105,10 @@ func (r *ProcessRepositoryBun) GetProcessById(ctx context.Context, id string) (*
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(process).Where("id = ?", id).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(process).Where("process.id = ?", id).
+		Relation("GroupItem.Items.AdditionalItems").
+		Relation("GroupItem.ComplementItem").
+		Relation("GroupItem.Category").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -122,7 +125,28 @@ func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]orderproc
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&processes).Relation("GroupItem").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&processes).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return processes, nil
+}
+
+func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, id string) ([]orderprocessentity.OrderProcess, error) {
+	processes := []orderprocessentity.OrderProcess{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(&processes).Where("process.process_rule_id = ?", id).
+		Relation("GroupItem.Items.AdditionalItems").
+		Relation("GroupItem.ComplementItem").
+		Relation("GroupItem.Category").
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 

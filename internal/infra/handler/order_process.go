@@ -31,6 +31,7 @@ func NewHandlerOrderProcess(processService *orderprocessusecases.Service) *handl
 		c.Post("/finish/{id}", h.handlerFinishProcess)
 		c.Get("/{id}", h.handlerGetProcess)
 		c.Get("/all", h.handlerGetAllProcesses)
+		c.Get("/by-process-rule/{id}", h.handlerGetProcessesByProcessRuleID)
 		c.Get("/by-group-item/{id}", h.handlerGetProcessesByGroupItem)
 		c.Get("/by-product/{id}", h.handlerGetProcessesByProduct)
 	})
@@ -163,6 +164,26 @@ func (h *handlerProcessImpl) handlerGetAllProcesses(w http.ResponseWriter, r *ht
 	ctx := r.Context()
 
 	processes, err := h.s.GetAllProcesses(ctx)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processes})
+}
+
+func (h *handlerProcessImpl) handlerGetProcessesByProcessRuleID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	processes, err := h.s.GetProcessesByProcessRuleID(ctx, dtoId)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

@@ -245,6 +245,14 @@ func (s *Service) GetAllProcesses(ctx context.Context) ([]orderprocessdto.Proces
 	}
 }
 
+func (s *Service) GetProcessesByProcessRuleID(ctx context.Context, dtoID *entitydto.IdRequest) ([]orderprocessdto.ProcessOutput, error) {
+	if process, err := s.r.GetProcessesByProcessRuleID(ctx, dtoID.ID.String()); err != nil {
+		return nil, err
+	} else {
+		return s.processesToOutputs(process), nil
+	}
+}
+
 func (s *Service) GetProcessesByProductID(ctx context.Context, dtoID *entitydto.IdRequest) ([]orderprocessdto.ProcessOutput, error) {
 	if process, err := s.r.GetProcessesByProductID(ctx, dtoID.ID.String()); err != nil {
 		return nil, err

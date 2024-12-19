@@ -10,6 +10,7 @@ type ProcessRepository interface {
 	DeleteProcess(ctx context.Context, id string) error
 	GetProcessById(ctx context.Context, id string) (*OrderProcess, error)
 	GetAllProcesses(ctx context.Context) ([]OrderProcess, error)
+	GetProcessesByProcessRuleID(ctx context.Context, id string) ([]OrderProcess, error)
 	GetProcessesByProductID(ctx context.Context, id string) ([]OrderProcess, error)
 	GetProcessesByGroupItemID(ctx context.Context, id string) ([]OrderProcess, error)
 }
