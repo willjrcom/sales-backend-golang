@@ -14,7 +14,7 @@ type UpdateScheduleGroupItem struct {
 }
 
 func (o *UpdateScheduleGroupItem) validate() error {
-	if o.StartAt != nil && o.StartAt.Before(time.Now()) {
+	if o.StartAt != nil && o.StartAt.Before(time.Now().UTC()) {
 		return ErrStartAtIsBeforeNow
 	}
 

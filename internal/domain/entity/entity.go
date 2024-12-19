@@ -14,6 +14,6 @@ type Entity struct {
 }
 
 func NewEntity() Entity {
-	now := time.Now()
+	now := time.Now().UTC()
 	return Entity{ID: uuid.New(), CreatedAt: now, UpdatedAt: now}
 }

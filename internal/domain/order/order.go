@@ -116,7 +116,7 @@ func (o *Order) PendingOrder() (err error) {
 
 	if o.PendingAt == nil {
 		o.PendingAt = &time.Time{}
-		*o.PendingAt = time.Now()
+		*o.PendingAt = time.Now().UTC()
 	}
 
 	if o.Delivery != nil {
@@ -165,7 +165,7 @@ func (o *Order) FinishOrder() (err error) {
 
 	o.Status = OrderStatusFinished
 	o.FinishedAt = &time.Time{}
-	*o.FinishedAt = time.Now()
+	*o.FinishedAt = time.Now().UTC()
 	return nil
 }
 
@@ -184,7 +184,7 @@ func (o *Order) CancelOrder() (err error) {
 
 	o.Status = OrderStatusCanceled
 	o.CanceledAt = &time.Time{}
-	*o.CanceledAt = time.Now()
+	*o.CanceledAt = time.Now().UTC()
 	return nil
 }
 
@@ -199,7 +199,7 @@ func (o *Order) ArchiveOrder() (err error) {
 
 	o.Status = OrderStatusArchived
 	o.ArchivedAt = &time.Time{}
-	*o.ArchivedAt = time.Now()
+	*o.ArchivedAt = time.Now().UTC()
 	return nil
 }
 

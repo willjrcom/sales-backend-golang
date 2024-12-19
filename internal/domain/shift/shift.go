@@ -36,13 +36,13 @@ type OrderTimeLogs struct {
 func (s *Shift) OpenShift() {
 	s.CurrentOrderNumber = 0
 	s.OpenedAt = &time.Time{}
-	*s.OpenedAt = time.Now()
+	*s.OpenedAt = time.Now().UTC()
 }
 
 func (s *Shift) CloseShift(endChange float32) (err error) {
 	s.EndChange = &endChange
 	s.ClosedAt = &time.Time{}
-	*s.ClosedAt = time.Now()
+	*s.ClosedAt = time.Now().UTC()
 	return nil
 }
 

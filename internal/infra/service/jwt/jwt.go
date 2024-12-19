@@ -19,7 +19,7 @@ func CreateAccessToken(user *companyentity.User) (string, error) {
 		"user_email":             user.Email,
 		"available_user_schemas": user.GetSchemas(),
 		"sub":                    "access-token",
-		"exp":                    time.Now().Add(time.Minute * 5).Unix(),
+		"exp":                    time.Now().UTC().Add(time.Minute * 5).Unix(),
 	}
 
 	// Criar um token JWT usando a chave secreta
@@ -36,7 +36,7 @@ func CreateIDToken(accessToken *jwt.Token, schema string) (string, error) {
 		"user_email":     oldClaims["user_email"],
 		"current_schema": schema,
 		"sub":            "id-token",
-		"exp":            time.Now().Add(time.Hour * 6).Unix(),
+		"exp":            time.Now().UTC().Add(time.Hour * 6).Unix(),
 	}
 
 	// Criar um token JWT usando a chave secreta

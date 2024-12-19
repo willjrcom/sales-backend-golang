@@ -50,7 +50,7 @@ func (t *OrderTable) Pend() error {
 
 	t.Status = OrderTableStatusPending
 	t.PendingAt = &time.Time{}
-	*t.PendingAt = time.Now()
+	*t.PendingAt = time.Now().UTC()
 	return nil
 }
 
@@ -61,6 +61,6 @@ func (t *OrderTable) Close() error {
 
 	t.Status = OrderTableStatusClosed
 	t.ClosedAt = &time.Time{}
-	*t.ClosedAt = time.Now()
+	*t.ClosedAt = time.Now().UTC()
 	return nil
 }

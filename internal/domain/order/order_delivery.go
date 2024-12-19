@@ -60,7 +60,7 @@ func (d *OrderDelivery) Pend() error {
 	}
 
 	d.PendingAt = &time.Time{}
-	*d.PendingAt = time.Now()
+	*d.PendingAt = time.Now().UTC()
 	d.Status = OrderDeliveryStatusPending
 	return nil
 }
@@ -72,7 +72,7 @@ func (d *OrderDelivery) Ship(driverID *uuid.UUID) error {
 
 	d.DriverID = driverID
 	d.ShippedAt = &time.Time{}
-	*d.ShippedAt = time.Now()
+	*d.ShippedAt = time.Now().UTC()
 	d.Status = OrderDeliveryStatusShipped
 	return nil
 }
@@ -83,7 +83,7 @@ func (d *OrderDelivery) Delivery() error {
 	}
 
 	d.DeliveredAt = &time.Time{}
-	*d.DeliveredAt = time.Now()
+	*d.DeliveredAt = time.Now().UTC()
 	d.Status = OrderDeliveryStatusDelivered
 	return nil
 }

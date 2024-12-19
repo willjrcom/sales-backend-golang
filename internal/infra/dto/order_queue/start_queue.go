@@ -24,7 +24,7 @@ func (s *StartQueueInput) validate() error {
 	}
 
 	if s.IsTest {
-		s.JoinedAt = time.Now()
+		s.JoinedAt = time.Now().UTC()
 	}
 
 	return nil

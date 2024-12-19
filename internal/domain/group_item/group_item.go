@@ -88,7 +88,7 @@ func (i *GroupItem) PendingGroupItem() (err error) {
 
 	i.Status = StatusGroupPending
 	i.PendingAt = &time.Time{}
-	*i.PendingAt = time.Now()
+	*i.PendingAt = time.Now().UTC()
 	return nil
 }
 
@@ -99,7 +99,7 @@ func (i *GroupItem) StartGroupItem() (err error) {
 
 	i.Status = StatusGroupStarted
 	i.StartedAt = &time.Time{}
-	*i.StartedAt = time.Now()
+	*i.StartedAt = time.Now().UTC()
 	return nil
 }
 
@@ -110,14 +110,14 @@ func (i *GroupItem) ReadyGroupItem() (err error) {
 
 	i.Status = StatusGroupReady
 	i.ReadyAt = &time.Time{}
-	*i.ReadyAt = time.Now()
+	*i.ReadyAt = time.Now().UTC()
 	return nil
 }
 
 func (i *GroupItem) CancelGroupItem() {
 	i.Status = StatusGroupCanceled
 	i.CanceledAt = &time.Time{}
-	*i.CanceledAt = time.Now()
+	*i.CanceledAt = time.Now().UTC()
 }
 
 func (i *GroupItem) CalculateTotalPrice() {

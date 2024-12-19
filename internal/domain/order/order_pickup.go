@@ -50,7 +50,7 @@ func (d *OrderPickup) Pend() error {
 	}
 
 	d.PendingAt = &time.Time{}
-	*d.PendingAt = time.Now()
+	*d.PendingAt = time.Now().UTC()
 	d.Status = OrderPickupStatusPending
 	return nil
 }
@@ -61,7 +61,7 @@ func (d *OrderPickup) Ready() error {
 	}
 
 	d.ReadyAt = &time.Time{}
-	*d.ReadyAt = time.Now()
+	*d.ReadyAt = time.Now().UTC()
 	d.Status = OrderPickupStatusReady
 	return nil
 }

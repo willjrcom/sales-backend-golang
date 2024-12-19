@@ -66,7 +66,7 @@ func (p *OrderProcess) StartProcess(employeeID uuid.UUID) error {
 
 	p.EmployeeID = &employeeID
 	p.StartedAt = &time.Time{}
-	*p.StartedAt = time.Now()
+	*p.StartedAt = time.Now().UTC()
 	p.Status = ProcessStatusStarted
 	return nil
 }
@@ -85,7 +85,7 @@ func (p *OrderProcess) FinishProcess() error {
 	}
 
 	p.FinishedAt = &time.Time{}
-	*p.FinishedAt = time.Now()
+	*p.FinishedAt = time.Now().UTC()
 	p.Status = ProcessStatusFinished
 
 	if p.ContinuedAt != nil {
@@ -111,7 +111,7 @@ func (p *OrderProcess) PauseProcess() error {
 	p.TotalPaused++
 
 	p.PausedAt = &time.Time{}
-	*p.PausedAt = time.Now()
+	*p.PausedAt = time.Now().UTC()
 	p.Status = ProcessStatusPaused
 
 	if p.ContinuedAt != nil {
@@ -140,7 +140,7 @@ func (p *OrderProcess) ContinueProcess() error {
 	}
 
 	p.ContinuedAt = &time.Time{}
-	*p.ContinuedAt = time.Now()
+	*p.ContinuedAt = time.Now().UTC()
 	p.Status = ProcessStatusContinued
 	p.PausedAt = nil
 	return nil
