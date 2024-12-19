@@ -13,6 +13,7 @@ import (
 
 var (
 	ErrMustBeStarted = errors.New("process must be started")
+	ErrMustBeReason  = errors.New("reason is required")
 )
 
 type OrderProcess struct {
@@ -37,6 +38,7 @@ type OrderProcessTimeLogs struct {
 	ContinuedAt       *time.Time    `bun:"continued_at" json:"continued_at,omitempty"`
 	FinishedAt        *time.Time    `bun:"finished_at" json:"finished_at,omitempty"`
 	CanceledAt        *time.Time    `bun:"canceled_at" json:"canceled_at,omitempty"`
+	CanceledReason    *string       `bun:"canceled_reason" json:"canceled_reason,omitempty"`
 	Duration          time.Duration `bun:"duration" json:"duration"`
 	DurationFormatted string        `bun:"duration_formatted" json:"duration_formatted"`
 	TotalPaused       int8          `bun:"total_paused" json:"total_paused"`
@@ -147,7 +149,12 @@ func (p *OrderProcess) ContinueProcess() error {
 	return nil
 }
 
-func (p *OrderProcess) CancelProcess() error {
+func (p *OrderProcess) CancelProcess(reason *string) error {
+	if reason == nil {
+		return ErrMustBeReason
+	}
+
+	p.CanceledReason = reason
 	p.CanceledAt = &time.Time{}
 	*p.CanceledAt = time.Now().UTC()
 	p.Status = ProcessStatusCanceled

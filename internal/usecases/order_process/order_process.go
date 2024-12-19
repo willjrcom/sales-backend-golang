@@ -227,13 +227,18 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 	return nextProcessID, nil
 }
 
-func (s *Service) CancelProcess(ctx context.Context, dtoID *entitydto.IdRequest) error {
+func (s *Service) CancelProcess(ctx context.Context, dtoID *entitydto.IdRequest, orderprocessdto *orderprocessdto.CancelProcess) error {
+	reason, err := orderprocessdto.ToModel()
+	if err != nil {
+		return err
+	}
+
 	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
 		return err
 	}
 
-	if err := process.CancelProcess(); err != nil {
+	if err := process.CancelProcess(reason); err != nil {
 		return err
 	}
 
