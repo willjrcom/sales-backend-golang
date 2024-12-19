@@ -122,7 +122,7 @@ func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]orderproc
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&processes).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&processes).Relation("GroupItem").Scan(ctx); err != nil {
 		return nil, err
 	}
 
