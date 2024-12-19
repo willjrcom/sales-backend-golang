@@ -18,6 +18,7 @@ type ProductCategoryCommonAttributes struct {
 	Name                 string            `bun:"name,notnull" json:"name"`
 	ImagePath            string            `bun:"image_path" json:"image_path"`
 	NeedPrint            bool              `bun:"need_print,notnull" json:"need_print"`
+	UseProcessRule       bool              `bun:"use_process_rule,notnull" json:"use_process_rule"`
 	RemovableIngredients []string          `bun:"removable_ingredients,type:jsonb" json:"removable_ingredients,omitempty"`
 	Sizes                []Size            `bun:"rel:has-many,join:id=category_id" json:"sizes,omitempty"`
 	Quantities           []Quantity        `bun:"rel:has-many,join:id=category_id" json:"quantities,omitempty"`
@@ -33,6 +34,7 @@ type PatchProductCategory struct {
 	Name                 *string           `json:"name"`
 	ImagePath            *string           `json:"image_path"`
 	NeedPrint            *bool             `json:"need_print"`
+	UseProcessRule       *bool             `json:"use_process_rule"`
 	RemovableIngredients []string          `json:"removable_ingredients"`
 	AdditionalCategories []ProductCategory `json:"product_category_to_additional"`
 	ComplementCategories []ProductCategory `json:"product_category_to_complement"`

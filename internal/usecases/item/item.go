@@ -240,9 +240,10 @@ func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *
 	groupCommonAttributes := groupitementity.GroupCommonAttributes{
 		OrderID: orderID,
 		GroupDetails: groupitementity.GroupDetails{
-			CategoryID: product.CategoryID,
-			Size:       product.Size.Name,
-			NeedPrint:  product.Category.NeedPrint,
+			CategoryID:     product.CategoryID,
+			Size:           product.Size.Name,
+			NeedPrint:      product.Category.NeedPrint,
+			UseProcessRule: product.Category.UseProcessRule,
 		},
 	}
 

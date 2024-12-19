@@ -31,8 +31,7 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 			continue
 		}
 
-		if groupItem.NeedPrint {
-			fmt.Println("need print is true for group item: " + groupItem.ID.String())
+		if !groupItem.UseProcessRule {
 			continue
 		}
 

@@ -41,6 +41,7 @@ type GroupDetails struct {
 	TotalPrice       float64                        `bun:"total_price" json:"total_price"`
 	Quantity         float64                        `bun:"quantity" json:"quantity"`
 	NeedPrint        bool                           `bun:"need_print" json:"need_print"`
+	UseProcessRule   bool                           `bun:"use_process_rule" json:"use_process_rule"`
 	Observation      string                         `bun:"observation" json:"observation"`
 	CategoryID       uuid.UUID                      `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
 	Category         *productentity.ProductCategory `bun:"rel:belongs-to" json:"category,omitempty"`

@@ -23,6 +23,10 @@ func (c *UpdateCategoryInput) UpdateModel(category *productentity.ProductCategor
 		category.NeedPrint = *c.NeedPrint
 	}
 
+	if c.UseProcessRule != nil {
+		category.UseProcessRule = *c.UseProcessRule
+	}
+
 	if len(c.RemovableIngredients) != 0 {
 		category.RemovableIngredients = c.RemovableIngredients
 	}
