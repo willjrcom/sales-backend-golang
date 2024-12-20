@@ -26,12 +26,15 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 	}
 
 	groupItemIDs := []uuid.UUID{}
-	for _, groupItem := range order.Groups {
+	for i, groupItem := range order.Groups {
 		if groupItem.Status != groupitementity.StatusGroupStaging {
 			continue
 		}
 
-		if !groupItem.UseProcessRule {
+		if !groupItem.UseProcessRule || groupItem.NeedPrint {
+			order.Groups[i].PendingGroupItem()
+			order.Groups[i].StartGroupItem()
+			order.Groups[i].ReadyGroupItem()
 			continue
 		}
 
