@@ -142,7 +142,7 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&processes).Where("process.process_rule_id = ?", id).
+	if err := r.db.NewSelect().Model(&processes).Where("process.process_rule_id = ? and process.status != ?", id, orderprocessentity.ProcessStatusFinished).
 		Relation("GroupItem.Items.AdditionalItems").
 		Relation("GroupItem.ComplementItem").
 		Relation("GroupItem.Category").
