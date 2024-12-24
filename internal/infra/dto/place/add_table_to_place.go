@@ -10,8 +10,8 @@ import (
 var (
 	ErrTableIDRequired = errors.New("table id is required")
 	ErrPlaceIDRequired = errors.New("place id is required")
-	ErrInvalidColumn   = errors.New("column must be greater than 0")
-	ErrInvalidRow      = errors.New("row must be greater than 0")
+	ErrInvalidColumn   = errors.New("column must be positive")
+	ErrInvalidRow      = errors.New("row must be positive")
 )
 
 type AddTableToPlaceInput struct {
@@ -30,11 +30,11 @@ func (o *AddTableToPlaceInput) validate() error {
 		return ErrPlaceIDRequired
 	}
 
-	if o.Column <= 0 {
+	if o.Column < 0 {
 		return ErrInvalidColumn
 	}
 
-	if o.Row <= 0 {
+	if o.Row < 0 {
 		return ErrInvalidRow
 	}
 	return nil
