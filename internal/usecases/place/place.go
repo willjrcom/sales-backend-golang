@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/google/uuid"
 	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
@@ -14,10 +13,7 @@ import (
 
 var (
 	ErrPlacePositionIsUsed = func(name string) error { return fmt.Errorf("place position already used by table: %s", name) }
-	ErrTableAlreadyInPlace = func(name string, column, row int) error {
-		return fmt.Errorf("table already in place: %s on position: column %d, row %d", name, column, row)
-	}
-	ErrToSearchUsedTable = errors.New("error to search used table")
+	ErrToSearchUsedTable   = errors.New("error to search used table")
 )
 
 type Service struct {
@@ -102,20 +98,6 @@ func (s *Service) AddTableToPlace(ctx context.Context, dto *placedto.AddTableToP
 
 	// If table ID already used
 	if err := s.r.AddTableToPlace(ctx, placeToTable); err != nil {
-		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
-			tableFromPlace, err := s.r.GetTableToPlaceByTableID(ctx, placeToTable.TableID)
-			if err != nil {
-				return ErrToSearchUsedTable
-			}
-
-			place, err := s.r.GetPlaceById(ctx, tableFromPlace.PlaceID.String())
-			if err != nil {
-				return ErrToSearchUsedTable
-			}
-
-			return ErrTableAlreadyInPlace(place.Name, tableFromPlace.Column, tableFromPlace.Row)
-		}
-
 		return err
 	}
 

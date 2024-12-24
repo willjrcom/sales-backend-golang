@@ -106,7 +106,23 @@ func (r *PlaceRepositoryBun) AddTableToPlace(ctx context.Context, placeToTables 
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(placeToTables).Exec(ctx); err != nil {
+	tx, err := r.db.Begin()
+
+	if err != nil {
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&tableentity.PlaceToTables{}).Where("table_id = ?", placeToTables.TableID).Exec(ctx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if _, err := tx.NewInsert().Model(placeToTables).Exec(ctx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 
