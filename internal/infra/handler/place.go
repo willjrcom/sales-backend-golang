@@ -29,8 +29,8 @@ func NewHandlerPlace(orderService *placeusecases.Service) *handler.Handler {
 		c.Patch("/update/{id}", h.handlerUpdatePlaceById)
 		c.Get("/{id}", h.handlerGetPlaceById)
 		c.Get("/all", h.handlerGetAllPlaces)
-		c.Post("/add/table", h.handlerAddTableToPlace)
-		c.Delete("/remove/table/{id}", h.handlerRemoveTableFromPlace)
+		c.Post("/table", h.handlerAddTableToPlace)
+		c.Delete("/table/{id}", h.handlerRemoveTableFromPlace)
 	})
 
 	return handler.NewHandler("/place", c)
