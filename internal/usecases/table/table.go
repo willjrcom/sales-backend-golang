@@ -76,3 +76,7 @@ func (s *Service) GetTableById(ctx context.Context, dto *entitydto.IdRequest) (*
 func (s *Service) GetAllTables(ctx context.Context) ([]tableentity.Table, error) {
 	return s.r.GetAllTables(ctx)
 }
+
+func (s *Service) GetUnusedTables(ctx context.Context) ([]tableentity.Table, error) {
+	return s.r.GetUnusedTables(ctx)
+}

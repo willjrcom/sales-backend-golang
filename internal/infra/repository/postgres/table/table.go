@@ -96,3 +96,21 @@ func (r *TableRepositoryBun) GetAllTables(ctx context.Context) ([]tableentity.Ta
 
 	return tables, nil
 }
+
+func (r *TableRepositoryBun) GetUnusedTables(ctx context.Context) ([]tableentity.Table, error) {
+	tables := make([]tableentity.Table, 0)
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(&tables).Where("id NOT IN (?)", r.db.NewSelect().Model((*tableentity.PlaceToTables)(nil)).
+		Column("table_id")).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return tables, nil
+}

@@ -31,7 +31,7 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 			continue
 		}
 
-		if !groupItem.UseProcessRule || groupItem.NeedPrint {
+		if !groupItem.UseProcessRule {
 			order.Groups[i].PendingGroupItem()
 			order.Groups[i].StartGroupItem()
 			order.Groups[i].ReadyGroupItem()

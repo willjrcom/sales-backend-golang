@@ -12,6 +12,7 @@ type TableRepository interface {
 	DeleteTable(ctx context.Context, id string) error
 	GetTableById(ctx context.Context, id string) (*Table, error)
 	GetAllTables(ctx context.Context) ([]Table, error)
+	GetUnusedTables(ctx context.Context) ([]Table, error)
 }
 
 type PlaceRepository interface {

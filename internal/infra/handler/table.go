@@ -29,6 +29,7 @@ func NewHandlerTable(orderService *tableusecases.Service) *handler.Handler {
 		c.Patch("/update/{id}", h.handlerUpdateTableById)
 		c.Get("/{id}", h.handlerGetTableById)
 		c.Get("/all", h.handlerGetAllTables)
+		c.Get("/all/unused", h.handlerGetUnusedTables)
 	})
 
 	return handler.NewHandler("/table", c)
@@ -123,6 +124,18 @@ func (h *handlerTableImpl) handlerGetAllTables(w http.ResponseWriter, r *http.Re
 	ctx := r.Context()
 
 	tables, err := h.s.GetAllTables(ctx)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: tables})
+}
+
+func (h *handlerTableImpl) handlerGetUnusedTables(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	tables, err := h.s.GetUnusedTables(ctx)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
