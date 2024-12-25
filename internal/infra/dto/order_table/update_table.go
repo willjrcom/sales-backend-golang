@@ -6,8 +6,8 @@ import (
 )
 
 type UpdateOrderTableInput struct {
-	orderentity.OrderTableCommonAttributes
-	ForceUpdate bool `json:"force_update"`
+	TableID     uuid.UUID `json:"table_id"`
+	ForceUpdate bool      `json:"force_update"`
 }
 
 func (o *UpdateOrderTableInput) validate() error {

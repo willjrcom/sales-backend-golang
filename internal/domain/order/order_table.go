@@ -1,16 +1,11 @@
 package orderentity
 
 import (
-	"errors"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-)
-
-var (
-	ErrOrderTableMustBePending = errors.New("table order must be pending")
 )
 
 type OrderTable struct {
@@ -55,10 +50,6 @@ func (t *OrderTable) Pend() error {
 }
 
 func (t *OrderTable) Close() error {
-	if t.Status != OrderTableStatusPending {
-		return ErrOrderTableMustBePending
-	}
-
 	t.Status = OrderTableStatusClosed
 	t.ClosedAt = &time.Time{}
 	*t.ClosedAt = time.Now().UTC()

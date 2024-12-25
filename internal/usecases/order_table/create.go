@@ -34,7 +34,9 @@ func (s *Service) CreateOrderTable(ctx context.Context, dto *ordertabledto.Creat
 
 	table.LockTable()
 
-	if orderTable.Name != "" {
+	if orderTable.Name == "" {
+		orderTable.Name = table.Name
+	} else {
 		orderTable.Name = table.Name + " - " + orderTable.Name
 	}
 
