@@ -93,27 +93,27 @@ func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *companyentity.
 		return err
 	}
 
-	if user.Person.Contact != nil {
+	if user.Contact != nil {
 		if _, err := tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", user.ID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 
 		// Create contact
-		if _, err := tx.NewInsert().Model(user.Person.Contact).Exec(ctx); err != nil {
+		if _, err := tx.NewInsert().Model(user.Contact).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
-	if user.Person.Address != nil {
+	if user.Address != nil {
 		if _, err := tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", user.ID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 
 		// Create addresse
-		if _, err := tx.NewInsert().Model(user.Person.Address).Exec(ctx); err != nil {
+		if _, err := tx.NewInsert().Model(user.Address).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -150,7 +150,29 @@ func (r *UserRepositoryBun) LoginAndDeleteUser(ctx context.Context, user *compan
 		return err
 	}
 
-	if _, err := tx.NewSelect().Model(&companyentity.User{}).Where("u.email = ?", user.Email).Exec(ctx); err != nil {
+	userToDelete := &companyentity.User{}
+
+	if _, err := tx.NewSelect().Model(userToDelete).Where("u.email = ?", user.Email).Exec(ctx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model((&personentity.Person{})).Where("object_id = ?", userToDelete.ID).Exec(ctx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model((&addressentity.Address{})).Where("object_id = ?", userToDelete.ID).Exec(ctx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model((&personentity.Contact{})).Where("object_id = ?", userToDelete.ID).Exec(ctx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(userToDelete).Where("id = ?", userToDelete.ID).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -194,18 +216,36 @@ func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *companyentity.U
 	return user, nil
 }
 
-func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (uuid.UUID, error) {
+func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (*uuid.UUID, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	user := &companyentity.User{}
-	err := r.db.NewSelect().Model(user).Where("u.email = ?", email).Column("id").Scan(ctx)
+	if err := r.db.NewSelect().Model(user).Where("u.email = ?", email).Column("id").Scan(ctx); err != nil {
+		return nil, err
+	}
 
-	return user.ID, err
+	return &user.ID, nil
+}
+
+func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID) (*companyentity.User, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	user := &companyentity.User{}
+	if err := r.db.NewSelect().Model(user).Where("u.id = ?", id).Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
 
 func (r *UserRepositoryBun) ExistsUserByID(ctx context.Context, id uuid.UUID) (bool, error) {

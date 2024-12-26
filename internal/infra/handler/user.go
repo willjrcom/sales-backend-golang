@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
+	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
@@ -28,7 +30,8 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerNewUser)
-		c.Post("/update-password", h.handlerUpdateUser)
+		c.Post("/update-password", h.handlerUpdateUserPassword)
+		c.Post("/update/{id}", h.handlerUpdateUser)
 		c.Post("/login", h.handlerLoginUser)
 		c.Post("/access", h.handlerAccess)
 		c.Delete("/", h.handlerDeleteUser)
@@ -62,7 +65,7 @@ func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request)
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
 }
 
-func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Request) {
+func (h *handlerUserImpl) handlerUpdateUserPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	dtoUser := &userdto.UpdatePasswordInput{}
@@ -71,7 +74,33 @@ func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if err := h.s.UpdateUser(ctx, dtoUser); err != nil {
+	if err := h.s.UpdateUserPassword(ctx, dtoUser); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoID := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	dtoUser := &userdto.UpdateUser{}
+	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	if err := h.s.UpdateUser(ctx, dtoID, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

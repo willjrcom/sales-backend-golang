@@ -28,25 +28,27 @@ func (s *Service) AddDependencies(rc personentity.ContactRepository, ru companye
 	s.ru = ru
 }
 
-func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.CreateEmployeeInput) (uuid.UUID, error) {
+func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.CreateEmployeeInput) (*uuid.UUID, error) {
 	employee, err := dto.ToModel()
 
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
-	// Get exists user
-	exists, _ := s.ru.ExistsUserByID(ctx, *employee.UserID)
+	// Get userExists user
+	if userExists, _ := s.ru.ExistsUserByID(ctx, *employee.UserID); !userExists {
+		return nil, errors.New("user ID not found")
+	}
 
-	if !exists {
-		return uuid.Nil, errors.New("user ID not found")
+	if employeeExists, _ := s.re.GetEmployeeByUserID(ctx, employee.UserID.String()); employeeExists != nil {
+		return nil, errors.New("employee already exists")
 	}
 
 	if err := s.re.CreateEmployee(ctx, employee); err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
-	return employee.ID, nil
+	return &employee.ID, nil
 }
 
 func (s *Service) UpdateEmployee(ctx context.Context, dtoId *entitydto.IdRequest, dto *employeedto.UpdateEmployeeInput) error {
@@ -117,23 +119,23 @@ func employeesToDtos(employees []employeeentity.Employee) []employeedto.Employee
 	return dtos
 }
 
-func (s *Service) CreateContactToEmployee(ctx context.Context, dto *contactdto.CreateContactInput) (uuid.UUID, error) {
+func (s *Service) CreateContactToEmployee(ctx context.Context, dto *contactdto.CreateContactInput) (*uuid.UUID, error) {
 	contact, err := dto.ToModel()
 
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	// Validate if exists
 	if _, err := s.re.GetEmployeeById(ctx, contact.ObjectID.String()); err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	if err := s.rc.CreateContact(ctx, contact); err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
-	return contact.ID, nil
+	return &contact.ID, nil
 }
 
 func (s *Service) UpdateContact(ctx context.Context, dtoId *entitydto.IdRequest, dto *contactdto.UpdateContactInput) error {

@@ -3,11 +3,11 @@ package companyusecases
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
@@ -55,7 +55,7 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) 
 	company := companyentity.NewCompany(cnpjData)
 	company.Email = email
 	company.Contacts = contacts
-	fmt.Println(company.SchemaName)
+
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), company.SchemaName)
 
 	if err := s.s.NewSchema(ctx); err != nil {
@@ -69,7 +69,11 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) 
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), company.SchemaName)
 
 	userCommonAttributes := companyentity.UserCommonAttributes{
-		Email:    email,
+		Person: personentity.Person{
+			PersonCommonAttributes: personentity.PersonCommonAttributes{
+				Email: email,
+			},
+		},
 		Password: utils.GeneratePassword(10, true, true, true),
 	}
 
@@ -101,13 +105,13 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserInpu
 
 	userID, _ := s.u.GetIDByEmail(ctx, user.Email)
 
-	if userID != uuid.Nil {
-		if exists, _ := s.r.ValidateUserToPublicCompany(ctx, userID); exists {
+	if userID != nil {
+		if exists, _ := s.r.ValidateUserToPublicCompany(ctx, *userID); exists {
 			return errors.New("user already added to company")
 		}
 	}
 
-	if userID == uuid.Nil {
+	if userID == nil {
 		createUserInput := &userdto.CreateUserInput{
 			Email:            user.Email,
 			GeneratePassword: true,
@@ -116,11 +120,11 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserInpu
 		if newUserID, err := s.us.CreateUser(ctx, createUserInput); err != nil {
 			return err
 		} else {
-			userID = *newUserID
+			userID = newUserID
 		}
 	}
 
-	if err := s.r.AddUserToPublicCompany(ctx, userID); err != nil {
+	if err := s.r.AddUserToPublicCompany(ctx, *userID); err != nil {
 		return err
 	}
 
@@ -140,13 +144,13 @@ func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.Use
 		return err
 	}
 
-	if userID != uuid.Nil {
-		if exists, _ := s.r.ValidateUserToPublicCompany(ctx, userID); !exists {
+	if userID != nil {
+		if exists, _ := s.r.ValidateUserToPublicCompany(ctx, *userID); !exists {
 			return errors.New("user already removed from company")
 		}
 	}
 
-	if err := s.r.RemoveUserFromPublicCompany(ctx, userID); err != nil {
+	if err := s.r.RemoveUserFromPublicCompany(ctx, *userID); err != nil {
 		return err
 	}
 

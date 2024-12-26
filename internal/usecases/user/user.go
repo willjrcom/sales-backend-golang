@@ -8,6 +8,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	bcryptservice "github.com/willjrcom/sales-backend-go/internal/infra/service/bcrypt"
 	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
@@ -34,7 +35,7 @@ func (s *Service) CreateUser(ctx context.Context, dto *userdto.CreateUserInput) 
 		return nil, err
 	}
 
-	if id, _ := s.r.GetIDByEmail(ctx, user.Email); id != uuid.Nil {
+	if id, _ := s.r.GetIDByEmail(ctx, user.Email); id != nil {
 		return nil, ErrUserAlreadyExists
 	}
 
@@ -48,14 +49,14 @@ func (s *Service) CreateUser(ctx context.Context, dto *userdto.CreateUserInput) 
 	return &user.ID, s.r.CreateUser(ctx, user)
 }
 
-func (s *Service) UpdateUser(ctx context.Context, dto *userdto.UpdatePasswordInput) error {
+func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UpdatePasswordInput) error {
 	user, err := dto.ToModel()
 
 	if err != nil {
 		return err
 	}
 
-	if id, _ := s.r.GetIDByEmail(ctx, user.Email); id == uuid.Nil {
+	if id, _ := s.r.GetIDByEmail(ctx, user.Email); id == nil {
 		return ErrInvalidEmail
 	}
 
@@ -70,6 +71,19 @@ func (s *Service) UpdateUser(ctx context.Context, dto *userdto.UpdatePasswordInp
 	}
 
 	userLoggedIn.Hash = string(hash)
+
+	return s.r.UpdateUser(ctx, user)
+}
+
+func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IdRequest, dto *userdto.UpdateUser) error {
+	user, err := s.r.GetUserByID(ctx, dtoID.ID)
+	if err != nil {
+		return err
+	}
+
+	if err = dto.UpdateModel(user); err != nil {
+		return err
+	}
 
 	return s.r.UpdateUser(ctx, user)
 }

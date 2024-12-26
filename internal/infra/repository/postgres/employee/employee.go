@@ -86,7 +86,7 @@ func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) 
 	}
 
 	user := &companyentity.User{}
-	if err := r.db.NewSelect().Model(user).Where("u.id = ?", employee.UserID).Relation("Person.Address").Relation("Person.Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(user).Where("u.id = ?", employee.UserID).Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -138,8 +138,8 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]employee
 	if err := r.db.NewSelect().
 		Model(&users).
 		Where("u.id IN (?)", bun.In(userIDs)).
-		Relation("Person.Address").
-		Relation("Person.Contact").
+		Relation("Address").
+		Relation("Contact").
 		ExcludeColumn("hash").
 		Scan(ctx); err != nil {
 		return nil, err

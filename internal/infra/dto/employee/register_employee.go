@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 var (
@@ -30,6 +31,7 @@ func (r *CreateEmployeeInput) ToModel() (*employeeentity.Employee, error) {
 
 	// Get exists user
 	return &employeeentity.Employee{
+		Entity: entity.NewEntity(),
 		UserID: r.UserID,
 	}, nil
 }

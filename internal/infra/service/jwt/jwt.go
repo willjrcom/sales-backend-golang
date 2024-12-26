@@ -2,21 +2,19 @@ package jwtservice
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 var secretKey = "sua_chave_secreta"
 
 func CreateAccessToken(user *companyentity.User) (string, error) {
-
 	claims := jwt.MapClaims{
 		"user_id":                user.ID,
-		"user_email":             user.Email,
+		"user":                   user,
 		"available_user_schemas": user.GetSchemas(),
 		"sub":                    "access-token",
 		"exp":                    time.Now().UTC().Add(time.Minute * 5).Unix(),
@@ -28,12 +26,11 @@ func CreateAccessToken(user *companyentity.User) (string, error) {
 }
 
 func CreateIDToken(accessToken *jwt.Token, schema string) (string, error) {
-
 	oldClaims := accessToken.Claims.(jwt.MapClaims)
 
 	claims := jwt.MapClaims{
 		"user_id":        oldClaims["user_id"],
-		"user_email":     oldClaims["user_email"],
+		"user":           oldClaims["user"],
 		"current_schema": schema,
 		"sub":            "id-token",
 		"exp":            time.Now().UTC().Add(time.Hour * 6).Unix(),
@@ -62,14 +59,16 @@ func GetSchemaFromToken(token *jwt.Token) string {
 }
 
 func GetUserFromToken(token *jwt.Token) companyentity.User {
-	id := token.Claims.(jwt.MapClaims)["user_id"].(string)
-	email := token.Claims.(jwt.MapClaims)["user_email"].(string)
-	return companyentity.User{
-		Entity: entity.Entity{
-			ID: uuid.MustParse(id),
-		},
-		UserCommonAttributes: companyentity.UserCommonAttributes{
-			Email: email,
-		},
+	user := companyentity.User{}
+	userMap := token.Claims.(jwt.MapClaims)["user"].(interface{})
+	userJson, err := json.Marshal(userMap)
+	if err != nil {
+		return user
 	}
+
+	if err := json.Unmarshal(userJson, &user); err != nil {
+		return user
+	}
+
+	return user
 }

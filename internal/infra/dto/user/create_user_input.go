@@ -87,7 +87,6 @@ func (u *CreateUserInput) ToModel() (*companyentity.User, error) {
 		Entity: entity.NewEntity(),
 		UserCommonAttributes: companyentity.UserCommonAttributes{
 			Person:   *person,
-			Email:    u.Email,
 			Password: u.Password,
 		},
 	}, nil

@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 )
 
@@ -39,7 +40,11 @@ func (r *UpdatePasswordInput) ToModel() (*companyentity.User, error) {
 	}
 
 	userCommonAttributes := companyentity.UserCommonAttributes{
-		Email:    r.Email,
+		Person: personentity.Person{
+			PersonCommonAttributes: personentity.PersonCommonAttributes{
+				Email: r.Email,
+			},
+		},
 		Password: r.CurrentPassword,
 	}
 
