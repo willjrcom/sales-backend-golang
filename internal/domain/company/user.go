@@ -5,14 +5,12 @@ import (
 	"time"
 
 	"github.com/uptrace/bun"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 )
 
 type UserValue string
 
 type User struct {
-	entity.Entity
 	bun.BaseModel `bun:"table:users,alias:u"`
 	UserCommonAttributes
 	DeletedAt time.Time `bun:",soft_delete,nullzero"`
@@ -28,7 +26,6 @@ type UserCommonAttributes struct {
 
 func NewUser(userCommonAttributes UserCommonAttributes) *User {
 	return &User{
-		Entity:               entity.NewEntity(),
 		UserCommonAttributes: userCommonAttributes,
 	}
 }

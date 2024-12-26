@@ -134,7 +134,7 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]employee
 	}
 
 	// Consultar todos os Users de uma vez
-	users := []*companyentity.User{}
+	users := []companyentity.User{}
 	if err := r.db.NewSelect().
 		Model(&users).
 		Where("u.id IN (?)", bun.In(userIDs)).
@@ -145,14 +145,14 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]employee
 		return nil, err
 	}
 	// Mapear os usuários de volta para os funcionários
-	userMap := make(map[uuid.UUID]*companyentity.User)
+	userMap := make(map[uuid.UUID]companyentity.User)
 	for _, user := range users {
 		userMap[user.ID] = user
 	}
 
 	for i := range employees {
 		if user, exists := userMap[*employees[i].UserID]; exists {
-			employees[i].User = user
+			employees[i].User = &user
 		} else {
 			// Tratar caso de usuário não encontrado
 			employees[i].User = nil

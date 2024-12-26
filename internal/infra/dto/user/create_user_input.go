@@ -6,7 +6,6 @@ import (
 
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 )
@@ -84,7 +83,6 @@ func (u *CreateUserInput) ToModel() (*companyentity.User, error) {
 	}
 
 	return &companyentity.User{
-		Entity: entity.NewEntity(),
 		UserCommonAttributes: companyentity.UserCommonAttributes{
 			Person:   *person,
 			Password: u.Password,
