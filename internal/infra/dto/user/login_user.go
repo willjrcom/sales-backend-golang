@@ -6,7 +6,8 @@ import (
 )
 
 type LoginUserInput struct {
-	companyentity.UserCommonAttributes
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func (u *LoginUserInput) validate() error {

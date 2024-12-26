@@ -6,7 +6,8 @@ import (
 )
 
 type DeleteUserInput struct {
-	companyentity.UserCommonAttributes
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func (u *DeleteUserInput) validate() error {
