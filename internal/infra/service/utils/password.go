@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"crypto/rand"
 	"errors"
+	"math/big"
 	"regexp"
 )
 
@@ -51,4 +53,36 @@ func containsSymbol(s string) bool {
 	symbolRegex := `[!@#$%^&*()-=_+{}\[\]:;<>,.?/~]`
 	match, _ := regexp.MatchString(symbolRegex, s)
 	return match
+}
+
+func GeneratePassword(length int, useUppercase bool, useNumbers bool, useSymbols bool) string {
+	lowercaseChars := "abcdefghijklmnopqrstuvwxyz"
+	uppercaseChars := "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	numberChars := "0123456789"
+	symbolChars := "!@#$%^&*()_+-=[]{}|;:'\",.<>?/`~"
+
+	// Montar conjunto de caracteres
+	characters := lowercaseChars
+	if useUppercase {
+		characters += uppercaseChars
+	}
+	if useNumbers {
+		characters += numberChars
+	}
+	if useSymbols {
+		characters += symbolChars
+	}
+
+	if len(characters) == 0 {
+		return ""
+	}
+
+	// Gerar a senha
+	password := make([]byte, length)
+	for i := 0; i < length; i++ {
+		randomIndex, _ := rand.Int(rand.Reader, big.NewInt(int64(len(characters))))
+		password[i] = characters[randomIndex.Int64()]
+	}
+
+	return string(password)
 }

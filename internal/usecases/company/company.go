@@ -13,6 +13,7 @@ import (
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 )
 
@@ -69,7 +70,7 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) 
 
 	userCommonAttributes := companyentity.UserCommonAttributes{
 		Email:    email,
-		Password: "12345",
+		Password: utils.GeneratePassword(10, true, true, true),
 	}
 
 	userInput := &companydto.UserInput{UserCommonAttributes: userCommonAttributes}
@@ -107,17 +108,15 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserInpu
 	}
 
 	if userID == uuid.Nil {
-		userCommonAttributes := &companyentity.UserCommonAttributes{
-			Email: user.Email,
-		}
-
 		createUserInput := &userdto.CreateUserInput{
-			UserCommonAttributes: *userCommonAttributes,
-			GeneratePassword:     true,
+			Email:            user.Email,
+			GeneratePassword: true,
 		}
 
-		if userID, err = s.us.CreateUser(ctx, createUserInput); err != nil {
+		if newUserID, err := s.us.CreateUser(ctx, createUserInput); err != nil {
 			return err
+		} else {
+			userID = *newUserID
 		}
 	}
 
