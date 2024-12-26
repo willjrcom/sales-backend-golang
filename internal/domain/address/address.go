@@ -92,7 +92,7 @@ func NewAddress(addressCommonAttributes *AddressCommonAttributes) *Address {
 	}
 }
 
-func NewPatchAddress(patchAddress *PatchAddress, objectID uuid.UUID) *Address {
+func NewAddressFromPatch(patchAddress *PatchAddress, objectID uuid.UUID) *Address {
 	addressCommonAttributes := AddressCommonAttributes{}
 	addressCommonAttributes.ObjectID = objectID
 

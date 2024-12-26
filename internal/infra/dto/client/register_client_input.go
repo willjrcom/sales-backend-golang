@@ -46,7 +46,7 @@ func (r *CreateClientInput) ToModel() (*cliententity.Client, error) {
 		return nil, err
 	}
 
-	personCommonAttributes := personentity.PersonCommonAttributes{
+	personCommonAttributes := &personentity.PersonCommonAttributes{
 		Name: *r.Name,
 	}
 
