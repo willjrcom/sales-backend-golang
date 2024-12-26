@@ -2,8 +2,12 @@ package userdto
 
 import (
 	"errors"
+	"time"
 
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 )
 
@@ -13,8 +17,14 @@ var (
 )
 
 type CreateUserInput struct {
-	companyentity.UserCommonAttributes
-	GeneratePassword bool `json:"generate_password"`
+	Email            string                      `json:"email"`
+	Password         string                      `json:"password"`
+	GeneratePassword bool                        `json:"generate_password"`
+	Name             string                      `json:"name"`
+	Cpf              string                      `json:"cpf,omitempty"`
+	Birthday         *time.Time                  `json:"birthday,omitempty"`
+	Contact          *personentity.Contact       `json:"contact,omitempty"`
+	Address          *addressentity.PatchAddress `json:"address,omitempty"`
 }
 
 func (u *CreateUserInput) validate() error {
@@ -26,6 +36,21 @@ func (u *CreateUserInput) validate() error {
 		return err
 	}
 
+	if u.Name == "" {
+		return errors.New("name is required")
+	}
+	if u.Cpf == "" {
+		return errors.New("cpf is required")
+	}
+	if u.Birthday == nil {
+		return errors.New("birthday is required")
+	}
+	if u.Contact == nil {
+		return errors.New("contact is required")
+	}
+	if u.Address == nil {
+		return errors.New("address is required")
+	}
 	return nil
 }
 
@@ -35,8 +60,35 @@ func (u *CreateUserInput) ToModel() (*companyentity.User, error) {
 	}
 
 	if u.GeneratePassword {
-		u.Password = "12345"
+		u.Password = utils.GeneratePassword(10, true, true, true)
 	}
 
-	return companyentity.NewUser(u.UserCommonAttributes), nil
+	personCommonAttributes := &personentity.PersonCommonAttributes{
+		Name:     u.Name,
+		Email:    u.Email,
+		Cpf:      u.Cpf,
+		Birthday: u.Birthday,
+	}
+
+	person := personentity.NewPerson(personCommonAttributes)
+
+	if u.Contact != nil {
+		if err := person.AddContact(&u.Contact.ContactCommonAttributes, personentity.ContactTypeEmployee); err != nil {
+			return nil, err
+		}
+	}
+	if u.Address != nil {
+		if err := person.AddAddress(u.Address); err != nil {
+			return nil, err
+		}
+	}
+
+	return &companyentity.User{
+		Entity: entity.NewEntity(),
+		UserCommonAttributes: companyentity.UserCommonAttributes{
+			Person:   *person,
+			Email:    u.Email,
+			Password: u.Password,
+		},
+	}, nil
 }
