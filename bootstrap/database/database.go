@@ -91,7 +91,7 @@ func NewPostgreSQLConnection() *bun.DB {
 		panic(err)
 	}
 
-	if err := defaultTables(ctx, dbBun); err != nil {
+	if err := publicTables(ctx, dbBun); err != nil {
 		panic(err)
 	}
 
@@ -137,7 +137,7 @@ func CreateSchema(ctx context.Context, db *bun.DB) error {
 	return nil
 }
 
-func defaultTables(ctx context.Context, db *bun.DB) error {
+func publicTables(ctx context.Context, db *bun.DB) error {
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
 	if err := CreateSchema(ctx, db); err != nil {
 		panic(err)
@@ -146,6 +146,7 @@ func defaultTables(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*companyentity.User)(nil))
 	db.RegisterModel((*companyentity.CompanyToUsers)(nil))
 	db.RegisterModel((*companyentity.CompanyWithUsers)(nil))
+	db.RegisterModel((*personentity.Person)(nil))
 
 	if err := RegisterModels(ctx, db); err != nil {
 		return err
@@ -162,6 +163,10 @@ func defaultTables(ctx context.Context, db *bun.DB) error {
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.CompanyWithUsers)(nil)).Exec(ctx); err != nil {
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*personentity.Person)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
