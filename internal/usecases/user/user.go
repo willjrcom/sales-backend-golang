@@ -108,6 +108,7 @@ func (s *Service) LoginUser(ctx context.Context, dto *userdto.LoginUserInput) (d
 	}
 
 	data = &userdto.TokenAndSchemasOutput{
+		Person:      userLoggedIn.Person,
 		AccessToken: accessToken,
 		Companies:   userLoggedIn.Companies,
 	}
