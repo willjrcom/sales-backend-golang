@@ -88,7 +88,7 @@ func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *companyentity.
 		return err
 	}
 
-	if _, err := tx.NewUpdate().Model(user).WherePK().Exec(context.Background()); err != nil {
+	if _, err := tx.NewUpdate().Model(user).WherePK().ExcludeColumn("hash").Exec(context.Background()); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -196,7 +196,7 @@ func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *companyentity.U
 		Model(user).
 		Where("u.email = ?", user.Email).
 		Where("crypt(?, u.hash) = u.hash", user.Password).
-		Relation("CompanyToUsers").
+		Relation("CompanyToUsers").Relation("Contact").Relation("Address").
 		Limit(1).
 		ExcludeColumn("hash").
 		Scan(context.Background()); err != nil {
