@@ -24,30 +24,30 @@ func (r *UpdateEmployeeInput) validate() error {
 	return nil
 }
 
-func (r *UpdateEmployeeInput) UpdateModel(client *employeeentity.Employee) error {
+func (r *UpdateEmployeeInput) UpdateModel(employee *employeeentity.Employee) error {
 	if err := r.validate(); err != nil {
 		return err
 	}
 
 	if r.Name != nil {
-		client.Name = *r.Name
+		employee.User.Person.Name = *r.Name
 	}
 	if r.Email != nil {
-		client.Email = *r.Email
+		employee.User.Email = *r.Email
 	}
 	if r.Cpf != nil {
-		client.Cpf = *r.Cpf
+		employee.User.Person.Cpf = *r.Cpf
 	}
 	if r.Birthday != nil {
-		client.Birthday = r.Birthday
+		employee.User.Person.Birthday = r.Birthday
 	}
 	if r.Contact != nil {
-		if err := client.AddContact(r.Contact, personentity.ContactTypeEmployee); err != nil {
+		if err := employee.User.Person.AddContact(r.Contact, personentity.ContactTypeEmployee); err != nil {
 			return err
 		}
 	}
 	if r.Address != nil {
-		if err := client.AddAddress(r.Address); err != nil {
+		if err := employee.User.Person.AddAddress(r.Address); err != nil {
 			return err
 		}
 	}

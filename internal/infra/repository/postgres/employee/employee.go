@@ -40,27 +40,27 @@ func (r *EmployeeRepositoryBun) CreateEmployee(ctx context.Context, c *employeee
 		return err
 	}
 
-	if c.Contact != nil {
+	if c.User.Person.Contact != nil {
 		if _, err := tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 
 		// Create contact
-		if _, err := tx.NewInsert().Model(c.Contact).Exec(ctx); err != nil {
+		if _, err := tx.NewInsert().Model(c.User.Person.Contact).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
-	if c.Address != nil {
+	if c.User.Person.Address != nil {
 		if _, err := tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 
 		// Create addresse
-		if _, err := tx.NewInsert().Model(c.Address).Exec(ctx); err != nil {
+		if _, err := tx.NewInsert().Model(c.User.Person.Address).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -92,27 +92,27 @@ func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeee
 		return err
 	}
 
-	if p.Contact != nil {
+	if p.User.Person.Contact != nil {
 		if _, err := tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", p.ID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 
 		// Create contact
-		if _, err := tx.NewInsert().Model(p.Contact).Exec(ctx); err != nil {
+		if _, err := tx.NewInsert().Model(p.User.Person.Contact).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
-	if p.Address != nil {
+	if p.User.Person.Address != nil {
 		if _, err := tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", p.ID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 
 		// Create addresse
-		if _, err := tx.NewInsert().Model(p.Address).Exec(ctx); err != nil {
+		if _, err := tx.NewInsert().Model(p.User.Person.Address).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}

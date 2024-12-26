@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/google/uuid"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 )
@@ -12,9 +13,11 @@ var (
 	ErrNameRequired    = errors.New("name is required")
 	ErrAddressRequired = errors.New("address is required")
 	ErrContactRequired = errors.New("contact is required")
+	ErrUserIDRequired  = errors.New("user_id is required")
 )
 
 type CreateEmployeeInput struct {
+	UserID *uuid.UUID `json:"user_id"`
 	personentity.PatchPerson
 }
 
@@ -32,6 +35,9 @@ func (r *CreateEmployeeInput) validate() error {
 	if r.Email != nil && !strings.Contains(*r.Email, "@") {
 		return ErrInvalidEmail
 	}
+	if r.UserID == nil {
+		return ErrUserIDRequired
+	}
 
 	return nil
 }
@@ -41,7 +47,7 @@ func (r *CreateEmployeeInput) ToModel() (*employeeentity.Employee, error) {
 		return nil, err
 	}
 
-	personCommonAttributes := personentity.PersonCommonAttributes{
+	personCommonAttributes := &personentity.PersonCommonAttributes{
 		Name: *r.Name,
 	}
 
@@ -68,6 +74,6 @@ func (r *CreateEmployeeInput) ToModel() (*employeeentity.Employee, error) {
 	}
 
 	return &employeeentity.Employee{
-		Person: *person,
+		UserID: r.UserID,
 	}, nil
 }

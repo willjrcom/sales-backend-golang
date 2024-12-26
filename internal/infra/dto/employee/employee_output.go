@@ -13,5 +13,5 @@ type EmployeeOutput struct {
 
 func (c *EmployeeOutput) FromModel(model *employeeentity.Employee) {
 	c.ID = model.ID
-	c.PersonCommonAttributes = model.PersonCommonAttributes
+	c.PersonCommonAttributes = model.User.Person.PersonCommonAttributes
 }
