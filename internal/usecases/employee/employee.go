@@ -2,8 +2,10 @@ package employeeusecases
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
@@ -14,14 +16,16 @@ import (
 type Service struct {
 	re employeeentity.Repository
 	rc personentity.ContactRepository
+	ru companyentity.UserRepository
 }
 
 func NewService(repository employeeentity.Repository) *Service {
 	return &Service{re: repository}
 }
 
-func (s *Service) AddDependencies(repositoryContact personentity.ContactRepository) {
-	s.rc = repositoryContact
+func (s *Service) AddDependencies(rc personentity.ContactRepository, ru companyentity.UserRepository) {
+	s.rc = rc
+	s.ru = ru
 }
 
 func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.CreateEmployeeInput) (uuid.UUID, error) {
@@ -29,6 +33,13 @@ func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.CreateEmp
 
 	if err != nil {
 		return uuid.Nil, err
+	}
+
+	// Get exists user
+	exists, _ := s.ru.ExistsUserByID(ctx, *employee.UserID)
+
+	if !exists {
+		return uuid.Nil, errors.New("user ID not found")
 	}
 
 	if err := s.re.CreateEmployee(ctx, employee); err != nil {

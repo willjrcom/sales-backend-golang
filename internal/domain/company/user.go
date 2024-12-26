@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
@@ -19,7 +20,8 @@ type User struct {
 }
 
 type UserCommonAttributes struct {
-	Person         personentity.Person `bun:"rel:has-one,join:id=user_id,notnull" json:"person"`
+	PersonID       uuid.UUID           `bun:"column:person_id,type:uuid,notnull" json:"person_id"`
+	Person         personentity.Person `bun:"rel:belongs-to,join:person_id=id" json:"person"`
 	Email          string              `bun:"column:email,unique,notnull" json:"email"`
 	Password       string              `bun:"-" json:"-"`
 	Hash           string              `bun:"column:hash,notnull" json:"hash"`

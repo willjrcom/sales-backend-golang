@@ -4,11 +4,11 @@ import (
 	"context"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
-	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 )
 
 type EmployeeRepositoryBun struct {
@@ -28,46 +28,8 @@ func (r *EmployeeRepositoryBun) CreateEmployee(ctx context.Context, c *employeee
 		return err
 	}
 
-	tx, err := r.db.Begin()
-
-	if err != nil {
-		return err
-	}
-
 	// Create employee
-	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	if c.User.Person.Contact != nil {
-		if _, err := tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		// Create contact
-		if _, err := tx.NewInsert().Model(c.User.Person.Contact).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
-	if c.User.Person.Address != nil {
-		if _, err := tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		// Create addresse
-		if _, err := tx.NewInsert().Model(c.User.Person.Address).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		tx.Rollback()
+	if _, err := r.db.NewInsert().Model(c).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -82,44 +44,7 @@ func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeee
 		return err
 	}
 
-	tx, err := r.db.Begin()
-
-	if err != nil {
-		return err
-	}
-
-	if _, err := tx.NewUpdate().Model(p).Where("employee.id = ?", p.ID).Exec(ctx); err != nil {
-		return err
-	}
-
-	if p.User.Person.Contact != nil {
-		if _, err := tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", p.ID).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		// Create contact
-		if _, err := tx.NewInsert().Model(p.User.Person.Contact).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
-	if p.User.Person.Address != nil {
-		if _, err := tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", p.ID).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		// Create addresse
-		if _, err := tx.NewInsert().Model(p.User.Person.Address).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		tx.Rollback()
+	if _, err := r.db.NewUpdate().Model(p).Where("employee.id = ?", p.ID).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -134,31 +59,8 @@ func (r *EmployeeRepositoryBun) DeleteEmployee(ctx context.Context, id string) e
 		return err
 	}
 
-	tx, err := r.db.Begin()
-
-	if err != nil {
-		return err
-	}
-
 	// Delete employee
-	if _, err = tx.NewDelete().Model(&employeeentity.Employee{}).Where("employee.id = ?", id).Exec(ctx); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Delete contact
-	if _, err = tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", id).Exec(ctx); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	// Delete address
-	if _, err = tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", id).Exec(ctx); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
+	if _, err := r.db.NewDelete().Model(&employeeentity.Employee{}).Where("employee.id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -175,10 +77,20 @@ func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) 
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(employee).Where("employee.id = ?", id).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(employee).Where("employee.id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	user := &companyentity.User{}
+	if err := r.db.NewSelect().Model(user).Where("u.id = ?", employee.UserID).Relation("Person.Address").Relation("Person.Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	employee.User = user
 	return employee, nil
 }
 
@@ -192,7 +104,7 @@ func (r *EmployeeRepositoryBun) GetEmployeeByUserID(ctx context.Context, userID 
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(employee).Where("employee.user_id = ?", userID).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(employee).Where("employee.user_id = ?", userID).Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -208,8 +120,43 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]employee
 	}
 
 	employees := []employeeentity.Employee{}
-	if err := r.db.NewSelect().Model(&employees).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&employees).Scan(ctx); err != nil {
 		return nil, err
+	}
+
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+	// Extrair todos os UserIDs de uma vez
+	userIDs := make([]uuid.UUID, len(employees))
+	for i, employee := range employees {
+		userIDs[i] = *employee.UserID
+	}
+
+	// Consultar todos os Users de uma vez
+	users := []*companyentity.User{}
+	if err := r.db.NewSelect().
+		Model(&users).
+		Where("u.id IN (?)", bun.In(userIDs)).
+		Relation("Person.Address").
+		Relation("Person.Contact").
+		ExcludeColumn("hash").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+	// Mapear os usuários de volta para os funcionários
+	userMap := make(map[uuid.UUID]*companyentity.User)
+	for _, user := range users {
+		userMap[user.ID] = user
+	}
+
+	for i := range employees {
+		if user, exists := userMap[*employees[i].UserID]; exists {
+			employees[i].User = user
+		} else {
+			// Tratar caso de usuário não encontrado
+			employees[i].User = nil
+		}
 	}
 
 	return employees, nil

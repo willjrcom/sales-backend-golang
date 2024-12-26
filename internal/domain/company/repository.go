@@ -20,4 +20,5 @@ type UserRepository interface {
 	LoginAndDeleteUser(ctx context.Context, user *User) error
 	LoginUser(ctx context.Context, user *User) (*User, error)
 	GetIDByEmail(ctx context.Context, email string) (uuid.UUID, error)
+	ExistsUserByID(ctx context.Context, id uuid.UUID) (bool, error)
 }

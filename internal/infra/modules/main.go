@@ -46,7 +46,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	categoryService.AddDependencies(*quantityService, *sizeService)
 
 	clientService.AddDependencies(contactRepository)
-	employeeService.AddDependencies(contactRepository)
+	employeeService.AddDependencies(contactRepository, userRepository)
 
 	orderQueueService.AddDependencies(orderProcessRepository)
 	orderProcessService.AddDependencies(orderQueueService, processRuleRepository, groupItemService, orderRepository, employeeService)
