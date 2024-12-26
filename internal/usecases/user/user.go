@@ -27,25 +27,25 @@ func NewService(r companyentity.UserRepository) *Service {
 	return &Service{r: r}
 }
 
-func (s *Service) CreateUser(ctx context.Context, dto *userdto.CreateUserInput) (uuid.UUID, error) {
+func (s *Service) CreateUser(ctx context.Context, dto *userdto.CreateUserInput) (*uuid.UUID, error) {
 	user, err := dto.ToModel()
 
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	if id, _ := s.r.GetIDByEmail(ctx, user.Email); id != uuid.Nil {
-		return uuid.Nil, ErrUserAlreadyExists
+		return nil, ErrUserAlreadyExists
 	}
 
 	hash, err := bcryptservice.HashPassword(dto.Password)
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	user.Hash = string(hash)
 
-	return user.ID, s.r.CreateUser(ctx, user)
+	return &user.ID, s.r.CreateUser(ctx, user)
 }
 
 func (s *Service) UpdateUser(ctx context.Context, dto *userdto.UpdatePasswordInput) error {
