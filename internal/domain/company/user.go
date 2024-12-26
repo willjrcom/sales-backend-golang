@@ -6,6 +6,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 )
 
 type UserValue string
@@ -18,11 +19,12 @@ type User struct {
 }
 
 type UserCommonAttributes struct {
-	Email          string             `bun:"column:email,unique,notnull" json:"email"`
-	Password       string             `bun:"-" json:"password"`
-	Hash           string             `bun:"column:hash,notnull" json:"hash"`
-	CompanyToUsers []CompanyToUsers   `bun:"rel:has-many,join:id=user_id" json:"company_users,omitempty"`
-	Companies      []CompanyWithUsers `bun:"-" json:"companies"`
+	Person         personentity.Person `bun:"rel:has-one,join:id=user_id,notnull" json:"person"`
+	Email          string              `bun:"column:email,unique,notnull" json:"email"`
+	Password       string              `bun:"-" json:"-"`
+	Hash           string              `bun:"column:hash,notnull" json:"hash"`
+	CompanyToUsers []CompanyToUsers    `bun:"rel:has-many,join:id=user_id" json:"company_users,omitempty"`
+	Companies      []CompanyWithUsers  `bun:"-" json:"companies"`
 }
 
 func NewUser(userCommonAttributes UserCommonAttributes) *User {
