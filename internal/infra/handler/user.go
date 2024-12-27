@@ -30,8 +30,8 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerNewUser)
-		c.Post("/update-password", h.handlerUpdateUserPassword)
-		c.Post("/update/{id}", h.handlerUpdateUser)
+		c.Patch("/update/password", h.handlerUpdateUserPassword)
+		c.Patch("/update/{id}", h.handlerUpdateUser)
 		c.Post("/login", h.handlerLoginUser)
 		c.Post("/access", h.handlerAccess)
 		c.Delete("/", h.handlerDeleteUser)
