@@ -31,6 +31,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerNewUser)
 		c.Patch("/update/password", h.handlerUpdateUserPassword)
+		c.Post("/forget-password", h.handlerForgetUserPassword)
 		c.Patch("/update/{id}", h.handlerUpdateUser)
 		c.Post("/login", h.handlerLoginUser)
 		c.Post("/access", h.handlerAccess)
@@ -42,6 +43,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 		fmt.Sprintf("%s/login", route),
 		fmt.Sprintf("%s/access", route),
 		fmt.Sprintf("%s/update-password", route),
+		fmt.Sprintf("%s/forget-password", route),
 	}
 
 	return handler.NewHandler(route, c, unprotectedRoutes...)
@@ -75,6 +77,23 @@ func (h *handlerUserImpl) handlerUpdateUserPassword(w http.ResponseWriter, r *ht
 	}
 
 	if err := h.s.UpdateUserPassword(ctx, dtoUser); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerUserImpl) handlerForgetUserPassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	dtoUser := &userdto.ForgetUserPassword{}
+	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	if err := h.s.ForgetUserPassword(ctx, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}

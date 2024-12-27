@@ -75,6 +75,16 @@ func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UpdatePas
 	return s.r.UpdateUser(ctx, user)
 }
 
+func (s *Service) ForgetUserPassword(ctx context.Context, dto *userdto.ForgetUserPassword) error {
+	_, err := dto.ToModel()
+	if err != nil {
+		return err
+	}
+
+	// Send email service
+	return nil
+}
+
 func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IdRequest, dto *userdto.UpdateUser) error {
 	user, err := s.r.GetUserByID(ctx, dtoID.ID)
 	if err != nil {
