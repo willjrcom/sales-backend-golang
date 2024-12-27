@@ -11,6 +11,7 @@ import (
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	bcryptservice "github.com/willjrcom/sales-backend-go/internal/infra/service/bcrypt"
+	emailservice "github.com/willjrcom/sales-backend-go/internal/infra/service/email"
 	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
 )
 
@@ -76,12 +77,13 @@ func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UpdatePas
 }
 
 func (s *Service) ForgetUserPassword(ctx context.Context, dto *userdto.ForgetUserPassword) error {
-	_, err := dto.ToModel()
+	email, err := dto.ToModel()
 	if err != nil {
 		return err
 	}
 
 	// Send email service
+	emailservice.SendEmail(email)
 	return nil
 }
 
