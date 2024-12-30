@@ -265,6 +265,13 @@ func (s *Service) AddRemovedItem(ctx context.Context, dtoID *entitydto.IdRequest
 		return errors.New("removed item not found on category")
 	}
 
+	// Already added
+	for _, removedItem := range item.RemovedItems {
+		if removedItem == *name {
+			return nil
+		}
+	}
+
 	item.AddRemovedItem(*name)
 
 	return s.ri.UpdateItem(ctx, item)
