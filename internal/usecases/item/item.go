@@ -28,17 +28,19 @@ type Service struct {
 	ro  orderentity.OrderRepository
 	rp  productentity.ProductRepository
 	rq  productentity.QuantityRepository
+	rc  productentity.CategoryRepository
 }
 
 func NewService(ri itementity.ItemRepository) *Service {
 	return &Service{ri: ri}
 }
 
-func (s *Service) AddDependencies(rgi groupitementity.GroupItemRepository, ro orderentity.OrderRepository, rp productentity.ProductRepository, rq productentity.QuantityRepository) {
+func (s *Service) AddDependencies(rgi groupitementity.GroupItemRepository, ro orderentity.OrderRepository, rp productentity.ProductRepository, rq productentity.QuantityRepository, rc productentity.CategoryRepository) {
 	s.rgi = rgi
 	s.ro = ro
 	s.rp = rp
 	s.rq = rq
+	s.rc = rc
 }
 
 func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInput) (ids *itemdto.ItemIDAndGroupItemOutput, err error) {
@@ -234,6 +236,54 @@ func (s *Service) DeleteAdditionalItemOrder(ctx context.Context, dtoAdditional *
 	}
 
 	return nil
+}
+
+func (s *Service) AddRemovedItem(ctx context.Context, dtoID *entitydto.IdRequest, dto *itemdto.RemovedItemInput) (err error) {
+	name, err := dto.ToModel()
+	if err != nil {
+		return err
+	}
+
+	item, err := s.ri.GetItemById(ctx, dtoID.ID.String())
+	if err != nil {
+		return err
+	}
+
+	category, err := s.rc.GetCategoryById(ctx, item.CategoryID.String())
+	if err != nil {
+		return err
+	}
+
+	found := false
+	for _, removedItem := range category.RemovableIngredients {
+		if removedItem == *name {
+			found = true
+		}
+	}
+
+	if !found {
+		return errors.New("removed item not found on category")
+	}
+
+	item.AddRemovedItem(*name)
+
+	return s.ri.UpdateItem(ctx, item)
+}
+
+func (s *Service) RemoveRemovedItem(ctx context.Context, dtoID *entitydto.IdRequest, dto *itemdto.RemovedItemInput) (err error) {
+	name, err := dto.ToModel()
+	if err != nil {
+		return err
+	}
+
+	item, err := s.ri.GetItemById(ctx, dtoID.ID.String())
+	if err != nil {
+		return err
+	}
+
+	item.RemoveRemovedItem(*name)
+
+	return s.ri.UpdateItem(ctx, item)
 }
 
 func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product) (groupItem *groupitementity.GroupItem, err error) {

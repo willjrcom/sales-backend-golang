@@ -25,7 +25,6 @@ type Item struct {
 
 type ItemCommonAttributes struct {
 	Name            string    `bun:"name,notnull" json:"name"`
-	Description     string    `bun:"description" json:"description"`
 	Observation     string    `bun:"observation" json:"observation"`
 	Price           float64   `bun:"price,notnull" json:"price"`
 	TotalPrice      float64   `bun:"total_price,notnull" json:"total_price"`
@@ -34,6 +33,7 @@ type ItemCommonAttributes struct {
 	GroupItemID     uuid.UUID `bun:"group_item_id,type:uuid" json:"group_item_id"`
 	CategoryID      uuid.UUID `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
 	AdditionalItems []Item    `bun:"m2m:item_to_additional,join:Item=AdditionalItem" json:"item_to_additional,omitempty"`
+	RemovedItems    []string  `bun:"removed_items,type:jsonb" json:"removed_items,omitempty"`
 	ProductID       uuid.UUID `bun:"product_id,type:uuid" json:"product_id"`
 }
 
@@ -56,6 +56,18 @@ func NewItem(name string, price float64, quantity float64, size string, productI
 
 func (i *Item) AddSizeToName() {
 	i.Name += " (" + i.Size + ")"
+}
+
+func (i *Item) AddRemovedItem(name string) {
+	i.RemovedItems = append(i.RemovedItems, name)
+}
+
+func (i *Item) RemoveRemovedItem(name string) {
+	for index, item := range i.RemovedItems {
+		if item == name {
+			i.RemovedItems = append(i.RemovedItems[:index], i.RemovedItems[index+1:]...)
+		}
+	}
 }
 
 func (i *Item) CalculateTotalPrice() float64 {

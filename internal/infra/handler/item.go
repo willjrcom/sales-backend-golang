@@ -30,6 +30,8 @@ func NewHandlerItem(itemService *itemusecases.Service) *handler.Handler {
 		c.Delete("/{id}", h.handlerDeleteItem)
 		c.Post("/update/{id}/additional", h.handlerAddAdditionalItem)
 		c.Delete("/delete/{id-additional}/additional", h.handlerDeleteAdditionalItem)
+		c.Post("/update/{id}/removed-item", h.handlerAddRemovedItem)
+		c.Delete("/delete/{id-removed}/removed-item", h.handlerRemoveRemovedItem)
 	})
 
 	unprotectedRoutes := []string{}
@@ -114,6 +116,58 @@ func (h *handlerItemImpl) handlerDeleteAdditionalItem(w http.ResponseWriter, r *
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteAdditionalItemOrder(ctx, dtoId); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerItemImpl) handlerAddRemovedItem(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	dtoRemovedItem := &itemdto.RemovedItemInput{}
+	if err := jsonpkg.ParseBody(r, dtoRemovedItem); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	if err := h.s.AddRemovedItem(ctx, dtoId, dtoRemovedItem); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerItemImpl) handlerRemoveRemovedItem(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+
+	dtoRemovedItem := &itemdto.RemovedItemInput{}
+	if err := jsonpkg.ParseBody(r, dtoRemovedItem); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	if err := h.s.RemoveRemovedItem(ctx, dtoId, dtoRemovedItem); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
