@@ -31,7 +31,7 @@ func NewHandlerItem(itemService *itemusecases.Service) *handler.Handler {
 		c.Post("/update/{id}/additional", h.handlerAddAdditionalItem)
 		c.Delete("/delete/{id-additional}/additional", h.handlerDeleteAdditionalItem)
 		c.Post("/update/{id}/removed-item", h.handlerAddRemovedItem)
-		c.Delete("/delete/{id-removed}/removed-item", h.handlerRemoveRemovedItem)
+		c.Delete("/delete/{id}/removed-item", h.handlerRemoveRemovedItem)
 	})
 
 	unprotectedRoutes := []string{}
