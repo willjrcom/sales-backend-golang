@@ -54,6 +54,10 @@ func NewItem(name string, price float64, quantity float64, size string, productI
 	}
 }
 
+func (i *Item) AddSizeToName() {
+	i.Name += " (" + i.Size + ")"
+}
+
 func (i *Item) CalculateTotalPrice() float64 {
 	totalPriceItemAndAdditionals := i.TotalPrice
 

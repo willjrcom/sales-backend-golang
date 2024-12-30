@@ -64,6 +64,7 @@ func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *g
 	}
 
 	item = itementity.NewItem(product.Name, product.Price, quantity.Quantity, product.Size.Name, product.ID, product.CategoryID)
+	item.AddSizeToName()
 	item.GroupItemID = *a.GroupItemID
 	item.Observation = a.Observation
 	item.Description = product.Description
