@@ -2,6 +2,7 @@ package itementity
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -55,6 +56,10 @@ func NewItem(name string, price float64, quantity float64, size string, productI
 }
 
 func (i *Item) AddSizeToName() {
+	if strings.Contains(i.Name, "("+i.Size+")") {
+		return
+	}
+
 	i.Name += " (" + i.Size + ")"
 }
 
