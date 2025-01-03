@@ -33,7 +33,7 @@ type ItemCommonAttributes struct {
 	Quantity        float64   `bun:"quantity,notnull" json:"quantity"`
 	GroupItemID     uuid.UUID `bun:"group_item_id,type:uuid" json:"group_item_id"`
 	CategoryID      uuid.UUID `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
-	AdditionalItems []Item    `bun:"m2m:item_to_additional,join:Item=AdditionalItem" json:"item_to_additional,omitempty"`
+	AdditionalItems []Item    `bun:"m2m:item_to_additional,join:Item=AdditionalItem" json:"additional_items,omitempty"`
 	RemovedItems    []string  `bun:"removed_items,type:jsonb" json:"removed_items,omitempty"`
 	ProductID       uuid.UUID `bun:"product_id,type:uuid" json:"product_id"`
 }

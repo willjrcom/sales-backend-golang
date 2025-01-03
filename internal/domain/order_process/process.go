@@ -30,7 +30,7 @@ type OrderProcessCommonAttributes struct {
 	ProcessRuleID uuid.UUID                  `bun:"process_rule_id,type:uuid,notnull" json:"process_rule_id"`
 	ProcessRule   *productentity.ProcessRule `bun:"rel:belongs-to,join:process_rule_id=id" json:"process_rule,omitempty"`
 	Status        StatusProcess              `bun:"status,notnull" json:"status"`
-	Products      []productentity.Product    `bun:"m2m:process_to_product_to_group_item,join:Process=Product" json:"process_to_product,omitempty"`
+	Products      []productentity.Product    `bun:"m2m:process_to_product_to_group_item,join:Process=Product" json:"products,omitempty"`
 	Queue         *OrderQueue                `bun:"rel:has-one,join:group_item_id=group_item_id,process_rule_id=process_rule_id" json:"queue,omitempty"`
 }
 

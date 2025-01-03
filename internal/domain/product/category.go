@@ -26,8 +26,8 @@ type ProductCategoryCommonAttributes struct {
 	ProcessRules         []ProcessRule     `bun:"rel:has-many,join:id=category_id" json:"process_rules,omitempty"`
 	IsAdditional         bool              `bun:"is_additional" json:"is_additional"`
 	IsComplement         bool              `bun:"is_complement" json:"is_complement"`
-	AdditionalCategories []ProductCategory `bun:"m2m:product_category_to_additional,join:Category=AdditionalCategory" json:"product_category_to_additional,omitempty"`
-	ComplementCategories []ProductCategory `bun:"m2m:product_category_to_complement,join:Category=ComplementCategory" json:"product_category_to_complement,omitempty"`
+	AdditionalCategories []ProductCategory `bun:"m2m:product_category_to_additional,join:Category=AdditionalCategory" json:"additional_categories,omitempty"`
+	ComplementCategories []ProductCategory `bun:"m2m:product_category_to_complement,join:Category=ComplementCategory" json:"complement_categories,omitempty"`
 }
 
 type PatchProductCategory struct {
@@ -36,8 +36,8 @@ type PatchProductCategory struct {
 	NeedPrint            *bool             `json:"need_print"`
 	UseProcessRule       *bool             `json:"use_process_rule"`
 	RemovableIngredients []string          `json:"removable_ingredients"`
-	AdditionalCategories []ProductCategory `json:"product_category_to_additional"`
-	ComplementCategories []ProductCategory `json:"product_category_to_complement"`
+	AdditionalCategories []ProductCategory `json:"additional_categories"`
+	ComplementCategories []ProductCategory `json:"complement_categories"`
 }
 
 func NewProductCategory(categoryCommonAttributes ProductCategoryCommonAttributes) *ProductCategory {
