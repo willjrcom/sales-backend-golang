@@ -30,6 +30,7 @@ func NewHandlerProcessRuleCategory(processRuleService *processruleusecases.Servi
 		c.Get("/{id}", h.handlerGetProcessRuleById)
 		c.Get("/by-category-id/{id}", h.handlerGetProcessRulesByCategoryID)
 		c.Get("/all", h.handlerGetAllProcessRules)
+		c.Get("/all-with-order-process", h.handlerGetAllProcessRulesWithOrderProcess)
 	})
 
 	return handler.NewHandler("/product-category/process-rule", c)
@@ -145,6 +146,18 @@ func (h *handlerProcessRuleCategoryImpl) handlerGetAllProcessRules(w http.Respon
 	ctx := r.Context()
 
 	processRules, err := h.s.GetAllProcessRules(ctx)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processRules})
+}
+
+func (h *handlerProcessRuleCategoryImpl) handlerGetAllProcessRulesWithOrderProcess(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	processRules, err := h.s.GetAllProcessRulesWithOrderProcess(ctx)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

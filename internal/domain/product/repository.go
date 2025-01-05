@@ -45,6 +45,7 @@ type ProcessRuleRepository interface {
 	GetProcessRuleById(ctx context.Context, id string) (*ProcessRule, error)
 	GetProcessRulesByCategoryId(ctx context.Context, id string) ([]ProcessRule, error)
 	GetAllProcessRules(ctx context.Context) ([]ProcessRule, error)
+	GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]ProcessRule, error)
 	GetProcessRuleByCategoryIdAndOrder(ctx context.Context, id string, order int8) (*ProcessRule, error)
 	GetFirstProcessRuleByCategoryId(ctx context.Context, id string) (*ProcessRule, error)
 	GetMapProcessRulesByFirstOrder(ctx context.Context) (map[uuid.UUID]uuid.UUID, error)

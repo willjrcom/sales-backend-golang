@@ -91,6 +91,13 @@ func (s *Service) GetAllProcessRules(ctx context.Context) ([]processruledto.Proc
 		return s.processRulesToDto(processRules), nil
 	}
 }
+func (s *Service) GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]processruledto.ProcessRuleOutput, error) {
+	if processRules, err := s.r.GetAllProcessRulesWithOrderProcess(ctx); err != nil {
+		return nil, err
+	} else {
+		return s.processRulesToDto(processRules), nil
+	}
+}
 
 func (s *Service) processRulesToDto(processRules []productentity.ProcessRule) []processruledto.ProcessRuleOutput {
 	var processRuleDtos []processruledto.ProcessRuleOutput
