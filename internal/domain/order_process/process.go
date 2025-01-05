@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
@@ -18,31 +17,30 @@ var (
 
 type OrderProcess struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:order_processes,alias:process"`
 	OrderProcessTimeLogs
 	OrderProcessCommonAttributes
 }
 
 type OrderProcessCommonAttributes struct {
-	EmployeeID    *uuid.UUID              `bun:"employee_id,type:uuid" json:"employee_id,omitempty"`
-	GroupItemID   uuid.UUID               `bun:"group_item_id,type:uuid,notnull" json:"group_item_id"`
-	GroupItem     *orderentity.GroupItem  `bun:"rel:belongs-to,join:group_item_id=id" json:"group_item,omitempty"`
-	ProcessRuleID uuid.UUID               `bun:"process_rule_id,type:uuid,notnull" json:"process_rule_id"`
-	Status        StatusProcess           `bun:"status,notnull" json:"status"`
-	Products      []productentity.Product `bun:"m2m:process_to_product_to_group_item,join:Process=Product" json:"products,omitempty"`
-	Queue         *OrderQueue             `bun:"rel:has-one,join:group_item_id=group_item_id,process_rule_id=process_rule_id" json:"queue,omitempty"`
+	EmployeeID    *uuid.UUID
+	GroupItemID   uuid.UUID
+	GroupItem     *orderentity.GroupItem
+	ProcessRuleID uuid.UUID
+	Status        StatusProcess
+	Products      []productentity.Product
+	Queue         *OrderQueue
 }
 
 type OrderProcessTimeLogs struct {
-	StartedAt         *time.Time    `bun:"started_at" json:"started_at,omitempty"`
-	PausedAt          *time.Time    `bun:"paused_at" json:"paused_at,omitempty"`
-	ContinuedAt       *time.Time    `bun:"continued_at" json:"continued_at,omitempty"`
-	FinishedAt        *time.Time    `bun:"finished_at" json:"finished_at,omitempty"`
-	CanceledAt        *time.Time    `bun:"canceled_at" json:"canceled_at,omitempty"`
-	CanceledReason    *string       `bun:"canceled_reason" json:"canceled_reason,omitempty"`
-	Duration          time.Duration `bun:"duration" json:"duration"`
-	DurationFormatted string        `bun:"duration_formatted" json:"duration_formatted"`
-	TotalPaused       int8          `bun:"total_paused" json:"total_paused"`
+	StartedAt         *time.Time
+	PausedAt          *time.Time
+	ContinuedAt       *time.Time
+	FinishedAt        *time.Time
+	CanceledAt        *time.Time
+	CanceledReason    *string
+	Duration          time.Duration
+	DurationFormatted string
+	TotalPaused       int8
 }
 
 func NewOrderProcess(groupItemID uuid.UUID, processRuleID uuid.UUID) *OrderProcess {

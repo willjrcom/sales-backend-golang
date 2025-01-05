@@ -4,27 +4,25 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 type OrderQueue struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:order_queues"`
 	OrderQueueCommonAttributes
 	OrderQueueTimeLogs
 }
 
 type OrderQueueCommonAttributes struct {
-	GroupItemID   uuid.UUID  `bun:"column:group_item_id,type:uuid,notnull" json:"group_item_id"`
-	ProcessRuleID *uuid.UUID `bun:"column:process_rule_id,type:uuid" json:"process_rule_id,omitempty"`
+	GroupItemID   uuid.UUID
+	ProcessRuleID *uuid.UUID
 }
 
 type OrderQueueTimeLogs struct {
-	JoinedAt          time.Time     `bun:"joined_at" json:"joined_at,omitempty"`
-	LeftAt            *time.Time    `bun:"left_at" json:"left_at,omitempty"`
-	Duration          time.Duration `bun:"duration" json:"duration"`
-	DurationFormatted string        `bun:"duration_formatted" json:"duration_formatted"`
+	JoinedAt          time.Time
+	LeftAt            *time.Time
+	Duration          time.Duration
+	DurationFormatted string
 }
 
 func NewOrderQueue(groupItemID uuid.UUID, joinedAt time.Time) (*OrderQueue, error) {

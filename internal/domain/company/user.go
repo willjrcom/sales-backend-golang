@@ -10,16 +10,15 @@ import (
 type UserValue string
 
 type User struct {
-	bun.BaseModel `bun:"table:users,alias:u"`
 	UserCommonAttributes
 }
 
 type UserCommonAttributes struct {
 	personentity.Person
-	Password       string             `bun:"-" json:"-"`
-	Hash           string             `bun:"column:hash,notnull" json:"hash"`
-	CompanyToUsers []CompanyToUsers   `bun:"rel:has-many,join:id=user_id" json:"company_users,omitempty"`
-	Companies      []CompanyWithUsers `bun:"-" json:"companies"`
+	Password       string
+	Hash           string
+	CompanyToUsers []CompanyToUsers
+	Companies      []CompanyWithUsers
 }
 
 func NewUser(userCommonAttributes UserCommonAttributes) *User {

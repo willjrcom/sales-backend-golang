@@ -13,40 +13,35 @@ import (
 
 type Company struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:companies"`
 	CompanyCommonAttributes
 }
 
 type CompanyCommonAttributes struct {
-	SchemaName   string                 `bun:"schema_name,notnull" json:"schema_name"`
-	BusinessName string                 `bun:"business_name,notnull" json:"business_name"`
-	TradeName    string                 `bun:"trade_name,notnull" json:"trade_name"`
-	Cnpj         string                 `bun:"cnpj,notnull" json:"cnpj"`
-	Email        string                 `bun:"email" json:"email"`
-	Contacts     []string               `bun:"contacts,type:jsonb" json:"contacts,omitempty"`
-	Address      *addressentity.Address `bun:"rel:has-one,join:id=object_id,notnull" json:"address,omitempty"`
+	SchemaName   string
+	BusinessName string
+	TradeName    string
+	Cnpj         string
+	Email        string
+	Contacts     []string
+	Address      *addressentity.Address
 }
 
 type CompanyWithUsers struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:companies"`
+	bun.BaseModel
 	CompanyCommonAttributes
-	Users []User `bun:"m2m:company_to_users,join:CompanyWithUsers=User" json:"users,omitempty"`
+	Users []User
 }
 
 type CompanyToUsers struct {
-	CompanyWithUsersID uuid.UUID         `bun:"type:uuid,pk" json:"company_with_users_id,omitempty"`
-	CompanyWithUsers   *CompanyWithUsers `bun:"rel:belongs-to,join:company_with_users_id=id" json:"company,omitempty"`
-	UserID             uuid.UUID         `bun:"type:uuid,pk" json:"user_id,omitempty"`
-	User               *User             `bun:"rel:belongs-to,join:user_id=id" json:"user,omitempty"`
+	CompanyWithUsersID uuid.UUID
+	CompanyWithUsers   *CompanyWithUsers
+	UserID             uuid.UUID
+	User               *User
 }
 
 func NewCompany(cnpjData *cnpj.Cnpj) *Company {
-	id, _ := shortid.Generate()
-	replacedName := strings.ReplaceAll(strings.ToLower(cnpjData.TradeName), " ", "_")
-	replacedName = strings.ReplaceAll(replacedName, "-", "_")
-	id = strings.ReplaceAll(id, "-", "_")
-	schema := "loja_" + replacedName + "_" + strings.ToLower(id)
+	schema := generateSchema(cnpjData)
 
 	company := &Company{
 		Entity: entity.NewEntity(),
@@ -71,6 +66,15 @@ func NewCompany(cnpjData *cnpj.Cnpj) *Company {
 	company.AddAddress(addressCommonAttributes)
 	return company
 
+}
+
+func generateSchema(cnpjData *cnpj.Cnpj) string {
+	id, _ := shortid.Generate()
+	replacedName := strings.ReplaceAll(strings.ToLower(cnpjData.TradeName), " ", "_")
+	replacedName = strings.ReplaceAll(replacedName, "-", "_")
+	id = strings.ReplaceAll(id, "-", "_")
+	schema := "loja_" + replacedName + "_" + strings.ToLower(id)
+	return schema
 }
 
 func (c *Company) AddAddress(addressCommonAttributes *addressentity.AddressCommonAttributes) {

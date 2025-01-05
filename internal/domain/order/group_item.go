@@ -22,37 +22,36 @@ var (
 
 type GroupItem struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:order_group_items"`
+	GroupItemTimeLogs
 	GroupCommonAttributes
 }
 
 type GroupCommonAttributes struct {
 	GroupDetails
-	GroupItemTimeLogs
-	Items   []Item    `bun:"rel:has-many,join:id=group_item_id" json:"items"`
-	OrderID uuid.UUID `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
+	Items   []Item
+	OrderID uuid.UUID
 }
 
 type GroupDetails struct {
-	Size             string                         `bun:"size,notnull" json:"size"`
-	Status           StatusGroupItem                `bun:"status,notnull" json:"status"`
-	TotalPrice       float64                        `bun:"total_price" json:"total_price"`
-	Quantity         float64                        `bun:"quantity" json:"quantity"`
-	NeedPrint        bool                           `bun:"need_print" json:"need_print"`
-	UseProcessRule   bool                           `bun:"use_process_rule" json:"use_process_rule"`
-	Observation      string                         `bun:"observation" json:"observation"`
-	CategoryID       uuid.UUID                      `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
-	Category         *productentity.ProductCategory `bun:"rel:belongs-to" json:"category,omitempty"`
-	ComplementItemID *uuid.UUID                     `bun:"column:complement_item_id,type:uuid" json:",omitempty"`
-	ComplementItem   *Item                          `bun:"rel:belongs-to" json:"complement_item,omitempty"`
+	Size             string
+	Status           StatusGroupItem
+	TotalPrice       float64
+	Quantity         float64
+	NeedPrint        bool
+	UseProcessRule   bool
+	Observation      string
+	CategoryID       uuid.UUID
+	Category         *productentity.ProductCategory
+	ComplementItemID *uuid.UUID
+	ComplementItem   *Item
 }
 
 type GroupItemTimeLogs struct {
-	StartAt    *time.Time `bun:"start_at" json:"start_at,omitempty"`
-	PendingAt  *time.Time `bun:"pending_at" json:"pending_at,omitempty"`
-	StartedAt  *time.Time `bun:"started_at" json:"started_at,omitempty"`
-	ReadyAt    *time.Time `bun:"ready_at" json:"ready_at,omitempty"`
-	CanceledAt *time.Time `bun:"canceled_at" json:"canceled_at,omitempty"`
+	StartAt    *time.Time
+	PendingAt  *time.Time
+	StartedAt  *time.Time
+	ReadyAt    *time.Time
+	CanceledAt *time.Time
 }
 
 func NewGroupItem(groupCommonAttributes GroupCommonAttributes) *GroupItem {

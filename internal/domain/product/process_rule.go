@@ -4,24 +4,22 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 type ProcessRule struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:process_rules,alias:pr"`
 	ProcessRuleCommonAttributes
 }
 
 type ProcessRuleCommonAttributes struct {
-	Name              string        `bun:"name,notnull" json:"name"`
-	Order             int8          `bun:"order,notnull" json:"order"`
-	Description       string        `bun:"description" json:"description"`
-	ImagePath         *string       `bun:"image_path" json:"image_path"`
-	IdealTime         time.Duration `bun:"ideal_time,notnull" json:"ideal_time"`
-	ExperimentalError time.Duration `bun:"experimental_error,notnull" json:"experimental_error"`
-	CategoryID        uuid.UUID     `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
+	Name              string
+	Order             int8
+	Description       string
+	ImagePath         *string
+	IdealTime         time.Duration
+	ExperimentalError time.Duration
+	CategoryID        uuid.UUID
 }
 
 type PatchProcessRule struct {

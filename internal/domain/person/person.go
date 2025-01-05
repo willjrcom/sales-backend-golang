@@ -13,12 +13,12 @@ type Person struct {
 }
 
 type PersonCommonAttributes struct {
-	Name     string                 `bun:"name,notnull" json:"name"`
-	Email    string                 `bun:"email" json:"email,omitempty"`
-	Cpf      string                 `bun:"cpf" json:"cpf,omitempty"`
-	Birthday *time.Time             `bun:"birthday" json:"birthday,omitempty"`
-	Contact  *Contact               `bun:"rel:has-one,join:id=object_id,notnull" json:"contact,omitempty"`
-	Address  *addressentity.Address `bun:"rel:has-one,join:id=object_id,notnull" json:"address,omitempty"`
+	Name     string
+	Email    string
+	Cpf      string
+	Birthday *time.Time
+	Contact  *Contact
+	Address  *addressentity.Address
 }
 
 type PatchPerson struct {

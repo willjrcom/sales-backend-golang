@@ -12,6 +12,7 @@ import (
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
+	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
@@ -55,6 +56,12 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) 
 	company := companyentity.NewCompany(cnpjData)
 	company.Email = email
 	company.Contacts = contacts
+
+	coordinates, _ := geocodeservice.GetCoordinates(&company.Address.AddressCommonAttributes)
+
+	if coordinates != nil {
+		company.Address.Coordinates = *coordinates
+	}
 
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), company.SchemaName)
 

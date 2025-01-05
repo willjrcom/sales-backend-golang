@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
@@ -16,15 +15,14 @@ var (
 
 type Contact struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:contacts"`
 	ContactCommonAttributes
-	ObjectID uuid.UUID `bun:"object_id,type:uuid,notnull" json:"object_id"`
+	ObjectID uuid.UUID
 }
 
 type ContactCommonAttributes struct {
-	Ddd    string      `bun:"ddd,notnull" json:"ddd"`
-	Number string      `bun:"number,notnull" json:"number"`
-	Type   ContactType `bun:"type,notnull" json:"type"`
+	Ddd    string
+	Number string
+	Type   ContactType
 }
 
 type ContactType string

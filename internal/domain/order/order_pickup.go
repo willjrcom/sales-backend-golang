@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
@@ -15,20 +14,19 @@ var (
 
 type OrderPickup struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:order_pickups,alias:pickup"`
 	PickupTimeLogs
 	OrderPickupCommonAttributes
 }
 
 type OrderPickupCommonAttributes struct {
-	Name    string            `bun:"name,notnull" json:"name"`
-	Status  StatusOrderPickup `bun:"status" json:"status"`
-	OrderID uuid.UUID         `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
+	Name    string
+	Status  StatusOrderPickup
+	OrderID uuid.UUID
 }
 
 type PickupTimeLogs struct {
-	PendingAt *time.Time `bun:"pending_at" json:"pending_at,omitempty"`
-	ReadyAt   *time.Time `bun:"ready_at" json:"ready_at,omitempty"`
+	PendingAt *time.Time
+	ReadyAt   *time.Time
 }
 
 func NewOrderPickup(name string) *OrderPickup {

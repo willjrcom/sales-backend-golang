@@ -7,9 +7,9 @@ import (
 )
 
 type Entity struct {
-	ID        uuid.UUID `bun:"id,type:uuid,pk,notnull" json:"id"`
-	CreatedAt time.Time `bun:"created_at,notnull" json:"created_at"`
-	UpdatedAt time.Time `bun:"updated_at" json:"updated_at,omitempty"`
+	ID        uuid.UUID
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func NewEntity() Entity {

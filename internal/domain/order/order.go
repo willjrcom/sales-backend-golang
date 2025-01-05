@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
@@ -27,7 +26,6 @@ var (
 
 type Order struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:orders,alias:order"`
 	OrderTimeLogs
 	OrderCommonAttributes
 }
@@ -35,34 +33,34 @@ type Order struct {
 type OrderCommonAttributes struct {
 	OrderType
 	OrderDetail
-	OrderNumber int            `bun:"order_number,notnull" json:"order_number"`
-	Status      StatusOrder    `bun:"status,notnull" json:"status"`
-	Groups      []GroupItem    `bun:"rel:has-many,join:id=order_id" json:"groups"`
-	Payments    []PaymentOrder `bun:"rel:has-many,join:id=order_id" json:"payments,omitempty"`
+	OrderNumber int
+	Status      StatusOrder
+	Groups      []GroupItem
+	Payments    []PaymentOrder
 }
 
 type OrderDetail struct {
-	TotalPayable  float64                  `bun:"total_payable" json:"total_payable"`
-	TotalPaid     float64                  `bun:"total_paid" json:"total_paid"`
-	TotalChange   float64                  `bun:"total_change" json:"total_change"`
-	QuantityItems float64                  `bun:"quantity_items" json:"quantity_items"`
-	Observation   string                   `bun:"observation" json:"observation"`
-	AttendantID   *uuid.UUID               `bun:"column:attendant_id,type:uuid,notnull" json:"attendant_id"`
-	Attendant     *employeeentity.Employee `bun:"rel:belongs-to" json:"attendant,omitempty"`
-	ShiftID       *uuid.UUID               `bun:"column:shift_id,type:uuid" json:"shift_id"`
+	TotalPayable  float64
+	TotalPaid     float64
+	TotalChange   float64
+	QuantityItems float64
+	Observation   string
+	AttendantID   *uuid.UUID
+	Attendant     *employeeentity.Employee
+	ShiftID       *uuid.UUID
 }
 
 type OrderType struct {
-	Delivery *OrderDelivery `bun:"rel:has-one,join:id=order_id" json:"delivery,omitempty"`
-	Table    *OrderTable    `bun:"rel:has-one,join:id=order_id" json:"table,omitempty"`
-	Pickup   *OrderPickup   `bun:"rel:has-one,join:id=order_id" json:"pickup,omitempty"`
+	Delivery *OrderDelivery
+	Table    *OrderTable
+	Pickup   *OrderPickup
 }
 
 type OrderTimeLogs struct {
-	PendingAt  *time.Time `bun:"pending_at" json:"pending_at,omitempty"`
-	FinishedAt *time.Time `bun:"finished_at" json:"finished_at,omitempty"`
-	CanceledAt *time.Time `bun:"canceled_at" json:"canceled_at,omitempty"`
-	ArchivedAt *time.Time `bun:"archived_at" json:"archived_at,omitempty"`
+	PendingAt  *time.Time
+	FinishedAt *time.Time
+	CanceledAt *time.Time
+	ArchivedAt *time.Time
 }
 
 func NewDefaultOrder(shiftID *uuid.UUID, currentOrderNumber int, attendantID *uuid.UUID) *Order {

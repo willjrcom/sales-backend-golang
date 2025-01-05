@@ -5,13 +5,13 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
 	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	keysdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/keys"
+	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
 )
 
 type Service struct {
@@ -44,7 +44,7 @@ func (s *Service) CreateClient(ctx context.Context, dto *clientdto.CreateClientI
 }
 
 func (s *Service) UpdateClientWithCoordinates(ctx context.Context, client *cliententity.Client) {
-	coordinates, _ := addressentity.GetCoordinates(&client.Address.AddressCommonAttributes)
+	coordinates, _ := geocodeservice.GetCoordinates(&client.Address.AddressCommonAttributes)
 	if coordinates == nil {
 		return
 	}

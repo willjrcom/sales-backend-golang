@@ -1,19 +1,17 @@
 package advertisingentity
 
 import (
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 type Advertising struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:advertisements"`
 	AdvertisingCommonAttributes
 }
 
 type AdvertisingCommonAttributes struct {
-	Name      string `bun:"name,notnull" json:"name"`
-	ImagePath string `bun:"image_path" json:"image_path"`
+	Name      string
+	ImagePath string
 }
 
 type PatchAdvertising struct {

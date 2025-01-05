@@ -4,29 +4,27 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 type Address struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:addresses"`
 	AddressCommonAttributes
 }
 
 type AddressCommonAttributes struct {
-	ObjectID     uuid.UUID   `bun:"object_id,type:uuid,notnull" json:"object_id"`
-	Street       string      `bun:"street,notnull" json:"street"`
-	Number       string      `bun:"number,notnull" json:"number"`
-	Complement   string      `bun:"complement" json:"complement"`
-	Reference    string      `bun:"reference" json:"reference"`
-	Neighborhood string      `bun:"neighborhood,notnull" json:"neighborhood"`
-	City         string      `bun:"city,notnull" json:"city"`
-	State        string      `bun:"state,notnull" json:"state"`
-	Cep          string      `bun:"cep" json:"cep"`
-	AddressType  AddressType `bun:"address_type,notnull" json:"address_type"`
-	DeliveryTax  float64     `bun:"delivery_tax,notnull" json:"delivery_tax"`
-	Coordinates  Coordinates `bun:"coordinates,type:jsonb" json:"coordinates,omitempty"`
+	ObjectID     uuid.UUID
+	Street       string
+	Number       string
+	Complement   string
+	Reference    string
+	Neighborhood string
+	City         string
+	State        string
+	Cep          string
+	AddressType  AddressType
+	DeliveryTax  float64
+	Coordinates  Coordinates
 }
 
 type PatchAddress struct {
@@ -78,12 +76,6 @@ func (a *Address) Validate() error {
 }
 
 func NewAddress(addressCommonAttributes *AddressCommonAttributes) *Address {
-	coordinates, _ := GetCoordinates(addressCommonAttributes)
-
-	if coordinates != nil {
-		addressCommonAttributes.Coordinates = *coordinates
-	}
-
 	return &Address{
 		Entity:                  entity.NewEntity(),
 		AddressCommonAttributes: *addressCommonAttributes,

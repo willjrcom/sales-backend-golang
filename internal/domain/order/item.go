@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
@@ -18,22 +17,21 @@ var (
 
 type Item struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:order_items"`
 	ItemCommonAttributes
 }
 
 type ItemCommonAttributes struct {
-	Name            string    `bun:"name,notnull" json:"name"`
-	Observation     string    `bun:"observation" json:"observation"`
-	Price           float64   `bun:"price,notnull" json:"price"`
-	TotalPrice      float64   `bun:"total_price,notnull" json:"total_price"`
-	Size            string    `bun:"size,notnull" json:"size"`
-	Quantity        float64   `bun:"quantity,notnull" json:"quantity"`
-	GroupItemID     uuid.UUID `bun:"group_item_id,type:uuid" json:"group_item_id"`
-	CategoryID      uuid.UUID `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
-	AdditionalItems []Item    `bun:"m2m:item_to_additional,join:Item=AdditionalItem" json:"additional_items,omitempty"`
-	RemovedItems    []string  `bun:"removed_items,type:jsonb" json:"removed_items,omitempty"`
-	ProductID       uuid.UUID `bun:"product_id,type:uuid" json:"product_id"`
+	Name            string
+	Observation     string
+	Price           float64
+	TotalPrice      float64
+	Size            string
+	Quantity        float64
+	GroupItemID     uuid.UUID
+	CategoryID      uuid.UUID
+	AdditionalItems []Item
+	RemovedItems    []string
+	ProductID       uuid.UUID
 }
 
 func NewItem(name string, price float64, quantity float64, size string, productID uuid.UUID, categoryID uuid.UUID) *Item {

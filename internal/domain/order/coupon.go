@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
@@ -16,15 +15,14 @@ var (
 
 type Coupon struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:coupons"`
 	CouponCommonAttributes
 }
 
 type CouponCommonAttributes struct {
-	Discount float64    `bun:"discount" json:"discount"`
-	Min      float64    `bun:"min" json:"min"`
-	StartAt  *time.Time `bun:"start_at" json:"start_at"`
-	EndAt    *time.Time `bun:"end_at" json:"end_at"`
+	Discount float64
+	Min      float64
+	StartAt  *time.Time
+	EndAt    *time.Time
 }
 
 func NewCoupon(couponCommonAttributes CouponCommonAttributes) (*Coupon, error) {

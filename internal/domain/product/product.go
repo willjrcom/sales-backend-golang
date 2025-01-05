@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
@@ -15,23 +14,22 @@ var (
 
 type Product struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:products"`
 	ProductCommonAttributes
 }
 
 type ProductCommonAttributes struct {
-	Code        string           `bun:"code,notnull" json:"code"`
-	Name        string           `bun:"name,notnull" json:"name"`
-	Flavors     []string         `bun:"flavors,type:jsonb" json:"flavors,omitempty"`
-	ImagePath   *string          `bun:"image_path" json:"image_path"`
-	Description string           `bun:"description" json:"description"`
-	Price       float64          `bun:"price,notnull" json:"price"`
-	Cost        float64          `bun:"cost" json:"cost"`
-	IsAvailable bool             `bun:"is_available" json:"is_available"`
-	CategoryID  uuid.UUID        `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
-	Category    *ProductCategory `bun:"rel:belongs-to" json:"category,omitempty"`
-	SizeID      uuid.UUID        `bun:"column:size_id,type:uuid,notnull" json:"size_id"`
-	Size        *Size            `bun:"rel:belongs-to" json:"size,omitempty"`
+	Code        string
+	Name        string
+	Flavors     []string
+	ImagePath   *string
+	Description string
+	Price       float64
+	Cost        float64
+	IsAvailable bool
+	CategoryID  uuid.UUID
+	Category    *ProductCategory
+	SizeID      uuid.UUID
+	Size        *Size
 }
 
 type PatchProduct struct {

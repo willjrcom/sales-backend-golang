@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
@@ -14,15 +13,14 @@ var (
 
 type Size struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:sizes"`
 	SizeCommonAttributes
 }
 
 type SizeCommonAttributes struct {
-	Name       string    `bun:"name" json:"name"`
-	IsActive   *bool     `bun:"is_active" json:"is_active"`
-	CategoryID uuid.UUID `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
-	Products   []Product `bun:"rel:has-many,join:id=size_id" json:"products,omitempty"`
+	Name       string
+	IsActive   *bool
+	CategoryID uuid.UUID
+	Products   []Product
 }
 
 type PatchSize struct {

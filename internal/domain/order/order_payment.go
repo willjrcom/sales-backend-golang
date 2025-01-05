@@ -4,25 +4,23 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 type PaymentOrder struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:order_payments,alias:payment"`
 	PaymentTimeLogs
 	PaymentCommonAttributes
 }
 
 type PaymentCommonAttributes struct {
-	TotalPaid float64   `bun:"total_paid" json:"total_paid"`
-	Method    PayMethod `bun:"method,notnull" json:"method"`
-	OrderID   uuid.UUID `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
+	TotalPaid float64
+	Method    PayMethod
+	OrderID   uuid.UUID
 }
 
 type PaymentTimeLogs struct {
-	PaidAt time.Time `bun:"paid_at" json:"paid_at,omitempty"`
+	PaidAt time.Time
 }
 
 func NewPayment(totalPaid float64, method PayMethod, orderID uuid.UUID) *PaymentOrder {

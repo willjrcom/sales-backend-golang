@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
@@ -14,13 +13,12 @@ var (
 
 type Quantity struct {
 	entity.Entity
-	bun.BaseModel `bun:"table:quantities"`
 	QuantityCommonAttributes
 }
 
 type QuantityCommonAttributes struct {
-	Quantity   float64   `bun:"quantity,notnull" json:"quantity"`
-	CategoryID uuid.UUID `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
+	Quantity   float64
+	CategoryID uuid.UUID
 }
 
 type PatchQuantity struct {
