@@ -22,7 +22,6 @@ type ProcessRuleCommonAttributes struct {
 	IdealTime         time.Duration `bun:"ideal_time,notnull" json:"ideal_time"`
 	ExperimentalError time.Duration `bun:"experimental_error,notnull" json:"experimental_error"`
 	CategoryID        uuid.UUID     `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
-	DeletedAt         time.Time     `bun:",soft_delete,nullzero"`
 }
 
 type PatchProcessRule struct {

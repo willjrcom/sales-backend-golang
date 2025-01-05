@@ -15,7 +15,6 @@ type Shift struct {
 	bun.BaseModel `bun:"table:shifts"`
 	OrderTimeLogs
 	ShiftCommonAttributes
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type ShiftCommonAttributes struct {

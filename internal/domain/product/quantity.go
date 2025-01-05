@@ -2,7 +2,6 @@ package productentity
 
 import (
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -17,7 +16,6 @@ type Quantity struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:quantities"`
 	QuantityCommonAttributes
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type QuantityCommonAttributes struct {

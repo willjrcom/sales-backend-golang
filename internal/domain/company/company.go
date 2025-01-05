@@ -2,7 +2,6 @@ package companyentity
 
 import (
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/teris-io/shortid"
@@ -16,7 +15,6 @@ type Company struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:companies"`
 	CompanyCommonAttributes
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type CompanyCommonAttributes struct {

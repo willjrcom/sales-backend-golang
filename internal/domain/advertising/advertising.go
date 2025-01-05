@@ -1,8 +1,6 @@
 package advertisingentity
 
 import (
-	"time"
-
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
@@ -11,7 +9,6 @@ type Advertising struct {
 	entity.Entity
 	bun.BaseModel `bun:"table:advertisements"`
 	AdvertisingCommonAttributes
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type AdvertisingCommonAttributes struct {

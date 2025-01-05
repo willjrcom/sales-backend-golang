@@ -24,14 +24,13 @@ type OrderProcess struct {
 }
 
 type OrderProcessCommonAttributes struct {
-	EmployeeID    *uuid.UUID                 `bun:"employee_id,type:uuid" json:"employee_id,omitempty"`
-	GroupItemID   uuid.UUID                  `bun:"group_item_id,type:uuid,notnull" json:"group_item_id"`
-	GroupItem     *orderentity.GroupItem     `bun:"rel:belongs-to,join:group_item_id=id" json:"group_item,omitempty"`
-	ProcessRuleID uuid.UUID                  `bun:"process_rule_id,type:uuid,notnull" json:"process_rule_id"`
-	ProcessRule   *productentity.ProcessRule `bun:"rel:belongs-to,join:process_rule_id=id" json:"process_rule,omitempty"`
-	Status        StatusProcess              `bun:"status,notnull" json:"status"`
-	Products      []productentity.Product    `bun:"m2m:process_to_product_to_group_item,join:Process=Product" json:"products,omitempty"`
-	Queue         *OrderQueue                `bun:"rel:has-one,join:group_item_id=group_item_id,process_rule_id=process_rule_id" json:"queue,omitempty"`
+	EmployeeID    *uuid.UUID              `bun:"employee_id,type:uuid" json:"employee_id,omitempty"`
+	GroupItemID   uuid.UUID               `bun:"group_item_id,type:uuid,notnull" json:"group_item_id"`
+	GroupItem     *orderentity.GroupItem  `bun:"rel:belongs-to,join:group_item_id=id" json:"group_item,omitempty"`
+	ProcessRuleID uuid.UUID               `bun:"process_rule_id,type:uuid,notnull" json:"process_rule_id"`
+	Status        StatusProcess           `bun:"status,notnull" json:"status"`
+	Products      []productentity.Product `bun:"m2m:process_to_product_to_group_item,join:Process=Product" json:"products,omitempty"`
+	Queue         *OrderQueue             `bun:"rel:has-one,join:group_item_id=group_item_id,process_rule_id=process_rule_id" json:"queue,omitempty"`
 }
 
 type OrderProcessTimeLogs struct {
