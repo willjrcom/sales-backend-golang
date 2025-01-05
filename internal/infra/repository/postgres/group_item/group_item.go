@@ -7,8 +7,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
-	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 type GroupItemRepositoryBun struct {
@@ -20,7 +19,7 @@ func NewGroupItemRepositoryBun(db *bun.DB) *GroupItemRepositoryBun {
 	return &GroupItemRepositoryBun{db: db}
 }
 
-func (r *GroupItemRepositoryBun) CreateGroupItem(ctx context.Context, p *groupitementity.GroupItem) error {
+func (r *GroupItemRepositoryBun) CreateGroupItem(ctx context.Context, p *orderentity.GroupItem) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -35,7 +34,7 @@ func (r *GroupItemRepositoryBun) CreateGroupItem(ctx context.Context, p *groupit
 	return nil
 }
 
-func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *groupitementity.GroupItem) error {
+func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *orderentity.GroupItem) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -64,19 +63,19 @@ func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string,
 		return err
 	}
 
-	if _, err = tx.NewDelete().Model(&groupitementity.GroupItem{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&orderentity.GroupItem{}).Where("id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	if complementItemID != nil {
-		if _, err = tx.NewDelete().Model(&itementity.Item{}).Where("id = ?", complementItemID).Exec(ctx); err != nil {
+		if _, err = tx.NewDelete().Model(&orderentity.Item{}).Where("id = ?", complementItemID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
-	if _, err = tx.NewDelete().Model(&itementity.Item{}).Where("group_item_id = ?", id).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&orderentity.Item{}).Where("group_item_id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -89,8 +88,8 @@ func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string,
 	return nil
 }
 
-func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, withRelation bool) (*groupitementity.GroupItem, error) {
-	item := &groupitementity.GroupItem{}
+func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, withRelation bool) (*orderentity.GroupItem, error) {
+	item := &orderentity.GroupItem{}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -111,8 +110,8 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 	return item, nil
 }
 
-func (r *GroupItemRepositoryBun) GetGroupsByStatus(ctx context.Context, status groupitementity.StatusGroupItem) ([]groupitementity.GroupItem, error) {
-	items := []groupitementity.GroupItem{}
+func (r *GroupItemRepositoryBun) GetGroupsByStatus(ctx context.Context, status orderentity.StatusGroupItem) ([]orderentity.GroupItem, error) {
+	items := []orderentity.GroupItem{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -128,8 +127,8 @@ func (r *GroupItemRepositoryBun) GetGroupsByStatus(ctx context.Context, status g
 	return items, nil
 }
 
-func (r *GroupItemRepositoryBun) GetGroupsByOrderIDAndStatus(ctx context.Context, id string, status groupitementity.StatusGroupItem) ([]groupitementity.GroupItem, error) {
-	items := []groupitementity.GroupItem{}
+func (r *GroupItemRepositoryBun) GetGroupsByOrderIDAndStatus(ctx context.Context, id string, status orderentity.StatusGroupItem) ([]orderentity.GroupItem, error) {
+	items := []orderentity.GroupItem{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

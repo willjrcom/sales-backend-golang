@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
@@ -27,7 +27,7 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 
 	groupItemIDs := []uuid.UUID{}
 	for i, groupItem := range order.Groups {
-		if groupItem.Status != groupitementity.StatusGroupStaging {
+		if groupItem.Status != orderentity.StatusGroupStaging {
 			continue
 		}
 

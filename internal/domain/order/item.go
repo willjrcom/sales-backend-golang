@@ -1,4 +1,4 @@
-package itementity
+package orderentity
 
 import (
 	"errors"

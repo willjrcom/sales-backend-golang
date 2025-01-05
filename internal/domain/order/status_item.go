@@ -1,4 +1,4 @@
-package groupitementity
+package orderentity
 
 type StatusGroupItem string
 

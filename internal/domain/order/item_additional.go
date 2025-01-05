@@ -1,4 +1,4 @@
-package itementity
+package orderentity
 
 import (
 	"github.com/google/uuid"

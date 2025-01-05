@@ -1,7 +1,9 @@
 package groupitemdto
 
-import groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
+import (
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+)
 
 type GroupItemByStatusInput struct {
-	Status groupitementity.StatusGroupItem `json:"status"`
+	Status orderentity.StatusGroupItem `json:"status"`
 }

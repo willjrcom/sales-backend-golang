@@ -8,8 +8,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
-	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
@@ -165,13 +163,13 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 		return err
 	}
 
-	groupItems := []groupitementity.GroupItem{}
+	groupItems := []orderentity.GroupItem{}
 	if err := tx.NewSelect().Model(&groupItems).Where("order_id = ?", id).Relation("ComplementItem").Relation("Items.AdditionalItems").Scan(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model(&groupitementity.GroupItem{}).Where("order_id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&orderentity.GroupItem{}).Where("order_id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -190,7 +188,7 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 				return err
 			}
 
-			if _, err := tx.NewDelete().Model(&itementity.ItemToAdditional{}).Where("item_id = ?", item.ID).Exec(ctx); err != nil {
+			if _, err := tx.NewDelete().Model(&orderentity.ItemToAdditional{}).Where("item_id = ?", item.ID).Exec(ctx); err != nil {
 				tx.Rollback()
 				return err
 			}

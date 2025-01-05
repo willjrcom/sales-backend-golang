@@ -1,4 +1,4 @@
-package groupitementity
+package orderentity
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -31,8 +30,8 @@ type GroupItem struct {
 type GroupCommonAttributes struct {
 	GroupDetails
 	GroupItemTimeLogs
-	Items   []itementity.Item `bun:"rel:has-many,join:id=group_item_id" json:"items"`
-	OrderID uuid.UUID         `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
+	Items   []Item    `bun:"rel:has-many,join:id=group_item_id" json:"items"`
+	OrderID uuid.UUID `bun:"column:order_id,type:uuid,notnull" json:"order_id"`
 }
 
 type GroupDetails struct {
@@ -46,7 +45,7 @@ type GroupDetails struct {
 	CategoryID       uuid.UUID                      `bun:"column:category_id,type:uuid,notnull" json:"category_id"`
 	Category         *productentity.ProductCategory `bun:"rel:belongs-to" json:"category,omitempty"`
 	ComplementItemID *uuid.UUID                     `bun:"column:complement_item_id,type:uuid" json:",omitempty"`
-	ComplementItem   *itementity.Item               `bun:"rel:belongs-to" json:"complement_item,omitempty"`
+	ComplementItem   *Item                          `bun:"rel:belongs-to" json:"complement_item,omitempty"`
 }
 
 type GroupItemTimeLogs struct {

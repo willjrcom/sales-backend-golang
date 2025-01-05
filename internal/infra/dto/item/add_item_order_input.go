@@ -4,8 +4,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
-	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -39,12 +38,12 @@ func (a *AddItemOrderInput) Validate() error {
 	return nil
 }
 
-func (a *AddItemOrderInput) validateInternal(product *productentity.Product, groupItem *groupitementity.GroupItem, quantity *productentity.Quantity) error {
+func (a *AddItemOrderInput) validateInternal(product *productentity.Product, groupItem *orderentity.GroupItem, quantity *productentity.Quantity) error {
 	if a.QuantityID != quantity.ID {
 		return errors.New("quantity id is invalid")
 	}
 
-	if groupItem.Status != groupitementity.StatusGroupStaging {
+	if groupItem.Status != orderentity.StatusGroupStaging {
 		return ErrGroupItemNotStaging
 	}
 
@@ -58,12 +57,12 @@ func (a *AddItemOrderInput) validateInternal(product *productentity.Product, gro
 	return nil
 }
 
-func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *groupitementity.GroupItem, quantity *productentity.Quantity) (item *itementity.Item, err error) {
+func (a *AddItemOrderInput) ToModel(product *productentity.Product, groupItem *orderentity.GroupItem, quantity *productentity.Quantity) (item *orderentity.Item, err error) {
 	if err = a.validateInternal(product, groupItem, quantity); err != nil {
 		return
 	}
 
-	item = itementity.NewItem(product.Name, product.Price, quantity.Quantity, product.Size.Name, product.ID, product.CategoryID)
+	item = orderentity.NewItem(product.Name, product.Price, quantity.Quantity, product.Size.Name, product.ID, product.CategoryID)
 	item.AddSizeToName()
 	item.GroupItemID = *a.GroupItemID
 	item.Observation = a.Observation

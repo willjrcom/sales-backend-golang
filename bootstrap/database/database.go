@@ -19,8 +19,6 @@ import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
-	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
@@ -259,11 +257,11 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*orderprocessentity.OrderProcessToProductToGroupItem)(nil))
 	db.RegisterModel((*orderprocessentity.OrderProcess)(nil))
 	db.RegisterModel((*orderprocessentity.OrderQueue)(nil))
-	db.RegisterModel((*itementity.ItemToAdditional)(nil))
-	db.RegisterModel((*itementity.Item)(nil))
-	db.RegisterModel((*groupitementity.GroupItem)(nil))
+	db.RegisterModel((*orderentity.ItemToAdditional)(nil))
+	db.RegisterModel((*orderentity.Item)(nil))
+	db.RegisterModel((*orderentity.GroupItem)(nil))
 
-	var _ bun.BeforeUpdateHook = (*groupitementity.GroupItem)(nil)
+	var _ bun.BeforeUpdateHook = (*orderentity.GroupItem)(nil)
 
 	db.RegisterModel((*orderentity.OrderPickup)(nil))
 	db.RegisterModel((*orderentity.OrderDelivery)(nil))
@@ -353,7 +351,7 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*groupitementity.GroupItem)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.GroupItem)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -361,11 +359,11 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*itementity.Item)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.Item)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*itementity.ItemToAdditional)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.ItemToAdditional)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 

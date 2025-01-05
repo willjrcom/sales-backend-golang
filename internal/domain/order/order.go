@@ -8,7 +8,6 @@ import (
 	"github.com/uptrace/bun"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
 )
 
 var (
@@ -37,10 +36,10 @@ type Order struct {
 type OrderCommonAttributes struct {
 	OrderType
 	OrderDetail
-	OrderNumber int                         `bun:"order_number,notnull" json:"order_number"`
-	Status      StatusOrder                 `bun:"status,notnull" json:"status"`
-	Groups      []groupitementity.GroupItem `bun:"rel:has-many,join:id=order_id" json:"groups"`
-	Payments    []PaymentOrder              `bun:"rel:has-many,join:id=order_id" json:"payments,omitempty"`
+	OrderNumber int            `bun:"order_number,notnull" json:"order_number"`
+	Status      StatusOrder    `bun:"status,notnull" json:"status"`
+	Groups      []GroupItem    `bun:"rel:has-many,join:id=order_id" json:"groups"`
+	Payments    []PaymentOrder `bun:"rel:has-many,join:id=order_id" json:"payments,omitempty"`
 }
 
 type OrderDetail struct {

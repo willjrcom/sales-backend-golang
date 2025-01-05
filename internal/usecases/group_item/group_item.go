@@ -4,8 +4,7 @@ import (
 	"context"
 	"errors"
 
-	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
-	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
@@ -19,21 +18,21 @@ var (
 )
 
 type Service struct {
-	rgi groupitementity.GroupItemRepository
-	ri  itementity.ItemRepository
+	rgi orderentity.GroupItemRepository
+	ri  orderentity.ItemRepository
 	rp  productentity.ProductRepository
 }
 
-func NewService(rgi groupitementity.GroupItemRepository) *Service {
+func NewService(rgi orderentity.GroupItemRepository) *Service {
 	return &Service{rgi: rgi}
 }
 
-func (s *Service) AddDependencies(ri itementity.ItemRepository, rp productentity.ProductRepository) {
+func (s *Service) AddDependencies(ri orderentity.ItemRepository, rp productentity.ProductRepository) {
 	s.ri = ri
 	s.rp = rp
 }
 
-func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IdRequest) (groupItem *groupitementity.GroupItem, err error) {
+func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IdRequest) (groupItem *orderentity.GroupItem, err error) {
 	groupItem, err = s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
@@ -43,11 +42,11 @@ func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IdRequest) (g
 	return
 }
 
-func (s *Service) GetGroupsByStatus(ctx context.Context, dto *groupitemdto.GroupItemByStatusInput) (groups []groupitementity.GroupItem, err error) {
+func (s *Service) GetGroupsByStatus(ctx context.Context, dto *groupitemdto.GroupItemByStatusInput) (groups []orderentity.GroupItem, err error) {
 	return s.rgi.GetGroupsByStatus(ctx, dto.Status)
 }
 
-func (s *Service) GetGroupsByOrderIDAndStatus(ctx context.Context, dto *groupitemdto.GroupItemByOrderIDAndStatusInput) (groups []groupitementity.GroupItem, err error) {
+func (s *Service) GetGroupsByOrderIDAndStatus(ctx context.Context, dto *groupitemdto.GroupItemByOrderIDAndStatusInput) (groups []orderentity.GroupItem, err error) {
 	return s.rgi.GetGroupsByOrderIDAndStatus(ctx, dto.OrderID.String(), dto.Status)
 }
 
@@ -101,7 +100,7 @@ func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IdReques
 		return errors.New("complement category does not belong to this category")
 	}
 
-	itemComplement := itementity.NewItem(productComplement.Name, productComplement.Price, groupItem.Quantity, groupItem.Size, productComplement.ID, productComplement.CategoryID)
+	itemComplement := orderentity.NewItem(productComplement.Name, productComplement.Price, groupItem.Quantity, groupItem.Size, productComplement.ID, productComplement.CategoryID)
 
 	if err = s.ri.AddItem(ctx, itemComplement); err != nil {
 		return err

@@ -5,8 +5,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	groupitementity "github.com/willjrcom/sales-backend-go/internal/domain/group_item"
-	itementity "github.com/willjrcom/sales-backend-go/internal/domain/item"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -23,19 +21,19 @@ var (
 )
 
 type Service struct {
-	ri  itementity.ItemRepository
-	rgi groupitementity.GroupItemRepository
+	ri  orderentity.ItemRepository
+	rgi orderentity.GroupItemRepository
 	ro  orderentity.OrderRepository
 	rp  productentity.ProductRepository
 	rq  productentity.QuantityRepository
 	rc  productentity.CategoryRepository
 }
 
-func NewService(ri itementity.ItemRepository) *Service {
+func NewService(ri orderentity.ItemRepository) *Service {
 	return &Service{ri: ri}
 }
 
-func (s *Service) AddDependencies(rgi groupitementity.GroupItemRepository, ro orderentity.OrderRepository, rp productentity.ProductRepository, rq productentity.QuantityRepository, rc productentity.CategoryRepository) {
+func (s *Service) AddDependencies(rgi orderentity.GroupItemRepository, ro orderentity.OrderRepository, rp productentity.ProductRepository, rq productentity.QuantityRepository, rc productentity.CategoryRepository) {
 	s.rgi = rgi
 	s.ro = ro
 	s.rp = rp
@@ -211,7 +209,7 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IdR
 		return uuid.Nil, errors.New("product category and quantity not match")
 	}
 
-	itemAdditional := itementity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, productAdditional.ID, productAdditional.CategoryID)
+	itemAdditional := orderentity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, productAdditional.ID, productAdditional.CategoryID)
 
 	if err = s.ri.AddAdditionalItem(ctx, item.ID, productAdditional.ID, itemAdditional); err != nil {
 		return uuid.Nil, errors.New("add additional item error: " + err.Error())
@@ -293,10 +291,10 @@ func (s *Service) RemoveRemovedItem(ctx context.Context, dtoID *entitydto.IdRequ
 	return s.ri.UpdateItem(ctx, item)
 }
 
-func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product) (groupItem *groupitementity.GroupItem, err error) {
-	groupCommonAttributes := groupitementity.GroupCommonAttributes{
+func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product) (groupItem *orderentity.GroupItem, err error) {
+	groupCommonAttributes := orderentity.GroupCommonAttributes{
 		OrderID: orderID,
-		GroupDetails: groupitementity.GroupDetails{
+		GroupDetails: orderentity.GroupDetails{
 			CategoryID:     product.CategoryID,
 			Size:           product.Size.Name,
 			NeedPrint:      product.Category.NeedPrint,
@@ -304,7 +302,7 @@ func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *
 		},
 	}
 
-	groupItem = groupitementity.NewGroupItem(groupCommonAttributes)
+	groupItem = orderentity.NewGroupItem(groupCommonAttributes)
 	err = s.rgi.CreateGroupItem(ctx, groupItem)
 	return
 }
