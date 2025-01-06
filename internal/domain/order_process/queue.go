@@ -15,7 +15,7 @@ type OrderQueue struct {
 
 type OrderQueueCommonAttributes struct {
 	GroupItemID   uuid.UUID
-	ProcessRuleID *uuid.UUID
+	ProcessRuleID uuid.UUID
 }
 
 type OrderQueueTimeLogs struct {
@@ -29,7 +29,8 @@ func NewOrderQueue(groupItemID uuid.UUID, joinedAt time.Time) (*OrderQueue, erro
 	return &OrderQueue{
 		Entity: entity.NewEntity(),
 		OrderQueueCommonAttributes: OrderQueueCommonAttributes{
-			GroupItemID: groupItemID,
+			GroupItemID:   groupItemID,
+			ProcessRuleID: uuid.Nil,
 		},
 		OrderQueueTimeLogs: OrderQueueTimeLogs{
 			JoinedAt:          joinedAt,
@@ -39,7 +40,7 @@ func NewOrderQueue(groupItemID uuid.UUID, joinedAt time.Time) (*OrderQueue, erro
 }
 
 func (q *OrderQueue) Finish(processRuleID uuid.UUID, finishedAt time.Time) {
-	q.ProcessRuleID = &processRuleID
+	q.ProcessRuleID = processRuleID
 	q.LeftAt = &time.Time{}
 	*q.LeftAt = finishedAt
 	q.Duration = q.LeftAt.Sub(q.JoinedAt)

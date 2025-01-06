@@ -9,7 +9,7 @@ import (
 
 type QueueDTO struct {
 	GroupItemID       uuid.UUID
-	ProcessRuleID     *uuid.UUID
+	ProcessRuleID     uuid.UUID
 	JoinedAt          time.Time
 	LeftAt            *time.Time
 	Duration          time.Duration

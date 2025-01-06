@@ -17,8 +17,8 @@ type OrderQueue struct {
 }
 
 type OrderQueueCommonAttributes struct {
-	GroupItemID   uuid.UUID  `bun:"column:group_item_id,type:uuid,notnull"`
-	ProcessRuleID *uuid.UUID `bun:"column:process_rule_id,type:uuid"`
+	GroupItemID   uuid.UUID `bun:"column:group_item_id,type:uuid,notnull"`
+	ProcessRuleID uuid.UUID `bun:"column:process_rule_id,type:uuid"`
 }
 
 type OrderQueueTimeLogs struct {

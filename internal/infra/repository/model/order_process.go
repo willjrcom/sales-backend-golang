@@ -24,7 +24,7 @@ type OrderProcessCommonAttributes struct {
 	ProcessRuleID uuid.UUID   `bun:"process_rule_id,type:uuid,notnull"`
 	Status        string      `bun:"status,notnull"`
 	Products      []Product   `bun:"m2m:process_to_product_to_group_item,join:Process=Product"`
-	Queue         *OrderQueue `bun:"rel:has-one,join:group_item_id=group_item_id,process_rule_id=process_rule_id"`
+	Queue         *OrderQueue `bun:"rel:has-one,join:group_item_id=group_item_id"`
 }
 
 type OrderProcessTimeLogs struct {

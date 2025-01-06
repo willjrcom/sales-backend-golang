@@ -109,7 +109,13 @@ func (r *ProcessRepositoryBun) GetProcessById(ctx context.Context, id string) (*
 	if err := r.db.NewSelect().Model(process).Where("process.id = ?", id).
 		Relation("GroupItem.Items.AdditionalItems").
 		Relation("GroupItem.ComplementItem").
-		Relation("GroupItem.Category").Scan(ctx); err != nil {
+		Relation("GroupItem.Category").
+		Relation("Products").
+		Relation("Queue", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Where("queue.group_item_id = order_process.group_item_id").
+				Where("queue.process_rule_id = order_process.process_rule_id")
+		}).
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -150,8 +156,10 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 		Relation("GroupItem.ComplementItem").
 		Relation("GroupItem.Category").
 		Relation("Products").
-		Relation("ProcessRule").
-		Relation("Queue").
+		Relation("Queue", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Where("queue.group_item_id = order_process.group_item_id").
+				Where("queue.process_rule_id = order_process.process_rule_id")
+		}).
 		Scan(ctx); err != nil {
 		return nil, err
 	}

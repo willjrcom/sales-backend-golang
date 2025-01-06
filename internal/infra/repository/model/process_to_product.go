@@ -11,6 +11,7 @@ type OrderProcessToProductToGroupItem struct {
 	ProcessID     uuid.UUID     `bun:"type:uuid,pk"`
 	Process       *OrderProcess `bun:"rel:belongs-to,join:process_id=id"`
 	ProductID     uuid.UUID     `bun:"type:uuid,pk"`
+	Product       *Product      `bun:"rel:belongs-to,join:product_id=id"`
 	GroupItemID   uuid.UUID     `bun:"type:uuid,pk"`
 	GroupItem     *GroupItem    `bun:"rel:belongs-to,join:group_item_id=id"`
 }
@@ -20,11 +21,13 @@ func (op *OrderProcessToProductToGroupItem) FromDomain(orderProcessToProductToGr
 		ProcessID:   orderProcessToProductToGroupItem.ProcessID,
 		Process:     &OrderProcess{},
 		ProductID:   orderProcessToProductToGroupItem.ProductID,
+		Product:     &Product{},
 		GroupItemID: orderProcessToProductToGroupItem.GroupItemID,
 		GroupItem:   &GroupItem{},
 	}
 
 	op.Process.FromDomain(orderProcessToProductToGroupItem.Process)
+	op.Product.FromDomain(orderProcessToProductToGroupItem.Product)
 	op.GroupItem.FromDomain(orderProcessToProductToGroupItem.GroupItem)
 }
 
@@ -33,6 +36,7 @@ func (op *OrderProcessToProductToGroupItem) ToDomain() *orderprocessentity.Order
 		ProcessID:   op.ProcessID,
 		Process:     op.Process.ToDomain(),
 		ProductID:   op.ProductID,
+		Product:     op.Product.ToDomain(),
 		GroupItemID: op.GroupItemID,
 		GroupItem:   op.GroupItem.ToDomain(),
 	}

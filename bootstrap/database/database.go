@@ -134,7 +134,6 @@ func publicTables(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*model.User)(nil))
 	db.RegisterModel((*model.CompanyToUsers)(nil))
 	db.RegisterModel((*model.CompanyWithUsers)(nil))
-	db.RegisterModel((*model.Person)(nil))
 	db.RegisterModel((*model.Address)(nil))
 	db.RegisterModel((*model.Contact)(nil))
 
@@ -153,10 +152,6 @@ func publicTables(ctx context.Context, db *bun.DB) error {
 	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*model.CompanyWithUsers)(nil)).Exec(ctx); err != nil {
-		return err
-	}
-
-	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Person)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
