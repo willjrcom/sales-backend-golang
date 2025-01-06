@@ -98,6 +98,9 @@ func (o *Order) FromDomain(order *orderentity.Order) {
 }
 
 func (o *Order) ToDomain() *orderentity.Order {
+	if o == nil {
+		return nil
+	}
 	order := &orderentity.Order{
 		Entity: o.Entity.ToDomain(),
 		OrderCommonAttributes: orderentity.OrderCommonAttributes{

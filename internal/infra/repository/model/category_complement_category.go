@@ -22,6 +22,9 @@ func (p *ProductCategoryToComplement) FromDomain(productCategoryToComplement *pr
 }
 
 func (p *ProductCategoryToComplement) ToDomain() *productentity.ProductCategoryToComplement {
+	if p == nil {
+		return nil
+	}
 	return &productentity.ProductCategoryToComplement{
 		CategoryID:           p.CategoryID,
 		ComplementCategoryID: p.ComplementCategoryID,

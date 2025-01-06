@@ -53,6 +53,9 @@ func (i *Item) FromDomain(item *orderentity.Item) {
 }
 
 func (i *Item) ToDomain() *orderentity.Item {
+	if i == nil {
+		return nil
+	}
 	return &orderentity.Item{
 		Entity: i.Entity.ToDomain(),
 		ItemCommonAttributes: orderentity.ItemCommonAttributes{

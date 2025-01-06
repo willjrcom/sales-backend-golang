@@ -37,6 +37,9 @@ func (c *Contact) FromDomain(contact *personentity.Contact) {
 }
 
 func (c *Contact) ToDomain() *personentity.Contact {
+	if c == nil {
+		return nil
+	}
 	return &personentity.Contact{
 		ContactCommonAttributes: personentity.ContactCommonAttributes{
 			Ddd:    c.Ddd,

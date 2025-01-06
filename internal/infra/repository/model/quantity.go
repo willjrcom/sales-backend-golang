@@ -29,6 +29,9 @@ func (q *Quantity) FromDomain(model *productentity.Quantity) {
 }
 
 func (q *Quantity) ToDomain() *productentity.Quantity {
+	if q == nil {
+		return nil
+	}
 	return &productentity.Quantity{
 		Entity: q.Entity.ToDomain(),
 		QuantityCommonAttributes: productentity.QuantityCommonAttributes{

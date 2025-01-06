@@ -28,6 +28,9 @@ func (p *Person) FromDomain(person *personentity.Person) {
 }
 
 func (p *Person) ToDomain() *personentity.Person {
+	if p == nil {
+		return nil
+	}
 	return &personentity.Person{
 		PersonCommonAttributes: personentity.PersonCommonAttributes{
 			Name:     p.Name,

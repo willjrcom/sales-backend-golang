@@ -41,6 +41,9 @@ func (p *ProcessRule) FromDomain(processRule *productentity.ProcessRule) {
 }
 
 func (p *ProcessRule) ToDomain() *productentity.ProcessRule {
+	if p == nil {
+		return nil
+	}
 	return &productentity.ProcessRule{
 		Entity: p.Entity.ToDomain(),
 		ProcessRuleCommonAttributes: productentity.ProcessRuleCommonAttributes{

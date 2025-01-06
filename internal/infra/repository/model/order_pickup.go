@@ -43,6 +43,9 @@ func (p *OrderPickup) FromDomain(pickup *orderentity.OrderPickup) {
 }
 
 func (p *OrderPickup) ToDomain() *orderentity.OrderPickup {
+	if p == nil {
+		return nil
+	}
 	return &orderentity.OrderPickup{
 		Entity: p.Entity.ToDomain(),
 		PickupTimeLogs: orderentity.PickupTimeLogs{

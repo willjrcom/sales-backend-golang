@@ -79,6 +79,9 @@ func (op *OrderProcess) FromDomain(model *orderprocessentity.OrderProcess) {
 }
 
 func (op *OrderProcess) ToDomain() *orderprocessentity.OrderProcess {
+	if op == nil {
+		return nil
+	}
 	orderProcess := &orderprocessentity.OrderProcess{
 		Entity: op.Entity.ToDomain(),
 		OrderProcessCommonAttributes: orderprocessentity.OrderProcessCommonAttributes{

@@ -37,6 +37,9 @@ func (d *DeliveryDriver) FromDomain(driver *orderentity.DeliveryDriver) {
 }
 
 func (d *DeliveryDriver) ToDomain() *orderentity.DeliveryDriver {
+	if d == nil {
+		return nil
+	}
 	deliveryDriver := &orderentity.DeliveryDriver{
 		Entity: d.Entity.ToDomain(),
 		DeliveryDriverCommonAttributes: orderentity.DeliveryDriverCommonAttributes{

@@ -41,6 +41,9 @@ func (p *PaymentOrder) FromDomain(payment *orderentity.PaymentOrder) {
 }
 
 func (p *PaymentOrder) ToDomain() *orderentity.PaymentOrder {
+	if p == nil {
+		return nil
+	}
 	return &orderentity.PaymentOrder{
 		Entity: p.Entity.ToDomain(),
 		PaymentCommonAttributes: orderentity.PaymentCommonAttributes{

@@ -38,6 +38,9 @@ func (p *Place) FromDomain(place *tableentity.Place) {
 }
 
 func (p *Place) ToDomain() *tableentity.Place {
+	if p == nil {
+		return nil
+	}
 	place := &tableentity.Place{
 		Entity: p.Entity.ToDomain(),
 		PlaceCommonAttributes: tableentity.PlaceCommonAttributes{

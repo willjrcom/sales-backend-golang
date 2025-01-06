@@ -58,7 +58,10 @@ func (u *User) FromDomain(user *companyentity.User) {
 }
 
 func (u *User) ToDomain() *companyentity.User {
-	return &companyentity.User{
+	if u == nil {
+		return nil
+	}
+	user := &companyentity.User{
 		Entity: u.Entity.ToDomain(),
 		UserCommonAttributes: companyentity.UserCommonAttributes{
 			Person:         *u.Person.ToDomain(),
@@ -68,4 +71,16 @@ func (u *User) ToDomain() *companyentity.User {
 			Companies:      []companyentity.CompanyWithUsers{},
 		},
 	}
+
+	for _, company := range u.Companies {
+		c := company.ToDomain()
+		user.Companies = append(user.Companies, *c)
+	}
+
+	for _, companyToUser := range u.CompanyToUsers {
+		c := companyToUser.ToDomain()
+		user.CompanyToUsers = append(user.CompanyToUsers, *c)
+	}
+
+	return user
 }

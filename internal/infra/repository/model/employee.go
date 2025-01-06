@@ -31,6 +31,9 @@ func (e *Employee) FromDomain(employee *employeeentity.Employee) {
 }
 
 func (e *Employee) ToDomain() *employeeentity.Employee {
+	if e == nil {
+		return nil
+	}
 	return &employeeentity.Employee{
 		Entity: e.Entity.ToDomain(),
 		UserID: e.UserID,

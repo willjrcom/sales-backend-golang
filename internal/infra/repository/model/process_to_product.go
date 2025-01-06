@@ -32,6 +32,9 @@ func (op *OrderProcessToProductToGroupItem) FromDomain(orderProcessToProductToGr
 }
 
 func (op *OrderProcessToProductToGroupItem) ToDomain() *orderprocessentity.OrderProcessToProductToGroupItem {
+	if op == nil {
+		return nil
+	}
 	return &orderprocessentity.OrderProcessToProductToGroupItem{
 		ProcessID:   op.ProcessID,
 		Process:     op.Process.ToDomain(),

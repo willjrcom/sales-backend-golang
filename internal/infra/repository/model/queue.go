@@ -45,6 +45,9 @@ func (q *OrderQueue) FromDomain(queue *orderprocessentity.OrderQueue) {
 }
 
 func (q *OrderQueue) ToDomain() *orderprocessentity.OrderQueue {
+	if q == nil {
+		return nil
+	}
 	return &orderprocessentity.OrderQueue{
 		Entity: q.Entity.ToDomain(),
 		OrderQueueCommonAttributes: orderprocessentity.OrderQueueCommonAttributes{

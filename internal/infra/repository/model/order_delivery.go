@@ -61,6 +61,9 @@ func (d *OrderDelivery) FromDomain(delivery *orderentity.OrderDelivery) {
 }
 
 func (d *OrderDelivery) ToDomain() *orderentity.OrderDelivery {
+	if d == nil {
+		return nil
+	}
 	return &orderentity.OrderDelivery{
 		Entity: d.Entity.ToDomain(),
 		OrderDeliveryCommonAttributes: orderentity.OrderDeliveryCommonAttributes{

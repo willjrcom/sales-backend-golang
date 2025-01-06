@@ -92,6 +92,9 @@ func (g *GroupItem) FromDomain(groupItem *orderentity.GroupItem) {
 }
 
 func (g *GroupItem) ToDomain() *orderentity.GroupItem {
+	if g == nil {
+		return nil
+	}
 	groupItem := &orderentity.GroupItem{
 		Entity: g.Entity.ToDomain(),
 		GroupCommonAttributes: orderentity.GroupCommonAttributes{

@@ -39,6 +39,9 @@ func (c *Company) FromDomain(model *companyentity.Company) {
 }
 
 func (c *Company) ToDomain() *companyentity.Company {
+	if c == nil {
+		return nil
+	}
 	return &companyentity.Company{
 		Entity: c.Entity.ToDomain(),
 		CompanyCommonAttributes: companyentity.CompanyCommonAttributes{

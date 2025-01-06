@@ -34,6 +34,9 @@ func (c *Coupon) FromDomain(coupon *orderentity.Coupon) {
 }
 
 func (c *Coupon) ToDomain() *orderentity.Coupon {
+	if c == nil {
+		return nil
+	}
 	return &orderentity.Coupon{
 		Entity: c.Entity.ToDomain(),
 		CouponCommonAttributes: orderentity.CouponCommonAttributes{

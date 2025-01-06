@@ -60,6 +60,9 @@ func (s *Shift) FromDomain(shift *shiftentity.Shift) {
 }
 
 func (s *Shift) ToDomain() *shiftentity.Shift {
+	if s == nil {
+		return nil
+	}
 	shift := &shiftentity.Shift{
 		Entity: s.Entity.ToDomain(),
 		ShiftTimeLogs: shiftentity.ShiftTimeLogs{

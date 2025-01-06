@@ -22,6 +22,9 @@ func (c *CompanyToUsers) FromDomain(model *companyentity.CompanyToUsers) {
 }
 
 func (c *CompanyToUsers) ToDomain() *companyentity.CompanyToUsers {
+	if c == nil {
+		return nil
+	}
 	return &companyentity.CompanyToUsers{
 		CompanyWithUsersID: c.CompanyWithUsersID,
 		CompanyWithUsers:   c.CompanyWithUsers.ToDomain(),

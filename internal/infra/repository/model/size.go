@@ -38,6 +38,9 @@ func (s *Size) FromDomain(size *productentity.Size) {
 }
 
 func (s *Size) ToDomain() *productentity.Size {
+	if s == nil {
+		return nil
+	}
 	size := &productentity.Size{
 		Entity: s.Entity.ToDomain(),
 		SizeCommonAttributes: productentity.SizeCommonAttributes{

@@ -52,6 +52,9 @@ func (t *OrderTable) FromDomain(table *orderentity.OrderTable) {
 }
 
 func (t *OrderTable) ToDomain() *orderentity.OrderTable {
+	if t == nil {
+		return nil
+	}
 	return &orderentity.OrderTable{
 		Entity: t.Entity.ToDomain(),
 		OrderTableCommonAttributes: orderentity.OrderTableCommonAttributes{

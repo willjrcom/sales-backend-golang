@@ -69,6 +69,10 @@ func (a *Address) FromDomain(address *addressentity.Address) {
 }
 
 func (a *Address) ToDomain() *addressentity.Address {
+	if a == nil {
+		return nil
+	}
+
 	address := &addressentity.Address{
 		Entity: a.Entity.ToDomain(),
 		AddressCommonAttributes: addressentity.AddressCommonAttributes{

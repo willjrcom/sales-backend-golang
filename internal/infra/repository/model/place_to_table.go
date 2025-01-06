@@ -26,6 +26,9 @@ func (p *PlaceToTables) FromDomain(placeToTables *tableentity.PlaceToTables) {
 }
 
 func (p *PlaceToTables) ToDomain() *tableentity.PlaceToTables {
+	if p == nil {
+		return nil
+	}
 	return &tableentity.PlaceToTables{
 		PlaceID: p.PlaceID,
 		Place:   p.Place.ToDomain(),

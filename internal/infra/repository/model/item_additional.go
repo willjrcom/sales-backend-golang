@@ -29,6 +29,9 @@ func (i *ItemToAdditional) FromDomain(itemToAdditional *orderentity.ItemToAdditi
 }
 
 func (i *ItemToAdditional) ToDomain() *orderentity.ItemToAdditional {
+	if i == nil {
+		return nil
+	}
 	return &orderentity.ItemToAdditional{
 		ItemID:           i.ItemID,
 		Item:             i.Item.ToDomain(),

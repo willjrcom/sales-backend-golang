@@ -22,6 +22,9 @@ func (p *ProductCategoryToAdditional) FromDomain(productCategoryToAdditional *pr
 }
 
 func (p *ProductCategoryToAdditional) ToDomain() *productentity.ProductCategoryToAdditional {
+	if p == nil {
+		return nil
+	}
 	return &productentity.ProductCategoryToAdditional{
 		CategoryID:           p.CategoryID,
 		AdditionalCategoryID: p.AdditionalCategoryID,

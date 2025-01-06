@@ -86,6 +86,9 @@ func (c *ProductCategory) FromDomain(category *productentity.ProductCategory) {
 }
 
 func (c *ProductCategory) ToDomain() *productentity.ProductCategory {
+	if c == nil {
+		return nil
+	}
 	category := &productentity.ProductCategory{
 		Entity: c.Entity.ToDomain(),
 		ProductCategoryCommonAttributes: productentity.ProductCategoryCommonAttributes{

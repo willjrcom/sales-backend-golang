@@ -42,6 +42,9 @@ func (t *Table) FromDomain(table *tableentity.Table) {
 }
 
 func (t *Table) ToDomain() *tableentity.Table {
+	if t == nil {
+		return nil
+	}
 	table := &tableentity.Table{
 		Entity: t.Entity.ToDomain(),
 		TableCommonAttributes: tableentity.TableCommonAttributes{

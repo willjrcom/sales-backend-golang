@@ -20,6 +20,9 @@ func (c *Client) FromDomain(client *cliententity.Client) {
 }
 
 func (c *Client) ToDomain() *cliententity.Client {
+	if c == nil {
+		return nil
+	}
 	return &cliententity.Client{
 		Entity: c.Entity.ToDomain(),
 		Person: *c.Person.ToDomain(),
