@@ -15,7 +15,7 @@ type ClientOutput struct {
 	Email    string
 	Cpf      string
 	Birthday *time.Time
-	Contact  *contactdto.ContactoDTO
+	Contact  *contactdto.ContactDTO
 	Address  *addressdto.AddressDTO
 }
 

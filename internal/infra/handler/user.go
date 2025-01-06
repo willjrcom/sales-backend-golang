@@ -113,7 +113,7 @@ func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Reque
 
 	dtoID := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	dtoUser := &userdto.UpdateUser{}
+	dtoUser := &userdto.UserUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

@@ -14,7 +14,7 @@ var (
 	ErrInvalidEmail = errors.New("invalid email")
 )
 
-type UpdateUser struct {
+type UserUpdateDTO struct {
 	Name     *string                      `json:"name"`
 	Email    *string                      `json:"email"`
 	Cpf      *string                      `json:"cpf"`
@@ -23,7 +23,7 @@ type UpdateUser struct {
 	Address  *addressdto.AddressUpdateDTO `json:"address"`
 }
 
-func (r *UpdateUser) validate() error {
+func (r *UserUpdateDTO) validate() error {
 	if r.Email != nil && !strings.Contains(*r.Email, "@") {
 		return ErrInvalidEmail
 	}
@@ -31,7 +31,7 @@ func (r *UpdateUser) validate() error {
 	return nil
 }
 
-func (r *UpdateUser) UpdateModel(user *companyentity.User) error {
+func (r *UserUpdateDTO) UpdateModel(user *companyentity.User) error {
 	if err := r.validate(); err != nil {
 		return err
 	}

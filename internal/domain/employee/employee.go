@@ -11,3 +11,10 @@ type Employee struct {
 	UserID *uuid.UUID
 	User   *companyentity.User
 }
+
+func NewEmployee(userID *uuid.UUID) *Employee {
+	return &Employee{
+		Entity: entity.NewEntity(),
+		UserID: userID,
+	}
+}

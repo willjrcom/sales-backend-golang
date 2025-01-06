@@ -87,7 +87,7 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *userdto.UserForge
 	return nil
 }
 
-func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IdRequest, dto *userdto.UpdateUser) error {
+func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IdRequest, dto *userdto.UserUpdateDTO) error {
 	user, err := s.r.GetUserByID(ctx, dtoID.ID)
 	if err != nil {
 		return err

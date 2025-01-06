@@ -17,17 +17,17 @@ func NewService(c personentity.ContactRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) GetContactById(ctx context.Context, dto *entitydto.IdRequest) (*contactdto.ContactoDTO, error) {
+func (s *Service) GetContactById(ctx context.Context, dto *entitydto.IdRequest) (*contactdto.ContactDTO, error) {
 	if contact, err := s.r.GetContactById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		output := &contactdto.ContactoDTO{}
+		output := &contactdto.ContactDTO{}
 		output.FromDomain(contact)
 		return output, nil
 	}
 }
 
-func (s *Service) FtSearchContacts(ctx context.Context, keys *keysdto.KeysInput) ([]contactdto.ContactoDTO, error) {
+func (s *Service) FtSearchContacts(ctx context.Context, keys *keysdto.KeysInput) ([]contactdto.ContactDTO, error) {
 	if keys.Query == "" {
 		return nil, keysdto.ErrInvalidQuery
 	}
@@ -40,8 +40,8 @@ func (s *Service) FtSearchContacts(ctx context.Context, keys *keysdto.KeysInput)
 	}
 }
 
-func contactsToDtos(contacts []personentity.Contact) []contactdto.ContactoDTO {
-	dtos := make([]contactdto.ContactoDTO, len(contacts))
+func contactsToDtos(contacts []personentity.Contact) []contactdto.ContactDTO {
+	dtos := make([]contactdto.ContactDTO, len(contacts))
 	for i, contact := range contacts {
 		dtos[i].FromDomain(&contact)
 	}
