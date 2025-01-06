@@ -34,7 +34,9 @@ func (s *Service) StartQueue(ctx context.Context, dto *orderqueuedto.QueueCreate
 		return uuid.Nil, err
 	}
 
-	if err := s.r.CreateQueue(ctx, queue); err != nil {
+	queueModel := &model.OrderQueue{}
+	queueModel.FromDomain(queue)
+	if err := s.r.CreateQueue(ctx, queueModel); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -42,14 +44,16 @@ func (s *Service) StartQueue(ctx context.Context, dto *orderqueuedto.QueueCreate
 }
 
 func (s *Service) FinishQueue(ctx context.Context, process *orderprocessentity.OrderProcess) error {
-	queue, err := s.r.GetOpenedQueueByGroupItemId(ctx, process.GroupItemID.String())
+	queueModel, err := s.r.GetOpenedQueueByGroupItemId(ctx, process.GroupItemID.String())
 	if err != nil {
 		return err
 	}
 
+	queue := queueModel.ToDomain()
 	queue.Finish(process.ProcessRuleID, *process.StartedAt)
 
-	if err := s.r.UpdateQueue(ctx, queue); err != nil {
+	queueModel.FromDomain(queue)
+	if err := s.r.UpdateQueue(ctx, queueModel); err != nil {
 		return err
 	}
 
@@ -57,25 +61,33 @@ func (s *Service) FinishQueue(ctx context.Context, process *orderprocessentity.O
 }
 
 func (s *Service) GetQueueById(ctx context.Context, dto *entitydto.IDRequest) (*orderprocessentity.OrderQueue, error) {
-	if queue, err := s.r.GetQueueById(ctx, dto.ID.String()); err != nil {
+	if queueModel, err := s.r.GetQueueById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return queue, nil
+		return queueModel.ToDomain(), nil
 	}
 }
 
 func (s *Service) GetQueuesByGroupItemId(ctx context.Context, dto *entitydto.IDRequest) ([]orderprocessentity.OrderQueue, error) {
-	if queues, err := s.r.GetQueuesByGroupItemId(ctx, dto.ID.String()); err != nil {
+	if queueModels, err := s.r.GetQueuesByGroupItemId(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
+		queues := []orderprocessentity.OrderQueue{}
+		for _, queueModel := range queueModels {
+			queues = append(queues, *queueModel.ToDomain())
+		}
 		return queues, nil
 	}
 }
 
 func (s *Service) GetAllQueues(ctx context.Context) ([]orderprocessentity.OrderQueue, error) {
-	if queue, err := s.r.GetAllQueues(ctx); err != nil {
+	if queueModels, err := s.r.GetAllQueues(ctx); err != nil {
 		return nil, err
 	} else {
-		return queue, nil
+		queues := []orderprocessentity.OrderQueue{}
+		for _, queueModel := range queueModels {
+			queues = append(queues, *queueModel.ToDomain())
+		}
+		return queues, nil
 	}
 }

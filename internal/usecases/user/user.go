@@ -47,7 +47,11 @@ func (s *Service) CreateUser(ctx context.Context, dto *userdto.UserCreateDTO) (*
 
 	user.Hash = string(hash)
 
-	return &user.ID, s.r.CreateUser(ctx, user)
+	userModel := &model.User{}
+	userModel.FromDomain(user)
+
+	err = s.r.CreateUser(ctx, userModel)
+	return &user.ID, err
 }
 
 func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UserUpdatePasswordDTO) error {
@@ -61,10 +65,15 @@ func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UserUpdat
 		return ErrInvalidEmail
 	}
 
-	userLoggedIn, err := s.r.LoginUser(ctx, user)
+	userModel := &model.User{}
+	userModel.FromDomain(user)
+
+	userLoggedInModel, err := s.r.LoginUser(ctx, userModel)
 	if err != nil {
 		return ErrInvalidPassword
 	}
+
+	userLoggedIn := userLoggedInModel.ToDomain()
 
 	hash, err := bcryptservice.HashPassword(dto.NewPassword)
 	if err != nil {
@@ -73,7 +82,8 @@ func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UserUpdat
 
 	userLoggedIn.Hash = string(hash)
 
-	return s.r.UpdateUser(ctx, user)
+	userModel.FromDomain(userLoggedIn)
+	return s.r.UpdateUser(ctx, userModel)
 }
 
 func (s *Service) ForgetUserPassword(ctx context.Context, dto *userdto.UserForgetPasswordDTO) error {
@@ -88,16 +98,19 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *userdto.UserForge
 }
 
 func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IDRequest, dto *userdto.UserUpdateDTO) error {
-	user, err := s.r.GetUserByID(ctx, dtoID.ID)
+	userModel, err := s.r.GetUserByID(ctx, dtoID.ID)
 	if err != nil {
 		return err
 	}
+
+	user := userModel.ToDomain()
 
 	if err = dto.UpdateDomain(user); err != nil {
 		return err
 	}
 
-	return s.r.UpdateUser(ctx, user)
+	userModel.FromDomain(user)
+	return s.r.UpdateUser(ctx, userModel)
 }
 
 func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (data *userdto.UserTokenAndSchemasDTO, err error) {
@@ -107,11 +120,15 @@ func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (dat
 		return nil, err
 	}
 
-	userLoggedIn, err := s.r.LoginUser(ctx, user)
+	userModel := &model.User{}
+	userModel.FromDomain(user)
+	userLoggedInModel, err := s.r.LoginUser(ctx, userModel)
 
 	if err != nil {
 		return nil, err
 	}
+
+	userLoggedIn := userLoggedInModel.ToDomain()
 
 	accessToken, err := jwtservice.CreateAccessToken(userLoggedIn)
 
@@ -169,5 +186,7 @@ func (s *Service) DeleteUser(ctx context.Context, dto *userdto.UserDeleteDTO) er
 		return err
 	}
 
-	return s.r.LoginAndDeleteUser(ctx, user)
+	userModel := &model.User{}
+	userModel.FromDomain(user)
+	return s.r.LoginAndDeleteUser(ctx, userModel)
 }

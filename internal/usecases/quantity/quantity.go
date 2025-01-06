@@ -30,17 +30,20 @@ func (s *Service) CreateQuantity(ctx context.Context, dto *quantitydto.QuantityC
 		return uuid.Nil, err
 	}
 
-	category, err := s.rc.GetCategoryById(ctx, quantity.CategoryID.String())
+	categoryModel, err := s.rc.GetCategoryById(ctx, quantity.CategoryID.String())
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
+	category := categoryModel.ToDomain()
 	if err = productentity.ValidateDuplicateQuantities(quantity.Quantity, category.Quantities); err != nil {
 		return uuid.Nil, err
 	}
 
-	if err = s.rq.CreateQuantity(ctx, quantity); err != nil {
+	quantityModel := &model.Quantity{}
+	quantityModel.FromDomain(quantity)
+	if err = s.rq.CreateQuantity(ctx, quantityModel); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -48,27 +51,31 @@ func (s *Service) CreateQuantity(ctx context.Context, dto *quantitydto.QuantityC
 }
 
 func (s *Service) UpdateQuantity(ctx context.Context, dtoId *entitydto.IDRequest, dto *quantitydto.QuantityUpdateDTO) error {
-	quantity, err := s.rq.GetQuantityById(ctx, dtoId.ID.String())
+	quantityModel, err := s.rq.GetQuantityById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	quantity := quantityModel.ToDomain()
 	if err = dto.UpdateDomain(quantity); err != nil {
 		return err
 	}
 
-	category, err := s.rc.GetCategoryById(ctx, quantity.CategoryID.String())
+	categoryModel, err := s.rc.GetCategoryById(ctx, quantity.CategoryID.String())
 
 	if err != nil {
 		return err
 	}
+
+	category := categoryModel.ToDomain()
 
 	if err = productentity.ValidateUpdateQuantity(quantity, category.Quantities); err != nil {
 		return err
 	}
 
-	if err = s.rq.UpdateQuantity(ctx, quantity); err != nil {
+	quantityModel.FromDomain(quantity)
+	if err = s.rq.UpdateQuantity(ctx, quantityModel); err != nil {
 		return err
 	}
 
@@ -88,10 +95,10 @@ func (s *Service) DeleteQuantity(ctx context.Context, dto *entitydto.IDRequest) 
 }
 
 func (s *Service) GetQuantityById(ctx context.Context, dto *entitydto.IDRequest) (*productentity.Quantity, error) {
-	if quantity, err := s.rq.GetQuantityById(ctx, dto.ID.String()); err != nil {
+	if quantityModel, err := s.rq.GetQuantityById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return quantity, nil
+		return quantityModel.ToDomain(), nil
 	}
 }
 
@@ -107,7 +114,9 @@ func (s *Service) AddQuantitiesByValues(ctx context.Context, dto *quantitydto.Qu
 			CategoryID: *categoryID,
 		})
 
-		if err := s.rq.CreateQuantity(ctx, newQuantity); err != nil {
+		quantityModel := &model.Quantity{}
+		quantityModel.FromDomain(newQuantity)
+		if err := s.rq.CreateQuantity(ctx, quantityModel); err != nil {
 			return err
 		}
 	}

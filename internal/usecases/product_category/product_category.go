@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 	quantitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/quantity"
@@ -45,7 +44,9 @@ func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.Ca
 		return uuid.Nil, errors.New("category name already exists")
 	}
 
-	err = s.r.CreateCategory(ctx, category)
+	categoryModel := &model.ProductCategory{}
+	categoryModel.FromDomain(category)
+	err = s.r.CreateCategory(ctx, categoryModel)
 
 	if err != nil {
 		return uuid.Nil, err
@@ -80,12 +81,13 @@ func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.Ca
 }
 
 func (s *Service) UpdateCategory(ctx context.Context, dtoId *entitydto.IDRequest, dto *productcategorydto.CategoryUpdateDTO) error {
-	category, err := s.r.GetCategoryById(ctx, dtoId.ID.String())
+	categoryModel, err := s.r.GetCategoryById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	category := categoryModel.ToDomain()
 	if err = dto.UpdateDomain(category); err != nil {
 		return err
 	}
@@ -94,7 +96,8 @@ func (s *Service) UpdateCategory(ctx context.Context, dtoId *entitydto.IDRequest
 		return errors.New("category name already exists")
 	}
 
-	if err = s.r.UpdateCategory(ctx, category); err != nil {
+	categoryModel.FromDomain(category)
+	if err = s.r.UpdateCategory(ctx, categoryModel); err != nil {
 		return err
 	}
 
@@ -114,30 +117,32 @@ func (s *Service) DeleteCategoryById(ctx context.Context, dto *entitydto.IDReque
 }
 
 func (s *Service) GetCategoryById(ctx context.Context, dto *entitydto.IDRequest) (*productcategorydto.CategoryDTO, error) {
-	if productCategory, err := s.r.GetCategoryById(ctx, dto.ID.String()); err != nil {
+	if categoryModel, err := s.r.GetCategoryById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
+		category := categoryModel.ToDomain()
 		dto := &productcategorydto.CategoryDTO{}
-		dto.FromDomain(productCategory)
+		dto.FromDomain(category)
 		return dto, nil
 	}
 }
 
 func (s *Service) GetAllCategories(ctx context.Context) ([]productcategorydto.CategoryDTO, error) {
-	if categories, err := s.r.GetAllCategories(ctx); err != nil {
+	if categoryModels, err := s.r.GetAllCategories(ctx); err != nil {
 		return nil, err
 	} else {
-		dtos := categorySizesToDtos(categories)
+		dtos := modelsToDTOs(categoryModels)
 		return dtos, nil
 	}
 }
 
-func categorySizesToDtos(categories []productentity.ProductCategory) []productcategorydto.CategoryDTO {
+func modelsToDTOs(categoryModels []model.ProductCategory) []productcategorydto.CategoryDTO {
 	DTOs := []productcategorydto.CategoryDTO{}
 
-	for _, category := range categories {
+	for _, categoryModel := range categoryModels {
+		category := categoryModel.ToDomain()
 		c := &productcategorydto.CategoryDTO{}
-		c.FromDomain(&category)
+		c.FromDomain(category)
 		DTOs = append(DTOs, *c)
 	}
 

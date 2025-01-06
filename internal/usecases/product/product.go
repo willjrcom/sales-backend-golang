@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -45,17 +44,22 @@ func (s *Service) CreateProduct(ctx context.Context, dto *productcategorydto.Pro
 		return uuid.Nil, errors.New("code product already exists")
 	}
 
-	if category, err := s.rc.GetCategoryById(ctx, product.CategoryID.String()); err == nil {
-		product.Category = category
-	} else {
+	categoryModel, err := s.rc.GetCategoryById(ctx, product.CategoryID.String())
+	if err == nil {
 		return uuid.Nil, err
 	}
+
+	category := categoryModel.ToDomain()
+
+	product.Category = category
 
 	if exists, err := product.FindSizeInCategory(); !exists {
 		return uuid.Nil, err
 	}
 
-	if err := s.rp.CreateProduct(ctx, product); err != nil {
+	productModel := &model.Product{}
+	productModel.FromDomain(product)
+	if err := s.rp.CreateProduct(ctx, productModel); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -63,21 +67,22 @@ func (s *Service) CreateProduct(ctx context.Context, dto *productcategorydto.Pro
 }
 
 func (s *Service) GetProductByCode(ctx context.Context, keys *productcategorydto.Keys) (*productcategorydto.ProductDTO, error) {
-	if product, err := s.rp.GetProductByCode(ctx, keys.Code); err != nil {
+	if productModel, err := s.rp.GetProductByCode(ctx, keys.Code); err != nil {
 		return nil, err
 	} else {
 
-		return productcategorydto.FromDomain(product), nil
+		return productcategorydto.FromDomain(productModel.ToDomain()), nil
 	}
 }
 
 func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IDRequest, dto *productcategorydto.ProductUpdateDTO) error {
-	product, err := s.rp.GetProductById(ctx, dtoId.ID.String())
+	productModel, err := s.rp.GetProductById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	product := productModel.ToDomain()
 	if err := dto.UpdateDomain(product); err != nil {
 		return err
 	}
@@ -86,7 +91,8 @@ func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IDRequest,
 		return errors.New("code product already exists")
 	}
 
-	if err := s.rp.UpdateProduct(ctx, product); err != nil {
+	productModel.FromDomain(product)
+	if err := s.rp.UpdateProduct(ctx, productModel); err != nil {
 		return err
 	}
 
@@ -114,28 +120,29 @@ func (s *Service) DeleteProductById(ctx context.Context, dto *entitydto.IDReques
 }
 
 func (s *Service) GetProductById(ctx context.Context, dto *entitydto.IDRequest) (*productcategorydto.ProductDTO, error) {
-	if product, err := s.rp.GetProductById(ctx, dto.ID.String()); err != nil {
+	if productModel, err := s.rp.GetProductById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return productcategorydto.FromDomain(product), nil
+		return productcategorydto.FromDomain(productModel.ToDomain()), nil
 	}
 }
 
 func (s *Service) GetAllProducts(ctx context.Context) ([]productcategorydto.ProductDTO, error) {
-	products, err := s.rp.GetAllProducts(ctx)
+	productModels, err := s.rp.GetAllProducts(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	dtos := productsToDtos(products)
+	dtos := modelsToDtos(productModels)
 	return dtos, nil
 }
 
-func productsToDtos(products []productentity.Product) []productcategorydto.ProductDTO {
-	dtos := make([]productcategorydto.ProductDTO, len(products))
-	for i, product := range products {
-		dtos[i] = *productcategorydto.FromDomain(&product)
+func modelsToDtos(productModels []model.Product) []productcategorydto.ProductDTO {
+	dtos := make([]productcategorydto.ProductDTO, len(productModels))
+	for i, productModel := range productModels {
+		product := productModel.ToDomain()
+		dtos[i] = *productcategorydto.FromDomain(product)
 	}
 
 	return dtos

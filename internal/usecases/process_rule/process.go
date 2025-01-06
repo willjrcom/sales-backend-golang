@@ -30,7 +30,9 @@ func (s *Service) CreateProcessRule(ctx context.Context, dto *processruledto.Pro
 		return uuid.Nil, err
 	}
 
-	err = s.r.CreateProcessRule(ctx, processRule)
+	processRuleModel := &model.ProcessRule{}
+	processRuleModel.FromDomain(processRule)
+	err = s.r.CreateProcessRule(ctx, processRuleModel)
 
 	if err != nil {
 		return uuid.Nil, err
@@ -40,17 +42,19 @@ func (s *Service) CreateProcessRule(ctx context.Context, dto *processruledto.Pro
 }
 
 func (s *Service) UpdateProcessRule(ctx context.Context, dtoId *entitydto.IDRequest, dto *processruledto.ProcessRuleUpdateDTO) error {
-	processRule, err := s.r.GetProcessRuleById(ctx, dtoId.ID.String())
+	processRuleModel, err := s.r.GetProcessRuleById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	processRule := processRuleModel.ToDomain()
 	if err = dto.UpdateDomain(processRule); err != nil {
 		return err
 	}
 
-	if err = s.r.UpdateProcessRule(ctx, processRule); err != nil {
+	processRuleModel.FromDomain(processRule)
+	if err = s.r.UpdateProcessRule(ctx, processRuleModel); err != nil {
 		return err
 	}
 
@@ -70,42 +74,48 @@ func (s *Service) DeleteProcessRule(ctx context.Context, dto *entitydto.IDReques
 }
 
 func (s *Service) GetProcessRuleById(ctx context.Context, dto *entitydto.IDRequest) (*productentity.ProcessRule, error) {
-	if processRule, err := s.r.GetProcessRuleById(ctx, dto.ID.String()); err != nil {
+	if processRuleModel, err := s.r.GetProcessRuleById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return processRule, nil
+		return processRuleModel.ToDomain(), nil
 	}
 }
 
 func (s *Service) GetProcessRulesByCategoryId(ctx context.Context, dto *entitydto.IDRequest) ([]productentity.ProcessRule, error) {
-	if processRules, err := s.r.GetProcessRulesByCategoryId(ctx, dto.ID.String()); err != nil {
+	if processRuleModels, err := s.r.GetProcessRulesByCategoryId(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
+		processRules := []productentity.ProcessRule{}
+		for _, processRuleModel := range processRuleModels {
+			processRule := processRuleModel.ToDomain()
+			processRules = append(processRules, *processRule)
+		}
 		return processRules, nil
 	}
 }
 
 func (s *Service) GetAllProcessRules(ctx context.Context) ([]processruledto.ProcessRuleDTO, error) {
-	if processRules, err := s.r.GetAllProcessRules(ctx); err != nil {
+	if processRuleModels, err := s.r.GetAllProcessRules(ctx); err != nil {
 		return nil, err
 	} else {
-		return s.processRulesToDto(processRules), nil
+		return s.processRulesToDto(processRuleModels), nil
 	}
 }
 func (s *Service) GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]processruledto.ProcessRuleDTO, error) {
-	if processRules, err := s.r.GetAllProcessRulesWithOrderProcess(ctx); err != nil {
+	if processRuleModels, err := s.r.GetAllProcessRulesWithOrderProcess(ctx); err != nil {
 		return nil, err
 	} else {
-		return s.processRulesToDto(processRules), nil
+		return s.processRulesToDto(processRuleModels), nil
 	}
 }
 
-func (s *Service) processRulesToDto(processRules []productentity.ProcessRule) []processruledto.ProcessRuleDTO {
+func (s *Service) processRulesToDto(processRuleModels []model.ProcessRule) []processruledto.ProcessRuleDTO {
 	var processRuleDTOs []processruledto.ProcessRuleDTO
 
-	for _, processRule := range processRules {
+	for _, processRuleModel := range processRuleModels {
+		processRule := processRuleModel.ToDomain()
 		processRuleDTO := processruledto.ProcessRuleDTO{}
-		processRuleDTO.FromDomain(&processRule)
+		processRuleDTO.FromDomain(processRule)
 		processRuleDTOs = append(processRuleDTOs, processRuleDTO)
 	}
 

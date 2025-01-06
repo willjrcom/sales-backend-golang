@@ -30,17 +30,21 @@ func (s *Service) CreateSize(ctx context.Context, dto *sizedto.SizeCreateDTO) (u
 		return uuid.Nil, err
 	}
 
-	category, err := s.rc.GetCategoryById(ctx, size.CategoryID.String())
+	categoryModel, err := s.rc.GetCategoryById(ctx, size.CategoryID.String())
 
 	if err != nil {
 		return uuid.Nil, err
 	}
 
+	category := categoryModel.ToDomain()
+
 	if err = productentity.ValidateDuplicateSizes(size.Name, category.Sizes); err != nil {
 		return uuid.Nil, err
 	}
 
-	err = s.rs.CreateSize(ctx, size)
+	sizeModel := &model.Size{}
+	sizeModel.FromDomain(size)
+	err = s.rs.CreateSize(ctx, sizeModel)
 
 	if err != nil {
 		return uuid.Nil, err
@@ -50,27 +54,31 @@ func (s *Service) CreateSize(ctx context.Context, dto *sizedto.SizeCreateDTO) (u
 }
 
 func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IDRequest, dto *sizedto.SizeUpdateDTO) error {
-	size, err := s.rs.GetSizeById(ctx, dtoId.ID.String())
+	sizeModel, err := s.rs.GetSizeById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	size := sizeModel.ToDomain()
 	if err = dto.UpdateDomain(size); err != nil {
 		return err
 	}
 
-	category, err := s.rc.GetCategoryById(ctx, size.CategoryID.String())
+	categoryModel, err := s.rc.GetCategoryById(ctx, size.CategoryID.String())
 
 	if err != nil {
 		return err
 	}
+
+	category := categoryModel.ToDomain()
 
 	if err = productentity.ValidateUpdateSize(size, category.Sizes); err != nil {
 		return err
 	}
 
-	if err = s.rs.UpdateSize(ctx, size); err != nil {
+	sizeModel.FromDomain(size)
+	if err = s.rs.UpdateSize(ctx, sizeModel); err != nil {
 		return err
 	}
 
@@ -103,7 +111,9 @@ func (s *Service) AddSizesByValues(ctx context.Context, dto *sizedto.SizeCreateB
 			CategoryID: *categoryID,
 		})
 
-		if err := s.rs.CreateSize(ctx, newSize); err != nil {
+		sizeModel := &model.Size{}
+		sizeModel.FromDomain(newSize)
+		if err := s.rs.CreateSize(ctx, sizeModel); err != nil {
 			return err
 		}
 	}

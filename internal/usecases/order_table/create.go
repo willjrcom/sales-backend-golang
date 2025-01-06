@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	ordertabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_table"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 var (
@@ -26,12 +27,13 @@ func (s *Service) CreateOrderTable(ctx context.Context, dto *ordertabledto.Creat
 
 	orderTable.OrderID = orderID
 
-	table, err := s.rt.GetTableById(ctx, orderTable.TableID.String())
+	tableModel, err := s.rt.GetTableById(ctx, orderTable.TableID.String())
 
 	if err != nil {
 		return nil, err
 	}
 
+	table := tableModel.ToDomain()
 	table.LockTable()
 
 	if orderTable.Name == "" {
@@ -40,11 +42,14 @@ func (s *Service) CreateOrderTable(ctx context.Context, dto *ordertabledto.Creat
 		orderTable.Name = table.Name + " - " + orderTable.Name
 	}
 
-	if err = s.rto.CreateOrderTable(ctx, orderTable); err != nil {
+	orderTableModel := &model.OrderTable{}
+	orderTableModel.FromDomain(orderTable)
+	if err = s.rto.CreateOrderTable(ctx, orderTableModel); err != nil {
 		return nil, err
 	}
 
-	if err = s.rt.UpdateTable(ctx, table); err != nil {
+	tableModel.FromDomain(table)
+	if err = s.rt.UpdateTable(ctx, tableModel); err != nil {
 		return nil, err
 	}
 

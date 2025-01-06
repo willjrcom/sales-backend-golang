@@ -30,7 +30,9 @@ func (s *Service) CreateTable(ctx context.Context, dto *tabledto.TableCreateDTO)
 		return uuid.Nil, err
 	}
 
-	if err = s.r.CreateTable(ctx, table); err != nil {
+	tableModel := &model.Table{}
+	tableModel.FromDomain(table)
+	if err = s.r.CreateTable(ctx, tableModel); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -38,16 +40,18 @@ func (s *Service) CreateTable(ctx context.Context, dto *tabledto.TableCreateDTO)
 }
 
 func (s *Service) UpdateTable(ctx context.Context, dtoId *entitydto.IDRequest, dto *tabledto.TableUpdateDTO) error {
-	table, err := s.r.GetTableById(ctx, dtoId.ID.String())
+	tableModel, err := s.r.GetTableById(ctx, dtoId.ID.String())
 	if err != nil {
 		return err
 	}
 
+	table := tableModel.ToDomain()
 	if err := dto.UpdateDomain(table); err != nil {
 		return err
 	}
 
-	if err = s.r.UpdateTable(ctx, table); err != nil {
+	tableModel.FromDomain(table)
+	if err = s.r.UpdateTable(ctx, tableModel); err != nil {
 		return err
 	}
 
@@ -67,17 +71,37 @@ func (s *Service) DeleteTable(ctx context.Context, dto *entitydto.IDRequest) err
 }
 
 func (s *Service) GetTableById(ctx context.Context, dto *entitydto.IDRequest) (*tableentity.Table, error) {
-	if table, err := s.r.GetTableById(ctx, dto.ID.String()); err != nil {
+	if tableModel, err := s.r.GetTableById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return table, nil
+		return tableModel.ToDomain(), nil
 	}
 }
 
 func (s *Service) GetAllTables(ctx context.Context) ([]tableentity.Table, error) {
-	return s.r.GetAllTables(ctx)
+	tableModels, err := s.r.GetAllTables(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tables := []tableentity.Table{}
+	for _, tableModel := range tableModels {
+		tables = append(tables, *tableModel.ToDomain())
+	}
+
+	return tables, nil
 }
 
 func (s *Service) GetUnusedTables(ctx context.Context) ([]tableentity.Table, error) {
-	return s.r.GetUnusedTables(ctx)
+	tableModels, err := s.r.GetUnusedTables(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tables := []tableentity.Table{}
+	for _, tableModel := range tableModels {
+		tables = append(tables, *tableModel.ToDomain())
+	}
+
+	return tables, nil
 }

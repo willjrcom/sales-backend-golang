@@ -32,7 +32,9 @@ func (s *Service) CreatePlace(ctx context.Context, dto *placedto.CreatePlaceInpu
 		return uuid.Nil, err
 	}
 
-	err = s.r.CreatePlace(ctx, place)
+	placeModel := &model.Place{}
+	placeModel.FromDomain(place)
+	err = s.r.CreatePlace(ctx, placeModel)
 
 	if err != nil {
 		return uuid.Nil, err
@@ -42,16 +44,18 @@ func (s *Service) CreatePlace(ctx context.Context, dto *placedto.CreatePlaceInpu
 }
 
 func (s *Service) UpdatePlace(ctx context.Context, dtoId *entitydto.IDRequest, dto *placedto.PlaceUpdateDTO) error {
-	place, err := s.r.GetPlaceById(ctx, dtoId.ID.String())
+	placeModel, err := s.r.GetPlaceById(ctx, dtoId.ID.String())
 	if err != nil {
 		return err
 	}
 
+	place := placeModel.ToDomain()
 	if err := dto.UpdateDomain(place); err != nil {
 		return err
 	}
 
-	if err = s.r.UpdatePlace(ctx, place); err != nil {
+	placeModel.FromDomain(place)
+	if err = s.r.UpdatePlace(ctx, placeModel); err != nil {
 		return err
 	}
 
@@ -71,15 +75,26 @@ func (s *Service) DeletePlace(ctx context.Context, dto *entitydto.IDRequest) err
 }
 
 func (s *Service) GetPlaceById(ctx context.Context, dto *entitydto.IDRequest) (*tableentity.Place, error) {
-	if place, err := s.r.GetPlaceById(ctx, dto.ID.String()); err != nil {
+	if placeModel, err := s.r.GetPlaceById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return place, nil
+		return placeModel.ToDomain(), nil
 	}
 }
 
 func (s *Service) GetAllPlaces(ctx context.Context) ([]tableentity.Place, error) {
-	return s.r.GetAllPlaces(ctx)
+	placeModels, err := s.r.GetAllPlaces(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	places := []tableentity.Place{}
+	for _, placeModel := range placeModels {
+		place := placeModel.ToDomain()
+		places = append(places, *place)
+	}
+
+	return places, nil
 }
 
 func (s *Service) AddTableToPlace(ctx context.Context, dto *placedto.PlaceUpdateTableDTO) error {
@@ -97,8 +112,11 @@ func (s *Service) AddTableToPlace(ctx context.Context, dto *placedto.PlaceUpdate
 		return ErrPlacePositionIsUsed(usedPlacePosition.Table.Name)
 	}
 
+	palceToTableModel := &model.PlaceToTables{}
+	palceToTableModel.FromDomain(placeToTable)
+
 	// If table ID already used
-	if err := s.r.AddTableToPlace(ctx, placeToTable); err != nil {
+	if err := s.r.AddTableToPlace(ctx, palceToTableModel); err != nil {
 		return err
 	}
 

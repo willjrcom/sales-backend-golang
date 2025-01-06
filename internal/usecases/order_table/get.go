@@ -8,17 +8,21 @@ import (
 )
 
 func (s *Service) GetTableById(ctx context.Context, dto *entitydto.IDRequest) (*orderentity.OrderTable, error) {
-	if order, err := s.rto.GetOrderTableById(ctx, dto.ID.String()); err != nil {
+	if orderTableModel, err := s.rto.GetOrderTableById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return order, nil
+		return orderTableModel.ToDomain(), nil
 	}
 }
 
 func (s *Service) GetAllTables(ctx context.Context) ([]orderentity.OrderTable, error) {
-	if orders, err := s.rto.GetAllOrderTables(ctx); err != nil {
+	if orderTableModels, err := s.rto.GetAllOrderTables(ctx); err != nil {
 		return nil, err
 	} else {
-		return orders, nil
+		orderTables := make([]orderentity.OrderTable, 0)
+		for _, orderTableModel := range orderTableModels {
+			orderTables = append(orderTables, *orderTableModel.ToDomain())
+		}
+		return orderTables, nil
 	}
 }
