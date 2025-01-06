@@ -55,7 +55,7 @@ func (h *handlerContactImpl) handlerGetContactById(w http.ResponseWriter, r *htt
 func (h *handlerContactImpl) handlerFtSearchContacts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	keys := &keysdto.KeysInput{}
+	keys := &keysdto.KeysDTO{}
 	if err := jsonpkg.ParseBody(r, keys); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

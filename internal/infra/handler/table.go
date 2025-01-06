@@ -38,7 +38,7 @@ func NewHandlerTable(orderService *tableusecases.Service) *handler.Handler {
 func (h *handlerTableImpl) handlerCreateTable(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoTable := &tabledto.CreateTableInput{}
+	dtoTable := &tabledto.TableCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -106,7 +106,7 @@ func (h *handlerTableImpl) handlerUpdateTableById(w http.ResponseWriter, r *http
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	dtoTable := &tabledto.UpdateTableInput{}
+	dtoTable := &tabledto.TableUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

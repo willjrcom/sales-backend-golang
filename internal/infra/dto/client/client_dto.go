@@ -10,13 +10,13 @@ import (
 )
 
 type ClientOutput struct {
-	ID       uuid.UUID `json:"id"`
-	Name     string
-	Email    string
-	Cpf      string
-	Birthday *time.Time
-	Contact  *contactdto.ContactDTO
-	Address  *addressdto.AddressDTO
+	ID       uuid.UUID              `json:"id"`
+	Name     string                 `json:"name"`
+	Email    string                 `json:"email"`
+	Cpf      string                 `json:"cpf"`
+	Birthday *time.Time             `json:"birthday"`
+	Contact  *contactdto.ContactDTO `json:"contact"`
+	Address  *addressdto.AddressDTO `json:"address"`
 }
 
 func (c *ClientOutput) FromModel(model *cliententity.Client) {

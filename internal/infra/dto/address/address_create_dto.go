@@ -3,7 +3,6 @@ package addressdto
 import (
 	"errors"
 
-	"github.com/google/uuid"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 )
 
@@ -17,18 +16,17 @@ var (
 )
 
 type AddressCreateDTO struct {
-	ObjectID     uuid.UUID
-	Street       string
-	Number       string
-	Complement   string
-	Reference    string
-	Neighborhood string
-	City         string
-	State        string
-	Cep          string
-	AddressType  addressentity.AddressType
-	DeliveryTax  *float64
-	Coordinates  Coordinates
+	Street       string                    `json:"street"`
+	Number       string                    `json:"number"`
+	Complement   string                    `json:"complement"`
+	Reference    string                    `json:"reference"`
+	Neighborhood string                    `json:"neighborhood"`
+	City         string                    `json:"city"`
+	State        string                    `json:"state"`
+	Cep          string                    `json:"cep"`
+	AddressType  addressentity.AddressType `json:"address_type"`
+	DeliveryTax  *float64                  `json:"delivery_tax"`
+	Coordinates  Coordinates               `json:"coordinates"`
 }
 
 func (a *AddressCreateDTO) validate(withDeliveryTax bool) error {
@@ -59,7 +57,7 @@ func (a *AddressCreateDTO) validate(withDeliveryTax bool) error {
 	return nil
 }
 
-func (a *AddressCreateDTO) ToModel(withDeliveryTax bool) (*addressentity.Address, error) {
+func (a *AddressCreateDTO) ToDomain(withDeliveryTax bool) (*addressentity.Address, error) {
 	if err := a.validate(withDeliveryTax); err != nil {
 		return nil, err
 	}

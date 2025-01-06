@@ -16,11 +16,6 @@ type TableCommonAttributes struct {
 	Orders      []orderentity.OrderTable
 }
 
-type PatchTable struct {
-	Name        *string
-	IsAvailable *bool
-}
-
 func (t *Table) LockTable() {
 	t.IsAvailable = false
 }

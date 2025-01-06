@@ -35,7 +35,7 @@ func NewHandlerSize(sizeService *sizeusecases.Service) *handler.Handler {
 func (h *handlerSizeImpl) handlerCreateSize(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoSize := &sizedto.CreateSizeInput{}
+	dtoSize := &sizedto.SizeCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoSize); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -62,7 +62,7 @@ func (h *handlerSizeImpl) handlerUpdateSize(w http.ResponseWriter, r *http.Reque
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	dtoSize := &sizedto.UpdateSizeInput{}
+	dtoSize := &sizedto.SizeUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoSize); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

@@ -4,11 +4,12 @@ import (
 	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
 )
 
-type UpdateTableInput struct {
-	tableentity.PatchTable
+type TableUpdateDTO struct {
+	Name        *string `json:"name"`
+	IsAvailable *bool   `json:"is_available"`
 }
 
-func (c *UpdateTableInput) UpdateModel(place *tableentity.Table) (err error) {
+func (c *TableUpdateDTO) UpdateModel(place *tableentity.Table) (err error) {
 	if c.Name != nil {
 		place.Name = *c.Name
 	}

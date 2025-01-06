@@ -108,7 +108,7 @@ func (h *handlerGroupItemImpl) handlerScheduleGroupByID(w http.ResponseWriter, r
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	dtoSchedule := &groupitemdto.UpdateScheduleGroupItem{}
+	dtoSchedule := &groupitemdto.GroupItemScheduleUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoSchedule); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

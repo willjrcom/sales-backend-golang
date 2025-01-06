@@ -11,12 +11,12 @@ var (
 )
 
 type DeliveryDriverUpdateDTO struct {
-	orderentity.PatchDeliveryDriver
 }
 
 func (s *DeliveryDriverUpdateDTO) validate() error {
 	return nil
 }
+
 func (s *DeliveryDriverUpdateDTO) UpdateModel(model *orderentity.DeliveryDriver) (err error) {
 	if err = s.validate(); err != nil {
 		return err

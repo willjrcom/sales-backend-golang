@@ -41,7 +41,7 @@ func (s *Service) AddDependencies(rgi orderentity.GroupItemRepository, ro ordere
 	s.rc = rc
 }
 
-func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInput) (ids *itemdto.ItemIDAndGroupItemOutput, err error) {
+func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.AddItemOrderInput) (ids *itemdto.ItemIDAndGroupItemDTO, err error) {
 	if err := dto.Validate(); err != nil {
 		return nil, err
 	}
@@ -236,7 +236,7 @@ func (s *Service) DeleteAdditionalItemOrder(ctx context.Context, dtoAdditional *
 	return nil
 }
 
-func (s *Service) AddRemovedItem(ctx context.Context, dtoID *entitydto.IdRequest, dto *itemdto.RemovedItemInput) (err error) {
+func (s *Service) AddRemovedItem(ctx context.Context, dtoID *entitydto.IdRequest, dto *itemdto.RemovedItemDTO) (err error) {
 	name, err := dto.ToModel()
 	if err != nil {
 		return err
@@ -275,7 +275,7 @@ func (s *Service) AddRemovedItem(ctx context.Context, dtoID *entitydto.IdRequest
 	return s.ri.UpdateItem(ctx, item)
 }
 
-func (s *Service) RemoveRemovedItem(ctx context.Context, dtoID *entitydto.IdRequest, dto *itemdto.RemovedItemInput) (err error) {
+func (s *Service) RemoveRemovedItem(ctx context.Context, dtoID *entitydto.IdRequest, dto *itemdto.RemovedItemDTO) (err error) {
 	name, err := dto.ToModel()
 	if err != nil {
 		return err

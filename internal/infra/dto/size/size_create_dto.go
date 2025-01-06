@@ -13,13 +13,13 @@ var (
 	ErrCategoryRequired = errors.New("category is required")
 )
 
-type CreateSizeInput struct {
+type SizeCreateDTO struct {
 	Name       string    `json:"name"`
 	IsActive   *bool     `json:"is_active"`
 	CategoryID uuid.UUID `json:"category_id"`
 }
 
-func (s *CreateSizeInput) validate() error {
+func (s *SizeCreateDTO) validate() error {
 	if s.Name == "" {
 		return ErrNameRequired
 	}
@@ -34,7 +34,7 @@ func (s *CreateSizeInput) validate() error {
 	return nil
 }
 
-func (s *CreateSizeInput) ToModel() (*productentity.Size, error) {
+func (s *SizeCreateDTO) ToModel() (*productentity.Size, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}

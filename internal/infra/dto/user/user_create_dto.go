@@ -82,7 +82,7 @@ func (u *UserCreateDTO) ToModel() (*companyentity.User, error) {
 		}
 	}
 	if u.Address != nil {
-		address, err := u.Address.ToModel(false)
+		address, err := u.Address.ToDomain(false)
 		if err != nil {
 			return nil, err
 		}

@@ -8,8 +8,8 @@ import (
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
+	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	keysdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/keys"
 	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
 )
 
@@ -92,7 +92,7 @@ func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IdRequest) (
 	}
 }
 
-func (s *Service) GetClientByContact(ctx context.Context, dto *keysdto.KeysInput) (*clientdto.ClientOutput, error) {
+func (s *Service) GetClientByContact(ctx context.Context, dto *contactdto.ContactDTO) (*clientdto.ClientOutput, error) {
 	contact, err := s.rcontact.GetContactByDddAndNumber(ctx, dto.Ddd, dto.Number, personentity.ContactTypeClient)
 
 	if err != nil {

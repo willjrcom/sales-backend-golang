@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
+	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	keysdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/keys"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -129,7 +129,7 @@ func (h *handlerClientImpl) handlerGetClientById(w http.ResponseWriter, r *http.
 func (h *handlerClientImpl) handlerGetClientByContact(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoContact := &keysdto.KeysInput{}
+	dtoContact := &contactdto.ContactDTO{}
 	if err := jsonpkg.ParseBody(r, dtoContact); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

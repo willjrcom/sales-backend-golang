@@ -22,7 +22,7 @@ func (s *Service) AddDependencies(rc productentity.CategoryRepository) {
 	s.rc = rc
 }
 
-func (s *Service) CreateSize(ctx context.Context, dto *sizedto.CreateSizeInput) (uuid.UUID, error) {
+func (s *Service) CreateSize(ctx context.Context, dto *sizedto.SizeCreateDTO) (uuid.UUID, error) {
 	size, err := dto.ToModel()
 
 	if err != nil {
@@ -48,7 +48,7 @@ func (s *Service) CreateSize(ctx context.Context, dto *sizedto.CreateSizeInput) 
 	return size.ID, nil
 }
 
-func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IdRequest, dto *sizedto.UpdateSizeInput) error {
+func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IdRequest, dto *sizedto.SizeUpdateDTO) error {
 	size, err := s.rs.GetSizeById(ctx, dtoId.ID.String())
 
 	if err != nil {
@@ -87,7 +87,7 @@ func (s *Service) DeleteSize(ctx context.Context, dto *entitydto.IdRequest) erro
 
 	return nil
 }
-func (s *Service) AddSizesByValues(ctx context.Context, dto *sizedto.CreateSizes) error {
+func (s *Service) AddSizesByValues(ctx context.Context, dto *sizedto.SizeCreateBatchDTO) error {
 	sizes, categoryID, err := dto.ToModel()
 	if err != nil {
 		return err

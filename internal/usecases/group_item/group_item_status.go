@@ -7,8 +7,8 @@ import (
 	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
 )
 
-func (s *Service) UpdateScheduleGroupItem(ctx context.Context, dtoId *entitydto.IdRequest, dto *groupitemdto.UpdateScheduleGroupItem) (err error) {
-	startAt, err := dto.ToModel()
+func (s *Service) UpdateScheduleGroupItem(ctx context.Context, dtoId *entitydto.IdRequest, dto *groupitemdto.GroupItemScheduleUpdateDTO) (err error) {
+	startAt, err := dto.ToDomain()
 
 	if err != nil {
 		return err

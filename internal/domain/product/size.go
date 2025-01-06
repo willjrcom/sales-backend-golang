@@ -23,11 +23,6 @@ type SizeCommonAttributes struct {
 	Products   []Product
 }
 
-type PatchSize struct {
-	Name     *string `json:"name"`
-	IsActive *bool   `json:"is_active"`
-}
-
 func NewSize(sizeCommonAttributes SizeCommonAttributes) *Size {
 	return &Size{
 		Entity:               entity.NewEntity(),

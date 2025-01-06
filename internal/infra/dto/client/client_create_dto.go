@@ -19,12 +19,12 @@ var (
 )
 
 type ClientCreateDTO struct {
-	Name     string
-	Email    *string
-	Cpf      *string
-	Birthday *time.Time
-	Contact  *contactdto.ContactCreateDTO
-	Address  *addressdto.AddressCreateDTO
+	Name     string                       `json:"name"`
+	Email    *string                      `json:"email"`
+	Cpf      *string                      `json:"cpf"`
+	Birthday *time.Time                   `json:"birthday"`
+	Contact  *contactdto.ContactCreateDTO `json:"contact"`
+	Address  *addressdto.AddressCreateDTO `json:"address"`
 }
 
 func (r *ClientCreateDTO) validate() error {
@@ -80,7 +80,7 @@ func (r *ClientCreateDTO) ToModel() (*cliententity.Client, error) {
 	}
 
 	// Address
-	address, err := r.Address.ToModel(true)
+	address, err := r.Address.ToDomain(true)
 	if err != nil {
 		return nil, err
 	}

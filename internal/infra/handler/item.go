@@ -135,7 +135,7 @@ func (h *handlerItemImpl) handlerAddRemovedItem(w http.ResponseWriter, r *http.R
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	dtoRemovedItem := &itemdto.RemovedItemInput{}
+	dtoRemovedItem := &itemdto.RemovedItemDTO{}
 	if err := jsonpkg.ParseBody(r, dtoRemovedItem); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -161,7 +161,7 @@ func (h *handlerItemImpl) handlerRemoveRemovedItem(w http.ResponseWriter, r *htt
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	dtoRemovedItem := &itemdto.RemovedItemInput{}
+	dtoRemovedItem := &itemdto.RemovedItemDTO{}
 	if err := jsonpkg.ParseBody(r, dtoRemovedItem); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

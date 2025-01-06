@@ -22,7 +22,7 @@ func NewService(c tableentity.TableRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) CreateTable(ctx context.Context, dto *tabledto.CreateTableInput) (uuid.UUID, error) {
+func (s *Service) CreateTable(ctx context.Context, dto *tabledto.TableCreateDTO) (uuid.UUID, error) {
 	table, err := dto.ToModel()
 
 	if err != nil {
@@ -36,7 +36,7 @@ func (s *Service) CreateTable(ctx context.Context, dto *tabledto.CreateTableInpu
 	return table.ID, nil
 }
 
-func (s *Service) UpdateTable(ctx context.Context, dtoId *entitydto.IdRequest, dto *tabledto.UpdateTableInput) error {
+func (s *Service) UpdateTable(ctx context.Context, dtoId *entitydto.IdRequest, dto *tabledto.TableUpdateDTO) error {
 	table, err := s.r.GetTableById(ctx, dtoId.ID.String())
 	if err != nil {
 		return err

@@ -67,7 +67,7 @@ func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.Cr
 		return category.ID, err
 	}
 
-	registerSizes := &sizedto.CreateSizes{
+	registerSizes := &sizedto.SizeCreateBatchDTO{
 		Sizes:      sizes,
 		CategoryID: category.ID,
 	}

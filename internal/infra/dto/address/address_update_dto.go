@@ -13,9 +13,9 @@ type AddressUpdateDTO struct {
 	City         *string                    `json:"city"`
 	State        *string                    `json:"state"`
 	Cep          *string                    `json:"cep"`
-	DeliveryTax  *float64                   `json:"delivery_tax"`
-	Coordinates  *Coordinates               `json:"coordinates,omitempty"`
 	AddressType  *addressentity.AddressType `json:"address_type"`
+	DeliveryTax  *float64                   `json:"delivery_tax"`
+	Coordinates  *Coordinates               `json:"coordinates"`
 }
 
 func (a *AddressUpdateDTO) validate() error {

@@ -10,12 +10,12 @@ var (
 	ErrSizesRequired = errors.New("sizes is required")
 )
 
-type CreateSizes struct {
+type SizeCreateBatchDTO struct {
 	Sizes      []string  `json:"sizes"`
 	CategoryID uuid.UUID `json:"category_id"`
 }
 
-func (s *CreateSizes) validate() error {
+func (s *SizeCreateBatchDTO) validate() error {
 	if len(s.Sizes) == 0 {
 		return ErrSizesRequired
 	}
@@ -27,7 +27,7 @@ func (s *CreateSizes) validate() error {
 	return nil
 }
 
-func (s *CreateSizes) ToModel() ([]string, *uuid.UUID, error) {
+func (s *SizeCreateBatchDTO) ToModel() ([]string, *uuid.UUID, error) {
 	if err := s.validate(); err != nil {
 		return nil, nil, err
 	}

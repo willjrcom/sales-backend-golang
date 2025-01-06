@@ -12,7 +12,7 @@ var (
 )
 
 type DeliveryDriverCreateDTO struct {
-	orderentity.DeliveryDriverCommonAttributes
+	EmployeeID uuid.UUID `json:"employee_id"`
 }
 
 func (s *DeliveryDriverCreateDTO) validate() error {

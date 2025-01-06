@@ -11,11 +11,12 @@ var (
 	ErrNameRequired = errors.New("name is required")
 )
 
-type CreateTableInput struct {
-	tableentity.TableCommonAttributes
+type TableCreateDTO struct {
+	Name        string `json:"name"`
+	IsAvailable bool   `json:"is_available"`
 }
 
-func (o *CreateTableInput) validate() error {
+func (o *TableCreateDTO) validate() error {
 	if o.Name == "" {
 		return ErrNameRequired
 	}
@@ -23,7 +24,7 @@ func (o *CreateTableInput) validate() error {
 	return nil
 }
 
-func (o *CreateTableInput) ToModel() (*tableentity.Table, error) {
+func (o *TableCreateDTO) ToModel() (*tableentity.Table, error) {
 	if err := o.validate(); err != nil {
 		return nil, err
 	}

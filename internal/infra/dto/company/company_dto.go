@@ -6,17 +6,17 @@ import (
 )
 
 type CompanyDTO struct {
-	SchemaName   string
-	BusinessName string
-	TradeName    string
-	Cnpj         string
-	Email        string
-	Contacts     []string
-	Address      *addressdto.AddressDTO
+	SchemaName   string                 `json:"schema_name"`
+	BusinessName string                 `json:"business_name"`
+	TradeName    string                 `json:"trade_name"`
+	Cnpj         string                 `json:"cnpj"`
+	Email        string                 `json:"email"`
+	Contacts     []string               `json:"contacts"`
+	Address      *addressdto.AddressDTO `json:"address"`
 }
 
-func (o *CompanyDTO) FromModel(model *companyentity.Company) {
-	*o = CompanyDTO{
+func (c *CompanyDTO) FromModel(model *companyentity.Company) {
+	*c = CompanyDTO{
 		SchemaName:   model.SchemaName,
 		BusinessName: model.BusinessName,
 		TradeName:    model.TradeName,
@@ -25,5 +25,5 @@ func (o *CompanyDTO) FromModel(model *companyentity.Company) {
 		Contacts:     model.Contacts,
 	}
 
-	o.Address.FromModel(model.Address)
+	c.Address.FromModel(model.Address)
 }

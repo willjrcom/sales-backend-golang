@@ -8,7 +8,6 @@ type EmployeeUpdateDTO struct {
 }
 
 func (r *EmployeeUpdateDTO) validate() error {
-
 	return nil
 }
 

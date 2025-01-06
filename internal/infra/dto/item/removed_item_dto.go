@@ -4,11 +4,11 @@ import "errors"
 
 var ErrNameRequired = errors.New("name is required")
 
-type RemovedItemInput struct {
+type RemovedItemDTO struct {
 	Name *string `json:"name"`
 }
 
-func (a *RemovedItemInput) validate() error {
+func (a *RemovedItemDTO) validate() error {
 	if a.Name == nil || *a.Name == "" {
 		return ErrNameRequired
 	}
@@ -16,7 +16,7 @@ func (a *RemovedItemInput) validate() error {
 	return nil
 }
 
-func (a *RemovedItemInput) ToModel() (*string, error) {
+func (a *RemovedItemDTO) ToModel() (*string, error) {
 	if err := a.validate(); err != nil {
 		return nil, err
 	}

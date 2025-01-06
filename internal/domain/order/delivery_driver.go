@@ -17,9 +17,6 @@ type DeliveryDriverCommonAttributes struct {
 	OrderDeliveries []OrderDelivery
 }
 
-type PatchDeliveryDriver struct {
-}
-
 func NewDeliveryDriver(deliveryDriverCommonAttributes DeliveryDriverCommonAttributes) *DeliveryDriver {
 	return &DeliveryDriver{
 		Entity:                         entity.NewEntity(),

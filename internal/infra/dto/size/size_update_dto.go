@@ -10,18 +10,19 @@ var (
 	ErrNameAndActiveIsEmpty = errors.New("name and active can't be empty")
 )
 
-type UpdateSizeInput struct {
-	productentity.PatchSize
+type SizeUpdateDTO struct {
+	Name     *string `json:"name"`
+	IsActive *bool   `json:"is_active"`
 }
 
-func (s *UpdateSizeInput) validate() error {
+func (s *SizeUpdateDTO) validate() error {
 	if s.Name == nil && s.IsActive == nil {
 		return ErrNameAndActiveIsEmpty
 	}
 
 	return nil
 }
-func (s *UpdateSizeInput) UpdateModel(model *productentity.Size) (err error) {
+func (s *SizeUpdateDTO) UpdateModel(model *productentity.Size) (err error) {
 	if err = s.validate(); err != nil {
 		return err
 	}
