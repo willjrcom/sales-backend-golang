@@ -1,18 +1,15 @@
 package model
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 type Address struct {
-	entity.Entity
+	entitymodel.Entity
 	bun.BaseModel `bun:"table:addresses"`
 	AddressCommonAttributes
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type AddressCommonAttributes struct {

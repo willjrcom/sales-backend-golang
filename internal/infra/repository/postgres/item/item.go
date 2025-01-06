@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type ItemRepositoryBun struct {
@@ -20,7 +20,7 @@ func NewItemRepositoryBun(db *bun.DB) *ItemRepositoryBun {
 	return &ItemRepositoryBun{db: db}
 }
 
-func (r *ItemRepositoryBun) AddItem(ctx context.Context, p *orderentity.Item) error {
+func (r *ItemRepositoryBun) AddItem(ctx context.Context, p *model.Item) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -35,7 +35,7 @@ func (r *ItemRepositoryBun) AddItem(ctx context.Context, p *orderentity.Item) er
 	return nil
 }
 
-func (r *ItemRepositoryBun) AddAdditionalItem(ctx context.Context, id uuid.UUID, productID uuid.UUID, additionalItem *orderentity.Item) error {
+func (r *ItemRepositoryBun) AddAdditionalItem(ctx context.Context, id uuid.UUID, productID uuid.UUID, additionalItem *model.Item) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -43,7 +43,7 @@ func (r *ItemRepositoryBun) AddAdditionalItem(ctx context.Context, id uuid.UUID,
 		return err
 	}
 
-	itemToAdditional := &orderentity.ItemToAdditional{
+	itemToAdditional := &model.ItemToAdditional{
 		ItemID:           id,
 		AdditionalItemID: additionalItem.ID,
 		ProductID:        productID,
@@ -55,7 +55,7 @@ func (r *ItemRepositoryBun) AddAdditionalItem(ctx context.Context, id uuid.UUID,
 		return err
 	}
 
-	if _, err = tx.NewDelete().Model(&orderentity.ItemToAdditional{}).Where("item_id = ? AND product_id = ?", id, productID).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&model.ItemToAdditional{}).Where("item_id = ? AND product_id = ?", id, productID).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -78,7 +78,7 @@ func (r *ItemRepositoryBun) AddAdditionalItem(ctx context.Context, id uuid.UUID,
 	return nil
 }
 
-func (r *ItemRepositoryBun) UpdateItem(ctx context.Context, p *orderentity.Item) error {
+func (r *ItemRepositoryBun) UpdateItem(ctx context.Context, p *model.Item) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -108,12 +108,12 @@ func (r *ItemRepositoryBun) DeleteItem(ctx context.Context, id string) error {
 	}
 
 	// Apaga o item
-	if _, err := tx.NewDelete().Model(&orderentity.Item{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.Item{}).Where("id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	additionalItems := []orderentity.ItemToAdditional{}
+	additionalItems := []model.ItemToAdditional{}
 	if err := r.db.NewSelect().Model(&additionalItems).Where("item_id = ?", id).Scan(ctx); err != nil {
 		tx.Rollback()
 		return err
@@ -125,14 +125,14 @@ func (r *ItemRepositoryBun) DeleteItem(ctx context.Context, id string) error {
 	}
 
 	// Apaga a relacao do item com additional items
-	if _, err := tx.NewDelete().Model(&orderentity.ItemToAdditional{}).Where("item_id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.ItemToAdditional{}).Where("item_id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	// Apaga os additional items
 	if len(additionalIds) > 0 {
-		if _, err := tx.NewDelete().Model(&orderentity.Item{}).Where("id in (?)", bun.In(additionalIds)).Exec(ctx); err != nil {
+		if _, err := tx.NewDelete().Model(&model.Item{}).Where("id in (?)", bun.In(additionalIds)).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -160,12 +160,12 @@ func (r *ItemRepositoryBun) DeleteAdditionalItem(ctx context.Context, idAddition
 		return err
 	}
 
-	if _, err = tx.NewDelete().Model(&orderentity.Item{}).Where("id = ?", idAdditional).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&model.Item{}).Where("id = ?", idAdditional).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if _, err = tx.NewDelete().Model(&orderentity.ItemToAdditional{}).Where("additional_item_id = ?", idAdditional).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&model.ItemToAdditional{}).Where("additional_item_id = ?", idAdditional).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -178,8 +178,8 @@ func (r *ItemRepositoryBun) DeleteAdditionalItem(ctx context.Context, idAddition
 	return nil
 }
 
-func (r *ItemRepositoryBun) GetItemById(ctx context.Context, id string) (*orderentity.Item, error) {
-	item := &orderentity.Item{}
+func (r *ItemRepositoryBun) GetItemById(ctx context.Context, id string) (*model.Item, error) {
+	item := &model.Item{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -195,8 +195,8 @@ func (r *ItemRepositoryBun) GetItemById(ctx context.Context, id string) (*ordere
 	return item, nil
 }
 
-func (r *ItemRepositoryBun) GetAllItems(ctx context.Context) ([]orderentity.Item, error) {
-	items := []orderentity.Item{}
+func (r *ItemRepositoryBun) GetAllItems(ctx context.Context) ([]model.Item, error) {
+	items := []model.Item{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

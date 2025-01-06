@@ -7,9 +7,9 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
-	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	bcryptservice "github.com/willjrcom/sales-backend-go/internal/infra/service/bcrypt"
 	emailservice "github.com/willjrcom/sales-backend-go/internal/infra/service/email"
 	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
@@ -22,10 +22,10 @@ var (
 )
 
 type Service struct {
-	r companyentity.UserRepository
+	r model.UserRepository
 }
 
-func NewService(r companyentity.UserRepository) *Service {
+func NewService(r model.UserRepository) *Service {
 	return &Service{r: r}
 }
 

@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type OrderRepositoryBun struct {
@@ -20,7 +20,7 @@ func NewOrderRepositoryBun(db *bun.DB) *OrderRepositoryBun {
 	return &OrderRepositoryBun{db: db}
 }
 
-func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *orderentity.Order) error {
+func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *model.Order) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -35,7 +35,7 @@ func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *orderentity
 	return nil
 }
 
-func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *orderentity.Order) error {
+func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *model.Order) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -109,7 +109,7 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *orderentity.Or
 	return nil
 }
 
-func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *orderentity.Order) error {
+func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *model.Order) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -138,38 +138,38 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model(&orderentity.Order{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.Order{}).Where("id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model(&orderentity.OrderDelivery{}).Where("order_id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.OrderDelivery{}).Where("order_id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model(&orderentity.OrderPickup{}).Where("order_id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.OrderPickup{}).Where("order_id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model(&orderentity.OrderTable{}).Where("order_id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.OrderTable{}).Where("order_id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model(&orderentity.PaymentOrder{}).Where("order_id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.PaymentOrder{}).Where("order_id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	groupItems := []orderentity.GroupItem{}
+	groupItems := []model.GroupItem{}
 	if err := tx.NewSelect().Model(&groupItems).Where("order_id = ?", id).Relation("ComplementItem").Relation("Items.AdditionalItems").Scan(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model(&orderentity.GroupItem{}).Where("order_id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.GroupItem{}).Where("order_id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -188,7 +188,7 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 				return err
 			}
 
-			if _, err := tx.NewDelete().Model(&orderentity.ItemToAdditional{}).Where("item_id = ?", item.ID).Exec(ctx); err != nil {
+			if _, err := tx.NewDelete().Model(&model.ItemToAdditional{}).Where("item_id = ?", item.ID).Exec(ctx); err != nil {
 				tx.Rollback()
 				return err
 			}
@@ -209,8 +209,8 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order *orderentity.Order, err error) {
-	order = &orderentity.Order{}
+func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order *model.Order, err error) {
+	order = &model.Order{}
 	order.ID = uuid.MustParse(id)
 
 	r.mu.Lock()
@@ -233,13 +233,11 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		}
 	}
 
-	order.CalculateTotalPrice()
-
 	return order, nil
 }
 
-func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]orderentity.Order, error) {
-	orders := []orderentity.Order{}
+func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]model.Order, error) {
+	orders := []model.Order{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -254,15 +252,11 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]orderentity.Or
 		return nil, err
 	}
 
-	for index := range orders {
-		orders[index].CalculateTotalPrice()
-	}
-
 	return orders, nil
 }
 
-func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context) ([]orderentity.Order, error) {
-	orders := []orderentity.Order{}
+func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context) ([]model.Order, error) {
+	orders := []model.Order{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -278,14 +272,10 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context) ([]or
 		return nil, err
 	}
 
-	for index := range orders {
-		orders[index].CalculateTotalPrice()
-	}
-
 	return orders, nil
 }
 
-func (r *OrderRepositoryBun) AddPaymentOrder(ctx context.Context, payment *orderentity.PaymentOrder) error {
+func (r *OrderRepositoryBun) AddPaymentOrder(ctx context.Context, payment *model.PaymentOrder) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

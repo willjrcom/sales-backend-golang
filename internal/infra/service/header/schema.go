@@ -3,14 +3,14 @@ package headerservice
 import (
 	"context"
 
-	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type Service struct {
-	r schemaentity.Repository
+	r model.SchemaRepository
 }
 
-func NewService(r schemaentity.Repository) *Service {
+func NewService(r model.SchemaRepository) *Service {
 	return &Service{r: r}
 }
 

@@ -2,22 +2,21 @@ package model
 
 import (
 	"context"
-	"time"
 
 	"github.com/uptrace/bun"
-	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 type UserValue string
 
 type User struct {
+	entitymodel.Entity
 	bun.BaseModel `bun:"table:users,alias:u"`
 	UserCommonAttributes
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type UserCommonAttributes struct {
-	personentity.Person
+	Person
 	Password       string             `bun:"-" json:"-"`
 	Hash           string             `bun:"column:hash,notnull" json:"hash"`
 	CompanyToUsers []CompanyToUsers   `bun:"rel:has-many,join:id=user_id" json:"company_users,omitempty"`

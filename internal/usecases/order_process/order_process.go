@@ -6,31 +6,31 @@ import (
 	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
 	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
 	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
 	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 )
 
 type Service struct {
-	r    orderprocessentity.ProcessRepository
-	rpr  productentity.ProcessRuleRepository
+	r    model.ProcessRepository
+	rpr  model.ProcessRuleRepository
 	sq   *orderqueueusecases.Service
 	rsgi *groupitemusecases.Service
-	ro   orderentity.OrderRepository
+	ro   model.OrderRepository
 	se   *employeeusecases.Service
 }
 
-func NewService(c orderprocessentity.ProcessRepository) *Service {
+func NewService(c model.ProcessRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) AddDependencies(sq *orderqueueusecases.Service, rpr productentity.ProcessRuleRepository, rsgi *groupitemusecases.Service, ro orderentity.OrderRepository, se *employeeusecases.Service) {
+func (s *Service) AddDependencies(sq *orderqueueusecases.Service, rpr model.ProcessRuleRepository, rsgi *groupitemusecases.Service, ro model.OrderRepository, se *employeeusecases.Service) {
 	s.rpr = rpr
 	s.sq = sq
 	s.rsgi = rsgi

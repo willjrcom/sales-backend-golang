@@ -5,15 +5,14 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 type OrderTable struct {
-	entity.Entity
+	entitymodel.Entity
 	bun.BaseModel `bun:"table:order_tables,alias:order_table"`
 	OrderTableCommonAttributes
 	OrderTableTimeLogs
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type OrderTableCommonAttributes struct {

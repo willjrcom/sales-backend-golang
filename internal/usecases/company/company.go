@@ -5,11 +5,11 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
@@ -17,18 +17,18 @@ import (
 )
 
 type Service struct {
-	r  companyentity.CompanyRepository
-	a  addressentity.Repository
+	r  model.CompanyRepository
+	a  model.AddressRepository
 	s  schemaservice.Service
-	u  companyentity.UserRepository
+	u  model.UserRepository
 	us userusecases.Service
 }
 
-func NewService(r companyentity.CompanyRepository) *Service {
+func NewService(r model.CompanyRepository) *Service {
 	return &Service{r: r}
 }
 
-func (s *Service) AddDependencies(a addressentity.Repository, ss schemaservice.Service, u companyentity.UserRepository, us userusecases.Service) {
+func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Service, u model.UserRepository, us userusecases.Service) {
 	s.a = a
 	s.s = ss
 	s.u = u

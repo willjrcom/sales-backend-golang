@@ -6,7 +6,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type OrderDeliveryRepositoryBun struct {
@@ -18,7 +18,7 @@ func NewOrderDeliveryRepositoryBun(db *bun.DB) *OrderDeliveryRepositoryBun {
 	return &OrderDeliveryRepositoryBun{db: db}
 }
 
-func (r *OrderDeliveryRepositoryBun) CreateOrderDelivery(ctx context.Context, delivery *orderentity.OrderDelivery) error {
+func (r *OrderDeliveryRepositoryBun) CreateOrderDelivery(ctx context.Context, delivery *model.OrderDelivery) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -33,7 +33,7 @@ func (r *OrderDeliveryRepositoryBun) CreateOrderDelivery(ctx context.Context, de
 	return nil
 }
 
-func (r *OrderDeliveryRepositoryBun) UpdateOrderDelivery(ctx context.Context, delivery *orderentity.OrderDelivery) error {
+func (r *OrderDeliveryRepositoryBun) UpdateOrderDelivery(ctx context.Context, delivery *model.OrderDelivery) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -56,15 +56,15 @@ func (r *OrderDeliveryRepositoryBun) DeleteOrderDelivery(ctx context.Context, id
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&orderentity.OrderDelivery{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&model.OrderDelivery{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *OrderDeliveryRepositoryBun) GetAllDeliveries(ctx context.Context) ([]orderentity.OrderDelivery, error) {
-	deliveries := []orderentity.OrderDelivery{}
+func (r *OrderDeliveryRepositoryBun) GetAllDeliveries(ctx context.Context) ([]model.OrderDelivery, error) {
+	deliveries := []model.OrderDelivery{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -73,15 +73,15 @@ func (r *OrderDeliveryRepositoryBun) GetAllDeliveries(ctx context.Context) ([]or
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&deliveries).Where("delivery.status != ?", orderentity.OrderDeliveryStatusStaging).Relation("Client").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&deliveries).Where("delivery.status != ?", model.OrderDeliveryStatusStaging).Relation("Client").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
 		return nil, err
 	}
 
 	return deliveries, nil
 }
 
-func (r *OrderDeliveryRepositoryBun) GetDeliveryById(ctx context.Context, id string) (*orderentity.OrderDelivery, error) {
-	delivery := &orderentity.OrderDelivery{}
+func (r *OrderDeliveryRepositoryBun) GetDeliveryById(ctx context.Context, id string) (*model.OrderDelivery, error) {
+	delivery := &model.OrderDelivery{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -97,8 +97,8 @@ func (r *OrderDeliveryRepositoryBun) GetDeliveryById(ctx context.Context, id str
 	return delivery, nil
 }
 
-func (r *OrderDeliveryRepositoryBun) GetDeliveriesByIds(ctx context.Context, ids []string) ([]orderentity.OrderDelivery, error) {
-	deliveries := []orderentity.OrderDelivery{}
+func (r *OrderDeliveryRepositoryBun) GetDeliveriesByIds(ctx context.Context, ids []string) ([]model.OrderDelivery, error) {
+	deliveries := []model.OrderDelivery{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

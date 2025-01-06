@@ -8,6 +8,7 @@ import (
 	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	tabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/table"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 var (
@@ -15,10 +16,10 @@ var (
 )
 
 type Service struct {
-	r tableentity.TableRepository
+	r model.TableRepository
 }
 
-func NewService(c tableentity.TableRepository) *Service {
+func NewService(c model.TableRepository) *Service {
 	return &Service{r: c}
 }
 

@@ -6,7 +6,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type ProductRepositoryBun struct {
@@ -18,7 +18,7 @@ func NewProductRepositoryBun(db *bun.DB) *ProductRepositoryBun {
 	return &ProductRepositoryBun{db: db}
 }
 
-func (r *ProductRepositoryBun) CreateProduct(ctx context.Context, p *productentity.Product) error {
+func (r *ProductRepositoryBun) CreateProduct(ctx context.Context, p *model.Product) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -44,7 +44,7 @@ func (r *ProductRepositoryBun) CreateProduct(ctx context.Context, p *productenti
 	return nil
 }
 
-func (r *ProductRepositoryBun) UpdateProduct(ctx context.Context, p *productentity.Product) error {
+func (r *ProductRepositoryBun) UpdateProduct(ctx context.Context, p *model.Product) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -78,15 +78,15 @@ func (r *ProductRepositoryBun) DeleteProduct(ctx context.Context, id string) err
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&productentity.Product{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&model.Product{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*productentity.Product, error) {
-	product := &productentity.Product{}
+func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*model.Product, error) {
+	product := &model.Product{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -102,8 +102,8 @@ func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*
 	return product, nil
 }
 
-func (r *ProductRepositoryBun) GetProductByCode(ctx context.Context, code string) (*productentity.Product, error) {
-	product := &productentity.Product{}
+func (r *ProductRepositoryBun) GetProductByCode(ctx context.Context, code string) (*model.Product, error) {
+	product := &model.Product{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -119,8 +119,8 @@ func (r *ProductRepositoryBun) GetProductByCode(ctx context.Context, code string
 	return product, nil
 }
 
-func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context) ([]productentity.Product, error) {
-	products := []productentity.Product{}
+func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context) ([]model.Product, error) {
+	products := []model.Product{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

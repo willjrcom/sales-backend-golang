@@ -5,9 +5,9 @@ import (
 	"errors"
 
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 var (
@@ -18,16 +18,16 @@ var (
 )
 
 type Service struct {
-	rgi orderentity.GroupItemRepository
-	ri  orderentity.ItemRepository
-	rp  productentity.ProductRepository
+	rgi model.GroupItemRepository
+	ri  model.ItemRepository
+	rp  model.ProductRepository
 }
 
-func NewService(rgi orderentity.GroupItemRepository) *Service {
+func NewService(rgi model.GroupItemRepository) *Service {
 	return &Service{rgi: rgi}
 }
 
-func (s *Service) AddDependencies(ri orderentity.ItemRepository, rp productentity.ProductRepository) {
+func (s *Service) AddDependencies(ri model.ItemRepository, rp model.ProductRepository) {
 	s.ri = ri
 	s.rp = rp
 }

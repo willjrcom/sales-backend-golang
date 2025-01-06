@@ -6,6 +6,7 @@ import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderpickupdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_pickup"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 )
 
@@ -42,11 +43,11 @@ type IStatusService interface {
 }
 
 type Service struct {
-	rp orderentity.OrderPickupRepository
+	rp model.OrderPickupRepository
 	os *orderusecases.Service
 }
 
-func NewService(rp orderentity.OrderPickupRepository) IService {
+func NewService(rp model.OrderPickupRepository) IService {
 	return &Service{rp: rp}
 }
 

@@ -6,7 +6,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type SizeRepositoryBun struct {
@@ -18,7 +18,7 @@ func NewSizeRepositoryBun(db *bun.DB) *SizeRepositoryBun {
 	return &SizeRepositoryBun{db: db}
 }
 
-func (r *SizeRepositoryBun) CreateSize(ctx context.Context, s *productentity.Size) error {
+func (r *SizeRepositoryBun) CreateSize(ctx context.Context, s *model.Size) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -33,7 +33,7 @@ func (r *SizeRepositoryBun) CreateSize(ctx context.Context, s *productentity.Siz
 	return nil
 }
 
-func (r *SizeRepositoryBun) UpdateSize(ctx context.Context, s *productentity.Size) error {
+func (r *SizeRepositoryBun) UpdateSize(ctx context.Context, s *model.Size) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -56,15 +56,15 @@ func (r *SizeRepositoryBun) DeleteSize(ctx context.Context, id string) error {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&productentity.Size{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&model.Size{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *SizeRepositoryBun) GetSizeById(ctx context.Context, id string) (*productentity.Size, error) {
-	size := &productentity.Size{}
+func (r *SizeRepositoryBun) GetSizeById(ctx context.Context, id string) (*model.Size, error) {
+	size := &model.Size{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

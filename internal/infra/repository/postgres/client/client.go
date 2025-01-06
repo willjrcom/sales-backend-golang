@@ -5,9 +5,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
-	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
-	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 
 	"golang.org/x/net/context"
 )
@@ -21,7 +19,7 @@ func NewClientRepositoryBun(db *bun.DB) *ClientRepositoryBun {
 	return &ClientRepositoryBun{db: db}
 }
 
-func (r *ClientRepositoryBun) CreateClient(ctx context.Context, c *cliententity.Client) error {
+func (r *ClientRepositoryBun) CreateClient(ctx context.Context, c *model.Client) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -60,7 +58,7 @@ func (r *ClientRepositoryBun) CreateClient(ctx context.Context, c *cliententity.
 	return nil
 }
 
-func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.Client) error {
+func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *model.Client) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -79,7 +77,7 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.
 	}
 
 	if c.Contact != nil {
-		if _, err := tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
+		if _, err := tx.NewDelete().Model(&model.Contact{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -92,7 +90,7 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *cliententity.
 	}
 
 	if c.Address != nil {
-		if _, err := tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
+		if _, err := tx.NewDelete().Model(&model.Address{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
@@ -127,19 +125,19 @@ func (r *ClientRepositoryBun) DeleteClient(ctx context.Context, id string) error
 	}
 
 	// Delete client
-	if _, err = tx.NewDelete().Model(&cliententity.Client{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&model.Client{}).Where("id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	// Delete contact
-	if _, err = tx.NewDelete().Model(&personentity.Contact{}).Where("object_id = ?", id).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&model.Contact{}).Where("object_id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	// Delete addresse
-	if _, err = tx.NewDelete().Model(&addressentity.Address{}).Where("object_id = ?", id).Exec(ctx); err != nil {
+	if _, err = tx.NewDelete().Model(&model.Address{}).Where("object_id = ?", id).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -151,8 +149,8 @@ func (r *ClientRepositoryBun) DeleteClient(ctx context.Context, id string) error
 	return nil
 }
 
-func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*cliententity.Client, error) {
-	client := &cliententity.Client{}
+func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*model.Client, error) {
+	client := &model.Client{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -168,8 +166,8 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*cl
 	return client, nil
 }
 
-func (r *ClientRepositoryBun) GetAllClients(ctx context.Context) ([]cliententity.Client, error) {
-	clients := []cliententity.Client{}
+func (r *ClientRepositoryBun) GetAllClients(ctx context.Context) ([]model.Client, error) {
+	clients := []model.Client{}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

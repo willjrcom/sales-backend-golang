@@ -7,18 +7,19 @@ import (
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type Service struct {
-	r  orderprocessentity.QueueRepository
-	rp orderprocessentity.ProcessRepository
+	r  model.QueueRepository
+	rp model.ProcessRepository
 }
 
-func NewService(c orderprocessentity.QueueRepository) *Service {
+func NewService(c model.QueueRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) AddDependencies(rp orderprocessentity.ProcessRepository) {
+func (s *Service) AddDependencies(rp model.ProcessRepository) {
 	s.rp = rp
 }
 

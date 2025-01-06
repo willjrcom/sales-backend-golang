@@ -7,13 +7,14 @@ import (
 	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	keysdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/keys"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type Service struct {
-	r personentity.ContactRepository
+	r model.ContactRepository
 }
 
-func NewService(c personentity.ContactRepository) *Service {
+func NewService(c model.ContactRepository) *Service {
 	return &Service{r: c}
 }
 

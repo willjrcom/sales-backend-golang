@@ -6,7 +6,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type QuantityRepositoryBun struct {
@@ -18,7 +18,7 @@ func NewQuantityRepositoryBun(db *bun.DB) *QuantityRepositoryBun {
 	return &QuantityRepositoryBun{db: db}
 }
 
-func (r *QuantityRepositoryBun) CreateQuantity(ctx context.Context, s *productentity.Quantity) error {
+func (r *QuantityRepositoryBun) CreateQuantity(ctx context.Context, s *model.Quantity) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -33,7 +33,7 @@ func (r *QuantityRepositoryBun) CreateQuantity(ctx context.Context, s *producten
 	return nil
 }
 
-func (r *QuantityRepositoryBun) UpdateQuantity(ctx context.Context, s *productentity.Quantity) error {
+func (r *QuantityRepositoryBun) UpdateQuantity(ctx context.Context, s *model.Quantity) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -56,15 +56,15 @@ func (r *QuantityRepositoryBun) DeleteQuantity(ctx context.Context, id string) e
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&productentity.Quantity{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&model.Quantity{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *QuantityRepositoryBun) GetQuantityById(ctx context.Context, id string) (*productentity.Quantity, error) {
-	quantity := &productentity.Quantity{}
+func (r *QuantityRepositoryBun) GetQuantityById(ctx context.Context, id string) (*model.Quantity, error) {
+	quantity := &model.Quantity{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

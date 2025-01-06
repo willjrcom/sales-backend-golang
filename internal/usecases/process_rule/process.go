@@ -8,6 +8,7 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	processruledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process_rule"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 var (
@@ -15,10 +16,10 @@ var (
 )
 
 type Service struct {
-	r productentity.ProcessRuleRepository
+	r model.ProcessRuleRepository
 }
 
-func NewService(c productentity.ProcessRuleRepository) *Service {
+func NewService(c model.ProcessRuleRepository) *Service {
 	return &Service{r: c}
 }
 

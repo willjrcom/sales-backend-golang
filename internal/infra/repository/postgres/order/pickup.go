@@ -6,7 +6,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type OrderPickupRepositoryBun struct {
@@ -18,7 +18,7 @@ func NewOrderPickupRepositoryBun(db *bun.DB) *OrderPickupRepositoryBun {
 	return &OrderPickupRepositoryBun{db: db}
 }
 
-func (r *OrderPickupRepositoryBun) CreateOrderPickup(ctx context.Context, orderPickup *orderentity.OrderPickup) error {
+func (r *OrderPickupRepositoryBun) CreateOrderPickup(ctx context.Context, orderPickup *model.OrderPickup) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -33,7 +33,7 @@ func (r *OrderPickupRepositoryBun) CreateOrderPickup(ctx context.Context, orderP
 	return nil
 }
 
-func (r *OrderPickupRepositoryBun) UpdateOrderPickup(ctx context.Context, orderPickup *orderentity.OrderPickup) error {
+func (r *OrderPickupRepositoryBun) UpdateOrderPickup(ctx context.Context, orderPickup *model.OrderPickup) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -56,15 +56,15 @@ func (r *OrderPickupRepositoryBun) DeleteOrderPickup(ctx context.Context, id str
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&orderentity.OrderPickup{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&model.OrderPickup{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *OrderPickupRepositoryBun) GetAllPickups(ctx context.Context) ([]orderentity.OrderPickup, error) {
-	pickups := []orderentity.OrderPickup{}
+func (r *OrderPickupRepositoryBun) GetAllPickups(ctx context.Context) ([]model.OrderPickup, error) {
+	pickups := []model.OrderPickup{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -80,8 +80,8 @@ func (r *OrderPickupRepositoryBun) GetAllPickups(ctx context.Context) ([]orderen
 	return pickups, nil
 }
 
-func (r *OrderPickupRepositoryBun) GetPickupById(ctx context.Context, id string) (*orderentity.OrderPickup, error) {
-	orderPickup := &orderentity.OrderPickup{}
+func (r *OrderPickupRepositoryBun) GetPickupById(ctx context.Context, id string) (*model.OrderPickup, error) {
+	orderPickup := &model.OrderPickup{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

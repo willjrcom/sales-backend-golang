@@ -3,11 +3,10 @@ package orderdeliveryusecases
 import (
 	"context"
 
-	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
-	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdeliverydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_delivery"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 )
 
@@ -19,7 +18,7 @@ type IService interface {
 	IStatusService
 }
 type ISetupService interface {
-	AddDependencies(ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, os *orderusecases.Service, rdd orderentity.DeliveryDriverRepository)
+	AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, os *orderusecases.Service, rdd model.DeliveryDriverRepository)
 }
 
 type ICreateService interface {
@@ -47,19 +46,19 @@ type IStatusService interface {
 }
 
 type Service struct {
-	rdo orderentity.OrderDeliveryRepository
-	ra  addressentity.Repository
-	rc  cliententity.Repository
-	ro  orderentity.OrderRepository
+	rdo model.OrderDeliveryRepository
+	ra  model.AddressRepository
+	rc  model.ClientRepository
+	ro  model.OrderRepository
 	os  *orderusecases.Service
-	rdd orderentity.DeliveryDriverRepository
+	rdd model.DeliveryDriverRepository
 }
 
-func NewService(rdo orderentity.OrderDeliveryRepository) IService {
+func NewService(rdo model.OrderDeliveryRepository) IService {
 	return &Service{rdo: rdo}
 }
 
-func (s *Service) AddDependencies(ra addressentity.Repository, rc cliententity.Repository, ro orderentity.OrderRepository, os *orderusecases.Service, rdd orderentity.DeliveryDriverRepository) {
+func (s *Service) AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, os *orderusecases.Service, rdd model.DeliveryDriverRepository) {
 	s.ra = ra
 	s.rc = rc
 	s.ro = ro

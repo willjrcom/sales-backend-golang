@@ -8,9 +8,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 type CompanyRepositoryBun struct {
@@ -22,7 +21,7 @@ func NewCompanyRepositoryBun(db *bun.DB) *CompanyRepositoryBun {
 	return &CompanyRepositoryBun{db: db}
 }
 
-func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *companyentity.Company) (err error) {
+func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *model.Company) (err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -49,8 +48,8 @@ func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *companye
 		return err
 	}
 
-	companyWithUsers := &companyentity.CompanyWithUsers{
-		Entity:                  entity.NewEntity(),
+	companyWithUsers := &model.CompanyWithUsers{
+		Entity:                  entitymodel.NewEntity(),
 		CompanyCommonAttributes: company.CompanyCommonAttributes,
 	}
 
@@ -65,8 +64,8 @@ func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *companye
 	return nil
 }
 
-func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*companyentity.Company, error) {
-	company := &companyentity.Company{}
+func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*model.Company, error) {
+	company := &model.Company{}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -84,7 +83,7 @@ func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*companyentity.C
 }
 
 func (r *CompanyRepositoryBun) ValidateUserToPublicCompany(ctx context.Context, userID uuid.UUID) (bool, error) {
-	schema := ctx.Value(schemaentity.Schema("schema")).(string)
+	schema := ctx.Value(model.Schema("schema")).(string)
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -93,12 +92,12 @@ func (r *CompanyRepositoryBun) ValidateUserToPublicCompany(ctx context.Context, 
 		return false, err
 	}
 
-	companyWithUsers := &companyentity.CompanyWithUsers{}
+	companyWithUsers := &model.CompanyWithUsers{}
 	if err := r.db.NewSelect().Model(companyWithUsers).Where("schema_name = ?", schema).Scan(ctx); err != nil {
 		return false, err
 	}
 
-	companyToUsers := &companyentity.CompanyToUsers{}
+	companyToUsers := &model.CompanyToUsers{}
 	if err := r.db.NewSelect().Model(companyToUsers).Where("company_with_users_id = ? AND user_id = ?", companyWithUsers.ID, userID).Scan(ctx); err != nil {
 		return false, err
 	}
@@ -107,7 +106,7 @@ func (r *CompanyRepositoryBun) ValidateUserToPublicCompany(ctx context.Context, 
 }
 
 func (r *CompanyRepositoryBun) AddUserToPublicCompany(ctx context.Context, userID uuid.UUID) error {
-	schema := ctx.Value(schemaentity.Schema("schema")).(string)
+	schema := ctx.Value(model.Schema("schema")).(string)
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -116,19 +115,19 @@ func (r *CompanyRepositoryBun) AddUserToPublicCompany(ctx context.Context, userI
 		return err
 	}
 
-	companyWithUsers := &companyentity.CompanyWithUsers{}
+	companyWithUsers := &model.CompanyWithUsers{}
 	if err := r.db.NewSelect().Model(companyWithUsers).Where("schema_name = ?", schema).Scan(ctx); err != nil {
 		return err
 	}
 
-	_, err := r.db.NewInsert().Model(&companyentity.CompanyToUsers{CompanyWithUsersID: companyWithUsers.ID, UserID: userID}).Exec(ctx)
+	_, err := r.db.NewInsert().Model(&model.CompanyToUsers{CompanyWithUsersID: companyWithUsers.ID, UserID: userID}).Exec(ctx)
 
 	return err
 
 }
 
 func (r *CompanyRepositoryBun) RemoveUserFromPublicCompany(ctx context.Context, userID uuid.UUID) error {
-	schema := ctx.Value(schemaentity.Schema("schema")).(string)
+	schema := ctx.Value(model.Schema("schema")).(string)
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -137,12 +136,12 @@ func (r *CompanyRepositoryBun) RemoveUserFromPublicCompany(ctx context.Context, 
 		return err
 	}
 
-	companyWithUsers := &companyentity.CompanyWithUsers{}
+	companyWithUsers := &model.CompanyWithUsers{}
 	if err := r.db.NewSelect().Model(companyWithUsers).Where("schema_name = ?", schema).Scan(ctx); err != nil {
 		return err
 	}
 
-	_, err := r.db.NewDelete().Model(&companyentity.CompanyToUsers{}).Where("company_with_users_id = ? AND user_id = ?", companyWithUsers.ID, userID).Exec(ctx)
+	_, err := r.db.NewDelete().Model(&model.CompanyToUsers{}).Where("company_with_users_id = ? AND user_id = ?", companyWithUsers.ID, userID).Exec(ctx)
 
 	return err
 

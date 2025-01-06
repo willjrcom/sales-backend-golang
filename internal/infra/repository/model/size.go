@@ -2,11 +2,10 @@ package model
 
 import (
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 var (
@@ -14,10 +13,9 @@ var (
 )
 
 type Size struct {
-	entity.Entity
+	entitymodel.Entity
 	bun.BaseModel `bun:"table:sizes"`
 	SizeCommonAttributes
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type SizeCommonAttributes struct {

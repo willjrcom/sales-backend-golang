@@ -8,6 +8,7 @@ import (
 	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	shiftdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/shift"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 var (
@@ -16,10 +17,10 @@ var (
 )
 
 type Service struct {
-	r shiftentity.ShiftRepository
+	r model.ShiftRepository
 }
 
-func NewService(c shiftentity.ShiftRepository) *Service {
+func NewService(c model.ShiftRepository) *Service {
 	return &Service{r: c}
 }
 

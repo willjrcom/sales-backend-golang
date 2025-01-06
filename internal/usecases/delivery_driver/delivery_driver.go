@@ -5,22 +5,21 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	deliverydriverdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/delivery_driver"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type Service struct {
-	r  orderentity.DeliveryDriverRepository
-	re employeeentity.Repository
+	r  model.DeliveryDriverRepository
+	re model.EmployeeRepository
 }
 
-func NewService(r orderentity.DeliveryDriverRepository) *Service {
+func NewService(r model.DeliveryDriverRepository) *Service {
 	return &Service{r: r}
 }
 
-func (s *Service) AddDependencies(re employeeentity.Repository) {
+func (s *Service) AddDependencies(re model.EmployeeRepository) {
 	s.re = re
 }
 

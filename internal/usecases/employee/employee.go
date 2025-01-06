@@ -5,24 +5,23 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
-	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	employeedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/employee"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type Service struct {
-	re employeeentity.Repository
-	rc personentity.ContactRepository
-	ru companyentity.UserRepository
+	re model.EmployeeRepository
+	rc model.ContactRepository
+	ru model.UserRepository
 }
 
-func NewService(repository employeeentity.Repository) *Service {
+func NewService(repository model.EmployeeRepository) *Service {
 	return &Service{re: repository}
 }
 
-func (s *Service) AddDependencies(rc personentity.ContactRepository, ru companyentity.UserRepository) {
+func (s *Service) AddDependencies(rc model.ContactRepository, ru model.UserRepository) {
 	s.rc = rc
 	s.ru = ru
 }

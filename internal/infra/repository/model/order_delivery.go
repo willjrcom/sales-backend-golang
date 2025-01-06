@@ -6,9 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
-	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
-	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 var (
@@ -17,23 +15,22 @@ var (
 )
 
 type OrderDelivery struct {
-	entity.Entity
+	entitymodel.Entity
 	bun.BaseModel `bun:"table:order_deliveries,alias:delivery"`
 	DeliveryTimeLogs
 	OrderDeliveryCommonAttributes
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type OrderDeliveryCommonAttributes struct {
-	Status      StatusOrderDelivery    `bun:"status"`
-	DeliveryTax *float64               `bun:"delivery_tax"`
-	ClientID    uuid.UUID              `bun:"column:client_id,type:uuid,notnull"`
-	Client      *cliententity.Client   `bun:"rel:belongs-to"`
-	AddressID   uuid.UUID              `bun:"column:address_id,type:uuid,notnull"`
-	Address     *addressentity.Address `bun:"rel:belongs-to"`
-	DriverID    *uuid.UUID             `bun:"column:driver_id,type:uuid"`
-	Driver      *DeliveryDriver        `bun:"rel:belongs-to"`
-	OrderID     uuid.UUID              `bun:"column:order_id,type:uuid,notnull"`
+	Status      StatusOrderDelivery `bun:"status"`
+	DeliveryTax *float64            `bun:"delivery_tax"`
+	ClientID    uuid.UUID           `bun:"column:client_id,type:uuid,notnull"`
+	Client      *Client             `bun:"rel:belongs-to"`
+	AddressID   uuid.UUID           `bun:"column:address_id,type:uuid,notnull"`
+	Address     *Address            `bun:"rel:belongs-to"`
+	DriverID    *uuid.UUID          `bun:"column:driver_id,type:uuid"`
+	Driver      *DeliveryDriver     `bun:"rel:belongs-to"`
+	OrderID     uuid.UUID           `bun:"column:order_id,type:uuid,notnull"`
 }
 
 type DeliveryTimeLogs struct {

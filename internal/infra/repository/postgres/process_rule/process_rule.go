@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type ProcessRuleRepositoryBun struct {
@@ -21,7 +21,7 @@ func NewProcessRuleRepositoryBun(db *bun.DB) *ProcessRuleRepositoryBun {
 	return &ProcessRuleRepositoryBun{db: db}
 }
 
-func (r *ProcessRuleRepositoryBun) CreateProcessRule(ctx context.Context, s *productentity.ProcessRule) error {
+func (r *ProcessRuleRepositoryBun) CreateProcessRule(ctx context.Context, s *model.ProcessRule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -36,7 +36,7 @@ func (r *ProcessRuleRepositoryBun) CreateProcessRule(ctx context.Context, s *pro
 	return nil
 }
 
-func (r *ProcessRuleRepositoryBun) UpdateProcessRule(ctx context.Context, s *productentity.ProcessRule) error {
+func (r *ProcessRuleRepositoryBun) UpdateProcessRule(ctx context.Context, s *model.ProcessRule) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -59,15 +59,15 @@ func (r *ProcessRuleRepositoryBun) DeleteProcessRule(ctx context.Context, id str
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&productentity.ProcessRule{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&model.ProcessRule{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *ProcessRuleRepositoryBun) GetProcessRuleById(ctx context.Context, id string) (*productentity.ProcessRule, error) {
-	processRule := &productentity.ProcessRule{}
+func (r *ProcessRuleRepositoryBun) GetProcessRuleById(ctx context.Context, id string) (*model.ProcessRule, error) {
+	processRule := &model.ProcessRule{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -83,8 +83,8 @@ func (r *ProcessRuleRepositoryBun) GetProcessRuleById(ctx context.Context, id st
 	return processRule, nil
 }
 
-func (r *ProcessRuleRepositoryBun) GetFirstProcessRuleByCategoryId(ctx context.Context, id string) (*productentity.ProcessRule, error) {
-	processRule := &productentity.ProcessRule{}
+func (r *ProcessRuleRepositoryBun) GetFirstProcessRuleByCategoryId(ctx context.Context, id string) (*model.ProcessRule, error) {
+	processRule := &model.ProcessRule{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -101,7 +101,7 @@ func (r *ProcessRuleRepositoryBun) GetFirstProcessRuleByCategoryId(ctx context.C
 }
 
 func (r *ProcessRuleRepositoryBun) GetMapProcessRulesByFirstOrder(ctx context.Context) (map[uuid.UUID]uuid.UUID, error) {
-	processRules := []productentity.ProcessRule{}
+	processRules := []model.ProcessRule{}
 	mapProcesses := map[uuid.UUID]uuid.UUID{}
 
 	r.mu.Lock()
@@ -122,8 +122,8 @@ func (r *ProcessRuleRepositoryBun) GetMapProcessRulesByFirstOrder(ctx context.Co
 	return mapProcesses, nil
 }
 
-func (r *ProcessRuleRepositoryBun) GetProcessRuleByCategoryIdAndOrder(ctx context.Context, id string, order int8) (*productentity.ProcessRule, error) {
-	processRule := &productentity.ProcessRule{}
+func (r *ProcessRuleRepositoryBun) GetProcessRuleByCategoryIdAndOrder(ctx context.Context, id string, order int8) (*model.ProcessRule, error) {
+	processRule := &model.ProcessRule{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -140,8 +140,8 @@ func (r *ProcessRuleRepositoryBun) GetProcessRuleByCategoryIdAndOrder(ctx contex
 }
 
 func (r *ProcessRuleRepositoryBun) GetMapProcessRulesByLastOrder(ctx context.Context) (map[uuid.UUID]uuid.UUID, error) {
-	processRulesSubquery := []productentity.ProcessRule{}
-	processRules := []productentity.ProcessRule{}
+	processRulesSubquery := []model.ProcessRule{}
+	processRules := []model.ProcessRule{}
 	mapProcesses := map[uuid.UUID]uuid.UUID{}
 
 	r.mu.Lock()
@@ -198,8 +198,8 @@ func (r *ProcessRuleRepositoryBun) IsLastProcessRuleByID(ctx context.Context, id
 	return false, nil
 }
 
-func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Context, id string) ([]productentity.ProcessRule, error) {
-	processRules := []productentity.ProcessRule{}
+func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Context, id string) ([]model.ProcessRule, error) {
+	processRules := []model.ProcessRule{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -215,8 +215,8 @@ func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Conte
 	return processRules, nil
 }
 
-func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context) ([]productentity.ProcessRule, error) {
-	processRules := []productentity.ProcessRule{}
+func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context) ([]model.ProcessRule, error) {
+	processRules := []model.ProcessRule{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -232,8 +232,8 @@ func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context) ([]pr
 	return processRules, nil
 }
 
-func (r *ProcessRuleRepositoryBun) GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]productentity.ProcessRule, error) {
-	processRules := []productentity.ProcessRule{}
+func (r *ProcessRuleRepositoryBun) GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]model.ProcessRule, error) {
+	processRules := []model.ProcessRule{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

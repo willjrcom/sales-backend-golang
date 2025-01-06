@@ -6,7 +6,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type AddressRepositoryBun struct {
@@ -18,7 +18,7 @@ func NewAddressRepositoryBun(db *bun.DB) *AddressRepositoryBun {
 	return &AddressRepositoryBun{db: db}
 }
 
-func (r *AddressRepositoryBun) CreateAddress(ctx context.Context, c *addressentity.Address) error {
+func (r *AddressRepositoryBun) CreateAddress(ctx context.Context, c *model.Address) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -32,7 +32,7 @@ func (r *AddressRepositoryBun) CreateAddress(ctx context.Context, c *addressenti
 	return nil
 }
 
-func (r *AddressRepositoryBun) UpdateAddress(ctx context.Context, c *addressentity.Address) error {
+func (r *AddressRepositoryBun) UpdateAddress(ctx context.Context, c *model.Address) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -55,15 +55,15 @@ func (r *AddressRepositoryBun) DeleteAddress(ctx context.Context, id string) err
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&addressentity.Address{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&model.Address{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *AddressRepositoryBun) GetAddressById(ctx context.Context, id string) (*addressentity.Address, error) {
-	aAddress := &addressentity.Address{}
+func (r *AddressRepositoryBun) GetAddressById(ctx context.Context, id string) (*model.Address, error) {
+	aAddress := &model.Address{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -79,8 +79,8 @@ func (r *AddressRepositoryBun) GetAddressById(ctx context.Context, id string) (*
 	return aAddress, nil
 }
 
-func (r *AddressRepositoryBun) GetAllAddress(ctx context.Context) ([]addressentity.Address, error) {
-	addresss := []addressentity.Address{}
+func (r *AddressRepositoryBun) GetAllAddress(ctx context.Context) ([]model.Address, error) {
+	addresss := []model.Address{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

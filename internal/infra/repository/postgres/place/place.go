@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type PlaceRepositoryBun struct {
@@ -19,7 +19,7 @@ func NewPlaceRepositoryBun(db *bun.DB) *PlaceRepositoryBun {
 	return &PlaceRepositoryBun{db: db}
 }
 
-func (r *PlaceRepositoryBun) CreatePlace(ctx context.Context, s *tableentity.Place) error {
+func (r *PlaceRepositoryBun) CreatePlace(ctx context.Context, s *model.Place) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -34,7 +34,7 @@ func (r *PlaceRepositoryBun) CreatePlace(ctx context.Context, s *tableentity.Pla
 	return nil
 }
 
-func (r *PlaceRepositoryBun) UpdatePlace(ctx context.Context, s *tableentity.Place) error {
+func (r *PlaceRepositoryBun) UpdatePlace(ctx context.Context, s *model.Place) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -57,15 +57,15 @@ func (r *PlaceRepositoryBun) DeletePlace(ctx context.Context, id string) error {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&tableentity.Place{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&model.Place{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *PlaceRepositoryBun) GetPlaceById(ctx context.Context, id string) (*tableentity.Place, error) {
-	place := &tableentity.Place{}
+func (r *PlaceRepositoryBun) GetPlaceById(ctx context.Context, id string) (*model.Place, error) {
+	place := &model.Place{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -81,8 +81,8 @@ func (r *PlaceRepositoryBun) GetPlaceById(ctx context.Context, id string) (*tabl
 	return place, nil
 }
 
-func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context) ([]tableentity.Place, error) {
-	places := make([]tableentity.Place, 0)
+func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context) ([]model.Place, error) {
+	places := make([]model.Place, 0)
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -98,7 +98,7 @@ func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context) ([]tableentity.Pl
 	return places, nil
 }
 
-func (r *PlaceRepositoryBun) AddTableToPlace(ctx context.Context, placeToTables *tableentity.PlaceToTables) error {
+func (r *PlaceRepositoryBun) AddTableToPlace(ctx context.Context, placeToTables *model.PlaceToTables) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -112,7 +112,7 @@ func (r *PlaceRepositoryBun) AddTableToPlace(ctx context.Context, placeToTables 
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model(&tableentity.PlaceToTables{}).Where("table_id = ?", placeToTables.TableID).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.PlaceToTables{}).Where("table_id = ?", placeToTables.TableID).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -129,7 +129,7 @@ func (r *PlaceRepositoryBun) AddTableToPlace(ctx context.Context, placeToTables 
 	return nil
 }
 
-func (r *PlaceRepositoryBun) GetTableToPlaceByTableID(ctx context.Context, tableID uuid.UUID) (*tableentity.PlaceToTables, error) {
+func (r *PlaceRepositoryBun) GetTableToPlaceByTableID(ctx context.Context, tableID uuid.UUID) (*model.PlaceToTables, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -137,7 +137,7 @@ func (r *PlaceRepositoryBun) GetTableToPlaceByTableID(ctx context.Context, table
 		return nil, err
 	}
 
-	placeToTable := &tableentity.PlaceToTables{}
+	placeToTable := &model.PlaceToTables{}
 
 	if err := r.db.NewSelect().Model(placeToTable).Where("table_id = ?", tableID).Scan(ctx); err != nil {
 		return nil, err
@@ -146,7 +146,7 @@ func (r *PlaceRepositoryBun) GetTableToPlaceByTableID(ctx context.Context, table
 	return placeToTable, nil
 }
 
-func (r *PlaceRepositoryBun) GetTableToPlaceByPlaceIDAndPosition(ctx context.Context, placeID uuid.UUID, column, row int) (*tableentity.PlaceToTables, error) {
+func (r *PlaceRepositoryBun) GetTableToPlaceByPlaceIDAndPosition(ctx context.Context, placeID uuid.UUID, column, row int) (*model.PlaceToTables, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -154,7 +154,7 @@ func (r *PlaceRepositoryBun) GetTableToPlaceByPlaceIDAndPosition(ctx context.Con
 		return nil, err
 	}
 
-	placeToTable := &tableentity.PlaceToTables{}
+	placeToTable := &model.PlaceToTables{}
 
 	if err := r.db.NewSelect().Model(placeToTable).
 		Where("place_id = ? AND \"column\" = ? AND row = ?", placeID.String(), column, row).Relation("Table").Relation("Place").Scan(ctx); err != nil {
@@ -172,7 +172,7 @@ func (r *PlaceRepositoryBun) RemoveTableFromPlace(ctx context.Context, tableID u
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&tableentity.PlaceToTables{}).Where("table_id = ?", tableID).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&model.PlaceToTables{}).Where("table_id = ?", tableID).Exec(ctx); err != nil {
 		return err
 	}
 

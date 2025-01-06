@@ -10,6 +10,7 @@ import (
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 	quantitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/quantity"
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size"
 )
@@ -19,12 +20,12 @@ var (
 )
 
 type Service struct {
-	r  productentity.CategoryRepository
+	r  model.CategoryRepository
 	sq quantityusecases.Service
 	ss sizeusecases.Service
 }
 
-func NewService(c productentity.CategoryRepository) *Service {
+func NewService(c model.CategoryRepository) *Service {
 	return &Service{r: c}
 }
 

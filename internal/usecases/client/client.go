@@ -10,19 +10,20 @@ import (
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
 	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
 )
 
 type Service struct {
-	rclient  cliententity.Repository
-	rcontact personentity.ContactRepository
+	rclient  model.ClientRepository
+	rcontact model.ContactRepository
 }
 
-func NewService(rcliente cliententity.Repository) *Service {
+func NewService(rcliente model.ClientRepository) *Service {
 	return &Service{rclient: rcliente}
 }
 
-func (s *Service) AddDependencies(rcontact personentity.ContactRepository) {
+func (s *Service) AddDependencies(rcontact model.ContactRepository) {
 	s.rcontact = rcontact
 }
 

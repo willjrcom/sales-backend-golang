@@ -5,7 +5,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	"golang.org/x/net/context"
 )
 
@@ -18,7 +18,7 @@ func NewShiftRepositoryBun(db *bun.DB) *ShiftRepositoryBun {
 	return &ShiftRepositoryBun{db: db}
 }
 
-func (r *ShiftRepositoryBun) CreateShift(ctx context.Context, c *shiftentity.Shift) error {
+func (r *ShiftRepositoryBun) CreateShift(ctx context.Context, c *model.Shift) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -33,7 +33,7 @@ func (r *ShiftRepositoryBun) CreateShift(ctx context.Context, c *shiftentity.Shi
 	return nil
 }
 
-func (r *ShiftRepositoryBun) UpdateShift(ctx context.Context, c *shiftentity.Shift) error {
+func (r *ShiftRepositoryBun) UpdateShift(ctx context.Context, c *model.Shift) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -56,15 +56,15 @@ func (r *ShiftRepositoryBun) DeleteShift(ctx context.Context, id string) error {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(&shiftentity.Shift{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewUpdate().Model(&model.Shift{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*shiftentity.Shift, error) {
-	shift := &shiftentity.Shift{}
+func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*model.Shift, error) {
+	shift := &model.Shift{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -80,8 +80,8 @@ func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*shif
 	return shift, nil
 }
 
-func (r *ShiftRepositoryBun) GetOpenedShift(ctx context.Context) (*shiftentity.Shift, error) {
-	shift := &shiftentity.Shift{}
+func (r *ShiftRepositoryBun) GetOpenedShift(ctx context.Context) (*model.Shift, error) {
+	shift := &model.Shift{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -97,8 +97,8 @@ func (r *ShiftRepositoryBun) GetOpenedShift(ctx context.Context) (*shiftentity.S
 	return shift, nil
 }
 
-func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context) ([]shiftentity.Shift, error) {
-	Shifts := []shiftentity.Shift{}
+func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context) ([]model.Shift, error) {
+	Shifts := []model.Shift{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

@@ -8,8 +8,7 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
-	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
-	productcategoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
@@ -18,14 +17,14 @@ var (
 )
 
 type Service struct {
-	rp        productentity.ProductRepository
-	rc        productentity.CategoryRepository
+	rp        model.ProductRepository
+	rc        model.CategoryRepository
 	s3Service *s3service.S3Client
 }
 
 func NewService(
-	rp *productrepositorybun.ProductRepositoryBun,
-	rc *productcategoryrepositorybun.ProductCategoryRepositoryBun,
+	rp model.ProductRepository,
+	rc model.CategoryRepository,
 	s3 *s3service.S3Client,
 ) *Service {
 	return &Service{

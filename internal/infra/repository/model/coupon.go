@@ -4,14 +4,13 @@ import (
 	"time"
 
 	"github.com/uptrace/bun"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 type Coupon struct {
-	entity.Entity
+	entitymodel.Entity
 	bun.BaseModel `bun:"table:coupons"`
 	CouponCommonAttributes
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type CouponCommonAttributes struct {

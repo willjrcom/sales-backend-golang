@@ -5,16 +5,14 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
-	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 type Order struct {
-	entity.Entity
+	entitymodel.Entity
 	bun.BaseModel `bun:"table:orders,alias:order"`
 	OrderTimeLogs
 	OrderCommonAttributes
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type OrderCommonAttributes struct {
@@ -27,14 +25,14 @@ type OrderCommonAttributes struct {
 }
 
 type OrderDetail struct {
-	TotalPayable  float64                  `bun:"total_payable"`
-	TotalPaid     float64                  `bun:"total_paid"`
-	TotalChange   float64                  `bun:"total_change"`
-	QuantityItems float64                  `bun:"quantity_items"`
-	Observation   string                   `bun:"observation"`
-	AttendantID   *uuid.UUID               `bun:"column:attendant_id,type:uuid,notnull"`
-	Attendant     *employeeentity.Employee `bun:"rel:belongs-to"`
-	ShiftID       *uuid.UUID               `bun:"column:shift_id,type:uuid"`
+	TotalPayable  float64    `bun:"total_payable"`
+	TotalPaid     float64    `bun:"total_paid"`
+	TotalChange   float64    `bun:"total_change"`
+	QuantityItems float64    `bun:"quantity_items"`
+	Observation   string     `bun:"observation"`
+	AttendantID   *uuid.UUID `bun:"column:attendant_id,type:uuid,notnull"`
+	Attendant     *Employee  `bun:"rel:belongs-to"`
+	ShiftID       *uuid.UUID `bun:"column:shift_id,type:uuid"`
 }
 
 type OrderType struct {

@@ -7,18 +7,19 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type Service struct {
-	rs productentity.SizeRepository
-	rc productentity.CategoryRepository
+	rs model.SizeRepository
+	rc model.CategoryRepository
 }
 
-func NewService(rs productentity.SizeRepository) *Service {
+func NewService(rs model.SizeRepository) *Service {
 	return &Service{rs: rs}
 }
 
-func (s *Service) AddDependencies(rc productentity.CategoryRepository) {
+func (s *Service) AddDependencies(rc model.CategoryRepository) {
 	s.rc = rc
 }
 

@@ -9,6 +9,7 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	itemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/item"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 var (
@@ -21,19 +22,19 @@ var (
 )
 
 type Service struct {
-	ri  orderentity.ItemRepository
-	rgi orderentity.GroupItemRepository
-	ro  orderentity.OrderRepository
-	rp  productentity.ProductRepository
-	rq  productentity.QuantityRepository
-	rc  productentity.CategoryRepository
+	ri  model.ItemRepository
+	rgi model.GroupItemRepository
+	ro  model.OrderRepository
+	rp  model.ProductRepository
+	rq  model.QuantityRepository
+	rc  model.CategoryRepository
 }
 
-func NewService(ri orderentity.ItemRepository) *Service {
+func NewService(ri model.ItemRepository) *Service {
 	return &Service{ri: ri}
 }
 
-func (s *Service) AddDependencies(rgi orderentity.GroupItemRepository, ro orderentity.OrderRepository, rp productentity.ProductRepository, rq productentity.QuantityRepository, rc productentity.CategoryRepository) {
+func (s *Service) AddDependencies(rgi model.GroupItemRepository, ro model.OrderRepository, rp model.ProductRepository, rq model.QuantityRepository, rc model.CategoryRepository) {
 	s.rgi = rgi
 	s.ro = ro
 	s.rp = rp

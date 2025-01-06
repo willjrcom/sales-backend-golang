@@ -1,14 +1,12 @@
 package model
 
 import (
-	"time"
-
 	"github.com/uptrace/bun"
-	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 type Client struct {
+	entitymodel.Entity
 	bun.BaseModel `bun:"table:clients"`
-	personentity.Person
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
+	Person
 }

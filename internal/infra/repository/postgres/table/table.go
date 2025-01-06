@@ -6,7 +6,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type TableRepositoryBun struct {
@@ -18,7 +18,7 @@ func NewTableRepositoryBun(db *bun.DB) *TableRepositoryBun {
 	return &TableRepositoryBun{db: db}
 }
 
-func (r *TableRepositoryBun) CreateTable(ctx context.Context, s *tableentity.Table) error {
+func (r *TableRepositoryBun) CreateTable(ctx context.Context, s *model.Table) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -33,7 +33,7 @@ func (r *TableRepositoryBun) CreateTable(ctx context.Context, s *tableentity.Tab
 	return nil
 }
 
-func (r *TableRepositoryBun) UpdateTable(ctx context.Context, s *tableentity.Table) error {
+func (r *TableRepositoryBun) UpdateTable(ctx context.Context, s *model.Table) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -56,15 +56,15 @@ func (r *TableRepositoryBun) DeleteTable(ctx context.Context, id string) error {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&tableentity.Table{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&model.Table{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *TableRepositoryBun) GetTableById(ctx context.Context, id string) (*tableentity.Table, error) {
-	table := &tableentity.Table{}
+func (r *TableRepositoryBun) GetTableById(ctx context.Context, id string) (*model.Table, error) {
+	table := &model.Table{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -80,8 +80,8 @@ func (r *TableRepositoryBun) GetTableById(ctx context.Context, id string) (*tabl
 	return table, nil
 }
 
-func (r *TableRepositoryBun) GetAllTables(ctx context.Context) ([]tableentity.Table, error) {
-	tables := make([]tableentity.Table, 0)
+func (r *TableRepositoryBun) GetAllTables(ctx context.Context) ([]model.Table, error) {
+	tables := make([]model.Table, 0)
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -97,8 +97,8 @@ func (r *TableRepositoryBun) GetAllTables(ctx context.Context) ([]tableentity.Ta
 	return tables, nil
 }
 
-func (r *TableRepositoryBun) GetUnusedTables(ctx context.Context) ([]tableentity.Table, error) {
-	tables := make([]tableentity.Table, 0)
+func (r *TableRepositoryBun) GetUnusedTables(ctx context.Context) ([]model.Table, error) {
+	tables := make([]model.Table, 0)
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -107,7 +107,7 @@ func (r *TableRepositoryBun) GetUnusedTables(ctx context.Context) ([]tableentity
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&tables).Where("id NOT IN (?)", r.db.NewSelect().Model((*tableentity.PlaceToTables)(nil)).
+	if err := r.db.NewSelect().Model(&tables).Where("id NOT IN (?)", r.db.NewSelect().Model((*model.PlaceToTables)(nil)).
 		Column("table_id")).Scan(ctx); err != nil {
 		return nil, err
 	}

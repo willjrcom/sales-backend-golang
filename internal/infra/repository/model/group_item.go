@@ -6,15 +6,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 type GroupItem struct {
-	entity.Entity
+	entitymodel.Entity
 	bun.BaseModel `bun:"table:order_group_items"`
 	GroupCommonAttributes
-	DeletedAt time.Time `bun:",soft_delete,nullzero"`
 }
 
 type GroupCommonAttributes struct {
@@ -25,17 +23,17 @@ type GroupCommonAttributes struct {
 }
 
 type GroupDetails struct {
-	Size             string                         `bun:"size,notnull"`
-	Status           StatusGroupItem                `bun:"status,notnull"`
-	TotalPrice       float64                        `bun:"total_price"`
-	Quantity         float64                        `bun:"quantity"`
-	NeedPrint        bool                           `bun:"need_print"`
-	UseProcessRule   bool                           `bun:"use_process_rule"`
-	Observation      string                         `bun:"observation"`
-	CategoryID       uuid.UUID                      `bun:"column:category_id,type:uuid,notnull"`
-	Category         *productentity.ProductCategory `bun:"rel:belongs-to"`
-	ComplementItemID *uuid.UUID                     `bun:"column:complement_item_id,type:uuid"`
-	ComplementItem   *Item                          `bun:"rel:belongs-to"`
+	Size             string           `bun:"size,notnull"`
+	Status           StatusGroupItem  `bun:"status,notnull"`
+	TotalPrice       float64          `bun:"total_price"`
+	Quantity         float64          `bun:"quantity"`
+	NeedPrint        bool             `bun:"need_print"`
+	UseProcessRule   bool             `bun:"use_process_rule"`
+	Observation      string           `bun:"observation"`
+	CategoryID       uuid.UUID        `bun:"column:category_id,type:uuid,notnull"`
+	Category         *ProductCategory `bun:"rel:belongs-to"`
+	ComplementItemID *uuid.UUID       `bun:"column:complement_item_id,type:uuid"`
+	ComplementItem   *Item            `bun:"rel:belongs-to"`
 }
 
 type GroupItemTimeLogs struct {

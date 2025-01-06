@@ -7,8 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
-	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type EmployeeRepositoryBun struct {
@@ -20,7 +19,7 @@ func NewEmployeeRepositoryBun(db *bun.DB) *EmployeeRepositoryBun {
 	return &EmployeeRepositoryBun{db: db}
 }
 
-func (r *EmployeeRepositoryBun) CreateEmployee(ctx context.Context, c *employeeentity.Employee) error {
+func (r *EmployeeRepositoryBun) CreateEmployee(ctx context.Context, c *model.Employee) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -36,7 +35,7 @@ func (r *EmployeeRepositoryBun) CreateEmployee(ctx context.Context, c *employeee
 	return nil
 }
 
-func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *employeeentity.Employee) error {
+func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *model.Employee) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -60,15 +59,15 @@ func (r *EmployeeRepositoryBun) DeleteEmployee(ctx context.Context, id string) e
 	}
 
 	// Delete employee
-	if _, err := r.db.NewDelete().Model(&employeeentity.Employee{}).Where("employee.id = ?", id).Exec(ctx); err != nil {
+	if _, err := r.db.NewDelete().Model(&model.Employee{}).Where("employee.id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) (*employeeentity.Employee, error) {
-	employee := &employeeentity.Employee{}
+func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) (*model.Employee, error) {
+	employee := &model.Employee{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -85,7 +84,7 @@ func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) 
 		return nil, err
 	}
 
-	user := &companyentity.User{}
+	user := &model.User{}
 	if err := r.db.NewSelect().Model(user).Where("u.id = ?", employee.UserID).Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
 		return nil, err
 	}
@@ -94,8 +93,8 @@ func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) 
 	return employee, nil
 }
 
-func (r *EmployeeRepositoryBun) GetEmployeeByUserID(ctx context.Context, userID string) (*employeeentity.Employee, error) {
-	employee := &employeeentity.Employee{}
+func (r *EmployeeRepositoryBun) GetEmployeeByUserID(ctx context.Context, userID string) (*model.Employee, error) {
+	employee := &model.Employee{}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -111,7 +110,7 @@ func (r *EmployeeRepositoryBun) GetEmployeeByUserID(ctx context.Context, userID 
 	return employee, nil
 }
 
-func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]employeeentity.Employee, error) {
+func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]model.Employee, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -119,7 +118,7 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]employee
 		return nil, err
 	}
 
-	employees := []employeeentity.Employee{}
+	employees := []model.Employee{}
 	if err := r.db.NewSelect().Model(&employees).Scan(ctx); err != nil {
 		return nil, err
 	}
@@ -134,7 +133,7 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]employee
 	}
 
 	// Consultar todos os Users de uma vez
-	users := []companyentity.User{}
+	users := []model.User{}
 	if err := r.db.NewSelect().
 		Model(&users).
 		Where("u.id IN (?)", bun.In(userIDs)).
@@ -145,7 +144,7 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]employee
 		return nil, err
 	}
 	// Mapear os usuários de volta para os funcionários
-	userMap := make(map[uuid.UUID]companyentity.User)
+	userMap := make(map[uuid.UUID]model.User)
 	for _, user := range users {
 		userMap[user.ID] = user
 	}

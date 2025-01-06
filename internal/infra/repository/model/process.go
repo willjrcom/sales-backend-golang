@@ -6,9 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 var (
@@ -17,20 +15,20 @@ var (
 )
 
 type OrderProcess struct {
-	entity.Entity
+	entitymodel.Entity
 	bun.BaseModel `bun:"table:order_processes,alias:process"`
 	OrderProcessTimeLogs
 	OrderProcessCommonAttributes
 }
 
 type OrderProcessCommonAttributes struct {
-	EmployeeID    *uuid.UUID              `bun:"employee_id,type:uuid"`
-	GroupItemID   uuid.UUID               `bun:"group_item_id,type:uuid,notnull"`
-	GroupItem     *orderentity.GroupItem  `bun:"rel:belongs-to,join:group_item_id=id"`
-	ProcessRuleID uuid.UUID               `bun:"process_rule_id,type:uuid,notnull"`
-	Status        StatusProcess           `bun:"status,notnull"`
-	Products      []productentity.Product `bun:"m2m:process_to_product_to_group_item,join:Process=Product"`
-	Queue         *OrderQueue             `bun:"rel:has-one,join:group_item_id=group_item_id,process_rule_id=process_rule_id"`
+	EmployeeID    *uuid.UUID    `bun:"employee_id,type:uuid"`
+	GroupItemID   uuid.UUID     `bun:"group_item_id,type:uuid,notnull"`
+	GroupItem     *GroupItem    `bun:"rel:belongs-to,join:group_item_id=id"`
+	ProcessRuleID uuid.UUID     `bun:"process_rule_id,type:uuid,notnull"`
+	Status        StatusProcess `bun:"status,notnull"`
+	Products      []Product     `bun:"m2m:process_to_product_to_group_item,join:Process=Product"`
+	Queue         *OrderQueue   `bun:"rel:has-one,join:group_item_id=group_item_id,process_rule_id=process_rule_id"`
 }
 
 type OrderProcessTimeLogs struct {
