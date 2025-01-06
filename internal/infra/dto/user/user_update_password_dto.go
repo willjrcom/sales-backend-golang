@@ -12,13 +12,13 @@ var (
 	ErrMustBeDifferentPassword = errors.New("must be different password")
 )
 
-type UpdatePasswordInput struct {
+type UserUpdatePasswordDTO struct {
 	Email           string `json:"email"`
 	CurrentPassword string `json:"current_password"`
 	NewPassword     string `json:"new_password"`
 }
 
-func (r *UpdatePasswordInput) validate() error {
+func (r *UserUpdatePasswordDTO) validate() error {
 	if !utils.IsEmailValid(r.Email) {
 		return ErrEmailInvalid
 	}
@@ -34,7 +34,7 @@ func (r *UpdatePasswordInput) validate() error {
 	return nil
 }
 
-func (r *UpdatePasswordInput) ToModel() (*companyentity.User, error) {
+func (r *UserUpdatePasswordDTO) ToModel() (*companyentity.User, error) {
 	if err := r.validate(); err != nil {
 		return nil, err
 	}

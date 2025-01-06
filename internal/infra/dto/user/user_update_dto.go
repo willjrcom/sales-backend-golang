@@ -3,9 +3,11 @@ package userdto
 import (
 	"errors"
 	"strings"
+	"time"
 
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
-	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
+	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
+	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 )
 
 var (
@@ -13,7 +15,12 @@ var (
 )
 
 type UpdateUser struct {
-	personentity.PatchPerson
+	Name     *string                      `json:"name"`
+	Email    *string                      `json:"email"`
+	Cpf      *string                      `json:"cpf"`
+	Birthday *time.Time                   `json:"birthday"`
+	Contact  *contactdto.ContactUpdateDTO `json:"contact"`
+	Address  *addressdto.AddressUpdateDTO `json:"address"`
 }
 
 func (r *UpdateUser) validate() error {
@@ -32,9 +39,6 @@ func (r *UpdateUser) UpdateModel(user *companyentity.User) error {
 	if r.Name != nil {
 		user.Person.Name = *r.Name
 	}
-	if r.Email != nil {
-		user.Email = *r.Email
-	}
 	if r.Cpf != nil {
 		user.Person.Cpf = *r.Cpf
 	}
@@ -42,17 +46,13 @@ func (r *UpdateUser) UpdateModel(user *companyentity.User) error {
 		user.Person.Birthday = r.Birthday
 	}
 	if r.Contact != nil {
-		if err := user.AddContact(r.Contact, personentity.ContactTypeEmployee); err != nil {
-			return err
-		}
+		r.Contact.UpdateDomain(user.Person.Contact)
 	} else {
 		user.Contact = nil
 	}
 
 	if r.Address != nil {
-		if err := user.AddAddress(r.Address); err != nil {
-			return err
-		}
+		r.Address.UpdateDomain(user.Address)
 	} else {
 		user.Address = nil
 	}

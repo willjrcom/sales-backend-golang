@@ -52,7 +52,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &userdto.CreateUserInput{}
+	dtoUser := &userdto.UserCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -70,7 +70,7 @@ func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request)
 func (h *handlerUserImpl) handlerUpdateUserPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &userdto.UpdatePasswordInput{}
+	dtoUser := &userdto.UserUpdatePasswordDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -87,7 +87,7 @@ func (h *handlerUserImpl) handlerUpdateUserPassword(w http.ResponseWriter, r *ht
 func (h *handlerUserImpl) handlerForgetUserPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &userdto.ForgetUserPassword{}
+	dtoUser := &userdto.UserForgetPasswordDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -130,7 +130,7 @@ func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Reque
 func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &userdto.LoginUserInput{}
+	dtoUser := &userdto.UserLoginDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -155,7 +155,7 @@ func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	dtoSchema := &userdto.AccessCompanyInput{}
+	dtoSchema := &userdto.UserSchemaDTO{}
 	if err := jsonpkg.ParseBody(r, dtoSchema); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -173,7 +173,7 @@ func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) 
 func (h *handlerUserImpl) handlerDeleteUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &userdto.DeleteUserInput{}
+	dtoUser := &userdto.UserDeleteDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

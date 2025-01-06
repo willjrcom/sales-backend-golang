@@ -8,7 +8,6 @@ import (
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
-	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	keysdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/keys"
 	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
@@ -129,53 +128,4 @@ func clientsToDtos(clients []cliententity.Client) []clientdto.ClientOutput {
 	}
 
 	return dtos
-}
-
-func (s *Service) CreateContactToClient(ctx context.Context, dto *contactdto.CreateContactInput) (uuid.UUID, error) {
-	contact, err := dto.ToModel()
-
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	// Validate if exists
-	if _, err := s.rclient.GetClientById(ctx, contact.ObjectID.String()); err != nil {
-		return uuid.Nil, err
-	}
-
-	if err := s.rcontact.CreateContact(ctx, contact); err != nil {
-		return uuid.Nil, err
-	}
-
-	return contact.ID, nil
-}
-
-func (s *Service) UpdateContact(ctx context.Context, dtoId *entitydto.IdRequest, dto *contactdto.UpdateContactInput) error {
-	contact, err := s.rcontact.GetContactById(ctx, dtoId.ID.String())
-
-	if err != nil {
-		return err
-	}
-
-	if err := dto.UpdateModel(contact); err != nil {
-		return err
-	}
-
-	if err := s.rcontact.UpdateContact(ctx, contact); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *Service) DeleteContact(ctx context.Context, dtoId *entitydto.IdRequest) error {
-	if _, err := s.rcontact.GetContactById(ctx, dtoId.ID.String()); err != nil {
-		return err
-	}
-
-	if err := s.rcontact.DeleteContact(ctx, dtoId.ID.String()); err != nil {
-		return err
-	}
-
-	return nil
 }

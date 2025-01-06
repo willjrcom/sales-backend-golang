@@ -4,9 +4,10 @@ import (
 	"errors"
 	"time"
 
-	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
+	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
+	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 )
 
@@ -15,18 +16,18 @@ var (
 	ErrMustHaveAtLeastOneSchema = errors.New("must have at least one schema")
 )
 
-type CreateUserInput struct {
-	Email            string                      `json:"email"`
-	Password         string                      `json:"password"`
-	GeneratePassword bool                        `json:"generate_password"`
-	Name             string                      `json:"name"`
-	Cpf              string                      `json:"cpf,omitempty"`
-	Birthday         *time.Time                  `json:"birthday,omitempty"`
-	Contact          *personentity.Contact       `json:"contact,omitempty"`
-	Address          *addressentity.PatchAddress `json:"address,omitempty"`
+type UserCreateDTO struct {
+	Email            string                       `json:"email"`
+	Password         string                       `json:"password"`
+	GeneratePassword bool                         `json:"generate_password"`
+	Name             string                       `json:"name"`
+	Cpf              string                       `json:"cpf,omitempty"`
+	Birthday         *time.Time                   `json:"birthday,omitempty"`
+	Contact          *contactdto.ContactCreateDTO `json:"contact,omitempty"`
+	Address          *addressdto.AddressCreateDTO `json:"address,omitempty"`
 }
 
-func (u *CreateUserInput) validate() error {
+func (u *UserCreateDTO) validate() error {
 	if !utils.IsEmailValid(u.Email) {
 		return ErrEmailInvalid
 	}
@@ -53,7 +54,7 @@ func (u *CreateUserInput) validate() error {
 	return nil
 }
 
-func (u *CreateUserInput) ToModel() (*companyentity.User, error) {
+func (u *UserCreateDTO) ToModel() (*companyentity.User, error) {
 	if err := u.validate(); err != nil {
 		return nil, err
 	}
@@ -72,12 +73,21 @@ func (u *CreateUserInput) ToModel() (*companyentity.User, error) {
 	person := personentity.NewPerson(personCommonAttributes)
 
 	if u.Contact != nil {
-		if err := person.AddContact(&u.Contact.ContactCommonAttributes, personentity.ContactTypeEmployee); err != nil {
+		contact, err := u.Contact.ToModel()
+		if err != nil {
+			return nil, err
+		}
+		if err := person.AddContact(contact); err != nil {
 			return nil, err
 		}
 	}
 	if u.Address != nil {
-		if err := person.AddAddress(u.Address); err != nil {
+		address, err := u.Address.ToModel(false)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := person.AddAddress(address); err != nil {
 			return nil, err
 		}
 	}

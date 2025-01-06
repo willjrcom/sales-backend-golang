@@ -3,9 +3,11 @@ package clientdto
 import (
 	"errors"
 	"strings"
+	"time"
 
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
-	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
+	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
+	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 )
 
 var (
@@ -13,7 +15,12 @@ var (
 )
 
 type UpdateClientInput struct {
-	personentity.PatchPerson
+	Name     *string                      `json:"name"`
+	Email    *string                      `json:"email"`
+	Cpf      *string                      `json:"cpf"`
+	Birthday *time.Time                   `json:"birthday"`
+	Contact  *contactdto.ContactUpdateDTO `json:"contact"`
+	Address  *addressdto.AddressUpdateDTO `json:"address"`
 }
 
 func (r *UpdateClientInput) validate() error {
@@ -46,14 +53,10 @@ func (r *UpdateClientInput) UpdateModel(client *cliententity.Client) error {
 		client.Birthday = r.Birthday
 	}
 	if r.Contact != nil {
-		if err := client.AddContact(r.Contact, personentity.ContactTypeClient); err != nil {
-			return err
-		}
+		r.Contact.UpdateDomain(client.Contact)
 	}
 	if r.Address != nil {
-		if err := client.AddAddress(r.Address); err != nil {
-			return err
-		}
+		r.Address.UpdateDomain(client.Address)
 	}
 
 	return nil

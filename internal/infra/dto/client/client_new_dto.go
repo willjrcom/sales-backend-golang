@@ -3,9 +3,12 @@ package clientdto
 import (
 	"errors"
 	"strings"
+	"time"
 
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
+	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
+	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 )
 
 var (
@@ -16,26 +19,26 @@ var (
 )
 
 type CreateClientInput struct {
-	personentity.PatchPerson
+	Name     string
+	Email    *string
+	Cpf      *string
+	Birthday *time.Time
+	Contact  *contactdto.ContactCreateDTO
+	Address  *addressdto.AddressCreateDTO
 }
 
 func (r *CreateClientInput) validate() error {
-	if r.Name == nil || *r.Name == "" {
+	if r.Name == "" {
 		return ErrNameRequired
+	}
+	if r.Email != nil && !strings.Contains(*r.Email, "@") {
+		return ErrInvalidEmail
 	}
 	if r.Contact == nil {
 		return ErrContactRequired
 	}
 	if r.Address == nil {
 		return ErrAddressRequired
-	}
-
-	if r.Address != nil && r.Address.DeliveryTax != nil && *r.Address.DeliveryTax == 0 {
-		return ErrDeliveryTaxRequired
-	}
-
-	if r.Email != nil && !strings.Contains(*r.Email, "@") {
-		return ErrInvalidEmail
 	}
 
 	return nil
@@ -47,7 +50,7 @@ func (r *CreateClientInput) ToModel() (*cliententity.Client, error) {
 	}
 
 	personCommonAttributes := &personentity.PersonCommonAttributes{
-		Name: *r.Name,
+		Name: r.Name,
 	}
 
 	// Create person
@@ -64,15 +67,27 @@ func (r *CreateClientInput) ToModel() (*cliententity.Client, error) {
 		person.Birthday = r.Birthday
 	}
 
-	if err := person.AddContact(r.Contact, personentity.ContactTypeClient); err != nil {
+	// Contact
+	contact, err := r.Contact.ToModel()
+	if err != nil {
 		return nil, err
 	}
 
-	if err := person.AddAddress(r.Address); err != nil {
+	contact.Type = personentity.ContactTypeClient
+
+	if err := person.AddContact(contact); err != nil {
 		return nil, err
 	}
 
-	return &cliententity.Client{
-		Person: *person,
-	}, nil
+	// Address
+	address, err := r.Address.ToModel(true)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := person.AddAddress(address); err != nil {
+		return nil, err
+	}
+
+	return cliententity.NewClient(person), nil
 }

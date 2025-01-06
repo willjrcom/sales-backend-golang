@@ -8,18 +8,18 @@ var (
 	ErrSchemaRequired = errors.New("schema required")
 )
 
-type AccessCompanyInput struct {
+type UserSchemaDTO struct {
 	Schema *string `json:"schema"`
 }
 
-func (u *AccessCompanyInput) validate() error {
+func (u *UserSchemaDTO) validate() error {
 	if u.Schema == nil {
 		return ErrSchemaRequired
 	}
 	return nil
 }
 
-func (u *AccessCompanyInput) ToModel() (*string, error) {
+func (u *UserSchemaDTO) ToModel() (*string, error) {
 	if err := u.validate(); err != nil {
 		return nil, err
 	}

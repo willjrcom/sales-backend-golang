@@ -119,7 +119,7 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserInpu
 	}
 
 	if userID == nil {
-		createUserInput := &userdto.CreateUserInput{
+		createUserInput := &userdto.UserCreateDTO{
 			Email:            user.Email,
 			GeneratePassword: true,
 		}

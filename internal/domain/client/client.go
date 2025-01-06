@@ -7,3 +7,9 @@ import (
 type Client struct {
 	personentity.Person
 }
+
+func NewClient(person *personentity.Person) *Client {
+	return &Client{
+		Person: *person,
+	}
+}

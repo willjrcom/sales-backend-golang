@@ -21,15 +21,6 @@ type PersonCommonAttributes struct {
 	Address  *addressentity.Address
 }
 
-type PatchPerson struct {
-	Name     *string                     `json:"name"`
-	Email    *string                     `json:"email"`
-	Cpf      *string                     `json:"cpf"`
-	Birthday *time.Time                  `json:"birthday"`
-	Contact  *ContactCommonAttributes    `json:"contact"`
-	Address  *addressentity.PatchAddress `json:"address"`
-}
-
 func NewPerson(personCommonAttributes *PersonCommonAttributes) *Person {
 	return &Person{
 		Entity:                 entity.NewEntity(),
@@ -37,20 +28,14 @@ func NewPerson(personCommonAttributes *PersonCommonAttributes) *Person {
 	}
 }
 
-func (p *Person) AddContact(contactInput *ContactCommonAttributes, contactType ContactType) error {
-	contactInput.Type = contactType
-
-	p.Contact = NewContact(contactInput)
+func (p *Person) AddContact(contact *Contact) error {
+	p.Contact = contact
 	p.Contact.ObjectID = p.ID
 	return nil
 }
 
-func (p *Person) AddAddress(patchAddress *addressentity.PatchAddress) error {
-	p.Address = addressentity.NewAddressFromPatch(patchAddress, p.ID)
-
-	if err := p.Address.Validate(); err != nil {
-		return err
-	}
-
+func (p *Person) AddAddress(patchAddress *addressentity.Address) error {
+	p.Address = patchAddress
+	p.Address.ObjectID = p.ID
 	return nil
 }

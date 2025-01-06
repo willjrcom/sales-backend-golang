@@ -29,7 +29,7 @@ func NewService(r companyentity.UserRepository) *Service {
 	return &Service{r: r}
 }
 
-func (s *Service) CreateUser(ctx context.Context, dto *userdto.CreateUserInput) (*uuid.UUID, error) {
+func (s *Service) CreateUser(ctx context.Context, dto *userdto.UserCreateDTO) (*uuid.UUID, error) {
 	user, err := dto.ToModel()
 
 	if err != nil {
@@ -50,7 +50,7 @@ func (s *Service) CreateUser(ctx context.Context, dto *userdto.CreateUserInput) 
 	return &user.ID, s.r.CreateUser(ctx, user)
 }
 
-func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UpdatePasswordInput) error {
+func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UserUpdatePasswordDTO) error {
 	user, err := dto.ToModel()
 
 	if err != nil {
@@ -76,7 +76,7 @@ func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UpdatePas
 	return s.r.UpdateUser(ctx, user)
 }
 
-func (s *Service) ForgetUserPassword(ctx context.Context, dto *userdto.ForgetUserPassword) error {
+func (s *Service) ForgetUserPassword(ctx context.Context, dto *userdto.UserForgetPasswordDTO) error {
 	email, err := dto.ToModel()
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IdRequest, dt
 	return s.r.UpdateUser(ctx, user)
 }
 
-func (s *Service) LoginUser(ctx context.Context, dto *userdto.LoginUserInput) (data *userdto.TokenAndSchemasOutput, err error) {
+func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (data *userdto.TokenAndSchemasOutput, err error) {
 	user, err := dto.ToModel()
 
 	if err != nil {
@@ -127,7 +127,7 @@ func (s *Service) LoginUser(ctx context.Context, dto *userdto.LoginUserInput) (d
 	return data, nil
 }
 
-func (s *Service) Access(ctx context.Context, dto *userdto.AccessCompanyInput, accessToken *jwt.Token) (token string, err error) {
+func (s *Service) Access(ctx context.Context, dto *userdto.UserSchemaDTO, accessToken *jwt.Token) (token string, err error) {
 	schema, err := dto.ToModel()
 
 	if err != nil {
@@ -162,7 +162,7 @@ func findSchemaInSchemas(schemas []interface{}, schema string) bool {
 	return false
 }
 
-func (s *Service) DeleteUser(ctx context.Context, dto *userdto.DeleteUserInput) error {
+func (s *Service) DeleteUser(ctx context.Context, dto *userdto.UserDeleteDTO) error {
 	user, err := dto.ToModel()
 
 	if err != nil {

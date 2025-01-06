@@ -8,7 +8,6 @@ import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
-	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	employeedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/employee"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 )
@@ -117,53 +116,4 @@ func employeesToDtos(employees []employeeentity.Employee) []employeedto.Employee
 	}
 
 	return dtos
-}
-
-func (s *Service) CreateContactToEmployee(ctx context.Context, dto *contactdto.CreateContactInput) (*uuid.UUID, error) {
-	contact, err := dto.ToModel()
-
-	if err != nil {
-		return nil, err
-	}
-
-	// Validate if exists
-	if _, err := s.re.GetEmployeeById(ctx, contact.ObjectID.String()); err != nil {
-		return nil, err
-	}
-
-	if err := s.rc.CreateContact(ctx, contact); err != nil {
-		return nil, err
-	}
-
-	return &contact.ID, nil
-}
-
-func (s *Service) UpdateContact(ctx context.Context, dtoId *entitydto.IdRequest, dto *contactdto.UpdateContactInput) error {
-	contact, err := s.rc.GetContactById(ctx, dtoId.ID.String())
-
-	if err != nil {
-		return err
-	}
-
-	if err := dto.UpdateModel(contact); err != nil {
-		return err
-	}
-
-	if err := s.rc.UpdateContact(ctx, contact); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *Service) DeleteContact(ctx context.Context, dtoId *entitydto.IdRequest) error {
-	if _, err := s.rc.GetContactById(ctx, dtoId.ID.String()); err != nil {
-		return err
-	}
-
-	if err := s.rc.DeleteContact(ctx, dtoId.ID.String()); err != nil {
-		return err
-	}
-
-	return nil
 }

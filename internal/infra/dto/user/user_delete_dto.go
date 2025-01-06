@@ -6,24 +6,24 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 )
 
-type LoginUserInput struct {
+type UserDeleteDTO struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-func (u *LoginUserInput) validate() error {
+func (u *UserDeleteDTO) validate() error {
 	if !utils.IsEmailValid(u.Email) {
 		return ErrEmailInvalid
 	}
 
-	if err := utils.ValidatePassword(u.Password); err != nil && u.Password != "12345" {
+	if err := utils.ValidatePassword(u.Password); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (u *LoginUserInput) ToModel() (*companyentity.User, error) {
+func (u *UserDeleteDTO) ToModel() (*companyentity.User, error) {
 	if err := u.validate(); err != nil {
 		return nil, err
 	}
