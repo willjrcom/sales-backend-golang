@@ -36,7 +36,7 @@ func (s *Service) AddDependencies(a addressentity.Repository, ss schemaservice.S
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (id uuid.UUID, schemaName *string, err error) {
-	cnpjString, tradeName, email, contacts, err := dto.ToModel()
+	cnpjString, tradeName, email, contacts, err := dto.ToDomain()
 	if err != nil {
 		return uuid.Nil, nil, err
 	}
@@ -89,7 +89,7 @@ func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyDTO, error
 		return nil, err
 	} else {
 		output := &companydto.CompanyDTO{}
-		output.FromModel(company)
+		output.FromDomain(company)
 		return output, nil
 	}
 }

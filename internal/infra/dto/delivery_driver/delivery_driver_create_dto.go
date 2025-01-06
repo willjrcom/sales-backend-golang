@@ -23,7 +23,7 @@ func (s *DeliveryDriverCreateDTO) validate() error {
 	return nil
 }
 
-func (s *DeliveryDriverCreateDTO) ToModel() (*orderentity.DeliveryDriver, error) {
+func (s *DeliveryDriverCreateDTO) ToDomain() (*orderentity.DeliveryDriver, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}

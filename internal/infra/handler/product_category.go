@@ -39,7 +39,7 @@ func NewHandlerProductCategory(categoryService *productcategoryusecases.Service)
 func (h *handlerProductCategoryImpl) handlerCreateProductCategory(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoCategory := &productcategorydto.CreateCategoryInput{}
+	dtoCategory := &productcategorydto.CategoryCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoCategory); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -64,9 +64,9 @@ func (h *handlerProductCategoryImpl) handlerUpdateProductCategory(w http.Respons
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	dtoCategory := &productcategorydto.UpdateCategoryInput{}
+	dtoCategory := &productcategorydto.CategoryUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoCategory); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -89,7 +89,7 @@ func (h *handlerProductCategoryImpl) handlerDeleteProductCategory(w http.Respons
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteCategoryById(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -108,7 +108,7 @@ func (h *handlerProductCategoryImpl) handlerGetProductCategory(w http.ResponseWr
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	category, err := h.s.GetCategoryById(ctx, dtoId)
 

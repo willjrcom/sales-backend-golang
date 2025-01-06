@@ -8,7 +8,7 @@ import (
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 )
 
-func (s *Service) DeleteOrderByID(ctx context.Context, dtoId *entitydto.IdRequest) error {
+func (s *Service) DeleteOrderByID(ctx context.Context, dtoId *entitydto.IDRequest) error {
 	order, err := s.ro.GetOrderById(ctx, dtoId.ID.String())
 	if err != nil {
 		return err

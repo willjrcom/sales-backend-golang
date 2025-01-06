@@ -64,7 +64,7 @@ func (h *handlerPlaceImpl) handlerDeletePlaceById(w http.ResponseWriter, r *http
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeletePlace(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -84,7 +84,7 @@ func (h *handlerPlaceImpl) handlerGetPlaceById(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	place, err := h.s.GetPlaceById(ctx, dtoId)
 	if err != nil {
@@ -105,9 +105,9 @@ func (h *handlerPlaceImpl) handlerUpdatePlaceById(w http.ResponseWriter, r *http
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	dtoPlace := &placedto.UpdatePlaceInput{}
+	dtoPlace := &placedto.PlaceUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoPlace); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -136,7 +136,7 @@ func (h *handlerPlaceImpl) handlerGetAllPlaces(w http.ResponseWriter, r *http.Re
 func (h *handlerPlaceImpl) handlerAddTableToPlace(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dto := &placedto.AddTableToPlaceInput{}
+	dto := &placedto.PlaceUpdateTableDTO{}
 	if err := jsonpkg.ParseBody(r, dto); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -160,7 +160,7 @@ func (h *handlerPlaceImpl) handlerRemoveTableFromPlace(w http.ResponseWriter, r 
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.RemoveTableFromPlace(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})

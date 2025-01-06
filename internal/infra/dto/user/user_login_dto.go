@@ -23,7 +23,7 @@ func (u *UserLoginDTO) validate() error {
 	return nil
 }
 
-func (u *UserLoginDTO) ToModel() (*companyentity.User, error) {
+func (u *UserLoginDTO) ToDomain() (*companyentity.User, error) {
 	if err := u.validate(); err != nil {
 		return nil, err
 	}

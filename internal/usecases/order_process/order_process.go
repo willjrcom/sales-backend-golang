@@ -38,8 +38,8 @@ func (s *Service) AddDependencies(sq *orderqueueusecases.Service, rpr productent
 	s.se = se
 }
 
-func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.CreateProcessInput) (uuid.UUID, error) {
-	process, err := dto.ToModel()
+func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.OrderProcessCreateDTO) (uuid.UUID, error) {
+	process, err := dto.ToDomain()
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -75,7 +75,7 @@ func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.Create
 	return process.ID, nil
 }
 
-func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IdRequest) error {
+func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IDRequest) error {
 	user := ctx.Value(companyentity.UserValue("user")).(companyentity.User)
 	employee, err := s.se.GetEmployeeByUserID(ctx, entitydto.NewIdRequest(user.ID))
 	if err != nil {
@@ -114,7 +114,7 @@ func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IdRequest) 
 	return nil
 }
 
-func (s *Service) PauseProcess(ctx context.Context, dtoID *entitydto.IdRequest) error {
+func (s *Service) PauseProcess(ctx context.Context, dtoID *entitydto.IDRequest) error {
 	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
 		return err
@@ -131,7 +131,7 @@ func (s *Service) PauseProcess(ctx context.Context, dtoID *entitydto.IdRequest) 
 	return nil
 }
 
-func (s *Service) ContinueProcess(ctx context.Context, dtoID *entitydto.IdRequest) error {
+func (s *Service) ContinueProcess(ctx context.Context, dtoID *entitydto.IDRequest) error {
 	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
 		return err
@@ -148,7 +148,7 @@ func (s *Service) ContinueProcess(ctx context.Context, dtoID *entitydto.IdReques
 	return nil
 }
 
-func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest) (nextProcessID uuid.UUID, err error) {
+func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IDRequest) (nextProcessID uuid.UUID, err error) {
 	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
 		return uuid.Nil, err
@@ -169,7 +169,7 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 
 	// Processes finished
 	if last {
-		entityDtoID := &entitydto.IdRequest{ID: process.GroupItemID}
+		entityDtoID := &entitydto.IDRequest{ID: process.GroupItemID}
 		if err := s.rsgi.ReadyGroupItem(ctx, entityDtoID); err != nil {
 			return uuid.Nil, err
 		}
@@ -195,11 +195,9 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 		return uuid.Nil, nil
 	}
 
-	startQueueInput := &orderqueuedto.StartQueueInput{
-		OrderQueueCommonAttributes: orderprocessentity.OrderQueueCommonAttributes{
-			GroupItemID: process.GroupItemID,
-		},
-		JoinedAt: *process.FinishedAt,
+	startQueueInput := &orderqueuedto.QueueCreateDTO{
+		GroupItemID: process.GroupItemID,
+		JoinedAt:    *process.FinishedAt,
 	}
 
 	if _, err := s.sq.StartQueue(ctx, startQueueInput); err != nil {
@@ -217,7 +215,7 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 	}
 
 	// Create next process
-	createProcessInput := &orderprocessdto.CreateProcessInput{
+	createProcessInput := &orderprocessdto.OrderProcessCreateDTO{
 		OrderProcessCommonAttributes: orderprocessentity.OrderProcessCommonAttributes{
 			GroupItemID:   process.GroupItemID,
 			ProcessRuleID: nextProcessRule.ID,
@@ -232,8 +230,8 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IdRequest)
 	return nextProcessID, nil
 }
 
-func (s *Service) CancelProcess(ctx context.Context, dtoID *entitydto.IdRequest, orderprocessdto *orderprocessdto.CancelProcess) error {
-	reason, err := orderprocessdto.ToModel()
+func (s *Service) CancelProcess(ctx context.Context, dtoID *entitydto.IDRequest, orderprocessdto *orderprocessdto.OrderProcessCancelDTO) error {
+	reason, err := orderprocessdto.ToDomain()
 	if err != nil {
 		return err
 	}
@@ -254,55 +252,55 @@ func (s *Service) CancelProcess(ctx context.Context, dtoID *entitydto.IdRequest,
 	return nil
 }
 
-func (s *Service) GetProcessById(ctx context.Context, dto *entitydto.IdRequest) (*orderprocessdto.ProcessOutput, error) {
+func (s *Service) GetProcessById(ctx context.Context, dto *entitydto.IDRequest) (*orderprocessdto.OrderProcessDTO, error) {
 	if process, err := s.r.GetProcessById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		processOutput := &orderprocessdto.ProcessOutput{}
-		processOutput.FromModel(process)
-		return processOutput, nil
+		processDTO := &orderprocessdto.OrderProcessDTO{}
+		processDTO.FromDomain(process)
+		return processDTO, nil
 	}
 }
 
-func (s *Service) GetAllProcesses(ctx context.Context) ([]orderprocessdto.ProcessOutput, error) {
+func (s *Service) GetAllProcesses(ctx context.Context) ([]orderprocessdto.OrderProcessDTO, error) {
 	if process, err := s.r.GetAllProcesses(ctx); err != nil {
 		return nil, err
 	} else {
-		return s.processesToOutputs(process), nil
+		return s.domainsToDTOs(process), nil
 	}
 }
 
-func (s *Service) GetProcessesByProcessRuleID(ctx context.Context, dtoID *entitydto.IdRequest) ([]orderprocessdto.ProcessOutput, error) {
+func (s *Service) GetProcessesByProcessRuleID(ctx context.Context, dtoID *entitydto.IDRequest) ([]orderprocessdto.OrderProcessDTO, error) {
 	if process, err := s.r.GetProcessesByProcessRuleID(ctx, dtoID.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return s.processesToOutputs(process), nil
+		return s.domainsToDTOs(process), nil
 	}
 }
 
-func (s *Service) GetProcessesByProductID(ctx context.Context, dtoID *entitydto.IdRequest) ([]orderprocessdto.ProcessOutput, error) {
+func (s *Service) GetProcessesByProductID(ctx context.Context, dtoID *entitydto.IDRequest) ([]orderprocessdto.OrderProcessDTO, error) {
 	if process, err := s.r.GetProcessesByProductID(ctx, dtoID.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return s.processesToOutputs(process), nil
+		return s.domainsToDTOs(process), nil
 	}
 }
 
-func (s *Service) GetProcessesByGroupItemID(ctx context.Context, dtoID *entitydto.IdRequest) ([]orderprocessdto.ProcessOutput, error) {
+func (s *Service) GetProcessesByGroupItemID(ctx context.Context, dtoID *entitydto.IDRequest) ([]orderprocessdto.OrderProcessDTO, error) {
 	if process, err := s.r.GetProcessesByGroupItemID(ctx, dtoID.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return s.processesToOutputs(process), nil
+		return s.domainsToDTOs(process), nil
 	}
 }
 
-func (s *Service) processesToOutputs(processes []orderprocessentity.OrderProcess) []orderprocessdto.ProcessOutput {
-	outputs := make([]orderprocessdto.ProcessOutput, 0)
+func (s *Service) domainsToDTOs(processes []orderprocessentity.OrderProcess) []orderprocessdto.OrderProcessDTO {
+	dtos := make([]orderprocessdto.OrderProcessDTO, 0)
 	for _, process := range processes {
-		processOutput := &orderprocessdto.ProcessOutput{}
-		processOutput.FromModel(&process)
-		outputs = append(outputs, *processOutput)
+		processDTO := &orderprocessdto.OrderProcessDTO{}
+		processDTO.FromDomain(&process)
+		dtos = append(dtos, *processDTO)
 	}
 
-	return outputs
+	return dtos
 }

@@ -68,7 +68,7 @@ func (h *handlerClientImpl) handlerUpdateClient(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	dtoClient := &clientdto.ClientUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoClient); err != nil {
@@ -94,7 +94,7 @@ func (h *handlerClientImpl) handlerDeleteClient(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteClient(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -114,7 +114,7 @@ func (h *handlerClientImpl) handlerGetClientById(w http.ResponseWriter, r *http.
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	client, err := h.s.GetClientById(ctx, dtoId)
 

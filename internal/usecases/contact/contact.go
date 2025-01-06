@@ -17,7 +17,7 @@ func NewService(c personentity.ContactRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) GetContactById(ctx context.Context, dto *entitydto.IdRequest) (*contactdto.ContactDTO, error) {
+func (s *Service) GetContactById(ctx context.Context, dto *entitydto.IDRequest) (*contactdto.ContactDTO, error) {
 	if contact, err := s.r.GetContactById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {

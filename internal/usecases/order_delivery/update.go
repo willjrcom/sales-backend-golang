@@ -13,7 +13,7 @@ var (
 	ErrOrderDelivered = errors.New("order already delivered")
 )
 
-func (s *Service) PendOrderDelivery(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
+func (s *Service) PendOrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error) {
 	orderDelivery, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 
 	if err != nil {
@@ -31,7 +31,7 @@ func (s *Service) PendOrderDelivery(ctx context.Context, dtoID *entitydto.IdRequ
 	return nil
 }
 
-func (s *Service) ShipOrderDelivery(ctx context.Context, dtoShip *orderdeliverydto.ShipDeliveryOrder) (err error) {
+func (s *Service) ShipOrderDelivery(ctx context.Context, dtoShip *orderdeliverydto.DeliveryOrderUpdateShipDTO) (err error) {
 	if len(dtoShip.DeliveryIDs) == 0 {
 		return errors.New("delivery ids is required")
 	}
@@ -42,7 +42,7 @@ func (s *Service) ShipOrderDelivery(ctx context.Context, dtoShip *orderdeliveryd
 		return err
 	}
 
-	if err = dtoShip.UpdateModel(orderDeliveries); err != nil {
+	if err = dtoShip.UpdateDomain(orderDeliveries); err != nil {
 		return err
 	}
 
@@ -63,7 +63,7 @@ func (s *Service) ShipOrderDelivery(ctx context.Context, dtoShip *orderdeliveryd
 	return nil
 }
 
-func (s *Service) OrderDelivery(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
+func (s *Service) OrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error) {
 	orderDelivery, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 
 	if err != nil {
@@ -81,7 +81,7 @@ func (s *Service) OrderDelivery(ctx context.Context, dtoID *entitydto.IdRequest)
 	return nil
 }
 
-func (s *Service) UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.IdRequest) error {
+func (s *Service) UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.IDRequest) error {
 	orderDelivery, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 
 	if err != nil {
@@ -105,7 +105,7 @@ func (s *Service) UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.Id
 	return nil
 }
 
-func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoID *entitydto.IdRequest, dto *orderdeliverydto.UpdateDriverOrder) error {
+func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoID *entitydto.IDRequest, dto *orderdeliverydto.DeliveryOrderDriverUpdateDTO) error {
 	orderDelivery, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 
 	if err != nil {
@@ -120,7 +120,7 @@ func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoID *entitydto.IdR
 		return err
 	}
 
-	if err := dto.UpdateModel(orderDelivery); err != nil {
+	if err := dto.UpdateDomain(orderDelivery); err != nil {
 		return err
 	}
 

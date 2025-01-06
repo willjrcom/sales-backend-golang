@@ -6,8 +6,8 @@ import (
 	orderpickupdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_pickup"
 )
 
-func (s *Service) CreateOrderPickup(ctx context.Context, dto *orderpickupdto.CreateOrderPickupInput) (*orderpickupdto.PickupIDAndOrderIDOutput, error) {
-	orderPickup, err := dto.ToModel()
+func (s *Service) CreateOrderPickup(ctx context.Context, dto *orderpickupdto.OrderPickupCreateDTO) (*orderpickupdto.PickupIDAndOrderIDDTO, error) {
+	orderPickup, err := dto.ToDomain()
 
 	if err != nil {
 		return nil, err
@@ -25,5 +25,5 @@ func (s *Service) CreateOrderPickup(ctx context.Context, dto *orderpickupdto.Cre
 		return nil, err
 	}
 
-	return orderpickupdto.NewOutput(orderPickup.ID, orderID), nil
+	return orderpickupdto.FromDomain(orderPickup.ID, orderID), nil
 }

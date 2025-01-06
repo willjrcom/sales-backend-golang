@@ -23,7 +23,7 @@ func NewService(c tableentity.TableRepository) *Service {
 }
 
 func (s *Service) CreateTable(ctx context.Context, dto *tabledto.TableCreateDTO) (uuid.UUID, error) {
-	table, err := dto.ToModel()
+	table, err := dto.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -36,13 +36,13 @@ func (s *Service) CreateTable(ctx context.Context, dto *tabledto.TableCreateDTO)
 	return table.ID, nil
 }
 
-func (s *Service) UpdateTable(ctx context.Context, dtoId *entitydto.IdRequest, dto *tabledto.TableUpdateDTO) error {
+func (s *Service) UpdateTable(ctx context.Context, dtoId *entitydto.IDRequest, dto *tabledto.TableUpdateDTO) error {
 	table, err := s.r.GetTableById(ctx, dtoId.ID.String())
 	if err != nil {
 		return err
 	}
 
-	if err := dto.UpdateModel(table); err != nil {
+	if err := dto.UpdateDomain(table); err != nil {
 		return err
 	}
 
@@ -53,7 +53,7 @@ func (s *Service) UpdateTable(ctx context.Context, dtoId *entitydto.IdRequest, d
 	return nil
 }
 
-func (s *Service) DeleteTable(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) DeleteTable(ctx context.Context, dto *entitydto.IDRequest) error {
 	if _, err := s.r.GetTableById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func (s *Service) DeleteTable(ctx context.Context, dto *entitydto.IdRequest) err
 	return nil
 }
 
-func (s *Service) GetTableById(ctx context.Context, dto *entitydto.IdRequest) (*tableentity.Table, error) {
+func (s *Service) GetTableById(ctx context.Context, dto *entitydto.IDRequest) (*tableentity.Table, error) {
 	if table, err := s.r.GetTableById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {

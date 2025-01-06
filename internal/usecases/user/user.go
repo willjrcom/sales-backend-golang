@@ -30,7 +30,7 @@ func NewService(r companyentity.UserRepository) *Service {
 }
 
 func (s *Service) CreateUser(ctx context.Context, dto *userdto.UserCreateDTO) (*uuid.UUID, error) {
-	user, err := dto.ToModel()
+	user, err := dto.ToDomain()
 
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (s *Service) CreateUser(ctx context.Context, dto *userdto.UserCreateDTO) (*
 }
 
 func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UserUpdatePasswordDTO) error {
-	user, err := dto.ToModel()
+	user, err := dto.ToDomain()
 
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UserUpdat
 }
 
 func (s *Service) ForgetUserPassword(ctx context.Context, dto *userdto.UserForgetPasswordDTO) error {
-	email, err := dto.ToModel()
+	email, err := dto.ToDomain()
 	if err != nil {
 		return err
 	}
@@ -87,21 +87,21 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *userdto.UserForge
 	return nil
 }
 
-func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IdRequest, dto *userdto.UserUpdateDTO) error {
+func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IDRequest, dto *userdto.UserUpdateDTO) error {
 	user, err := s.r.GetUserByID(ctx, dtoID.ID)
 	if err != nil {
 		return err
 	}
 
-	if err = dto.UpdateModel(user); err != nil {
+	if err = dto.UpdateDomain(user); err != nil {
 		return err
 	}
 
 	return s.r.UpdateUser(ctx, user)
 }
 
-func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (data *userdto.TokenAndSchemasOutput, err error) {
-	user, err := dto.ToModel()
+func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (data *userdto.UserTokenAndSchemasDTO, err error) {
+	user, err := dto.ToDomain()
 
 	if err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (dat
 		return nil, err
 	}
 
-	data = &userdto.TokenAndSchemasOutput{
+	data = &userdto.UserTokenAndSchemasDTO{
 		Person:      userLoggedIn.Person,
 		AccessToken: accessToken,
 		Companies:   userLoggedIn.Companies,
@@ -128,7 +128,7 @@ func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (dat
 }
 
 func (s *Service) Access(ctx context.Context, dto *userdto.UserSchemaDTO, accessToken *jwt.Token) (token string, err error) {
-	schema, err := dto.ToModel()
+	schema, err := dto.ToDomain()
 
 	if err != nil {
 		return "", err
@@ -163,7 +163,7 @@ func findSchemaInSchemas(schemas []interface{}, schema string) bool {
 }
 
 func (s *Service) DeleteUser(ctx context.Context, dto *userdto.UserDeleteDTO) error {
-	user, err := dto.ToModel()
+	user, err := dto.ToDomain()
 
 	if err != nil {
 		return err

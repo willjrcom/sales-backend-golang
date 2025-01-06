@@ -49,7 +49,7 @@ func (h *handlerGroupItemImpl) handlerGetGroupByID(w http.ResponseWriter, r *htt
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	groupItem, err := h.s.GetGroupByID(ctx, dtoId)
 	if err != nil {
@@ -63,7 +63,7 @@ func (h *handlerGroupItemImpl) handlerGetGroupByID(w http.ResponseWriter, r *htt
 func (h *handlerGroupItemImpl) handlerGetGroupsByStatus(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoGroupItem := &groupitemdto.GroupItemByStatusInput{}
+	dtoGroupItem := &groupitemdto.OrderGroupItemStatusDTO{}
 	if err := jsonpkg.ParseBody(r, dtoGroupItem); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -81,7 +81,7 @@ func (h *handlerGroupItemImpl) handlerGetGroupsByStatus(w http.ResponseWriter, r
 func (h *handlerGroupItemImpl) handlerGetGroupsByOrderIDAndStatus(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoGroupItem := &groupitemdto.GroupItemByOrderIDAndStatusInput{}
+	dtoGroupItem := &groupitemdto.GroupItemByOrderIDAndStatusDTO{}
 	if err := jsonpkg.ParseBody(r, dtoGroupItem); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -106,9 +106,9 @@ func (h *handlerGroupItemImpl) handlerScheduleGroupByID(w http.ResponseWriter, r
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	dtoSchedule := &groupitemdto.GroupItemScheduleUpdateDTO{}
+	dtoSchedule := &groupitemdto.OrderGroupItemUpdateScheduleDTO{}
 	if err := jsonpkg.ParseBody(r, dtoSchedule); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -132,7 +132,7 @@ func (h *handlerGroupItemImpl) handlerStartGroupByID(w http.ResponseWriter, r *h
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.StartGroupItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -152,7 +152,7 @@ func (h *handlerGroupItemImpl) handlerReadyGroupByID(w http.ResponseWriter, r *h
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.ReadyGroupItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -172,7 +172,7 @@ func (h *handlerGroupItemImpl) handlerCancelGroupByID(w http.ResponseWriter, r *
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.CancelGroupItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -192,7 +192,7 @@ func (h *handlerGroupItemImpl) handlerDeleteGroupByID(w http.ResponseWriter, r *
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteGroupItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -212,7 +212,7 @@ func (h *handlerGroupItemImpl) handlerAddComplementItem(w http.ResponseWriter, r
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	idComplement := chi.URLParam(r, "id-complement")
 
@@ -221,7 +221,7 @@ func (h *handlerGroupItemImpl) handlerAddComplementItem(w http.ResponseWriter, r
 		return
 	}
 
-	dtoIdComplement := &entitydto.IdRequest{ID: uuid.MustParse(idComplement)}
+	dtoIdComplement := &entitydto.IDRequest{ID: uuid.MustParse(idComplement)}
 
 	if err := h.s.AddComplementItem(ctx, dtoId, dtoIdComplement); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -241,7 +241,7 @@ func (h *handlerGroupItemImpl) handlerDeleteComplementItem(w http.ResponseWriter
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteComplementItem(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})

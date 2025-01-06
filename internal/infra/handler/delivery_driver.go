@@ -62,7 +62,7 @@ func (h *handlerDeliveryDriverImpl) handlerUpdateDeliveryDriver(w http.ResponseW
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	dtoDeliveryDriver := &deliverydriverdto.DeliveryDriverUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoDeliveryDriver); err != nil {
@@ -88,7 +88,7 @@ func (h *handlerDeliveryDriverImpl) handlerDeleteDeliveryDriver(w http.ResponseW
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteDeliveryDriver(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -108,7 +108,7 @@ func (h *handlerDeliveryDriverImpl) handlerGetDeliveryDriver(w http.ResponseWrit
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	deliveryDriver, err := h.s.GetDeliveryDriverByID(ctx, dtoId)
 	if err != nil {

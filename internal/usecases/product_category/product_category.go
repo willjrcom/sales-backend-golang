@@ -33,8 +33,8 @@ func (s *Service) AddDependencies(sq quantityusecases.Service, ss sizeusecases.S
 	s.sq = sq
 }
 
-func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.CreateCategoryInput) (uuid.UUID, error) {
-	category, err := dto.ToModel()
+func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.CategoryCreateDTO) (uuid.UUID, error) {
+	category, err := dto.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -58,7 +58,7 @@ func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.Cr
 		sizes = []string{"Padrão"}
 	}
 
-	registerQuantities := &quantitydto.RegisterQuantities{
+	registerQuantities := &quantitydto.QuantityCreateBatchDTO{
 		Quantities: quantities,
 		CategoryID: category.ID,
 	}
@@ -78,14 +78,14 @@ func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.Cr
 	return category.ID, nil
 }
 
-func (s *Service) UpdateCategory(ctx context.Context, dtoId *entitydto.IdRequest, dto *productcategorydto.UpdateCategoryInput) error {
+func (s *Service) UpdateCategory(ctx context.Context, dtoId *entitydto.IDRequest, dto *productcategorydto.CategoryUpdateDTO) error {
 	category, err := s.r.GetCategoryById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if err = dto.UpdateModel(category); err != nil {
+	if err = dto.UpdateDomain(category); err != nil {
 		return err
 	}
 
@@ -100,7 +100,7 @@ func (s *Service) UpdateCategory(ctx context.Context, dtoId *entitydto.IdRequest
 	return nil
 }
 
-func (s *Service) DeleteCategoryById(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) DeleteCategoryById(ctx context.Context, dto *entitydto.IDRequest) error {
 	if _, err := s.r.GetCategoryById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
@@ -112,17 +112,17 @@ func (s *Service) DeleteCategoryById(ctx context.Context, dto *entitydto.IdReque
 	return nil
 }
 
-func (s *Service) GetCategoryById(ctx context.Context, dto *entitydto.IdRequest) (*productcategorydto.CategoryOutput, error) {
+func (s *Service) GetCategoryById(ctx context.Context, dto *entitydto.IDRequest) (*productcategorydto.CategoryDTO, error) {
 	if productCategory, err := s.r.GetCategoryById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		dto := &productcategorydto.CategoryOutput{}
-		dto.FromModel(productCategory)
+		dto := &productcategorydto.CategoryDTO{}
+		dto.FromDomain(productCategory)
 		return dto, nil
 	}
 }
 
-func (s *Service) GetAllCategories(ctx context.Context) ([]productcategorydto.CategoryOutput, error) {
+func (s *Service) GetAllCategories(ctx context.Context) ([]productcategorydto.CategoryDTO, error) {
 	if categories, err := s.r.GetAllCategories(ctx); err != nil {
 		return nil, err
 	} else {
@@ -131,14 +131,14 @@ func (s *Service) GetAllCategories(ctx context.Context) ([]productcategorydto.Ca
 	}
 }
 
-func categorySizesToDtos(categories []productentity.ProductCategory) []productcategorydto.CategoryOutput {
-	dtoOutput := []productcategorydto.CategoryOutput{}
+func categorySizesToDtos(categories []productentity.ProductCategory) []productcategorydto.CategoryDTO {
+	DTOs := []productcategorydto.CategoryDTO{}
 
 	for _, category := range categories {
-		c := &productcategorydto.CategoryOutput{}
-		c.FromModel(&category)
-		dtoOutput = append(dtoOutput, *c)
+		c := &productcategorydto.CategoryDTO{}
+		c.FromDomain(&category)
+		DTOs = append(DTOs, *c)
 	}
 
-	return dtoOutput
+	return DTOs
 }

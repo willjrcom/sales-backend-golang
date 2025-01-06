@@ -35,7 +35,7 @@ func NewHandlerQuantity(quantityService *quantityusecases.Service) *handler.Hand
 func (h *handlerQuantityImpl) handlerCreateQuantity(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoQuantity := &quantitydto.CreateQuantityInput{}
+	dtoQuantity := &quantitydto.QuantityCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoQuantity); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -60,9 +60,9 @@ func (h *handlerQuantityImpl) handlerUpdateQuantity(w http.ResponseWriter, r *ht
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	dtoQuantity := &quantitydto.UpdateQuantityInput{}
+	dtoQuantity := &quantitydto.QuantityUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoQuantity); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -86,7 +86,7 @@ func (h *handlerQuantityImpl) handlerDeleteQuantity(w http.ResponseWriter, r *ht
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteQuantity(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})

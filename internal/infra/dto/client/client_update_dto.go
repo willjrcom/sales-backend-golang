@@ -35,7 +35,7 @@ func (r *ClientUpdateDTO) validate() error {
 	return nil
 }
 
-func (r *ClientUpdateDTO) UpdateModel(client *cliententity.Client) error {
+func (r *ClientUpdateDTO) UpdateDomain(client *cliententity.Client) error {
 	if err := r.validate(); err != nil {
 		return err
 	}

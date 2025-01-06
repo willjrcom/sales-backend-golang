@@ -34,7 +34,7 @@ func (r *UserUpdatePasswordDTO) validate() error {
 	return nil
 }
 
-func (r *UserUpdatePasswordDTO) ToModel() (*companyentity.User, error) {
+func (r *UserUpdatePasswordDTO) ToDomain() (*companyentity.User, error) {
 	if err := r.validate(); err != nil {
 		return nil, err
 	}

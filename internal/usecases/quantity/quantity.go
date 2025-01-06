@@ -22,8 +22,8 @@ func (s *Service) AddDependencies(rc productentity.CategoryRepository) {
 	s.rc = rc
 }
 
-func (s *Service) CreateQuantity(ctx context.Context, dto *quantitydto.CreateQuantityInput) (uuid.UUID, error) {
-	quantity, err := dto.ToModel()
+func (s *Service) CreateQuantity(ctx context.Context, dto *quantitydto.QuantityCreateDTO) (uuid.UUID, error) {
+	quantity, err := dto.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -46,14 +46,14 @@ func (s *Service) CreateQuantity(ctx context.Context, dto *quantitydto.CreateQua
 	return quantity.ID, nil
 }
 
-func (s *Service) UpdateQuantity(ctx context.Context, dtoId *entitydto.IdRequest, dto *quantitydto.UpdateQuantityInput) error {
+func (s *Service) UpdateQuantity(ctx context.Context, dtoId *entitydto.IDRequest, dto *quantitydto.QuantityUpdateDTO) error {
 	quantity, err := s.rq.GetQuantityById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if err = dto.UpdateModel(quantity); err != nil {
+	if err = dto.UpdateDomain(quantity); err != nil {
 		return err
 	}
 
@@ -74,7 +74,7 @@ func (s *Service) UpdateQuantity(ctx context.Context, dtoId *entitydto.IdRequest
 	return nil
 }
 
-func (s *Service) DeleteQuantity(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) DeleteQuantity(ctx context.Context, dto *entitydto.IDRequest) error {
 	if _, err := s.rq.GetQuantityById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func (s *Service) DeleteQuantity(ctx context.Context, dto *entitydto.IdRequest) 
 	return nil
 }
 
-func (s *Service) GetQuantityById(ctx context.Context, dto *entitydto.IdRequest) (*productentity.Quantity, error) {
+func (s *Service) GetQuantityById(ctx context.Context, dto *entitydto.IDRequest) (*productentity.Quantity, error) {
 	if quantity, err := s.rq.GetQuantityById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
@@ -94,8 +94,8 @@ func (s *Service) GetQuantityById(ctx context.Context, dto *entitydto.IdRequest)
 	}
 }
 
-func (s *Service) AddQuantitiesByValues(ctx context.Context, dto *quantitydto.RegisterQuantities) error {
-	quantities, categoryID, err := dto.ToModel()
+func (s *Service) AddQuantitiesByValues(ctx context.Context, dto *quantitydto.QuantityCreateBatchDTO) error {
+	quantities, categoryID, err := dto.ToDomain()
 	if err != nil {
 		return err
 	}

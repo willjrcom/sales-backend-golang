@@ -30,10 +30,19 @@ type OrderTimeLogs struct {
 	ClosedAt *time.Time
 }
 
-func (s *Shift) OpenShift() {
-	s.CurrentOrderNumber = 0
-	s.OpenedAt = &time.Time{}
-	*s.OpenedAt = time.Now().UTC()
+func NewShift(startChange float32) *Shift {
+	shift := &Shift{
+		Entity: entity.NewEntity(),
+		ShiftCommonAttributes: ShiftCommonAttributes{
+			CurrentOrderNumber: 0,
+		},
+		OrderTimeLogs: OrderTimeLogs{
+			OpenedAt: &time.Time{},
+		},
+	}
+
+	*shift.OpenedAt = time.Now().UTC()
+	return shift
 }
 
 func (s *Shift) CloseShift(endChange float32) (err error) {

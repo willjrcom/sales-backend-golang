@@ -9,7 +9,7 @@ import (
 	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 )
 
-type ClientOutput struct {
+type ClientDTO struct {
 	ID       uuid.UUID              `json:"id"`
 	Name     string                 `json:"name"`
 	Email    string                 `json:"email"`
@@ -19,8 +19,8 @@ type ClientOutput struct {
 	Address  *addressdto.AddressDTO `json:"address"`
 }
 
-func (c *ClientOutput) FromModel(model *cliententity.Client) {
-	*c = ClientOutput{
+func (c *ClientDTO) FromDomain(model *cliententity.Client) {
+	*c = ClientDTO{
 		ID:       model.ID,
 		Name:     model.Name,
 		Email:    model.Email,
@@ -29,5 +29,5 @@ func (c *ClientOutput) FromModel(model *cliententity.Client) {
 	}
 
 	c.Contact.FromDomain(model.Contact)
-	c.Address.FromModel(model.Address)
+	c.Address.FromDomain(model.Address)
 }

@@ -7,7 +7,7 @@ import (
 	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
 )
 
-func (s *Service) UpdateScheduleGroupItem(ctx context.Context, dtoId *entitydto.IdRequest, dto *groupitemdto.GroupItemScheduleUpdateDTO) (err error) {
+func (s *Service) UpdateScheduleGroupItem(ctx context.Context, dtoId *entitydto.IDRequest, dto *groupitemdto.OrderGroupItemUpdateScheduleDTO) (err error) {
 	startAt, err := dto.ToDomain()
 
 	if err != nil {
@@ -25,7 +25,7 @@ func (s *Service) UpdateScheduleGroupItem(ctx context.Context, dtoId *entitydto.
 	return s.rgi.UpdateGroupItem(ctx, groupItem)
 }
 
-func (s *Service) StartGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+func (s *Service) StartGroupItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
 	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), false)
 
 	if err != nil {
@@ -39,7 +39,7 @@ func (s *Service) StartGroupItem(ctx context.Context, dto *entitydto.IdRequest) 
 	return s.rgi.UpdateGroupItem(ctx, groupItem)
 }
 
-func (s *Service) ReadyGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+func (s *Service) ReadyGroupItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
 	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), false)
 
 	if err != nil {
@@ -53,7 +53,7 @@ func (s *Service) ReadyGroupItem(ctx context.Context, dto *entitydto.IdRequest) 
 	return s.rgi.UpdateGroupItem(ctx, groupItem)
 }
 
-func (s *Service) CancelGroupItem(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+func (s *Service) CancelGroupItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
 	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), false)
 
 	if err != nil {

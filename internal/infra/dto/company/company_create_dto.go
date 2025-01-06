@@ -27,7 +27,7 @@ func (c *CompanyCreateDTO) validate() error {
 	return nil
 }
 
-func (c *CompanyCreateDTO) ToModel() (cnpj string, tradeName string, email string, contacts []string, err error) {
+func (c *CompanyCreateDTO) ToDomain() (cnpj string, tradeName string, email string, contacts []string, err error) {
 	if err := c.validate(); err != nil {
 		return "", "", "", nil, err
 	}

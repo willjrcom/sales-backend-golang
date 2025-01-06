@@ -13,7 +13,7 @@ import (
 	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
 )
 
-func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) error {
 	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -47,7 +47,7 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 		// Append only Staging group items
 		groupItemIDs = append(groupItemIDs, groupItem.ID)
 
-		createProcessInput := &orderprocessdto.CreateProcessInput{
+		createProcessInput := &orderprocessdto.OrderProcessCreateDTO{
 			OrderProcessCommonAttributes: orderprocessentity.OrderProcessCommonAttributes{
 				GroupItemID:   groupItem.ID,
 				ProcessRuleID: processRuleID,
@@ -66,11 +66,9 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 
 	// Create queue for each group item
 	for _, groupItemID := range groupItemIDs {
-		startQueueInput := &orderqueuedto.StartQueueInput{
-			OrderQueueCommonAttributes: orderprocessentity.OrderQueueCommonAttributes{
-				GroupItemID: groupItemID,
-			},
-			JoinedAt: *order.PendingAt,
+		startQueueInput := &orderqueuedto.QueueCreateDTO{
+			GroupItemID: groupItemID,
+			JoinedAt:    *order.PendingAt,
 		}
 
 		if _, err := s.rq.StartQueue(ctx, startQueueInput); err != nil {
@@ -85,7 +83,7 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IdRequest) er
 	return nil
 }
 
-func (s *Service) ReadyOrder(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) ReadyOrder(ctx context.Context, dto *entitydto.IDRequest) error {
 	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -103,7 +101,7 @@ func (s *Service) ReadyOrder(ctx context.Context, dto *entitydto.IdRequest) erro
 	return nil
 }
 
-func (s *Service) FinishOrder(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) FinishOrder(ctx context.Context, dto *entitydto.IDRequest) error {
 	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -121,7 +119,7 @@ func (s *Service) FinishOrder(ctx context.Context, dto *entitydto.IdRequest) err
 	return nil
 }
 
-func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IDRequest) (err error) {
 	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -146,7 +144,7 @@ func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IdRequest) (er
 	return nil
 }
 
-func (s *Service) ArchiveOrder(ctx context.Context, dto *entitydto.IdRequest) (err error) {
+func (s *Service) ArchiveOrder(ctx context.Context, dto *entitydto.IDRequest) (err error) {
 	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -164,7 +162,7 @@ func (s *Service) ArchiveOrder(ctx context.Context, dto *entitydto.IdRequest) (e
 	return nil
 }
 
-func (s *Service) UnarchiveOrder(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) UnarchiveOrder(ctx context.Context, dto *entitydto.IDRequest) error {
 	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -182,7 +180,7 @@ func (s *Service) UnarchiveOrder(ctx context.Context, dto *entitydto.IdRequest) 
 	return nil
 }
 
-func (s *Service) AddPayment(ctx context.Context, dto *entitydto.IdRequest, dtoPayment *orderdto.AddPaymentMethod) error {
+func (s *Service) AddPayment(ctx context.Context, dto *entitydto.IDRequest, dtoPayment *orderdto.OrderPaymentCreateDTO) error {
 	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -193,7 +191,7 @@ func (s *Service) AddPayment(ctx context.Context, dto *entitydto.IdRequest, dtoP
 		return err
 	}
 
-	paymentOrder, err := dtoPayment.ToModel(order)
+	paymentOrder, err := dtoPayment.ToDomain(order)
 	if err != nil {
 		return err
 	}
@@ -212,14 +210,14 @@ func (s *Service) AddPayment(ctx context.Context, dto *entitydto.IdRequest, dtoP
 	return nil
 }
 
-func (s *Service) UpdateOrderObservation(ctx context.Context, dtoId *entitydto.IdRequest, dto *orderdto.UpdateObservationOrder) error {
+func (s *Service) UpdateOrderObservation(ctx context.Context, dtoId *entitydto.IDRequest, dto *orderdto.OrderUpdateObservationDTO) error {
 	order, err := s.ro.GetOrderById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	dto.UpdateModel(order)
+	dto.UpdateDomain(order)
 
 	if err := s.ro.UpdateOrder(ctx, order); err != nil {
 		return err

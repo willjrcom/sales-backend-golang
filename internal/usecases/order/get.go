@@ -7,7 +7,7 @@ import (
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 )
 
-func (s *Service) GetOrderById(ctx context.Context, dto *entitydto.IdRequest) (*orderentity.Order, error) {
+func (s *Service) GetOrderById(ctx context.Context, dto *entitydto.IDRequest) (*orderentity.Order, error) {
 	if order, err := s.ro.GetOrderById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {

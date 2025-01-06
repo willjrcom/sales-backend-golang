@@ -44,7 +44,7 @@ func (r *ClientCreateDTO) validate() error {
 	return nil
 }
 
-func (r *ClientCreateDTO) ToModel() (*cliententity.Client, error) {
+func (r *ClientCreateDTO) ToDomain() (*cliententity.Client, error) {
 	if err := r.validate(); err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (r *ClientCreateDTO) ToModel() (*cliententity.Client, error) {
 	}
 
 	// Contact
-	contact, err := r.Contact.ToModel()
+	contact, err := r.Contact.ToDomain()
 	if err != nil {
 		return nil, err
 	}

@@ -29,7 +29,7 @@ func (c *ContactCreateDTO) validate() error {
 	return nil
 }
 
-func (c *ContactCreateDTO) ToModel() (*personentity.Contact, error) {
+func (c *ContactCreateDTO) ToDomain() (*personentity.Contact, error) {
 	if err := c.validate(); err != nil {
 		return nil, err
 	}

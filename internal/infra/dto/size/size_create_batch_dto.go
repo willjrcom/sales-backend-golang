@@ -27,7 +27,7 @@ func (s *SizeCreateBatchDTO) validate() error {
 	return nil
 }
 
-func (s *SizeCreateBatchDTO) ToModel() ([]string, *uuid.UUID, error) {
+func (s *SizeCreateBatchDTO) ToDomain() ([]string, *uuid.UUID, error) {
 	if err := s.validate(); err != nil {
 		return nil, nil, err
 	}

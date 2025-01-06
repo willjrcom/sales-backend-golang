@@ -43,7 +43,7 @@ func NewHandlerOrderProcess(processService *orderprocessusecases.Service) *handl
 func (h *handlerProcessImpl) handlerCreateProcess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoProcess := &processdto.CreateProcessInput{}
+	dtoProcess := &processdto.OrderProcessCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoProcess); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -67,7 +67,7 @@ func (h *handlerProcessImpl) handlerStartProcess(w http.ResponseWriter, r *http.
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.StartProcess(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -86,7 +86,7 @@ func (h *handlerProcessImpl) handlerPauseProcess(w http.ResponseWriter, r *http.
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.PauseProcess(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -105,7 +105,7 @@ func (h *handlerProcessImpl) handlerContinueProcess(w http.ResponseWriter, r *ht
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.ContinueProcess(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -124,7 +124,7 @@ func (h *handlerProcessImpl) handlerFinishProcess(w http.ResponseWriter, r *http
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	nexProcessID, err := h.s.FinishProcess(ctx, dtoId)
 	if err != nil {
@@ -144,9 +144,9 @@ func (h *handlerProcessImpl) handlerCancelProcess(w http.ResponseWriter, r *http
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	dtoCancel := &processdto.CancelProcess{}
+	dtoCancel := &processdto.OrderProcessCancelDTO{}
 	if err := jsonpkg.ParseBody(r, &dtoCancel); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -170,7 +170,7 @@ func (h *handlerProcessImpl) handlerGetProcess(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	process, err := h.s.GetProcessById(ctx, dtoId)
 	if err != nil {
@@ -202,7 +202,7 @@ func (h *handlerProcessImpl) handlerGetProcessesByProcessRuleID(w http.ResponseW
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	processes, err := h.s.GetProcessesByProcessRuleID(ctx, dtoId)
 	if err != nil {
@@ -222,7 +222,7 @@ func (h *handlerProcessImpl) handlerGetProcessesByGroupItem(w http.ResponseWrite
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	processes, err := h.s.GetProcessesByGroupItemID(ctx, dtoId)
 	if err != nil {
@@ -242,7 +242,7 @@ func (h *handlerProcessImpl) handlerGetProcessesByProduct(w http.ResponseWriter,
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	processes, err := h.s.GetProcessesByProductID(ctx, dtoId)
 	if err != nil {

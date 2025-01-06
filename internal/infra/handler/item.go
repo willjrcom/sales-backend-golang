@@ -41,7 +41,7 @@ func NewHandlerItem(itemService *itemusecases.Service) *handler.Handler {
 func (h *handlerItemImpl) handlerAddItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoAddItem := &itemdto.AddItemOrderInput{}
+	dtoAddItem := &itemdto.OrderItemCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoAddItem); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -66,7 +66,7 @@ func (h *handlerItemImpl) handlerDeleteItem(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteItemOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -86,9 +86,9 @@ func (h *handlerItemImpl) handlerAddAdditionalItem(w http.ResponseWriter, r *htt
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	dtoAddAdditionalItem := &itemdto.AddAdditionalItemOrderInput{}
+	dtoAddAdditionalItem := &itemdto.OrderAdditionalItemCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoAddAdditionalItem); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -113,7 +113,7 @@ func (h *handlerItemImpl) handlerDeleteAdditionalItem(w http.ResponseWriter, r *
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteAdditionalItemOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -133,7 +133,7 @@ func (h *handlerItemImpl) handlerAddRemovedItem(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	dtoRemovedItem := &itemdto.RemovedItemDTO{}
 	if err := jsonpkg.ParseBody(r, dtoRemovedItem); err != nil {
@@ -159,7 +159,7 @@ func (h *handlerItemImpl) handlerRemoveRemovedItem(w http.ResponseWriter, r *htt
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	dtoRemovedItem := &itemdto.RemovedItemDTO{}
 	if err := jsonpkg.ParseBody(r, dtoRemovedItem); err != nil {

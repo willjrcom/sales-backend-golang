@@ -23,7 +23,7 @@ func (r *EmployeeCreateDTO) validate() error {
 	return nil
 }
 
-func (r *EmployeeCreateDTO) ToModel() (*employeeentity.Employee, error) {
+func (r *EmployeeCreateDTO) ToDomain() (*employeeentity.Employee, error) {
 	if err := r.validate(); err != nil {
 		return nil, err
 	}

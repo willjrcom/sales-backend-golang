@@ -22,19 +22,19 @@ type ISetupService interface {
 }
 
 type ICreateService interface {
-	CreateOrderPickup(ctx context.Context, dto *orderpickupdto.CreateOrderPickupInput) (*orderpickupdto.PickupIDAndOrderIDOutput, error)
+	CreateOrderPickup(ctx context.Context, dto *orderpickupdto.OrderPickupCreateDTO) (*orderpickupdto.PickupIDAndOrderIDDTO, error)
 }
 
 type IGetService interface {
-	GetPickupById(ctx context.Context, dto *entitydto.IdRequest) (*orderentity.OrderPickup, error)
+	GetPickupById(ctx context.Context, dto *entitydto.IDRequest) (*orderentity.OrderPickup, error)
 	GetAllPickups(ctx context.Context) ([]orderentity.OrderPickup, error)
 	GetOrderPickupByStatus(ctx context.Context) (pickups []orderentity.OrderPickup, err error)
 }
 
 type IUpdateService interface {
-	PendingOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
-	ReadyOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
-	UpdateName(ctx context.Context, dtoID *entitydto.IdRequest, dtoPickup *orderpickupdto.UpdateOrderPickupInput) (err error)
+	PendingOrder(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
+	ReadyOrder(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
+	UpdateName(ctx context.Context, dtoID *entitydto.IDRequest, dtoPickup *orderpickupdto.UpdateOrderPickupInput) (err error)
 }
 
 type IStatusService interface {

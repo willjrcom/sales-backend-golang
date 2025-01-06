@@ -13,12 +13,12 @@ type DeliveryDriverDTO struct {
 	OrderDeliveries []orderentity.OrderDelivery `json:"order_deliveries"`
 }
 
-func (s *DeliveryDriverDTO) FromModel(model *orderentity.DeliveryDriver) {
+func (s *DeliveryDriverDTO) FromDomain(model *orderentity.DeliveryDriver) {
 	*s = DeliveryDriverDTO{
 		ID:              model.ID,
 		EmployeeID:      model.EmployeeID,
 		OrderDeliveries: model.OrderDeliveries,
 	}
 
-	s.Employee.FromModel(model.Employee)
+	s.Employee.FromDomain(model.Employee)
 }

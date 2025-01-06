@@ -23,7 +23,7 @@ func (u *UserDeleteDTO) validate() error {
 	return nil
 }
 
-func (u *UserDeleteDTO) ToModel() (*companyentity.User, error) {
+func (u *UserDeleteDTO) ToDomain() (*companyentity.User, error) {
 	if err := u.validate(); err != nil {
 		return nil, err
 	}

@@ -7,7 +7,7 @@ import (
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 )
 
-func (s *Service) GetPickupById(ctx context.Context, dto *entitydto.IdRequest) (*orderentity.OrderPickup, error) {
+func (s *Service) GetPickupById(ctx context.Context, dto *entitydto.IDRequest) (*orderentity.OrderPickup, error) {
 	if orderPickup, err := s.rp.GetPickupById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {

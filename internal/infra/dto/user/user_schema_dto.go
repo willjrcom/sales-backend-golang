@@ -19,7 +19,7 @@ func (u *UserSchemaDTO) validate() error {
 	return nil
 }
 
-func (u *UserSchemaDTO) ToModel() (*string, error) {
+func (u *UserSchemaDTO) ToDomain() (*string, error) {
 	if err := u.validate(); err != nil {
 		return nil, err
 	}

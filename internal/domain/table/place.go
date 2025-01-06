@@ -17,12 +17,6 @@ type PlaceCommonAttributes struct {
 	Tables      []PlaceToTables
 }
 
-type PatchPlace struct {
-	Name        *string
-	ImagePath   *string
-	IsAvailable *bool
-}
-
 type PlaceToTables struct {
 	PlaceID uuid.UUID
 	Place   *Place

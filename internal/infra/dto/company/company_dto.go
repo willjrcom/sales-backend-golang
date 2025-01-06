@@ -15,7 +15,7 @@ type CompanyDTO struct {
 	Address      *addressdto.AddressDTO `json:"address"`
 }
 
-func (c *CompanyDTO) FromModel(model *companyentity.Company) {
+func (c *CompanyDTO) FromDomain(model *companyentity.Company) {
 	*c = CompanyDTO{
 		SchemaName:   model.SchemaName,
 		BusinessName: model.BusinessName,
@@ -25,5 +25,5 @@ func (c *CompanyDTO) FromModel(model *companyentity.Company) {
 		Contacts:     model.Contacts,
 	}
 
-	c.Address.FromModel(model.Address)
+	c.Address.FromDomain(model.Address)
 }

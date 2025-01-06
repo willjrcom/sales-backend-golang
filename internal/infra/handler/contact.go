@@ -41,7 +41,7 @@ func (h *handlerContactImpl) handlerGetContactById(w http.ResponseWriter, r *htt
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	contact, err := h.s.GetContactById(ctx, dtoId)
 	if err != nil {

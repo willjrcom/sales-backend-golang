@@ -23,7 +23,7 @@ func (s *Service) AddDependencies(rc productentity.CategoryRepository) {
 }
 
 func (s *Service) CreateSize(ctx context.Context, dto *sizedto.SizeCreateDTO) (uuid.UUID, error) {
-	size, err := dto.ToModel()
+	size, err := dto.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -48,14 +48,14 @@ func (s *Service) CreateSize(ctx context.Context, dto *sizedto.SizeCreateDTO) (u
 	return size.ID, nil
 }
 
-func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IdRequest, dto *sizedto.SizeUpdateDTO) error {
+func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IDRequest, dto *sizedto.SizeUpdateDTO) error {
 	size, err := s.rs.GetSizeById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if err = dto.UpdateModel(size); err != nil {
+	if err = dto.UpdateDomain(size); err != nil {
 		return err
 	}
 
@@ -76,7 +76,7 @@ func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IdRequest, dt
 	return nil
 }
 
-func (s *Service) DeleteSize(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) DeleteSize(ctx context.Context, dto *entitydto.IDRequest) error {
 	if _, err := s.rs.GetSizeById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (s *Service) DeleteSize(ctx context.Context, dto *entitydto.IdRequest) erro
 	return nil
 }
 func (s *Service) AddSizesByValues(ctx context.Context, dto *sizedto.SizeCreateBatchDTO) error {
-	sizes, categoryID, err := dto.ToModel()
+	sizes, categoryID, err := dto.ToDomain()
 	if err != nil {
 		return err
 	}

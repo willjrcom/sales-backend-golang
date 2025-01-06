@@ -111,7 +111,7 @@ func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	dtoID := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoID := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	dtoUser := &userdto.UserUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {

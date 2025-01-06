@@ -37,7 +37,7 @@ func NewHandlerShift(shiftService *shiftusecases.Service) *handler.Handler {
 func (h *handlerShiftImpl) handlerOpenShift(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoShift := &shiftdto.OpenShift{}
+	dtoShift := &shiftdto.ShiftUpdateOpenDTO{}
 	if err := jsonpkg.ParseBody(r, dtoShift); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -55,7 +55,7 @@ func (h *handlerShiftImpl) handlerOpenShift(w http.ResponseWriter, r *http.Reque
 func (h *handlerShiftImpl) handlerCloseShift(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoShift := &shiftdto.CloseShift{}
+	dtoShift := &shiftdto.ShiftUpdateCloseDTO{}
 	if err := jsonpkg.ParseBody(r, dtoShift); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -79,7 +79,7 @@ func (h *handlerShiftImpl) handlerGetShiftByID(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	shift, err := h.s.GetShiftByID(ctx, dtoId)
 	if err != nil {

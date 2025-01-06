@@ -20,7 +20,7 @@ type AddressDTO struct {
 	Coordinates  Coordinates               `json:"coordinates"`
 }
 
-func (a *AddressDTO) FromModel(domain *addressentity.Address) {
+func (a *AddressDTO) FromDomain(domain *addressentity.Address) {
 	coordinates := Coordinates{
 		domain.Coordinates.Latitude,
 		domain.Coordinates.Longitude,

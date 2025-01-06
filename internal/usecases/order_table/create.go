@@ -11,8 +11,8 @@ var (
 	ErrTableIsNotAvailable = errors.New("table is not available")
 )
 
-func (s *Service) CreateOrderTable(ctx context.Context, dto *ordertabledto.CreateOrderTableInput) (*ordertabledto.TableIDAndOrderIDOutput, error) {
-	orderTable, err := dto.ToModel()
+func (s *Service) CreateOrderTable(ctx context.Context, dto *ordertabledto.CreateOrderTableInput) (*ordertabledto.OrderTableIDDTO, error) {
+	orderTable, err := dto.ToDomain()
 
 	if err != nil {
 		return nil, err
@@ -48,5 +48,5 @@ func (s *Service) CreateOrderTable(ctx context.Context, dto *ordertabledto.Creat
 		return nil, err
 	}
 
-	return ordertabledto.NewOutput(orderTable.ID, orderID), nil
+	return ordertabledto.FromDomain(orderTable.ID, orderID), nil
 }

@@ -25,7 +25,7 @@ func (s *Service) AddDependencies(re employeeentity.Repository) {
 }
 
 func (s *Service) CreateDeliveryDriver(ctx context.Context, dto *deliverydriverdto.DeliveryDriverCreateDTO) (uuid.UUID, error) {
-	driver, err := dto.ToModel()
+	driver, err := dto.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -48,14 +48,14 @@ func (s *Service) CreateDeliveryDriver(ctx context.Context, dto *deliverydriverd
 	return driver.ID, nil
 }
 
-func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoId *entitydto.IdRequest, dto *deliverydriverdto.DeliveryDriverUpdateDTO) error {
+func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoId *entitydto.IDRequest, dto *deliverydriverdto.DeliveryDriverUpdateDTO) error {
 	driver, err := s.r.GetDeliveryDriverById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if err = dto.UpdateModel(driver); err != nil {
+	if err = dto.UpdateDomain(driver); err != nil {
 		return err
 	}
 
@@ -66,7 +66,7 @@ func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoId *entitydto.IdR
 	return nil
 }
 
-func (s *Service) DeleteDeliveryDriver(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) DeleteDeliveryDriver(ctx context.Context, dto *entitydto.IDRequest) error {
 	if _, err := s.r.GetDeliveryDriverById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
@@ -78,15 +78,15 @@ func (s *Service) DeleteDeliveryDriver(ctx context.Context, dto *entitydto.IdReq
 	return nil
 }
 
-func (s *Service) GetDeliveryDriverByID(ctx context.Context, dto *entitydto.IdRequest) (*deliverydriverdto.DeliveryDriverDTO, error) {
+func (s *Service) GetDeliveryDriverByID(ctx context.Context, dto *entitydto.IDRequest) (*deliverydriverdto.DeliveryDriverDTO, error) {
 	deliveryDriver, err := s.r.GetDeliveryDriverById(ctx, dto.ID.String())
 	if err != nil {
 		return nil, err
 	}
 
-	deliveryDriverOutput := &deliverydriverdto.DeliveryDriverDTO{}
-	deliveryDriverOutput.FromModel(deliveryDriver)
-	return deliveryDriverOutput, nil
+	deliveryDriverDTO := &deliverydriverdto.DeliveryDriverDTO{}
+	deliveryDriverDTO.FromDomain(deliveryDriver)
+	return deliveryDriverDTO, nil
 }
 
 func (s *Service) GetAllDeliveryDrivers(ctx context.Context) ([]deliverydriverdto.DeliveryDriverDTO, error) {
@@ -97,9 +97,9 @@ func (s *Service) GetAllDeliveryDrivers(ctx context.Context) ([]deliverydriverdt
 
 	deliveryDriversDto := []deliverydriverdto.DeliveryDriverDTO{}
 	for _, deliveryDriver := range deliveryDrivers {
-		deliveryDriverOutput := &deliverydriverdto.DeliveryDriverDTO{}
-		deliveryDriverOutput.FromModel(&deliveryDriver)
-		deliveryDriversDto = append(deliveryDriversDto, *deliveryDriverOutput)
+		deliveryDriverDTO := &deliverydriverdto.DeliveryDriverDTO{}
+		deliveryDriverDTO.FromDomain(&deliveryDriver)
+		deliveryDriversDto = append(deliveryDriversDto, *deliveryDriverDTO)
 	}
 
 	return deliveryDriversDto, nil

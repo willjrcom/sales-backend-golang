@@ -12,7 +12,7 @@ var (
 	ErrTableNotAvailableToChange = errors.New("table not available to change")
 )
 
-func (s *Service) ChangeTable(ctx context.Context, dtoOrderTable *entitydto.IdRequest, dtoNew *ordertabledto.UpdateOrderTableInput) error {
+func (s *Service) ChangeTable(ctx context.Context, dtoOrderTable *entitydto.IDRequest, dtoNew *ordertabledto.OrderTableUpdateDTO) error {
 	newTable, err := s.rt.GetTableById(ctx, dtoNew.TableID.String())
 
 	if err != nil {
@@ -64,7 +64,7 @@ func (s *Service) ChangeTable(ctx context.Context, dtoOrderTable *entitydto.IdRe
 
 }
 
-func (s *Service) CloseOrderTable(ctx context.Context, dtoID *entitydto.IdRequest) error {
+func (s *Service) CloseOrderTable(ctx context.Context, dtoID *entitydto.IDRequest) error {
 	orderTable, err := s.rto.GetOrderTableById(ctx, dtoID.ID.String())
 
 	if err != nil {

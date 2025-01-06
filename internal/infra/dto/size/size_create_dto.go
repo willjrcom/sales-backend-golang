@@ -34,7 +34,7 @@ func (s *SizeCreateDTO) validate() error {
 	return nil
 }
 
-func (s *SizeCreateDTO) ToModel() (*productentity.Size, error) {
+func (s *SizeCreateDTO) ToDomain() (*productentity.Size, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}

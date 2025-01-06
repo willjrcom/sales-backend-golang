@@ -39,7 +39,7 @@ func NewHandlerProcessRuleCategory(processRuleService *processruleusecases.Servi
 func (h *handlerProcessRuleCategoryImpl) handlerCreateProcessRule(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoProcessRule := &processruledto.CreateProcessRuleInput{}
+	dtoProcessRule := &processruledto.ProcessRuleCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoProcessRule); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -64,9 +64,9 @@ func (h *handlerProcessRuleCategoryImpl) handlerUpdateProcessRule(w http.Respons
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	dtoProcessRule := &processruledto.UpdateProcessRuleInput{}
+	dtoProcessRule := &processruledto.ProcessRuleUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoProcessRule); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -90,7 +90,7 @@ func (h *handlerProcessRuleCategoryImpl) handlerDeleteProcessRule(w http.Respons
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteProcessRule(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -110,7 +110,7 @@ func (h *handlerProcessRuleCategoryImpl) handlerGetProcessRuleById(w http.Respon
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	processRule, err := h.s.GetProcessRuleById(ctx, dtoId)
 	if err != nil {
@@ -131,7 +131,7 @@ func (h *handlerProcessRuleCategoryImpl) handlerGetProcessRulesByCategoryID(w ht
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	processRules, err := h.s.GetProcessRulesByCategoryId(ctx, dtoId)
 	if err != nil {

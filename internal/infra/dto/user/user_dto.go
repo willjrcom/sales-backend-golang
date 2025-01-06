@@ -19,7 +19,7 @@ type UserDTO struct {
 	Address  *addressdto.AddressDTO `json:"address,omitempty"`
 }
 
-func (u *UserDTO) FromModel(user *companyentity.User) {
+func (u *UserDTO) FromDomain(user *companyentity.User) {
 	*u = UserDTO{
 		ID:       user.ID,
 		Email:    user.Email,
@@ -29,5 +29,5 @@ func (u *UserDTO) FromModel(user *companyentity.User) {
 	}
 
 	u.Contact.FromDomain(user.Contact)
-	u.Address.FromModel(user.Address)
+	u.Address.FromDomain(user.Address)
 }

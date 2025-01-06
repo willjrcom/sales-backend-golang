@@ -60,7 +60,7 @@ func (h *handlerSizeImpl) handlerUpdateSize(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	dtoSize := &sizedto.SizeUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoSize); err != nil {
@@ -86,7 +86,7 @@ func (h *handlerSizeImpl) handlerDeleteSize(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteSize(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})

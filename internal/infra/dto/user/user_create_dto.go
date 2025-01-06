@@ -54,7 +54,7 @@ func (u *UserCreateDTO) validate() error {
 	return nil
 }
 
-func (u *UserCreateDTO) ToModel() (*companyentity.User, error) {
+func (u *UserCreateDTO) ToDomain() (*companyentity.User, error) {
 	if err := u.validate(); err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func (u *UserCreateDTO) ToModel() (*companyentity.User, error) {
 	person := personentity.NewPerson(personCommonAttributes)
 
 	if u.Contact != nil {
-		contact, err := u.Contact.ToModel()
+		contact, err := u.Contact.ToDomain()
 		if err != nil {
 			return nil, err
 		}

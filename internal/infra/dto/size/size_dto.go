@@ -12,7 +12,7 @@ type SizeDTO struct {
 	CategoryID uuid.UUID `json:"category_id"`
 }
 
-func (s *SizeDTO) FromModel(model *productentity.Size) {
+func (s *SizeDTO) FromDomain(model *productentity.Size) {
 	*s = SizeDTO{
 		ID:         model.ID,
 		Name:       model.Name,

@@ -2,12 +2,12 @@ package entitydto
 
 import "github.com/google/uuid"
 
-type IdRequest struct {
+type IDRequest struct {
 	ID uuid.UUID `json:"id"`
 }
 
-func NewIdRequest(id uuid.UUID) *IdRequest {
-	return &IdRequest{
+func NewIdRequest(id uuid.UUID) *IDRequest {
+	return &IDRequest{
 		ID: id,
 	}
 }

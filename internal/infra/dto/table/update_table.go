@@ -9,7 +9,7 @@ type TableUpdateDTO struct {
 	IsAvailable *bool   `json:"is_available"`
 }
 
-func (c *TableUpdateDTO) UpdateModel(place *tableentity.Table) (err error) {
+func (c *TableUpdateDTO) UpdateDomain(place *tableentity.Table) (err error) {
 	if c.Name != nil {
 		place.Name = *c.Name
 	}

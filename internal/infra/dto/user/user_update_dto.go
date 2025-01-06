@@ -31,7 +31,7 @@ func (r *UserUpdateDTO) validate() error {
 	return nil
 }
 
-func (r *UserUpdateDTO) UpdateModel(user *companyentity.User) error {
+func (r *UserUpdateDTO) UpdateDomain(user *companyentity.User) error {
 	if err := r.validate(); err != nil {
 		return err
 	}

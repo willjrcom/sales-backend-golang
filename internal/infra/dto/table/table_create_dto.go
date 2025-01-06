@@ -24,7 +24,7 @@ func (o *TableCreateDTO) validate() error {
 	return nil
 }
 
-func (o *TableCreateDTO) ToModel() (*tableentity.Table, error) {
+func (o *TableCreateDTO) ToDomain() (*tableentity.Table, error) {
 	if err := o.validate(); err != nil {
 		return nil, err
 	}

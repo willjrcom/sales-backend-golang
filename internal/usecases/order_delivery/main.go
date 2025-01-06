@@ -23,23 +23,23 @@ type ISetupService interface {
 }
 
 type ICreateService interface {
-	CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto.CreateOrderDeliveryInput) (*orderdeliverydto.DeliveryIDAndOrderIDOutput, error)
+	CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto.DeliveryOrderCreateDTO) (*orderdeliverydto.OrderDeliveryIDDTO, error)
 }
 
 type IGetService interface {
-	GetDeliveryById(ctx context.Context, dto *entitydto.IdRequest) (*orderentity.OrderDelivery, error)
+	GetDeliveryById(ctx context.Context, dto *entitydto.IDRequest) (*orderentity.OrderDelivery, error)
 	GetAllDeliveries(ctx context.Context) ([]orderentity.OrderDelivery, error)
 	GetOrderDeliveryByStatus(ctx context.Context) (deliveries []orderentity.OrderDelivery, err error)
-	GetOrderDeliveryByClientId(ctx context.Context, dto *entitydto.IdRequest) ([]orderentity.OrderDelivery, error)
-	GetOrderDeliveryByDriverId(ctx context.Context, dto *entitydto.IdRequest) ([]orderentity.OrderDelivery, error)
+	GetOrderDeliveryByClientId(ctx context.Context, dto *entitydto.IDRequest) ([]orderentity.OrderDelivery, error)
+	GetOrderDeliveryByDriverId(ctx context.Context, dto *entitydto.IDRequest) ([]orderentity.OrderDelivery, error)
 }
 
 type IUpdateService interface {
-	PendOrderDelivery(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
-	ShipOrderDelivery(ctx context.Context, dtoDriver *orderdeliverydto.ShipDeliveryOrder) (err error)
-	OrderDelivery(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
-	UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.IdRequest) (err error)
-	UpdateDeliveryDriver(ctx context.Context, dto *entitydto.IdRequest, orderDelivery *orderdeliverydto.UpdateDriverOrder) (err error)
+	PendOrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
+	ShipOrderDelivery(ctx context.Context, dtoDriver *orderdeliverydto.DeliveryOrderUpdateShipDTO) (err error)
+	OrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
+	UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
+	UpdateDeliveryDriver(ctx context.Context, dto *entitydto.IDRequest, orderDelivery *orderdeliverydto.DeliveryOrderDriverUpdateDTO) (err error)
 }
 
 type IStatusService interface {

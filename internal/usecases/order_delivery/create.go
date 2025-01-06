@@ -6,8 +6,8 @@ import (
 	orderdeliverydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_delivery"
 )
 
-func (s *Service) CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto.CreateOrderDeliveryInput) (*orderdeliverydto.DeliveryIDAndOrderIDOutput, error) {
-	delivery, err := dto.ToModel()
+func (s *Service) CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto.DeliveryOrderCreateDTO) (*orderdeliverydto.OrderDeliveryIDDTO, error) {
+	delivery, err := dto.ToDomain()
 
 	if err != nil {
 		return nil, err
@@ -35,5 +35,5 @@ func (s *Service) CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto
 		return nil, err
 	}
 
-	return orderdeliverydto.NewOutput(delivery.ID, orderID), nil
+	return orderdeliverydto.FromDomain(delivery.ID, orderID), nil
 }

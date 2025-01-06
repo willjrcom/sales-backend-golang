@@ -38,7 +38,7 @@ func NewHandlerOrderQueue(queueService *orderqueueusecases.Service) *handler.Han
 func (h *handlerQueueImpl) handlerStartQueue(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoQueue := &orderqueuedto.StartQueueInput{}
+	dtoQueue := &orderqueuedto.QueueCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoQueue); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -79,7 +79,7 @@ func (h *handlerQueueImpl) handlerGetQueueByID(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	queue, err := h.s.GetQueueById(ctx, dtoId)
 	if err != nil {
@@ -99,7 +99,7 @@ func (h *handlerQueueImpl) handlerGetQueuesByGroupItemId(w http.ResponseWriter, 
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	queues, err := h.s.GetQueuesByGroupItemId(ctx, dtoId)
 	if err != nil {

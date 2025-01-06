@@ -22,16 +22,16 @@ func (s *SizeUpdateDTO) validate() error {
 
 	return nil
 }
-func (s *SizeUpdateDTO) UpdateModel(model *productentity.Size) (err error) {
+func (s *SizeUpdateDTO) UpdateDomain(size *productentity.Size) (err error) {
 	if err = s.validate(); err != nil {
 		return err
 	}
 
 	if s.Name != nil {
-		model.Name = *s.Name
+		size.Name = *s.Name
 	}
 	if s.IsActive != nil {
-		model.IsActive = s.IsActive
+		size.IsActive = s.IsActive
 	}
 
 	return nil

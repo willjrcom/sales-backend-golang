@@ -63,7 +63,7 @@ func (h *handlerTableImpl) handlerDeleteTableById(w http.ResponseWriter, r *http
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteTable(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -83,7 +83,7 @@ func (h *handlerTableImpl) handlerGetTableById(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	table, err := h.s.GetTableById(ctx, dtoId)
 	if err != nil {
@@ -104,7 +104,7 @@ func (h *handlerTableImpl) handlerUpdateTableById(w http.ResponseWriter, r *http
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	dtoTable := &tabledto.TableUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {

@@ -8,9 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
 	productrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
@@ -49,7 +47,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestCreateProduct(t *testing.T) {
-	dtoCategory := &productcategorydto.CreateCategoryInput{ProductCategoryCommonAttributes: productentity.ProductCategoryCommonAttributes{Name: "pizza"}}
+	dtoCategory := &productcategorydto.CategoryCreateDTO{Name: "pizza"}
 	categoryId, err := productCategoryService.CreateCategory(ctx, dtoCategory)
 	assert.Nil(t, err)
 	assert.NotNil(t, categoryId)
@@ -59,9 +57,7 @@ func TestCreateProduct(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, sizeId)
 
-	dto := &productdto.CreateProductInput{
-		PatchProduct: productentity.PatchProduct{},
-	}
+	dto := &productcategorydto.ProductCreateDTO{}
 
 	productId, err := productService.CreateProduct(ctx, dto)
 	assert.Nil(t, err)
@@ -77,40 +73,32 @@ func TestCreateProduct(t *testing.T) {
 
 func TestCreateProductError(t *testing.T) {
 	// Teste 1 - No Code
-	dto := &productdto.CreateProductInput{
-		PatchProduct: productentity.PatchProduct{},
-	}
+	dto := &productcategorydto.ProductCreateDTO{}
 
 	_, err := productService.CreateProduct(ctx, dto)
 	assert.NotNil(t, err)
-	assert.EqualError(t, err, productdto.ErrCodeRequired.Error())
+	assert.EqualError(t, err, productcategorydto.ErrCodeRequired.Error())
 
 	// Test 2 - No Name
-	dto = &productdto.CreateProductInput{
-		PatchProduct: productentity.PatchProduct{},
-	}
+	dto = &productcategorydto.ProductCreateDTO{}
 
 	_, err = productService.CreateProduct(ctx, dto)
 	assert.NotNil(t, err)
-	assert.EqualError(t, err, productdto.ErrNameRequired.Error())
+	assert.EqualError(t, err, productcategorydto.ErrNameRequired.Error())
 
 	// Test 3 - Price greater than cost
-	dto = &productdto.CreateProductInput{
-		PatchProduct: productentity.PatchProduct{},
-	}
+	dto = &productcategorydto.ProductCreateDTO{}
 
 	_, err = productService.CreateProduct(ctx, dto)
 	assert.NotNil(t, err)
-	assert.EqualError(t, err, productdto.ErrCostGreaterThanPrice.Error())
+	assert.EqualError(t, err, productcategorydto.ErrCostGreaterThanPrice.Error())
 
 	// Test 4 - No category
-	dto = &productdto.CreateProductInput{
-		PatchProduct: productentity.PatchProduct{},
-	}
+	dto = &productcategorydto.ProductCreateDTO{}
 
 	_, err = productService.CreateProduct(ctx, dto)
 	assert.NotNil(t, err)
-	assert.EqualError(t, err, productdto.ErrCategoryRequired.Error())
+	assert.EqualError(t, err, productcategorydto.ErrCategoryRequired.Error())
 }
 
 func TestUpdateProduct(t *testing.T) {
@@ -122,7 +110,7 @@ func TestUpdateProduct(t *testing.T) {
 
 	idProduct := products[0].ID
 
-	dto := &productdto.UpdateProductInput{}
+	dto := &productcategorydto.ProductUpdateDTO{}
 	dtoId := entitydto.NewIdRequest(idProduct)
 
 	jsonTest1 := []byte(`{"name": "new Product"}`)
@@ -139,7 +127,7 @@ func TestUpdateProduct(t *testing.T) {
 	assert.Nil(t, json.Unmarshal(jsonTest2, &dto))
 
 	err = productService.UpdateProduct(ctx, dtoId, dto)
-	assert.EqualError(t, err, productdto.ErrCostGreaterThanPrice.Error())
+	assert.EqualError(t, err, productcategorydto.ErrCostGreaterThanPrice.Error())
 	*dto.Cost = float64(90.0)
 }
 

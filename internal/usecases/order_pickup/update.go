@@ -7,7 +7,7 @@ import (
 	orderpickupdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_pickup"
 )
 
-func (s *Service) PendingOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
+func (s *Service) PendingOrder(ctx context.Context, dtoID *entitydto.IDRequest) (err error) {
 	orderPickup, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
 
 	if err != nil {
@@ -25,7 +25,7 @@ func (s *Service) PendingOrder(ctx context.Context, dtoID *entitydto.IdRequest) 
 	return nil
 }
 
-func (s *Service) ReadyOrder(ctx context.Context, dtoID *entitydto.IdRequest) (err error) {
+func (s *Service) ReadyOrder(ctx context.Context, dtoID *entitydto.IDRequest) (err error) {
 	orderPickup, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
 
 	if err != nil {
@@ -43,7 +43,7 @@ func (s *Service) ReadyOrder(ctx context.Context, dtoID *entitydto.IdRequest) (e
 	return nil
 }
 
-func (s *Service) UpdateName(ctx context.Context, dtoID *entitydto.IdRequest, dtoPickup *orderpickupdto.UpdateOrderPickupInput) (err error) {
+func (s *Service) UpdateName(ctx context.Context, dtoID *entitydto.IDRequest, dtoPickup *orderpickupdto.UpdateOrderPickupInput) (err error) {
 	orderPickup, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
 
 	if err != nil {

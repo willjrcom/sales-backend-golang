@@ -11,6 +11,6 @@ type EmployeeDTO struct {
 	userdto.UserDTO
 }
 
-func (c *EmployeeDTO) FromModel(employee *employeeentity.Employee) {
-	c.UserDTO.FromModel(employee.User)
+func (c *EmployeeDTO) FromDomain(employee *employeeentity.Employee) {
+	c.UserDTO.FromDomain(employee.User)
 }

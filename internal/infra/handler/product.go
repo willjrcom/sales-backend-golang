@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
+	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -46,7 +46,7 @@ func (h *HandlerProductImpl) handlerCreateProduct(w http.ResponseWriter, r *http
 
 	ctx := r.Context()
 
-	dtoProduct := &productdto.CreateProductInput{}
+	dtoProduct := &productcategorydto.ProductCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoProduct); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -75,9 +75,9 @@ func (h *HandlerProductImpl) handlerUpdateProduct(w http.ResponseWriter, r *http
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	dtoProduct := &productdto.UpdateProductInput{}
+	dtoProduct := &productcategorydto.ProductUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoProduct); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -101,7 +101,7 @@ func (h *HandlerProductImpl) handlerDeleteProduct(w http.ResponseWriter, r *http
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteProductById(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -121,7 +121,7 @@ func (h *HandlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	product, err := h.s.GetProductById(ctx, dtoId)
 	if err != nil {
@@ -142,7 +142,7 @@ func (h *HandlerProductImpl) handlerGetProductByCode(w http.ResponseWriter, r *h
 		return
 	}
 
-	dto := &productdto.Keys{Code: code}
+	dto := &productcategorydto.Keys{Code: code}
 
 	product, err := h.s.GetProductByCode(ctx, dto)
 	if err != nil {

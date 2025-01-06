@@ -25,16 +25,6 @@ type ProductCategoryCommonAttributes struct {
 	ComplementCategories []ProductCategory
 }
 
-type PatchProductCategory struct {
-	Name                 *string           `json:"name"`
-	ImagePath            *string           `json:"image_path"`
-	NeedPrint            *bool             `json:"need_print"`
-	UseProcessRule       *bool             `json:"use_process_rule"`
-	RemovableIngredients []string          `json:"removable_ingredients"`
-	AdditionalCategories []ProductCategory `json:"additional_categories"`
-	ComplementCategories []ProductCategory `json:"complement_categories"`
-}
-
 func NewProductCategory(categoryCommonAttributes ProductCategoryCommonAttributes) *ProductCategory {
 	return &ProductCategory{
 		Entity:                          entity.NewEntity(),

@@ -22,8 +22,8 @@ func (s *Service) AddDependencies(rp orderprocessentity.ProcessRepository) {
 	s.rp = rp
 }
 
-func (s *Service) StartQueue(ctx context.Context, dto *orderqueuedto.StartQueueInput) (uuid.UUID, error) {
-	groupItemID, joinedAt, err := dto.ToModel()
+func (s *Service) StartQueue(ctx context.Context, dto *orderqueuedto.QueueCreateDTO) (uuid.UUID, error) {
+	groupItemID, joinedAt, err := dto.ToDomain()
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -55,7 +55,7 @@ func (s *Service) FinishQueue(ctx context.Context, process *orderprocessentity.O
 	return nil
 }
 
-func (s *Service) GetQueueById(ctx context.Context, dto *entitydto.IdRequest) (*orderprocessentity.OrderQueue, error) {
+func (s *Service) GetQueueById(ctx context.Context, dto *entitydto.IDRequest) (*orderprocessentity.OrderQueue, error) {
 	if queue, err := s.r.GetQueueById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
@@ -63,7 +63,7 @@ func (s *Service) GetQueueById(ctx context.Context, dto *entitydto.IdRequest) (*
 	}
 }
 
-func (s *Service) GetQueuesByGroupItemId(ctx context.Context, dto *entitydto.IdRequest) ([]orderprocessentity.OrderQueue, error) {
+func (s *Service) GetQueuesByGroupItemId(ctx context.Context, dto *entitydto.IDRequest) ([]orderprocessentity.OrderQueue, error) {
 	if queues, err := s.r.GetQueuesByGroupItemId(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {

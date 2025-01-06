@@ -21,10 +21,6 @@ type QuantityCommonAttributes struct {
 	CategoryID uuid.UUID
 }
 
-type PatchQuantity struct {
-	Quantity *float64 `json:"quantity"`
-}
-
 func NewQuantity(quantityCommonAttributes QuantityCommonAttributes) *Quantity {
 	return &Quantity{
 		Entity:                   entity.NewEntity(),

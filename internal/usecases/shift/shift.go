@@ -23,8 +23,8 @@ func NewService(c shiftentity.ShiftRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.OpenShift) (id uuid.UUID, err error) {
-	shift, err := dto.ToModel()
+func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.ShiftUpdateOpenDTO) (id uuid.UUID, err error) {
+	startChange, err := dto.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -34,7 +34,7 @@ func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.OpenShift) (id uu
 		return uuid.Nil, ErrShiftAlreadyOpened
 	}
 
-	shift.OpenShift()
+	shift := shiftentity.NewShift(startChange)
 
 	if err = s.r.CreateShift(ctx, shift); err != nil {
 		return uuid.Nil, err
@@ -43,8 +43,8 @@ func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.OpenShift) (id uu
 	return shift.ID, nil
 }
 
-func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.CloseShift) (err error) {
-	endChange, err := dto.ToModel()
+func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateCloseDTO) (err error) {
+	endChange, err := dto.ToDomain()
 
 	if err != nil {
 		return err
@@ -69,7 +69,7 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.CloseShift) (err
 	return nil
 }
 
-func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IdRequest) (shift *shiftentity.Shift, err error) {
+func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IDRequest) (shift *shiftentity.Shift, err error) {
 	return s.r.GetShiftByID(ctx, dtoID.ID.String())
 }
 

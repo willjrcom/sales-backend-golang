@@ -16,7 +16,7 @@ func (a *RemovedItemDTO) validate() error {
 	return nil
 }
 
-func (a *RemovedItemDTO) ToModel() (*string, error) {
+func (a *RemovedItemDTO) ToDomain() (*string, error) {
 	if err := a.validate(); err != nil {
 		return nil, err
 	}

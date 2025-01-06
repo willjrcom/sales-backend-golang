@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	productdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product"
+	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
 	productcategoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
@@ -35,8 +35,8 @@ func NewService(
 	}
 }
 
-func (s *Service) CreateProduct(ctx context.Context, dto *productdto.CreateProductInput) (uuid.UUID, error) {
-	product, err := dto.ToModel()
+func (s *Service) CreateProduct(ctx context.Context, dto *productcategorydto.ProductCreateDTO) (uuid.UUID, error) {
+	product, err := dto.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -63,24 +63,23 @@ func (s *Service) CreateProduct(ctx context.Context, dto *productdto.CreateProdu
 	return product.ID, nil
 }
 
-func (s *Service) GetProductByCode(ctx context.Context, keys *productdto.Keys) (*productdto.ProductOutput, error) {
+func (s *Service) GetProductByCode(ctx context.Context, keys *productcategorydto.Keys) (*productcategorydto.ProductDTO, error) {
 	if product, err := s.rp.GetProductByCode(ctx, keys.Code); err != nil {
 		return nil, err
 	} else {
-		dtoOutput := &productdto.ProductOutput{}
-		dtoOutput.FromModel(product)
-		return dtoOutput, nil
+
+		return productcategorydto.FromDomain(product), nil
 	}
 }
 
-func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IdRequest, dto *productdto.UpdateProductInput) error {
+func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IDRequest, dto *productcategorydto.ProductUpdateDTO) error {
 	product, err := s.rp.GetProductById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if err := dto.UpdateModel(product); err != nil {
+	if err := dto.UpdateDomain(product); err != nil {
 		return err
 	}
 
@@ -95,7 +94,7 @@ func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IdRequest,
 	return nil
 }
 
-func (s *Service) DeleteProductById(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) DeleteProductById(ctx context.Context, dto *entitydto.IDRequest) error {
 	product, err := s.rp.GetProductById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -115,17 +114,15 @@ func (s *Service) DeleteProductById(ctx context.Context, dto *entitydto.IdReques
 	return nil
 }
 
-func (s *Service) GetProductById(ctx context.Context, dto *entitydto.IdRequest) (*productdto.ProductOutput, error) {
+func (s *Service) GetProductById(ctx context.Context, dto *entitydto.IDRequest) (*productcategorydto.ProductDTO, error) {
 	if product, err := s.rp.GetProductById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		dtoOutput := &productdto.ProductOutput{}
-		dtoOutput.FromModel(product)
-		return dtoOutput, nil
+		return productcategorydto.FromDomain(product), nil
 	}
 }
 
-func (s *Service) GetAllProducts(ctx context.Context) ([]productdto.ProductOutput, error) {
+func (s *Service) GetAllProducts(ctx context.Context) ([]productcategorydto.ProductDTO, error) {
 	products, err := s.rp.GetAllProducts(ctx)
 
 	if err != nil {
@@ -136,10 +133,10 @@ func (s *Service) GetAllProducts(ctx context.Context) ([]productdto.ProductOutpu
 	return dtos, nil
 }
 
-func productsToDtos(products []productentity.Product) []productdto.ProductOutput {
-	dtos := make([]productdto.ProductOutput, len(products))
+func productsToDtos(products []productentity.Product) []productcategorydto.ProductDTO {
+	dtos := make([]productcategorydto.ProductDTO, len(products))
 	for i, product := range products {
-		dtos[i].FromModel(&product)
+		dtos[i] = *productcategorydto.FromDomain(&product)
 	}
 
 	return dtos

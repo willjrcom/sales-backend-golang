@@ -27,7 +27,7 @@ func (s *Service) AddDependencies(rcontact personentity.ContactRepository) {
 }
 
 func (s *Service) CreateClient(ctx context.Context, dto *clientdto.ClientCreateDTO) (uuid.UUID, error) {
-	client, err := dto.ToModel()
+	client, err := dto.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -51,13 +51,13 @@ func (s *Service) UpdateClientWithCoordinates(ctx context.Context, client *clien
 	client.Address.AddressCommonAttributes.Coordinates = *coordinates
 }
 
-func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IdRequest, dto *clientdto.ClientUpdateDTO) error {
+func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IDRequest, dto *clientdto.ClientUpdateDTO) error {
 	client, err := s.rclient.GetClientById(ctx, dtoId.ID.String())
 	if err != nil {
 		return err
 	}
 
-	if err := dto.UpdateModel(client); err != nil {
+	if err := dto.UpdateDomain(client); err != nil {
 		return err
 	}
 
@@ -70,7 +70,7 @@ func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IdRequest, 
 	return nil
 }
 
-func (s *Service) DeleteClient(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) DeleteClient(ctx context.Context, dto *entitydto.IDRequest) error {
 	if _, err := s.rclient.GetClientById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
@@ -82,17 +82,17 @@ func (s *Service) DeleteClient(ctx context.Context, dto *entitydto.IdRequest) er
 	return nil
 }
 
-func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IdRequest) (*clientdto.ClientOutput, error) {
+func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IDRequest) (*clientdto.ClientDTO, error) {
 	if client, err := s.rclient.GetClientById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		dto := &clientdto.ClientOutput{}
-		dto.FromModel(client)
+		dto := &clientdto.ClientDTO{}
+		dto.FromDomain(client)
 		return dto, nil
 	}
 }
 
-func (s *Service) GetClientByContact(ctx context.Context, dto *contactdto.ContactDTO) (*clientdto.ClientOutput, error) {
+func (s *Service) GetClientByContact(ctx context.Context, dto *contactdto.ContactDTO) (*clientdto.ClientDTO, error) {
 	contact, err := s.rcontact.GetContactByDddAndNumber(ctx, dto.Ddd, dto.Number, personentity.ContactTypeClient)
 
 	if err != nil {
@@ -106,13 +106,13 @@ func (s *Service) GetClientByContact(ctx context.Context, dto *contactdto.Contac
 	if client, err := s.rclient.GetClientById(ctx, contact.ObjectID.String()); err != nil {
 		return nil, err
 	} else {
-		dto := &clientdto.ClientOutput{}
-		dto.FromModel(client)
+		dto := &clientdto.ClientDTO{}
+		dto.FromDomain(client)
 		return dto, nil
 	}
 }
 
-func (s *Service) GetAllClients(ctx context.Context) ([]clientdto.ClientOutput, error) {
+func (s *Service) GetAllClients(ctx context.Context) ([]clientdto.ClientDTO, error) {
 	if clients, err := s.rclient.GetAllClients(ctx); err != nil {
 		return nil, err
 	} else {
@@ -121,10 +121,10 @@ func (s *Service) GetAllClients(ctx context.Context) ([]clientdto.ClientOutput, 
 	}
 }
 
-func clientsToDtos(clients []cliententity.Client) []clientdto.ClientOutput {
-	dtos := make([]clientdto.ClientOutput, len(clients))
+func clientsToDtos(clients []cliententity.Client) []clientdto.ClientDTO {
+	dtos := make([]clientdto.ClientDTO, len(clients))
 	for i, client := range clients {
-		dtos[i].FromModel(&client)
+		dtos[i].FromDomain(&client)
 	}
 
 	return dtos

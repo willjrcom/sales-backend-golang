@@ -25,7 +25,7 @@ func NewService(c tableentity.PlaceRepository) *Service {
 }
 
 func (s *Service) CreatePlace(ctx context.Context, dto *placedto.CreatePlaceInput) (uuid.UUID, error) {
-	place, err := dto.ToModel()
+	place, err := dto.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -40,13 +40,13 @@ func (s *Service) CreatePlace(ctx context.Context, dto *placedto.CreatePlaceInpu
 	return place.ID, nil
 }
 
-func (s *Service) UpdatePlace(ctx context.Context, dtoId *entitydto.IdRequest, dto *placedto.UpdatePlaceInput) error {
+func (s *Service) UpdatePlace(ctx context.Context, dtoId *entitydto.IDRequest, dto *placedto.PlaceUpdateDTO) error {
 	place, err := s.r.GetPlaceById(ctx, dtoId.ID.String())
 	if err != nil {
 		return err
 	}
 
-	if err := dto.UpdateModel(place); err != nil {
+	if err := dto.UpdateDomain(place); err != nil {
 		return err
 	}
 
@@ -57,7 +57,7 @@ func (s *Service) UpdatePlace(ctx context.Context, dtoId *entitydto.IdRequest, d
 	return nil
 }
 
-func (s *Service) DeletePlace(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) DeletePlace(ctx context.Context, dto *entitydto.IDRequest) error {
 	if _, err := s.r.GetPlaceById(ctx, dto.ID.String()); err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (s *Service) DeletePlace(ctx context.Context, dto *entitydto.IdRequest) err
 	return nil
 }
 
-func (s *Service) GetPlaceById(ctx context.Context, dto *entitydto.IdRequest) (*tableentity.Place, error) {
+func (s *Service) GetPlaceById(ctx context.Context, dto *entitydto.IDRequest) (*tableentity.Place, error) {
 	if place, err := s.r.GetPlaceById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
@@ -81,8 +81,8 @@ func (s *Service) GetAllPlaces(ctx context.Context) ([]tableentity.Place, error)
 	return s.r.GetAllPlaces(ctx)
 }
 
-func (s *Service) AddTableToPlace(ctx context.Context, dto *placedto.AddTableToPlaceInput) error {
-	placeToTable, err := dto.ToModel()
+func (s *Service) AddTableToPlace(ctx context.Context, dto *placedto.PlaceUpdateTableDTO) error {
+	placeToTable, err := dto.ToDomain()
 	if err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func (s *Service) AddTableToPlace(ctx context.Context, dto *placedto.AddTableToP
 	return nil
 }
 
-func (s *Service) RemoveTableFromPlace(ctx context.Context, dto *entitydto.IdRequest) error {
+func (s *Service) RemoveTableFromPlace(ctx context.Context, dto *entitydto.IDRequest) error {
 	if err := s.r.RemoveTableFromPlace(ctx, dto.ID); err != nil {
 		return err
 	}

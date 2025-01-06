@@ -61,9 +61,9 @@ func (h *handlerOrderTableImpl) handlerChangeTable(w http.ResponseWriter, r *htt
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	dtoTable := &ordertabledto.UpdateOrderTableInput{}
+	dtoTable := &ordertabledto.OrderTableUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -87,7 +87,7 @@ func (h *handlerOrderTableImpl) handlerCloseOrderTable(w http.ResponseWriter, r 
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.CloseOrderTable(ctx, dtoId); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
@@ -107,7 +107,7 @@ func (h *handlerOrderTableImpl) handlerGetOrderTableById(w http.ResponseWriter, 
 		return
 	}
 
-	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	table, err := h.s.GetTableById(ctx, dtoId)
 	if err != nil {

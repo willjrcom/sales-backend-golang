@@ -16,7 +16,7 @@ func (r *UserForgetPasswordDTO) validate() error {
 	return nil
 }
 
-func (r *UserForgetPasswordDTO) ToModel() (*string, error) {
+func (r *UserForgetPasswordDTO) ToDomain() (*string, error) {
 	if err := r.validate(); err != nil {
 		return nil, err
 	}
