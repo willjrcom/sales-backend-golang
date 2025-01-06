@@ -77,7 +77,7 @@ func (h *handlerCompanyImpl) handlerGetCompany(w http.ResponseWriter, r *http.Re
 func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &companydto.UserCreateDTO{}
+	dtoUser := &companydto.UserToCompanyDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -94,7 +94,7 @@ func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *h
 func (h *handlerCompanyImpl) handlerRemoveUserFromCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &companydto.UserBasicCreateDTO{}
+	dtoUser := &companydto.UserToCompanyDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

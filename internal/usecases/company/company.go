@@ -13,7 +13,6 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
-	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 )
 
@@ -74,9 +73,8 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), company.SchemaName)
 
-	userInput := &companydto.UserCreateDTO{
-		Email:    email,
-		Password: utils.GeneratePassword(10, true, true, true),
+	userInput := &companydto.UserToCompanyDTO{
+		Email: email,
 	}
 
 	if err = s.AddUserToCompany(ctx, userInput); err != nil {
@@ -96,18 +94,14 @@ func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyDTO, error
 	}
 }
 
-type UserCreateDTO interface {
-	ToDomain() (*companyentity.User, error)
-}
-
-func (s *Service) AddUserToCompany(ctx context.Context, dto UserCreateDTO) error {
-	user, err := dto.ToDomain()
+func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserToCompanyDTO) error {
+	email, err := dto.ToDomain()
 
 	if err != nil {
 		return err
 	}
 
-	userID, _ := s.u.GetIDByEmail(ctx, user.Email)
+	userID, _ := s.u.GetIDByEmail(ctx, email)
 
 	if userID != nil {
 		if exists, _ := s.r.ValidateUserToPublicCompany(ctx, *userID); exists {
@@ -117,7 +111,7 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto UserCreateDTO) error
 
 	if userID == nil {
 		createUserInput := &userdto.UserCreateDTO{
-			Email:            user.Email,
+			Email:            email,
 			GeneratePassword: true,
 		}
 
@@ -135,14 +129,14 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto UserCreateDTO) error
 	return nil
 }
 
-func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.UserBasicCreateDTO) error {
-	user, err := dto.ToDomain()
+func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.UserToCompanyDTO) error {
+	email, err := dto.ToDomain()
 
 	if err != nil {
 		return err
 	}
 
-	userID, err := s.u.GetIDByEmail(ctx, user.Email)
+	userID, err := s.u.GetIDByEmail(ctx, email)
 
 	if err != nil {
 		return err
