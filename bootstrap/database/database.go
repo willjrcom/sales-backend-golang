@@ -14,19 +14,8 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
-	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
-	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
-	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
-	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
-	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
-	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
-	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
-	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 type Environment string
@@ -110,12 +99,12 @@ func ChangeSchema(ctx context.Context, db *bun.DB) error {
 }
 
 func ChangeToPublicSchema(ctx context.Context, db *bun.DB) error {
-	_, err := db.Exec("SET search_path=?", schemaentity.DEFAULT_SCHEMA)
+	_, err := db.Exec("SET search_path=?", model.DEFAULT_SCHEMA)
 	return err
 }
 
 func GetSchema(ctx context.Context) (string, error) {
-	schemaName := ctx.Value(schemaentity.Schema("schema"))
+	schemaName := ctx.Value(model.Schema("schema"))
 	if schemaName == nil {
 		return "", errors.New("schema not found")
 	}
@@ -126,7 +115,7 @@ func CreateSchema(ctx context.Context, db *bun.DB) error {
 	schemaName, err := GetSchema(ctx)
 
 	if err != nil {
-		schemaName = schemaentity.LOST_SCHEMA
+		schemaName = model.LOST_SCHEMA
 	}
 
 	if _, err := db.Exec("CREATE SCHEMA IF NOT EXISTS " + schemaName); err != nil {
@@ -137,45 +126,45 @@ func CreateSchema(ctx context.Context, db *bun.DB) error {
 }
 
 func publicTables(ctx context.Context, db *bun.DB) error {
-	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaentity.DEFAULT_SCHEMA)
+	ctx = context.WithValue(ctx, model.Schema("schema"), model.DEFAULT_SCHEMA)
 	if err := CreateSchema(ctx, db); err != nil {
 		panic(err)
 	}
 
-	db.RegisterModel((*companyentity.User)(nil))
-	db.RegisterModel((*companyentity.CompanyToUsers)(nil))
-	db.RegisterModel((*companyentity.CompanyWithUsers)(nil))
-	db.RegisterModel((*personentity.Person)(nil))
-	db.RegisterModel((*addressentity.Address)(nil))
-	db.RegisterModel((*personentity.Contact)(nil))
+	db.RegisterModel((*model.User)(nil))
+	db.RegisterModel((*model.CompanyToUsers)(nil))
+	db.RegisterModel((*model.CompanyWithUsers)(nil))
+	db.RegisterModel((*model.Person)(nil))
+	db.RegisterModel((*model.Address)(nil))
+	db.RegisterModel((*model.Contact)(nil))
 
 	if err := RegisterModels(ctx, db); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.User)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.User)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
 	var _ bun.BeforeSelectHook = (*model.User)(nil)
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.CompanyToUsers)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.CompanyToUsers)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.CompanyWithUsers)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.CompanyWithUsers)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*personentity.Person)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Person)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*addressentity.Address)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Address)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*personentity.Contact)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Contact)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -203,7 +192,7 @@ func LoadAllSchemas(ctx context.Context, db *bun.DB) error {
 			continue
 		}
 
-		ctx = context.WithValue(ctx, schemaentity.Schema("schema"), schemaName)
+		ctx = context.WithValue(ctx, model.Schema("schema"), schemaName)
 
 		if err := RegisterModels(ctx, db); err != nil {
 			return err
@@ -239,45 +228,45 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	db.RegisterModel((*entity.Entity)(nil))
+	db.RegisterModel((*entitymodel.Entity)(nil))
 
-	db.RegisterModel((*productentity.ProductCategoryToAdditional)(nil))
-	db.RegisterModel((*productentity.ProductCategoryToComplement)(nil))
-	db.RegisterModel((*productentity.ProductToCombo)(nil))
-	db.RegisterModel((*productentity.Size)(nil))
-	db.RegisterModel((*productentity.Quantity)(nil))
-	db.RegisterModel((*productentity.ProductCategory)(nil))
-	db.RegisterModel((*productentity.ProcessRule)(nil))
-	db.RegisterModel((*productentity.Product)(nil))
+	db.RegisterModel((*model.ProductCategoryToAdditional)(nil))
+	db.RegisterModel((*model.ProductCategoryToComplement)(nil))
+	db.RegisterModel((*model.ProductToCombo)(nil))
+	db.RegisterModel((*model.Size)(nil))
+	db.RegisterModel((*model.Quantity)(nil))
+	db.RegisterModel((*model.ProductCategory)(nil))
+	db.RegisterModel((*model.ProcessRule)(nil))
+	db.RegisterModel((*model.Product)(nil))
 
-	db.RegisterModel((*addressentity.Address)(nil))
-	db.RegisterModel((*personentity.Contact)(nil))
-	db.RegisterModel((*cliententity.Client)(nil))
-	db.RegisterModel((*employeeentity.Employee)(nil))
+	db.RegisterModel((*model.Address)(nil))
+	db.RegisterModel((*model.Contact)(nil))
+	db.RegisterModel((*model.Client)(nil))
+	db.RegisterModel((*model.Employee)(nil))
 
-	db.RegisterModel((*orderprocessentity.OrderProcessToProductToGroupItem)(nil))
-	db.RegisterModel((*orderprocessentity.OrderProcess)(nil))
-	db.RegisterModel((*orderprocessentity.OrderQueue)(nil))
-	db.RegisterModel((*orderentity.ItemToAdditional)(nil))
-	db.RegisterModel((*orderentity.Item)(nil))
-	db.RegisterModel((*orderentity.GroupItem)(nil))
+	db.RegisterModel((*model.OrderProcessToProductToGroupItem)(nil))
+	db.RegisterModel((*model.OrderProcess)(nil))
+	db.RegisterModel((*model.OrderQueue)(nil))
+	db.RegisterModel((*model.ItemToAdditional)(nil))
+	db.RegisterModel((*model.Item)(nil))
+	db.RegisterModel((*model.GroupItem)(nil))
 
-	var _ bun.BeforeUpdateHook = (*orderentity.GroupItem)(nil)
+	var _ bun.BeforeUpdateHook = (*model.GroupItem)(nil)
 
-	db.RegisterModel((*orderentity.OrderPickup)(nil))
-	db.RegisterModel((*orderentity.OrderDelivery)(nil))
-	db.RegisterModel((*orderentity.DeliveryDriver)(nil))
-	db.RegisterModel((*orderentity.OrderTable)(nil))
-	db.RegisterModel((*orderentity.PaymentOrder)(nil))
-	db.RegisterModel((*orderentity.Order)(nil))
-	// var _ bun.AfterScanRowHook = (*orderentity.Order)(nil)
+	db.RegisterModel((*model.OrderPickup)(nil))
+	db.RegisterModel((*model.OrderDelivery)(nil))
+	db.RegisterModel((*model.DeliveryDriver)(nil))
+	db.RegisterModel((*model.OrderTable)(nil))
+	db.RegisterModel((*model.PaymentOrder)(nil))
+	db.RegisterModel((*model.Order)(nil))
+	// var _ bun.AfterScanRowHook = (*model.Order)(nil)
 
-	db.RegisterModel((*tableentity.Table)(nil))
-	db.RegisterModel((*tableentity.PlaceToTables)(nil))
-	db.RegisterModel((*tableentity.Place)(nil))
+	db.RegisterModel((*model.Table)(nil))
+	db.RegisterModel((*model.PlaceToTables)(nil))
+	db.RegisterModel((*model.Place)(nil))
 
-	db.RegisterModel((*shiftentity.Shift)(nil))
-	db.RegisterModel((*companyentity.Company)(nil))
+	db.RegisterModel((*model.Shift)(nil))
+	db.RegisterModel((*model.Company)(nil))
 
 	return nil
 }
@@ -292,127 +281,123 @@ func LoadCompanyModels(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*entity.Entity)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Size)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Size)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.ProductCategoryToAdditional)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProductCategoryToAdditional)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.ProductCategoryToComplement)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProductCategoryToComplement)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.ProductToCombo)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProductToCombo)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.ProductCategory)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProductCategory)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Quantity)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Quantity)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.ProcessRule)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.ProcessRule)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Product)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*productentity.Product)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Address)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*addressentity.Address)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Contact)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*personentity.Contact)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Client)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*cliententity.Client)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Employee)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*employeeentity.Employee)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.OrderProcess)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.OrderProcess)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.OrderQueue)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.OrderQueue)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.GroupItem)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.GroupItem)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.OrderProcessToProductToGroupItem)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderprocessentity.OrderProcessToProductToGroupItem)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Item)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.Item)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.ItemToAdditional)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.ItemToAdditional)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.OrderPickup)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.OrderPickup)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.OrderDelivery)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.OrderDelivery)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.DeliveryDriver)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.DeliveryDriver)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.OrderTable)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.OrderTable)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.PaymentOrder)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.PaymentOrder)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Order)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*orderentity.Order)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Table)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*tableentity.Table)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Place)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*tableentity.Place)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.PlaceToTables)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*tableentity.PlaceToTables)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateIndex().IfNotExists().Model((*model.PlaceToTables)(nil)).Unique().Index("idx_place_id_row_and_column").Column("place_id", "row", "column").Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateIndex().IfNotExists().Model((*tableentity.PlaceToTables)(nil)).Unique().Index("idx_place_id_row_and_column").Column("place_id", "row", "column").Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Shift)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err := db.NewCreateTable().IfNotExists().Model((*shiftentity.Shift)(nil)).Exec(ctx); err != nil {
-		return err
-	}
-
-	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.Company)(nil)).Exec(ctx); err != nil {
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Company)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 

@@ -1,13 +1,11 @@
 package orderentity
 
 import (
-	"context"
 	"errors"
 	"math"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
@@ -61,13 +59,6 @@ func NewGroupItem(groupCommonAttributes GroupCommonAttributes) *GroupItem {
 		Entity:                entity.NewEntity(),
 		GroupCommonAttributes: groupCommonAttributes,
 	}
-}
-
-func (i *GroupItem) BeforeUpdate(ctx context.Context, query *bun.UpdateQuery) error {
-	if model, ok := query.GetModel().Value().(*GroupItem); ok {
-		model.CalculateTotalPrice()
-	}
-	return nil
 }
 
 func (i *GroupItem) Schedule(startAt *time.Time) (err error) {
