@@ -1,15 +1,9 @@
 package model
 
 import (
-	"errors"
-
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
-)
-
-var (
-	ErrQuantityAlreadyExists = errors.New("quantity already exists")
 )
 
 type Quantity struct {

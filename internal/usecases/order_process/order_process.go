@@ -18,7 +18,7 @@ import (
 )
 
 type Service struct {
-	r    model.ProcessRepository
+	r    model.OrderProcessRepository
 	rpr  model.ProcessRuleRepository
 	sq   *orderqueueusecases.Service
 	rsgi *groupitemusecases.Service
@@ -26,7 +26,7 @@ type Service struct {
 	se   *employeeusecases.Service
 }
 
-func NewService(c model.ProcessRepository) *Service {
+func NewService(c model.OrderProcessRepository) *Service {
 	return &Service{r: c}
 }
 

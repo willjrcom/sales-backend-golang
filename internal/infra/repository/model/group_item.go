@@ -24,7 +24,7 @@ type GroupCommonAttributes struct {
 
 type GroupDetails struct {
 	Size             string           `bun:"size,notnull"`
-	Status           StatusGroupItem  `bun:"status,notnull"`
+	Status           string           `bun:"status,notnull"`
 	TotalPrice       float64          `bun:"total_price"`
 	Quantity         float64          `bun:"quantity"`
 	NeedPrint        bool             `bun:"need_print"`

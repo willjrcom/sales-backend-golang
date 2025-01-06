@@ -88,7 +88,7 @@ func (r *ContactRepositoryBun) GetContactById(ctx context.Context, id string) (*
 	return contact, nil
 }
 
-func (r *ContactRepositoryBun) GetContactByDddAndNumber(ctx context.Context, ddd string, number string, contactType model.ContactType) (*model.Contact, error) {
+func (r *ContactRepositoryBun) GetContactByDddAndNumber(ctx context.Context, ddd string, number string, contactType string) (*model.Contact, error) {
 	contact := &model.Contact{}
 
 	r.mu.Lock()
@@ -105,7 +105,7 @@ func (r *ContactRepositoryBun) GetContactByDddAndNumber(ctx context.Context, ddd
 	return contact, nil
 }
 
-func (r *ContactRepositoryBun) FtSearchContacts(ctx context.Context, text string, contactType model.ContactType) (contacts []model.Contact, err error) {
+func (r *ContactRepositoryBun) FtSearchContacts(ctx context.Context, text string, contactType string) (contacts []model.Contact, err error) {
 	contacts = []model.Contact{}
 
 	r.mu.Lock()

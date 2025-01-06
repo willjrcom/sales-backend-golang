@@ -9,6 +9,10 @@ import (
 type Employee struct {
 	entitymodel.Entity
 	bun.BaseModel `bun:"table:employees"`
-	UserID        *uuid.UUID `bun:"column:user_id,type:uuid"`
-	User          *User      `bun:"rel:belongs-to"`
+	EmployeeCommonAttributes
+}
+
+type EmployeeCommonAttributes struct {
+	UserID *uuid.UUID `bun:"column:user_id,type:uuid,notnull"`
+	User   *User      `bun:"rel:belongs-to"`
 }

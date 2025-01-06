@@ -19,7 +19,7 @@ type OrderCommonAttributes struct {
 	OrderType
 	OrderDetail
 	OrderNumber int            `bun:"order_number,notnull"`
-	Status      StatusOrder    `bun:"status,notnull"`
+	Status      string         `bun:"status,notnull"`
 	Groups      []GroupItem    `bun:"rel:has-many,join:id=order_id"`
 	Payments    []PaymentOrder `bun:"rel:has-many,join:id=order_id"`
 }

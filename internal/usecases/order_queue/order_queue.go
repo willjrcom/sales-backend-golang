@@ -12,14 +12,14 @@ import (
 
 type Service struct {
 	r  model.QueueRepository
-	rp model.ProcessRepository
+	rp model.OrderProcessRepository
 }
 
 func NewService(c model.QueueRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) AddDependencies(rp model.ProcessRepository) {
+func (s *Service) AddDependencies(rp model.OrderProcessRepository) {
 	s.rp = rp
 }
 

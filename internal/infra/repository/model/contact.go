@@ -20,14 +20,7 @@ type Contact struct {
 }
 
 type ContactCommonAttributes struct {
-	Ddd    string      `bun:"ddd,notnull"`
-	Number string      `bun:"number,notnull"`
-	Type   ContactType `bun:"type,notnull"`
+	Ddd    string `bun:"ddd,notnull"`
+	Number string `bun:"number,notnull"`
+	Type   string `bun:"type,notnull"`
 }
-
-type ContactType string
-
-const (
-	ContactTypeClient   ContactType = "Client"
-	ContactTypeEmployee ContactType = "Employee"
-)

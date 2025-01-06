@@ -8,6 +8,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
@@ -144,7 +145,7 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 
 	if err := r.db.NewSelect().Model(&processes).
 		Where("process.process_rule_id = ? and process.status != ?",
-			id, model.ProcessStatusFinished).
+			id, orderprocessentity.ProcessStatusFinished).
 		Relation("GroupItem.Items.AdditionalItems").
 		Relation("GroupItem.ComplementItem").
 		Relation("GroupItem.Category").

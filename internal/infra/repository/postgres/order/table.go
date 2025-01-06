@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
@@ -92,7 +93,7 @@ func (r *OrderTableRepositoryBun) GetPendingOrderTablesByTableId(ctx context.Con
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&tables).Where("table_id = ? AND status = ?", id, model.OrderTableStatusPending).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&tables).Where("table_id = ? AND status = ?", id, orderentity.OrderTableStatusPending).Scan(ctx); err != nil {
 		return nil, err
 	}
 

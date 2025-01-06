@@ -6,6 +6,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
@@ -73,7 +74,7 @@ func (r *OrderDeliveryRepositoryBun) GetAllDeliveries(ctx context.Context) ([]mo
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&deliveries).Where("delivery.status != ?", model.OrderDeliveryStatusStaging).Relation("Client").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&deliveries).Where("delivery.status != ?", orderentity.OrderDeliveryStatusStaging).Relation("Client").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
 		return nil, err
 	}
 

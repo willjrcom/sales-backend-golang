@@ -16,11 +16,11 @@ type OrderTable struct {
 }
 
 type OrderTableCommonAttributes struct {
-	Name    string           `bun:"name,notnull"`
-	Contact string           `bun:"contact,notnull"`
-	Status  StatusOrderTable `bun:"status,notnull"`
-	OrderID uuid.UUID        `bun:"column:order_id,type:uuid,notnull"`
-	TableID uuid.UUID        `bun:"column:table_id,type:uuid,notnull"`
+	Name    string    `bun:"name,notnull"`
+	Contact string    `bun:"contact,notnull"`
+	Status  string    `bun:"status,notnull"`
+	OrderID uuid.UUID `bun:"column:order_id,type:uuid,notnull"`
+	TableID uuid.UUID `bun:"column:table_id,type:uuid,notnull"`
 }
 
 type OrderTableTimeLogs struct {

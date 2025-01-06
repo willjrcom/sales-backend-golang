@@ -1,16 +1,9 @@
 package model
 
 import (
-	"errors"
-
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
-)
-
-var (
-	ErrCategoryNotFound = errors.New("product category not found")
-	ErrSizeIsInvalid    = errors.New("size is invalid")
 )
 
 type Product struct {

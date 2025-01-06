@@ -1,15 +1,9 @@
 package model
 
 import (
-	"errors"
-
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
-)
-
-var (
-	ErrSizeAlreadyExists = errors.New("size already exists")
 )
 
 type Size struct {
