@@ -4,6 +4,7 @@ import (
 	"context"
 
 	orderdeliverydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_delivery"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 func (s *Service) CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto.DeliveryOrderCreateDTO) (*orderdeliverydto.OrderDeliveryIDDTO, error) {
@@ -22,16 +23,20 @@ func (s *Service) CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto
 	delivery.OrderID = orderID
 
 	// Validate client
-	client, err := s.rc.GetClientById(ctx, delivery.ClientID.String())
+	clientModel, err := s.rc.GetClientById(ctx, delivery.ClientID.String())
 	if err != nil {
 		return nil, err
 	}
+
+	client := clientModel.ToDomain()
 
 	delivery.ClientID = client.ID
 	delivery.AddressID = client.Address.ID
 	delivery.DeliveryTax = &client.Address.DeliveryTax
 
-	if err = s.rdo.CreateOrderDelivery(ctx, delivery); err != nil {
+	deliveryModel := &model.OrderDelivery{}
+	deliveryModel.FromDomain(delivery)
+	if err = s.rdo.CreateOrderDelivery(ctx, deliveryModel); err != nil {
 		return nil, err
 	}
 

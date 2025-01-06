@@ -8,17 +8,19 @@ import (
 )
 
 func (s *Service) PendingOrder(ctx context.Context, dtoID *entitydto.IDRequest) (err error) {
-	orderPickup, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
+	orderPickupModel, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	orderPickup := orderPickupModel.ToDomain()
 	if err := orderPickup.Pend(); err != nil {
 		return err
 	}
 
-	if err = s.rp.UpdateOrderPickup(ctx, orderPickup); err != nil {
+	orderPickupModel.FromDomain(orderPickup)
+	if err = s.rp.UpdateOrderPickup(ctx, orderPickupModel); err != nil {
 		return err
 	}
 
@@ -26,17 +28,19 @@ func (s *Service) PendingOrder(ctx context.Context, dtoID *entitydto.IDRequest) 
 }
 
 func (s *Service) ReadyOrder(ctx context.Context, dtoID *entitydto.IDRequest) (err error) {
-	orderPickup, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
+	orderPickupModel, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	orderPickup := orderPickupModel.ToDomain()
 	if err := orderPickup.Ready(); err != nil {
 		return err
 	}
 
-	if err = s.rp.UpdateOrderPickup(ctx, orderPickup); err != nil {
+	orderPickupModel.FromDomain(orderPickup)
+	if err = s.rp.UpdateOrderPickup(ctx, orderPickupModel); err != nil {
 		return err
 	}
 
@@ -44,17 +48,19 @@ func (s *Service) ReadyOrder(ctx context.Context, dtoID *entitydto.IDRequest) (e
 }
 
 func (s *Service) UpdateName(ctx context.Context, dtoID *entitydto.IDRequest, dtoPickup *orderpickupdto.UpdateOrderPickupInput) (err error) {
-	orderPickup, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
+	orderPickupModel, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	orderPickup := orderPickupModel.ToDomain()
 	if err := orderPickup.UpdateName(dtoPickup.Name); err != nil {
 		return err
 	}
 
-	if err = s.rp.UpdateOrderPickup(ctx, orderPickup); err != nil {
+	orderPickupModel.FromDomain(orderPickup)
+	if err = s.rp.UpdateOrderPickup(ctx, orderPickupModel); err != nil {
 		return err
 	}
 

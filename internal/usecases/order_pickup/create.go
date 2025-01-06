@@ -4,6 +4,7 @@ import (
 	"context"
 
 	orderpickupdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_pickup"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 func (s *Service) CreateOrderPickup(ctx context.Context, dto *orderpickupdto.OrderPickupCreateDTO) (*orderpickupdto.PickupIDAndOrderIDDTO, error) {
@@ -21,7 +22,10 @@ func (s *Service) CreateOrderPickup(ctx context.Context, dto *orderpickupdto.Ord
 
 	orderPickup.OrderID = orderID
 
-	if err = s.rp.CreateOrderPickup(ctx, orderPickup); err != nil {
+	orderPickupModel := &model.OrderPickup{}
+	orderPickupModel.FromDomain(orderPickup)
+
+	if err = s.rp.CreateOrderPickup(ctx, orderPickupModel); err != nil {
 		return nil, err
 	}
 

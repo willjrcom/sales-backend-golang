@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdeliverydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_delivery"
 )
@@ -14,17 +15,19 @@ var (
 )
 
 func (s *Service) PendOrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error) {
-	orderDelivery, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
+	orderDeliveryModel, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	orderDelivery := orderDeliveryModel.ToDomain()
 	if err := orderDelivery.Pend(); err != nil {
 		return err
 	}
 
-	if err = s.rdo.UpdateOrderDelivery(ctx, orderDelivery); err != nil {
+	orderDeliveryModel.FromDomain(orderDelivery)
+	if err = s.rdo.UpdateOrderDelivery(ctx, orderDeliveryModel); err != nil {
 		return err
 	}
 
@@ -36,10 +39,15 @@ func (s *Service) ShipOrderDelivery(ctx context.Context, dtoShip *orderdeliveryd
 		return errors.New("delivery ids is required")
 	}
 
-	orderDeliveries, err := s.rdo.GetDeliveriesByIds(ctx, dtoShip.DeliveryIDs)
+	orderDeliveryModel, err := s.rdo.GetDeliveriesByIds(ctx, dtoShip.DeliveryIDs)
 
 	if err != nil {
 		return err
+	}
+
+	orderDeliveries := []orderentity.OrderDelivery{}
+	for _, orderDeliveryModel := range orderDeliveryModel {
+		orderDeliveries = append(orderDeliveries, *orderDeliveryModel.ToDomain())
 	}
 
 	if err = dtoShip.UpdateDomain(orderDeliveries); err != nil {
@@ -55,7 +63,8 @@ func (s *Service) ShipOrderDelivery(ctx context.Context, dtoShip *orderdeliveryd
 			return err
 		}
 
-		if err := s.rdo.UpdateOrderDelivery(ctx, &orderDeliveries[i]); err != nil {
+		orderDeliveryModel[i].FromDomain(&orderDeliveries[i])
+		if err := s.rdo.UpdateOrderDelivery(ctx, &orderDeliveryModel[i]); err != nil {
 			return err
 		}
 	}
@@ -64,17 +73,19 @@ func (s *Service) ShipOrderDelivery(ctx context.Context, dtoShip *orderdeliveryd
 }
 
 func (s *Service) OrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error) {
-	orderDelivery, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
+	orderDeliveryModel, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	orderDelivery := orderDeliveryModel.ToDomain()
 	if err := orderDelivery.Delivery(); err != nil {
 		return err
 	}
 
-	if err = s.rdo.UpdateOrderDelivery(ctx, orderDelivery); err != nil {
+	orderDeliveryModel.FromDomain(orderDelivery)
+	if err = s.rdo.UpdateOrderDelivery(ctx, orderDeliveryModel); err != nil {
 		return err
 	}
 
@@ -106,12 +117,13 @@ func (s *Service) UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.ID
 }
 
 func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoID *entitydto.IDRequest, dto *orderdeliverydto.DeliveryOrderDriverUpdateDTO) error {
-	orderDelivery, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
+	orderDeliveryModel, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	orderDelivery := orderDeliveryModel.ToDomain()
 	if orderDelivery.DeliveredAt != nil {
 		return ErrOrderDelivered
 	}
@@ -124,7 +136,8 @@ func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoID *entitydto.IDR
 		return err
 	}
 
-	if err := s.rdo.UpdateOrderDelivery(ctx, orderDelivery); err != nil {
+	orderDeliveryModel.FromDomain(orderDelivery)
+	if err := s.rdo.UpdateOrderDelivery(ctx, orderDeliveryModel); err != nil {
 		return err
 	}
 

@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	employeedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/employee"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -42,7 +41,9 @@ func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.EmployeeC
 		return nil, errors.New("employee already exists")
 	}
 
-	if err := s.re.CreateEmployee(ctx, employee); err != nil {
+	employeeModel := &model.Employee{}
+	employeeModel.FromDomain(employee)
+	if err := s.re.CreateEmployee(ctx, employeeModel); err != nil {
 		return nil, err
 	}
 
@@ -50,17 +51,19 @@ func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.EmployeeC
 }
 
 func (s *Service) UpdateEmployee(ctx context.Context, dtoId *entitydto.IDRequest, dto *employeedto.EmployeeUpdateDTO) error {
-	employee, err := s.re.GetEmployeeById(ctx, dtoId.ID.String())
+	employeeModel, err := s.re.GetEmployeeById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	employee := employeeModel.ToDomain()
 	if err := dto.UpdateDomain(employee); err != nil {
 		return err
 	}
 
-	if err := s.re.UpdateEmployee(ctx, employee); err != nil {
+	employeeModel.FromDomain(employee)
+	if err := s.re.UpdateEmployee(ctx, employeeModel); err != nil {
 		return err
 	}
 
@@ -80,9 +83,10 @@ func (s *Service) DeleteEmployee(ctx context.Context, dto *entitydto.IDRequest) 
 }
 
 func (s *Service) GetEmployeeById(ctx context.Context, dto *entitydto.IDRequest) (*employeedto.EmployeeDTO, error) {
-	if employee, err := s.re.GetEmployeeById(ctx, dto.ID.String()); err != nil {
+	if employeeModel, err := s.re.GetEmployeeById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
+		employee := employeeModel.ToDomain()
 		dto := &employeedto.EmployeeDTO{}
 		dto.FromDomain(employee)
 		return dto, nil
@@ -90,9 +94,10 @@ func (s *Service) GetEmployeeById(ctx context.Context, dto *entitydto.IDRequest)
 }
 
 func (s *Service) GetEmployeeByUserID(ctx context.Context, dto *entitydto.IDRequest) (*employeedto.EmployeeDTO, error) {
-	if employee, err := s.re.GetEmployeeByUserID(ctx, dto.ID.String()); err != nil {
+	if employeeModel, err := s.re.GetEmployeeByUserID(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
+		employee := employeeModel.ToDomain()
 		dto := &employeedto.EmployeeDTO{}
 		dto.FromDomain(employee)
 		return dto, nil
@@ -100,18 +105,19 @@ func (s *Service) GetEmployeeByUserID(ctx context.Context, dto *entitydto.IDRequ
 }
 
 func (s *Service) GetAllEmployees(ctx context.Context) ([]employeedto.EmployeeDTO, error) {
-	if employees, err := s.re.GetAllEmployees(ctx); err != nil {
+	if employeeModels, err := s.re.GetAllEmployees(ctx); err != nil {
 		return nil, err
 	} else {
-		dtos := employeesToDtos(employees)
+		dtos := modelsToDTOs(employeeModels)
 		return dtos, nil
 	}
 }
 
-func employeesToDtos(employees []employeeentity.Employee) []employeedto.EmployeeDTO {
-	dtos := make([]employeedto.EmployeeDTO, len(employees))
-	for i, employee := range employees {
-		dtos[i].FromDomain(&employee)
+func modelsToDTOs(employeeModels []model.Employee) []employeedto.EmployeeDTO {
+	dtos := make([]employeedto.EmployeeDTO, len(employeeModels))
+	for i, employeeModel := range employeeModels {
+		employee := employeeModel.ToDomain()
+		dtos[i].FromDomain(employee)
 	}
 
 	return dtos

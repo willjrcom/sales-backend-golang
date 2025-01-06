@@ -6,7 +6,6 @@ import (
 
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
@@ -33,21 +32,14 @@ func (s *Service) AddDependencies(ri model.ItemRepository, rp model.ProductRepos
 }
 
 func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IDRequest) (groupItem *orderentity.GroupItem, err error) {
-	groupItem, err = s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+	groupItemModel, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
 		return nil, err
 	}
 
+	groupItem = groupItemModel.ToDomain()
 	return
-}
-
-func (s *Service) GetGroupsByStatus(ctx context.Context, dto *groupitemdto.OrderGroupItemStatusDTO) (groups []orderentity.GroupItem, err error) {
-	return s.rgi.GetGroupsByStatus(ctx, dto.Status)
-}
-
-func (s *Service) GetGroupsByOrderIDAndStatus(ctx context.Context, dto *groupitemdto.GroupItemByOrderIDAndStatusDTO) (groups []orderentity.GroupItem, err error) {
-	return s.rgi.GetGroupsByOrderIDAndStatus(ctx, dto.OrderID.String(), dto.Status)
 }
 
 func (s *Service) DeleteGroupItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
@@ -102,7 +94,9 @@ func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IDReques
 
 	itemComplement := orderentity.NewItem(productComplement.Name, productComplement.Price, groupItem.Quantity, groupItem.Size, productComplement.ID, productComplement.CategoryID)
 
-	if err = s.ri.AddItem(ctx, itemComplement); err != nil {
+	itemComplementModel := &model.Item{}
+	itemComplementModel.FromDomain(itemComplement)
+	if err = s.ri.AddItem(ctx, itemComplementModel); err != nil {
 		return err
 	}
 

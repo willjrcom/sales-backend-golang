@@ -8,17 +8,21 @@ import (
 )
 
 func (s *Service) GetPickupById(ctx context.Context, dto *entitydto.IDRequest) (*orderentity.OrderPickup, error) {
-	if orderPickup, err := s.rp.GetPickupById(ctx, dto.ID.String()); err != nil {
+	if orderPickupModel, err := s.rp.GetPickupById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return orderPickup, nil
+		return orderPickupModel.ToDomain(), nil
 	}
 }
 
 func (s *Service) GetAllPickups(ctx context.Context) ([]orderentity.OrderPickup, error) {
-	if pickups, err := s.rp.GetAllPickups(ctx); err != nil {
+	if pickupModels, err := s.rp.GetAllPickups(ctx); err != nil {
 		return nil, err
 	} else {
+		pickups := make([]orderentity.OrderPickup, len(pickupModels))
+		for i, pickupModel := range pickupModels {
+			pickups[i] = *pickupModel.ToDomain()
+		}
 		return pickups, nil
 	}
 }

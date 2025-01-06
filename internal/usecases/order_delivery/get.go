@@ -8,17 +8,21 @@ import (
 )
 
 func (s *Service) GetDeliveryById(ctx context.Context, dto *entitydto.IDRequest) (*orderentity.OrderDelivery, error) {
-	if delivery, err := s.rdo.GetDeliveryById(ctx, dto.ID.String()); err != nil {
+	if deliveryModel, err := s.rdo.GetDeliveryById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return delivery, nil
+		return deliveryModel.ToDomain(), nil
 	}
 }
 
 func (s *Service) GetAllDeliveries(ctx context.Context) ([]orderentity.OrderDelivery, error) {
-	if deliveries, err := s.rdo.GetAllDeliveries(ctx); err != nil {
+	if deliveryModels, err := s.rdo.GetAllDeliveries(ctx); err != nil {
 		return nil, err
 	} else {
+		deliveries := []orderentity.OrderDelivery{}
+		for _, deliveryModel := range deliveryModels {
+			deliveries = append(deliveries, *deliveryModel.ToDomain())
+		}
 		return deliveries, nil
 	}
 }

@@ -11,14 +11,17 @@ import (
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
 	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) error {
-	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
+	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
 		return err
 	}
+
+	order := orderModel.ToDomain()
 
 	processRules, err := s.rpr.GetMapProcessRulesByFirstOrder(ctx)
 	if err != nil {
@@ -76,7 +79,8 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) er
 		}
 	}
 
-	if err := s.ro.PendingOrder(ctx, order); err != nil {
+	orderModel.FromDomain(order)
+	if err := s.ro.PendingOrder(ctx, orderModel); err != nil {
 		return err
 	}
 
@@ -84,17 +88,19 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) er
 }
 
 func (s *Service) ReadyOrder(ctx context.Context, dto *entitydto.IDRequest) error {
-	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
+	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	order := orderModel.ToDomain()
 	if err = order.ReadyOrder(); err != nil {
 		return err
 	}
 
-	if err := s.ro.UpdateOrder(ctx, order); err != nil {
+	orderModel.FromDomain(order)
+	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
 		return err
 	}
 
@@ -102,17 +108,19 @@ func (s *Service) ReadyOrder(ctx context.Context, dto *entitydto.IDRequest) erro
 }
 
 func (s *Service) FinishOrder(ctx context.Context, dto *entitydto.IDRequest) error {
-	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
+	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	order := orderModel.ToDomain()
 	if err = order.FinishOrder(); err != nil {
 		return err
 	}
 
-	if err := s.ro.UpdateOrder(ctx, order); err != nil {
+	orderModel.FromDomain(order)
+	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
 		return err
 	}
 
@@ -120,17 +128,19 @@ func (s *Service) FinishOrder(ctx context.Context, dto *entitydto.IDRequest) err
 }
 
 func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IDRequest) (err error) {
-	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
+	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	order := orderModel.ToDomain()
 	if err = order.CancelOrder(); err != nil {
 		return err
 	}
 
-	if err := s.ro.UpdateOrder(ctx, order); err != nil {
+	orderModel.FromDomain(order)
+	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
 		return err
 	}
 
@@ -145,17 +155,19 @@ func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IDRequest) (er
 }
 
 func (s *Service) ArchiveOrder(ctx context.Context, dto *entitydto.IDRequest) (err error) {
-	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
+	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	order := orderModel.ToDomain()
 	if err = order.ArchiveOrder(); err != nil {
 		return err
 	}
 
-	if err := s.ro.UpdateOrder(ctx, order); err != nil {
+	orderModel.FromDomain(order)
+	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
 		return err
 	}
 
@@ -163,17 +175,19 @@ func (s *Service) ArchiveOrder(ctx context.Context, dto *entitydto.IDRequest) (e
 }
 
 func (s *Service) UnarchiveOrder(ctx context.Context, dto *entitydto.IDRequest) error {
-	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
+	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	order := orderModel.ToDomain()
 	if err = order.UnarchiveOrder(); err != nil {
 		return err
 	}
 
-	if err := s.ro.UpdateOrder(ctx, order); err != nil {
+	orderModel.FromDomain(order)
+	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
 		return err
 	}
 
@@ -181,12 +195,13 @@ func (s *Service) UnarchiveOrder(ctx context.Context, dto *entitydto.IDRequest) 
 }
 
 func (s *Service) AddPayment(ctx context.Context, dto *entitydto.IDRequest, dtoPayment *orderdto.OrderPaymentCreateDTO) error {
-	order, err := s.ro.GetOrderById(ctx, dto.ID.String())
+	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	order := orderModel.ToDomain()
 	if err = order.ValidatePayments(); err != nil {
 		return err
 	}
@@ -199,11 +214,15 @@ func (s *Service) AddPayment(ctx context.Context, dto *entitydto.IDRequest, dtoP
 	order.AddPayment(paymentOrder)
 
 	order.CalculateTotalPrice()
-	if err := s.ro.AddPaymentOrder(ctx, paymentOrder); err != nil {
+
+	paymentOrderModel := &model.PaymentOrder{}
+	paymentOrderModel.FromDomain(paymentOrder)
+	if err := s.ro.AddPaymentOrder(ctx, paymentOrderModel); err != nil {
 		return err
 	}
 
-	if err := s.ro.UpdateOrder(ctx, order); err != nil {
+	orderModel.FromDomain(order)
+	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
 		return err
 	}
 
@@ -211,15 +230,16 @@ func (s *Service) AddPayment(ctx context.Context, dto *entitydto.IDRequest, dtoP
 }
 
 func (s *Service) UpdateOrderObservation(ctx context.Context, dtoId *entitydto.IDRequest, dto *orderdto.OrderUpdateObservationDTO) error {
-	order, err := s.ro.GetOrderById(ctx, dtoId.ID.String())
+	orderModel, err := s.ro.GetOrderById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	order := orderModel.ToDomain()
 	dto.UpdateDomain(order)
 
-	if err := s.ro.UpdateOrder(ctx, order); err != nil {
+	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
 		return err
 	}
 

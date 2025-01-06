@@ -25,8 +25,6 @@ func NewHandlerGroupItem(itemService *groupitemusecases.Service) *handler.Handle
 
 	c.With().Group(func(c chi.Router) {
 		c.Get("/{id}", h.handlerGetGroupByID)
-		c.Post("/all-by-status", h.handlerGetGroupsByStatus)
-		c.Post("/by-order-id-and-status", h.handlerGetGroupsByOrderIDAndStatus)
 		c.Post("/update/schedule/{id}", h.handlerScheduleGroupByID)
 		c.Post("/start/{id}", h.handlerStartGroupByID)
 		c.Post("/ready/{id}", h.handlerReadyGroupByID)
@@ -58,42 +56,6 @@ func (h *handlerGroupItemImpl) handlerGetGroupByID(w http.ResponseWriter, r *htt
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: groupItem})
-}
-
-func (h *handlerGroupItemImpl) handlerGetGroupsByStatus(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	dtoGroupItem := &groupitemdto.OrderGroupItemStatusDTO{}
-	if err := jsonpkg.ParseBody(r, dtoGroupItem); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
-		return
-	}
-
-	groups, err := h.s.GetGroupsByStatus(ctx, dtoGroupItem)
-	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: groups})
-}
-
-func (h *handlerGroupItemImpl) handlerGetGroupsByOrderIDAndStatus(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	dtoGroupItem := &groupitemdto.GroupItemByOrderIDAndStatusDTO{}
-	if err := jsonpkg.ParseBody(r, dtoGroupItem); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
-		return
-	}
-
-	groups, err := h.s.GetGroupsByOrderIDAndStatus(ctx, dtoGroupItem)
-	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: groups})
 }
 
 func (h *handlerGroupItemImpl) handlerScheduleGroupByID(w http.ResponseWriter, r *http.Request) {

@@ -63,7 +63,9 @@ func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.OrderP
 		})
 	}
 
-	if err := s.r.CreateProcess(ctx, process); err != nil {
+	processModel := &model.OrderProcess{}
+	processModel.FromDomain(process)
+	if err := s.r.CreateProcess(ctx, processModel); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -82,10 +84,12 @@ func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IDRequest) 
 		return err
 	}
 
-	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
+	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
 		return err
 	}
+
+	process := processModel.ToDomain()
 
 	processRule, err := s.rpr.GetProcessRuleById(ctx, process.ProcessRuleID.String())
 	if err != nil {
@@ -103,7 +107,8 @@ func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IDRequest) 
 		return err
 	}
 
-	if err := s.r.UpdateProcess(ctx, process); err != nil {
+	processModel.FromDomain(process)
+	if err := s.r.UpdateProcess(ctx, processModel); err != nil {
 		return err
 	}
 
@@ -115,16 +120,18 @@ func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IDRequest) 
 }
 
 func (s *Service) PauseProcess(ctx context.Context, dtoID *entitydto.IDRequest) error {
-	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
+	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
 		return err
 	}
 
+	process := processModel.ToDomain()
 	if err := process.PauseProcess(); err != nil {
 		return err
 	}
 
-	if err := s.r.UpdateProcess(ctx, process); err != nil {
+	processModel.FromDomain(process)
+	if err := s.r.UpdateProcess(ctx, processModel); err != nil {
 		return err
 	}
 
@@ -132,16 +139,18 @@ func (s *Service) PauseProcess(ctx context.Context, dtoID *entitydto.IDRequest) 
 }
 
 func (s *Service) ContinueProcess(ctx context.Context, dtoID *entitydto.IDRequest) error {
-	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
+	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
 		return err
 	}
 
+	process := processModel.ToDomain()
 	if err := process.ContinueProcess(); err != nil {
 		return err
 	}
 
-	if err := s.r.UpdateProcess(ctx, process); err != nil {
+	processModel.FromDomain(process)
+	if err := s.r.UpdateProcess(ctx, processModel); err != nil {
 		return err
 	}
 
@@ -149,16 +158,18 @@ func (s *Service) ContinueProcess(ctx context.Context, dtoID *entitydto.IDReques
 }
 
 func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IDRequest) (nextProcessID uuid.UUID, err error) {
-	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
+	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
 		return uuid.Nil, err
 	}
 
+	process := processModel.ToDomain()
 	if err := process.FinishProcess(); err != nil {
 		return uuid.Nil, err
 	}
 
-	if err := s.r.UpdateProcess(ctx, process); err != nil {
+	processModel.FromDomain(process)
+	if err := s.r.UpdateProcess(ctx, processModel); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -179,17 +190,20 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IDRequest)
 			return uuid.Nil, err
 		}
 
-		order, err := s.ro.GetOrderById(ctx, groupItem.OrderID.String())
+		orderModel, err := s.ro.GetOrderById(ctx, groupItem.OrderID.String())
 		if err != nil {
 			return uuid.Nil, err
 		}
+
+		order := orderModel.ToDomain()
 
 		// Update order status
 		if err := order.ReadyOrder(); err != nil {
 			return uuid.Nil, err
 		}
 
-		if err := s.ro.UpdateOrder(ctx, order); err != nil {
+		orderModel.FromDomain(order)
+		if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
 			return uuid.Nil, err
 		}
 		return uuid.Nil, nil
@@ -236,16 +250,18 @@ func (s *Service) CancelProcess(ctx context.Context, dtoID *entitydto.IDRequest,
 		return err
 	}
 
-	process, err := s.r.GetProcessById(ctx, dtoID.ID.String())
+	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String())
 	if err != nil {
 		return err
 	}
 
+	process := processModel.ToDomain()
 	if err := process.CancelProcess(reason); err != nil {
 		return err
 	}
 
-	if err := s.r.UpdateProcess(ctx, process); err != nil {
+	processModel.FromDomain(process)
+	if err := s.r.UpdateProcess(ctx, processModel); err != nil {
 		return err
 	}
 
@@ -253,9 +269,10 @@ func (s *Service) CancelProcess(ctx context.Context, dtoID *entitydto.IDRequest,
 }
 
 func (s *Service) GetProcessById(ctx context.Context, dto *entitydto.IDRequest) (*orderprocessdto.OrderProcessDTO, error) {
-	if process, err := s.r.GetProcessById(ctx, dto.ID.String()); err != nil {
+	if processModel, err := s.r.GetProcessById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
+		process := processModel.ToDomain()
 		processDTO := &orderprocessdto.OrderProcessDTO{}
 		processDTO.FromDomain(process)
 		return processDTO, nil
@@ -263,42 +280,43 @@ func (s *Service) GetProcessById(ctx context.Context, dto *entitydto.IDRequest) 
 }
 
 func (s *Service) GetAllProcesses(ctx context.Context) ([]orderprocessdto.OrderProcessDTO, error) {
-	if process, err := s.r.GetAllProcesses(ctx); err != nil {
+	if processModels, err := s.r.GetAllProcesses(ctx); err != nil {
 		return nil, err
 	} else {
-		return s.domainsToDTOs(process), nil
+		return s.modelsToDTOs(processModels), nil
 	}
 }
 
 func (s *Service) GetProcessesByProcessRuleID(ctx context.Context, dtoID *entitydto.IDRequest) ([]orderprocessdto.OrderProcessDTO, error) {
-	if process, err := s.r.GetProcessesByProcessRuleID(ctx, dtoID.ID.String()); err != nil {
+	if processModels, err := s.r.GetProcessesByProcessRuleID(ctx, dtoID.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return s.domainsToDTOs(process), nil
+		return s.modelsToDTOs(processModels), nil
 	}
 }
 
 func (s *Service) GetProcessesByProductID(ctx context.Context, dtoID *entitydto.IDRequest) ([]orderprocessdto.OrderProcessDTO, error) {
-	if process, err := s.r.GetProcessesByProductID(ctx, dtoID.ID.String()); err != nil {
+	if processModels, err := s.r.GetProcessesByProductID(ctx, dtoID.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return s.domainsToDTOs(process), nil
+		return s.modelsToDTOs(processModels), nil
 	}
 }
 
 func (s *Service) GetProcessesByGroupItemID(ctx context.Context, dtoID *entitydto.IDRequest) ([]orderprocessdto.OrderProcessDTO, error) {
-	if process, err := s.r.GetProcessesByGroupItemID(ctx, dtoID.ID.String()); err != nil {
+	if processModels, err := s.r.GetProcessesByGroupItemID(ctx, dtoID.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return s.domainsToDTOs(process), nil
+		return s.modelsToDTOs(processModels), nil
 	}
 }
 
-func (s *Service) domainsToDTOs(processes []orderprocessentity.OrderProcess) []orderprocessdto.OrderProcessDTO {
+func (s *Service) modelsToDTOs(processModels []model.OrderProcess) []orderprocessdto.OrderProcessDTO {
 	dtos := make([]orderprocessdto.OrderProcessDTO, 0)
-	for _, process := range processes {
+	for _, processModel := range processModels {
+		process := processModel.ToDomain()
 		processDTO := &orderprocessdto.OrderProcessDTO{}
-		processDTO.FromDomain(&process)
+		processDTO.FromDomain(process)
 		dtos = append(dtos, *processDTO)
 	}
 

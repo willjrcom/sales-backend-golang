@@ -51,11 +51,12 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 		return nil, err
 	}
 
-	product, err := s.rp.GetProductById(ctx, dto.ProductID.String())
-
+	productModel, err := s.rp.GetProductById(ctx, dto.ProductID.String())
 	if err != nil {
 		return nil, errors.New("product not found: " + err.Error())
 	}
+
+	product := productModel.ToDomain()
 
 	if product.Category == nil {
 		return nil, ErrCategoryNotFound
@@ -75,11 +76,13 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 		dto.GroupItemID = &groupItem.ID
 	}
 
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.GroupItemID.String(), true)
+	groupItemModel, err := s.rgi.GetGroupByID(ctx, dto.GroupItemID.String(), true)
 
 	if err != nil {
 		return nil, errors.New("group item not found: " + err.Error())
 	}
+
+	groupItem := groupItemModel.ToDomain()
 
 	if groupItem.OrderID != dto.OrderID {
 		return nil, ErrGroupItemNotBelongsToOrder
@@ -89,29 +92,39 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 		return nil, err
 	}
 
-	quantity, err := s.rq.GetQuantityById(ctx, dto.QuantityID.String())
+	quantityModel, err := s.rq.GetQuantityById(ctx, dto.QuantityID.String())
 
 	if err != nil {
 		return nil, errors.New("quantity not found: " + err.Error())
 	}
 
+	quantity := quantityModel.ToDomain()
 	item, err := dto.ToDomain(product, groupItem, quantity)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err = s.ri.AddItem(ctx, item); err != nil {
+	itemModel := &model.Item{}
+	itemModel.FromDomain(item)
+
+	if err = s.ri.AddItem(ctx, itemModel); err != nil {
 		return nil, errors.New("add item error: " + err.Error())
 	}
 
-	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
+	GroupItemModel := &model.GroupItem{}
+	GroupItemModel.FromDomain(groupItem)
+
+	if err = s.rgi.UpdateGroupItem(ctx, groupItemModel); err != nil {
 		return nil, errors.New("update group item error: " + err.Error())
 	}
 
 	if groupItem.ComplementItemID != nil {
 		groupItem.ComplementItem.Quantity += item.Quantity
-		if err = s.ri.UpdateItem(ctx, groupItem.ComplementItem); err != nil {
+
+		complementItemModel := &model.Item{}
+		complementItemModel.FromDomain(groupItem.ComplementItem)
+		if err = s.ri.UpdateItem(ctx, complementItemModel); err != nil {
 			return nil, errors.New("update complement item error: " + err.Error())
 		}
 	}
@@ -179,10 +192,12 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 		return uuid.Nil, errors.New("product not found: " + err.Error())
 	}
 
-	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
+	groupItemModel, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
 	if err != nil {
 		return uuid.Nil, errors.New("group item not found: " + err.Error())
 	}
+
+	groupItem := groupItemModel.ToDomain()
 
 	if ok, err := groupItem.CanAddItems(); !ok {
 		return uuid.Nil, err
@@ -210,23 +225,26 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 		return uuid.Nil, errors.New("product category and quantity not match")
 	}
 
-	itemAdditional := orderentity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, productAdditional.ID, productAdditional.CategoryID)
+	additionalItem := orderentity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, productAdditional.ID, productAdditional.CategoryID)
 
-	if err = s.ri.AddAdditionalItem(ctx, item.ID, productAdditional.ID, itemAdditional); err != nil {
+	additionalItemModel := &model.Item{}
+	additionalItemModel.FromDomain(additionalItem)
+
+	if err = s.ri.AddAdditionalItem(ctx, item.ID, productAdditional.ID, additionalItemModel); err != nil {
 		return uuid.Nil, errors.New("add additional item error: " + err.Error())
 	}
 
-	groupItem, err = s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
+	groupItemModel, err = s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
 
 	if err != nil {
 		return uuid.Nil, errors.New("group item not found: " + err.Error())
 	}
 
-	if err = s.rgi.UpdateGroupItem(ctx, groupItem); err != nil {
+	if err = s.rgi.UpdateGroupItem(ctx, groupItemModel); err != nil {
 		return uuid.Nil, errors.New("update group item error: " + err.Error())
 	}
 
-	return itemAdditional.ID, nil
+	return additionalItem.ID, nil
 }
 
 func (s *Service) DeleteAdditionalItemOrder(ctx context.Context, dtoAdditional *entitydto.IDRequest) (err error) {
@@ -243,10 +261,12 @@ func (s *Service) AddRemovedItem(ctx context.Context, dtoID *entitydto.IDRequest
 		return err
 	}
 
-	item, err := s.ri.GetItemById(ctx, dtoID.ID.String())
+	itemModel, err := s.ri.GetItemById(ctx, dtoID.ID.String())
 	if err != nil {
 		return err
 	}
+
+	item := itemModel.ToDomain()
 
 	category, err := s.rc.GetCategoryById(ctx, item.CategoryID.String())
 	if err != nil {
@@ -273,7 +293,8 @@ func (s *Service) AddRemovedItem(ctx context.Context, dtoID *entitydto.IDRequest
 
 	item.AddRemovedItem(*name)
 
-	return s.ri.UpdateItem(ctx, item)
+	itemModel.FromDomain(item)
+	return s.ri.UpdateItem(ctx, itemModel)
 }
 
 func (s *Service) RemoveRemovedItem(ctx context.Context, dtoID *entitydto.IDRequest, dto *itemdto.RemovedItemDTO) (err error) {
@@ -282,14 +303,16 @@ func (s *Service) RemoveRemovedItem(ctx context.Context, dtoID *entitydto.IDRequ
 		return err
 	}
 
-	item, err := s.ri.GetItemById(ctx, dtoID.ID.String())
+	itemModel, err := s.ri.GetItemById(ctx, dtoID.ID.String())
 	if err != nil {
 		return err
 	}
 
+	item := itemModel.ToDomain()
 	item.RemoveRemovedItem(*name)
 
-	return s.ri.UpdateItem(ctx, item)
+	itemModel.FromDomain(item)
+	return s.ri.UpdateItem(ctx, itemModel)
 }
 
 func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product) (groupItem *orderentity.GroupItem, err error) {
@@ -304,6 +327,9 @@ func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *
 	}
 
 	groupItem = orderentity.NewGroupItem(groupCommonAttributes)
-	err = s.rgi.CreateGroupItem(ctx, groupItem)
+
+	groupItemModel := &model.GroupItem{}
+	groupItemModel.FromDomain(groupItem)
+	err = s.rgi.CreateGroupItem(ctx, groupItemModel)
 	return
 }
