@@ -26,6 +26,7 @@ import (
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
 	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type Environment string
@@ -156,7 +157,7 @@ func publicTables(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	var _ bun.BeforeSelectHook = (*companyentity.User)(nil)
+	var _ bun.BeforeSelectHook = (*model.User)(nil)
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*companyentity.CompanyToUsers)(nil)).Exec(ctx); err != nil {
 		return err

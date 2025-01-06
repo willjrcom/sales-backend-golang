@@ -14,11 +14,6 @@ type AdvertisingCommonAttributes struct {
 	ImagePath string
 }
 
-type PatchAdvertising struct {
-	Name      *string `json:"name"`
-	ImagePath *string `json:"image_path"`
-}
-
 func NewAdvertising(advertisingCommonAttributes AdvertisingCommonAttributes) *Advertising {
 	return &Advertising{
 		Entity:                      entity.NewEntity(),

@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/teris-io/shortid"
-	"github.com/uptrace/bun"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
@@ -28,7 +27,6 @@ type CompanyCommonAttributes struct {
 
 type CompanyWithUsers struct {
 	entity.Entity
-	bun.BaseModel
 	CompanyCommonAttributes
 	Users []User
 }

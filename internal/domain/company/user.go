@@ -1,9 +1,6 @@
 package companyentity
 
 import (
-	"context"
-
-	"github.com/uptrace/bun"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 )
 
@@ -25,10 +22,6 @@ func NewUser(userCommonAttributes *UserCommonAttributes) *User {
 	return &User{
 		UserCommonAttributes: *userCommonAttributes,
 	}
-}
-
-func (u *User) BeforeSelect(ctx context.Context, query *bun.SelectQuery) error {
-	return nil
 }
 
 func (u *User) GetSchemas() []string {

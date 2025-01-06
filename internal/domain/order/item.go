@@ -36,7 +36,7 @@ type ItemCommonAttributes struct {
 
 func NewItem(name string, price float64, quantity float64, size string, productID uuid.UUID, categoryID uuid.UUID) *Item {
 	itemAdditionalCommonAttributes := ItemCommonAttributes{
-		Name:       name + " (" + size + ")",
+		Name:       name,
 		Price:      price,
 		TotalPrice: price * quantity,
 		Size:       size,

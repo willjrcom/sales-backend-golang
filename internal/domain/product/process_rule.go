@@ -22,15 +22,6 @@ type ProcessRuleCommonAttributes struct {
 	CategoryID        uuid.UUID
 }
 
-type PatchProcessRule struct {
-	Name              *string `json:"name"`
-	Order             *int8   `json:"order"`
-	Description       *string `json:"description"`
-	ImagePath         *string `json:"image_path"`
-	IdealTime         *string `json:"ideal_time"`
-	ExperimentalError *string `json:"experimental_error"`
-}
-
 func NewProcessRule(processCommonAttributes ProcessRuleCommonAttributes) *ProcessRule {
 	return &ProcessRule{
 		Entity:                      entity.NewEntity(),

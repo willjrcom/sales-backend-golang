@@ -11,7 +11,3 @@ type ItemToAdditional struct {
 	AdditionalItem   *Item
 	ProductID        uuid.UUID
 }
-
-type ItemRelation struct {
-	ID uuid.UUID `json:"id"`
-}
