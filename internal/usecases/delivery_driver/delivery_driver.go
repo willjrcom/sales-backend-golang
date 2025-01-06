@@ -24,7 +24,7 @@ func (s *Service) AddDependencies(re employeeentity.Repository) {
 	s.re = re
 }
 
-func (s *Service) CreateDeliveryDriver(ctx context.Context, dto *deliverydriverdto.CreateDeliveryDriverInput) (uuid.UUID, error) {
+func (s *Service) CreateDeliveryDriver(ctx context.Context, dto *deliverydriverdto.DeliveryDriverCreateDTO) (uuid.UUID, error) {
 	driver, err := dto.ToModel()
 
 	if err != nil {
@@ -48,7 +48,7 @@ func (s *Service) CreateDeliveryDriver(ctx context.Context, dto *deliverydriverd
 	return driver.ID, nil
 }
 
-func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoId *entitydto.IdRequest, dto *deliverydriverdto.UpdateDeliveryDriverInput) error {
+func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoId *entitydto.IdRequest, dto *deliverydriverdto.DeliveryDriverUpdateDTO) error {
 	driver, err := s.r.GetDeliveryDriverById(ctx, dtoId.ID.String())
 
 	if err != nil {
@@ -78,26 +78,26 @@ func (s *Service) DeleteDeliveryDriver(ctx context.Context, dto *entitydto.IdReq
 	return nil
 }
 
-func (s *Service) GetDeliveryDriverByID(ctx context.Context, dto *entitydto.IdRequest) (*deliverydriverdto.DeliveryDriverOutput, error) {
+func (s *Service) GetDeliveryDriverByID(ctx context.Context, dto *entitydto.IdRequest) (*deliverydriverdto.DeliveryDriverDTO, error) {
 	deliveryDriver, err := s.r.GetDeliveryDriverById(ctx, dto.ID.String())
 	if err != nil {
 		return nil, err
 	}
 
-	deliveryDriverOutput := &deliverydriverdto.DeliveryDriverOutput{}
+	deliveryDriverOutput := &deliverydriverdto.DeliveryDriverDTO{}
 	deliveryDriverOutput.FromModel(deliveryDriver)
 	return deliveryDriverOutput, nil
 }
 
-func (s *Service) GetAllDeliveryDrivers(ctx context.Context) ([]deliverydriverdto.DeliveryDriverOutput, error) {
+func (s *Service) GetAllDeliveryDrivers(ctx context.Context) ([]deliverydriverdto.DeliveryDriverDTO, error) {
 	deliveryDrivers, err := s.r.GetAllDeliveryDrivers(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	deliveryDriversDto := []deliverydriverdto.DeliveryDriverOutput{}
+	deliveryDriversDto := []deliverydriverdto.DeliveryDriverDTO{}
 	for _, deliveryDriver := range deliveryDrivers {
-		deliveryDriverOutput := &deliverydriverdto.DeliveryDriverOutput{}
+		deliveryDriverOutput := &deliverydriverdto.DeliveryDriverDTO{}
 		deliveryDriverOutput.FromModel(&deliveryDriver)
 		deliveryDriversDto = append(deliveryDriversDto, *deliveryDriverOutput)
 	}

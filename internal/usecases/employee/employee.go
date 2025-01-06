@@ -27,7 +27,7 @@ func (s *Service) AddDependencies(rc personentity.ContactRepository, ru companye
 	s.ru = ru
 }
 
-func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.CreateEmployeeInput) (*uuid.UUID, error) {
+func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.EmployeeCreateDTO) (*uuid.UUID, error) {
 	employee, err := dto.ToModel()
 
 	if err != nil {
@@ -50,7 +50,7 @@ func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.CreateEmp
 	return &employee.ID, nil
 }
 
-func (s *Service) UpdateEmployee(ctx context.Context, dtoId *entitydto.IdRequest, dto *employeedto.UpdateEmployeeInput) error {
+func (s *Service) UpdateEmployee(ctx context.Context, dtoId *entitydto.IdRequest, dto *employeedto.EmployeeUpdateDTO) error {
 	employee, err := s.re.GetEmployeeById(ctx, dtoId.ID.String())
 
 	if err != nil {
@@ -80,27 +80,27 @@ func (s *Service) DeleteEmployee(ctx context.Context, dto *entitydto.IdRequest) 
 	return nil
 }
 
-func (s *Service) GetEmployeeById(ctx context.Context, dto *entitydto.IdRequest) (*employeedto.EmployeeOutput, error) {
+func (s *Service) GetEmployeeById(ctx context.Context, dto *entitydto.IdRequest) (*employeedto.EmployeeDTO, error) {
 	if employee, err := s.re.GetEmployeeById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		dto := &employeedto.EmployeeOutput{}
+		dto := &employeedto.EmployeeDTO{}
 		dto.FromModel(employee)
 		return dto, nil
 	}
 }
 
-func (s *Service) GetEmployeeByUserID(ctx context.Context, dto *entitydto.IdRequest) (*employeedto.EmployeeOutput, error) {
+func (s *Service) GetEmployeeByUserID(ctx context.Context, dto *entitydto.IdRequest) (*employeedto.EmployeeDTO, error) {
 	if employee, err := s.re.GetEmployeeByUserID(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		dto := &employeedto.EmployeeOutput{}
+		dto := &employeedto.EmployeeDTO{}
 		dto.FromModel(employee)
 		return dto, nil
 	}
 }
 
-func (s *Service) GetAllEmployees(ctx context.Context) ([]employeedto.EmployeeOutput, error) {
+func (s *Service) GetAllEmployees(ctx context.Context) ([]employeedto.EmployeeDTO, error) {
 	if employees, err := s.re.GetAllEmployees(ctx); err != nil {
 		return nil, err
 	} else {
@@ -109,8 +109,8 @@ func (s *Service) GetAllEmployees(ctx context.Context) ([]employeedto.EmployeeOu
 	}
 }
 
-func employeesToDtos(employees []employeeentity.Employee) []employeedto.EmployeeOutput {
-	dtos := make([]employeedto.EmployeeOutput, len(employees))
+func employeesToDtos(employees []employeeentity.Employee) []employeedto.EmployeeDTO {
+	dtos := make([]employeedto.EmployeeDTO, len(employees))
 	for i, employee := range employees {
 		dtos[i].FromModel(&employee)
 	}

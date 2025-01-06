@@ -10,14 +10,14 @@ var (
 	ErrNameAndActiveIsEmpty = errors.New("name and active can't be empty")
 )
 
-type UpdateDeliveryDriverInput struct {
+type DeliveryDriverUpdateDTO struct {
 	orderentity.PatchDeliveryDriver
 }
 
-func (s *UpdateDeliveryDriverInput) validate() error {
+func (s *DeliveryDriverUpdateDTO) validate() error {
 	return nil
 }
-func (s *UpdateDeliveryDriverInput) UpdateModel(model *orderentity.DeliveryDriver) (err error) {
+func (s *DeliveryDriverUpdateDTO) UpdateModel(model *orderentity.DeliveryDriver) (err error) {
 	if err = s.validate(); err != nil {
 		return err
 	}

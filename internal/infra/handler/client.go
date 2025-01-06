@@ -42,7 +42,7 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 func (h *handlerClientImpl) handlerCreateClient(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoClient := &clientdto.CreateClientInput{}
+	dtoClient := &clientdto.ClientCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoClient); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -70,7 +70,7 @@ func (h *handlerClientImpl) handlerUpdateClient(w http.ResponseWriter, r *http.R
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	dtoClient := &clientdto.UpdateClientInput{}
+	dtoClient := &clientdto.ClientUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoClient); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

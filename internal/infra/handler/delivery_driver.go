@@ -37,7 +37,7 @@ func NewHandlerDeliveryDriver(sizeService *deliverydriverusecases.Service) *hand
 func (h *handlerDeliveryDriverImpl) handlerCreateDeliveryDriver(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoDeliveryDriver := &deliverydriverdto.CreateDeliveryDriverInput{}
+	dtoDeliveryDriver := &deliverydriverdto.DeliveryDriverCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoDeliveryDriver); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -64,7 +64,7 @@ func (h *handlerDeliveryDriverImpl) handlerUpdateDeliveryDriver(w http.ResponseW
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	dtoDeliveryDriver := &deliverydriverdto.UpdateDeliveryDriverInput{}
+	dtoDeliveryDriver := &deliverydriverdto.DeliveryDriverUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoDeliveryDriver); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

@@ -39,12 +39,14 @@ func (r *UserUpdatePasswordDTO) ToModel() (*companyentity.User, error) {
 		return nil, err
 	}
 
-	userCommonAttributes := companyentity.UserCommonAttributes{
-		Person: personentity.Person{
-			PersonCommonAttributes: personentity.PersonCommonAttributes{
-				Email: r.Email,
-			},
-		},
+	personCommonAttributes := &personentity.PersonCommonAttributes{
+		Email: r.Email,
+	}
+
+	person := personentity.NewPerson(personCommonAttributes)
+
+	userCommonAttributes := &companyentity.UserCommonAttributes{
+		Person:   *person,
 		Password: r.CurrentPassword,
 	}
 

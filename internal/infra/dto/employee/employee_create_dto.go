@@ -11,11 +11,11 @@ var (
 	ErrUserIDRequired = errors.New("user_id is required")
 )
 
-type CreateEmployeeInput struct {
+type EmployeeCreateDTO struct {
 	UserID *uuid.UUID `json:"user_id"`
 }
 
-func (r *CreateEmployeeInput) validate() error {
+func (r *EmployeeCreateDTO) validate() error {
 	if r.UserID == nil {
 		return ErrUserIDRequired
 	}
@@ -23,7 +23,7 @@ func (r *CreateEmployeeInput) validate() error {
 	return nil
 }
 
-func (r *CreateEmployeeInput) ToModel() (*employeeentity.Employee, error) {
+func (r *EmployeeCreateDTO) ToModel() (*employeeentity.Employee, error) {
 	if err := r.validate(); err != nil {
 		return nil, err
 	}

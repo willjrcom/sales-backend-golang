@@ -1,42 +1,38 @@
-package userdto
+package companydto
 
 import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
-	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 )
 
-type UserDeleteDTO struct {
+type UserBasicCreateDTO struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-func (u *UserDeleteDTO) validate() error {
-	if !utils.IsEmailValid(u.Email) {
-		return ErrEmailInvalid
+func (c *UserBasicCreateDTO) validate() error {
+	if c.Email == "" {
+		return ErrMustBeEmail
 	}
-
-	if err := utils.ValidatePassword(u.Password); err != nil {
-		return err
+	if c.Password == "" {
+		return ErrMustBePassword
 	}
-
 	return nil
 }
 
-func (u *UserDeleteDTO) ToModel() (*companyentity.User, error) {
-	if err := u.validate(); err != nil {
+func (c *UserBasicCreateDTO) ToDomain() (*companyentity.User, error) {
+	if err := c.validate(); err != nil {
 		return nil, err
 	}
 
 	personCommonAttributes := &personentity.PersonCommonAttributes{
-		Email: u.Email,
+		Email: c.Email,
 	}
 
 	person := personentity.NewPerson(personCommonAttributes)
 
 	userCommonAttributes := &companyentity.UserCommonAttributes{
-		Person:   *person,
-		Password: u.Password,
+		Person: *person,
 	}
 
 	return companyentity.NewUser(userCommonAttributes), nil

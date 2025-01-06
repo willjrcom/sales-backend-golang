@@ -21,9 +21,9 @@ type UserCommonAttributes struct {
 	Companies      []CompanyWithUsers
 }
 
-func NewUser(userCommonAttributes UserCommonAttributes) *User {
+func NewUser(userCommonAttributes *UserCommonAttributes) *User {
 	return &User{
-		UserCommonAttributes: userCommonAttributes,
+		UserCommonAttributes: *userCommonAttributes,
 	}
 }
 

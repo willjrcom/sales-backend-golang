@@ -6,11 +6,11 @@ import (
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 )
 
-type EmployeeOutput struct {
+type EmployeeDTO struct {
 	ID uuid.UUID `json:"id"`
 	userdto.UserDTO
 }
 
-func (c *EmployeeOutput) FromModel(employee *employeeentity.Employee) {
+func (c *EmployeeDTO) FromModel(employee *employeeentity.Employee) {
 	c.UserDTO.FromModel(employee.User)
 }

@@ -37,7 +37,7 @@ func NewHandlerEmployee(employeeService *employeeusecases.Service) *handler.Hand
 func (h *handlerEmployeeImpl) handlerCreateEmployee(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoEmployee := &employeedto.CreateEmployeeInput{}
+	dtoEmployee := &employeedto.EmployeeCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoEmployee); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -64,7 +64,7 @@ func (h *handlerEmployeeImpl) handlerUpdateEmployee(w http.ResponseWriter, r *ht
 
 	dtoId := &entitydto.IdRequest{ID: uuid.MustParse(id)}
 
-	dtoEmployee := &employeedto.UpdateEmployeeInput{}
+	dtoEmployee := &employeedto.EmployeeUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoEmployee); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

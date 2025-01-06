@@ -26,7 +26,7 @@ func (s *Service) AddDependencies(rcontact personentity.ContactRepository) {
 	s.rcontact = rcontact
 }
 
-func (s *Service) CreateClient(ctx context.Context, dto *clientdto.CreateClientInput) (uuid.UUID, error) {
+func (s *Service) CreateClient(ctx context.Context, dto *clientdto.ClientCreateDTO) (uuid.UUID, error) {
 	client, err := dto.ToModel()
 
 	if err != nil {
@@ -51,7 +51,7 @@ func (s *Service) UpdateClientWithCoordinates(ctx context.Context, client *clien
 	client.Address.AddressCommonAttributes.Coordinates = *coordinates
 }
 
-func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IdRequest, dto *clientdto.UpdateClientInput) error {
+func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IdRequest, dto *clientdto.ClientUpdateDTO) error {
 	client, err := s.rclient.GetClientById(ctx, dtoId.ID.String())
 	if err != nil {
 		return err

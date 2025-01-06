@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
-	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
@@ -37,7 +36,7 @@ func (s *Service) AddDependencies(a addressentity.Repository, ss schemaservice.S
 	s.us = us
 }
 
-func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) (id uuid.UUID, schemaName *string, err error) {
+func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (id uuid.UUID, schemaName *string, err error) {
 	cnpjString, tradeName, email, contacts, err := dto.ToModel()
 	if err != nil {
 		return uuid.Nil, nil, err
@@ -75,16 +74,10 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) 
 
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), company.SchemaName)
 
-	userCommonAttributes := companyentity.UserCommonAttributes{
-		Person: personentity.Person{
-			PersonCommonAttributes: personentity.PersonCommonAttributes{
-				Email: email,
-			},
-		},
+	userInput := &companydto.UserCreateDTO{
+		Email:    email,
 		Password: utils.GeneratePassword(10, true, true, true),
 	}
-
-	userInput := &companydto.UserInput{UserCommonAttributes: userCommonAttributes}
 
 	if err = s.AddUserToCompany(ctx, userInput); err != nil {
 		return uuid.Nil, nil, err
@@ -93,18 +86,22 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyInput) 
 	return company.ID, &company.SchemaName, nil
 }
 
-func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyOutput, error) {
+func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyDTO, error) {
 	if company, err := s.r.GetCompany(ctx); err != nil {
 		return nil, err
 	} else {
-		output := &companydto.CompanyOutput{}
+		output := &companydto.CompanyDTO{}
 		output.FromModel(company)
 		return output, nil
 	}
 }
 
-func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserInput) error {
-	user, err := dto.ToModel()
+type UserCreateDTO interface {
+	ToDomain() (*companyentity.User, error)
+}
+
+func (s *Service) AddUserToCompany(ctx context.Context, dto UserCreateDTO) error {
+	user, err := dto.ToDomain()
 
 	if err != nil {
 		return err
@@ -138,8 +135,8 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserInpu
 	return nil
 }
 
-func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.UserInput) error {
-	user, err := dto.ToModel()
+func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.UserBasicCreateDTO) error {
+	user, err := dto.ToDomain()
 
 	if err != nil {
 		return err

@@ -41,7 +41,7 @@ func NewHandlerCompany(companyService *companyusecases.Service) *handler.Handler
 func (h *handlerCompanyImpl) handlerNewCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoCompany := &companydto.CompanyInput{}
+	dtoCompany := &companydto.CompanyCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoCompany); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -77,7 +77,7 @@ func (h *handlerCompanyImpl) handlerGetCompany(w http.ResponseWriter, r *http.Re
 func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &companydto.UserInput{}
+	dtoUser := &companydto.UserCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -94,7 +94,7 @@ func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *h
 func (h *handlerCompanyImpl) handlerRemoveUserFromCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &companydto.UserInput{}
+	dtoUser := &companydto.UserBasicCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

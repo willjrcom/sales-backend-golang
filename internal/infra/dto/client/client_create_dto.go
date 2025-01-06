@@ -18,7 +18,7 @@ var (
 	ErrDeliveryTaxRequired = errors.New("delivery tax is required")
 )
 
-type CreateClientInput struct {
+type ClientCreateDTO struct {
 	Name     string
 	Email    *string
 	Cpf      *string
@@ -27,7 +27,7 @@ type CreateClientInput struct {
 	Address  *addressdto.AddressCreateDTO
 }
 
-func (r *CreateClientInput) validate() error {
+func (r *ClientCreateDTO) validate() error {
 	if r.Name == "" {
 		return ErrNameRequired
 	}
@@ -44,7 +44,7 @@ func (r *CreateClientInput) validate() error {
 	return nil
 }
 
-func (r *CreateClientInput) ToModel() (*cliententity.Client, error) {
+func (r *ClientCreateDTO) ToModel() (*cliententity.Client, error) {
 	if err := r.validate(); err != nil {
 		return nil, err
 	}

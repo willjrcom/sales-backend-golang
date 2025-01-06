@@ -11,11 +11,11 @@ var (
 	ErrEmployeeIDRequired = errors.New("employee ID is required")
 )
 
-type CreateDeliveryDriverInput struct {
+type DeliveryDriverCreateDTO struct {
 	orderentity.DeliveryDriverCommonAttributes
 }
 
-func (s *CreateDeliveryDriverInput) validate() error {
+func (s *DeliveryDriverCreateDTO) validate() error {
 	if s.EmployeeID == uuid.Nil {
 		return ErrEmployeeIDRequired
 	}
@@ -23,7 +23,7 @@ func (s *CreateDeliveryDriverInput) validate() error {
 	return nil
 }
 
-func (s *CreateDeliveryDriverInput) ToModel() (*orderentity.DeliveryDriver, error) {
+func (s *DeliveryDriverCreateDTO) ToModel() (*orderentity.DeliveryDriver, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}

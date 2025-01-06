@@ -14,7 +14,7 @@ var (
 	ErrInvalidEmail = errors.New("invalid email")
 )
 
-type UpdateClientInput struct {
+type ClientUpdateDTO struct {
 	Name     *string                      `json:"name"`
 	Email    *string                      `json:"email"`
 	Cpf      *string                      `json:"cpf"`
@@ -23,7 +23,7 @@ type UpdateClientInput struct {
 	Address  *addressdto.AddressUpdateDTO `json:"address"`
 }
 
-func (r *UpdateClientInput) validate() error {
+func (r *ClientUpdateDTO) validate() error {
 	if r.Email != nil && !strings.Contains(*r.Email, "@") {
 		return ErrInvalidEmail
 	}
@@ -35,7 +35,7 @@ func (r *UpdateClientInput) validate() error {
 	return nil
 }
 
-func (r *UpdateClientInput) UpdateModel(client *cliententity.Client) error {
+func (r *ClientUpdateDTO) UpdateModel(client *cliententity.Client) error {
 	if err := r.validate(); err != nil {
 		return err
 	}

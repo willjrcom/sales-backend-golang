@@ -28,12 +28,14 @@ func (u *UserLoginDTO) ToModel() (*companyentity.User, error) {
 		return nil, err
 	}
 
-	userCommonAttributes := companyentity.UserCommonAttributes{
-		Person: personentity.Person{
-			PersonCommonAttributes: personentity.PersonCommonAttributes{
-				Email: u.Email,
-			},
-		},
+	personCommonAttributes := &personentity.PersonCommonAttributes{
+		Email: u.Email,
+	}
+
+	person := personentity.NewPerson(personCommonAttributes)
+
+	userCommonAttributes := &companyentity.UserCommonAttributes{
+		Person:   *person,
 		Password: u.Password,
 	}
 
