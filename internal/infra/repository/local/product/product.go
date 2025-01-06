@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 var (
@@ -16,14 +16,14 @@ var (
 
 type ProductRepositoryLocal struct {
 	mu       sync.Mutex
-	products map[uuid.UUID]*productentity.Product
+	products map[uuid.UUID]*model.Product
 }
 
 func NewProductRepositoryLocal() *ProductRepositoryLocal {
-	return &ProductRepositoryLocal{products: make(map[uuid.UUID]*productentity.Product)}
+	return &ProductRepositoryLocal{products: make(map[uuid.UUID]*model.Product)}
 }
 
-func (r *ProductRepositoryLocal) CreateProduct(_ context.Context, p *productentity.Product) error {
+func (r *ProductRepositoryLocal) CreateProduct(_ context.Context, p *model.Product) error {
 
 	if _, ok := r.products[p.ID]; ok {
 
@@ -34,7 +34,7 @@ func (r *ProductRepositoryLocal) CreateProduct(_ context.Context, p *productenti
 	return nil
 }
 
-func (r *ProductRepositoryLocal) UpdateProduct(_ context.Context, p *productentity.Product) error {
+func (r *ProductRepositoryLocal) UpdateProduct(_ context.Context, p *model.Product) error {
 	r.products[p.ID] = p
 	return nil
 }
@@ -50,7 +50,7 @@ func (r *ProductRepositoryLocal) DeleteProduct(_ context.Context, id string) err
 	return nil
 }
 
-func (r *ProductRepositoryLocal) GetProductById(_ context.Context, id string) (*productentity.Product, error) {
+func (r *ProductRepositoryLocal) GetProductById(_ context.Context, id string) (*model.Product, error) {
 
 	if p, ok := r.products[uuid.MustParse(id)]; ok {
 
@@ -60,7 +60,7 @@ func (r *ProductRepositoryLocal) GetProductById(_ context.Context, id string) (*
 	return nil, errProductNotFound
 }
 
-func (r *ProductRepositoryLocal) GetProductByCode(_ context.Context, code string) (*productentity.Product, error) {
+func (r *ProductRepositoryLocal) GetProductByCode(_ context.Context, code string) (*model.Product, error) {
 
 	for _, p := range r.products {
 		if p.Code == code {
@@ -71,8 +71,8 @@ func (r *ProductRepositoryLocal) GetProductByCode(_ context.Context, code string
 	return nil, errProductNotFound
 }
 
-func (r *ProductRepositoryLocal) GetAllProducts(_ context.Context) ([]productentity.Product, error) {
-	products := make([]productentity.Product, 0)
+func (r *ProductRepositoryLocal) GetAllProducts(_ context.Context) ([]model.Product, error) {
+	products := make([]model.Product, 0)
 
 	for _, p := range r.products {
 		products = append(products, *p)

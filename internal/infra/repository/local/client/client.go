@@ -3,7 +3,7 @@ package clientrepositorylocal
 import (
 	"context"
 
-	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type ClientRepositoryLocal struct {
@@ -13,11 +13,11 @@ func NewClientRepositoryLocal() *ClientRepositoryLocal {
 	return &ClientRepositoryLocal{}
 }
 
-func (r *ClientRepositoryLocal) CreateClient(ctx context.Context, p *cliententity.Client) error {
+func (r *ClientRepositoryLocal) CreateClient(ctx context.Context, p *model.Client) error {
 	return nil
 }
 
-func (r *ClientRepositoryLocal) UpdateClient(ctx context.Context, p *cliententity.Client) error {
+func (r *ClientRepositoryLocal) UpdateClient(ctx context.Context, p *model.Client) error {
 	return nil
 }
 
@@ -25,10 +25,10 @@ func (r *ClientRepositoryLocal) DeleteClient(ctx context.Context, id string) err
 	return nil
 }
 
-func (r *ClientRepositoryLocal) GetClientById(ctx context.Context, id string) (*cliententity.Client, error) {
+func (r *ClientRepositoryLocal) GetClientById(ctx context.Context, id string) (*model.Client, error) {
 	return nil, nil
 }
 
-func (r *ClientRepositoryLocal) GetAllClient(ctx context.Context) ([]cliententity.Client, error) {
+func (r *ClientRepositoryLocal) GetAllClient(ctx context.Context) ([]model.Client, error) {
 	return nil, nil
 }

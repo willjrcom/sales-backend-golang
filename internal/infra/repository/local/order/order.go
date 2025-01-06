@@ -5,18 +5,18 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type OrderRepositoryLocal struct {
-	orders map[uuid.UUID]*orderentity.Order
+	orders map[uuid.UUID]*model.Order
 }
 
 func NewOrderRepositoryLocal() *OrderRepositoryLocal {
-	return &OrderRepositoryLocal{orders: make(map[uuid.UUID]*orderentity.Order)}
+	return &OrderRepositoryLocal{orders: make(map[uuid.UUID]*model.Order)}
 }
 
-func (r *OrderRepositoryLocal) CreateOrder(ctx context.Context, order *orderentity.Order) error {
+func (r *OrderRepositoryLocal) CreateOrder(ctx context.Context, order *model.Order) error {
 	if _, ok := r.orders[order.Entity.ID]; ok {
 		return errors.New("order already exists")
 	}
@@ -35,17 +35,17 @@ func (r *OrderRepositoryLocal) DeleteOrder(ctx context.Context, id string) error
 	return nil
 }
 
-func (r *OrderRepositoryLocal) PendingOrder(ctx context.Context, order *orderentity.Order) error {
+func (r *OrderRepositoryLocal) PendingOrder(ctx context.Context, order *model.Order) error {
 	r.orders[order.ID] = order
 	return nil
 }
 
-func (r *OrderRepositoryLocal) UpdateOrder(ctx context.Context, order *orderentity.Order) error {
+func (r *OrderRepositoryLocal) UpdateOrder(ctx context.Context, order *model.Order) error {
 	r.orders[order.ID] = order
 	return nil
 }
 
-func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*orderentity.Order, error) {
+func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*model.Order, error) {
 	if p, ok := r.orders[uuid.MustParse(id)]; ok {
 		return p, nil
 	}
@@ -53,8 +53,8 @@ func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*or
 	return nil, errors.New("order not found")
 }
 
-func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context) ([]orderentity.Order, error) {
-	orders := make([]orderentity.Order, 0)
+func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context) ([]model.Order, error) {
+	orders := make([]model.Order, 0)
 
 	for _, p := range r.orders {
 		orders = append(orders, *p)
@@ -63,7 +63,7 @@ func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context) ([]orderentity.
 	return orders, nil
 }
 
-func (r *OrderRepositoryLocal) UpdateOrderDelivery(ctx context.Context, delivery *orderentity.OrderDelivery) error {
+func (r *OrderRepositoryLocal) UpdateOrderDelivery(ctx context.Context, delivery *model.OrderDelivery) error {
 	return nil
 }
 
@@ -71,7 +71,7 @@ func (r *OrderRepositoryLocal) DeleteOrderDelivery(ctx context.Context, id strin
 	return nil
 }
 
-func (r *OrderRepositoryLocal) UpdateOrderTable(ctx context.Context, table *orderentity.OrderTable) error {
+func (r *OrderRepositoryLocal) UpdateOrderTable(ctx context.Context, table *model.OrderTable) error {
 	return nil
 }
 
@@ -79,6 +79,6 @@ func (r *OrderRepositoryLocal) DeleteOrderTable(ctx context.Context, id string) 
 	return nil
 }
 
-func (r *OrderRepositoryLocal) AddPaymentOrder(ctx context.Context, payment *orderentity.PaymentOrder) error {
+func (r *OrderRepositoryLocal) AddPaymentOrder(ctx context.Context, payment *model.PaymentOrder) error {
 	return nil
 }

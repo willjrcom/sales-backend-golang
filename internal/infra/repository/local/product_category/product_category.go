@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 var (
@@ -14,14 +14,14 @@ var (
 )
 
 type CategoryRepositoryLocal struct {
-	productCategories map[uuid.UUID]*productentity.ProductCategory
+	productCategories map[uuid.UUID]*model.ProductCategory
 }
 
 func NewCategoryRepositoryLocal() *CategoryRepositoryLocal {
-	return &CategoryRepositoryLocal{productCategories: make(map[uuid.UUID]*productentity.ProductCategory)}
+	return &CategoryRepositoryLocal{productCategories: make(map[uuid.UUID]*model.ProductCategory)}
 }
 
-func (r *CategoryRepositoryLocal) CreateCategory(_ context.Context, p *productentity.ProductCategory) error {
+func (r *CategoryRepositoryLocal) CreateCategory(_ context.Context, p *model.ProductCategory) error {
 	if _, ok := r.productCategories[p.ID]; ok {
 
 		return errProductCategoryAlreadyExists
@@ -31,7 +31,7 @@ func (r *CategoryRepositoryLocal) CreateCategory(_ context.Context, p *producten
 	return nil
 }
 
-func (r *CategoryRepositoryLocal) UpdateCategory(_ context.Context, p *productentity.ProductCategory) error {
+func (r *CategoryRepositoryLocal) UpdateCategory(_ context.Context, p *model.ProductCategory) error {
 	r.productCategories[p.ID] = p
 	return nil
 }
@@ -46,7 +46,7 @@ func (r *CategoryRepositoryLocal) DeleteCategory(_ context.Context, id string) e
 	return nil
 }
 
-func (r *CategoryRepositoryLocal) GetCategoryById(_ context.Context, id string) (*productentity.ProductCategory, error) {
+func (r *CategoryRepositoryLocal) GetCategoryById(_ context.Context, id string) (*model.ProductCategory, error) {
 	if p, ok := r.productCategories[uuid.MustParse(id)]; ok {
 
 		return p, nil
@@ -55,7 +55,7 @@ func (r *CategoryRepositoryLocal) GetCategoryById(_ context.Context, id string) 
 	return nil, errProductCategoryNotFound
 }
 
-func (r *CategoryRepositoryLocal) GetCategoryByName(_ context.Context, name string, withRelation bool) (*productentity.ProductCategory, error) {
+func (r *CategoryRepositoryLocal) GetCategoryByName(_ context.Context, name string, withRelation bool) (*model.ProductCategory, error) {
 	for _, p := range r.productCategories {
 		if p.Name == name {
 			return p, nil
@@ -65,8 +65,8 @@ func (r *CategoryRepositoryLocal) GetCategoryByName(_ context.Context, name stri
 	return nil, errProductCategoryNotFound
 }
 
-func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context) ([]productentity.ProductCategory, error) {
-	productCategories := make([]productentity.ProductCategory, 0)
+func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context) ([]model.ProductCategory, error) {
+	productCategories := make([]model.ProductCategory, 0)
 
 	for _, p := range r.productCategories {
 		p.Sizes = nil

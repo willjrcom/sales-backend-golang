@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 var (
@@ -14,14 +14,14 @@ var (
 )
 
 type SizeRepositoryLocal struct {
-	sizes map[uuid.UUID]*productentity.Size
+	sizes map[uuid.UUID]*model.Size
 }
 
 func NewSizeRepositoryLocal() *SizeRepositoryLocal {
-	return &SizeRepositoryLocal{sizes: make(map[uuid.UUID]*productentity.Size)}
+	return &SizeRepositoryLocal{sizes: make(map[uuid.UUID]*model.Size)}
 }
 
-func (r *SizeRepositoryLocal) CreateSize(_ context.Context, p *productentity.Size) error {
+func (r *SizeRepositoryLocal) CreateSize(_ context.Context, p *model.Size) error {
 
 	if _, ok := r.sizes[p.ID]; ok {
 		return errSizeExists
@@ -31,7 +31,7 @@ func (r *SizeRepositoryLocal) CreateSize(_ context.Context, p *productentity.Siz
 	return nil
 }
 
-func (r *SizeRepositoryLocal) UpdateSize(_ context.Context, s *productentity.Size) error {
+func (r *SizeRepositoryLocal) UpdateSize(_ context.Context, s *model.Size) error {
 	r.sizes[s.ID] = s
 	return nil
 }
@@ -46,7 +46,7 @@ func (r *SizeRepositoryLocal) DeleteSize(_ context.Context, id string) error {
 	return nil
 }
 
-func (r *SizeRepositoryLocal) GetSizeById(_ context.Context, id string) (*productentity.Size, error) {
+func (r *SizeRepositoryLocal) GetSizeById(_ context.Context, id string) (*model.Size, error) {
 
 	if p, ok := r.sizes[uuid.MustParse(id)]; ok {
 		return p, nil
