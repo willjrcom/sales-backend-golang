@@ -67,7 +67,9 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 		return uuid.Nil, nil, err
 	}
 
-	if err = s.r.NewCompany(ctx, company); err != nil {
+	companyModel := &model.Company{}
+	companyModel.FromDomain(company)
+	if err = s.r.NewCompany(ctx, companyModel); err != nil {
 		return uuid.Nil, nil, err
 	}
 
@@ -85,9 +87,10 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 }
 
 func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyDTO, error) {
-	if company, err := s.r.GetCompany(ctx); err != nil {
+	if companyModel, err := s.r.GetCompany(ctx); err != nil {
 		return nil, err
 	} else {
+		company := companyModel.ToDomain()
 		output := &companydto.CompanyDTO{}
 		output.FromDomain(company)
 		return output, nil

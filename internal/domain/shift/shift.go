@@ -11,7 +11,7 @@ import (
 
 type Shift struct {
 	entity.Entity
-	OrderTimeLogs
+	ShiftTimeLogs
 	ShiftCommonAttributes
 }
 
@@ -25,7 +25,7 @@ type ShiftCommonAttributes struct {
 	Attendant          *employeeentity.Employee
 }
 
-type OrderTimeLogs struct {
+type ShiftTimeLogs struct {
 	OpenedAt *time.Time
 	ClosedAt *time.Time
 }
@@ -36,7 +36,7 @@ func NewShift(startChange float32) *Shift {
 		ShiftCommonAttributes: ShiftCommonAttributes{
 			CurrentOrderNumber: 0,
 		},
-		OrderTimeLogs: OrderTimeLogs{
+		ShiftTimeLogs: ShiftTimeLogs{
 			OpenedAt: &time.Time{},
 		},
 	}

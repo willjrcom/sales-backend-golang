@@ -1,6 +1,9 @@
 package model
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
+)
 
 type PlaceToTables struct {
 	PlaceID uuid.UUID `bun:"type:uuid,pk"`
@@ -9,4 +12,26 @@ type PlaceToTables struct {
 	Table   *Table    `bun:"rel:belongs-to,join:table_id=id"`
 	Column  int       `bun:"column:column,notnull"`
 	Row     int       `bun:"column:row,notnull"`
+}
+
+func (p *PlaceToTables) FromDomain(placeToTables *tableentity.PlaceToTables) {
+	*p = PlaceToTables{
+		PlaceID: placeToTables.PlaceID,
+		Place:   &Place{},
+		TableID: placeToTables.TableID,
+		Table:   &Table{},
+		Column:  placeToTables.Column,
+		Row:     placeToTables.Row,
+	}
+}
+
+func (p *PlaceToTables) ToDomain() *tableentity.PlaceToTables {
+	return &tableentity.PlaceToTables{
+		PlaceID: p.PlaceID,
+		Place:   p.Place.ToDomain(),
+		TableID: p.TableID,
+		Table:   p.Table.ToDomain(),
+		Column:  p.Column,
+		Row:     p.Row,
+	}
 }

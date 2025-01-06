@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
@@ -24,4 +25,48 @@ type ItemCommonAttributes struct {
 	AdditionalItems []Item    `bun:"m2m:item_to_additional,join:Item=AdditionalItem"`
 	RemovedItems    []string  `bun:"removed_items,type:jsonb"`
 	ProductID       uuid.UUID `bun:"product_id,type:uuid"`
+}
+
+func (i *Item) FromDomain(item *orderentity.Item) {
+	*i = Item{
+		Entity: entitymodel.Entity{ID: item.ID},
+		ItemCommonAttributes: ItemCommonAttributes{
+			Name:            item.Name,
+			Observation:     item.Observation,
+			Price:           item.Price,
+			TotalPrice:      item.TotalPrice,
+			Size:            item.Size,
+			Quantity:        item.Quantity,
+			GroupItemID:     item.GroupItemID,
+			CategoryID:      item.CategoryID,
+			AdditionalItems: []Item{},
+			RemovedItems:    item.RemovedItems,
+			ProductID:       item.ProductID,
+		},
+	}
+
+	for _, additionalItem := range item.AdditionalItems {
+		ai := Item{}
+		ai.FromDomain(&additionalItem)
+		i.AdditionalItems = append(i.AdditionalItems, ai)
+	}
+}
+
+func (i *Item) ToDomain() *orderentity.Item {
+	return &orderentity.Item{
+		Entity: i.Entity.ToDomain(),
+		ItemCommonAttributes: orderentity.ItemCommonAttributes{
+			Name:            i.Name,
+			Observation:     i.Observation,
+			Price:           i.Price,
+			TotalPrice:      i.TotalPrice,
+			Size:            i.Size,
+			Quantity:        i.Quantity,
+			GroupItemID:     i.GroupItemID,
+			CategoryID:      i.CategoryID,
+			AdditionalItems: []orderentity.Item{},
+			RemovedItems:    i.RemovedItems,
+			ProductID:       i.ProductID,
+		},
+	}
 }

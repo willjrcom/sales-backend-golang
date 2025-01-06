@@ -19,9 +19,10 @@ func NewService(c model.ContactRepository) *Service {
 }
 
 func (s *Service) GetContactById(ctx context.Context, dto *entitydto.IDRequest) (*contactdto.ContactDTO, error) {
-	if contact, err := s.r.GetContactById(ctx, dto.ID.String()); err != nil {
+	if contactModel, err := s.r.GetContactById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
+		contact := contactModel.ToDomain()
 		output := &contactdto.ContactDTO{}
 		output.FromDomain(contact)
 		return output, nil
@@ -33,18 +34,20 @@ func (s *Service) FtSearchContacts(ctx context.Context, keys *keysdto.KeysDTO) (
 		return nil, keysdto.ErrInvalidQuery
 	}
 
-	if contacts, err := s.r.FtSearchContacts(ctx, keys.Query, personentity.ContactTypeClient); err != nil {
+	if contacts, err := s.r.FtSearchContacts(ctx, keys.Query, string(personentity.ContactTypeClient)); err != nil {
 		return nil, err
 	} else {
-		dtos := contactsToDtos(contacts)
+		dtos := modelsToDTOs(contacts)
 		return dtos, nil
 	}
 }
 
-func contactsToDtos(contacts []personentity.Contact) []contactdto.ContactDTO {
-	dtos := make([]contactdto.ContactDTO, len(contacts))
-	for i, contact := range contacts {
-		dtos[i].FromDomain(&contact)
+func modelsToDTOs(contactModels []model.Contact) []contactdto.ContactDTO {
+	dtos := make([]contactdto.ContactDTO, len(contactModels))
+
+	for i, contactModel := range contactModels {
+		contact := contactModel.ToDomain()
+		dtos[i].FromDomain(contact)
 	}
 
 	return dtos

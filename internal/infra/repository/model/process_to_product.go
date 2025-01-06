@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 )
 
 type OrderProcessToProductToGroupItem struct {
@@ -12,4 +13,27 @@ type OrderProcessToProductToGroupItem struct {
 	ProductID     uuid.UUID     `bun:"type:uuid,pk"`
 	GroupItemID   uuid.UUID     `bun:"type:uuid,pk"`
 	GroupItem     *GroupItem    `bun:"rel:belongs-to,join:group_item_id=id"`
+}
+
+func (op *OrderProcessToProductToGroupItem) FromDomain(orderProcessToProductToGroupItem *orderprocessentity.OrderProcessToProductToGroupItem) {
+	*op = OrderProcessToProductToGroupItem{
+		ProcessID:   orderProcessToProductToGroupItem.ProcessID,
+		Process:     &OrderProcess{},
+		ProductID:   orderProcessToProductToGroupItem.ProductID,
+		GroupItemID: orderProcessToProductToGroupItem.GroupItemID,
+		GroupItem:   &GroupItem{},
+	}
+
+	op.Process.FromDomain(orderProcessToProductToGroupItem.Process)
+	op.GroupItem.FromDomain(orderProcessToProductToGroupItem.GroupItem)
+}
+
+func (op *OrderProcessToProductToGroupItem) ToDomain() *orderprocessentity.OrderProcessToProductToGroupItem {
+	return &orderprocessentity.OrderProcessToProductToGroupItem{
+		ProcessID:   op.ProcessID,
+		Process:     op.Process.ToDomain(),
+		ProductID:   op.ProductID,
+		GroupItemID: op.GroupItemID,
+		GroupItem:   op.GroupItem.ToDomain(),
+	}
 }

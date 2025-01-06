@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
@@ -15,4 +16,24 @@ type Quantity struct {
 type QuantityCommonAttributes struct {
 	Quantity   float64   `bun:"quantity,notnull"`
 	CategoryID uuid.UUID `bun:"column:category_id,type:uuid,notnull"`
+}
+
+func (q *Quantity) FromDomain(model *productentity.Quantity) {
+	*q = Quantity{
+		Entity: entitymodel.FromDomain(model.Entity),
+		QuantityCommonAttributes: QuantityCommonAttributes{
+			Quantity:   model.Quantity,
+			CategoryID: model.CategoryID,
+		},
+	}
+}
+
+func (q *Quantity) ToDomain() *productentity.Quantity {
+	return &productentity.Quantity{
+		Entity: q.Entity.ToDomain(),
+		QuantityCommonAttributes: productentity.QuantityCommonAttributes{
+			Quantity:   q.Quantity,
+			CategoryID: q.CategoryID,
+		},
+	}
 }

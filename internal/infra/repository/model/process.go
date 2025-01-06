@@ -5,6 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
+	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
@@ -35,4 +37,75 @@ type OrderProcessTimeLogs struct {
 	Duration          time.Duration `bun:"duration"`
 	DurationFormatted string        `bun:"duration_formatted"`
 	TotalPaused       int8          `bun:"total_paused"`
+}
+
+func (op *OrderProcess) FromDomain(model *orderprocessentity.OrderProcess) {
+	*op = OrderProcess{
+		Entity: entitymodel.Entity{
+			ID:        model.ID,
+			CreatedAt: model.CreatedAt,
+			UpdatedAt: model.UpdatedAt,
+		},
+		OrderProcessTimeLogs: OrderProcessTimeLogs{
+			StartedAt:         model.StartedAt,
+			PausedAt:          model.PausedAt,
+			ContinuedAt:       model.ContinuedAt,
+			FinishedAt:        model.FinishedAt,
+			CanceledAt:        model.CanceledAt,
+			CanceledReason:    model.CanceledReason,
+			Duration:          model.Duration,
+			DurationFormatted: model.Duration.String(),
+			TotalPaused:       model.TotalPaused,
+		},
+		OrderProcessCommonAttributes: OrderProcessCommonAttributes{
+			EmployeeID:    model.EmployeeID,
+			GroupItemID:   model.GroupItemID,
+			GroupItem:     &GroupItem{},
+			ProcessRuleID: model.ProcessRuleID,
+			Status:        string(model.Status),
+			Products:      []Product{},
+			Queue:         &OrderQueue{},
+		},
+	}
+
+	op.GroupItem.FromDomain(model.GroupItem)
+	op.Queue.FromDomain(model.Queue)
+
+	for _, product := range model.Products {
+		p := Product{}
+		p.FromDomain(&product)
+		op.Products = append(op.Products, p)
+	}
+}
+
+func (op *OrderProcess) ToDomain() *orderprocessentity.OrderProcess {
+	orderProcess := &orderprocessentity.OrderProcess{
+		Entity: op.Entity.ToDomain(),
+		OrderProcessCommonAttributes: orderprocessentity.OrderProcessCommonAttributes{
+			EmployeeID:    op.EmployeeID,
+			GroupItemID:   op.GroupItemID,
+			GroupItem:     op.GroupItem.ToDomain(),
+			ProcessRuleID: op.ProcessRuleID,
+			Status:        orderprocessentity.StatusProcess(op.Status),
+			Products:      []productentity.Product{},
+			Queue:         op.Queue.ToDomain(),
+		},
+		OrderProcessTimeLogs: orderprocessentity.OrderProcessTimeLogs{
+			StartedAt:         op.StartedAt,
+			PausedAt:          op.PausedAt,
+			ContinuedAt:       op.ContinuedAt,
+			FinishedAt:        op.FinishedAt,
+			CanceledAt:        op.CanceledAt,
+			CanceledReason:    op.CanceledReason,
+			Duration:          op.Duration,
+			DurationFormatted: op.Duration.String(),
+			TotalPaused:       op.TotalPaused,
+		},
+	}
+
+	for _, product := range op.Products {
+		orderProcess.Products = append(orderProcess.Products, *product.ToDomain())
+	}
+
+	return orderProcess
 }

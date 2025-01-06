@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 type ItemToAdditional struct {
@@ -12,4 +13,27 @@ type ItemToAdditional struct {
 	AdditionalItemID uuid.UUID `bun:"type:uuid,pk"`
 	AdditionalItem   *Item     `bun:"rel:belongs-to,join:additional_item_id=id"`
 	ProductID        uuid.UUID `bun:"type:uuid,pk"`
+}
+
+func (i *ItemToAdditional) FromDomain(itemToAdditional *orderentity.ItemToAdditional) {
+	*i = ItemToAdditional{
+		ItemID:           itemToAdditional.ItemID,
+		AdditionalItemID: itemToAdditional.AdditionalItemID,
+		ProductID:        itemToAdditional.ProductID,
+		Item:             &Item{},
+		AdditionalItem:   &Item{},
+	}
+
+	i.Item.FromDomain(itemToAdditional.Item)
+	i.AdditionalItem.FromDomain(itemToAdditional.AdditionalItem)
+}
+
+func (i *ItemToAdditional) ToDomain() *orderentity.ItemToAdditional {
+	return &orderentity.ItemToAdditional{
+		ItemID:           i.ItemID,
+		Item:             i.Item.ToDomain(),
+		AdditionalItemID: i.AdditionalItemID,
+		AdditionalItem:   i.AdditionalItem.ToDomain(),
+		ProductID:        i.ProductID,
+	}
 }

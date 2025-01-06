@@ -3,6 +3,7 @@ package model
 import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
@@ -16,4 +17,38 @@ type DeliveryDriverCommonAttributes struct {
 	EmployeeID      uuid.UUID       `bun:"column:employee_id,type:uuid,notnull"`
 	Employee        *Employee       `bun:"rel:belongs-to"`
 	OrderDeliveries []OrderDelivery `bun:"rel:has-many,join:employee_id=driver_id"`
+}
+
+func (d *DeliveryDriver) FromDomain(driver *orderentity.DeliveryDriver) {
+	*d = DeliveryDriver{
+		Entity: entitymodel.FromDomain(driver.Entity),
+		DeliveryDriverCommonAttributes: DeliveryDriverCommonAttributes{
+			EmployeeID: driver.EmployeeID,
+		},
+	}
+
+	d.Employee.FromDomain(driver.Employee)
+
+	for _, orderDelivery := range driver.OrderDeliveries {
+		od := OrderDelivery{}
+		od.FromDomain(&orderDelivery)
+		d.OrderDeliveries = append(d.OrderDeliveries, od)
+	}
+}
+
+func (d *DeliveryDriver) ToDomain() *orderentity.DeliveryDriver {
+	deliveryDriver := &orderentity.DeliveryDriver{
+		Entity: d.Entity.ToDomain(),
+		DeliveryDriverCommonAttributes: orderentity.DeliveryDriverCommonAttributes{
+			EmployeeID:      d.EmployeeID,
+			Employee:        d.Employee.ToDomain(),
+			OrderDeliveries: []orderentity.OrderDelivery{},
+		},
+	}
+
+	for _, orderDelivery := range d.OrderDeliveries {
+		deliveryDriver.OrderDeliveries = append(deliveryDriver.OrderDeliveries, *orderDelivery.ToDomain())
+	}
+
+	return deliveryDriver
 }

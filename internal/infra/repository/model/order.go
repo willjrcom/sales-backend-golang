@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
@@ -46,4 +47,98 @@ type OrderTimeLogs struct {
 	FinishedAt *time.Time `bun:"finished_at"`
 	CanceledAt *time.Time `bun:"canceled_at"`
 	ArchivedAt *time.Time `bun:"archived_at"`
+}
+
+func (o *Order) FromDomain(order *orderentity.Order) {
+	*o = Order{
+		Entity: entitymodel.FromDomain(order.Entity),
+		OrderCommonAttributes: OrderCommonAttributes{
+			OrderNumber: order.OrderNumber,
+			Status:      string(order.Status),
+			Groups:      []GroupItem{},
+			Payments:    []PaymentOrder{},
+			OrderType: OrderType{
+				Delivery: &OrderDelivery{},
+				Table:    &OrderTable{},
+				Pickup:   &OrderPickup{},
+			},
+			OrderDetail: OrderDetail{
+				Attendant:     &Employee{},
+				TotalPayable:  order.TotalPayable,
+				TotalPaid:     order.TotalPaid,
+				TotalChange:   order.TotalChange,
+				QuantityItems: order.QuantityItems,
+				Observation:   order.Observation,
+				AttendantID:   order.AttendantID,
+				ShiftID:       order.ShiftID,
+			},
+		},
+		OrderTimeLogs: OrderTimeLogs{
+			PendingAt:  order.PendingAt,
+			FinishedAt: order.FinishedAt,
+			CanceledAt: order.CanceledAt,
+			ArchivedAt: order.ArchivedAt,
+		},
+	}
+
+	for i := range order.Groups {
+		o.Groups = append(o.Groups, GroupItem{})
+		o.Groups[i].FromDomain(&order.Groups[i])
+	}
+
+	for i := range order.Payments {
+		o.Payments = append(o.Payments, PaymentOrder{})
+		o.Payments[i].FromDomain(&order.Payments[i])
+	}
+
+	o.OrderType.Delivery.FromDomain(order.Delivery)
+	o.OrderType.Table.FromDomain(order.Table)
+	o.OrderType.Pickup.FromDomain(order.Pickup)
+	o.OrderDetail.Attendant.FromDomain(order.Attendant)
+}
+
+func (o *Order) ToDomain() *orderentity.Order {
+	order := &orderentity.Order{
+		Entity: o.Entity.ToDomain(),
+		OrderCommonAttributes: orderentity.OrderCommonAttributes{
+			OrderNumber: o.OrderNumber,
+			Status:      orderentity.StatusOrder(o.Status),
+			Groups:      []orderentity.GroupItem{},
+			Payments:    []orderentity.PaymentOrder{},
+			OrderType: orderentity.OrderType{
+				Delivery: &orderentity.OrderDelivery{},
+				Table:    &orderentity.OrderTable{},
+				Pickup:   &orderentity.OrderPickup{},
+			},
+			OrderDetail: orderentity.OrderDetail{
+				TotalPayable:  o.TotalPayable,
+				TotalPaid:     o.TotalPaid,
+				TotalChange:   o.TotalChange,
+				QuantityItems: o.QuantityItems,
+				Observation:   o.Observation,
+				AttendantID:   o.AttendantID,
+				ShiftID:       o.ShiftID,
+			},
+		},
+		OrderTimeLogs: orderentity.OrderTimeLogs{
+			PendingAt:  o.PendingAt,
+			FinishedAt: o.FinishedAt,
+			CanceledAt: o.CanceledAt,
+			ArchivedAt: o.ArchivedAt,
+		},
+	}
+
+	for i := range o.Groups {
+		order.Groups = append(order.Groups, *o.Groups[i].ToDomain())
+	}
+
+	for i := range o.Payments {
+		order.Payments = append(order.Payments, *o.Payments[i].ToDomain())
+	}
+
+	order.Delivery = o.Delivery.ToDomain()
+	order.Table = o.Table.ToDomain()
+	order.Pickup = o.Pickup.ToDomain()
+	order.Attendant = o.Attendant.ToDomain()
+	return order
 }

@@ -69,15 +69,20 @@ func (u *UserCreateDTO) ToDomain() (*companyentity.User, error) {
 		Cpf:      u.Cpf,
 		Birthday: u.Birthday,
 	}
-
 	person := personentity.NewPerson(personCommonAttributes)
+
+	userCommonAttributes := &companyentity.UserCommonAttributes{
+		Person:   *person,
+		Password: u.Password,
+	}
+	user := companyentity.NewUser(userCommonAttributes)
 
 	if u.Contact != nil {
 		contact, err := u.Contact.ToDomain()
 		if err != nil {
 			return nil, err
 		}
-		if err := person.AddContact(contact); err != nil {
+		if err := user.AddContact(contact); err != nil {
 			return nil, err
 		}
 	}
@@ -87,15 +92,10 @@ func (u *UserCreateDTO) ToDomain() (*companyentity.User, error) {
 			return nil, err
 		}
 
-		if err := person.AddAddress(address); err != nil {
+		if err := user.AddAddress(address); err != nil {
 			return nil, err
 		}
 	}
 
-	return &companyentity.User{
-		UserCommonAttributes: companyentity.UserCommonAttributes{
-			Person:   *person,
-			Password: u.Password,
-		},
-	}, nil
+	return user, nil
 }

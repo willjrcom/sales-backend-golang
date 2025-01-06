@@ -36,7 +36,9 @@ func (s *Service) CreateClient(ctx context.Context, dto *clientdto.ClientCreateD
 
 	s.UpdateClientWithCoordinates(ctx, client)
 
-	if err := s.rclient.CreateClient(ctx, client); err != nil {
+	clientModel := &model.Client{}
+	clientModel.FromDomain(client)
+	if err := s.rclient.CreateClient(ctx, clientModel); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -53,18 +55,20 @@ func (s *Service) UpdateClientWithCoordinates(ctx context.Context, client *clien
 }
 
 func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IDRequest, dto *clientdto.ClientUpdateDTO) error {
-	client, err := s.rclient.GetClientById(ctx, dtoId.ID.String())
+	clientModel, err := s.rclient.GetClientById(ctx, dtoId.ID.String())
 	if err != nil {
 		return err
 	}
 
+	client := clientModel.ToDomain()
 	if err := dto.UpdateDomain(client); err != nil {
 		return err
 	}
 
 	s.UpdateClientWithCoordinates(ctx, client)
 
-	if err := s.rclient.UpdateClient(ctx, client); err != nil {
+	clientModel.FromDomain(client)
+	if err := s.rclient.UpdateClient(ctx, clientModel); err != nil {
 		return err
 	}
 
@@ -84,9 +88,10 @@ func (s *Service) DeleteClient(ctx context.Context, dto *entitydto.IDRequest) er
 }
 
 func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IDRequest) (*clientdto.ClientDTO, error) {
-	if client, err := s.rclient.GetClientById(ctx, dto.ID.String()); err != nil {
+	if clientModel, err := s.rclient.GetClientById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
+		client := clientModel.ToDomain()
 		dto := &clientdto.ClientDTO{}
 		dto.FromDomain(client)
 		return dto, nil
@@ -94,19 +99,20 @@ func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IDRequest) (
 }
 
 func (s *Service) GetClientByContact(ctx context.Context, dto *contactdto.ContactDTO) (*clientdto.ClientDTO, error) {
-	contact, err := s.rcontact.GetContactByDddAndNumber(ctx, dto.Ddd, dto.Number, personentity.ContactTypeClient)
+	contactModel, err := s.rcontact.GetContactByDddAndNumber(ctx, dto.Ddd, dto.Number, string(personentity.ContactTypeClient))
 
 	if err != nil {
 		return nil, err
 	}
 
-	if contact == nil {
+	if contactModel == nil {
 		return nil, errors.New(("contact not found"))
 	}
 
-	if client, err := s.rclient.GetClientById(ctx, contact.ObjectID.String()); err != nil {
+	if clientModel, err := s.rclient.GetClientById(ctx, contactModel.ObjectID.String()); err != nil {
 		return nil, err
 	} else {
+		client := clientModel.ToDomain()
 		dto := &clientdto.ClientDTO{}
 		dto.FromDomain(client)
 		return dto, nil
@@ -117,15 +123,16 @@ func (s *Service) GetAllClients(ctx context.Context) ([]clientdto.ClientDTO, err
 	if clients, err := s.rclient.GetAllClients(ctx); err != nil {
 		return nil, err
 	} else {
-		dtos := clientsToDtos(clients)
+		dtos := modelsToDTOs(clients)
 		return dtos, nil
 	}
 }
 
-func clientsToDtos(clients []cliententity.Client) []clientdto.ClientDTO {
-	dtos := make([]clientdto.ClientDTO, len(clients))
-	for i, client := range clients {
-		dtos[i].FromDomain(&client)
+func modelsToDTOs(clientModels []model.Client) []clientdto.ClientDTO {
+	dtos := make([]clientdto.ClientDTO, len(clientModels))
+	for i, clientModel := range clientModels {
+		client := clientModel.ToDomain()
+		dtos[i].FromDomain(client)
 	}
 
 	return dtos

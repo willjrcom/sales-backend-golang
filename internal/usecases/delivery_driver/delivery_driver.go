@@ -40,7 +40,9 @@ func (s *Service) CreateDeliveryDriver(ctx context.Context, dto *deliverydriverd
 		return uuid.Nil, errors.New("delivery driver already exists")
 	}
 
-	if err = s.r.CreateDeliveryDriver(ctx, driver); err != nil {
+	driverModel := &model.DeliveryDriver{}
+	driverModel.FromDomain(driver)
+	if err = s.r.CreateDeliveryDriver(ctx, driverModel); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -48,17 +50,19 @@ func (s *Service) CreateDeliveryDriver(ctx context.Context, dto *deliverydriverd
 }
 
 func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoId *entitydto.IDRequest, dto *deliverydriverdto.DeliveryDriverUpdateDTO) error {
-	driver, err := s.r.GetDeliveryDriverById(ctx, dtoId.ID.String())
+	driverModel, err := s.r.GetDeliveryDriverById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
 	}
 
+	driver := driverModel.ToDomain()
 	if err = dto.UpdateDomain(driver); err != nil {
 		return err
 	}
 
-	if err = s.r.UpdateDeliveryDriver(ctx, driver); err != nil {
+	driverModel.FromDomain(driver)
+	if err = s.r.UpdateDeliveryDriver(ctx, driverModel); err != nil {
 		return err
 	}
 
@@ -78,26 +82,29 @@ func (s *Service) DeleteDeliveryDriver(ctx context.Context, dto *entitydto.IDReq
 }
 
 func (s *Service) GetDeliveryDriverByID(ctx context.Context, dto *entitydto.IDRequest) (*deliverydriverdto.DeliveryDriverDTO, error) {
-	deliveryDriver, err := s.r.GetDeliveryDriverById(ctx, dto.ID.String())
+	deliveryDriverModel, err := s.r.GetDeliveryDriverById(ctx, dto.ID.String())
 	if err != nil {
 		return nil, err
 	}
 
+	deliveryDriver := deliveryDriverModel.ToDomain()
 	deliveryDriverDTO := &deliverydriverdto.DeliveryDriverDTO{}
 	deliveryDriverDTO.FromDomain(deliveryDriver)
 	return deliveryDriverDTO, nil
 }
 
 func (s *Service) GetAllDeliveryDrivers(ctx context.Context) ([]deliverydriverdto.DeliveryDriverDTO, error) {
-	deliveryDrivers, err := s.r.GetAllDeliveryDrivers(ctx)
+	driverModels, err := s.r.GetAllDeliveryDrivers(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	deliveryDriversDto := []deliverydriverdto.DeliveryDriverDTO{}
-	for _, deliveryDriver := range deliveryDrivers {
+	for _, driverModel := range driverModels {
+
+		driver := driverModel.ToDomain()
 		deliveryDriverDTO := &deliverydriverdto.DeliveryDriverDTO{}
-		deliveryDriverDTO.FromDomain(&deliveryDriver)
+		deliveryDriverDTO.FromDomain(driver)
 		deliveryDriversDto = append(deliveryDriversDto, *deliveryDriverDTO)
 	}
 

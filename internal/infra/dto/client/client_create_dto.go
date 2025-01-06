@@ -67,6 +67,8 @@ func (r *ClientCreateDTO) ToDomain() (*cliententity.Client, error) {
 		person.Birthday = r.Birthday
 	}
 
+	client := cliententity.NewClient(person)
+
 	// Contact
 	contact, err := r.Contact.ToDomain()
 	if err != nil {
@@ -75,7 +77,7 @@ func (r *ClientCreateDTO) ToDomain() (*cliententity.Client, error) {
 
 	contact.Type = personentity.ContactTypeClient
 
-	if err := person.AddContact(contact); err != nil {
+	if err := client.AddContact(contact); err != nil {
 		return nil, err
 	}
 
@@ -85,9 +87,9 @@ func (r *ClientCreateDTO) ToDomain() (*cliententity.Client, error) {
 		return nil, err
 	}
 
-	if err := person.AddAddress(address); err != nil {
+	if err := client.AddAddress(address); err != nil {
 		return nil, err
 	}
 
-	return cliententity.NewClient(person), nil
+	return client, nil
 }

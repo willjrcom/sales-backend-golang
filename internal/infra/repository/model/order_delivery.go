@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
@@ -31,4 +32,52 @@ type DeliveryTimeLogs struct {
 	PendingAt   *time.Time `bun:"pending_at"`
 	ShippedAt   *time.Time `bun:"shipped_at"`
 	DeliveredAt *time.Time `bun:"delivered_at"`
+}
+
+func (d *OrderDelivery) FromDomain(delivery *orderentity.OrderDelivery) {
+	*d = OrderDelivery{
+		Entity: entitymodel.FromDomain(delivery.Entity),
+		OrderDeliveryCommonAttributes: OrderDeliveryCommonAttributes{
+			Status:      string(delivery.Status),
+			DeliveryTax: delivery.DeliveryTax,
+			ClientID:    delivery.ClientID,
+			Client:      &Client{},
+			AddressID:   delivery.AddressID,
+			Address:     &Address{},
+			DriverID:    delivery.DriverID,
+			Driver:      &DeliveryDriver{},
+			OrderID:     delivery.OrderID,
+		},
+		DeliveryTimeLogs: DeliveryTimeLogs{
+			PendingAt:   delivery.PendingAt,
+			ShippedAt:   delivery.ShippedAt,
+			DeliveredAt: delivery.DeliveredAt,
+		},
+	}
+
+	d.Address.FromDomain(delivery.Address)
+	d.Client.FromDomain(delivery.Client)
+	d.Driver.FromDomain(delivery.Driver)
+}
+
+func (d *OrderDelivery) ToDomain() *orderentity.OrderDelivery {
+	return &orderentity.OrderDelivery{
+		Entity: d.Entity.ToDomain(),
+		OrderDeliveryCommonAttributes: orderentity.OrderDeliveryCommonAttributes{
+			Status:      orderentity.StatusOrderDelivery(d.Status),
+			DeliveryTax: d.DeliveryTax,
+			ClientID:    d.ClientID,
+			Client:      d.Client.ToDomain(),
+			AddressID:   d.AddressID,
+			Address:     d.Address.ToDomain(),
+			DriverID:    d.DriverID,
+			Driver:      d.Driver.ToDomain(),
+			OrderID:     d.OrderID,
+		},
+		DeliveryTimeLogs: orderentity.DeliveryTimeLogs{
+			PendingAt:   d.PendingAt,
+			ShippedAt:   d.ShippedAt,
+			DeliveredAt: d.DeliveredAt,
+		},
+	}
 }

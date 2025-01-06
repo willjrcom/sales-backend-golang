@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
@@ -22,5 +23,34 @@ type ProcessRuleCommonAttributes struct {
 	IdealTime         time.Duration `bun:"ideal_time,notnull"`
 	ExperimentalError time.Duration `bun:"experimental_error,notnull"`
 	CategoryID        uuid.UUID     `bun:"column:category_id,type:uuid,notnull"`
-	DeletedAt         time.Time     `bun:",soft_delete,nullzero"`
+}
+
+func (p *ProcessRule) FromDomain(processRule *productentity.ProcessRule) {
+	*p = ProcessRule{
+		Entity: entitymodel.FromDomain(processRule.Entity),
+		ProcessRuleCommonAttributes: ProcessRuleCommonAttributes{
+			Name:              processRule.Name,
+			Order:             processRule.Order,
+			Description:       processRule.Description,
+			ImagePath:         processRule.ImagePath,
+			IdealTime:         processRule.IdealTime,
+			ExperimentalError: processRule.ExperimentalError,
+			CategoryID:        processRule.CategoryID,
+		},
+	}
+}
+
+func (p *ProcessRule) ToDomain() *productentity.ProcessRule {
+	return &productentity.ProcessRule{
+		Entity: p.Entity.ToDomain(),
+		ProcessRuleCommonAttributes: productentity.ProcessRuleCommonAttributes{
+			Name:              p.Name,
+			Order:             p.Order,
+			Description:       p.Description,
+			ImagePath:         p.ImagePath,
+			IdealTime:         p.IdealTime,
+			ExperimentalError: p.ExperimentalError,
+			CategoryID:        p.CategoryID,
+		},
+	}
 }

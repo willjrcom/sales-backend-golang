@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
@@ -26,4 +27,43 @@ type OrderTableCommonAttributes struct {
 type OrderTableTimeLogs struct {
 	PendingAt *time.Time `bun:"pending_at"`
 	ClosedAt  *time.Time `bun:"closed_at"`
+}
+
+func (t *OrderTable) FromDomain(table *orderentity.OrderTable) {
+	*t = OrderTable{
+		Entity: entitymodel.Entity{
+			ID:        table.ID,
+			CreatedAt: table.CreatedAt,
+			UpdatedAt: table.UpdatedAt,
+			DeletedAt: table.DeletedAt,
+		},
+		OrderTableCommonAttributes: OrderTableCommonAttributes{
+			Name:    table.Name,
+			Contact: table.Contact,
+			Status:  string(table.Status),
+			OrderID: table.OrderID,
+			TableID: table.TableID,
+		},
+		OrderTableTimeLogs: OrderTableTimeLogs{
+			PendingAt: table.PendingAt,
+			ClosedAt:  table.ClosedAt,
+		},
+	}
+}
+
+func (t *OrderTable) ToDomain() *orderentity.OrderTable {
+	return &orderentity.OrderTable{
+		Entity: t.Entity.ToDomain(),
+		OrderTableCommonAttributes: orderentity.OrderTableCommonAttributes{
+			Name:    t.Name,
+			Contact: t.Contact,
+			Status:  orderentity.StatusOrderTable(t.Status),
+			OrderID: t.OrderID,
+			TableID: t.TableID,
+		},
+		OrderTableTimeLogs: orderentity.OrderTableTimeLogs{
+			PendingAt: t.PendingAt,
+			ClosedAt:  t.ClosedAt,
+		},
+	}
 }
