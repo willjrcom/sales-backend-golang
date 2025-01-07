@@ -31,6 +31,8 @@ func (c *Contact) FromDomain(contact *personentity.Contact) {
 		return
 	}
 	*c = Contact{
+		Entity:   entitymodel.FromDomain(contact.Entity),
+		ObjectID: contact.ObjectID,
 		ContactCommonAttributes: ContactCommonAttributes{
 			Ddd:    contact.Ddd,
 			Number: contact.Number,
@@ -44,6 +46,8 @@ func (c *Contact) ToDomain() *personentity.Contact {
 		return nil
 	}
 	return &personentity.Contact{
+		Entity:   c.Entity.ToDomain(),
+		ObjectID: c.ObjectID,
 		ContactCommonAttributes: personentity.ContactCommonAttributes{
 			Ddd:    c.Ddd,
 			Number: c.Number,
