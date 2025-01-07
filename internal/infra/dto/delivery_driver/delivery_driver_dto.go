@@ -20,6 +20,7 @@ func (s *DeliveryDriverDTO) FromDomain(driver *orderentity.DeliveryDriver) {
 	*s = DeliveryDriverDTO{
 		ID:              driver.ID,
 		EmployeeID:      driver.EmployeeID,
+		Employee:        &employeedto.EmployeeDTO{},
 		OrderDeliveries: driver.OrderDeliveries,
 	}
 

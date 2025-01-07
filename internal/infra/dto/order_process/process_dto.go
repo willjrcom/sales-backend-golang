@@ -38,6 +38,7 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 		ID:                orderProcess.ID,
 		EmployeeID:        orderProcess.EmployeeID,
 		GroupItemID:       orderProcess.GroupItemID,
+		GroupItem:         &groupitemdto.GroupItemDTO{},
 		ProcessRuleID:     orderProcess.ProcessRuleID,
 		Status:            orderProcess.Status,
 		StartedAt:         orderProcess.StartedAt,
@@ -49,8 +50,16 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 		Duration:          orderProcess.Duration,
 		DurationFormatted: orderProcess.Duration.String(),
 		TotalPaused:       orderProcess.TotalPaused,
+		Products:          []productcategorydto.ProductDTO{},
+		Queue:             &orderqueuedto.QueueDTO{},
 	}
 
 	s.GroupItem.FromDomain(orderProcess.GroupItem)
 	s.Queue.FromDomain(orderProcess.Queue)
+
+	for _, product := range orderProcess.Products {
+		p := &productcategorydto.ProductDTO{}
+		p.FromDomain(&product)
+		s.Products = append(s.Products, *p)
+	}
 }

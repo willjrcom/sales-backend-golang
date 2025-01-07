@@ -70,8 +70,10 @@ func (s *Service) GetProductByCode(ctx context.Context, keys *productcategorydto
 	if productModel, err := s.rp.GetProductByCode(ctx, keys.Code); err != nil {
 		return nil, err
 	} else {
-
-		return productcategorydto.FromDomain(productModel.ToDomain()), nil
+		product := productModel.ToDomain()
+		c := productcategorydto.ProductDTO{}
+		c.FromDomain(product)
+		return &c, nil
 	}
 }
 
@@ -123,7 +125,10 @@ func (s *Service) GetProductById(ctx context.Context, dto *entitydto.IDRequest) 
 	if productModel, err := s.rp.GetProductById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return productcategorydto.FromDomain(productModel.ToDomain()), nil
+		product := productModel.ToDomain()
+		c := productcategorydto.ProductDTO{}
+		c.FromDomain(product)
+		return &c, nil
 	}
 }
 
@@ -139,10 +144,13 @@ func (s *Service) GetAllProducts(ctx context.Context) ([]productcategorydto.Prod
 }
 
 func modelsToDtos(productModels []model.Product) []productcategorydto.ProductDTO {
-	dtos := make([]productcategorydto.ProductDTO, len(productModels))
-	for i, productModel := range productModels {
+	dtos := make([]productcategorydto.ProductDTO, 0)
+
+	for _, productModel := range productModels {
 		product := productModel.ToDomain()
-		dtos[i] = *productcategorydto.FromDomain(product)
+		c := productcategorydto.ProductDTO{}
+		c.FromDomain(product)
+		dtos = append(dtos, c)
 	}
 
 	return dtos

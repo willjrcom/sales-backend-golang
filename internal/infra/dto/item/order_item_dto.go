@@ -25,17 +25,18 @@ func (i *ItemDTO) FromDomain(item *orderentity.Item) {
 		return
 	}
 	*i = ItemDTO{
-		ID:           item.ID,
-		Name:         item.Name,
-		Observation:  item.Observation,
-		Price:        item.Price,
-		TotalPrice:   item.TotalPrice,
-		Size:         item.Size,
-		Quantity:     item.Quantity,
-		GroupItemID:  item.GroupItemID,
-		CategoryID:   item.CategoryID,
-		RemovedItems: item.RemovedItems,
-		ProductID:    item.ProductID,
+		ID:              item.ID,
+		Name:            item.Name,
+		Observation:     item.Observation,
+		Price:           item.Price,
+		TotalPrice:      item.TotalPrice,
+		Size:            item.Size,
+		Quantity:        item.Quantity,
+		GroupItemID:     item.GroupItemID,
+		CategoryID:      item.CategoryID,
+		RemovedItems:    item.RemovedItems,
+		ProductID:       item.ProductID,
+		AdditionalItems: []ItemDTO{},
 	}
 
 	for i, additionalItem := range i.AdditionalItems {

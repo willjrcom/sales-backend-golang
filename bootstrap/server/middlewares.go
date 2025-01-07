@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
-	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
@@ -53,7 +53,7 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 				return
 			}
 
-			ctx = context.WithValue(ctx, schemaentity.Schema("schema"), jwtservice.GetSchemaFromToken(token))
+			ctx = context.WithValue(ctx, model.Schema("schema"), jwtservice.GetSchemaFromToken(token))
 			ctx = context.WithValue(ctx, companyentity.UserValue("user"), jwtservice.GetUserFromToken(token))
 		}
 

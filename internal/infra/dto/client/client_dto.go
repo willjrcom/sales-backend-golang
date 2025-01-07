@@ -29,6 +29,8 @@ func (c *ClientDTO) FromDomain(client *cliententity.Client) {
 		Email:    client.Email,
 		Cpf:      client.Cpf,
 		Birthday: client.Birthday,
+		Contact:  &contactdto.ContactDTO{},
+		Address:  &addressdto.AddressDTO{},
 	}
 
 	c.Contact.FromDomain(client.Contact)

@@ -38,7 +38,10 @@ func (i *GroupItemDTO) FromDomain(groupItem *orderentity.GroupItem) {
 		UseProcessRule:   groupItem.UseProcessRule,
 		Observation:      groupItem.Observation,
 		CategoryID:       groupItem.CategoryID,
+		Category:         &productcategorydto.CategoryDTO{},
 		ComplementItemID: groupItem.ComplementItemID,
+		ComplementItem:   &itemdto.ItemDTO{},
+		Items:            []itemdto.ItemDTO{},
 		OrderID:          groupItem.OrderID,
 	}
 

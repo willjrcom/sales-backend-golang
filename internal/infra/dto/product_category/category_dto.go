@@ -39,61 +39,47 @@ func (c *CategoryDTO) FromDomain(category *productentity.ProductCategory) {
 		IsAdditional:         category.IsAdditional,
 		IsComplement:         category.IsComplement,
 		RemovableIngredients: category.RemovableIngredients,
+		Sizes:                []sizedto.SizeDTO{},
+		Quantities:           []quantitydto.QuantityDTO{},
+		Products:             []ProductDTO{},
+		AdditionalCategories: []CategoryDTO{},
+		ComplementCategories: []CategoryDTO{},
+		ProcessRules:         []processruledto.ProcessRuleDTO{},
 	}
 
-	if len(category.Sizes) == 0 {
-		category.Sizes = []productentity.Size{}
+	for _, processRule := range category.ProcessRules {
+		p := processruledto.ProcessRuleDTO{}
+		p.FromDomain(&processRule)
+		c.ProcessRules = append(c.ProcessRules, p)
 	}
 
-	if len(category.Quantities) == 0 {
-		category.Quantities = []productentity.Quantity{}
+	for _, size := range category.Sizes {
+		s := sizedto.SizeDTO{}
+		s.FromDomain(&size)
+		c.Sizes = append(c.Sizes, s)
 	}
 
-	if len(category.Products) == 0 {
-		category.Products = []productentity.Product{}
+	for _, quantity := range category.Quantities {
+		q := quantitydto.QuantityDTO{}
+		q.FromDomain(&quantity)
+		c.Quantities = append(c.Quantities, q)
 	}
 
-	if len(category.ProcessRules) == 0 {
-		category.ProcessRules = []productentity.ProcessRule{}
-	} else {
-		c.ProcessRules = make([]processruledto.ProcessRuleDTO, len(category.ProcessRules))
-
-		for i, processRule := range category.ProcessRules {
-			c.ProcessRules[i] = processruledto.ProcessRuleDTO{}
-			c.ProcessRules[i].FromDomain(&processRule)
-		}
+	for _, product := range category.Products {
+		p := ProductDTO{}
+		p.FromDomain(&product)
+		c.Products = append(c.Products, p)
 	}
 
-	if len(category.AdditionalCategories) == 0 {
-		category.AdditionalCategories = []productentity.ProductCategory{}
+	for _, category := range category.AdditionalCategories {
+		a := CategoryDTO{}
+		a.FromDomain(&category)
+		c.AdditionalCategories = append(c.AdditionalCategories, a)
 	}
 
-	if len(category.ComplementCategories) == 0 {
-		category.ComplementCategories = []productentity.ProductCategory{}
-	}
-
-	for i := range category.Sizes {
-		c.Sizes[i] = sizedto.SizeDTO{}
-		c.Sizes[i].FromDomain(&category.Sizes[i])
-	}
-
-	for i := range category.Quantities {
-		c.Quantities[i] = quantitydto.QuantityDTO{}
-		c.Quantities[i].FromDomain(&category.Quantities[i])
-	}
-
-	for i := range category.Products {
-		c.Products[i] = ProductDTO{}
-		c.Products[i] = *FromDomain(&category.Products[i])
-	}
-
-	for i := range category.AdditionalCategories {
-		c.AdditionalCategories[i] = CategoryDTO{}
-		c.AdditionalCategories[i].FromDomain(&category.AdditionalCategories[i])
-	}
-
-	for i := range category.ComplementCategories {
-		c.ComplementCategories[i] = CategoryDTO{}
-		c.ComplementCategories[i].FromDomain(&category.ComplementCategories[i])
+	for _, category := range category.ComplementCategories {
+		a := CategoryDTO{}
+		a.FromDomain(&category)
+		c.ComplementCategories = append(c.ComplementCategories, a)
 	}
 }

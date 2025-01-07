@@ -15,5 +15,11 @@ func (c *EmployeeDTO) FromDomain(employee *employeeentity.Employee) {
 	if employee == nil {
 		return
 	}
+
+	*c = EmployeeDTO{
+		ID:      employee.ID,
+		UserDTO: userdto.UserDTO{},
+	}
+
 	c.UserDTO.FromDomain(employee.User)
 }
