@@ -19,16 +19,19 @@ type ProcessRuleDTO struct {
 	CategoryID        uuid.UUID `json:"category_id"`
 }
 
-func (s *ProcessRuleDTO) FromDomain(model *productentity.ProcessRule) {
+func (s *ProcessRuleDTO) FromDomain(processRule *productentity.ProcessRule) {
+	if processRule == nil {
+		return
+	}
 	*s = ProcessRuleDTO{
-		ID:                model.ID,
-		Name:              model.Name,
-		Order:             model.Order,
-		Description:       model.Description,
-		ImagePath:         model.ImagePath,
-		IdealTime:         getTimeFormatted(model.IdealTime),
-		ExperimentalError: getTimeFormatted(model.ExperimentalError),
-		CategoryID:        model.CategoryID,
+		ID:                processRule.ID,
+		Name:              processRule.Name,
+		Order:             processRule.Order,
+		Description:       processRule.Description,
+		ImagePath:         processRule.ImagePath,
+		IdealTime:         getTimeFormatted(processRule.IdealTime),
+		ExperimentalError: getTimeFormatted(processRule.ExperimentalError),
+		CategoryID:        processRule.CategoryID,
 	}
 }
 

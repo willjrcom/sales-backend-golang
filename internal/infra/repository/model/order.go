@@ -50,6 +50,9 @@ type OrderTimeLogs struct {
 }
 
 func (o *Order) FromDomain(order *orderentity.Order) {
+	if order == nil {
+		return
+	}
 	*o = Order{
 		Entity: entitymodel.FromDomain(order.Entity),
 		OrderCommonAttributes: OrderCommonAttributes{

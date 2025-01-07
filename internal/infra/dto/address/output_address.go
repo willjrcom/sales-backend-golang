@@ -20,24 +20,27 @@ type AddressDTO struct {
 	Coordinates  Coordinates               `json:"coordinates"`
 }
 
-func (a *AddressDTO) FromDomain(domain *addressentity.Address) {
+func (a *AddressDTO) FromDomain(address *addressentity.Address) {
+	if address == nil {
+		return
+	}
 	coordinates := Coordinates{
-		domain.Coordinates.Latitude,
-		domain.Coordinates.Longitude,
+		address.Coordinates.Latitude,
+		address.Coordinates.Longitude,
 	}
 
 	*a = AddressDTO{
-		ID:           domain.ID,
-		Street:       domain.Street,
-		Number:       domain.Number,
-		Complement:   domain.Complement,
-		Reference:    domain.Reference,
-		Neighborhood: domain.Neighborhood,
-		City:         domain.City,
-		State:        domain.State,
-		Cep:          domain.Cep,
-		AddressType:  domain.AddressType,
-		DeliveryTax:  domain.DeliveryTax,
+		ID:           address.ID,
+		Street:       address.Street,
+		Number:       address.Number,
+		Complement:   address.Complement,
+		Reference:    address.Reference,
+		Neighborhood: address.Neighborhood,
+		City:         address.City,
+		State:        address.State,
+		Cep:          address.Cep,
+		AddressType:  address.AddressType,
+		DeliveryTax:  address.DeliveryTax,
 		Coordinates:  coordinates,
 	}
 }

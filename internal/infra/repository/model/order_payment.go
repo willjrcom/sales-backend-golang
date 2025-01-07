@@ -27,6 +27,9 @@ type PaymentTimeLogs struct {
 }
 
 func (p *PaymentOrder) FromDomain(payment *orderentity.PaymentOrder) {
+	if payment == nil {
+		return
+	}
 	*p = PaymentOrder{
 		Entity: entitymodel.FromDomain(payment.Entity),
 		PaymentCommonAttributes: PaymentCommonAttributes{

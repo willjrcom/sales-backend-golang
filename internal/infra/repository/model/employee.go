@@ -19,6 +19,9 @@ type EmployeeCommonAttributes struct {
 }
 
 func (e *Employee) FromDomain(employee *employeeentity.Employee) {
+	if employee == nil {
+		return
+	}
 	*e = Employee{
 		Entity: entitymodel.FromDomain(employee.Entity),
 		EmployeeCommonAttributes: EmployeeCommonAttributes{

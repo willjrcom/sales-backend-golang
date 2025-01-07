@@ -17,16 +17,19 @@ type CompanyDTO struct {
 	Address      *addressdto.AddressDTO `json:"address"`
 }
 
-func (c *CompanyDTO) FromDomain(model *companyentity.Company) {
+func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
+	if company == nil {
+		return
+	}
 	*c = CompanyDTO{
-		ID:           model.ID,
-		SchemaName:   model.SchemaName,
-		BusinessName: model.BusinessName,
-		TradeName:    model.TradeName,
-		Cnpj:         model.Cnpj,
-		Email:        model.Email,
-		Contacts:     model.Contacts,
+		ID:           company.ID,
+		SchemaName:   company.SchemaName,
+		BusinessName: company.BusinessName,
+		TradeName:    company.TradeName,
+		Cnpj:         company.Cnpj,
+		Email:        company.Email,
+		Contacts:     company.Contacts,
 	}
 
-	c.Address.FromDomain(model.Address)
+	c.Address.FromDomain(company.Address)
 }

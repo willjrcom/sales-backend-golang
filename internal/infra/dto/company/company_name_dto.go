@@ -12,6 +12,9 @@ type CompanyNameDTO struct {
 }
 
 func (c *CompanyNameDTO) FromDomain(company *companyentity.Company) {
+	if company == nil {
+		return
+	}
 	*c = CompanyNameDTO{
 		ID:   company.ID,
 		Name: company.TradeName,

@@ -34,6 +34,9 @@ type Coordinates struct {
 }
 
 func (c *Coordinates) FromDomain(coordinates *addressentity.Coordinates) {
+	if coordinates == nil {
+		return
+	}
 	*c = Coordinates{
 		Latitude:  coordinates.Latitude,
 		Longitude: coordinates.Longitude,
@@ -48,6 +51,9 @@ func (c *Coordinates) ToDomain() *addressentity.Coordinates {
 }
 
 func (a *Address) FromDomain(address *addressentity.Address) {
+	if address == nil {
+		return
+	}
 	*a = Address{
 		Entity: entitymodel.FromDomain(address.Entity),
 		AddressCommonAttributes: AddressCommonAttributes{

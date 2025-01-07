@@ -25,6 +25,9 @@ type GroupItemDTO struct {
 }
 
 func (i *GroupItemDTO) FromDomain(groupItem *orderentity.GroupItem) {
+	if groupItem == nil {
+		return
+	}
 	*i = GroupItemDTO{
 		ID:               groupItem.ID,
 		Size:             groupItem.Size,

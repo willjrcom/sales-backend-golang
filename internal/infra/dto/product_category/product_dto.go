@@ -23,6 +23,10 @@ type ProductDTO struct {
 }
 
 func FromDomain(product *productentity.Product) *ProductDTO {
+	if product == nil {
+		return nil
+	}
+
 	p := &ProductDTO{
 		ID:          product.ID,
 		Code:        product.Code,

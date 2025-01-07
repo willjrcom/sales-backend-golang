@@ -29,6 +29,9 @@ type OrderQueueTimeLogs struct {
 }
 
 func (q *OrderQueue) FromDomain(queue *orderprocessentity.OrderQueue) {
+	if queue == nil {
+		return
+	}
 	*q = OrderQueue{
 		Entity: entitymodel.FromDomain(queue.Entity),
 		OrderQueueCommonAttributes: OrderQueueCommonAttributes{

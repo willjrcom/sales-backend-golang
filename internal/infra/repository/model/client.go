@@ -13,6 +13,9 @@ type Client struct {
 }
 
 func (c *Client) FromDomain(client *cliententity.Client) {
+	if client == nil {
+		return
+	}
 	*c = Client{
 		Entity: entitymodel.FromDomain(client.Entity),
 	}

@@ -21,6 +21,9 @@ type SizeCommonAttributes struct {
 }
 
 func (s *Size) FromDomain(size *productentity.Size) {
+	if size == nil {
+		return
+	}
 	*s = Size{
 		Entity: entitymodel.FromDomain(size.Entity),
 		SizeCommonAttributes: SizeCommonAttributes{

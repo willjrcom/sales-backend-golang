@@ -22,6 +22,9 @@ type CouponCommonAttributes struct {
 }
 
 func (c *Coupon) FromDomain(coupon *orderentity.Coupon) {
+	if coupon == nil {
+		return
+	}
 	*c = Coupon{
 		Entity: entitymodel.FromDomain(coupon.Entity),
 		CouponCommonAttributes: CouponCommonAttributes{

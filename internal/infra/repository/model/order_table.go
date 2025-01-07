@@ -30,6 +30,9 @@ type OrderTableTimeLogs struct {
 }
 
 func (t *OrderTable) FromDomain(table *orderentity.OrderTable) {
+	if table == nil {
+		return
+	}
 	*t = OrderTable{
 		Entity: entitymodel.Entity{
 			ID:        table.ID,

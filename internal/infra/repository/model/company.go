@@ -22,20 +22,23 @@ type CompanyCommonAttributes struct {
 	Address      *Address `bun:"rel:has-one,join:id=object_id,notnull"`
 }
 
-func (c *Company) FromDomain(model *companyentity.Company) {
+func (c *Company) FromDomain(company *companyentity.Company) {
+	if company == nil {
+		return
+	}
 	*c = Company{
-		Entity: entitymodel.FromDomain(model.Entity),
+		Entity: entitymodel.FromDomain(company.Entity),
 		CompanyCommonAttributes: CompanyCommonAttributes{
-			SchemaName:   model.SchemaName,
-			BusinessName: model.BusinessName,
-			TradeName:    model.TradeName,
-			Cnpj:         model.Cnpj,
-			Email:        model.Email,
-			Contacts:     model.Contacts,
+			SchemaName:   company.SchemaName,
+			BusinessName: company.BusinessName,
+			TradeName:    company.TradeName,
+			Cnpj:         company.Cnpj,
+			Email:        company.Email,
+			Contacts:     company.Contacts,
 		},
 	}
 
-	c.Address.FromDomain(model.Address)
+	c.Address.FromDomain(company.Address)
 }
 
 func (c *Company) ToDomain() *companyentity.Company {

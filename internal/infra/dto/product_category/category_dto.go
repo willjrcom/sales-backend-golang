@@ -27,6 +27,9 @@ type CategoryDTO struct {
 }
 
 func (c *CategoryDTO) FromDomain(category *productentity.ProductCategory) {
+	if category == nil {
+		return
+	}
 	*c = CategoryDTO{
 		ID:                   category.ID,
 		Name:                 category.Name,

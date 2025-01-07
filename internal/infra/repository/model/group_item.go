@@ -53,6 +53,9 @@ func (i *GroupItem) BeforeUpdate(ctx context.Context, query *bun.UpdateQuery) er
 }
 
 func (g *GroupItem) FromDomain(groupItem *orderentity.GroupItem) {
+	if groupItem == nil {
+		return
+	}
 	*g = GroupItem{
 		Entity: entitymodel.FromDomain(groupItem.Entity),
 		GroupCommonAttributes: GroupCommonAttributes{

@@ -20,6 +20,9 @@ type DeliveryDriverCommonAttributes struct {
 }
 
 func (d *DeliveryDriver) FromDomain(driver *orderentity.DeliveryDriver) {
+	if driver == nil {
+		return
+	}
 	*d = DeliveryDriver{
 		Entity: entitymodel.FromDomain(driver.Entity),
 		DeliveryDriverCommonAttributes: DeliveryDriverCommonAttributes{

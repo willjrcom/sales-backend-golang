@@ -21,6 +21,9 @@ type ItemDTO struct {
 }
 
 func (i *ItemDTO) FromDomain(item *orderentity.Item) {
+	if item == nil {
+		return
+	}
 	*i = ItemDTO{
 		ID:           item.ID,
 		Name:         item.Name,

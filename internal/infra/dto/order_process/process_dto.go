@@ -30,24 +30,27 @@ type OrderProcessDTO struct {
 	TotalPaused       int8                             `json:"total_paused,omitempty"`
 }
 
-func (s *OrderProcessDTO) FromDomain(model *orderprocessentity.OrderProcess) {
+func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProcess) {
+	if orderProcess == nil {
+		return
+	}
 	*s = OrderProcessDTO{
-		ID:                model.ID,
-		EmployeeID:        model.EmployeeID,
-		GroupItemID:       model.GroupItemID,
-		ProcessRuleID:     model.ProcessRuleID,
-		Status:            model.Status,
-		StartedAt:         model.StartedAt,
-		PausedAt:          model.PausedAt,
-		ContinuedAt:       model.ContinuedAt,
-		FinishedAt:        model.FinishedAt,
-		CanceledAt:        model.CanceledAt,
-		CanceledReason:    model.CanceledReason,
-		Duration:          model.Duration,
-		DurationFormatted: model.Duration.String(),
-		TotalPaused:       model.TotalPaused,
+		ID:                orderProcess.ID,
+		EmployeeID:        orderProcess.EmployeeID,
+		GroupItemID:       orderProcess.GroupItemID,
+		ProcessRuleID:     orderProcess.ProcessRuleID,
+		Status:            orderProcess.Status,
+		StartedAt:         orderProcess.StartedAt,
+		PausedAt:          orderProcess.PausedAt,
+		ContinuedAt:       orderProcess.ContinuedAt,
+		FinishedAt:        orderProcess.FinishedAt,
+		CanceledAt:        orderProcess.CanceledAt,
+		CanceledReason:    orderProcess.CanceledReason,
+		Duration:          orderProcess.Duration,
+		DurationFormatted: orderProcess.Duration.String(),
+		TotalPaused:       orderProcess.TotalPaused,
 	}
 
-	s.GroupItem.FromDomain(model.GroupItem)
-	s.Queue.FromDomain(model.Queue)
+	s.GroupItem.FromDomain(orderProcess.GroupItem)
+	s.Queue.FromDomain(orderProcess.Queue)
 }

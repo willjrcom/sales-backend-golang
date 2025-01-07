@@ -27,6 +27,9 @@ type ContactCommonAttributes struct {
 }
 
 func (c *Contact) FromDomain(contact *personentity.Contact) {
+	if contact == nil {
+		return
+	}
 	*c = Contact{
 		ContactCommonAttributes: ContactCommonAttributes{
 			Ddd:    contact.Ddd,

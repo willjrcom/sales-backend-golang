@@ -20,6 +20,9 @@ type TableCommonAttributes struct {
 }
 
 func (t *Table) FromDomain(table *tableentity.Table) {
+	if table == nil {
+		return
+	}
 	*t = Table{
 		Entity: entitymodel.Entity{
 			ID:        table.ID,

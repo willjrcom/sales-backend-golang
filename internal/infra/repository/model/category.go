@@ -29,6 +29,9 @@ type ProductCategoryCommonAttributes struct {
 }
 
 func (c *ProductCategory) FromDomain(category *productentity.ProductCategory) {
+	if category == nil {
+		return
+	}
 	*c = ProductCategory{
 		Entity: entitymodel.FromDomain(category.Entity),
 		ProductCategoryCommonAttributes: ProductCategoryCommonAttributes{

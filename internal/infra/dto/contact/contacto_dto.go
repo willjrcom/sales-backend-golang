@@ -13,6 +13,9 @@ type ContactDTO struct {
 }
 
 func (c *ContactDTO) FromDomain(contact *personentity.Contact) {
+	if contact == nil {
+		return
+	}
 	*c = ContactDTO{
 		ID:     contact.ID,
 		Ddd:    contact.Ddd,

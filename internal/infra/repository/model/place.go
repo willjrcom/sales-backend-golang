@@ -20,6 +20,9 @@ type PlaceCommonAttributes struct {
 }
 
 func (p *Place) FromDomain(place *tableentity.Place) {
+	if place == nil {
+		return
+	}
 	*p = Place{
 		Entity: entitymodel.FromDomain(place.Entity),
 		PlaceCommonAttributes: PlaceCommonAttributes{

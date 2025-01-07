@@ -28,6 +28,9 @@ type PickupTimeLogs struct {
 }
 
 func (p *OrderPickup) FromDomain(pickup *orderentity.OrderPickup) {
+	if pickup == nil {
+		return
+	}
 	*p = OrderPickup{
 		Entity: entitymodel.FromDomain(pickup.Entity),
 		PickupTimeLogs: PickupTimeLogs{

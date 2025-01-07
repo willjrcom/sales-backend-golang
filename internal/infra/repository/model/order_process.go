@@ -39,39 +39,42 @@ type OrderProcessTimeLogs struct {
 	TotalPaused       int8          `bun:"total_paused"`
 }
 
-func (op *OrderProcess) FromDomain(model *orderprocessentity.OrderProcess) {
+func (op *OrderProcess) FromDomain(orderProcess *orderprocessentity.OrderProcess) {
+	if orderProcess == nil {
+		return
+	}
 	*op = OrderProcess{
 		Entity: entitymodel.Entity{
-			ID:        model.ID,
-			CreatedAt: model.CreatedAt,
-			UpdatedAt: model.UpdatedAt,
+			ID:        orderProcess.ID,
+			CreatedAt: orderProcess.CreatedAt,
+			UpdatedAt: orderProcess.UpdatedAt,
 		},
 		OrderProcessTimeLogs: OrderProcessTimeLogs{
-			StartedAt:         model.StartedAt,
-			PausedAt:          model.PausedAt,
-			ContinuedAt:       model.ContinuedAt,
-			FinishedAt:        model.FinishedAt,
-			CanceledAt:        model.CanceledAt,
-			CanceledReason:    model.CanceledReason,
-			Duration:          model.Duration,
-			DurationFormatted: model.Duration.String(),
-			TotalPaused:       model.TotalPaused,
+			StartedAt:         orderProcess.StartedAt,
+			PausedAt:          orderProcess.PausedAt,
+			ContinuedAt:       orderProcess.ContinuedAt,
+			FinishedAt:        orderProcess.FinishedAt,
+			CanceledAt:        orderProcess.CanceledAt,
+			CanceledReason:    orderProcess.CanceledReason,
+			Duration:          orderProcess.Duration,
+			DurationFormatted: orderProcess.Duration.String(),
+			TotalPaused:       orderProcess.TotalPaused,
 		},
 		OrderProcessCommonAttributes: OrderProcessCommonAttributes{
-			EmployeeID:    model.EmployeeID,
-			GroupItemID:   model.GroupItemID,
+			EmployeeID:    orderProcess.EmployeeID,
+			GroupItemID:   orderProcess.GroupItemID,
 			GroupItem:     &GroupItem{},
-			ProcessRuleID: model.ProcessRuleID,
-			Status:        string(model.Status),
+			ProcessRuleID: orderProcess.ProcessRuleID,
+			Status:        string(orderProcess.Status),
 			Products:      []Product{},
 			Queue:         &OrderQueue{},
 		},
 	}
 
-	op.GroupItem.FromDomain(model.GroupItem)
-	op.Queue.FromDomain(model.Queue)
+	op.GroupItem.FromDomain(orderProcess.GroupItem)
+	op.Queue.FromDomain(orderProcess.Queue)
 
-	for _, product := range model.Products {
+	for _, product := range orderProcess.Products {
 		p := Product{}
 		p.FromDomain(&product)
 		op.Products = append(op.Products, p)

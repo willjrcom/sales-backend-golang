@@ -15,6 +15,9 @@ type PlaceToTables struct {
 }
 
 func (p *PlaceToTables) FromDomain(placeToTables *tableentity.PlaceToTables) {
+	if placeToTables == nil {
+		return
+	}
 	*p = PlaceToTables{
 		PlaceID: placeToTables.PlaceID,
 		Place:   &Place{},

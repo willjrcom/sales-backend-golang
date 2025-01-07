@@ -28,6 +28,9 @@ func (u *User) BeforeSelect(ctx context.Context, query *bun.SelectQuery) error {
 }
 
 func (u *User) FromDomain(user *companyentity.User) {
+	if user == nil {
+		return
+	}
 	*u = User{
 		Entity: entitymodel.FromDomain(user.Entity),
 		UserCommonAttributes: UserCommonAttributes{

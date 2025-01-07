@@ -12,11 +12,14 @@ type SizeDTO struct {
 	CategoryID uuid.UUID `json:"category_id"`
 }
 
-func (s *SizeDTO) FromDomain(model *productentity.Size) {
+func (s *SizeDTO) FromDomain(size *productentity.Size) {
+	if size == nil {
+		return
+	}
 	*s = SizeDTO{
-		ID:         model.ID,
-		Name:       model.Name,
-		IsActive:   model.IsActive,
-		CategoryID: model.CategoryID,
+		ID:         size.ID,
+		Name:       size.Name,
+		IsActive:   size.IsActive,
+		CategoryID: size.CategoryID,
 	}
 }

@@ -19,6 +19,9 @@ type QuantityCommonAttributes struct {
 }
 
 func (q *Quantity) FromDomain(model *productentity.Quantity) {
+	if model == nil {
+		return
+	}
 	*q = Quantity{
 		Entity: entitymodel.FromDomain(model.Entity),
 		QuantityCommonAttributes: QuantityCommonAttributes{

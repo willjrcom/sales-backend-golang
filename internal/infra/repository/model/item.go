@@ -28,6 +28,9 @@ type ItemCommonAttributes struct {
 }
 
 func (i *Item) FromDomain(item *orderentity.Item) {
+	if item == nil {
+		return
+	}
 	*i = Item{
 		Entity: entitymodel.Entity{ID: item.ID},
 		ItemCommonAttributes: ItemCommonAttributes{

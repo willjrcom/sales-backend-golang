@@ -33,6 +33,9 @@ type ShiftTimeLogs struct {
 }
 
 func (s *Shift) FromDomain(shift *shiftentity.Shift) {
+	if shift == nil {
+		return
+	}
 	*s = Shift{
 		Entity: entitymodel.FromDomain(shift.Entity),
 		ShiftTimeLogs: ShiftTimeLogs{

@@ -17,6 +17,9 @@ type QueueDTO struct {
 }
 
 func (s *QueueDTO) FromDomain(queue *orderprocessentity.OrderQueue) {
+	if queue == nil {
+		return
+	}
 	*s = QueueDTO{
 		GroupItemID:       queue.GroupItemID,
 		ProcessRuleID:     queue.ProcessRuleID,

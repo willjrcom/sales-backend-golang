@@ -19,15 +19,18 @@ type ClientDTO struct {
 	Address  *addressdto.AddressDTO `json:"address"`
 }
 
-func (c *ClientDTO) FromDomain(model *cliententity.Client) {
+func (c *ClientDTO) FromDomain(client *cliententity.Client) {
+	if client == nil {
+		return
+	}
 	*c = ClientDTO{
-		ID:       model.ID,
-		Name:     model.Name,
-		Email:    model.Email,
-		Cpf:      model.Cpf,
-		Birthday: model.Birthday,
+		ID:       client.ID,
+		Name:     client.Name,
+		Email:    client.Email,
+		Cpf:      client.Cpf,
+		Birthday: client.Birthday,
 	}
 
-	c.Contact.FromDomain(model.Contact)
-	c.Address.FromDomain(model.Address)
+	c.Contact.FromDomain(client.Contact)
+	c.Address.FromDomain(client.Address)
 }

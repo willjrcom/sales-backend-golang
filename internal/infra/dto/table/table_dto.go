@@ -12,6 +12,9 @@ type TableDTO struct {
 }
 
 func (c *TableDTO) FromDomain(table *tableentity.Table) (err error) {
+	if table == nil {
+		return
+	}
 	*c = TableDTO{
 		ID:          table.ID,
 		Name:        &table.Name,

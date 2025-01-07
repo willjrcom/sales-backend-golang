@@ -26,6 +26,9 @@ type ProcessRuleCommonAttributes struct {
 }
 
 func (p *ProcessRule) FromDomain(processRule *productentity.ProcessRule) {
+	if processRule == nil {
+		return
+	}
 	*p = ProcessRule{
 		Entity: entitymodel.FromDomain(processRule.Entity),
 		ProcessRuleCommonAttributes: ProcessRuleCommonAttributes{

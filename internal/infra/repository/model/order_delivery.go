@@ -35,6 +35,9 @@ type DeliveryTimeLogs struct {
 }
 
 func (d *OrderDelivery) FromDomain(delivery *orderentity.OrderDelivery) {
+	if delivery == nil {
+		return
+	}
 	*d = OrderDelivery{
 		Entity: entitymodel.FromDomain(delivery.Entity),
 		OrderDeliveryCommonAttributes: OrderDeliveryCommonAttributes{

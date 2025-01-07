@@ -11,10 +11,13 @@ type QuantityDTO struct {
 	CategoryID uuid.UUID `json:"category_id"`
 }
 
-func (s *QuantityDTO) FromDomain(model *productentity.Quantity) {
+func (s *QuantityDTO) FromDomain(quantity *productentity.Quantity) {
+	if quantity == nil {
+		return
+	}
 	*s = QuantityDTO{
-		ID:         model.ID,
-		Quantity:   model.Quantity,
-		CategoryID: model.CategoryID,
+		ID:         quantity.ID,
+		Quantity:   quantity.Quantity,
+		CategoryID: quantity.CategoryID,
 	}
 }

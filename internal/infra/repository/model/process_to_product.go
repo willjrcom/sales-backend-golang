@@ -17,6 +17,9 @@ type OrderProcessToProductToGroupItem struct {
 }
 
 func (op *OrderProcessToProductToGroupItem) FromDomain(orderProcessToProductToGroupItem *orderprocessentity.OrderProcessToProductToGroupItem) {
+	if orderProcessToProductToGroupItem == nil {
+		return
+	}
 	*op = OrderProcessToProductToGroupItem{
 		ProcessID:   orderProcessToProductToGroupItem.ProcessID,
 		Process:     &OrderProcess{},

@@ -22,6 +22,9 @@ type UserDTO struct {
 }
 
 func (u *UserDTO) FromDomain(user *companyentity.User) {
+	if user == nil {
+		return
+	}
 	*u = UserDTO{
 		ID:        user.ID,
 		Email:     user.Email,

@@ -29,6 +29,9 @@ type ProductCommonAttributes struct {
 }
 
 func (p *Product) FromDomain(product *productentity.Product) {
+	if product == nil {
+		return
+	}
 	*p = Product{
 		Entity: entitymodel.FromDomain(product.Entity),
 		ProductCommonAttributes: ProductCommonAttributes{

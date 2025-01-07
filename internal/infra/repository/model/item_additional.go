@@ -16,6 +16,9 @@ type ItemToAdditional struct {
 }
 
 func (i *ItemToAdditional) FromDomain(itemToAdditional *orderentity.ItemToAdditional) {
+	if itemToAdditional == nil {
+		return
+	}
 	*i = ItemToAdditional{
 		ItemID:           itemToAdditional.ItemID,
 		AdditionalItemID: itemToAdditional.AdditionalItemID,

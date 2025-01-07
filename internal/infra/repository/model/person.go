@@ -16,6 +16,9 @@ type Person struct {
 }
 
 func (p *Person) FromDomain(person *personentity.Person) {
+	if person == nil {
+		return
+	}
 	*p = Person{
 		Name:     person.Name,
 		Email:    person.Email,
