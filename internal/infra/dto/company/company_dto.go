@@ -1,11 +1,13 @@
 package companydto
 
 import (
+	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
 )
 
 type CompanyDTO struct {
+	ID           uuid.UUID              `json:"id"`
 	SchemaName   string                 `json:"schema_name"`
 	BusinessName string                 `json:"business_name"`
 	TradeName    string                 `json:"trade_name"`
@@ -17,6 +19,7 @@ type CompanyDTO struct {
 
 func (c *CompanyDTO) FromDomain(model *companyentity.Company) {
 	*c = CompanyDTO{
+		ID:           model.ID,
 		SchemaName:   model.SchemaName,
 		BusinessName: model.BusinessName,
 		TradeName:    model.TradeName,

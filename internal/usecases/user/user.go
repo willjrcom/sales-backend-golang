@@ -113,7 +113,7 @@ func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IDRequest, dt
 	return s.r.UpdateUser(ctx, userModel)
 }
 
-func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (data *userdto.UserTokenAndSchemasDTO, err error) {
+func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (data *userdto.UserTokenDTO, err error) {
 	user, err := dto.ToDomain()
 
 	if err != nil {
@@ -136,11 +136,12 @@ func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (dat
 		return nil, err
 	}
 
-	data = &userdto.UserTokenAndSchemasDTO{
-		Person:      userLoggedIn.Person,
+	data = &userdto.UserTokenDTO{
 		AccessToken: accessToken,
-		Companies:   userLoggedIn.Companies,
 	}
+
+	data.User.FromDomain(userLoggedIn)
+
 	return data, nil
 }
 

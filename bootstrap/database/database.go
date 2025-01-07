@@ -131,13 +131,21 @@ func publicTables(ctx context.Context, db *bun.DB) error {
 		panic(err)
 	}
 
-	db.RegisterModel((*model.User)(nil))
 	db.RegisterModel((*model.CompanyToUsers)(nil))
-	db.RegisterModel((*model.CompanyWithUsers)(nil))
+	db.RegisterModel((*model.User)(nil))
+	db.RegisterModel((*model.Company)(nil))
 	db.RegisterModel((*model.Address)(nil))
 	db.RegisterModel((*model.Contact)(nil))
 
 	if err := RegisterModels(ctx, db); err != nil {
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.CompanyToUsers)(nil)).Exec(ctx); err != nil {
+		return err
+	}
+
+	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Company)(nil)).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -146,14 +154,6 @@ func publicTables(ctx context.Context, db *bun.DB) error {
 	}
 
 	var _ bun.BeforeSelectHook = (*model.User)(nil)
-
-	if _, err := db.NewCreateTable().IfNotExists().Model((*model.CompanyToUsers)(nil)).Exec(ctx); err != nil {
-		return err
-	}
-
-	if _, err := db.NewCreateTable().IfNotExists().Model((*model.CompanyWithUsers)(nil)).Exec(ctx); err != nil {
-		return err
-	}
 
 	if _, err := db.NewCreateTable().IfNotExists().Model((*model.Address)(nil)).Exec(ctx); err != nil {
 		return err

@@ -18,10 +18,9 @@ type User struct {
 
 type UserCommonAttributes struct {
 	Person
-	Password       string             `bun:"-" json:"-"`
-	Hash           string             `bun:"column:hash,notnull" json:"hash"`
-	CompanyToUsers []CompanyToUsers   `bun:"rel:has-many,join:id=user_id" json:"company_users,omitempty"`
-	Companies      []CompanyWithUsers `bun:"-" json:"companies"`
+	Password  string    `bun:"-"`
+	Hash      string    `bun:"column:hash,notnull"`
+	Companies []Company `bun:"m2m:company_to_users,join:User=Company"`
 }
 
 func (u *User) BeforeSelect(ctx context.Context, query *bun.SelectQuery) error {
@@ -37,24 +36,22 @@ func (u *User) FromDomain(user *companyentity.User) {
 				Email:    user.Person.Email,
 				Cpf:      user.Person.Cpf,
 				Birthday: user.Person.Birthday,
+				Contact:  &Contact{},
+				Address:  &Address{},
 			},
-			Password:       user.Password,
-			CompanyToUsers: []CompanyToUsers{},
-			Companies:      []CompanyWithUsers{},
+			Password:  user.Password,
+			Companies: []Company{},
 		},
 	}
 
 	for _, company := range user.Companies {
-		c := CompanyWithUsers{}
+		c := Company{}
 		c.FromDomain(&company)
 		u.Companies = append(u.Companies, c)
 	}
 
-	for _, companyToUser := range user.CompanyToUsers {
-		c := CompanyToUsers{}
-		c.FromDomain(&companyToUser)
-		u.CompanyToUsers = append(u.CompanyToUsers, c)
-	}
+	u.Contact.FromDomain(user.Contact)
+	u.Address.FromDomain(user.Address)
 }
 
 func (u *User) ToDomain() *companyentity.User {
@@ -64,11 +61,10 @@ func (u *User) ToDomain() *companyentity.User {
 	user := &companyentity.User{
 		Entity: u.Entity.ToDomain(),
 		UserCommonAttributes: companyentity.UserCommonAttributes{
-			Person:         *u.Person.ToDomain(),
-			Password:       u.Password,
-			Hash:           u.Hash,
-			CompanyToUsers: []companyentity.CompanyToUsers{},
-			Companies:      []companyentity.CompanyWithUsers{},
+			Person:    *u.Person.ToDomain(),
+			Password:  u.Password,
+			Hash:      u.Hash,
+			Companies: []companyentity.Company{},
 		},
 	}
 
@@ -77,9 +73,9 @@ func (u *User) ToDomain() *companyentity.User {
 		user.Companies = append(user.Companies, *c)
 	}
 
-	for _, companyToUser := range u.CompanyToUsers {
+	for _, companyToUser := range u.Companies {
 		c := companyToUser.ToDomain()
-		user.CompanyToUsers = append(user.CompanyToUsers, *c)
+		user.Companies = append(user.Companies, *c)
 	}
 
 	return user

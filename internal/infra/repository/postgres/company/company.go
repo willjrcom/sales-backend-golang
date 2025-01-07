@@ -9,7 +9,6 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
-	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 type CompanyRepositoryBun struct {
@@ -34,6 +33,7 @@ func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *model.Co
 		return err
 	}
 
+	// Insert to private schema
 	if _, err = tx.NewInsert().Model(company).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
@@ -48,16 +48,26 @@ func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *model.Co
 		return err
 	}
 
-	companyWithUsers := &model.CompanyWithUsers{
-		Entity:                  entitymodel.NewEntity(),
-		CompanyCommonAttributes: company.CompanyCommonAttributes,
-	}
-
 	if err = database.ChangeToPublicSchema(ctx, r.db); err != nil {
 		return err
 	}
 
-	if _, err = r.db.NewInsert().Model(companyWithUsers).Exec(ctx); err != nil {
+	tx, err = r.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+
+	// Insert on public schema
+	if _, err = tx.NewInsert().Model(company).Exec(ctx); err != nil {
+		return err
+	}
+
+	if _, err = tx.NewInsert().Model(company.Address).Exec(ctx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
 		return err
 	}
 
@@ -92,13 +102,13 @@ func (r *CompanyRepositoryBun) ValidateUserToPublicCompany(ctx context.Context, 
 		return false, err
 	}
 
-	companyWithUsers := &model.CompanyWithUsers{}
-	if err := r.db.NewSelect().Model(companyWithUsers).Where("schema_name = ?", schema).Scan(ctx); err != nil {
+	company := &model.Company{}
+	if err := r.db.NewSelect().Model(company).Where("schema_name = ?", schema).Scan(ctx); err != nil {
 		return false, err
 	}
 
 	companyToUsers := &model.CompanyToUsers{}
-	if err := r.db.NewSelect().Model(companyToUsers).Where("company_with_users_id = ? AND user_id = ?", companyWithUsers.ID, userID).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(companyToUsers).Where("company_with_users_id = ? AND user_id = ?", company.ID, userID).Scan(ctx); err != nil {
 		return false, err
 	}
 
@@ -115,12 +125,13 @@ func (r *CompanyRepositoryBun) AddUserToPublicCompany(ctx context.Context, userI
 		return err
 	}
 
-	companyWithUsers := &model.CompanyWithUsers{}
-	if err := r.db.NewSelect().Model(companyWithUsers).Where("schema_name = ?", schema).Scan(ctx); err != nil {
+	company := &model.Company{}
+	if err := r.db.NewSelect().Model(company).Where("schema_name = ?", schema).Scan(ctx); err != nil {
 		return err
 	}
 
-	_, err := r.db.NewInsert().Model(&model.CompanyToUsers{CompanyWithUsersID: companyWithUsers.ID, UserID: userID}).Exec(ctx)
+	companyToUsers := &model.CompanyToUsers{CompanyID: company.ID, UserID: userID}
+	_, err := r.db.NewInsert().Model(companyToUsers).Exec(ctx)
 
 	return err
 
@@ -136,12 +147,12 @@ func (r *CompanyRepositoryBun) RemoveUserFromPublicCompany(ctx context.Context, 
 		return err
 	}
 
-	companyWithUsers := &model.CompanyWithUsers{}
-	if err := r.db.NewSelect().Model(companyWithUsers).Where("schema_name = ?", schema).Scan(ctx); err != nil {
+	company := &model.Company{}
+	if err := r.db.NewSelect().Model(company).Where("schema_name = ?", schema).Scan(ctx); err != nil {
 		return err
 	}
 
-	_, err := r.db.NewDelete().Model(&model.CompanyToUsers{}).Where("company_with_users_id = ? AND user_id = ?", companyWithUsers.ID, userID).Exec(ctx)
+	_, err := r.db.NewDelete().Model(&model.CompanyToUsers{}).Where("company_with_users_id = ? AND user_id = ?", company.ID, userID).Exec(ctx)
 
 	return err
 

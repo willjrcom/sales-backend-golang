@@ -25,17 +25,11 @@ type CompanyCommonAttributes struct {
 	Address      *addressentity.Address
 }
 
-type CompanyWithUsers struct {
-	entity.Entity
-	CompanyCommonAttributes
-	Users []User
-}
-
 type CompanyToUsers struct {
-	CompanyWithUsersID uuid.UUID
-	CompanyWithUsers   *CompanyWithUsers
-	UserID             uuid.UUID
-	User               *User
+	CompanyID uuid.UUID
+	Company   *Company
+	UserID    uuid.UUID
+	User      *User
 }
 
 func NewCompany(cnpjData *cnpj.Cnpj) *Company {

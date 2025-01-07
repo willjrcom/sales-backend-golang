@@ -21,6 +21,8 @@ func (p *Person) FromDomain(person *personentity.Person) {
 		Email:    person.Email,
 		Cpf:      person.Cpf,
 		Birthday: person.Birthday,
+		Contact:  &Contact{},
+		Address:  &Address{},
 	}
 
 	p.Contact.FromDomain(person.Contact)

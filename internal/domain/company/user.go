@@ -15,10 +15,9 @@ type User struct {
 
 type UserCommonAttributes struct {
 	personentity.Person
-	Password       string
-	Hash           string
-	CompanyToUsers []CompanyToUsers
-	Companies      []CompanyWithUsers
+	Password  string
+	Hash      string
+	Companies []Company
 }
 
 func NewUser(userCommonAttributes *UserCommonAttributes) *User {

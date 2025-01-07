@@ -194,21 +194,11 @@ func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *model.User) (*m
 		Model(user).
 		Where("u.email = ?", user.Email).
 		Where("crypt(?, u.hash) = u.hash", user.Password).
-		Relation("CompanyToUsers").Relation("Contact").Relation("Address").
+		Relation("Companies").Relation("Contact").Relation("Address").
 		Limit(1).
 		ExcludeColumn("hash").
 		Scan(context.Background()); err != nil {
 		return nil, err
-	}
-
-	for _, ctu := range user.CompanyToUsers {
-		company := &model.CompanyWithUsers{}
-		if err := r.db.NewSelect().Model(company).Where("id = ?", ctu.CompanyWithUsersID).Scan(ctx); err != nil {
-			return nil, err
-		}
-
-		company.Address = nil
-		user.Companies = append(user.Companies, *company)
 	}
 
 	return user, nil
