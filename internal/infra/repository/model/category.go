@@ -115,5 +115,25 @@ func (c *ProductCategory) ToDomain() *productentity.ProductCategory {
 		category.Sizes = append(category.Sizes, *size.ToDomain())
 	}
 
+	for _, quantity := range c.Quantities {
+		category.Quantities = append(category.Quantities, *quantity.ToDomain())
+	}
+
+	for _, product := range c.Products {
+		category.Products = append(category.Products, *product.ToDomain())
+	}
+
+	for _, processRule := range c.ProcessRules {
+		category.ProcessRules = append(category.ProcessRules, *processRule.ToDomain())
+	}
+
+	for _, additionalCategory := range c.AdditionalCategories {
+		category.AdditionalCategories = append(category.AdditionalCategories, *additionalCategory.ToDomain())
+	}
+
+	for _, complementCategory := range c.ComplementCategories {
+		category.ComplementCategories = append(category.ComplementCategories, *complementCategory.ToDomain())
+	}
+
 	return category
 }
