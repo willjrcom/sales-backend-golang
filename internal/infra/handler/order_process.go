@@ -8,15 +8,15 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	processdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
-	orderprocessusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_process"
+	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
 type handlerProcessImpl struct {
-	s *orderprocessusecases.Service
+	s *orderusecases.OrderProcessService
 }
 
-func NewHandlerOrderProcess(processService *orderprocessusecases.Service) *handler.Handler {
+func NewHandlerOrderProcess(processService *orderusecases.OrderProcessService) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerProcessImpl{

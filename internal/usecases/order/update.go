@@ -58,7 +58,7 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) er
 		}
 
 		// Create process for each group item
-		if _, err := s.rp.CreateProcess(ctx, createProcessInput); err != nil {
+		if _, err := s.sop.CreateProcess(ctx, createProcessInput); err != nil {
 			return err
 		}
 	}
@@ -74,7 +74,7 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) er
 			JoinedAt:    *order.PendingAt,
 		}
 
-		if _, err := s.rq.StartQueue(ctx, startQueueInput); err != nil {
+		if _, err := s.sq.StartQueue(ctx, startQueueInput); err != nil {
 			return err
 		}
 	}
@@ -146,7 +146,7 @@ func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IDRequest) (er
 
 	for _, groupItem := range order.Groups {
 		dtoID := entitydto.NewIdRequest(groupItem.ID)
-		if err = s.rgi.CancelGroupItem(ctx, dtoID); err != nil {
+		if err = s.sgi.CancelGroupItem(ctx, dtoID); err != nil {
 			return err
 		}
 	}
@@ -239,6 +239,24 @@ func (s *Service) UpdateOrderObservation(ctx context.Context, dtoId *entitydto.I
 	order := orderModel.ToDomain()
 	dto.UpdateDomain(order)
 
+	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *Service) UpdateOrderTotal(ctx context.Context, id string) error {
+	orderModel, err := s.ro.GetOrderById(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	order := orderModel.ToDomain()
+
+	order.CalculateTotalPrice()
+
+	orderModel.FromDomain(order)
 	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
 		return err
 	}

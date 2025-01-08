@@ -8,15 +8,15 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
-	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
+	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
 type handlerGroupItemImpl struct {
-	s *groupitemusecases.Service
+	s *orderusecases.GroupItemService
 }
 
-func NewHandlerGroupItem(itemService *groupitemusecases.Service) *handler.Handler {
+func NewHandlerGroupItem(itemService *orderusecases.GroupItemService) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerGroupItemImpl{

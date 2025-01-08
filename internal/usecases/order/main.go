@@ -2,28 +2,76 @@ package orderusecases
 
 import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
-	groupitemusecases "github.com/willjrcom/sales-backend-go/internal/usecases/group_item"
-	orderprocessusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_process"
+	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
 	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 )
 
 type Service struct {
 	ro  model.OrderRepository
 	rs  model.ShiftRepository
-	rgi *groupitemusecases.Service
-	rp  *orderprocessusecases.Service
+	rp  model.ProductRepository
 	rpr model.ProcessRuleRepository
-	rq  *orderqueueusecases.Service
+	sgi *GroupItemService
+	sop *OrderProcessService
+	sq  *orderqueueusecases.Service
 }
 
 func NewService(ro model.OrderRepository) *Service {
 	return &Service{ro: ro}
 }
 
-func (s *Service) AddDependencies(rs model.ShiftRepository, rgi *groupitemusecases.Service, rp *orderprocessusecases.Service, rpr model.ProcessRuleRepository, rq *orderqueueusecases.Service) {
+func (s *Service) AddDependencies(
+	ro model.OrderRepository,
+	rs model.ShiftRepository,
+	rp model.ProductRepository,
+	rpr model.ProcessRuleRepository,
+	sgi *GroupItemService,
+	sop *OrderProcessService,
+	sq *orderqueueusecases.Service,
+) {
+	s.ro = ro
 	s.rs = rs
-	s.rgi = rgi
 	s.rp = rp
 	s.rpr = rpr
-	s.rq = rq
+	s.sgi = sgi
+	s.sq = sq
+	s.sop = sop
+}
+
+type GroupItemService struct {
+	r  model.GroupItemRepository
+	ri model.ItemRepository
+	rp model.ProductRepository
+}
+
+func NewGroupItemService(rgi model.GroupItemRepository) *GroupItemService {
+	return &GroupItemService{r: rgi}
+}
+
+func (s *GroupItemService) AddDependencies(ri model.ItemRepository, rp model.ProductRepository) {
+	s.ri = ri
+	s.rp = rp
+}
+
+type OrderProcessService struct {
+	r   model.OrderProcessRepository
+	rpr model.ProcessRuleRepository
+	sq  *orderqueueusecases.Service
+	sgi *GroupItemService
+	rgi model.GroupItemRepository
+	ro  model.OrderRepository
+	se  *employeeusecases.Service
+}
+
+func NewOrderProcessService(c model.OrderProcessRepository) *OrderProcessService {
+	return &OrderProcessService{r: c}
+}
+
+func (s *OrderProcessService) AddDependencies(sq *orderqueueusecases.Service, rpr model.ProcessRuleRepository, sgi *GroupItemService, ro model.OrderRepository, se *employeeusecases.Service, rgi model.GroupItemRepository) {
+	s.rgi = rgi
+	s.rpr = rpr
+	s.sq = sq
+	s.sgi = sgi
+	s.ro = ro
+	s.se = se
 }

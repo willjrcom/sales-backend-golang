@@ -14,7 +14,7 @@ func (s *Service) CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto
 		return nil, err
 	}
 
-	orderID, err := s.os.CreateDefaultOrder(ctx)
+	orderID, err := s.so.CreateDefaultOrder(ctx)
 
 	if err != nil {
 		return nil, err
@@ -37,6 +37,11 @@ func (s *Service) CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto
 	deliveryModel := &model.OrderDelivery{}
 	deliveryModel.FromDomain(delivery)
 	if err = s.rdo.CreateOrderDelivery(ctx, deliveryModel); err != nil {
+		return nil, err
+	}
+
+	// Update delivery tax
+	if err := s.so.UpdateOrderTotal(ctx, delivery.OrderID.String()); err != nil {
 		return nil, err
 	}
 

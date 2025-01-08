@@ -10,6 +10,7 @@ import (
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	itemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/item"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 )
 
 var (
@@ -28,18 +29,20 @@ type Service struct {
 	rp  model.ProductRepository
 	rq  model.QuantityRepository
 	rc  model.CategoryRepository
+	so  *orderusecases.Service
 }
 
 func NewService(ri model.ItemRepository) *Service {
 	return &Service{ri: ri}
 }
 
-func (s *Service) AddDependencies(rgi model.GroupItemRepository, ro model.OrderRepository, rp model.ProductRepository, rq model.QuantityRepository, rc model.CategoryRepository) {
+func (s *Service) AddDependencies(rgi model.GroupItemRepository, ro model.OrderRepository, rp model.ProductRepository, rq model.QuantityRepository, rc model.CategoryRepository, so *orderusecases.Service) {
 	s.rgi = rgi
 	s.ro = ro
 	s.rp = rp
 	s.rq = rq
 	s.rc = rc
+	s.so = so
 }
 
 func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreateDTO) (ids *itemdto.ItemIDDTO, err error) {
@@ -66,6 +69,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 		return nil, ErrSizeNotFound
 	}
 
+	// If group item id is not provided, create a new group item
 	if dto.GroupItemID == nil {
 		groupItem, err := s.newGroupItem(ctx, dto.OrderID, product)
 
@@ -84,6 +88,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 
 	groupItem := groupItemModel.ToDomain()
 
+	// Check if group item belongs to order
 	if groupItem.OrderID != dto.OrderID {
 		return nil, ErrGroupItemNotBelongsToOrder
 	}
@@ -119,6 +124,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 		return nil, errors.New("update group item error: " + err.Error())
 	}
 
+	// Update complement item
 	if groupItem.ComplementItemID != nil {
 		groupItem.ComplementItem.Quantity += item.Quantity
 
@@ -127,6 +133,10 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 		if err = s.ri.UpdateItem(ctx, complementItemModel); err != nil {
 			return nil, errors.New("update complement item error: " + err.Error())
 		}
+	}
+
+	if err := s.so.UpdateOrderTotal(ctx, dto.OrderID.String()); err != nil {
+		return nil, err
 	}
 
 	return itemdto.FromDomain(item.ID, groupItem.ID), nil
@@ -149,6 +159,15 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest)
 		return errors.New("group item not found: " + err.Error())
 	}
 
+	// Update complement item quantity
+	if groupItem.ComplementItemID != nil && len(groupItem.Items) != 0 {
+		groupItem.ComplementItem.Quantity -= item.Quantity
+		if err = s.ri.UpdateItem(ctx, groupItem.ComplementItem); err != nil {
+			return errors.New("update complement item error: " + err.Error())
+		}
+	}
+
+	// Delete group item if there are no items
 	if len(groupItem.Items) == 0 {
 		var complementItemID *string
 		if groupItem.ComplementItemID != nil {
@@ -163,11 +182,8 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest)
 		return nil
 	}
 
-	if groupItem.ComplementItemID != nil {
-		groupItem.ComplementItem.Quantity -= item.Quantity
-		if err = s.ri.UpdateItem(ctx, groupItem.ComplementItem); err != nil {
-			return errors.New("update complement item error: " + err.Error())
-		}
+	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
+		return err
 	}
 
 	return nil
@@ -244,11 +260,29 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 		return uuid.Nil, errors.New("update group item error: " + err.Error())
 	}
 
+	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
+		return uuid.Nil, err
+	}
+
 	return additionalItem.ID, nil
 }
 
 func (s *Service) DeleteAdditionalItemOrder(ctx context.Context, dtoAdditional *entitydto.IDRequest) (err error) {
+	additionalItem, err := s.ri.GetItemById(ctx, dtoAdditional.ID.String())
+	if err != nil {
+		return errors.New("item not found: " + err.Error())
+	}
+
+	groupItemModel, err := s.rgi.GetGroupByID(ctx, additionalItem.GroupItemID.String(), true)
+	if err != nil {
+		return errors.New("group item not found: " + err.Error())
+	}
+
 	if err = s.ri.DeleteAdditionalItem(ctx, dtoAdditional.ID); err != nil {
+		return err
+	}
+
+	if err := s.so.UpdateOrderTotal(ctx, groupItemModel.OrderID.String()); err != nil {
 		return err
 	}
 

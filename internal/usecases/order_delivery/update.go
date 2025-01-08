@@ -93,23 +93,23 @@ func (s *Service) OrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest)
 }
 
 func (s *Service) UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.IDRequest) error {
-	orderDelivery, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
+	orderDeliveryModel, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if orderDelivery.DeliveredAt != nil {
+	if orderDeliveryModel.DeliveredAt != nil {
 		return ErrOrderDelivered
 	}
 
-	if orderDelivery.ShippedAt != nil {
+	if orderDeliveryModel.ShippedAt != nil {
 		return ErrOrderLaunched
 	}
 
-	orderDelivery.AddressID = orderDelivery.Client.Address.ID
+	orderDeliveryModel.AddressID = orderDeliveryModel.Client.Address.ID
 
-	if err := s.rdo.UpdateOrderDelivery(ctx, orderDelivery); err != nil {
+	if err := s.rdo.UpdateOrderDelivery(ctx, orderDeliveryModel); err != nil {
 		return err
 	}
 
@@ -138,6 +138,10 @@ func (s *Service) UpdateDeliveryDriver(ctx context.Context, dtoID *entitydto.IDR
 
 	orderDeliveryModel.FromDomain(orderDelivery)
 	if err := s.rdo.UpdateOrderDelivery(ctx, orderDeliveryModel); err != nil {
+		return err
+	}
+
+	if err := s.so.UpdateOrderTotal(ctx, orderDelivery.OrderID.String()); err != nil {
 		return err
 	}
 

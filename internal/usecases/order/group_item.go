@@ -1,4 +1,4 @@
-package groupitemusecases
+package orderusecases
 
 import (
 	"context"
@@ -17,23 +17,8 @@ var (
 	ErrComplementItemNotFound     = errors.New("complement item not found")
 )
 
-type Service struct {
-	rgi model.GroupItemRepository
-	ri  model.ItemRepository
-	rp  model.ProductRepository
-}
-
-func NewService(rgi model.GroupItemRepository) *Service {
-	return &Service{rgi: rgi}
-}
-
-func (s *Service) AddDependencies(ri model.ItemRepository, rp model.ProductRepository) {
-	s.ri = ri
-	s.rp = rp
-}
-
-func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IDRequest) (groupItemDTO *groupitemdto.GroupItemDTO, err error) {
-	groupItemModel, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+func (s *GroupItemService) GetGroupByID(ctx context.Context, dto *entitydto.IDRequest) (groupItemDTO *groupitemdto.GroupItemDTO, err error) {
+	groupItemModel, err := s.r.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
 		return nil, err
@@ -45,8 +30,8 @@ func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IDRequest) (g
 	return
 }
 
-func (s *Service) DeleteGroupItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+func (s *GroupItemService) DeleteGroupItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
+	groupItem, err := s.r.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
 		return err
@@ -58,11 +43,15 @@ func (s *Service) DeleteGroupItem(ctx context.Context, dto *entitydto.IDRequest)
 		*complementItemID = groupItem.ComplementItemID.String()
 	}
 
-	return s.rgi.DeleteGroupItem(ctx, groupItem.ID.String(), complementItemID)
+	if err := s.r.DeleteGroupItem(ctx, groupItem.ID.String(), complementItemID); err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IDRequest, dtoComplement *entitydto.IDRequest) (err error) {
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto.IDRequest, dtoComplement *entitydto.IDRequest) (err error) {
+	groupItem, err := s.r.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
 		return err
@@ -105,11 +94,11 @@ func (s *Service) AddComplementItem(ctx context.Context, dto *entitydto.IDReques
 
 	groupItem.ComplementItemID = &itemComplement.ID
 
-	return s.rgi.UpdateGroupItem(ctx, groupItem)
+	return s.r.UpdateGroupItem(ctx, groupItem)
 }
 
-func (s *Service) DeleteComplementItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
-	groupItem, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
+func (s *GroupItemService) DeleteComplementItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
+	groupItem, err := s.r.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
 		return err
@@ -126,5 +115,5 @@ func (s *Service) DeleteComplementItem(ctx context.Context, dto *entitydto.IDReq
 	groupItem.ComplementItemID = nil
 	groupItem.ComplementItem = nil
 
-	return s.rgi.UpdateGroupItem(ctx, groupItem)
+	return s.r.UpdateGroupItem(ctx, groupItem)
 }
