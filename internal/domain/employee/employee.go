@@ -8,11 +8,11 @@ import (
 
 type Employee struct {
 	entity.Entity
-	UserID *uuid.UUID
+	UserID uuid.UUID
 	User   *companyentity.User
 }
 
-func NewEmployee(userID *uuid.UUID) *Employee {
+func NewEmployee(userID uuid.UUID) *Employee {
 	return &Employee{
 		Entity: entity.NewEntity(),
 		UserID: userID,

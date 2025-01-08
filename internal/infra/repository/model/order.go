@@ -33,7 +33,7 @@ type OrderDetail struct {
 	Observation   string     `bun:"observation"`
 	AttendantID   *uuid.UUID `bun:"column:attendant_id,type:uuid,notnull"`
 	Attendant     *Employee  `bun:"rel:belongs-to"`
-	ShiftID       *uuid.UUID `bun:"column:shift_id,type:uuid"`
+	ShiftID       uuid.UUID  `bun:"column:shift_id,type:uuid,notnull"`
 }
 
 type OrderType struct {

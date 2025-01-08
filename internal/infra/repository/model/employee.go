@@ -14,8 +14,8 @@ type Employee struct {
 }
 
 type EmployeeCommonAttributes struct {
-	UserID *uuid.UUID `bun:"column:user_id,type:uuid,notnull"`
-	User   *User      `bun:"rel:belongs-to"`
+	UserID uuid.UUID `bun:"column:user_id,type:uuid,notnull"`
+	User   *User     `bun:"rel:belongs-to,join:user_id=id"`
 }
 
 func (e *Employee) FromDomain(employee *employeeentity.Employee) {

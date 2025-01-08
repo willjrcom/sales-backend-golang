@@ -4,7 +4,6 @@ import (
 	"context"
 	"sync"
 
-	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -76,20 +75,10 @@ func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) 
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(employee).Where("employee.id = ?", id).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(employee).Where("employee.id = ?", id).Relation("User").Relation("User.Address").Relation("User.Contact").Scan(ctx); err != nil {
 		return nil, err
 	}
 
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
-		return nil, err
-	}
-
-	user := &model.User{}
-	if err := r.db.NewSelect().Model(user).Where("u.id = ?", employee.UserID).Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
-		return nil, err
-	}
-
-	employee.User = user
 	return employee, nil
 }
 
@@ -103,7 +92,7 @@ func (r *EmployeeRepositoryBun) GetEmployeeByUserID(ctx context.Context, userID 
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(employee).Where("employee.user_id = ?", userID).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(employee).Where("employee.user_id = ?", userID).Relation("User").Relation("User.Address").Relation("User.Contact").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -119,43 +108,8 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]model.Em
 	}
 
 	employees := []model.Employee{}
-	if err := r.db.NewSelect().Model(&employees).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&employees).Relation("User").ExcludeColumn("hash").Scan(ctx); err != nil {
 		return nil, err
-	}
-
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
-		return nil, err
-	}
-	// Extrair todos os UserIDs de uma vez
-	userIDs := make([]uuid.UUID, len(employees))
-	for i, employee := range employees {
-		userIDs[i] = *employee.UserID
-	}
-
-	// Consultar todos os Users de uma vez
-	users := []model.User{}
-	if err := r.db.NewSelect().
-		Model(&users).
-		Where("u.id IN (?)", bun.In(userIDs)).
-		Relation("Address").
-		Relation("Contact").
-		ExcludeColumn("hash").
-		Scan(ctx); err != nil {
-		return nil, err
-	}
-	// Mapear os usuários de volta para os funcionários
-	userMap := make(map[uuid.UUID]model.User)
-	for _, user := range users {
-		userMap[user.ID] = user
-	}
-
-	for i := range employees {
-		if user, exists := userMap[*employees[i].UserID]; exists {
-			employees[i].User = &user
-		} else {
-			// Tratar caso de usuário não encontrado
-			employees[i].User = nil
-		}
 	}
 
 	return employees, nil

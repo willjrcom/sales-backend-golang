@@ -24,7 +24,7 @@ func (s *Service) CreateDefaultOrder(ctx context.Context) (uuid.UUID, error) {
 		return uuid.Nil, err
 	}
 
-	order := orderentity.NewDefaultOrder(&shift.ID, shift.CurrentOrderNumber, shift.AttendantID)
+	order := orderentity.NewDefaultOrder(shift.ID, shift.CurrentOrderNumber, shift.AttendantID)
 
 	orderModel := &model.Order{}
 	orderModel.FromDomain(order)

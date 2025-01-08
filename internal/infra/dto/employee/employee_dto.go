@@ -7,7 +7,8 @@ import (
 )
 
 type EmployeeDTO struct {
-	ID uuid.UUID `json:"id"`
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
 	userdto.UserDTO
 }
 
@@ -18,6 +19,7 @@ func (c *EmployeeDTO) FromDomain(employee *employeeentity.Employee) {
 
 	*c = EmployeeDTO{
 		ID:      employee.ID,
+		UserID:  employee.UserID,
 		UserDTO: userdto.UserDTO{},
 	}
 

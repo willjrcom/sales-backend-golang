@@ -29,5 +29,5 @@ func (r *EmployeeCreateDTO) ToDomain() (*employeeentity.Employee, error) {
 	}
 
 	// Get exists user
-	return employeeentity.NewEmployee(r.UserID), nil
+	return employeeentity.NewEmployee(*r.UserID), nil
 }

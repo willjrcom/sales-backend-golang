@@ -7,32 +7,18 @@ import (
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
-type Address struct {
+type PublicAddress struct {
 	entitymodel.Entity
-	bun.BaseModel `bun:"table:addresses"`
+	bun.BaseModel `bun:"table:public.addresses"`
 	AddressCommonAttributes
 	ObjectID uuid.UUID `bun:"object_id,type:uuid,notnull"`
 }
 
-type AddressCommonAttributes struct {
-	Street       string      `bun:"street,notnull"`
-	Number       string      `bun:"number,notnull"`
-	Complement   string      `bun:"complement"`
-	Reference    string      `bun:"reference"`
-	Neighborhood string      `bun:"neighborhood,notnull"`
-	City         string      `bun:"city,notnull"`
-	State        string      `bun:"state,notnull"`
-	Cep          string      `bun:"cep"`
-	AddressType  string      `bun:"address_type,notnull"`
-	DeliveryTax  float64     `bun:"delivery_tax,notnull"`
-	Coordinates  Coordinates `bun:"coordinates,type:jsonb"`
-}
-
-func (a *Address) FromDomain(address *addressentity.Address) {
+func (a *PublicAddress) FromDomain(address *addressentity.Address) {
 	if address == nil {
 		return
 	}
-	*a = Address{
+	*a = PublicAddress{
 		Entity:   entitymodel.FromDomain(address.Entity),
 		ObjectID: address.ObjectID,
 		AddressCommonAttributes: AddressCommonAttributes{
@@ -52,7 +38,7 @@ func (a *Address) FromDomain(address *addressentity.Address) {
 	a.Coordinates.FromDomain(&address.Coordinates)
 }
 
-func (a *Address) ToDomain() *addressentity.Address {
+func (a *PublicAddress) ToDomain() *addressentity.Address {
 	if a == nil {
 		return nil
 	}

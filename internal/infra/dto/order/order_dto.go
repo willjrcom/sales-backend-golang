@@ -30,7 +30,7 @@ type OrderDetail struct {
 	Observation   string                   `json:"observation"`
 	AttendantID   *uuid.UUID               `json:"attendant_id"`
 	Attendant     *employeedto.EmployeeDTO `json:"attendant"`
-	ShiftID       *uuid.UUID               `json:"shift_id"`
+	ShiftID       uuid.UUID                `json:"shift_id"`
 }
 
 type OrderType struct {

@@ -46,7 +46,7 @@ type OrderDetail struct {
 	Observation   string
 	AttendantID   *uuid.UUID
 	Attendant     *employeeentity.Employee
-	ShiftID       *uuid.UUID
+	ShiftID       uuid.UUID
 }
 
 type OrderType struct {
@@ -62,7 +62,7 @@ type OrderTimeLogs struct {
 	ArchivedAt *time.Time
 }
 
-func NewDefaultOrder(shiftID *uuid.UUID, currentOrderNumber int, attendantID *uuid.UUID) *Order {
+func NewDefaultOrder(shiftID uuid.UUID, currentOrderNumber int, attendantID *uuid.UUID) *Order {
 	order := &Order{
 		Entity: entity.NewEntity(),
 		OrderCommonAttributes: OrderCommonAttributes{

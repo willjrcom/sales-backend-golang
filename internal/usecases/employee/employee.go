@@ -33,7 +33,7 @@ func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.EmployeeC
 	}
 
 	// Get userExists user
-	if userExists, _ := s.ru.ExistsUserByID(ctx, *employee.UserID); !userExists {
+	if userExists, _ := s.ru.ExistsUserByID(ctx, employee.UserID); !userExists {
 		return nil, errors.New("user ID not found")
 	}
 

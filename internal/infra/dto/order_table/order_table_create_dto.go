@@ -13,9 +13,9 @@ var (
 )
 
 type CreateOrderTableInput struct {
-	Name    string    `bun:"name,notnull" json:"name,omitempty"`
-	Contact string    `bun:"contact,notnull" json:"contact,omitempty"`
-	TableID uuid.UUID `bun:"column:table_id,type:uuid,notnull" json:"table_id"`
+	Name    string    `json:"name,omitempty"`
+	Contact string    `json:"contact,omitempty"`
+	TableID uuid.UUID `json:"table_id"`
 }
 
 func (o *CreateOrderTableInput) validate() error {
