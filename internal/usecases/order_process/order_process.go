@@ -18,22 +18,24 @@ import (
 )
 
 type Service struct {
-	r    model.OrderProcessRepository
-	rpr  model.ProcessRuleRepository
-	sq   *orderqueueusecases.Service
-	rsgi *groupitemusecases.Service
-	ro   model.OrderRepository
-	se   *employeeusecases.Service
+	r   model.OrderProcessRepository
+	rpr model.ProcessRuleRepository
+	sq  *orderqueueusecases.Service
+	sgi *groupitemusecases.Service
+	rgi model.GroupItemRepository
+	ro  model.OrderRepository
+	se  *employeeusecases.Service
 }
 
 func NewService(c model.OrderProcessRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) AddDependencies(sq *orderqueueusecases.Service, rpr model.ProcessRuleRepository, rsgi *groupitemusecases.Service, ro model.OrderRepository, se *employeeusecases.Service) {
+func (s *Service) AddDependencies(sq *orderqueueusecases.Service, rpr model.ProcessRuleRepository, rsgi *groupitemusecases.Service, ro model.OrderRepository, se *employeeusecases.Service, rgi model.GroupItemRepository) {
+	s.rgi = rgi
 	s.rpr = rpr
 	s.sq = sq
-	s.rsgi = rsgi
+	s.sgi = rsgi
 	s.ro = ro
 	s.se = se
 }
@@ -44,11 +46,12 @@ func (s *Service) CreateProcess(ctx context.Context, dto *orderprocessdto.OrderP
 		return uuid.Nil, err
 	}
 
-	idRequest := entitydto.NewIdRequest(process.GroupItemID)
-	groupItem, err := s.rsgi.GetGroupByID(ctx, idRequest)
+	groupItemModel, err := s.rgi.GetGroupByID(ctx, process.GroupItemID.String(), true)
 	if err != nil {
 		return uuid.Nil, err
 	}
+
+	groupItem := groupItemModel.ToDomain()
 
 	productIDs, err := groupItem.GetDistinctProductIDs()
 	if err != nil {
@@ -98,7 +101,7 @@ func (s *Service) StartProcess(ctx context.Context, dtoID *entitydto.IDRequest) 
 
 	if processRule.Order == 1 {
 		entityDtoID := entitydto.NewIdRequest(process.GroupItemID)
-		if err := s.rsgi.StartGroupItem(ctx, entityDtoID); err != nil {
+		if err := s.sgi.StartGroupItem(ctx, entityDtoID); err != nil {
 			return err
 		}
 	}
@@ -181,11 +184,11 @@ func (s *Service) FinishProcess(ctx context.Context, dtoID *entitydto.IDRequest)
 	// Processes finished
 	if last {
 		entityDtoID := &entitydto.IDRequest{ID: process.GroupItemID}
-		if err := s.rsgi.ReadyGroupItem(ctx, entityDtoID); err != nil {
+		if err := s.sgi.ReadyGroupItem(ctx, entityDtoID); err != nil {
 			return uuid.Nil, err
 		}
 
-		groupItem, err := s.rsgi.GetGroupByID(ctx, entityDtoID)
+		groupItem, err := s.sgi.GetGroupByID(ctx, entityDtoID)
 		if err != nil {
 			return uuid.Nil, err
 		}

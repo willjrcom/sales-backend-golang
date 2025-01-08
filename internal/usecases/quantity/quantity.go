@@ -94,11 +94,15 @@ func (s *Service) DeleteQuantity(ctx context.Context, dto *entitydto.IDRequest) 
 	return nil
 }
 
-func (s *Service) GetQuantityById(ctx context.Context, dto *entitydto.IDRequest) (*productentity.Quantity, error) {
+func (s *Service) GetQuantityById(ctx context.Context, dto *entitydto.IDRequest) (*quantitydto.QuantityDTO, error) {
 	if quantityModel, err := s.rq.GetQuantityById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return quantityModel.ToDomain(), nil
+		quantity := quantityModel.ToDomain()
+
+		quantityDto := &quantitydto.QuantityDTO{}
+		quantityDto.FromDomain(quantity)
+		return quantityDto, nil
 	}
 }
 

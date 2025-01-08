@@ -3,7 +3,6 @@ package orderpickupusecases
 import (
 	"context"
 
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderpickupdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_pickup"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -15,7 +14,6 @@ type IService interface {
 	ICreateService
 	IGetService
 	IUpdateService
-	IStatusService
 }
 
 type ISetupService interface {
@@ -27,19 +25,15 @@ type ICreateService interface {
 }
 
 type IGetService interface {
-	GetPickupById(ctx context.Context, dto *entitydto.IDRequest) (*orderentity.OrderPickup, error)
-	GetAllPickups(ctx context.Context) ([]orderentity.OrderPickup, error)
-	GetOrderPickupByStatus(ctx context.Context) (pickups []orderentity.OrderPickup, err error)
+	GetPickupById(ctx context.Context, dto *entitydto.IDRequest) (*orderpickupdto.OrderPickupDTO, error)
+	GetAllPickups(ctx context.Context) ([]orderpickupdto.OrderPickupDTO, error)
+	GetOrderPickupByStatus(ctx context.Context) (pickups []orderpickupdto.OrderPickupDTO, err error)
 }
 
 type IUpdateService interface {
 	PendingOrder(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
 	ReadyOrder(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
 	UpdateName(ctx context.Context, dtoID *entitydto.IDRequest, dtoPickup *orderpickupdto.UpdateOrderPickupInput) (err error)
-}
-
-type IStatusService interface {
-	GetAllOrderPickupStatus(ctx context.Context) (pickups []orderentity.StatusOrderPickup)
 }
 
 type Service struct {

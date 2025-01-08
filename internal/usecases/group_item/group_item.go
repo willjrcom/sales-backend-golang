@@ -6,6 +6,7 @@ import (
 
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
@@ -31,14 +32,16 @@ func (s *Service) AddDependencies(ri model.ItemRepository, rp model.ProductRepos
 	s.rp = rp
 }
 
-func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IDRequest) (groupItem *orderentity.GroupItem, err error) {
+func (s *Service) GetGroupByID(ctx context.Context, dto *entitydto.IDRequest) (groupItemDTO *groupitemdto.GroupItemDTO, err error) {
 	groupItemModel, err := s.rgi.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
 		return nil, err
 	}
 
-	groupItem = groupItemModel.ToDomain()
+	groupItem := groupItemModel.ToDomain()
+	groupItemDTO = &groupitemdto.GroupItemDTO{}
+	groupItemDTO.FromDomain(groupItem)
 	return
 }
 

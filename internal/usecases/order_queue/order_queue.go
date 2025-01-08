@@ -60,33 +60,45 @@ func (s *Service) FinishQueue(ctx context.Context, process *orderprocessentity.O
 	return nil
 }
 
-func (s *Service) GetQueueById(ctx context.Context, dto *entitydto.IDRequest) (*orderprocessentity.OrderQueue, error) {
+func (s *Service) GetQueueById(ctx context.Context, dto *entitydto.IDRequest) (*orderqueuedto.QueueDTO, error) {
 	if queueModel, err := s.r.GetQueueById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return queueModel.ToDomain(), nil
+		queue := queueModel.ToDomain()
+
+		queueDto := &orderqueuedto.QueueDTO{}
+		queueDto.FromDomain(queue)
+		return queueDto, nil
 	}
 }
 
-func (s *Service) GetQueuesByGroupItemId(ctx context.Context, dto *entitydto.IDRequest) ([]orderprocessentity.OrderQueue, error) {
+func (s *Service) GetQueuesByGroupItemId(ctx context.Context, dto *entitydto.IDRequest) ([]orderqueuedto.QueueDTO, error) {
 	if queueModels, err := s.r.GetQueuesByGroupItemId(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		queues := []orderprocessentity.OrderQueue{}
+		queues := []orderqueuedto.QueueDTO{}
 		for _, queueModel := range queueModels {
-			queues = append(queues, *queueModel.ToDomain())
+			queue := queueModel.ToDomain()
+
+			queueDto := &orderqueuedto.QueueDTO{}
+			queueDto.FromDomain(queue)
+			queues = append(queues, *queueDto)
 		}
 		return queues, nil
 	}
 }
 
-func (s *Service) GetAllQueues(ctx context.Context) ([]orderprocessentity.OrderQueue, error) {
+func (s *Service) GetAllQueues(ctx context.Context) ([]orderqueuedto.QueueDTO, error) {
 	if queueModels, err := s.r.GetAllQueues(ctx); err != nil {
 		return nil, err
 	} else {
-		queues := []orderprocessentity.OrderQueue{}
+		queues := []orderqueuedto.QueueDTO{}
 		for _, queueModel := range queueModels {
-			queues = append(queues, *queueModel.ToDomain())
+			queue := queueModel.ToDomain()
+
+			queueDto := &orderqueuedto.QueueDTO{}
+			queueDto.FromDomain(queue)
+			queues = append(queues, *queueDto)
 		}
 		return queues, nil
 	}

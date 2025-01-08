@@ -26,11 +26,11 @@ type ICreateService interface {
 }
 
 type IGetService interface {
-	GetDeliveryById(ctx context.Context, dto *entitydto.IDRequest) (*orderentity.OrderDelivery, error)
-	GetAllDeliveries(ctx context.Context) ([]orderentity.OrderDelivery, error)
-	GetOrderDeliveryByStatus(ctx context.Context) (deliveries []orderentity.OrderDelivery, err error)
-	GetOrderDeliveryByClientId(ctx context.Context, dto *entitydto.IDRequest) ([]orderentity.OrderDelivery, error)
-	GetOrderDeliveryByDriverId(ctx context.Context, dto *entitydto.IDRequest) ([]orderentity.OrderDelivery, error)
+	GetDeliveryById(ctx context.Context, dto *entitydto.IDRequest) (*orderdeliverydto.OrderDeliveryDTO, error)
+	GetAllDeliveries(ctx context.Context) ([]orderdeliverydto.OrderDeliveryDTO, error)
+	GetOrderDeliveryByStatus(ctx context.Context) (deliveries []orderdeliverydto.OrderDeliveryDTO, err error)
+	GetOrderDeliveryByClientId(ctx context.Context, dto *entitydto.IDRequest) ([]orderdeliverydto.OrderDeliveryDTO, error)
+	GetOrderDeliveryByDriverId(ctx context.Context, dto *entitydto.IDRequest) ([]orderdeliverydto.OrderDeliveryDTO, error)
 }
 
 type IUpdateService interface {

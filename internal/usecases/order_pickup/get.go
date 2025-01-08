@@ -3,34 +3,36 @@ package orderpickupusecases
 import (
 	"context"
 
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	orderpickupdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_pickup"
 )
 
-func (s *Service) GetPickupById(ctx context.Context, dto *entitydto.IDRequest) (*orderentity.OrderPickup, error) {
+func (s *Service) GetPickupById(ctx context.Context, dto *entitydto.IDRequest) (*orderpickupdto.OrderPickupDTO, error) {
 	if orderPickupModel, err := s.rp.GetPickupById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return orderPickupModel.ToDomain(), nil
+		pickup := orderPickupModel.ToDomain()
+		orderPickupDTO := &orderpickupdto.OrderPickupDTO{}
+		orderPickupDTO.FromDomain(pickup)
+		return orderPickupDTO, nil
 	}
 }
 
-func (s *Service) GetAllPickups(ctx context.Context) ([]orderentity.OrderPickup, error) {
+func (s *Service) GetAllPickups(ctx context.Context) ([]orderpickupdto.OrderPickupDTO, error) {
 	if pickupModels, err := s.rp.GetAllPickups(ctx); err != nil {
 		return nil, err
 	} else {
-		pickups := make([]orderentity.OrderPickup, len(pickupModels))
-		for i, pickupModel := range pickupModels {
-			pickups[i] = *pickupModel.ToDomain()
+		pickupDTOs := make([]orderpickupdto.OrderPickupDTO, 0)
+		for _, pickupModel := range pickupModels {
+			pickup := pickupModel.ToDomain()
+			pickupDTO := &orderpickupdto.OrderPickupDTO{}
+			pickupDTO.FromDomain(pickup)
+			pickupDTOs = append(pickupDTOs, *pickupDTO)
 		}
-		return pickups, nil
+		return pickupDTOs, nil
 	}
 }
 
-func (s *Service) GetAllOrderPickupStatus(ctx context.Context) (pickups []orderentity.StatusOrderPickup) {
-	return orderentity.GetAllPickupStatus()
-}
-
-func (s *Service) GetOrderPickupByStatus(ctx context.Context) (pickups []orderentity.OrderPickup, err error) {
+func (s *Service) GetOrderPickupByStatus(ctx context.Context) (pickups []orderpickupdto.OrderPickupDTO, err error) {
 	return nil, nil
 }

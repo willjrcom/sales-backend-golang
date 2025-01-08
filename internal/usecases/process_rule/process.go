@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	processruledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process_rule"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -73,22 +72,29 @@ func (s *Service) DeleteProcessRule(ctx context.Context, dto *entitydto.IDReques
 	return nil
 }
 
-func (s *Service) GetProcessRuleById(ctx context.Context, dto *entitydto.IDRequest) (*productentity.ProcessRule, error) {
+func (s *Service) GetProcessRuleById(ctx context.Context, dto *entitydto.IDRequest) (*processruledto.ProcessRuleDTO, error) {
 	if processRuleModel, err := s.r.GetProcessRuleById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return processRuleModel.ToDomain(), nil
+		processRule := processRuleModel.ToDomain()
+
+		processRuleDto := &processruledto.ProcessRuleDTO{}
+		processRuleDto.FromDomain(processRule)
+		return processRuleDto, nil
 	}
 }
 
-func (s *Service) GetProcessRulesByCategoryId(ctx context.Context, dto *entitydto.IDRequest) ([]productentity.ProcessRule, error) {
+func (s *Service) GetProcessRulesByCategoryId(ctx context.Context, dto *entitydto.IDRequest) ([]processruledto.ProcessRuleDTO, error) {
 	if processRuleModels, err := s.r.GetProcessRulesByCategoryId(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		processRules := []productentity.ProcessRule{}
+		processRules := []processruledto.ProcessRuleDTO{}
 		for _, processRuleModel := range processRuleModels {
 			processRule := processRuleModel.ToDomain()
-			processRules = append(processRules, *processRule)
+
+			processRuleDto := &processruledto.ProcessRuleDTO{}
+			processRuleDto.FromDomain(processRule)
+			processRules = append(processRules, *processRuleDto)
 		}
 		return processRules, nil
 	}

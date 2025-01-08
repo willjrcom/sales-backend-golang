@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	tabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/table"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -70,37 +69,49 @@ func (s *Service) DeleteTable(ctx context.Context, dto *entitydto.IDRequest) err
 	return nil
 }
 
-func (s *Service) GetTableById(ctx context.Context, dto *entitydto.IDRequest) (*tableentity.Table, error) {
+func (s *Service) GetTableById(ctx context.Context, dto *entitydto.IDRequest) (*tabledto.TableDTO, error) {
 	if tableModel, err := s.r.GetTableById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return tableModel.ToDomain(), nil
+		table := tableModel.ToDomain()
+
+		tableDTO := &tabledto.TableDTO{}
+		tableDTO.FromDomain(table)
+		return tableDTO, nil
 	}
 }
 
-func (s *Service) GetAllTables(ctx context.Context) ([]tableentity.Table, error) {
+func (s *Service) GetAllTables(ctx context.Context) ([]tabledto.TableDTO, error) {
 	tableModels, err := s.r.GetAllTables(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	tables := []tableentity.Table{}
+	tables := []tabledto.TableDTO{}
 	for _, tableModel := range tableModels {
-		tables = append(tables, *tableModel.ToDomain())
+		table := tableModel.ToDomain()
+
+		tableDTO := &tabledto.TableDTO{}
+		tableDTO.FromDomain(table)
+		tables = append(tables, *tableDTO)
 	}
 
 	return tables, nil
 }
 
-func (s *Service) GetUnusedTables(ctx context.Context) ([]tableentity.Table, error) {
+func (s *Service) GetUnusedTables(ctx context.Context) ([]tabledto.TableDTO, error) {
 	tableModels, err := s.r.GetUnusedTables(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	tables := []tableentity.Table{}
+	tables := []tabledto.TableDTO{}
 	for _, tableModel := range tableModels {
-		tables = append(tables, *tableModel.ToDomain())
+		table := tableModel.ToDomain()
+
+		tableDTO := &tabledto.TableDTO{}
+		tableDTO.FromDomain(table)
+		tables = append(tables, *tableDTO)
 	}
 
 	return tables, nil

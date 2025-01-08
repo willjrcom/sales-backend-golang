@@ -74,34 +74,46 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 	return nil
 }
 
-func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IDRequest) (shift *shiftentity.Shift, err error) {
+func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IDRequest) (shiftDTO *shiftdto.ShiftDTO, err error) {
 	shiftModel, err := s.r.GetShiftByID(ctx, dtoID.ID.String())
 	if err != nil {
 		return nil, err
 	}
 
-	return shiftModel.ToDomain(), nil
+	shift := shiftModel.ToDomain()
+
+	shiftDTO = &shiftdto.ShiftDTO{}
+	shiftDTO.FromDomain(shift)
+	return shiftDTO, nil
 }
 
-func (s *Service) GetOpenedShift(ctx context.Context) (shift *shiftentity.Shift, err error) {
+func (s *Service) GetOpenedShift(ctx context.Context) (shiftDTO *shiftdto.ShiftDTO, err error) {
 	shiftModel, err := s.r.GetOpenedShift(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return shiftModel.ToDomain(), nil
+	shift := shiftModel.ToDomain()
+
+	shiftDTO = &shiftdto.ShiftDTO{}
+	shiftDTO.FromDomain(shift)
+	return shiftDTO, nil
 }
 
-func (s *Service) GetAllShifts(ctx context.Context) (shift []shiftentity.Shift, err error) {
+func (s *Service) GetAllShifts(ctx context.Context) (shift []shiftdto.ShiftDTO, err error) {
 	shiftModels, err := s.r.GetAllShifts(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	shifts := []shiftentity.Shift{}
+	shiftDTOs := []shiftdto.ShiftDTO{}
 	for _, shiftModel := range shiftModels {
-		shifts = append(shifts, *shiftModel.ToDomain())
+		shift := shiftModel.ToDomain()
+
+		shiftDTO := shiftdto.ShiftDTO{}
+		shiftDTO.FromDomain(shift)
+		shiftDTOs = append(shiftDTOs, shiftDTO)
 	}
 
-	return shifts, nil
+	return shiftDTOs, nil
 }

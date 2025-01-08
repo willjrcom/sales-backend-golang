@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	placedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/place"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -74,27 +73,34 @@ func (s *Service) DeletePlace(ctx context.Context, dto *entitydto.IDRequest) err
 	return nil
 }
 
-func (s *Service) GetPlaceById(ctx context.Context, dto *entitydto.IDRequest) (*tableentity.Place, error) {
+func (s *Service) GetPlaceById(ctx context.Context, dto *entitydto.IDRequest) (*placedto.PlaceDTO, error) {
 	if placeModel, err := s.r.GetPlaceById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		return placeModel.ToDomain(), nil
+		place := placeModel.ToDomain()
+
+		placeDTO := &placedto.PlaceDTO{}
+		placeDTO.FromDomain(place)
+		return placeDTO, nil
 	}
 }
 
-func (s *Service) GetAllPlaces(ctx context.Context) ([]tableentity.Place, error) {
+func (s *Service) GetAllPlaces(ctx context.Context) ([]placedto.PlaceDTO, error) {
 	placeModels, err := s.r.GetAllPlaces(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	places := []tableentity.Place{}
+	placeDTOs := []placedto.PlaceDTO{}
 	for _, placeModel := range placeModels {
 		place := placeModel.ToDomain()
-		places = append(places, *place)
+
+		placeDTO := &placedto.PlaceDTO{}
+		placeDTO.FromDomain(place)
+		placeDTOs = append(placeDTOs, *placeDTO)
 	}
 
-	return places, nil
+	return placeDTOs, nil
 }
 
 func (s *Service) AddTableToPlace(ctx context.Context, dto *placedto.PlaceUpdateTableDTO) error {
