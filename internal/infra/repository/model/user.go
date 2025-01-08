@@ -76,10 +76,5 @@ func (u *User) ToDomain() *companyentity.User {
 		user.Companies = append(user.Companies, *c)
 	}
 
-	for _, companyToUser := range u.Companies {
-		c := companyToUser.ToDomain()
-		user.Companies = append(user.Companies, *c)
-	}
-
 	return user
 }

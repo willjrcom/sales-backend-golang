@@ -42,15 +42,17 @@ type GroupItemService struct {
 	r  model.GroupItemRepository
 	ri model.ItemRepository
 	rp model.ProductRepository
+	so *Service
 }
 
 func NewGroupItemService(rgi model.GroupItemRepository) *GroupItemService {
 	return &GroupItemService{r: rgi}
 }
 
-func (s *GroupItemService) AddDependencies(ri model.ItemRepository, rp model.ProductRepository) {
+func (s *GroupItemService) AddDependencies(ri model.ItemRepository, rp model.ProductRepository, so *Service) {
 	s.ri = ri
 	s.rp = rp
+	s.so = so
 }
 
 type OrderProcessService struct {

@@ -47,6 +47,10 @@ func (s *GroupItemService) DeleteGroupItem(ctx context.Context, dto *entitydto.I
 		return err
 	}
 
+	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -94,7 +98,15 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 
 	groupItem.ComplementItemID = &itemComplement.ID
 
-	return s.r.UpdateGroupItem(ctx, groupItem)
+	if err := s.r.UpdateGroupItem(ctx, groupItem); err != nil {
+		return err
+	}
+
+	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *GroupItemService) DeleteComplementItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
@@ -115,5 +127,13 @@ func (s *GroupItemService) DeleteComplementItem(ctx context.Context, dto *entity
 	groupItem.ComplementItemID = nil
 	groupItem.ComplementItem = nil
 
-	return s.r.UpdateGroupItem(ctx, groupItem)
+	if err := s.r.UpdateGroupItem(ctx, groupItem); err != nil {
+		return err
+	}
+
+	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
+		return err
+	}
+
+	return nil
 }
