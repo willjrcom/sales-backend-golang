@@ -108,7 +108,7 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]model.Em
 	}
 
 	employees := []model.Employee{}
-	if err := r.db.NewSelect().Model(&employees).Relation("User").ExcludeColumn("hash").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&employees).Relation("User").Scan(ctx); err != nil {
 		return nil, err
 	}
 
