@@ -25,4 +25,8 @@ func (s *DeliveryDriverDTO) FromDomain(driver *orderentity.DeliveryDriver) {
 	}
 
 	s.Employee.FromDomain(driver.Employee)
+
+	if driver.Employee == nil {
+		s.Employee = nil
+	}
 }

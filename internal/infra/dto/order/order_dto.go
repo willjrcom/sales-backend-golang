@@ -76,6 +76,7 @@ func (o *OrderDTO) FromDomain(order *orderentity.Order) {
 	o.Delivery.FromDomain(order.Delivery)
 	o.Table.FromDomain(order.Table)
 	o.Pickup.FromDomain(order.Pickup)
+	o.Attendant.FromDomain(order.Attendant)
 
 	for _, group := range order.Groups {
 		groupItemDTO := groupitemdto.GroupItemDTO{}
@@ -89,5 +90,24 @@ func (o *OrderDTO) FromDomain(order *orderentity.Order) {
 		o.Payments = append(o.Payments, paymentOrderDTO)
 	}
 
-	o.Attendant.FromDomain(order.Attendant)
+	if order.Delivery == nil {
+		o.Delivery = nil
+	}
+	if order.Table == nil {
+		o.Table = nil
+	}
+	if order.Pickup == nil {
+		o.Pickup = nil
+	}
+	if order.Attendant == nil {
+		o.Attendant = nil
+	}
+
+	if len(order.Groups) == 0 {
+		o.Groups = nil
+	}
+	if len(order.Payments) == 0 {
+		o.Payments = nil
+	}
+
 }

@@ -36,4 +36,8 @@ func (p *PlaceDTO) FromDomain(place *tableentity.Place) {
 		pt.FromDomain(&table)
 		p.Tables = append(p.Tables, pt)
 	}
+
+	if len(place.Tables) == 0 {
+		p.Tables = nil
+	}
 }

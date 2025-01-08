@@ -22,9 +22,9 @@ type ProductDTO struct {
 	Size        *sizedto.SizeDTO `json:"size"`
 }
 
-func (p *ProductDTO) FromDomain(product *productentity.Product) *ProductDTO {
+func (p *ProductDTO) FromDomain(product *productentity.Product) {
 	if product == nil {
-		return nil
+		return
 	}
 
 	*p = ProductDTO{
@@ -46,5 +46,10 @@ func (p *ProductDTO) FromDomain(product *productentity.Product) *ProductDTO {
 	p.Category.FromDomain(product.Category)
 	p.Size.FromDomain(product.Size)
 
-	return p
+	if product.Category == nil {
+		p.Category = nil
+	}
+	if product.Size == nil {
+		p.Size = nil
+	}
 }

@@ -39,7 +39,13 @@ func (i *ItemDTO) FromDomain(item *orderentity.Item) {
 		AdditionalItems: []ItemDTO{},
 	}
 
-	for i, additionalItem := range i.AdditionalItems {
-		additionalItem.FromDomain(&item.AdditionalItems[i])
+	for _, additionalItem := range item.AdditionalItems {
+		itemDTO := ItemDTO{}
+		itemDTO.FromDomain(&additionalItem)
+		i.AdditionalItems = append(i.AdditionalItems, itemDTO)
+	}
+
+	if len(item.AdditionalItems) == 0 {
+		i.AdditionalItems = nil
 	}
 }

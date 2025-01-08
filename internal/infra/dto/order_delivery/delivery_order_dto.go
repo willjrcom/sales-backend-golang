@@ -60,4 +60,11 @@ func (o *OrderDeliveryDTO) FromDomain(delivery *orderentity.OrderDelivery) {
 
 	o.Client.FromDomain(delivery.Client)
 	o.Driver.FromDomain(delivery.Driver)
+
+	if delivery.Client == nil {
+		o.Client = nil
+	}
+	if delivery.Driver == nil {
+		o.Driver = nil
+	}
 }

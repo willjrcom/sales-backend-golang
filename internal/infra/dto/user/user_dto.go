@@ -44,4 +44,14 @@ func (u *UserDTO) FromDomain(user *companyentity.User) {
 		companyDTO.FromDomain(&company)
 		u.Companies = append(u.Companies, companyDTO)
 	}
+
+	if user.Contact == nil {
+		u.Contact = nil
+	}
+	if user.Address == nil {
+		u.Address = nil
+	}
+	if len(user.Companies) == 0 {
+		u.Companies = nil
+	}
 }

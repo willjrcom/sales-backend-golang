@@ -35,4 +35,11 @@ func (c *ClientDTO) FromDomain(client *cliententity.Client) {
 
 	c.Contact.FromDomain(client.Contact)
 	c.Address.FromDomain(client.Address)
+
+	if client.Contact == nil {
+		c.Contact = nil
+	}
+	if client.Address == nil {
+		c.Address = nil
+	}
 }

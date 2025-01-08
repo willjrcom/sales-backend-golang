@@ -58,4 +58,11 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 	}
 
 	s.Attendant.FromDomain(shift.Attendant)
+
+	if len(shift.Orders) == 0 {
+		s.Orders = nil
+	}
+	if shift.Attendant == nil {
+		s.Attendant = nil
+	}
 }

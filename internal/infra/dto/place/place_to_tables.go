@@ -30,4 +30,11 @@ func (p *PlaceToTablesDTO) FromDomain(placeToTables *tableentity.PlaceToTables) 
 
 	p.Place.FromDomain(placeToTables.Place)
 	p.Table.FromDomain(placeToTables.Table)
+
+	if placeToTables.Place == nil {
+		p.Place = nil
+	}
+	if placeToTables.Table == nil {
+		p.Table = nil
+	}
 }

@@ -58,8 +58,19 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 	s.Queue.FromDomain(orderProcess.Queue)
 
 	for _, product := range orderProcess.Products {
-		p := &productcategorydto.ProductDTO{}
+		p := productcategorydto.ProductDTO{}
 		p.FromDomain(&product)
-		s.Products = append(s.Products, *p)
+		s.Products = append(s.Products, p)
+	}
+
+	if orderProcess.GroupItem == nil {
+		s.GroupItem = nil
+	}
+	if orderProcess.Queue == nil {
+		s.Queue = nil
+	}
+
+	if len(orderProcess.Products) == 0 {
+		s.Products = nil
 	}
 }

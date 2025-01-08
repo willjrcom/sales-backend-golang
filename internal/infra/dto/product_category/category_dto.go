@@ -82,4 +82,23 @@ func (c *CategoryDTO) FromDomain(category *productentity.ProductCategory) {
 		a.FromDomain(&category)
 		c.ComplementCategories = append(c.ComplementCategories, a)
 	}
+
+	if len(category.ProcessRules) == 0 {
+		c.ProcessRules = nil
+	}
+	if len(category.Sizes) == 0 {
+		c.Sizes = nil
+	}
+	if len(category.Quantities) == 0 {
+		c.Quantities = nil
+	}
+	if len(category.Products) == 0 {
+		c.Products = nil
+	}
+	if len(category.AdditionalCategories) == 0 {
+		c.AdditionalCategories = nil
+	}
+	if len(category.ComplementCategories) == 0 {
+		c.ComplementCategories = nil
+	}
 }
