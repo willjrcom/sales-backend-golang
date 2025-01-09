@@ -9,7 +9,7 @@ import (
 
 type Item struct {
 	entitymodel.Entity
-	bun.BaseModel `bun:"table:order_items"`
+	bun.BaseModel `bun:"table:order_items,alias:item"`
 	ItemCommonAttributes
 }
 

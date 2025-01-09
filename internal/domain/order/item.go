@@ -73,11 +73,12 @@ func (i *Item) RemoveRemovedItem(name string) {
 }
 
 func (i *Item) CalculateTotalPrice() float64 {
-	totalPriceItemAndAdditionals := i.TotalPrice
+	totalPrice := i.Price
 
 	for _, additionalItem := range i.AdditionalItems {
-		totalPriceItemAndAdditionals += additionalItem.TotalPrice
+		totalPrice += additionalItem.TotalPrice
 	}
 
-	return totalPriceItemAndAdditionals
+	i.TotalPrice = totalPrice
+	return i.TotalPrice
 }

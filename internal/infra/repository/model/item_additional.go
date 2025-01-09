@@ -7,7 +7,7 @@ import (
 )
 
 type ItemToAdditional struct {
-	bun.BaseModel    `bun:"table:item_to_additional"`
+	bun.BaseModel    `bun:"table:item_to_additional,alias:item_to_additional"`
 	ItemID           uuid.UUID `bun:"item_id,type:uuid,pk"`
 	Item             *Item     `bun:"rel:belongs-to,join:item_id=id"`
 	AdditionalItemID uuid.UUID `bun:"type:uuid,pk"`

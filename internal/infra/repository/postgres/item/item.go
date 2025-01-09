@@ -195,6 +195,26 @@ func (r *ItemRepositoryBun) GetItemById(ctx context.Context, id string) (*model.
 	return item, nil
 }
 
+func (r *ItemRepositoryBun) GetItemByAdditionalItemID(ctx context.Context, idAdditional uuid.UUID) (*model.Item, error) {
+	item := &model.Item{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(item).
+		Where("item_to_additional.additional_item_id = ?", idAdditional).
+		Join("INNER JOIN item_to_additional ON item_to_additional.item_id = item.id").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return item, nil
+}
+
 func (r *ItemRepositoryBun) GetAllItems(ctx context.Context) ([]model.Item, error) {
 	items := []model.Item{}
 

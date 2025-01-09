@@ -262,6 +262,10 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 		return uuid.Nil, errors.New("add additional item error: " + err.Error())
 	}
 
+	if err := s.UpdateItemTotal(ctx, item.ID.String()); err != nil {
+		return uuid.Nil, err
+	}
+
 	if err := s.sgi.UpdateGroupItemTotal(ctx, groupItem.ID.String()); err != nil {
 		return uuid.Nil, err
 	}
@@ -284,7 +288,16 @@ func (s *Service) DeleteAdditionalItemOrder(ctx context.Context, dtoAdditional *
 		return errors.New("group item not found: " + err.Error())
 	}
 
+	item, err := s.ri.GetItemByAdditionalItemID(ctx, additionalItem.ID)
+	if err != nil {
+		return err
+	}
+
 	if err = s.ri.DeleteAdditionalItem(ctx, dtoAdditional.ID); err != nil {
+		return err
+	}
+
+	if err := s.UpdateItemTotal(ctx, item.ID.String()); err != nil {
 		return err
 	}
 
@@ -376,4 +389,22 @@ func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *
 	groupItemModel.FromDomain(groupItem)
 	err = s.rgi.CreateGroupItem(ctx, groupItemModel)
 	return
+}
+
+func (s *Service) UpdateItemTotal(ctx context.Context, id string) error {
+	itemModel, err := s.ri.GetItemById(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	item := itemModel.ToDomain()
+
+	item.CalculateTotalPrice()
+
+	itemModel.FromDomain(item)
+	if err := s.ri.UpdateItem(ctx, itemModel); err != nil {
+		return err
+	}
+
+	return nil
 }

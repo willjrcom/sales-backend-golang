@@ -13,4 +13,5 @@ type ItemRepository interface {
 	DeleteAdditionalItem(ctx context.Context, idAdditional uuid.UUID) error
 	UpdateItem(ctx context.Context, item *Item) error
 	GetItemById(ctx context.Context, id string) (*Item, error)
+	GetItemByAdditionalItemID(ctx context.Context, idAdditional uuid.UUID) (*Item, error)
 }
