@@ -48,9 +48,9 @@ func (i *GroupItemDTO) FromDomain(groupItem *orderentity.GroupItem) {
 	i.Category.FromDomain(groupItem.Category)
 	i.ComplementItem.FromDomain(groupItem.ComplementItem)
 
-	for _, additionalItem := range groupItem.Items {
+	for _, item := range groupItem.Items {
 		itemDTO := itemdto.ItemDTO{}
-		itemDTO.FromDomain(&additionalItem)
+		itemDTO.FromDomain(&item)
 		i.Items = append(i.Items, itemDTO)
 	}
 

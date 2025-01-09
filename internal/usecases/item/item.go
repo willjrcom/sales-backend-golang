@@ -30,19 +30,21 @@ type Service struct {
 	rq  model.QuantityRepository
 	rc  model.CategoryRepository
 	so  *orderusecases.Service
+	sgi *orderusecases.GroupItemService
 }
 
 func NewService(ri model.ItemRepository) *Service {
 	return &Service{ri: ri}
 }
 
-func (s *Service) AddDependencies(rgi model.GroupItemRepository, ro model.OrderRepository, rp model.ProductRepository, rq model.QuantityRepository, rc model.CategoryRepository, so *orderusecases.Service) {
+func (s *Service) AddDependencies(rgi model.GroupItemRepository, ro model.OrderRepository, rp model.ProductRepository, rq model.QuantityRepository, rc model.CategoryRepository, so *orderusecases.Service, sgi *orderusecases.GroupItemService) {
 	s.rgi = rgi
 	s.ro = ro
 	s.rp = rp
 	s.rq = rq
 	s.rc = rc
 	s.so = so
+	s.sgi = sgi
 }
 
 func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreateDTO) (ids *itemdto.ItemIDDTO, err error) {
@@ -135,6 +137,10 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 		}
 	}
 
+	if err := s.sgi.UpdateGroupItemTotal(ctx, dto.GroupItemID.String()); err != nil {
+		return nil, err
+	}
+
 	if err := s.so.UpdateOrderTotal(ctx, dto.OrderID.String()); err != nil {
 		return nil, err
 	}
@@ -180,6 +186,10 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest)
 		}
 
 		return nil
+	}
+
+	if err := s.sgi.UpdateGroupItemTotal(ctx, groupItem.ID.String()); err != nil {
+		return err
 	}
 
 	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
@@ -242,6 +252,8 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 	}
 
 	additionalItem := orderentity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, productAdditional.ID, productAdditional.CategoryID)
+	additionalItem.IsAdditional = true
+	additionalItem.GroupItemID = groupItem.ID
 
 	additionalItemModel := &model.Item{}
 	additionalItemModel.FromDomain(additionalItem)
@@ -250,14 +262,8 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 		return uuid.Nil, errors.New("add additional item error: " + err.Error())
 	}
 
-	groupItemModel, err = s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
-
-	if err != nil {
-		return uuid.Nil, errors.New("group item not found: " + err.Error())
-	}
-
-	if err = s.rgi.UpdateGroupItem(ctx, groupItemModel); err != nil {
-		return uuid.Nil, errors.New("update group item error: " + err.Error())
+	if err := s.sgi.UpdateGroupItemTotal(ctx, groupItem.ID.String()); err != nil {
+		return uuid.Nil, err
 	}
 
 	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
@@ -279,6 +285,10 @@ func (s *Service) DeleteAdditionalItemOrder(ctx context.Context, dtoAdditional *
 	}
 
 	if err = s.ri.DeleteAdditionalItem(ctx, dtoAdditional.ID); err != nil {
+		return err
+	}
+
+	if err := s.sgi.UpdateGroupItemTotal(ctx, groupItemModel.ID.String()); err != nil {
 		return err
 	}
 

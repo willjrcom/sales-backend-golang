@@ -221,14 +221,27 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	}
 
 	if err := r.db.NewSelect().Model(order).WherePK().
-		Relation("Groups.Items.AdditionalItems").Relation("Attendant").
-		Relation("Payments").Relation("Groups.ComplementItem").
-		Relation("Table").Relation("Delivery").Relation("Pickup").Scan(ctx); err != nil {
+		Relation("Groups.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Where("is_additional = ?", false)
+		}).
+		Relation("Groups.Items.AdditionalItems").
+		Relation("Attendant").
+		Relation("Payments").
+		Relation("Groups.ComplementItem").
+		Relation("Table").
+		Relation("Delivery").
+		Relation("Pickup").
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
 	if order.Delivery != nil {
-		if err := r.db.NewSelect().Model(order.Delivery).WherePK().Relation("Client.Contact").Relation("Client.Address").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
+		if err := r.db.NewSelect().Model(order.Delivery).WherePK().
+			Relation("Client.Contact").
+			Relation("Client.Address").
+			Relation("Address").
+			Relation("Driver").
+			Scan(ctx); err != nil {
 			return nil, err
 		}
 	}
@@ -246,8 +259,17 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]model.Order, e
 		return nil, err
 	}
 
-	query := r.db.NewSelect().Model(&orders)
-	query.Relation("Groups.Items.AdditionalItems").Relation("Attendant").Relation("Payments").Relation("Groups.ComplementItem").Relation("Table").Relation("Delivery").Relation("Pickup")
+	query := r.db.NewSelect().Model(&orders).
+		Relation("Groups.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Where("is_additional = ?", false)
+		}).
+		Relation("Groups.Items.AdditionalItems").
+		Relation("Groups.ComplementItem").
+		Relation("Attendant").
+		Relation("Payments").
+		Relation("Table").
+		Relation("Delivery").
+		Relation("Pickup")
 	if err := query.Scan(ctx); err != nil {
 		return nil, err
 	}
@@ -265,8 +287,11 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context) ([]mo
 		return nil, err
 	}
 
-	query := r.db.NewSelect().Model(&orders).Where("delivery.id IS NOT NULL")
-	query.Relation("Delivery.Client").Relation("Delivery.Address").Relation("Delivery.Driver")
+	query := r.db.NewSelect().Model(&orders).
+		Where("delivery.id IS NOT NULL").
+		Relation("Delivery.Client").
+		Relation("Delivery.Address").
+		Relation("Delivery.Driver")
 
 	if err := query.Scan(ctx); err != nil {
 		return nil, err

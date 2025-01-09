@@ -22,6 +22,7 @@ type ItemCommonAttributes struct {
 	Quantity        float64   `bun:"quantity,notnull"`
 	GroupItemID     uuid.UUID `bun:"group_item_id,type:uuid"`
 	CategoryID      uuid.UUID `bun:"column:category_id,type:uuid,notnull"`
+	IsAdditional    bool      `bun:"is_additional"`
 	AdditionalItems []Item    `bun:"m2m:item_to_additional,join:Item=AdditionalItem"`
 	RemovedItems    []string  `bun:"removed_items,type:jsonb"`
 	ProductID       uuid.UUID `bun:"product_id,type:uuid"`
@@ -42,6 +43,7 @@ func (i *Item) FromDomain(item *orderentity.Item) {
 			Quantity:        item.Quantity,
 			GroupItemID:     item.GroupItemID,
 			CategoryID:      item.CategoryID,
+			IsAdditional:    item.IsAdditional,
 			AdditionalItems: []Item{},
 			RemovedItems:    item.RemovedItems,
 			ProductID:       item.ProductID,
@@ -59,7 +61,7 @@ func (i *Item) ToDomain() *orderentity.Item {
 	if i == nil {
 		return nil
 	}
-	return &orderentity.Item{
+	item := &orderentity.Item{
 		Entity: i.Entity.ToDomain(),
 		ItemCommonAttributes: orderentity.ItemCommonAttributes{
 			Name:            i.Name,
@@ -75,4 +77,10 @@ func (i *Item) ToDomain() *orderentity.Item {
 			ProductID:       i.ProductID,
 		},
 	}
+
+	for _, additionalItem := range i.AdditionalItems {
+		item.AdditionalItems = append(item.AdditionalItems, *additionalItem.ToDomain())
+	}
+
+	return item
 }

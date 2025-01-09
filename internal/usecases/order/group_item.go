@@ -55,11 +55,13 @@ func (s *GroupItemService) DeleteGroupItem(ctx context.Context, dto *entitydto.I
 }
 
 func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto.IDRequest, dtoComplement *entitydto.IDRequest) (err error) {
-	groupItem, err := s.r.GetGroupByID(ctx, dto.ID.String(), true)
+	groupItemModel, err := s.r.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
 		return err
 	}
+
+	groupItem := groupItemModel.ToDomain()
 
 	if groupItem.ComplementItemID != nil {
 		return ErrComplementItemAlreadyAdded
@@ -97,8 +99,12 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 	}
 
 	groupItem.ComplementItemID = &itemComplement.ID
+	groupItem.ComplementItem = itemComplement
 
-	if err := s.r.UpdateGroupItem(ctx, groupItem); err != nil {
+	groupItem.CalculateTotalPrice()
+
+	groupItemModel.FromDomain(groupItem)
+	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
 		return err
 	}
 
@@ -110,28 +116,50 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 }
 
 func (s *GroupItemService) DeleteComplementItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
-	groupItem, err := s.r.GetGroupByID(ctx, dto.ID.String(), true)
+	groupItemModel, err := s.r.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
 		return err
 	}
 
-	if groupItem.ComplementItemID == nil {
+	if groupItemModel.ComplementItemID == nil {
 		return ErrComplementItemNotFound
 	}
 
-	if err := s.ri.DeleteItem(ctx, groupItem.ComplementItemID.String()); err != nil {
+	if err := s.ri.DeleteItem(ctx, groupItemModel.ComplementItemID.String()); err != nil {
 		return err
 	}
 
-	groupItem.ComplementItemID = nil
-	groupItem.ComplementItem = nil
+	groupItemModel.ComplementItemID = nil
+	groupItemModel.ComplementItem = nil
 
-	if err := s.r.UpdateGroupItem(ctx, groupItem); err != nil {
+	groupItem := groupItemModel.ToDomain()
+	groupItem.CalculateTotalPrice()
+
+	groupItemModel.FromDomain(groupItem)
+	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
 		return err
 	}
 
-	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
+	if err := s.so.UpdateOrderTotal(ctx, groupItemModel.OrderID.String()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *GroupItemService) UpdateGroupItemTotal(ctx context.Context, id string) error {
+	groupItemModel, err := s.r.GetGroupByID(ctx, id, true)
+	if err != nil {
+		return err
+	}
+
+	groupItem := groupItemModel.ToDomain()
+
+	groupItem.CalculateTotalPrice()
+
+	groupItemModel.FromDomain(groupItem)
+	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
 		return err
 	}
 

@@ -29,6 +29,7 @@ type ItemCommonAttributes struct {
 	Quantity        float64
 	GroupItemID     uuid.UUID
 	CategoryID      uuid.UUID
+	IsAdditional    bool
 	AdditionalItems []Item
 	RemovedItems    []string
 	ProductID       uuid.UUID
