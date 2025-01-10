@@ -10,12 +10,11 @@ import (
 )
 
 type ProcessRuleUpdateDTO struct {
-	Name              *string `json:"name"`
-	Order             *int8   `json:"order"`
-	Description       *string `json:"description"`
-	ImagePath         *string `json:"image_path"`
-	IdealTime         *string `json:"ideal_time"`
-	ExperimentalError *string `json:"experimental_error"`
+	Name        *string `json:"name"`
+	Order       *int8   `json:"order"`
+	Description *string `json:"description"`
+	ImagePath   *string `json:"image_path"`
+	IdealTime   *string `json:"ideal_time"`
 }
 
 func (s *ProcessRuleUpdateDTO) validate() error {
@@ -53,13 +52,6 @@ func (s *ProcessRuleUpdateDTO) UpdateDomain(model *productentity.ProcessRule) (e
 
 	if s.IdealTime != nil {
 		model.IdealTime, err = convertToDuration(*s.IdealTime)
-		if err != nil {
-			return err
-		}
-	}
-
-	if s.ExperimentalError != nil {
-		model.ExperimentalError, err = convertToDuration(*s.ExperimentalError)
 		if err != nil {
 			return err
 		}

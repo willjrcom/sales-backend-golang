@@ -25,13 +25,12 @@ func (p *ProcessRuleWithOrderProcess) FromDomain(processRule *productentity.Proc
 	*p = ProcessRuleWithOrderProcess{
 		Entity: entitymodel.FromDomain(processRule.Entity),
 		ProcessRuleCommonAttributes: ProcessRuleCommonAttributes{
-			Name:              processRule.Name,
-			Order:             processRule.Order,
-			Description:       processRule.Description,
-			ImagePath:         processRule.ImagePath,
-			IdealTime:         processRule.IdealTime,
-			ExperimentalError: processRule.ExperimentalError,
-			CategoryID:        processRule.CategoryID,
+			Name:        processRule.Name,
+			Order:       processRule.Order,
+			Description: processRule.Description,
+			ImagePath:   processRule.ImagePath,
+			IdealTime:   processRule.IdealTime,
+			CategoryID:  processRule.CategoryID,
 		},
 		ProcessRuleWithOrderProcessCommonAttributes: ProcessRuleWithOrderProcessCommonAttributes{
 			TotalOrderProcessLate: 0,
@@ -47,13 +46,12 @@ func (p *ProcessRuleWithOrderProcess) ToDomain() *productentity.ProcessRuleWithO
 	return &productentity.ProcessRuleWithOrderProcess{
 		Entity: p.Entity.ToDomain(),
 		ProcessRuleCommonAttributes: productentity.ProcessRuleCommonAttributes{
-			Name:              p.Name,
-			Order:             p.Order,
-			Description:       p.Description,
-			ImagePath:         p.ImagePath,
-			IdealTime:         p.IdealTime,
-			ExperimentalError: p.ExperimentalError,
-			CategoryID:        p.CategoryID,
+			Name:        p.Name,
+			Order:       p.Order,
+			Description: p.Description,
+			ImagePath:   p.ImagePath,
+			IdealTime:   p.IdealTime,
+			CategoryID:  p.CategoryID,
 		},
 		ProcessRuleWithOrderProcessCommonAttributes: productentity.ProcessRuleWithOrderProcessCommonAttributes{
 			TotalOrderProcessLate: p.TotalOrderProcessLate,

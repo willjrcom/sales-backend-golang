@@ -12,7 +12,6 @@ type ProcessRuleWithOrderProcessDTO struct {
 	Description           string    `json:"description"`
 	ImagePath             *string   `json:"image_path"`
 	IdealTime             string    `json:"ideal_time"`
-	ExperimentalError     string    `json:"experimental_error"`
 	CategoryID            uuid.UUID `json:"category_id"`
 	TotalOrderProcessLate int       `json:"total_order_process_late"`
 	TotalOrderQueue       int       `json:"total_order_queue"`
@@ -29,7 +28,6 @@ func (s *ProcessRuleWithOrderProcessDTO) FromDomain(processRule *productentity.P
 		Description:           processRule.Description,
 		ImagePath:             processRule.ImagePath,
 		IdealTime:             getTimeFormatted(processRule.IdealTime),
-		ExperimentalError:     getTimeFormatted(processRule.ExperimentalError),
 		CategoryID:            processRule.CategoryID,
 		TotalOrderProcessLate: processRule.TotalOrderProcessLate,
 		TotalOrderQueue:       processRule.TotalOrderQueue,

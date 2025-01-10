@@ -8,21 +8,19 @@ import (
 )
 
 var (
-	ErrNameRequired              = errors.New("name is required")
-	ErrOrderRequired             = errors.New("order min: 1is required")
-	ErrIdealTimeRequired         = errors.New("ideal time is required")
-	ErrExperimentalErrorRequired = errors.New("experimental error is required")
-	ErrCategoryRequired          = errors.New("category ID is required")
+	ErrNameRequired      = errors.New("name is required")
+	ErrOrderRequired     = errors.New("order min: 1is required")
+	ErrIdealTimeRequired = errors.New("ideal time is required")
+	ErrCategoryRequired  = errors.New("category ID is required")
 )
 
 type ProcessRuleCreateDTO struct {
-	Name              string    `json:"name"`
-	Order             int8      `json:"order"`
-	Description       string    `json:"description"`
-	ImagePath         *string   `json:"image_path"`
-	IdealTime         string    `json:"ideal_time"`
-	ExperimentalError string    `json:"experimental_error"`
-	CategoryID        uuid.UUID `json:"category_id"`
+	Name        string    `json:"name"`
+	Order       int8      `json:"order"`
+	Description string    `json:"description"`
+	ImagePath   *string   `json:"image_path"`
+	IdealTime   string    `json:"ideal_time"`
+	CategoryID  uuid.UUID `json:"category_id"`
 }
 
 func (s *ProcessRuleCreateDTO) validate() error {
@@ -35,10 +33,6 @@ func (s *ProcessRuleCreateDTO) validate() error {
 
 	if s.IdealTime == "" {
 		return ErrIdealTimeRequired
-	}
-
-	if s.ExperimentalError == "" {
-		return ErrExperimentalErrorRequired
 	}
 
 	if s.CategoryID == uuid.Nil {
@@ -63,12 +57,6 @@ func (s *ProcessRuleCreateDTO) ToDomain() (*productentity.ProcessRule, error) {
 		return nil, err
 	}
 
-	experimentalError, err := convertToDuration(s.ExperimentalError)
-	if err != nil {
-		return nil, err
-	}
-
 	processRuleCommonAttributes.IdealTime = idealTime
-	processRuleCommonAttributes.ExperimentalError = experimentalError
 	return productentity.NewProcessRule(processRuleCommonAttributes), nil
 }

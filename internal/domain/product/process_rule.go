@@ -13,13 +13,12 @@ type ProcessRule struct {
 }
 
 type ProcessRuleCommonAttributes struct {
-	Name              string
-	Order             int8
-	Description       string
-	ImagePath         *string
-	IdealTime         time.Duration
-	ExperimentalError time.Duration
-	CategoryID        uuid.UUID
+	Name        string
+	Order       int8
+	Description string
+	ImagePath   *string
+	IdealTime   time.Duration
+	CategoryID  uuid.UUID
 }
 
 func NewProcessRule(processCommonAttributes ProcessRuleCommonAttributes) *ProcessRule {

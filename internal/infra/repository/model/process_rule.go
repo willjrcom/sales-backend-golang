@@ -16,13 +16,12 @@ type ProcessRule struct {
 }
 
 type ProcessRuleCommonAttributes struct {
-	Name              string        `bun:"name,notnull"`
-	Order             int8          `bun:"order,notnull"`
-	Description       string        `bun:"description"`
-	ImagePath         *string       `bun:"image_path"`
-	IdealTime         time.Duration `bun:"ideal_time,notnull"`
-	ExperimentalError time.Duration `bun:"experimental_error,notnull"`
-	CategoryID        uuid.UUID     `bun:"column:category_id,type:uuid,notnull"`
+	Name        string        `bun:"name,notnull"`
+	Order       int8          `bun:"order,notnull"`
+	Description string        `bun:"description"`
+	ImagePath   *string       `bun:"image_path"`
+	IdealTime   time.Duration `bun:"ideal_time,notnull"`
+	CategoryID  uuid.UUID     `bun:"column:category_id,type:uuid,notnull"`
 }
 
 func (p *ProcessRule) FromDomain(processRule *productentity.ProcessRule) {
@@ -32,13 +31,12 @@ func (p *ProcessRule) FromDomain(processRule *productentity.ProcessRule) {
 	*p = ProcessRule{
 		Entity: entitymodel.FromDomain(processRule.Entity),
 		ProcessRuleCommonAttributes: ProcessRuleCommonAttributes{
-			Name:              processRule.Name,
-			Order:             processRule.Order,
-			Description:       processRule.Description,
-			ImagePath:         processRule.ImagePath,
-			IdealTime:         processRule.IdealTime,
-			ExperimentalError: processRule.ExperimentalError,
-			CategoryID:        processRule.CategoryID,
+			Name:        processRule.Name,
+			Order:       processRule.Order,
+			Description: processRule.Description,
+			ImagePath:   processRule.ImagePath,
+			IdealTime:   processRule.IdealTime,
+			CategoryID:  processRule.CategoryID,
 		},
 	}
 }
@@ -50,13 +48,12 @@ func (p *ProcessRule) ToDomain() *productentity.ProcessRule {
 	return &productentity.ProcessRule{
 		Entity: p.Entity.ToDomain(),
 		ProcessRuleCommonAttributes: productentity.ProcessRuleCommonAttributes{
-			Name:              p.Name,
-			Order:             p.Order,
-			Description:       p.Description,
-			ImagePath:         p.ImagePath,
-			IdealTime:         p.IdealTime,
-			ExperimentalError: p.ExperimentalError,
-			CategoryID:        p.CategoryID,
+			Name:        p.Name,
+			Order:       p.Order,
+			Description: p.Description,
+			ImagePath:   p.ImagePath,
+			IdealTime:   p.IdealTime,
+			CategoryID:  p.CategoryID,
 		},
 	}
 }
