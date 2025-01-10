@@ -35,6 +35,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 		c.Patch("/update/{id}", h.handlerUpdateUser)
 		c.Post("/login", h.handlerLoginUser)
 		c.Post("/access", h.handlerAccess)
+		c.Post("/search", h.handlerSearchUser)
 		c.Delete("/", h.handlerDeleteUser)
 	})
 
@@ -168,6 +169,24 @@ func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) 
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: token})
+}
+
+func (h *handlerUserImpl) handlerSearchUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	dtoUser := &userdto.UserSearchDTO{}
+	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	user, err := h.s.SearchUser(ctx, dtoUser)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: user})
 }
 
 func (h *handlerUserImpl) handlerDeleteUser(w http.ResponseWriter, r *http.Request) {

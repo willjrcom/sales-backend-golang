@@ -180,6 +180,25 @@ func findSchemaInSchemas(schemas []interface{}, schema string) bool {
 	return false
 }
 
+func (s *Service) SearchUser(ctx context.Context, dto *userdto.UserSearchDTO) (*userdto.UserDTO, error) {
+	cpf, err := dto.ToDomain()
+
+	if err != nil {
+		return nil, err
+	}
+
+	userModel, err := s.r.GetByCPF(ctx, cpf)
+	if err != nil {
+		return nil, err
+	}
+
+	user := userModel.ToDomain()
+
+	userDTO := &userdto.UserDTO{}
+	userDTO.FromDomain(user)
+
+	return userDTO, nil
+}
 func (s *Service) DeleteUser(ctx context.Context, dto *userdto.UserDeleteDTO) error {
 	user, err := dto.ToDomain()
 

@@ -236,6 +236,22 @@ func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID) (*mod
 	return user, nil
 }
 
+func (r *UserRepositoryBun) GetByCPF(ctx context.Context, cpf string) (*model.User, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	user := &model.User{}
+	if err := r.db.NewSelect().Model(user).Where("u.cpf = ?", cpf).Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (r *UserRepositoryBun) ExistsUserByID(ctx context.Context, id uuid.UUID) (bool, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()

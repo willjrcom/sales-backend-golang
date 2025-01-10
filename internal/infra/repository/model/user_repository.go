@@ -13,5 +13,6 @@ type UserRepository interface {
 	LoginUser(ctx context.Context, user *User) (*User, error)
 	GetIDByEmail(ctx context.Context, email string) (*uuid.UUID, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (*User, error)
+	GetByCPF(ctx context.Context, cpf string) (*User, error)
 	ExistsUserByID(ctx context.Context, id uuid.UUID) (bool, error)
 }
