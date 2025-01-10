@@ -8,12 +8,12 @@ import (
 )
 
 type QueueDTO struct {
-	GroupItemID       uuid.UUID
-	ProcessRuleID     uuid.UUID
-	JoinedAt          time.Time
-	LeftAt            *time.Time
-	Duration          time.Duration
-	DurationFormatted string
+	GroupItemID       uuid.UUID     `json:"group_item_id"`
+	ProcessRuleID     uuid.UUID     `json:"process_rule_id"`
+	JoinedAt          time.Time     `json:"joined_at"`
+	LeftAt            *time.Time    `json:"left_at"`
+	Duration          time.Duration `json:"duration"`
+	DurationFormatted string        `json:"duration_formatted"`
 }
 
 func (s *QueueDTO) FromDomain(queue *orderprocessentity.OrderQueue) {
