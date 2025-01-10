@@ -149,8 +149,9 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 	if err := r.db.NewSelect().Model(&processes).
 		Where("process.process_rule_id = ? and process.status != ?",
 			id, orderprocessentity.ProcessStatusFinished).
-		Relation("GroupItem.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.Where("is_additional = ?", false)
+		Relation("GroupItem").
+		Relation("GroupItem.Items", func(sq *bun.SelectQuery) *bun.SelectQuery {
+			return sq.Where("is_additional = ?", false)
 		}).
 		Relation("GroupItem.Items.AdditionalItems").
 		Relation("GroupItem.ComplementItem").

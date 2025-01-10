@@ -72,6 +72,7 @@ func (i *Item) ToDomain() *orderentity.Item {
 			Quantity:        i.Quantity,
 			GroupItemID:     i.GroupItemID,
 			CategoryID:      i.CategoryID,
+			IsAdditional:    i.IsAdditional,
 			AdditionalItems: []orderentity.Item{},
 			RemovedItems:    i.RemovedItems,
 			ProductID:       i.ProductID,
