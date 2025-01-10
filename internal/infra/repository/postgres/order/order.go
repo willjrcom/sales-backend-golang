@@ -54,7 +54,7 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *model.Order) e
 		return err
 	}
 
-	for _, group := range p.Groups {
+	for _, group := range p.GroupItems {
 		if _, err = tx.NewUpdate().Model(&group).WherePK().Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
@@ -221,13 +221,13 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	}
 
 	if err := r.db.NewSelect().Model(order).WherePK().
-		Relation("Groups.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
+		Relation("GroupItems.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Where("is_additional = ?", false)
 		}).
-		Relation("Groups.Items.AdditionalItems").
+		Relation("GroupItems.Items.AdditionalItems").
 		Relation("Attendant").
 		Relation("Payments").
-		Relation("Groups.ComplementItem").
+		Relation("GroupItems.ComplementItem").
 		Relation("Table").
 		Relation("Delivery").
 		Relation("Pickup").
@@ -260,11 +260,11 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]model.Order, e
 	}
 
 	query := r.db.NewSelect().Model(&orders).
-		Relation("Groups.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
+		Relation("GroupItems.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Where("is_additional = ?", false)
 		}).
-		Relation("Groups.Items.AdditionalItems").
-		Relation("Groups.ComplementItem").
+		Relation("GroupItems.Items.AdditionalItems").
+		Relation("GroupItems.ComplementItem").
 		Relation("Attendant").
 		Relation("Payments").
 		Relation("Table").

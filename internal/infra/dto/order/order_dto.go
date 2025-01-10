@@ -18,7 +18,7 @@ type OrderDTO struct {
 	ID          uuid.UUID                   `json:"id"`
 	OrderNumber int                         `json:"order_number"`
 	Status      orderentity.StatusOrder     `json:"status"`
-	Groups      []groupitemdto.GroupItemDTO `json:"groups"`
+	GroupsItems []groupitemdto.GroupItemDTO `json:"group_items"`
 	Payments    []PaymentOrderDTO           `json:"payments"`
 }
 
@@ -69,7 +69,7 @@ func (o *OrderDTO) FromDomain(order *orderentity.Order) {
 		ID:          order.ID,
 		OrderNumber: order.OrderNumber,
 		Status:      order.Status,
-		Groups:      []groupitemdto.GroupItemDTO{},
+		GroupsItems: []groupitemdto.GroupItemDTO{},
 		Payments:    []PaymentOrderDTO{},
 	}
 
@@ -78,10 +78,10 @@ func (o *OrderDTO) FromDomain(order *orderentity.Order) {
 	o.Pickup.FromDomain(order.Pickup)
 	o.Attendant.FromDomain(order.Attendant)
 
-	for _, group := range order.Groups {
+	for _, group := range order.GroupItems {
 		groupItemDTO := groupitemdto.GroupItemDTO{}
 		groupItemDTO.FromDomain(&group)
-		o.Groups = append(o.Groups, groupItemDTO)
+		o.GroupsItems = append(o.GroupsItems, groupItemDTO)
 	}
 
 	for _, payment := range order.Payments {
@@ -103,8 +103,8 @@ func (o *OrderDTO) FromDomain(order *orderentity.Order) {
 		o.Attendant = nil
 	}
 
-	if len(order.Groups) == 0 {
-		o.Groups = nil
+	if len(order.GroupItems) == 0 {
+		o.GroupsItems = nil
 	}
 	if len(order.Payments) == 0 {
 		o.Payments = nil

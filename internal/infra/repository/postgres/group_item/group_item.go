@@ -116,7 +116,7 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 	return item, nil
 }
 
-func (r *GroupItemRepositoryBun) GetGroupsByStatus(ctx context.Context, status string) ([]model.GroupItem, error) {
+func (r *GroupItemRepositoryBun) GetGroupItemsByStatus(ctx context.Context, status string) ([]model.GroupItem, error) {
 	items := []model.GroupItem{}
 
 	r.mu.Lock()
@@ -141,7 +141,7 @@ func (r *GroupItemRepositoryBun) GetGroupsByStatus(ctx context.Context, status s
 	return items, nil
 }
 
-func (r *GroupItemRepositoryBun) GetGroupsByOrderIDAndStatus(ctx context.Context, id string, status string) ([]model.GroupItem, error) {
+func (r *GroupItemRepositoryBun) GetGroupItemsByOrderIDAndStatus(ctx context.Context, id string, status string) ([]model.GroupItem, error) {
 	items := []model.GroupItem{}
 
 	r.mu.Lock()

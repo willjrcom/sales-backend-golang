@@ -21,7 +21,7 @@ type OrderCommonAttributes struct {
 	OrderDetail
 	OrderNumber int            `bun:"order_number,notnull"`
 	Status      string         `bun:"status,notnull"`
-	Groups      []GroupItem    `bun:"rel:has-many,join:id=order_id"`
+	GroupItems  []GroupItem    `bun:"rel:has-many,join:id=order_id"`
 	Payments    []PaymentOrder `bun:"rel:has-many,join:id=order_id"`
 }
 
@@ -58,7 +58,7 @@ func (o *Order) FromDomain(order *orderentity.Order) {
 		OrderCommonAttributes: OrderCommonAttributes{
 			OrderNumber: order.OrderNumber,
 			Status:      string(order.Status),
-			Groups:      []GroupItem{},
+			GroupItems:  []GroupItem{},
 			Payments:    []PaymentOrder{},
 			OrderType: OrderType{
 				Delivery: &OrderDelivery{},
@@ -84,9 +84,9 @@ func (o *Order) FromDomain(order *orderentity.Order) {
 		},
 	}
 
-	for i := range order.Groups {
-		o.Groups = append(o.Groups, GroupItem{})
-		o.Groups[i].FromDomain(&order.Groups[i])
+	for i := range order.GroupItems {
+		o.GroupItems = append(o.GroupItems, GroupItem{})
+		o.GroupItems[i].FromDomain(&order.GroupItems[i])
 	}
 
 	for i := range order.Payments {
@@ -109,7 +109,7 @@ func (o *Order) ToDomain() *orderentity.Order {
 		OrderCommonAttributes: orderentity.OrderCommonAttributes{
 			OrderNumber: o.OrderNumber,
 			Status:      orderentity.StatusOrder(o.Status),
-			Groups:      []orderentity.GroupItem{},
+			GroupItems:  []orderentity.GroupItem{},
 			Payments:    []orderentity.PaymentOrder{},
 			OrderType: orderentity.OrderType{
 				Delivery: &orderentity.OrderDelivery{},
@@ -134,8 +134,8 @@ func (o *Order) ToDomain() *orderentity.Order {
 		},
 	}
 
-	for i := range o.Groups {
-		order.Groups = append(order.Groups, *o.Groups[i].ToDomain())
+	for i := range o.GroupItems {
+		order.GroupItems = append(order.GroupItems, *o.GroupItems[i].ToDomain())
 	}
 
 	for i := range o.Payments {

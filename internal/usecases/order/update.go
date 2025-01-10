@@ -29,15 +29,15 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) er
 	}
 
 	groupItemIDs := []uuid.UUID{}
-	for i, groupItem := range order.Groups {
+	for i, groupItem := range order.GroupItems {
 		if groupItem.Status != orderentity.StatusGroupStaging {
 			continue
 		}
 
 		if !groupItem.UseProcessRule {
-			order.Groups[i].PendingGroupItem()
-			order.Groups[i].StartGroupItem()
-			order.Groups[i].ReadyGroupItem()
+			order.GroupItems[i].PendingGroupItem()
+			order.GroupItems[i].StartGroupItem()
+			order.GroupItems[i].ReadyGroupItem()
 			continue
 		}
 
@@ -144,7 +144,7 @@ func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IDRequest) (er
 		return err
 	}
 
-	for _, groupItem := range order.Groups {
+	for _, groupItem := range order.GroupItems {
 		dtoID := entitydto.NewIdRequest(groupItem.ID)
 		if err = s.sgi.CancelGroupItem(ctx, dtoID); err != nil {
 			return err

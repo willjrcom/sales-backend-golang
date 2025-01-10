@@ -34,7 +34,7 @@ type OrderCommonAttributes struct {
 	OrderDetail
 	OrderNumber int
 	Status      StatusOrder
-	Groups      []GroupItem
+	GroupItems  []GroupItem
 	Payments    []PaymentOrder
 }
 
@@ -97,12 +97,12 @@ func (o *Order) PendingOrder() (err error) {
 		return ErrOrderAlreadyArchived
 	}
 
-	if len(o.Groups) == 0 {
+	if len(o.GroupItems) == 0 {
 		return ErrOrderWithoutItems
 	}
 
-	for i := range o.Groups {
-		if err = o.Groups[i].PendingGroupItem(); err != nil {
+	for i := range o.GroupItems {
+		if err = o.GroupItems[i].PendingGroupItem(); err != nil {
 			return err
 		}
 	}
@@ -173,8 +173,8 @@ func (o *Order) CancelOrder() (err error) {
 		return ErrOrderAlreadyArchived
 	}
 
-	for i := range o.Groups {
-		o.Groups[i].CancelGroupItem()
+	for i := range o.GroupItems {
+		o.GroupItems[i].CancelGroupItem()
 	}
 
 	o.Status = OrderStatusCanceled
@@ -229,10 +229,10 @@ func (o *Order) CalculateTotalPrice() {
 	o.TotalPayable = 0.00
 	o.QuantityItems = 0.00
 
-	for i := range o.Groups {
-		o.Groups[i].CalculateTotalPrice()
-		o.TotalPayable += o.Groups[i].TotalPrice
-		o.QuantityItems += o.Groups[i].Quantity
+	for i := range o.GroupItems {
+		o.GroupItems[i].CalculateTotalPrice()
+		o.TotalPayable += o.GroupItems[i].TotalPrice
+		o.QuantityItems += o.GroupItems[i].Quantity
 	}
 
 	o.TotalPaid = 0.00
