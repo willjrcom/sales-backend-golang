@@ -257,3 +257,85 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context) ([]
 
 	return categories, nil
 }
+
+func (r *ProductCategoryRepositoryBun) GetAllCategoriesWithProcessRulesAndOrderProcess(ctx context.Context) ([]model.ProductCategoryWithOrderProcess, error) {
+	categories := []model.ProductCategoryWithOrderProcess{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	// Busca todas as categorias com suas ProcessRules
+	err := r.db.NewSelect().
+		Model(&categories).
+		Relation("ProcessRules").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	schemaName, err := database.GetSchema(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	processRuleIDs := make([]uuid.UUID, 0)
+
+	// Coletar todos os IDs de ProcessRules
+	for i := range categories {
+		for j := range categories[i].ProcessRules {
+			processRule := categories[i].ProcessRules[j]
+			processRuleIDs = append(processRuleIDs, processRule.ID)
+		}
+	}
+
+	// Query SQL para contar os processos em geral
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT process_rule_id, 
+			COUNT(*) AS total_orders, 
+			COUNT(CASE WHEN status != 'Finished' AND EXTRACT(EPOCH FROM (NOW() - started_at)) * 1000 > pr.ideal_time THEN 1 END) AS late_orders 
+		FROM `+schemaName+`.order_processes AS process
+		JOIN `+schemaName+`.process_rules AS pr ON process.process_rule_id = pr.id
+		WHERE process_rule_id IN (?) 
+		GROUP BY process_rule_id
+	`, bun.In(processRuleIDs))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Map para armazenar os resultados
+	processCount := map[uuid.UUID]int{}
+	lateCount := map[uuid.UUID]int{}
+
+	for rows.Next() {
+		var processRuleID uuid.UUID
+		var totalOrders int
+		var lateOrders int
+
+		if err := rows.Scan(&processRuleID, &totalOrders, &lateOrders); err != nil {
+			return nil, err
+		}
+
+		processCount[processRuleID] = totalOrders
+		lateCount[processRuleID] = lateOrders
+	}
+
+	// Preenchimento na struct
+	for i := range categories {
+		for j := range categories[i].ProcessRules {
+			processRule := &categories[i].ProcessRules[j]
+			if count, ok := processCount[processRule.ID]; ok {
+				processRule.TotalOrderQueue = count // Total de pedidos
+			}
+			if late, ok := lateCount[processRule.ID]; ok {
+				processRule.TotalOrderProcessLate = late // Total de atrasados
+			}
+		}
+	}
+
+	return categories, nil
+}

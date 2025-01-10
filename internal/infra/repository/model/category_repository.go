@@ -9,4 +9,5 @@ type CategoryRepository interface {
 	GetCategoryById(ctx context.Context, id string) (*ProductCategory, error)
 	GetCategoryByName(ctx context.Context, name string, withRelation bool) (*ProductCategory, error)
 	GetAllCategories(ctx context.Context) ([]ProductCategory, error)
+	GetAllCategoriesWithProcessRulesAndOrderProcess(ctx context.Context) ([]ProductCategoryWithOrderProcess, error)
 }

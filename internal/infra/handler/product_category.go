@@ -31,6 +31,7 @@ func NewHandlerProductCategory(categoryService *productcategoryusecases.Service)
 		c.Delete("/{id}", h.handlerDeleteProductCategory)
 		c.Get("/{id}", h.handlerGetProductCategory)
 		c.Get("/all", h.handlerGetAllCategories)
+		c.Get("/all-with-order-process", h.handlerGetAllCategoriesWithProcessRulesAndOrderProcess)
 	})
 
 	return handler.NewHandler(route, c)
@@ -130,4 +131,16 @@ func (h *handlerProductCategoryImpl) handlerGetAllCategories(w http.ResponseWrit
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
+}
+
+func (h *handlerProductCategoryImpl) handlerGetAllCategoriesWithProcessRulesAndOrderProcess(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	processRules, err := h.s.GetAllCategoriesWithProcessRulesAndOrderProcess(ctx)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processRules})
 }

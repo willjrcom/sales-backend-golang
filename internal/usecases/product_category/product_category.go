@@ -136,12 +136,34 @@ func (s *Service) GetAllCategories(ctx context.Context) ([]productcategorydto.Ca
 	}
 }
 
+func (s *Service) GetAllCategoriesWithProcessRulesAndOrderProcess(ctx context.Context) ([]productcategorydto.CategoryWithOrderProcessDTO, error) {
+	if categoryModels, err := s.r.GetAllCategoriesWithProcessRulesAndOrderProcess(ctx); err != nil {
+		return nil, err
+	} else {
+		dtos := modelsWithOrderProcessToDTOs(categoryModels)
+		return dtos, nil
+	}
+}
+
 func modelsToDTOs(categoryModels []model.ProductCategory) []productcategorydto.CategoryDTO {
 	DTOs := []productcategorydto.CategoryDTO{}
 
 	for _, categoryModel := range categoryModels {
 		category := categoryModel.ToDomain()
 		c := &productcategorydto.CategoryDTO{}
+		c.FromDomain(category)
+		DTOs = append(DTOs, *c)
+	}
+
+	return DTOs
+}
+
+func modelsWithOrderProcessToDTOs(categoryModels []model.ProductCategoryWithOrderProcess) []productcategorydto.CategoryWithOrderProcessDTO {
+	DTOs := []productcategorydto.CategoryWithOrderProcessDTO{}
+
+	for _, categoryModel := range categoryModels {
+		category := categoryModel.ToDomain()
+		c := &productcategorydto.CategoryWithOrderProcessDTO{}
 		c.FromDomain(category)
 		DTOs = append(DTOs, *c)
 	}

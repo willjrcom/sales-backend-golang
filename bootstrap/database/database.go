@@ -231,7 +231,9 @@ func RegisterModels(ctx context.Context, db *bun.DB) error {
 	db.RegisterModel((*model.Size)(nil))
 	db.RegisterModel((*model.Quantity)(nil))
 	db.RegisterModel((*model.ProductCategory)(nil))
+	db.RegisterModel((*model.ProductCategoryWithOrderProcess)(nil))
 	db.RegisterModel((*model.ProcessRule)(nil))
+	db.RegisterModel((*model.ProcessRuleWithOrderProcess)(nil))
 	db.RegisterModel((*model.Product)(nil))
 
 	db.RegisterModel((*model.Address)(nil))

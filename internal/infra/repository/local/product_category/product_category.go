@@ -75,3 +75,7 @@ func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context) ([]model.P
 
 	return productCategories, nil
 }
+
+func (r *CategoryRepositoryLocal) GetAllCategoriesWithProcessRulesAndOrderProcess(_ context.Context) ([]model.ProductCategoryWithOrderProcess, error) {
+	return nil, nil
+}
