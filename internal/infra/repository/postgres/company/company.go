@@ -108,7 +108,7 @@ func (r *CompanyRepositoryBun) ValidateUserToPublicCompany(ctx context.Context, 
 	}
 
 	companyToUsers := &model.CompanyToUsers{}
-	if err := r.db.NewSelect().Model(companyToUsers).Where("company_with_users_id = ? AND user_id = ?", company.ID, userID).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(companyToUsers).Where("company_id = ? AND user_id = ?", company.ID, userID).Scan(ctx); err != nil {
 		return false, err
 	}
 
@@ -152,7 +152,7 @@ func (r *CompanyRepositoryBun) RemoveUserFromPublicCompany(ctx context.Context, 
 		return err
 	}
 
-	_, err := r.db.NewDelete().Model(&model.CompanyToUsers{}).Where("company_with_users_id = ? AND user_id = ?", company.ID, userID).Exec(ctx)
+	_, err := r.db.NewDelete().Model(&model.CompanyToUsers{}).Where("company_id = ? AND user_id = ?", company.ID, userID).Exec(ctx)
 
 	return err
 

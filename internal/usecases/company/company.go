@@ -128,16 +128,17 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserToCo
 	}
 
 	if userID == nil {
-		createUserInput := &companydto.UserCreateDTO{
-			Email:            email,
-			GeneratePassword: true,
-		}
+		return errors.New("user not found")
+		// createUserInput := &companydto.UserCreateDTO{
+		// 	Email:            email,
+		// 	GeneratePassword: true,
+		// }
 
-		if newUserID, err := s.us.CreateUser(ctx, createUserInput); err != nil {
-			return err
-		} else {
-			userID = newUserID
-		}
+		// if newUserID, err := s.us.CreateUser(ctx, createUserInput); err != nil {
+		// 	return err
+		// } else {
+		// 	userID = newUserID
+		// }
 	}
 
 	if err := s.r.AddUserToPublicCompany(ctx, *userID); err != nil {
