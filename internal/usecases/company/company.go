@@ -96,6 +96,22 @@ func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyDTO, error
 	}
 }
 
+func (s *Service) GetCompanyUsers(ctx context.Context) ([]companydto.UserDTO, error) {
+	companyModel, err := s.r.GetCompany(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	users := []companydto.UserDTO{}
+	for _, userModel := range companyModel.Users {
+		user := userModel.ToDomain()
+		userDTO := &companydto.UserDTO{}
+		userDTO.FromDomain(user)
+		users = append(users, *userDTO)
+	}
+
+	return users, nil
+}
 func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserToCompanyDTO) error {
 	email, err := dto.ToDomain()
 

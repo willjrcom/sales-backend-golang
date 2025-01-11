@@ -27,6 +27,7 @@ func NewHandlerCompany(companyService *companyusecases.Service) *handler.Handler
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerNewCompany)
 		c.Get("/", h.handlerGetCompany)
+		c.Get("/users", h.handlerGetCompanyUsers)
 		c.Post("/add/user", h.handlerAddUserToCompany)
 		c.Post("/remove/user", h.handlerRemoveUserFromCompany)
 		c.Post("/test", h.handlerTest)
@@ -74,6 +75,17 @@ func (h *handlerCompanyImpl) handlerGetCompany(w http.ResponseWriter, r *http.Re
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
 }
 
+func (h *handlerCompanyImpl) handlerGetCompanyUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	users, err := h.s.GetCompanyUsers(ctx)
+	if err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: users})
+}
 func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
