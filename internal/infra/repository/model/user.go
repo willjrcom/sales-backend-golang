@@ -20,7 +20,7 @@ type UserCommonAttributes struct {
 	PublicPerson
 	Password  string    `bun:"-"`
 	Hash      string    `bun:"column:hash,notnull"`
-	Companies []Company `bun:"m2m:company_to_users,join:User=Company"`
+	Companies []Company `bun:"m2m:public.company_to_users,join:User=Company"`
 }
 
 func (u *User) BeforeSelect(ctx context.Context, query *bun.SelectQuery) error {

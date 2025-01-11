@@ -20,6 +20,7 @@ type CompanyCommonAttributes struct {
 	Email        string   `bun:"email"`
 	Contacts     []string `bun:"contacts,type:jsonb"`
 	Address      *Address `bun:"rel:has-one,join:id=object_id,notnull"`
+	Users        []User   `bun:"m2m:public.company_to_users,join:Company=User"`
 }
 
 func (c *Company) FromDomain(company *companyentity.Company) {
@@ -35,16 +36,30 @@ func (c *Company) FromDomain(company *companyentity.Company) {
 			Cnpj:         company.Cnpj,
 			Email:        company.Email,
 			Contacts:     company.Contacts,
+			Address:      &Address{},
+			Users:        []User{},
 		},
 	}
 
 	c.Address.FromDomain(company.Address)
+
+	for _, user := range company.Users {
+		userModel := User{}
+		userModel.FromDomain(&user)
+		c.Users = append(c.Users, userModel)
+	}
 }
 
 func (c *Company) ToDomain() *companyentity.Company {
 	if c == nil {
 		return nil
 	}
+
+	users := []companyentity.User{}
+	for _, user := range c.Users {
+		users = append(users, *user.ToDomain())
+	}
+
 	return &companyentity.Company{
 		Entity: c.Entity.ToDomain(),
 		CompanyCommonAttributes: companyentity.CompanyCommonAttributes{
@@ -55,6 +70,7 @@ func (c *Company) ToDomain() *companyentity.Company {
 			Email:        c.Email,
 			Contacts:     c.Contacts,
 			Address:      c.Address.ToDomain(),
+			Users:        users,
 		},
 	}
 }

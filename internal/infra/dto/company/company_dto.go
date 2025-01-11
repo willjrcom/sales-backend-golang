@@ -15,6 +15,7 @@ type CompanyDTO struct {
 	Email        string                 `json:"email"`
 	Contacts     []string               `json:"contacts"`
 	Address      *addressdto.AddressDTO `json:"address,omitempty"`
+	Users        []UserDTO              `json:"users,omitempty"`
 }
 
 func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
@@ -30,9 +31,16 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 		Email:        company.Email,
 		Contacts:     company.Contacts,
 		Address:      &addressdto.AddressDTO{},
+		Users:        []UserDTO{},
 	}
 
 	c.Address.FromDomain(company.Address)
+
+	for _, user := range company.Users {
+		userDTO := UserDTO{}
+		userDTO.FromDomain(&user)
+		c.Users = append(c.Users, userDTO)
+	}
 
 	if company.Address == nil {
 		c.Address = nil

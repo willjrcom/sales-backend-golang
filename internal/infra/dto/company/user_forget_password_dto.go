@@ -1,4 +1,4 @@
-package userdto
+package companydto
 
 import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"

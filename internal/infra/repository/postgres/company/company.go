@@ -83,7 +83,7 @@ func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*model.Company, 
 		return nil, err
 	}
 
-	err := r.db.NewSelect().Model(company).Relation("Address").Scan(ctx)
+	err := r.db.NewSelect().Model(company).Relation("Address").Relation("Users").Scan(ctx)
 
 	if err != nil {
 		return nil, err

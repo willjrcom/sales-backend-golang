@@ -7,8 +7,8 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
+	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	bcryptservice "github.com/willjrcom/sales-backend-go/internal/infra/service/bcrypt"
 	emailservice "github.com/willjrcom/sales-backend-go/internal/infra/service/email"
@@ -29,7 +29,7 @@ func NewService(r model.UserRepository) *Service {
 	return &Service{r: r}
 }
 
-func (s *Service) CreateUser(ctx context.Context, dto *userdto.UserCreateDTO) (*uuid.UUID, error) {
+func (s *Service) CreateUser(ctx context.Context, dto *companydto.UserCreateDTO) (*uuid.UUID, error) {
 	user, err := dto.ToDomain()
 
 	if err != nil {
@@ -54,7 +54,7 @@ func (s *Service) CreateUser(ctx context.Context, dto *userdto.UserCreateDTO) (*
 	return &user.ID, err
 }
 
-func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UserUpdatePasswordDTO) error {
+func (s *Service) UpdateUserPassword(ctx context.Context, dto *companydto.UserUpdatePasswordDTO) error {
 	user, err := dto.ToDomain()
 
 	if err != nil {
@@ -86,7 +86,7 @@ func (s *Service) UpdateUserPassword(ctx context.Context, dto *userdto.UserUpdat
 	return s.r.UpdateUser(ctx, userModel)
 }
 
-func (s *Service) ForgetUserPassword(ctx context.Context, dto *userdto.UserForgetPasswordDTO) error {
+func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserForgetPasswordDTO) error {
 	email, err := dto.ToDomain()
 	if err != nil {
 		return err
@@ -97,7 +97,7 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *userdto.UserForge
 	return nil
 }
 
-func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IDRequest, dto *userdto.UserUpdateDTO) error {
+func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IDRequest, dto *companydto.UserUpdateDTO) error {
 	userModel, err := s.r.GetUserByID(ctx, dtoID.ID)
 	if err != nil {
 		return err
@@ -113,7 +113,7 @@ func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IDRequest, dt
 	return s.r.UpdateUser(ctx, userModel)
 }
 
-func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (data *userdto.UserTokenDTO, err error) {
+func (s *Service) LoginUser(ctx context.Context, dto *companydto.UserLoginDTO) (data *companydto.UserTokenDTO, err error) {
 	user, err := dto.ToDomain()
 
 	if err != nil {
@@ -136,7 +136,7 @@ func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (dat
 		return nil, err
 	}
 
-	data = &userdto.UserTokenDTO{
+	data = &companydto.UserTokenDTO{
 		AccessToken: accessToken,
 	}
 
@@ -145,7 +145,7 @@ func (s *Service) LoginUser(ctx context.Context, dto *userdto.UserLoginDTO) (dat
 	return data, nil
 }
 
-func (s *Service) Access(ctx context.Context, dto *userdto.UserSchemaDTO, accessToken *jwt.Token) (token string, err error) {
+func (s *Service) Access(ctx context.Context, dto *companydto.UserSchemaDTO, accessToken *jwt.Token) (token string, err error) {
 	schema, err := dto.ToDomain()
 
 	if err != nil {
@@ -180,7 +180,7 @@ func findSchemaInSchemas(schemas []interface{}, schema string) bool {
 	return false
 }
 
-func (s *Service) SearchUser(ctx context.Context, dto *userdto.UserSearchDTO) (*userdto.UserDTO, error) {
+func (s *Service) SearchUser(ctx context.Context, dto *companydto.UserSearchDTO) (*companydto.UserDTO, error) {
 	cpf, err := dto.ToDomain()
 
 	if err != nil {
@@ -194,12 +194,12 @@ func (s *Service) SearchUser(ctx context.Context, dto *userdto.UserSearchDTO) (*
 
 	user := userModel.ToDomain()
 
-	userDTO := &userdto.UserDTO{}
+	userDTO := &companydto.UserDTO{}
 	userDTO.FromDomain(user)
 
 	return userDTO, nil
 }
-func (s *Service) DeleteUser(ctx context.Context, dto *userdto.UserDeleteDTO) error {
+func (s *Service) DeleteUser(ctx context.Context, dto *companydto.UserDeleteDTO) error {
 	user, err := dto.ToDomain()
 
 	if err != nil {

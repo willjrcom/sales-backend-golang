@@ -23,6 +23,7 @@ type CompanyCommonAttributes struct {
 	Email        string
 	Contacts     []string
 	Address      *addressentity.Address
+	Users        []User
 }
 
 type CompanyToUsers struct {

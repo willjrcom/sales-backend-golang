@@ -7,8 +7,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
+	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
@@ -53,7 +53,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &userdto.UserCreateDTO{}
+	dtoUser := &companydto.UserCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -71,7 +71,7 @@ func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request)
 func (h *handlerUserImpl) handlerUpdateUserPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &userdto.UserUpdatePasswordDTO{}
+	dtoUser := &companydto.UserUpdatePasswordDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -88,7 +88,7 @@ func (h *handlerUserImpl) handlerUpdateUserPassword(w http.ResponseWriter, r *ht
 func (h *handlerUserImpl) handlerForgetUserPassword(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &userdto.UserForgetPasswordDTO{}
+	dtoUser := &companydto.UserForgetPasswordDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -114,7 +114,7 @@ func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Reque
 
 	dtoID := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	dtoUser := &userdto.UserUpdateDTO{}
+	dtoUser := &companydto.UserUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -131,7 +131,7 @@ func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Reque
 func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &userdto.UserLoginDTO{}
+	dtoUser := &companydto.UserLoginDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -156,7 +156,7 @@ func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	dtoSchema := &userdto.UserSchemaDTO{}
+	dtoSchema := &companydto.UserSchemaDTO{}
 	if err := jsonpkg.ParseBody(r, dtoSchema); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -174,7 +174,7 @@ func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) 
 func (h *handlerUserImpl) handlerSearchUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &userdto.UserSearchDTO{}
+	dtoUser := &companydto.UserSearchDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return
@@ -192,7 +192,7 @@ func (h *handlerUserImpl) handlerSearchUser(w http.ResponseWriter, r *http.Reque
 func (h *handlerUserImpl) handlerDeleteUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoUser := &userdto.UserDeleteDTO{}
+	dtoUser := &companydto.UserDeleteDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
 		return

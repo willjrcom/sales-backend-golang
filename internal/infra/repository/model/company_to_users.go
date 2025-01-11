@@ -6,7 +6,7 @@ import (
 )
 
 type CompanyToUsers struct {
-	bun.BaseModel `bun:"table:company_to_users"`
+	bun.BaseModel `bun:"table:public.company_to_users"`
 	CompanyID     uuid.UUID `bun:"type:uuid,pk"`
 	Company       *Company  `bun:"rel:belongs-to,join:company_id=id"`
 	UserID        uuid.UUID `bun:"type:uuid,pk"`

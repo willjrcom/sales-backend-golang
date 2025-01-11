@@ -8,7 +8,6 @@ import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
-	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
@@ -61,7 +60,7 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 		company.Address.Coordinates = *coordinates
 	}
 
-	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), company.SchemaName)
+	ctx = context.WithValue(ctx, model.Schema("schema"), company.SchemaName)
 
 	if err := s.s.NewSchema(ctx); err != nil {
 		return uuid.Nil, nil, err
@@ -113,7 +112,7 @@ func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserToCo
 	}
 
 	if userID == nil {
-		createUserInput := &userdto.UserCreateDTO{
+		createUserInput := &companydto.UserCreateDTO{
 			Email:            email,
 			GeneratePassword: true,
 		}

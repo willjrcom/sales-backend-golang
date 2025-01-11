@@ -3,13 +3,13 @@ package employeedto
 import (
 	"github.com/google/uuid"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
-	userdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/user"
+	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 )
 
 type EmployeeDTO struct {
 	ID     uuid.UUID `json:"id"`
 	UserID uuid.UUID `json:"user_id"`
-	userdto.UserDTO
+	companydto.UserDTO
 }
 
 func (c *EmployeeDTO) FromDomain(employee *employeeentity.Employee) {
@@ -20,7 +20,7 @@ func (c *EmployeeDTO) FromDomain(employee *employeeentity.Employee) {
 	*c = EmployeeDTO{
 		ID:      employee.ID,
 		UserID:  employee.UserID,
-		UserDTO: userdto.UserDTO{},
+		UserDTO: companydto.UserDTO{},
 	}
 
 	c.UserDTO.FromDomain(employee.User)

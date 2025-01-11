@@ -1,4 +1,4 @@
-package userdto
+package companydto
 
 import (
 	"errors"

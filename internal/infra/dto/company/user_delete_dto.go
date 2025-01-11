@@ -1,4 +1,4 @@
-package userdto
+package companydto
 
 import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
@@ -6,24 +6,24 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 )
 
-type UserLoginDTO struct {
+type UserDeleteDTO struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-func (u *UserLoginDTO) validate() error {
+func (u *UserDeleteDTO) validate() error {
 	if !utils.IsEmailValid(u.Email) {
 		return ErrEmailInvalid
 	}
 
-	if err := utils.ValidatePassword(u.Password); err != nil && u.Password != "12345" {
+	if err := utils.ValidatePassword(u.Password); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (u *UserLoginDTO) ToDomain() (*companyentity.User, error) {
+func (u *UserDeleteDTO) ToDomain() (*companyentity.User, error) {
 	if err := u.validate(); err != nil {
 		return nil, err
 	}
