@@ -22,12 +22,12 @@ func (u *DeliveryOrderDriverUpdateDTO) validate() error {
 	return nil
 }
 
-func (u *DeliveryOrderDriverUpdateDTO) UpdateDomain(model *orderentity.OrderDelivery) error {
+func (u *DeliveryOrderDriverUpdateDTO) UpdateDomain(delivery *orderentity.OrderDelivery) error {
 	if err := u.validate(); err != nil {
 		return err
 	}
 
-	model.DriverID = &u.DriverID
+	delivery.DriverID = &u.DriverID
 
 	return nil
 }

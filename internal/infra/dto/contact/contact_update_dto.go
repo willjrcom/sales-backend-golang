@@ -11,7 +11,7 @@ func (c *ContactUpdateDTO) validate() error {
 	return nil
 }
 
-func (c *ContactUpdateDTO) UpdateDomain(contact *personentity.Contact) error {
+func (c *ContactUpdateDTO) UpdateDomain(contact *personentity.Contact, Type personentity.ContactType) error {
 	if err := c.validate(); err != nil {
 		return err
 	}
@@ -22,6 +22,8 @@ func (c *ContactUpdateDTO) UpdateDomain(contact *personentity.Contact) error {
 	if c.Number != nil {
 		contact.Number = *c.Number
 	}
+
+	contact.Type = Type
 
 	return nil
 }

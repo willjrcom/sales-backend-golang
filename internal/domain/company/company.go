@@ -71,6 +71,6 @@ func generateSchema(cnpjData *cnpj.Cnpj) string {
 }
 
 func (c *Company) AddAddress(addressCommonAttributes *addressentity.AddressCommonAttributes) {
-	addressCommonAttributes.ObjectID = c.ID
 	c.Address = addressentity.NewAddress(addressCommonAttributes)
+	c.Address.ObjectID = c.ID
 }

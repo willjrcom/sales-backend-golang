@@ -8,10 +8,10 @@ import (
 type Address struct {
 	entity.Entity
 	AddressCommonAttributes
+	ObjectID uuid.UUID
 }
 
 type AddressCommonAttributes struct {
-	ObjectID     uuid.UUID
 	Street       string
 	Number       string
 	Complement   string

@@ -29,29 +29,29 @@ func (s *ProcessRuleUpdateDTO) validate() error {
 	return nil
 }
 
-func (s *ProcessRuleUpdateDTO) UpdateDomain(model *productentity.ProcessRule) (err error) {
+func (s *ProcessRuleUpdateDTO) UpdateDomain(processRule *productentity.ProcessRule) (err error) {
 	if err = s.validate(); err != nil {
 		return err
 	}
 
 	if s.Name != nil {
-		model.Name = *s.Name
+		processRule.Name = *s.Name
 	}
 
 	if s.Order != nil {
-		model.Order = *s.Order
+		processRule.Order = *s.Order
 	}
 
 	if s.Description != nil {
-		model.Description = *s.Description
+		processRule.Description = *s.Description
 	}
 
 	if s.ImagePath != nil {
-		model.ImagePath = s.ImagePath
+		processRule.ImagePath = s.ImagePath
 	}
 
 	if s.IdealTime != nil {
-		model.IdealTime, err = convertToDuration(*s.IdealTime)
+		processRule.IdealTime, err = convertToDuration(*s.IdealTime)
 		if err != nil {
 			return err
 		}

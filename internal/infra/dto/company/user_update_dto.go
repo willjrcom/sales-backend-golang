@@ -5,7 +5,10 @@ import (
 	"strings"
 	"time"
 
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
 	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 )
@@ -37,21 +40,33 @@ func (r *UserUpdateDTO) UpdateDomain(user *companyentity.User) error {
 	}
 
 	if r.Name != nil {
-		user.Person.Name = *r.Name
+		user.Name = *r.Name
 	}
 	if r.Cpf != nil {
-		user.Person.Cpf = *r.Cpf
+		user.Cpf = *r.Cpf
 	}
 	if r.Birthday != nil {
-		user.Person.Birthday = r.Birthday
+		user.Birthday = r.Birthday
 	}
 	if r.Contact != nil {
-		r.Contact.UpdateDomain(user.Person.Contact)
+		if user.Contact == nil {
+			user.Contact = &personentity.Contact{
+				Entity:   entity.NewEntity(),
+				ObjectID: user.ID,
+			}
+		}
+		r.Contact.UpdateDomain(user.Contact, personentity.ContactTypeEmployee)
 	} else {
 		user.Contact = nil
 	}
 
 	if r.Address != nil {
+		if user.Address == nil {
+			user.Address = &addressentity.Address{
+				Entity:   entity.NewEntity(),
+				ObjectID: user.ID,
+			}
+		}
 		r.Address.UpdateDomain(user.Address)
 	} else {
 		user.Address = nil

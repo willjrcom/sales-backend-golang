@@ -5,7 +5,10 @@ import (
 	"strings"
 	"time"
 
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
 	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 )
@@ -53,9 +56,21 @@ func (r *ClientUpdateDTO) UpdateDomain(client *cliententity.Client) error {
 		client.Birthday = r.Birthday
 	}
 	if r.Contact != nil {
-		r.Contact.UpdateDomain(client.Contact)
+		if client.Contact == nil {
+			client.Contact = &personentity.Contact{
+				Entity:   entity.NewEntity(),
+				ObjectID: client.ID,
+			}
+		}
+		r.Contact.UpdateDomain(client.Contact, personentity.ContactTypeClient)
 	}
 	if r.Address != nil {
+		if client.Address == nil {
+			client.Address = &addressentity.Address{
+				Entity:   entity.NewEntity(),
+				ObjectID: client.ID,
+			}
+		}
 		r.Address.UpdateDomain(client.Address)
 	}
 

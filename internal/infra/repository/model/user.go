@@ -35,10 +35,10 @@ func (u *User) FromDomain(user *companyentity.User) {
 		Entity: entitymodel.FromDomain(user.Entity),
 		UserCommonAttributes: UserCommonAttributes{
 			PublicPerson: PublicPerson{
-				Name:     user.Person.Name,
-				Email:    user.Person.Email,
-				Cpf:      user.Person.Cpf,
-				Birthday: user.Person.Birthday,
+				Name:     user.Name,
+				Email:    user.Email,
+				Cpf:      user.Cpf,
+				Birthday: user.Birthday,
 				Contact:  &PublicContact{},
 				Address:  &PublicAddress{},
 			},
@@ -55,6 +55,13 @@ func (u *User) FromDomain(user *companyentity.User) {
 
 	u.Contact.FromDomain(user.Contact)
 	u.Address.FromDomain(user.Address)
+
+	if user.Contact == nil {
+		u.Contact = nil
+	}
+	if user.Address == nil {
+		u.Address = nil
+	}
 }
 
 func (u *User) ToDomain() *companyentity.User {

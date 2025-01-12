@@ -58,9 +58,9 @@ func (a *Address) ToDomain() *addressentity.Address {
 	}
 
 	address := &addressentity.Address{
-		Entity: a.Entity.ToDomain(),
+		Entity:   a.Entity.ToDomain(),
+		ObjectID: a.ObjectID,
 		AddressCommonAttributes: addressentity.AddressCommonAttributes{
-			ObjectID:     a.ObjectID,
 			Street:       a.Street,
 			Number:       a.Number,
 			Complement:   a.Complement,

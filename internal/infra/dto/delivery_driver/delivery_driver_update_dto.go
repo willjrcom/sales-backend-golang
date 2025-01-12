@@ -17,7 +17,7 @@ func (s *DeliveryDriverUpdateDTO) validate() error {
 	return nil
 }
 
-func (s *DeliveryDriverUpdateDTO) UpdateDomain(model *orderentity.DeliveryDriver) (err error) {
+func (s *DeliveryDriverUpdateDTO) UpdateDomain(driver *orderentity.DeliveryDriver) (err error) {
 	if err = s.validate(); err != nil {
 		return err
 	}

@@ -28,50 +28,50 @@ func (a *AddressUpdateDTO) UpdateDomain(address *addressentity.Address) error {
 	}
 
 	if a.Cep != nil {
-		address.AddressCommonAttributes.Cep = *a.Cep
+		address.Cep = *a.Cep
 	}
 
 	if a.DeliveryTax != nil {
-		address.AddressCommonAttributes.DeliveryTax = *a.DeliveryTax
+		address.DeliveryTax = *a.DeliveryTax
 	}
 
 	if a.Street != nil {
-		address.AddressCommonAttributes.Street = *a.Street
+		address.Street = *a.Street
 	}
 
 	if a.Number != nil {
-		address.AddressCommonAttributes.Number = *a.Number
+		address.Number = *a.Number
 	}
 
 	if a.Complement != nil {
-		address.AddressCommonAttributes.Complement = *a.Complement
+		address.Complement = *a.Complement
 	}
 
 	if a.Reference != nil {
-		address.AddressCommonAttributes.Reference = *a.Reference
+		address.Reference = *a.Reference
 	}
 
 	if a.Neighborhood != nil {
-		address.AddressCommonAttributes.Neighborhood = *a.Neighborhood
+		address.Neighborhood = *a.Neighborhood
 	}
 
 	if a.City != nil {
-		address.AddressCommonAttributes.City = *a.City
+		address.City = *a.City
 	}
 
 	if a.State != nil {
-		address.AddressCommonAttributes.State = *a.State
+		address.State = *a.State
 	}
 
 	if a.Coordinates != nil {
-		address.AddressCommonAttributes.Coordinates = addressentity.Coordinates{
+		address.Coordinates = addressentity.Coordinates{
 			Latitude:  a.Coordinates.Latitude,
 			Longitude: a.Coordinates.Longitude,
 		}
 	}
 
 	if a.AddressType != nil {
-		address.AddressCommonAttributes.AddressType = *a.AddressType
+		address.AddressType = *a.AddressType
 	}
 
 	return nil

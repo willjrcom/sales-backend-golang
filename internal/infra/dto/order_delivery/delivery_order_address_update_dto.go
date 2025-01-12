@@ -24,17 +24,17 @@ func (u *DeliveryOrderAddressUpdateDTO) validate() error {
 	return nil
 }
 
-func (u *DeliveryOrderAddressUpdateDTO) UpdateDomain(model *orderentity.OrderDelivery, address *addressentity.Address) error {
+func (u *DeliveryOrderAddressUpdateDTO) UpdateDomain(delivery *orderentity.OrderDelivery, address *addressentity.Address) error {
 	if err := u.validate(); err != nil {
 		return err
 	}
 
 	// Validate if address is from client
-	if address.ObjectID != model.ClientID {
+	if address.ObjectID != delivery.ClientID {
 		return ErrAddressNotInClient
 	}
 
-	model.AddressID = *u.AddressID
+	delivery.AddressID = *u.AddressID
 
 	return nil
 }

@@ -16,13 +16,13 @@ func (s *QuantityUpdateDTO) validate() error {
 	return nil
 }
 
-func (s *QuantityUpdateDTO) UpdateDomain(model *productentity.Quantity) (err error) {
+func (s *QuantityUpdateDTO) UpdateDomain(quantity *productentity.Quantity) (err error) {
 	if err = s.validate(); err != nil {
 		return err
 	}
 
 	if s.Quantity != nil {
-		model.Quantity = *s.Quantity
+		quantity.Quantity = *s.Quantity
 	}
 
 	return nil
