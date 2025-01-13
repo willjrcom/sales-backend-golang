@@ -51,7 +51,7 @@ func NewCompany(cnpjData *cnpj.Cnpj) *Company {
 		Number:       cnpjData.Number,
 		Neighborhood: cnpjData.Neighborhood,
 		City:         cnpjData.City,
-		State:        cnpjData.State,
+		UF:           cnpjData.UF,
 		Cep:          cnpjData.Cep,
 		AddressType:  addressentity.AddressTypeWork,
 	}

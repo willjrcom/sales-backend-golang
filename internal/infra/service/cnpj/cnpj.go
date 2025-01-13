@@ -22,7 +22,7 @@ type Cnpj struct {
 	Number       string `json:"numero"`
 	City         string `json:"municipio"`
 	Neighborhood string `json:"bairro"`
-	State        string `json:"uf"`
+	UF           string `json:"uf"`
 	Cep          string `json:"cep"`
 }
 

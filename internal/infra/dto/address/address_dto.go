@@ -13,7 +13,7 @@ type AddressDTO struct {
 	Reference    string                    `json:"reference"`
 	Neighborhood string                    `json:"neighborhood"`
 	City         string                    `json:"city"`
-	State        string                    `json:"state"`
+	UF           string                    `json:"uf"`
 	Cep          string                    `json:"cep"`
 	AddressType  addressentity.AddressType `json:"address_type"`
 	DeliveryTax  float64                   `json:"delivery_tax"`
@@ -37,7 +37,7 @@ func (a *AddressDTO) FromDomain(address *addressentity.Address) {
 		Reference:    address.Reference,
 		Neighborhood: address.Neighborhood,
 		City:         address.City,
-		State:        address.State,
+		UF:           address.UF,
 		Cep:          address.Cep,
 		AddressType:  address.AddressType,
 		DeliveryTax:  address.DeliveryTax,

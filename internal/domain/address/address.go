@@ -18,7 +18,7 @@ type AddressCommonAttributes struct {
 	Reference    string
 	Neighborhood string
 	City         string
-	State        string
+	UF           string
 	Cep          string
 	AddressType  AddressType
 	DeliveryTax  float64

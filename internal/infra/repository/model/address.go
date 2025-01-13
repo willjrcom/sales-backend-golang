@@ -21,7 +21,7 @@ type AddressCommonAttributes struct {
 	Reference    string      `bun:"reference"`
 	Neighborhood string      `bun:"neighborhood,notnull"`
 	City         string      `bun:"city,notnull"`
-	State        string      `bun:"state,notnull"`
+	UF           string      `bun:"uf,notnull"`
 	Cep          string      `bun:"cep"`
 	AddressType  string      `bun:"address_type,notnull"`
 	DeliveryTax  float64     `bun:"delivery_tax,notnull"`
@@ -42,7 +42,7 @@ func (a *Address) FromDomain(address *addressentity.Address) {
 			Reference:    address.Reference,
 			Neighborhood: address.Neighborhood,
 			City:         address.City,
-			State:        address.State,
+			UF:           address.UF,
 			Cep:          address.Cep,
 			AddressType:  string(address.AddressType),
 			DeliveryTax:  address.DeliveryTax,
@@ -67,7 +67,7 @@ func (a *Address) ToDomain() *addressentity.Address {
 			Reference:    a.Reference,
 			Neighborhood: a.Neighborhood,
 			City:         a.City,
-			State:        a.State,
+			UF:           a.UF,
 			Cep:          a.Cep,
 			AddressType:  addressentity.AddressType(a.AddressType),
 			DeliveryTax:  a.DeliveryTax,

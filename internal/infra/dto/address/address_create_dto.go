@@ -11,7 +11,7 @@ var (
 	ErrNumberRequired       = errors.New("number is required")
 	ErrNeighborhoodRequired = errors.New("neighborhood is required")
 	ErrCityRequired         = errors.New("city is required")
-	ErrStateRequired        = errors.New("state is required")
+	ErrUfRequired           = errors.New("uf is required")
 	ErrDeliveryTaxRequired  = errors.New("delivery tax is required")
 )
 
@@ -22,7 +22,7 @@ type AddressCreateDTO struct {
 	Reference    string                    `json:"reference"`
 	Neighborhood string                    `json:"neighborhood"`
 	City         string                    `json:"city"`
-	State        string                    `json:"state"`
+	UF           string                    `json:"uf"`
 	Cep          string                    `json:"cep"`
 	AddressType  addressentity.AddressType `json:"address_type"`
 	DeliveryTax  *float64                  `json:"delivery_tax"`
@@ -42,8 +42,8 @@ func (a *AddressCreateDTO) validate(withDeliveryTax bool) error {
 	if a.City == "" {
 		return ErrCityRequired
 	}
-	if a.State == "" {
-		return ErrStateRequired
+	if a.UF == "" {
+		return ErrUfRequired
 	}
 	if a.AddressType == "" {
 		house := addressentity.AddressTypeHouse
@@ -69,7 +69,7 @@ func (a *AddressCreateDTO) ToDomain(withDeliveryTax bool) (*addressentity.Addres
 		Reference:    a.Reference,
 		Neighborhood: a.Neighborhood,
 		City:         a.City,
-		State:        a.State,
+		UF:           a.UF,
 		Cep:          a.Cep,
 		AddressType:  a.AddressType,
 	}
