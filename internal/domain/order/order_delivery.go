@@ -22,15 +22,17 @@ type OrderDelivery struct {
 }
 
 type OrderDeliveryCommonAttributes struct {
-	Status      StatusOrderDelivery
-	DeliveryTax *float64
-	ClientID    uuid.UUID
-	Client      *cliententity.Client
-	AddressID   uuid.UUID
-	Address     *addressentity.Address
-	DriverID    *uuid.UUID
-	Driver      *DeliveryDriver
-	OrderID     uuid.UUID
+	Status        StatusOrderDelivery
+	DeliveryTax   *float64
+	Change        float64
+	PaymentMethod PayMethod
+	ClientID      uuid.UUID
+	Client        *cliententity.Client
+	AddressID     uuid.UUID
+	Address       *addressentity.Address
+	DriverID      *uuid.UUID
+	Driver        *DeliveryDriver
+	OrderID       uuid.UUID
 }
 
 type DeliveryTimeLogs struct {
@@ -49,6 +51,11 @@ func NewOrderDelivery(clientID uuid.UUID) *OrderDelivery {
 		Entity:                        entity.NewEntity(),
 		OrderDeliveryCommonAttributes: orderCommonAttributes,
 	}
+}
+
+func (d *OrderDelivery) AddChange(change float64, paymentMethod PayMethod) {
+	d.Change = change
+	d.PaymentMethod = paymentMethod
 }
 
 func (d *OrderDelivery) Pend() error {

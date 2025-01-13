@@ -17,15 +17,17 @@ type OrderDelivery struct {
 }
 
 type OrderDeliveryCommonAttributes struct {
-	Status      string          `bun:"status"`
-	DeliveryTax *float64        `bun:"delivery_tax"`
-	ClientID    uuid.UUID       `bun:"column:client_id,type:uuid,notnull"`
-	Client      *Client         `bun:"rel:belongs-to"`
-	AddressID   uuid.UUID       `bun:"column:address_id,type:uuid,notnull"`
-	Address     *Address        `bun:"rel:belongs-to"`
-	DriverID    *uuid.UUID      `bun:"column:driver_id,type:uuid"`
-	Driver      *DeliveryDriver `bun:"rel:belongs-to"`
-	OrderID     uuid.UUID       `bun:"column:order_id,type:uuid,notnull"`
+	Status        string          `bun:"status"`
+	DeliveryTax   *float64        `bun:"delivery_tax"`
+	Change        float64         `bun:"change"`
+	PaymentMethod string          `bun:"payment_method"`
+	ClientID      uuid.UUID       `bun:"column:client_id,type:uuid,notnull"`
+	Client        *Client         `bun:"rel:belongs-to"`
+	AddressID     uuid.UUID       `bun:"column:address_id,type:uuid,notnull"`
+	Address       *Address        `bun:"rel:belongs-to"`
+	DriverID      *uuid.UUID      `bun:"column:driver_id,type:uuid"`
+	Driver        *DeliveryDriver `bun:"rel:belongs-to"`
+	OrderID       uuid.UUID       `bun:"column:order_id,type:uuid,notnull"`
 }
 
 type DeliveryTimeLogs struct {
@@ -41,15 +43,17 @@ func (d *OrderDelivery) FromDomain(delivery *orderentity.OrderDelivery) {
 	*d = OrderDelivery{
 		Entity: entitymodel.FromDomain(delivery.Entity),
 		OrderDeliveryCommonAttributes: OrderDeliveryCommonAttributes{
-			Status:      string(delivery.Status),
-			DeliveryTax: delivery.DeliveryTax,
-			ClientID:    delivery.ClientID,
-			Client:      &Client{},
-			AddressID:   delivery.AddressID,
-			Address:     &Address{},
-			DriverID:    delivery.DriverID,
-			Driver:      &DeliveryDriver{},
-			OrderID:     delivery.OrderID,
+			Status:        string(delivery.Status),
+			DeliveryTax:   delivery.DeliveryTax,
+			Change:        delivery.Change,
+			PaymentMethod: string(delivery.PaymentMethod),
+			ClientID:      delivery.ClientID,
+			Client:        &Client{},
+			AddressID:     delivery.AddressID,
+			Address:       &Address{},
+			DriverID:      delivery.DriverID,
+			Driver:        &DeliveryDriver{},
+			OrderID:       delivery.OrderID,
 		},
 		DeliveryTimeLogs: DeliveryTimeLogs{
 			PendingAt:   delivery.PendingAt,
@@ -70,15 +74,17 @@ func (d *OrderDelivery) ToDomain() *orderentity.OrderDelivery {
 	return &orderentity.OrderDelivery{
 		Entity: d.Entity.ToDomain(),
 		OrderDeliveryCommonAttributes: orderentity.OrderDeliveryCommonAttributes{
-			Status:      orderentity.StatusOrderDelivery(d.Status),
-			DeliveryTax: d.DeliveryTax,
-			ClientID:    d.ClientID,
-			Client:      d.Client.ToDomain(),
-			AddressID:   d.AddressID,
-			Address:     d.Address.ToDomain(),
-			DriverID:    d.DriverID,
-			Driver:      d.Driver.ToDomain(),
-			OrderID:     d.OrderID,
+			Status:        orderentity.StatusOrderDelivery(d.Status),
+			DeliveryTax:   d.DeliveryTax,
+			Change:        d.Change,
+			PaymentMethod: orderentity.PayMethod(d.PaymentMethod),
+			ClientID:      d.ClientID,
+			Client:        d.Client.ToDomain(),
+			AddressID:     d.AddressID,
+			Address:       d.Address.ToDomain(),
+			DriverID:      d.DriverID,
+			Driver:        d.Driver.ToDomain(),
+			OrderID:       d.OrderID,
 		},
 		DeliveryTimeLogs: orderentity.DeliveryTimeLogs{
 			PendingAt:   d.PendingAt,

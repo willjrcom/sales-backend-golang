@@ -14,6 +14,30 @@ var (
 	ErrOrderDelivered = errors.New("order already delivered")
 )
 
+func (s *Service) AddChange(ctx context.Context, dto *entitydto.IDRequest, dtoPayment *orderdeliverydto.OrderChangeCreateDTO) error {
+	change, method, err := dtoPayment.ToDomain()
+	if err != nil {
+		return err
+	}
+
+	orderDeliveryModel, err := s.rdo.GetDeliveryById(ctx, dto.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	orderDelivery := orderDeliveryModel.ToDomain()
+
+	orderDelivery.AddChange(change, *method)
+
+	orderDeliveryModel.FromDomain(orderDelivery)
+	if err := s.rdo.UpdateOrderDelivery(ctx, orderDeliveryModel); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Service) PendOrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error) {
 	orderDeliveryModel, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
 

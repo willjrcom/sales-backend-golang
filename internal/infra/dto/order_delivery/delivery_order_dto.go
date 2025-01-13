@@ -17,15 +17,17 @@ type OrderDeliveryDTO struct {
 }
 
 type OrderDeliveryCommonAttributes struct {
-	Status      orderentity.StatusOrderDelivery      `json:"status"`
-	DeliveryTax *float64                             `json:"delivery_tax"`
-	ClientID    uuid.UUID                            `json:"client_id"`
-	Client      *clientdto.ClientDTO                 `json:"client"`
-	AddressID   uuid.UUID                            `json:"address_id"`
-	Address     *addressdto.AddressDTO               `json:"address"`
-	DriverID    *uuid.UUID                           `json:"driver_id"`
-	Driver      *deliverydriverdto.DeliveryDriverDTO `json:"driver"`
-	OrderID     uuid.UUID                            `json:"order_id"`
+	Status        orderentity.StatusOrderDelivery      `json:"status"`
+	DeliveryTax   *float64                             `json:"delivery_tax"`
+	Change        float64                              `json:"change"`
+	PaymentMethod string                               `json:"payment_method"`
+	ClientID      uuid.UUID                            `json:"client_id"`
+	Client        *clientdto.ClientDTO                 `json:"client"`
+	AddressID     uuid.UUID                            `json:"address_id"`
+	Address       *addressdto.AddressDTO               `json:"address"`
+	DriverID      *uuid.UUID                           `json:"driver_id"`
+	Driver        *deliverydriverdto.DeliveryDriverDTO `json:"driver"`
+	OrderID       uuid.UUID                            `json:"order_id"`
 }
 
 type DeliveryTimeLogs struct {
@@ -41,15 +43,17 @@ func (o *OrderDeliveryDTO) FromDomain(delivery *orderentity.OrderDelivery) {
 	*o = OrderDeliveryDTO{
 		ID: delivery.ID,
 		OrderDeliveryCommonAttributes: OrderDeliveryCommonAttributes{
-			Status:      delivery.Status,
-			DeliveryTax: delivery.DeliveryTax,
-			ClientID:    delivery.ClientID,
-			Client:      &clientdto.ClientDTO{},
-			AddressID:   delivery.AddressID,
-			Address:     &addressdto.AddressDTO{},
-			DriverID:    delivery.DriverID,
-			Driver:      &deliverydriverdto.DeliveryDriverDTO{},
-			OrderID:     delivery.OrderID,
+			Status:        delivery.Status,
+			DeliveryTax:   delivery.DeliveryTax,
+			Change:        delivery.Change,
+			PaymentMethod: string(delivery.PaymentMethod),
+			ClientID:      delivery.ClientID,
+			Client:        &clientdto.ClientDTO{},
+			AddressID:     delivery.AddressID,
+			Address:       &addressdto.AddressDTO{},
+			DriverID:      delivery.DriverID,
+			Driver:        &deliverydriverdto.DeliveryDriverDTO{},
+			OrderID:       delivery.OrderID,
 		},
 		DeliveryTimeLogs: DeliveryTimeLogs{
 			PendingAt:   delivery.PendingAt,
