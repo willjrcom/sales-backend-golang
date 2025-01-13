@@ -12,8 +12,8 @@ var (
 )
 
 type OrderChangeCreateDTO struct {
-	Change float64               `json:"total_paid"`
-	Method orderentity.PayMethod `json:"method"`
+	Change        float64               `json:"change"`
+	PaymentMethod orderentity.PayMethod `json:"payment_method"`
 }
 
 func (u *OrderChangeCreateDTO) validate() error {
@@ -30,7 +30,7 @@ func (u *OrderChangeCreateDTO) validatePayMethod() error {
 	}
 
 	for _, method := range orderentity.GetAllPayMethod() {
-		if method == u.Method {
+		if method == u.PaymentMethod {
 			return nil
 		}
 
@@ -44,5 +44,5 @@ func (u *OrderChangeCreateDTO) ToDomain() (float64, *orderentity.PayMethod, erro
 		return 0, nil, err
 	}
 
-	return u.Change, &u.Method, nil
+	return u.Change, &u.PaymentMethod, nil
 }
