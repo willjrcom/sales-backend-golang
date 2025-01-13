@@ -39,6 +39,7 @@ type IUpdateService interface {
 	OrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
 	UpdateDeliveryAddress(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
 	UpdateDeliveryDriver(ctx context.Context, dto *entitydto.IDRequest, orderDelivery *orderdeliverydto.DeliveryOrderDriverUpdateDTO) (err error)
+	UpdateDeliveryChange(ctx context.Context, dtoId *entitydto.IDRequest, dtoDelivery *orderdeliverydto.OrderChangeCreateDTO) (err error)
 }
 
 type IStatusService interface {

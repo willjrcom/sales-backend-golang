@@ -29,6 +29,7 @@ func NewHandlerOrderDelivery(orderService orderdeliveryusecases.IService) *handl
 		c.Post("/update/ship", h.handlerShipOrderDelivery)
 		c.Post("/update/delivery/{id}", h.handlerDeliveryOrderDelivery)
 		c.Put("/update/driver/{id}", h.handlerUpdateDriver)
+		c.Put("/update/change/{id}", h.handlerUpdateChange)
 		c.Put("/update/address/{id}", h.handlerUpdateDeliveryAddress)
 	})
 
@@ -182,6 +183,32 @@ func (h *handlerOrderDeliveryImpl) handlerUpdateDriver(w http.ResponseWriter, r 
 	}
 
 	if err := h.IService.UpdateDeliveryDriver(ctx, dtoId, dtoDelivery); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerOrderDeliveryImpl) handlerUpdateChange(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		return
+	}
+
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+
+	dtoDelivery := &orderdeliverydto.OrderChangeCreateDTO{}
+	if err := jsonpkg.ParseBody(r, dtoDelivery); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	if err := h.IService.UpdateDeliveryChange(ctx, dtoId, dtoDelivery); err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return
 	}
