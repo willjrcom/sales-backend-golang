@@ -98,6 +98,19 @@ func (o *Order) FromDomain(order *orderentity.Order) {
 	o.OrderType.Table.FromDomain(order.Table)
 	o.OrderType.Pickup.FromDomain(order.Pickup)
 	o.OrderDetail.Attendant.FromDomain(order.Attendant)
+
+	if order.Delivery == nil {
+		o.OrderType.Delivery = nil
+	}
+	if order.Table == nil {
+		o.OrderType.Table = nil
+	}
+	if order.Pickup == nil {
+		o.OrderType.Pickup = nil
+	}
+	if order.Attendant == nil {
+		o.OrderDetail.Attendant = nil
+	}
 }
 
 func (o *Order) ToDomain() *orderentity.Order {

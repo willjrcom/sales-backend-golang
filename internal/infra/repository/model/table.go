@@ -24,12 +24,7 @@ func (t *Table) FromDomain(table *tableentity.Table) {
 		return
 	}
 	*t = Table{
-		Entity: entitymodel.Entity{
-			ID:        table.ID,
-			CreatedAt: table.CreatedAt,
-			UpdatedAt: table.UpdatedAt,
-			DeletedAt: table.DeletedAt,
-		},
+		Entity: entitymodel.FromDomain(table.Entity),
 		TableCommonAttributes: TableCommonAttributes{
 			Name:        table.Name,
 			IsAvailable: table.IsAvailable,

@@ -34,12 +34,7 @@ func (t *OrderTable) FromDomain(table *orderentity.OrderTable) {
 		return
 	}
 	*t = OrderTable{
-		Entity: entitymodel.Entity{
-			ID:        table.ID,
-			CreatedAt: table.CreatedAt,
-			UpdatedAt: table.UpdatedAt,
-			DeletedAt: table.DeletedAt,
-		},
+		Entity: entitymodel.FromDomain(table.Entity),
 		OrderTableCommonAttributes: OrderTableCommonAttributes{
 			Name:    table.Name,
 			Contact: table.Contact,
