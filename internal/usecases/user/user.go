@@ -36,7 +36,7 @@ func (s *Service) CreateUser(ctx context.Context, dto *companydto.UserCreateDTO)
 		return nil, err
 	}
 
-	if id, _ := s.r.GetIDByEmail(ctx, user.Email); id != nil {
+	if id, _ := s.r.GetIDByEmailOrCPF(ctx, user.Email, user.Cpf); id != nil {
 		return nil, ErrUserAlreadyExists
 	}
 

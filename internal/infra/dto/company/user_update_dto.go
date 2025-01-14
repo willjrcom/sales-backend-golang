@@ -42,9 +42,6 @@ func (r *UserUpdateDTO) UpdateDomain(user *companyentity.User) error {
 	if r.Name != nil {
 		user.Name = *r.Name
 	}
-	if r.Cpf != nil {
-		user.Cpf = *r.Cpf
-	}
 	if r.Birthday != nil {
 		user.Birthday = r.Birthday
 	}

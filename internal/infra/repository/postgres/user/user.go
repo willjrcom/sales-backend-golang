@@ -220,6 +220,22 @@ func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (*uu
 	return &user.ID, nil
 }
 
+func (r *UserRepositoryBun) GetIDByEmailOrCPF(ctx context.Context, email string, cpf string) (*uuid.UUID, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	user := &model.User{}
+	if err := r.db.NewSelect().Model(user).Where("u.email = ? or u.cpf = ?", email, cpf).Column("id").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return &user.ID, nil
+}
+
 func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID) (*model.User, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
