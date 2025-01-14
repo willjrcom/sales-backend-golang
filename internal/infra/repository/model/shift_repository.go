@@ -7,6 +7,6 @@ type ShiftRepository interface {
 	UpdateShift(ctx context.Context, shift *Shift) (err error)
 	DeleteShift(ctx context.Context, id string) (err error)
 	GetShiftByID(ctx context.Context, id string) (shift *Shift, err error)
-	GetOpenedShift(ctx context.Context) (*Shift, error)
+	GetCurrentShift(ctx context.Context) (*Shift, error)
 	GetAllShifts(ctx context.Context) ([]Shift, error)
 }

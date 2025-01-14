@@ -27,7 +27,7 @@ func NewHandlerShift(shiftService *shiftusecases.Service) *handler.Handler {
 		c.Post("/open", h.handlerOpenShift)
 		c.Put("/close", h.handlerCloseShift)
 		c.Get("/{id}", h.handlerGetShiftByID)
-		c.Get("/current", h.handlerGetOpenedShift)
+		c.Get("/current", h.handlerGetCurrentShift)
 		c.Get("/all", h.handlerGetAllShifts)
 	})
 
@@ -90,10 +90,10 @@ func (h *handlerShiftImpl) handlerGetShiftByID(w http.ResponseWriter, r *http.Re
 	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: shift})
 }
 
-func (h *handlerShiftImpl) handlerGetOpenedShift(w http.ResponseWriter, r *http.Request) {
+func (h *handlerShiftImpl) handlerGetCurrentShift(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	shift, err := h.s.GetOpenedShift(ctx)
+	shift, err := h.s.GetCurrentShift(ctx)
 	if err != nil {
 		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
 		return

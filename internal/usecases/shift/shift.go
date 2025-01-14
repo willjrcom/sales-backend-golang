@@ -31,7 +31,7 @@ func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.ShiftUpdateOpenDT
 		return uuid.Nil, err
 	}
 
-	if openedShift, _ := s.r.GetOpenedShift(ctx); openedShift != nil {
+	if openedShift, _ := s.r.GetCurrentShift(ctx); openedShift != nil {
 		return uuid.Nil, ErrShiftAlreadyOpened
 	}
 
@@ -53,7 +53,7 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 		return err
 	}
 
-	shiftModel, err := s.r.GetOpenedShift(ctx)
+	shiftModel, err := s.r.GetCurrentShift(ctx)
 
 	if err != nil {
 		return err
@@ -87,8 +87,8 @@ func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IDRequest) 
 	return shiftDTO, nil
 }
 
-func (s *Service) GetOpenedShift(ctx context.Context) (shiftDTO *shiftdto.ShiftDTO, err error) {
-	shiftModel, err := s.r.GetOpenedShift(ctx)
+func (s *Service) GetCurrentShift(ctx context.Context) (shiftDTO *shiftdto.ShiftDTO, err error) {
+	shiftModel, err := s.r.GetCurrentShift(ctx)
 	if err != nil {
 		return nil, err
 	}

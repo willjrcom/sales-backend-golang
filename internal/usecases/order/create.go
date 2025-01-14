@@ -10,7 +10,7 @@ import (
 )
 
 func (s *Service) CreateDefaultOrder(ctx context.Context) (uuid.UUID, error) {
-	shiftModel, err := s.rs.GetOpenedShift(ctx)
+	shiftModel, err := s.rs.GetCurrentShift(ctx)
 	if err != nil {
 		return uuid.Nil, errors.New("must be opened shift")
 	}

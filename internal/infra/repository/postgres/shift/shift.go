@@ -80,7 +80,7 @@ func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*mode
 	return shift, nil
 }
 
-func (r *ShiftRepositoryBun) GetOpenedShift(ctx context.Context) (*model.Shift, error) {
+func (r *ShiftRepositoryBun) GetCurrentShift(ctx context.Context) (*model.Shift, error) {
 	shift := &model.Shift{}
 
 	r.mu.Lock()
