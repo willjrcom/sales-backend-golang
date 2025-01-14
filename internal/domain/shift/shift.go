@@ -18,11 +18,16 @@ type Shift struct {
 type ShiftCommonAttributes struct {
 	CurrentOrderNumber int
 	Orders             []orderentity.Order
-	Redeems            []string
-	StartChange        float32
-	EndChange          *float32
+	Redeems            []Redeem
+	StartChange        float64
+	EndChange          *float64
 	AttendantID        *uuid.UUID
 	Attendant          *employeeentity.Employee
+}
+
+type Redeem struct {
+	Name  string
+	Value float64
 }
 
 type ShiftTimeLogs struct {
@@ -30,7 +35,7 @@ type ShiftTimeLogs struct {
 	ClosedAt *time.Time
 }
 
-func NewShift(startChange float32) *Shift {
+func NewShift(startChange float64) *Shift {
 	shift := &Shift{
 		Entity: entity.NewEntity(),
 		ShiftCommonAttributes: ShiftCommonAttributes{
@@ -45,7 +50,7 @@ func NewShift(startChange float32) *Shift {
 	return shift
 }
 
-func (s *Shift) CloseShift(endChange float32) (err error) {
+func (s *Shift) CloseShift(endChange float64) (err error) {
 	s.EndChange = &endChange
 	s.ClosedAt = &time.Time{}
 	*s.ClosedAt = time.Now().UTC()
@@ -58,4 +63,8 @@ func (s *Shift) IncrementCurrentOrder() {
 
 func (s *Shift) IsClosed() bool {
 	return s.EndChange != nil
+}
+
+func (s *Shift) AddRedeem(redeem *Redeem) {
+	s.Redeems = append(s.Redeems, *redeem)
 }

@@ -29,6 +29,7 @@ func NewHandlerShift(shiftService *shiftusecases.Service) *handler.Handler {
 		c.Get("/{id}", h.handlerGetShiftByID)
 		c.Get("/current", h.handlerGetCurrentShift)
 		c.Get("/all", h.handlerGetAllShifts)
+		c.Put("/redeem/add", h.handlerAddRedeem)
 	})
 
 	return handler.NewHandler("/shift", c)
@@ -110,4 +111,22 @@ func (h *handlerShiftImpl) handlerGetAllShifts(w http.ResponseWriter, r *http.Re
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: shifts})
 	}
+}
+
+func (h *handlerShiftImpl) handlerAddRedeem(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	dtoRedeem := &shiftdto.ShiftRedeemCreateDTO{}
+	if err := jsonpkg.ParseBody(r, dtoRedeem); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	if err := h.s.AddRedeem(ctx, dtoRedeem); err != nil {
+		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+
 }

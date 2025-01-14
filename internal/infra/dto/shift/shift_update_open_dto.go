@@ -9,7 +9,7 @@ var (
 )
 
 type ShiftUpdateOpenDTO struct {
-	StartChange *float32 `json:"start_change"`
+	StartChange *float64 `json:"start_change"`
 }
 
 func (o *ShiftUpdateOpenDTO) validate() (err error) {
@@ -20,7 +20,7 @@ func (o *ShiftUpdateOpenDTO) validate() (err error) {
 	return
 }
 
-func (o *ShiftUpdateOpenDTO) ToDomain() (startChange float32, err error) {
+func (o *ShiftUpdateOpenDTO) ToDomain() (startChange float64, err error) {
 	if err = o.validate(); err != nil {
 		return 0, err
 	}

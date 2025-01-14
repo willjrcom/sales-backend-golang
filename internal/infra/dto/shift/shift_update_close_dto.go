@@ -9,7 +9,7 @@ var (
 )
 
 type ShiftUpdateCloseDTO struct {
-	EndChange *float32 `json:"end_change"`
+	EndChange *float64 `json:"end_change"`
 }
 
 func (o *ShiftUpdateCloseDTO) validate() (err error) {
@@ -20,7 +20,7 @@ func (o *ShiftUpdateCloseDTO) validate() (err error) {
 	return
 }
 
-func (o *ShiftUpdateCloseDTO) ToDomain() (endChange float32, err error) {
+func (o *ShiftUpdateCloseDTO) ToDomain() (endChange float64, err error) {
 	if err = o.validate(); err != nil {
 		return 0, err
 	}

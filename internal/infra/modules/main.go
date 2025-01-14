@@ -18,7 +18,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	employeeRepository, employeeService, _ := NewEmployeeModule(db, chi)
 	contactRepository, _, _ := NewContactModule(db, chi)
 
-	shiftRepository, _, _ := NewShiftModule(db, chi)
+	shiftRepository, shiftService, _ := NewShiftModule(db, chi)
 
 	groupItemRepository, groupItemService, _ := NewGroupItemModule(db, chi)
 	itemRepository, itemService, _ := NewItemModule(db, chi)
@@ -60,5 +60,6 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	orderTableService.AddDependencies(tableRepository, orderService)
 	orderPickupService.AddDependencies(orderService)
 
+	shiftService.AddDependencies(employeeService)
 	companyService.AddDependencies(addressRepository, *schemaService, userRepository, *userService)
 }

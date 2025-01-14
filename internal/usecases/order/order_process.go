@@ -2,6 +2,7 @@ package orderusecases
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
@@ -56,7 +57,12 @@ func (s *OrderProcessService) CreateProcess(ctx context.Context, dto *orderproce
 }
 
 func (s *OrderProcessService) StartProcess(ctx context.Context, dtoID *entitydto.IDRequest) error {
-	user := ctx.Value(companyentity.UserValue("user")).(companyentity.User)
+	user, ok := ctx.Value(companyentity.UserValue("user")).(companyentity.User)
+
+	if !ok {
+		return errors.New("context user not found")
+	}
+
 	employee, err := s.se.GetEmployeeByUserID(ctx, entitydto.NewIdRequest(user.ID))
 	if err != nil {
 		return err

@@ -20,11 +20,16 @@ type Shift struct {
 type ShiftCommonAttributes struct {
 	CurrentOrderNumber int        `bun:"current_order_number,notnull"`
 	Orders             []Order    `bun:"rel:has-many,join:id=shift_id"`
-	Redeems            []string   `bun:"redeems,type:json"`
-	StartChange        float32    `bun:"start_change"`
-	EndChange          *float32   `bun:"end_change"`
+	Redeems            []Redeem   `bun:"redeems,type:jsonb"`
+	StartChange        float64    `bun:"start_change"`
+	EndChange          *float64   `bun:"end_change"`
 	AttendantID        *uuid.UUID `bun:"column:attendant_id,type:uuid"`
 	Attendant          *Employee  `bun:"rel:belongs-to"`
+}
+
+type Redeem struct {
+	Name  string  `bun:"name,notnull"`
+	Value float64 `bun:"value,notnull"`
 }
 
 type ShiftTimeLogs struct {
@@ -47,7 +52,7 @@ func (s *Shift) FromDomain(shift *shiftentity.Shift) {
 			StartChange:        shift.StartChange,
 			EndChange:          shift.EndChange,
 			AttendantID:        shift.AttendantID,
-			Redeems:            shift.Redeems,
+			Redeems:            []Redeem{},
 			Orders:             []Order{},
 			Attendant:          &Employee{},
 		},
@@ -57,6 +62,14 @@ func (s *Shift) FromDomain(shift *shiftentity.Shift) {
 		o := Order{}
 		o.FromDomain(&order)
 		s.Orders = append(s.Orders, o)
+	}
+
+	for _, redeem := range shift.Redeems {
+		r := Redeem{
+			Name:  redeem.Name,
+			Value: redeem.Value,
+		}
+		s.Redeems = append(s.Redeems, r)
 	}
 
 	s.Attendant.FromDomain(shift.Attendant)
@@ -77,7 +90,7 @@ func (s *Shift) ToDomain() *shiftentity.Shift {
 			StartChange:        s.StartChange,
 			EndChange:          s.EndChange,
 			AttendantID:        s.AttendantID,
-			Redeems:            s.Redeems,
+			Redeems:            []shiftentity.Redeem{},
 			Orders:             []orderentity.Order{},
 			Attendant:          s.Attendant.ToDomain(),
 		},
@@ -85,6 +98,13 @@ func (s *Shift) ToDomain() *shiftentity.Shift {
 
 	for _, order := range s.Orders {
 		shift.Orders = append(shift.Orders, *order.ToDomain())
+	}
+
+	for _, redeem := range s.Redeems {
+		shift.Redeems = append(shift.Redeems, shiftentity.Redeem{
+			Name:  redeem.Name,
+			Value: redeem.Value,
+		})
 	}
 
 	return shift

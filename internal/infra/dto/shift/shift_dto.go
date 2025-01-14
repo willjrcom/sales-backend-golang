@@ -18,9 +18,9 @@ type ShiftDTO struct {
 type ShiftCommonAttributes struct {
 	CurrentOrderNumber int                      `json:"current_order_number"`
 	Orders             []orderdto.OrderDTO      `json:"orders"`
-	Redeems            []string                 `json:"redeems"`
-	StartChange        float32                  `json:"start_change"`
-	EndChange          *float32                 `json:"end_change"`
+	Redeems            []RedeemDTO              `json:"redeems"`
+	StartChange        float64                  `json:"start_change"`
+	EndChange          *float64                 `json:"end_change"`
 	AttendantID        *uuid.UUID               `json:"attendant_id"`
 	Attendant          *employeedto.EmployeeDTO `json:"attendant"`
 }
@@ -43,7 +43,7 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 		ShiftCommonAttributes: ShiftCommonAttributes{
 			CurrentOrderNumber: shift.CurrentOrderNumber,
 			Orders:             []orderdto.OrderDTO{},
-			Redeems:            shift.Redeems,
+			Redeems:            []RedeemDTO{},
 			StartChange:        shift.StartChange,
 			EndChange:          shift.EndChange,
 			AttendantID:        shift.AttendantID,
@@ -57,10 +57,19 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 		s.Orders = append(s.Orders, o)
 	}
 
+	for _, redeem := range shift.Redeems {
+		r := RedeemDTO{}
+		r.FromDomain(&redeem)
+		s.Redeems = append(s.Redeems, r)
+	}
+
 	s.Attendant.FromDomain(shift.Attendant)
 
 	if len(shift.Orders) == 0 {
 		s.Orders = nil
+	}
+	if len(shift.Redeems) == 0 {
+		s.Redeems = nil
 	}
 	if shift.Attendant == nil {
 		s.Attendant = nil
