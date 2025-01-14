@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -162,28 +163,44 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 			return uuid.Nil, err
 		}
 
-		groupItem, err := s.sgi.GetGroupByID(ctx, entityDtoID)
+		groupItemDTO, err := s.sgi.GetGroupByID(ctx, entityDtoID)
 		if err != nil {
 			return uuid.Nil, err
 		}
 
-		orderModel, err := s.ro.GetOrderById(ctx, groupItem.OrderID.String())
+		orderModel, err := s.ro.GetOrderById(ctx, groupItemDTO.OrderID.String())
 		if err != nil {
 			return uuid.Nil, err
 		}
 
 		order := orderModel.ToDomain()
+		orderIsReady := true
 
-		// Update order status
-		if err := order.ReadyOrder(); err != nil {
-			return uuid.Nil, err
+		// Search not ready group item
+		for _, groupItem := range order.GroupItems {
+			// Next group item
+			if groupItem.ID == process.GroupItemID {
+				continue
+			}
+
+			// Is not ready
+			if groupItem.Status != orderentity.StatusGroupReady {
+				orderIsReady = false
+			}
 		}
 
-		orderModel.FromDomain(order)
-		if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
-			return uuid.Nil, err
+		if orderIsReady {
+			// Update order status
+			if err := order.ReadyOrder(); err != nil {
+				return uuid.Nil, err
+			}
+
+			orderModel.FromDomain(order)
+			if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
+				return uuid.Nil, err
+			}
+			return uuid.Nil, nil
 		}
-		return uuid.Nil, nil
 	}
 
 	startQueueInput := &orderqueuedto.QueueCreateDTO{
