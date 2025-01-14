@@ -25,7 +25,15 @@ func GetCoordinates(address *addressentity.AddressCommonAttributes) (*addressent
 
 	// Codifica o endereço na URL
 	params := url.Values{}
-	params.Add("q", address.Street+" "+address.Number+", "+address.Neighborhood+", "+address.City+", "+address.UF)
+	q := address.Street + " " + address.Number + ", " + address.Neighborhood + ", " + address.City + ", " + address.UF
+
+	if address.Cep != "" {
+		q += ", " + address.Cep + ", Brasil"
+	} else {
+		q += ", Brasil"
+	}
+
+	params.Add("q", q)
 	params.Add("key", apiKey)
 
 	// Constrói a URL completa
