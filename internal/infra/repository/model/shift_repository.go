@@ -1,6 +1,8 @@
 package model
 
-import "context"
+import (
+	"context"
+)
 
 type ShiftRepository interface {
 	CreateShift(ctx context.Context, shift *Shift) (err error)
@@ -9,4 +11,5 @@ type ShiftRepository interface {
 	GetShiftByID(ctx context.Context, id string) (shift *Shift, err error)
 	GetCurrentShift(ctx context.Context) (*Shift, error)
 	GetAllShifts(ctx context.Context) ([]Shift, error)
+	IncrementCurrentOrder(id string) (int, error)
 }

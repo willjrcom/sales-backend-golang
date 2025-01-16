@@ -113,3 +113,44 @@ func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context) ([]model.Shift, e
 
 	return Shifts, nil
 }
+
+func (s *ShiftRepositoryBun) IncrementCurrentOrder(id string) (int, error) {
+	ctx := context.Background()
+
+	// Inicia a transação
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	// Busca o turno com "FOR UPDATE" para bloquear a linha
+	shift := new(model.Shift)
+	err = tx.NewSelect().
+		Model(shift).
+		Where("id = ?", id).
+		For("UPDATE"). // bloqueia a linha durante a transação
+		Scan(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	// Incrementa o número do pedido
+	shift.CurrentOrderNumber++
+
+	// Atualiza o registro
+	_, err = tx.NewUpdate().
+		Model(shift).
+		Where("id = ?", id).
+		Exec(ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	// Commit da transação
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+
+	return shift.CurrentOrderNumber, nil
+}

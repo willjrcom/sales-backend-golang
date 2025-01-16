@@ -50,7 +50,7 @@ func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.ShiftUpdateOpenDT
 
 	employee, err := s.se.GetEmployeeByUserID(ctx, entitydto.NewIdRequest(user.ID))
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, errors.New("user must be an employee")
 	}
 
 	shift := shiftentity.NewShift(startChange)
