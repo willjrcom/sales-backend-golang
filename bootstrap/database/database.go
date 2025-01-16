@@ -20,44 +20,25 @@ import (
 
 type Environment string
 
-func ConnectLocalDB(ctx context.Context) string {
+func ConnectDB(ctx context.Context) string {
 	dbHost := os.Getenv("DB_HOST")
-	if dbHost == "" {
-		dbHost = "localhost" // Valor padrão para desenvolvimento local
+	if dbHost != "" {
+		return dbHost
 	}
 
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		"admin",
 		"admin",
-		dbHost,
+		"localhost",
 		"5432",
 		"sales-db",
 	)
 }
 
-func ConnectRdsDB(ctx context.Context) string {
-	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?",
-		"postgres",
-		"48279111",
-		"sales-backend-db1.c7ou20us0aar.us-east-1.rds.amazonaws.com",
-		"5432",
-		"salesBackendDB",
-	)
-}
-
 func NewPostgreSQLConnection() *bun.DB {
 	ctx := context.Background()
-	// Prepare connection string parameterized
-	connectionParams := ""
-	environment := ctx.Value(Environment("environment"))
-	fmt.Print(environment)
-	if environment == "prod" {
-		connectionParams = ConnectRdsDB(ctx)
-	} else {
-		connectionParams = ConnectLocalDB(ctx)
-	}
+	connectionParams := ConnectDB(ctx)
 
 	// Connect to database doing a PING
 	db := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(connectionParams), pgdriver.WithTimeout(time.Second*30)))
