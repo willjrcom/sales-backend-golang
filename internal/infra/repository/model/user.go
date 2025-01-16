@@ -43,6 +43,7 @@ func (u *User) FromDomain(user *companyentity.User) {
 				Address:  &PublicAddress{},
 			},
 			Password:  user.Password,
+			Hash:      user.Hash,
 			Companies: []Company{},
 		},
 	}

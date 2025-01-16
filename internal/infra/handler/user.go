@@ -43,7 +43,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 		fmt.Sprintf("%s/new", route),
 		fmt.Sprintf("%s/login", route),
 		fmt.Sprintf("%s/access", route),
-		fmt.Sprintf("%s/update-password", route),
+		fmt.Sprintf("%s/update/password", route),
 		fmt.Sprintf("%s/forget-password", route),
 	}
 
