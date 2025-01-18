@@ -21,11 +21,7 @@ func (r *SchemaRepositoryBun) NewSchema(ctx context.Context) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.RegisterModels(ctx, r.db); err != nil {
-		return err
-	}
-
-	if err := database.LoadCompanyModels(ctx, r.db); err != nil {
+	if err := database.CreateNewCompanySchema(ctx, r.db); err != nil {
 		return err
 	}
 

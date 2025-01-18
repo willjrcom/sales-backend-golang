@@ -33,7 +33,7 @@ func (k *KafkaProducer) NewMessage(ctx context.Context, topic string, message in
 		return errors.New("Failed to marshal message: " + err.Error())
 	}
 
-	schema, err := database.GetSchema(ctx)
+	schema, err := database.GetCurrentSchema(ctx)
 	if err != nil {
 		return err
 	}

@@ -22,7 +22,7 @@ var HttpserverCmd = &cobra.Command{
 		cmd.Println("httpserver called")
 		port, _ := cmd.Flags().GetString("port")
 		environment, _ := cmd.Flags().GetString("environment")
-		fmt.Print(environment)
+		fmt.Println(environment)
 		flag.Parse()
 		chi := server.NewServerChi()
 

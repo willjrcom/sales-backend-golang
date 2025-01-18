@@ -277,7 +277,7 @@ func (r *ProductCategoryRepositoryBun) GetAllCategoriesWithProcessRulesAndOrderP
 		return nil, err
 	}
 
-	schemaName, err := database.GetSchema(ctx)
+	schemaName, err := database.GetCurrentSchema(ctx)
 	if err != nil {
 		return nil, err
 	}
