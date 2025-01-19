@@ -152,7 +152,7 @@ func (s *Service) Access(ctx context.Context, dto *companydto.UserSchemaDTO, acc
 		return "", err
 	}
 
-	schemasInterface := jwtservice.GetSchemasFromToken(accessToken)
+	schemasInterface := jwtservice.GetSchemasFromAccessToken(accessToken)
 
 	if len(schemasInterface) == 0 {
 		return "", errors.New("schemas not found in token")

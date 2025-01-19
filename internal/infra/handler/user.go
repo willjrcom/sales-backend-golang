@@ -38,7 +38,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 		c.Post("/access", h.handlerAccess)
 		c.Post("/search", h.handlerSearchUser)
 		c.Delete("/", h.handlerDeleteUser)
-		// c.Get("/refresh-access-token", h.handlerRefreshAccessToken)
+		c.Get("/refresh-access-token", h.handlerRefreshAccessToken)
 	})
 
 	unprotectedRoutes := []string{
@@ -139,19 +139,25 @@ func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	token, err := h.s.LoginUser(ctx, dtoUser)
+	accessToken, err := h.s.LoginUser(ctx, dtoUser)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, token)
+	jsonpkg.ResponseJson(w, r, http.StatusOK, accessToken)
 }
 
 func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	headerToken, _ := headerservice.GetAccessTokenHeader(r)
-	accessToken, err := jwtservice.ValidateToken(ctx, headerToken)
+
+	token, err := headerservice.GetAnyToken(r)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
+		return
+	}
+
+	validToken, err := jwtservice.ValidateToken(ctx, token)
 
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
@@ -164,13 +170,13 @@ func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	token, err := h.s.Access(ctx, dtoSchema, accessToken)
+	IDToken, err := h.s.Access(ctx, dtoSchema, validToken)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, token)
+	jsonpkg.ResponseJson(w, r, http.StatusOK, IDToken)
 }
 
 func (h *handlerUserImpl) handlerSearchUser(w http.ResponseWriter, r *http.Request) {
@@ -208,15 +214,26 @@ func (h *handlerUserImpl) handlerDeleteUser(w http.ResponseWriter, r *http.Reque
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-// func(h *handlerUserImpl) handlerRefreshAccessToken(w http.ResponseWriter, r *http.Request) {
-// 	ctx := r.Context()
-// 	headerToken, _ := headerservice.GetAccessTokenHeader(r)
-// 	accessToken, err := jwtservice.ValidateToken(ctx, headerToken)
+func (h *handlerUserImpl) handlerRefreshAccessToken(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	accessToken, err := headerservice.GetAccessTokenFromHeader(r)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
+		return
+	}
 
-// 	if err != nil {
-// 		jsonpkg.ResponseJson(w, r, http.StatusUnauthorized, jsonpkg.Error{Message: err.Error()})
-// 		return
-// 	}
+	validToken, err := jwtservice.ValidateToken(ctx, accessToken)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
+		return
+	}
 
-// 	token, err := h.s.RefreshAccessToken(ctx, accessToken)
-// }
+	currentSchema := jwtservice.GetSchemaFromIDToken(validToken)
+	newIDToken, err := jwtservice.CreateIDToken(validToken, currentSchema)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, newIDToken)
+}

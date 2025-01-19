@@ -5,7 +5,14 @@ import (
 	"net/http"
 )
 
-func GetAccessTokenHeader(r *http.Request) (string, error) {
+func GetAnyToken(r *http.Request) (string, error) {
+	if accessToken, err := GetAccessTokenFromHeader(r); err == nil {
+		return accessToken, nil
+	}
+
+	return GetIDTokenFromHeader(r)
+}
+func GetAccessTokenFromHeader(r *http.Request) (string, error) {
 	accessToken := r.Header.Get("access-token")
 
 	if accessToken == "" {
@@ -15,7 +22,7 @@ func GetAccessTokenHeader(r *http.Request) (string, error) {
 	return accessToken, nil
 }
 
-func GetIDTokenHeader(r *http.Request) (string, error) {
+func GetIDTokenFromHeader(r *http.Request) (string, error) {
 	idToken := r.Header.Get("id-token")
 
 	if idToken == "" {

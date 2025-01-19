@@ -53,11 +53,11 @@ func ValidateToken(ctx context.Context, tokenString string) (*jwt.Token, error) 
 	})
 }
 
-func GetSchemasFromToken(token *jwt.Token) []interface{} {
+func GetSchemasFromAccessToken(token *jwt.Token) []interface{} {
 	return token.Claims.(jwt.MapClaims)["available_user_schemas"].([]interface{})
 }
 
-func GetSchemaFromToken(token *jwt.Token) string {
+func GetSchemaFromIDToken(token *jwt.Token) string {
 	return token.Claims.(jwt.MapClaims)["current_schema"].(string)
 }
 

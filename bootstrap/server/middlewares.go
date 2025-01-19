@@ -39,7 +39,7 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 			// Executar a lógica desejada apenas para os endpoints selecionados
 			fmt.Println("Antes de chamar o endpoint:", r.URL.Path)
 
-			tokenString, err := headerservice.GetIDTokenHeader(r)
+			tokenString, err := headerservice.GetIDTokenFromHeader(r)
 
 			if err != nil {
 				jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
@@ -53,7 +53,7 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 				return
 			}
 
-			ctx = context.WithValue(ctx, model.Schema("schema"), jwtservice.GetSchemaFromToken(token))
+			ctx = context.WithValue(ctx, model.Schema("schema"), jwtservice.GetSchemaFromIDToken(token))
 
 			userID := jwtservice.GetUserIDFromToken(token)
 			ctx = context.WithValue(ctx, companyentity.UserValue("user_id"), *userID)
