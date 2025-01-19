@@ -2,19 +2,17 @@ package jwtservice
 
 import (
 	"context"
-	"encoding/json"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 )
-
-var secretKey = "sua_chave_secreta"
 
 func CreateAccessToken(user *companyentity.User) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id":                user.ID,
-		"user":                   user,
 		"available_user_schemas": user.GetSchemas(),
 		"sub":                    "access-token",
 		"exp":                    time.Now().UTC().Add(time.Minute * 5).Unix(),
@@ -22,6 +20,8 @@ func CreateAccessToken(user *companyentity.User) (string, error) {
 
 	// Criar um token JWT usando a chave secreta
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	secretKey := os.Getenv("JWT_SECRET_KEY")
 	return token.SignedString([]byte(secretKey))
 }
 
@@ -30,7 +30,6 @@ func CreateIDToken(accessToken *jwt.Token, schema string) (string, error) {
 
 	claims := jwt.MapClaims{
 		"user_id":        oldClaims["user_id"],
-		"user":           oldClaims["user"],
 		"current_schema": schema,
 		"sub":            "id-token",
 		"exp":            time.Now().UTC().Add(time.Hour * 6).Unix(),
@@ -38,6 +37,8 @@ func CreateIDToken(accessToken *jwt.Token, schema string) (string, error) {
 
 	// Criar um token JWT usando a chave secreta
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	secretKey := os.Getenv("JWT_SECRET_KEY")
+
 	return token.SignedString([]byte(secretKey))
 }
 
@@ -46,6 +47,8 @@ func ValidateToken(ctx context.Context, tokenString string) (*jwt.Token, error) 
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, jwt.ErrSignatureInvalid
 		}
+
+		secretKey := os.Getenv("JWT_SECRET_KEY")
 		return []byte(secretKey), nil
 	})
 }
@@ -58,23 +61,16 @@ func GetSchemaFromToken(token *jwt.Token) string {
 	return token.Claims.(jwt.MapClaims)["current_schema"].(string)
 }
 
-func GetUserFromToken(token *jwt.Token) *companyentity.User {
-	user := &companyentity.User{}
+func GetUserIDFromToken(token *jwt.Token) *uuid.UUID {
 	claims := token.Claims.(jwt.MapClaims)
 
-	userMap, ok := claims["user"]
+	userID, ok := claims["user_id"]
 	if !ok {
 		return nil
 	}
 
-	userJson, err := json.Marshal(userMap) // .(interface{})
-	if err != nil {
-		return nil
-	}
+	userIDString := userID.(string)
 
-	if err := json.Unmarshal(userJson, user); err != nil {
-		return nil
-	}
-
-	return user
+	userIDUUID := uuid.MustParse(userIDString)
+	return &userIDUUID
 }
