@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -39,17 +40,17 @@ func (h *handlerDeliveryDriverImpl) handlerCreateDeliveryDriver(w http.ResponseW
 
 	dtoDeliveryDriver := &deliverydriverdto.DeliveryDriverCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoDeliveryDriver); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	id, err := h.s.CreateDeliveryDriver(ctx, dtoDeliveryDriver)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, id)
 }
 
 func (h *handlerDeliveryDriverImpl) handlerUpdateDeliveryDriver(w http.ResponseWriter, r *http.Request) {
@@ -58,7 +59,7 @@ func (h *handlerDeliveryDriverImpl) handlerUpdateDeliveryDriver(w http.ResponseW
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -66,12 +67,12 @@ func (h *handlerDeliveryDriverImpl) handlerUpdateDeliveryDriver(w http.ResponseW
 
 	dtoDeliveryDriver := &deliverydriverdto.DeliveryDriverUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoDeliveryDriver); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.UpdateDeliveryDriver(ctx, dtoId, dtoDeliveryDriver); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -84,14 +85,14 @@ func (h *handlerDeliveryDriverImpl) handlerDeleteDeliveryDriver(w http.ResponseW
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteDeliveryDriver(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -104,7 +105,7 @@ func (h *handlerDeliveryDriverImpl) handlerGetDeliveryDriver(w http.ResponseWrit
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -112,11 +113,11 @@ func (h *handlerDeliveryDriverImpl) handlerGetDeliveryDriver(w http.ResponseWrit
 
 	deliveryDriver, err := h.s.GetDeliveryDriverByID(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: deliveryDriver})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, deliveryDriver)
 }
 
 func (h *handlerDeliveryDriverImpl) handlerGetAllDeliveryDrivers(w http.ResponseWriter, r *http.Request) {
@@ -124,9 +125,9 @@ func (h *handlerDeliveryDriverImpl) handlerGetAllDeliveryDrivers(w http.Response
 
 	deliveryDrivers, err := h.s.GetAllDeliveryDrivers(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: deliveryDrivers})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, deliveryDrivers)
 }

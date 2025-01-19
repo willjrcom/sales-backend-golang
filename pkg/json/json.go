@@ -10,11 +10,21 @@ import (
 )
 
 type HTTPResponse struct {
-	Data interface{} `json:"data,omitempty"`
+	Success  bool        `json:"success"`
+	Data     interface{} `json:"data,omitempty"`
+	Error    *Error      `json:"error,omitempty"`
+	Metadata *Metadata   `json:"metadata,omitempty"`
 }
 
 type Error struct {
 	Message string `json:"message,omitempty"`
+}
+
+type Metadata struct {
+	Page         int `json:"page"`
+	PageSize     int `json:"page_size"`
+	TotalPages   int `json:"total_pages"`
+	TotalResults int `json:"total_results"`
 }
 
 func ParseBody(r *http.Request, output interface{}) error {
@@ -45,22 +55,51 @@ func ParseBody(r *http.Request, output interface{}) error {
 
 func ResponseJson(w http.ResponseWriter, r *http.Request, statusCode int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-	// Write status
 	w.WriteHeader(statusCode)
 
-	if statusCode == http.StatusNoContent || data == nil {
-		noContent, _ := json.Marshal(struct{}{})
-		w.Write([]byte(noContent))
+	response := &HTTPResponse{
+		Success: true,
+		Data:    data,
+	}
+
+	// Serializa a resposta para JSON
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		// Erro na serialização do JSON
+		http.Error(w, "Internal Server Error: failed to serialize response", http.StatusInternalServerError)
 		return
 	}
 
-	if jsonResponse, err := json.Marshal(data); err != nil {
-		w.Write([]byte("Internal Server Error: " + err.Error()))
-		return
+	// Escreve o JSON no body da resposta
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		// Loga o erro de escrita no body (não é possível alterar a resposta após WriteHeader)
+		w.Write([]byte("Failed to write response: " + err.Error()))
+	}
+}
 
-	} else if _, err = w.Write(jsonResponse); err != nil {
-		w.Write([]byte("Internal Server Error: " + err.Error()))
+func ResponseErrorJson(w http.ResponseWriter, r *http.Request, statusCode int, err error) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(statusCode)
+
+	response := &HTTPResponse{
+		Success: true,
+		Error: &Error{
+			Message: err.Error(),
+		},
+	}
+
+	// Serializa a resposta para JSON
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		// Erro na serialização do JSON
+		http.Error(w, "Internal Server Error: failed to serialize response", http.StatusInternalServerError)
 		return
+	}
+
+	// Escreve o JSON no body da resposta
+	if _, err = w.Write(jsonResponse); err != nil {
+		// Loga o erro de escrita no body (não é possível alterar a resposta após WriteHeader)
+		w.Write([]byte("Failed to write response: " + err.Error()))
 	}
 }

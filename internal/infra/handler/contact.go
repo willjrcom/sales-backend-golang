@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -37,7 +38,7 @@ func (h *handlerContactImpl) handlerGetContactById(w http.ResponseWriter, r *htt
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -45,11 +46,11 @@ func (h *handlerContactImpl) handlerGetContactById(w http.ResponseWriter, r *htt
 
 	contact, err := h.s.GetContactById(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: contact})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, contact)
 }
 
 func (h *handlerContactImpl) handlerFtSearchContacts(w http.ResponseWriter, r *http.Request) {
@@ -57,15 +58,15 @@ func (h *handlerContactImpl) handlerFtSearchContacts(w http.ResponseWriter, r *h
 
 	keys := &keysdto.KeysDTO{}
 	if err := jsonpkg.ParseBody(r, keys); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	contacts, err := h.s.FtSearchContacts(ctx, keys)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: contacts})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, contacts)
 }

@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -37,6 +38,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 		c.Post("/access", h.handlerAccess)
 		c.Post("/search", h.handlerSearchUser)
 		c.Delete("/", h.handlerDeleteUser)
+		// c.Get("/refresh-access-token", h.handlerRefreshAccessToken)
 	})
 
 	unprotectedRoutes := []string{
@@ -55,17 +57,17 @@ func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request)
 
 	dtoUser := &companydto.UserCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	id, err := h.s.CreateUser(ctx, dtoUser)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, id)
 }
 
 func (h *handlerUserImpl) handlerUpdateUserPassword(w http.ResponseWriter, r *http.Request) {
@@ -73,12 +75,12 @@ func (h *handlerUserImpl) handlerUpdateUserPassword(w http.ResponseWriter, r *ht
 
 	dtoUser := &companydto.UserUpdatePasswordDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.UpdateUserPassword(ctx, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -90,12 +92,12 @@ func (h *handlerUserImpl) handlerForgetUserPassword(w http.ResponseWriter, r *ht
 
 	dtoUser := &companydto.UserForgetPasswordDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.ForgetUserPassword(ctx, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -108,7 +110,7 @@ func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Reque
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -116,12 +118,12 @@ func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Reque
 
 	dtoUser := &companydto.UserUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.UpdateUser(ctx, dtoID, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -133,17 +135,17 @@ func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Reques
 
 	dtoUser := &companydto.UserLoginDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	token, err := h.s.LoginUser(ctx, dtoUser)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: token})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, token)
 }
 
 func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) {
@@ -152,23 +154,23 @@ func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) 
 	accessToken, err := jwtservice.ValidateToken(ctx, headerToken)
 
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusUnauthorized, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 		return
 	}
 
 	dtoSchema := &companydto.UserSchemaDTO{}
 	if err := jsonpkg.ParseBody(r, dtoSchema); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	token, err := h.s.Access(ctx, dtoSchema, accessToken)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: token})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, token)
 }
 
 func (h *handlerUserImpl) handlerSearchUser(w http.ResponseWriter, r *http.Request) {
@@ -176,17 +178,17 @@ func (h *handlerUserImpl) handlerSearchUser(w http.ResponseWriter, r *http.Reque
 
 	dtoUser := &companydto.UserSearchDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	user, err := h.s.SearchUser(ctx, dtoUser)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: user})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, user)
 }
 
 func (h *handlerUserImpl) handlerDeleteUser(w http.ResponseWriter, r *http.Request) {
@@ -194,14 +196,27 @@ func (h *handlerUserImpl) handlerDeleteUser(w http.ResponseWriter, r *http.Reque
 
 	dtoUser := &companydto.UserDeleteDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.DeleteUser(ctx, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
+
+// func(h *handlerUserImpl) handlerRefreshAccessToken(w http.ResponseWriter, r *http.Request) {
+// 	ctx := r.Context()
+// 	headerToken, _ := headerservice.GetAccessTokenHeader(r)
+// 	accessToken, err := jwtservice.ValidateToken(ctx, headerToken)
+
+// 	if err != nil {
+// 		jsonpkg.ResponseJson(w, r, http.StatusUnauthorized, jsonpkg.Error{Message: err.Error()})
+// 		return
+// 	}
+
+// 	token, err := h.s.RefreshAccessToken(ctx, accessToken)
+// }

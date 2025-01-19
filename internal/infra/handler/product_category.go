@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -42,18 +43,18 @@ func (h *handlerProductCategoryImpl) handlerCreateProductCategory(w http.Respons
 
 	dtoCategory := &productcategorydto.CategoryCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoCategory); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	id, err := h.s.CreateCategory(ctx, dtoCategory)
 
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, id)
 }
 
 func (h *handlerProductCategoryImpl) handlerUpdateProductCategory(w http.ResponseWriter, r *http.Request) {
@@ -61,7 +62,7 @@ func (h *handlerProductCategoryImpl) handlerUpdateProductCategory(w http.Respons
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -69,12 +70,12 @@ func (h *handlerProductCategoryImpl) handlerUpdateProductCategory(w http.Respons
 
 	dtoCategory := &productcategorydto.CategoryUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoCategory); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.UpdateCategory(ctx, dtoId, dtoCategory); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -86,14 +87,14 @@ func (h *handlerProductCategoryImpl) handlerDeleteProductCategory(w http.Respons
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteCategoryById(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -105,7 +106,7 @@ func (h *handlerProductCategoryImpl) handlerGetProductCategory(w http.ResponseWr
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -114,11 +115,11 @@ func (h *handlerProductCategoryImpl) handlerGetProductCategory(w http.ResponseWr
 	category, err := h.s.GetCategoryById(ctx, dtoId)
 
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: category})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, category)
 }
 
 func (h *handlerProductCategoryImpl) handlerGetAllCategories(w http.ResponseWriter, r *http.Request) {
@@ -126,11 +127,11 @@ func (h *handlerProductCategoryImpl) handlerGetAllCategories(w http.ResponseWrit
 	categories, err := h.s.GetAllCategories(ctx)
 
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
 }
 
 func (h *handlerProductCategoryImpl) handlerGetAllCategoriesWithProcessRulesAndOrderProcess(w http.ResponseWriter, r *http.Request) {
@@ -138,9 +139,9 @@ func (h *handlerProductCategoryImpl) handlerGetAllCategoriesWithProcessRulesAndO
 
 	processRules, err := h.s.GetAllCategoriesWithProcessRulesAndOrderProcess(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processRules})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, processRules)
 }

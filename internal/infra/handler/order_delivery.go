@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -41,17 +42,17 @@ func (h *handlerOrderDeliveryImpl) handlerCreateOrderDelivery(w http.ResponseWri
 
 	dtoDelivery := &orderdeliverydto.DeliveryOrderCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoDelivery); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	id, err := h.IService.CreateOrderDelivery(ctx, dtoDelivery)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, id)
 }
 
 func (h *handlerOrderDeliveryImpl) handlerGetDeliveryById(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +61,7 @@ func (h *handlerOrderDeliveryImpl) handlerGetDeliveryById(w http.ResponseWriter,
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -68,11 +69,11 @@ func (h *handlerOrderDeliveryImpl) handlerGetDeliveryById(w http.ResponseWriter,
 
 	delivery, err := h.IService.GetDeliveryById(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: delivery})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, delivery)
 }
 
 func (h *handlerOrderDeliveryImpl) handlerGetAllDeliveries(w http.ResponseWriter, r *http.Request) {
@@ -80,11 +81,11 @@ func (h *handlerOrderDeliveryImpl) handlerGetAllDeliveries(w http.ResponseWriter
 
 	orders, err := h.IService.GetAllDeliveries(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
 }
 
 func (h *handlerOrderDeliveryImpl) handlerPendOrderDelivery(w http.ResponseWriter, r *http.Request) {
@@ -93,14 +94,14 @@ func (h *handlerOrderDeliveryImpl) handlerPendOrderDelivery(w http.ResponseWrite
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.IService.PendOrderDelivery(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -112,12 +113,12 @@ func (h *handlerOrderDeliveryImpl) handlerShipOrderDelivery(w http.ResponseWrite
 
 	dtoDelivery := &orderdeliverydto.DeliveryOrderUpdateShipDTO{}
 	if err := jsonpkg.ParseBody(r, dtoDelivery); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.IService.ShipOrderDelivery(ctx, dtoDelivery); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -130,14 +131,14 @@ func (h *handlerOrderDeliveryImpl) handlerDeliveryOrderDelivery(w http.ResponseW
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.IService.OrderDelivery(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -150,14 +151,14 @@ func (h *handlerOrderDeliveryImpl) handlerUpdateDeliveryAddress(w http.ResponseW
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.IService.UpdateDeliveryAddress(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -170,7 +171,7 @@ func (h *handlerOrderDeliveryImpl) handlerUpdateDriver(w http.ResponseWriter, r 
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -178,12 +179,12 @@ func (h *handlerOrderDeliveryImpl) handlerUpdateDriver(w http.ResponseWriter, r 
 
 	dtoDelivery := &orderdeliverydto.DeliveryOrderDriverUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoDelivery); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.IService.UpdateDeliveryDriver(ctx, dtoId, dtoDelivery); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -196,7 +197,7 @@ func (h *handlerOrderDeliveryImpl) handlerUpdateChange(w http.ResponseWriter, r 
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -204,12 +205,12 @@ func (h *handlerOrderDeliveryImpl) handlerUpdateChange(w http.ResponseWriter, r 
 
 	dtoDelivery := &orderdeliverydto.OrderChangeCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoDelivery); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.IService.UpdateDeliveryChange(ctx, dtoId, dtoDelivery); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 

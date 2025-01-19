@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -40,17 +41,17 @@ func (h *handlerShiftImpl) handlerOpenShift(w http.ResponseWriter, r *http.Reque
 
 	dtoShift := &shiftdto.ShiftUpdateOpenDTO{}
 	if err := jsonpkg.ParseBody(r, dtoShift); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	id, err := h.s.OpenShift(ctx, dtoShift)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, id)
 }
 
 func (h *handlerShiftImpl) handlerCloseShift(w http.ResponseWriter, r *http.Request) {
@@ -58,12 +59,12 @@ func (h *handlerShiftImpl) handlerCloseShift(w http.ResponseWriter, r *http.Requ
 
 	dtoShift := &shiftdto.ShiftUpdateCloseDTO{}
 	if err := jsonpkg.ParseBody(r, dtoShift); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.CloseShift(ctx, dtoShift); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -76,7 +77,7 @@ func (h *handlerShiftImpl) handlerGetShiftByID(w http.ResponseWriter, r *http.Re
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -84,11 +85,11 @@ func (h *handlerShiftImpl) handlerGetShiftByID(w http.ResponseWriter, r *http.Re
 
 	shift, err := h.s.GetShiftByID(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: shift})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, shift)
 }
 
 func (h *handlerShiftImpl) handlerGetCurrentShift(w http.ResponseWriter, r *http.Request) {
@@ -96,20 +97,20 @@ func (h *handlerShiftImpl) handlerGetCurrentShift(w http.ResponseWriter, r *http
 
 	shift, err := h.s.GetCurrentShift(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: shift})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, shift)
 }
 
 func (h *handlerShiftImpl) handlerGetAllShifts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	if shifts, err := h.s.GetAllShifts(ctx); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 	} else {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: shifts})
+		jsonpkg.ResponseJson(w, r, http.StatusOK, shifts)
 	}
 }
 
@@ -118,12 +119,12 @@ func (h *handlerShiftImpl) handlerAddRedeem(w http.ResponseWriter, r *http.Reque
 
 	dtoRedeem := &shiftdto.ShiftRedeemCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoRedeem); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.AddRedeem(ctx, dtoRedeem); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 

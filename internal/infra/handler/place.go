@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -41,17 +42,17 @@ func (h *handlerPlaceImpl) handlerCreatePlace(w http.ResponseWriter, r *http.Req
 
 	dtoPlace := &placedto.CreatePlaceInput{}
 	if err := jsonpkg.ParseBody(r, dtoPlace); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	id, err := h.s.CreatePlace(ctx, dtoPlace)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, id)
 }
 
 func (h *handlerPlaceImpl) handlerDeletePlaceById(w http.ResponseWriter, r *http.Request) {
@@ -60,14 +61,14 @@ func (h *handlerPlaceImpl) handlerDeletePlaceById(w http.ResponseWriter, r *http
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeletePlace(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -80,7 +81,7 @@ func (h *handlerPlaceImpl) handlerGetPlaceById(w http.ResponseWriter, r *http.Re
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -88,11 +89,11 @@ func (h *handlerPlaceImpl) handlerGetPlaceById(w http.ResponseWriter, r *http.Re
 
 	place, err := h.s.GetPlaceById(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: place})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, place)
 }
 
 func (h *handlerPlaceImpl) handlerUpdatePlaceById(w http.ResponseWriter, r *http.Request) {
@@ -101,7 +102,7 @@ func (h *handlerPlaceImpl) handlerUpdatePlaceById(w http.ResponseWriter, r *http
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -109,12 +110,12 @@ func (h *handlerPlaceImpl) handlerUpdatePlaceById(w http.ResponseWriter, r *http
 
 	dtoPlace := &placedto.PlaceUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoPlace); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.UpdatePlace(ctx, dtoId, dtoPlace); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -126,11 +127,11 @@ func (h *handlerPlaceImpl) handlerGetAllPlaces(w http.ResponseWriter, r *http.Re
 
 	places, err := h.s.GetAllPlaces(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: places})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, places)
 }
 
 func (h *handlerPlaceImpl) handlerAddTableToPlace(w http.ResponseWriter, r *http.Request) {
@@ -138,12 +139,12 @@ func (h *handlerPlaceImpl) handlerAddTableToPlace(w http.ResponseWriter, r *http
 
 	dto := &placedto.PlaceUpdateTableDTO{}
 	if err := jsonpkg.ParseBody(r, dto); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.AddTableToPlace(ctx, dto); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -156,14 +157,14 @@ func (h *handlerPlaceImpl) handlerRemoveTableFromPlace(w http.ResponseWriter, r 
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.RemoveTableFromPlace(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 

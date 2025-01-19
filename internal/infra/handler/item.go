@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -43,17 +44,17 @@ func (h *handlerItemImpl) handlerAddItem(w http.ResponseWriter, r *http.Request)
 
 	dtoAddItem := &itemdto.OrderItemCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoAddItem); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	ids, err := h.s.AddItemOrder(ctx, dtoAddItem)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: ids})
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, ids)
 }
 
 func (h *handlerItemImpl) handlerDeleteItem(w http.ResponseWriter, r *http.Request) {
@@ -62,14 +63,14 @@ func (h *handlerItemImpl) handlerDeleteItem(w http.ResponseWriter, r *http.Reque
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteItemOrder(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -82,7 +83,7 @@ func (h *handlerItemImpl) handlerAddAdditionalItem(w http.ResponseWriter, r *htt
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -90,17 +91,17 @@ func (h *handlerItemImpl) handlerAddAdditionalItem(w http.ResponseWriter, r *htt
 
 	dtoAddAdditionalItem := &itemdto.OrderAdditionalItemCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoAddAdditionalItem); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	additionalId, err := h.s.AddAdditionalItemOrder(ctx, dtoId, dtoAddAdditionalItem)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: additionalId})
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, additionalId)
 }
 
 func (h *handlerItemImpl) handlerDeleteAdditionalItem(w http.ResponseWriter, r *http.Request) {
@@ -109,14 +110,14 @@ func (h *handlerItemImpl) handlerDeleteAdditionalItem(w http.ResponseWriter, r *
 	id := chi.URLParam(r, "id-additional")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteAdditionalItemOrder(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -129,7 +130,7 @@ func (h *handlerItemImpl) handlerAddRemovedItem(w http.ResponseWriter, r *http.R
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -137,12 +138,12 @@ func (h *handlerItemImpl) handlerAddRemovedItem(w http.ResponseWriter, r *http.R
 
 	dtoRemovedItem := &itemdto.RemovedItemDTO{}
 	if err := jsonpkg.ParseBody(r, dtoRemovedItem); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.AddRemovedItem(ctx, dtoId, dtoRemovedItem); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -155,7 +156,7 @@ func (h *handlerItemImpl) handlerRemoveRemovedItem(w http.ResponseWriter, r *htt
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -163,12 +164,12 @@ func (h *handlerItemImpl) handlerRemoveRemovedItem(w http.ResponseWriter, r *htt
 
 	dtoRemovedItem := &itemdto.RemovedItemDTO{}
 	if err := jsonpkg.ParseBody(r, dtoRemovedItem); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.RemoveRemovedItem(ctx, dtoId, dtoRemovedItem); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 

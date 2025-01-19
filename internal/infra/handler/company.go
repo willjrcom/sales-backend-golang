@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
@@ -44,23 +43,17 @@ func (h *handlerCompanyImpl) handlerNewCompany(w http.ResponseWriter, r *http.Re
 
 	dtoCompany := &companydto.CompanyCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoCompany); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	id, schemaName, err := h.s.NewCompany(ctx, dtoCompany)
+	companySchema, err := h.s.NewCompany(ctx, dtoCompany)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: struct {
-		ID     uuid.UUID `json:"company_id"`
-		Schema *string   `json:"schema"`
-	}{
-		ID:     id,
-		Schema: schemaName,
-	}})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, companySchema)
 }
 
 func (h *handlerCompanyImpl) handlerGetCompany(w http.ResponseWriter, r *http.Request) {
@@ -68,11 +61,11 @@ func (h *handlerCompanyImpl) handlerGetCompany(w http.ResponseWriter, r *http.Re
 
 	id, err := h.s.GetCompany(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, id)
 }
 
 func (h *handlerCompanyImpl) handlerGetCompanyUsers(w http.ResponseWriter, r *http.Request) {
@@ -80,23 +73,23 @@ func (h *handlerCompanyImpl) handlerGetCompanyUsers(w http.ResponseWriter, r *ht
 
 	users, err := h.s.GetCompanyUsers(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: users})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, users)
 }
 func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	dtoUser := &companydto.UserToCompanyDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.AddUserToCompany(ctx, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -108,12 +101,12 @@ func (h *handlerCompanyImpl) handlerRemoveUserFromCompany(w http.ResponseWriter,
 
 	dtoUser := &companydto.UserToCompanyDTO{}
 	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.RemoveUserFromCompany(ctx, dtoUser); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -124,7 +117,7 @@ func (h *handlerCompanyImpl) handlerTest(w http.ResponseWriter, r *http.Request)
 	ctx := r.Context()
 
 	if err := h.s.Test(ctx); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 

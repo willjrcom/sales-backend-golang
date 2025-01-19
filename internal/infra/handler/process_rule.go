@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -41,17 +42,17 @@ func (h *handlerProcessRuleCategoryImpl) handlerCreateProcessRule(w http.Respons
 
 	dtoProcessRule := &processruledto.ProcessRuleCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoProcessRule); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	id, err := h.s.CreateProcessRule(ctx, dtoProcessRule)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, id)
 }
 
 func (h *handlerProcessRuleCategoryImpl) handlerUpdateProcessRule(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +61,7 @@ func (h *handlerProcessRuleCategoryImpl) handlerUpdateProcessRule(w http.Respons
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -68,12 +69,12 @@ func (h *handlerProcessRuleCategoryImpl) handlerUpdateProcessRule(w http.Respons
 
 	dtoProcessRule := &processruledto.ProcessRuleUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoProcessRule); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.UpdateProcessRule(ctx, dtoId, dtoProcessRule); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -86,14 +87,14 @@ func (h *handlerProcessRuleCategoryImpl) handlerDeleteProcessRule(w http.Respons
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteProcessRule(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -106,7 +107,7 @@ func (h *handlerProcessRuleCategoryImpl) handlerGetProcessRuleById(w http.Respon
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -114,11 +115,11 @@ func (h *handlerProcessRuleCategoryImpl) handlerGetProcessRuleById(w http.Respon
 
 	processRule, err := h.s.GetProcessRuleById(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processRule})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, processRule)
 }
 
 func (h *handlerProcessRuleCategoryImpl) handlerGetProcessRulesByCategoryID(w http.ResponseWriter, r *http.Request) {
@@ -127,7 +128,7 @@ func (h *handlerProcessRuleCategoryImpl) handlerGetProcessRulesByCategoryID(w ht
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -135,11 +136,11 @@ func (h *handlerProcessRuleCategoryImpl) handlerGetProcessRulesByCategoryID(w ht
 
 	processRules, err := h.s.GetProcessRulesByCategoryId(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processRules})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, processRules)
 }
 
 func (h *handlerProcessRuleCategoryImpl) handlerGetAllProcessRules(w http.ResponseWriter, r *http.Request) {
@@ -147,11 +148,11 @@ func (h *handlerProcessRuleCategoryImpl) handlerGetAllProcessRules(w http.Respon
 
 	processRules, err := h.s.GetAllProcessRules(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processRules})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, processRules)
 }
 
 func (h *handlerProcessRuleCategoryImpl) handlerGetAllProcessRulesWithOrderProcess(w http.ResponseWriter, r *http.Request) {
@@ -159,9 +160,9 @@ func (h *handlerProcessRuleCategoryImpl) handlerGetAllProcessRulesWithOrderProce
 
 	processRules, err := h.s.GetAllProcessRulesWithOrderProcess(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processRules})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, processRules)
 }

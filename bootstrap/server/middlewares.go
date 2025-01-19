@@ -42,19 +42,21 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 			tokenString, err := headerservice.GetIDTokenHeader(r)
 
 			if err != nil {
-				jsonpkg.ResponseJson(w, r, http.StatusUnauthorized, jsonpkg.Error{Message: err.Error()})
+				jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 				return
 			}
 
 			token, err := jwtservice.ValidateToken(ctx, tokenString)
 
 			if err != nil {
-				jsonpkg.ResponseJson(w, r, http.StatusUnauthorized, jsonpkg.Error{Message: err.Error()})
+				jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 				return
 			}
 
 			ctx = context.WithValue(ctx, model.Schema("schema"), jwtservice.GetSchemaFromToken(token))
-			ctx = context.WithValue(ctx, companyentity.UserValue("user"), jwtservice.GetUserFromToken(token))
+
+			user := jwtservice.GetUserFromToken(token)
+			ctx = context.WithValue(ctx, companyentity.UserValue("user"), *user)
 		}
 
 		// Chamando o próximo handler

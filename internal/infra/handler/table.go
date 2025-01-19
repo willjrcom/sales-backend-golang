@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -40,17 +41,17 @@ func (h *handlerTableImpl) handlerCreateTable(w http.ResponseWriter, r *http.Req
 
 	dtoTable := &tabledto.TableCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	id, err := h.s.CreateTable(ctx, dtoTable)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, id)
 }
 
 func (h *handlerTableImpl) handlerDeleteTableById(w http.ResponseWriter, r *http.Request) {
@@ -59,14 +60,14 @@ func (h *handlerTableImpl) handlerDeleteTableById(w http.ResponseWriter, r *http
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteTable(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -79,7 +80,7 @@ func (h *handlerTableImpl) handlerGetTableById(w http.ResponseWriter, r *http.Re
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -87,11 +88,11 @@ func (h *handlerTableImpl) handlerGetTableById(w http.ResponseWriter, r *http.Re
 
 	table, err := h.s.GetTableById(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: table})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, table)
 }
 
 func (h *handlerTableImpl) handlerUpdateTableById(w http.ResponseWriter, r *http.Request) {
@@ -100,7 +101,7 @@ func (h *handlerTableImpl) handlerUpdateTableById(w http.ResponseWriter, r *http
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -108,12 +109,12 @@ func (h *handlerTableImpl) handlerUpdateTableById(w http.ResponseWriter, r *http
 
 	dtoTable := &tabledto.TableUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.UpdateTable(ctx, dtoId, dtoTable); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -125,11 +126,11 @@ func (h *handlerTableImpl) handlerGetAllTables(w http.ResponseWriter, r *http.Re
 
 	tables, err := h.s.GetAllTables(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: tables})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, tables)
 }
 
 func (h *handlerTableImpl) handlerGetUnusedTables(w http.ResponseWriter, r *http.Request) {
@@ -137,9 +138,9 @@ func (h *handlerTableImpl) handlerGetUnusedTables(w http.ResponseWriter, r *http
 
 	tables, err := h.s.GetUnusedTables(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: tables})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, tables)
 }

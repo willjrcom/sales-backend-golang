@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -45,17 +46,17 @@ func (h *handlerProcessImpl) handlerCreateProcess(w http.ResponseWriter, r *http
 
 	dtoProcess := &processdto.OrderProcessCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoProcess); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	process, err := h.s.CreateProcess(ctx, dtoProcess)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: process})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, process)
 }
 
 func (h *handlerProcessImpl) handlerStartProcess(w http.ResponseWriter, r *http.Request) {
@@ -63,14 +64,14 @@ func (h *handlerProcessImpl) handlerStartProcess(w http.ResponseWriter, r *http.
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.StartProcess(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -82,14 +83,14 @@ func (h *handlerProcessImpl) handlerPauseProcess(w http.ResponseWriter, r *http.
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.PauseProcess(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -101,14 +102,14 @@ func (h *handlerProcessImpl) handlerContinueProcess(w http.ResponseWriter, r *ht
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.ContinueProcess(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -120,19 +121,19 @@ func (h *handlerProcessImpl) handlerFinishProcess(w http.ResponseWriter, r *http
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	nexProcessID, err := h.s.FinishProcess(ctx, dtoId)
+	nextProcessID, err := h.s.FinishProcess(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: nexProcessID})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nextProcessID)
 }
 
 func (h *handlerProcessImpl) handlerCancelProcess(w http.ResponseWriter, r *http.Request) {
@@ -140,7 +141,7 @@ func (h *handlerProcessImpl) handlerCancelProcess(w http.ResponseWriter, r *http
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -148,17 +149,17 @@ func (h *handlerProcessImpl) handlerCancelProcess(w http.ResponseWriter, r *http
 
 	dtoCancel := &processdto.OrderProcessCancelDTO{}
 	if err := jsonpkg.ParseBody(r, &dtoCancel); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	err := h.s.CancelProcess(ctx, dtoId, dtoCancel)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: nil})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerProcessImpl) handlerGetProcess(w http.ResponseWriter, r *http.Request) {
@@ -166,7 +167,7 @@ func (h *handlerProcessImpl) handlerGetProcess(w http.ResponseWriter, r *http.Re
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -174,11 +175,11 @@ func (h *handlerProcessImpl) handlerGetProcess(w http.ResponseWriter, r *http.Re
 
 	process, err := h.s.GetProcessById(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: process})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, process)
 }
 
 func (h *handlerProcessImpl) handlerGetAllProcesses(w http.ResponseWriter, r *http.Request) {
@@ -186,11 +187,11 @@ func (h *handlerProcessImpl) handlerGetAllProcesses(w http.ResponseWriter, r *ht
 
 	processes, err := h.s.GetAllProcesses(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processes})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, processes)
 }
 
 func (h *handlerProcessImpl) handlerGetProcessesByProcessRuleID(w http.ResponseWriter, r *http.Request) {
@@ -198,7 +199,7 @@ func (h *handlerProcessImpl) handlerGetProcessesByProcessRuleID(w http.ResponseW
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -206,11 +207,11 @@ func (h *handlerProcessImpl) handlerGetProcessesByProcessRuleID(w http.ResponseW
 
 	processes, err := h.s.GetProcessesByProcessRuleID(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processes})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, processes)
 }
 
 func (h *handlerProcessImpl) handlerGetProcessesByGroupItem(w http.ResponseWriter, r *http.Request) {
@@ -218,7 +219,7 @@ func (h *handlerProcessImpl) handlerGetProcessesByGroupItem(w http.ResponseWrite
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -226,11 +227,11 @@ func (h *handlerProcessImpl) handlerGetProcessesByGroupItem(w http.ResponseWrite
 
 	processes, err := h.s.GetProcessesByGroupItemID(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processes})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, processes)
 }
 
 func (h *handlerProcessImpl) handlerGetProcessesByProduct(w http.ResponseWriter, r *http.Request) {
@@ -238,7 +239,7 @@ func (h *handlerProcessImpl) handlerGetProcessesByProduct(w http.ResponseWriter,
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -246,9 +247,9 @@ func (h *handlerProcessImpl) handlerGetProcessesByProduct(w http.ResponseWriter,
 
 	processes, err := h.s.GetProcessesByProductID(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: processes})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, processes)
 }

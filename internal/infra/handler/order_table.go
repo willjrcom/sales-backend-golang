@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -38,17 +39,17 @@ func (h *handlerOrderTableImpl) handlerCreateOrderTable(w http.ResponseWriter, r
 	ctx := r.Context()
 	dtoTable := &ordertabledto.CreateOrderTableInput{}
 	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	id, err := h.s.CreateOrderTable(ctx, dtoTable)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, id)
 }
 
 func (h *handlerOrderTableImpl) handlerChangeTable(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +58,7 @@ func (h *handlerOrderTableImpl) handlerChangeTable(w http.ResponseWriter, r *htt
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -65,12 +66,12 @@ func (h *handlerOrderTableImpl) handlerChangeTable(w http.ResponseWriter, r *htt
 
 	dtoTable := &ordertabledto.OrderTableUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.ChangeTable(ctx, dtoId, dtoTable); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -83,14 +84,14 @@ func (h *handlerOrderTableImpl) handlerCloseOrderTable(w http.ResponseWriter, r 
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.CloseOrderTable(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -103,7 +104,7 @@ func (h *handlerOrderTableImpl) handlerGetOrderTableById(w http.ResponseWriter, 
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -111,11 +112,11 @@ func (h *handlerOrderTableImpl) handlerGetOrderTableById(w http.ResponseWriter, 
 
 	table, err := h.s.GetTableById(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: table})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, table)
 }
 
 func (h *handlerOrderTableImpl) handlerGetAllTables(w http.ResponseWriter, r *http.Request) {
@@ -123,9 +124,9 @@ func (h *handlerOrderTableImpl) handlerGetAllTables(w http.ResponseWriter, r *ht
 
 	orders, err := h.s.GetAllTables(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: orders})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
 }

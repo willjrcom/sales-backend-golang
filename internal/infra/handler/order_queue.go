@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -40,17 +41,17 @@ func (h *handlerQueueImpl) handlerStartQueue(w http.ResponseWriter, r *http.Requ
 
 	dtoQueue := &orderqueuedto.QueueCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoQueue); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	id, err := h.s.StartQueue(ctx, dtoQueue)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: id})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, id)
 }
 
 func (h *handlerQueueImpl) handlerFinishQueue(w http.ResponseWriter, r *http.Request) {
@@ -58,12 +59,12 @@ func (h *handlerQueueImpl) handlerFinishQueue(w http.ResponseWriter, r *http.Req
 
 	process := &orderprocessentity.OrderProcess{}
 	if err := jsonpkg.ParseBody(r, process); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.FinishQueue(ctx, process); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -75,7 +76,7 @@ func (h *handlerQueueImpl) handlerGetQueueByID(w http.ResponseWriter, r *http.Re
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -83,11 +84,11 @@ func (h *handlerQueueImpl) handlerGetQueueByID(w http.ResponseWriter, r *http.Re
 
 	queue, err := h.s.GetQueueById(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: queue})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, queue)
 }
 
 func (h *handlerQueueImpl) handlerGetQueuesByGroupItemId(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +96,7 @@ func (h *handlerQueueImpl) handlerGetQueuesByGroupItemId(w http.ResponseWriter, 
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -103,20 +104,20 @@ func (h *handlerQueueImpl) handlerGetQueuesByGroupItemId(w http.ResponseWriter, 
 
 	queues, err := h.s.GetQueuesByGroupItemId(ctx, dtoId)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: queues})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, queues)
 }
 
 func (h *handlerQueueImpl) handlerGetAllQueues(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	queues, err := h.s.GetAllQueues(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: queues})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, queues)
 }

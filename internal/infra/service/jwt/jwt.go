@@ -58,16 +58,22 @@ func GetSchemaFromToken(token *jwt.Token) string {
 	return token.Claims.(jwt.MapClaims)["current_schema"].(string)
 }
 
-func GetUserFromToken(token *jwt.Token) companyentity.User {
-	user := companyentity.User{}
-	userMap := token.Claims.(jwt.MapClaims)["user"].(interface{})
-	userJson, err := json.Marshal(userMap)
-	if err != nil {
-		return user
+func GetUserFromToken(token *jwt.Token) *companyentity.User {
+	user := &companyentity.User{}
+	claims := token.Claims.(jwt.MapClaims)
+
+	userMap, ok := claims["user"]
+	if !ok {
+		return nil
 	}
 
-	if err := json.Unmarshal(userJson, &user); err != nil {
-		return user
+	userJson, err := json.Marshal(userMap) // .(interface{})
+	if err != nil {
+		return nil
+	}
+
+	if err := json.Unmarshal(userJson, user); err != nil {
+		return nil
 	}
 
 	return user

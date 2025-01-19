@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
@@ -34,16 +33,16 @@ func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Se
 	s.us = us
 }
 
-func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (id uuid.UUID, schemaName *string, err error) {
+func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (response *companydto.CompanySchemaDTO, err error) {
 	cnpjString, tradeName, email, contacts, err := dto.ToDomain()
 	if err != nil {
-		return uuid.Nil, nil, err
+		return nil, err
 	}
 
 	cnpjData, err := cnpj.Get(cnpjString)
 
 	if err != nil {
-		return uuid.Nil, nil, err
+		return nil, err
 	}
 
 	if tradeName != cnpjData.TradeName {
@@ -63,13 +62,13 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	ctx = context.WithValue(ctx, model.Schema("schema"), company.SchemaName)
 
 	if err := s.s.NewSchema(ctx); err != nil {
-		return uuid.Nil, nil, err
+		return nil, err
 	}
 
 	companyModel := &model.Company{}
 	companyModel.FromDomain(company)
 	if err = s.r.NewCompany(ctx, companyModel); err != nil {
-		return uuid.Nil, nil, err
+		return nil, err
 	}
 
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), company.SchemaName)
@@ -79,10 +78,12 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	}
 
 	if err = s.AddUserToCompany(ctx, userInput); err != nil {
-		return uuid.Nil, nil, err
+		return nil, err
 	}
 
-	return company.ID, &company.SchemaName, nil
+	companyDTO := &companydto.CompanySchemaDTO{}
+	companyDTO.FromDomain(company)
+	return companyDTO, nil
 }
 
 func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyDTO, error) {

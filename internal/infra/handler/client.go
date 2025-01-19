@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -44,18 +45,18 @@ func (h *handlerClientImpl) handlerCreateClient(w http.ResponseWriter, r *http.R
 
 	dtoClient := &clientdto.ClientCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoClient); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	id, err := h.s.CreateClient(ctx, dtoClient)
 
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusCreated, jsonpkg.HTTPResponse{Data: id})
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, id)
 }
 
 func (h *handlerClientImpl) handlerUpdateClient(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +65,7 @@ func (h *handlerClientImpl) handlerUpdateClient(w http.ResponseWriter, r *http.R
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -72,12 +73,12 @@ func (h *handlerClientImpl) handlerUpdateClient(w http.ResponseWriter, r *http.R
 
 	dtoClient := &clientdto.ClientUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoClient); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	if err := h.s.UpdateClient(ctx, dtoId, dtoClient); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -90,14 +91,14 @@ func (h *handlerClientImpl) handlerDeleteClient(w http.ResponseWriter, r *http.R
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.DeleteClient(ctx, dtoId); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -110,7 +111,7 @@ func (h *handlerClientImpl) handlerGetClientById(w http.ResponseWriter, r *http.
 	id := chi.URLParam(r, "id")
 
 	if id == "" {
-		jsonpkg.ResponseJson(w, r, http.StatusBadRequest, jsonpkg.Error{Message: "id is required"})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
@@ -119,11 +120,11 @@ func (h *handlerClientImpl) handlerGetClientById(w http.ResponseWriter, r *http.
 	client, err := h.s.GetClientById(ctx, dtoId)
 
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: client})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, client)
 }
 
 func (h *handlerClientImpl) handlerGetClientByContact(w http.ResponseWriter, r *http.Request) {
@@ -131,17 +132,17 @@ func (h *handlerClientImpl) handlerGetClientByContact(w http.ResponseWriter, r *
 
 	dtoContact := &contactdto.ContactDTO{}
 	if err := jsonpkg.ParseBody(r, dtoContact); err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	client, err := h.s.GetClientByContact(ctx, dtoContact)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: client})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, client)
 }
 
 func (h *handlerClientImpl) handlerGetAllClients(w http.ResponseWriter, r *http.Request) {
@@ -149,9 +150,9 @@ func (h *handlerClientImpl) handlerGetAllClients(w http.ResponseWriter, r *http.
 
 	categories, err := h.s.GetAllClients(ctx)
 	if err != nil {
-		jsonpkg.ResponseJson(w, r, http.StatusInternalServerError, jsonpkg.Error{Message: err.Error()})
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, jsonpkg.HTTPResponse{Data: categories})
+	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
 }
