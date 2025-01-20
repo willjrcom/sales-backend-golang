@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -42,13 +43,19 @@ func NewHandlerCompany(companyService *companyusecases.Service) *handler.Handler
 func (h *handlerCompanyImpl) handlerNewCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	validToken, err := headerservice.GetAnyValidToken(ctx, r)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
+		return
+	}
+
 	dtoCompany := &companydto.CompanyCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoCompany); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	companySchema, err := h.s.NewCompany(ctx, dtoCompany)
+	companySchema, err := h.s.NewCompany(ctx, dtoCompany, validToken)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

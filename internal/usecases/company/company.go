@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/dgrijalva/jwt-go"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
@@ -11,6 +12,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
+	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 )
 
@@ -33,8 +35,8 @@ func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Se
 	s.us = us
 }
 
-func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (response *companydto.CompanySchemaDTO, err error) {
-	cnpjString, tradeName, email, contacts, err := dto.ToDomain()
+func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO, token *jwt.Token) (response *companydto.CompanySchemaDTO, err error) {
+	cnpjString, tradeName, contacts, err := dto.ToDomain()
 	if err != nil {
 		return nil, err
 	}
@@ -49,8 +51,14 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 		cnpjData.TradeName = tradeName
 	}
 
+	userID := jwtservice.GetUserIDFromToken(token)
+	user, err := s.u.GetUserByID(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+
 	company := companyentity.NewCompany(cnpjData)
-	company.Email = email
+	company.Email = user.Email
 	company.Contacts = contacts
 
 	coordinates, _ := geocodeservice.GetCoordinates(&company.Address.AddressCommonAttributes)
@@ -74,7 +82,7 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	ctx = context.WithValue(ctx, schemaentity.Schema("schema"), company.SchemaName)
 
 	userInput := &companydto.UserToCompanyDTO{
-		Email: email,
+		Email: user.Email,
 	}
 
 	if err = s.AddUserToCompany(ctx, userInput); err != nil {
