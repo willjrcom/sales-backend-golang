@@ -86,6 +86,43 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	return companyDTO, nil
 }
 
+func (s *Service) UpdateCompany(ctx context.Context, dto *companydto.CompanyUpdateDTO) (err error) {
+	companyModel, err := s.r.GetCompany(ctx)
+	if err != nil {
+		return err
+	}
+
+	company := companyModel.ToDomain()
+
+	dto.UpdateDomain(company)
+
+	if company.Cnpj != companyModel.Cnpj {
+		cnpjData, err := cnpj.Get(company.Cnpj)
+		if err != nil {
+			return err
+		}
+
+		if dto.TradeName != nil {
+			cnpjData.TradeName = *dto.TradeName
+		}
+
+		company.UpdateCompany(cnpjData)
+	}
+
+	coordinates, _ := geocodeservice.GetCoordinates(&company.Address.AddressCommonAttributes)
+
+	if coordinates != nil {
+		company.Address.Coordinates = *coordinates
+	}
+
+	companyModel.FromDomain(company)
+	if err = s.r.UpdateCompany(ctx, companyModel); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyDTO, error) {
 	if companyModel, err := s.r.GetCompany(ctx); err != nil {
 		return nil, err

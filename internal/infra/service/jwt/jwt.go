@@ -15,7 +15,7 @@ func CreateAccessToken(user *companyentity.User) (string, error) {
 		"user_id":                user.ID,
 		"available_user_schemas": user.GetSchemas(),
 		"sub":                    "access-token",
-		"exp":                    time.Now().UTC().Add(time.Minute * 5).Unix(),
+		"exp":                    time.Now().UTC().Add(time.Minute * 30).Unix(),
 	}
 
 	// Criar um token JWT usando a chave secreta
@@ -61,16 +61,16 @@ func GetSchemaFromIDToken(token *jwt.Token) string {
 	return token.Claims.(jwt.MapClaims)["current_schema"].(string)
 }
 
-func GetUserIDFromToken(token *jwt.Token) *uuid.UUID {
+func GetUserIDFromToken(token *jwt.Token) uuid.UUID {
 	claims := token.Claims.(jwt.MapClaims)
 
 	userID, ok := claims["user_id"]
 	if !ok {
-		return nil
+		return uuid.Nil
 	}
 
 	userIDString := userID.(string)
 
 	userIDUUID := uuid.MustParse(userIDString)
-	return &userIDUUID
+	return userIDUUID
 }

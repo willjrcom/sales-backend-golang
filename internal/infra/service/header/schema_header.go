@@ -1,17 +1,37 @@
 package headerservice
 
 import (
+	"context"
 	"errors"
 	"net/http"
+
+	"github.com/dgrijalva/jwt-go"
+	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
 )
 
-func GetAnyToken(r *http.Request) (string, error) {
-	if accessToken, err := GetAccessTokenFromHeader(r); err == nil {
-		return accessToken, nil
+func GetAnyValidToken(ctx context.Context, r *http.Request) (*jwt.Token, error) {
+	if idToken, err := GetIDTokenFromHeader(r); err == nil {
+		validToken, err := jwtservice.ValidateToken(ctx, idToken)
+
+		if err == nil {
+			return validToken, nil
+		}
 	}
 
-	return GetIDTokenFromHeader(r)
+	accessToken, err := GetAccessTokenFromHeader(r)
+	if err != nil {
+		return nil, err
+	}
+
+	validToken, err := jwtservice.ValidateToken(ctx, accessToken)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return validToken, nil
 }
+
 func GetAccessTokenFromHeader(r *http.Request) (string, error) {
 	accessToken := r.Header.Get("access-token")
 

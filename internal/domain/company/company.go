@@ -61,6 +61,24 @@ func NewCompany(cnpjData *cnpj.Cnpj) *Company {
 
 }
 
+func (c *Company) UpdateCompany(cnpjData *cnpj.Cnpj) {
+	c.BusinessName = cnpjData.BusinessName
+	c.TradeName = cnpjData.TradeName
+	c.Cnpj = cnpjData.Cnpj
+
+	addressCommonAttributes := &addressentity.AddressCommonAttributes{
+		Street:       cnpjData.Street,
+		Number:       cnpjData.Number,
+		Neighborhood: cnpjData.Neighborhood,
+		City:         cnpjData.City,
+		UF:           cnpjData.UF,
+		Cep:          cnpjData.Cep,
+		AddressType:  addressentity.AddressTypeWork,
+	}
+
+	c.AddAddress(addressCommonAttributes)
+}
+
 func generateSchema(cnpjData *cnpj.Cnpj) string {
 	id, _ := shortid.Generate()
 	replacedName := strings.ReplaceAll(strings.ToLower(cnpjData.TradeName), " ", "_")

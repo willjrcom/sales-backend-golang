@@ -3,7 +3,6 @@ package userusecases
 import (
 	"context"
 	"errors"
-	"strings"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
@@ -152,32 +151,19 @@ func (s *Service) Access(ctx context.Context, dto *companydto.UserSchemaDTO, acc
 		return "", err
 	}
 
-	schemasInterface := jwtservice.GetSchemasFromAccessToken(accessToken)
-
-	if len(schemasInterface) == 0 {
-		return "", errors.New("schemas not found in token")
+	userID := jwtservice.GetUserIDFromToken(accessToken)
+	userModel, err := s.r.GetUserByID(ctx, userID)
+	if err != nil {
+		return "", err
 	}
 
-	if !findSchemaInSchemas(schemasInterface, *schema) {
-		return "", errors.New("schema not found in schemas in token")
-	}
-
-	return jwtservice.CreateIDToken(accessToken, *schema)
-}
-
-func findSchemaInSchemas(schemas []interface{}, schema string) bool {
-	for _, s := range schemas {
-		schemaCompany, ok := s.(string)
-
-		if !ok {
-			continue
-		}
-		if strings.EqualFold(schemaCompany, schema) {
-			return true
+	for _, company := range userModel.Companies {
+		if company.SchemaName == *schema {
+			return jwtservice.CreateIDToken(accessToken, *schema)
 		}
 	}
 
-	return false
+	return "", errors.New("schema not found in schemas in token")
 }
 
 func (s *Service) SearchUser(ctx context.Context, dto *companydto.UserSearchDTO) (*companydto.UserDTO, error) {
@@ -199,6 +185,7 @@ func (s *Service) SearchUser(ctx context.Context, dto *companydto.UserSearchDTO)
 
 	return userDTO, nil
 }
+
 func (s *Service) DeleteUser(ctx context.Context, dto *companydto.UserDeleteDTO) error {
 	user, err := dto.ToDomain()
 

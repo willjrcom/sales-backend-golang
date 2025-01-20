@@ -74,6 +74,70 @@ func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *model.Co
 	return nil
 }
 
+func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model.Company) (err error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+
+	// Insert to private schema
+	if _, err = tx.NewUpdate().Model(company).Exec(ctx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&model.Address{}).Where("object_id = ?", company.ID).Exec(ctx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if _, err = tx.NewInsert().Model(company.Address).Exec(ctx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+
+	if err = database.ChangeToPublicSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	tx, err = r.db.BeginTx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return err
+	}
+
+	// Insert on public schema
+	if _, err = tx.NewInsert().Model(company).Exec(ctx); err != nil {
+		return err
+	}
+
+	if _, err := tx.NewDelete().Model(&model.Address{}).Where("object_id = ?", company.ID).Exec(ctx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if _, err = tx.NewInsert().Model(company.Address).Exec(ctx); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*model.Company, error) {
 	company := &model.Company{}
 	r.mu.Lock()

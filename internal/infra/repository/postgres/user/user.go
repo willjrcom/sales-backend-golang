@@ -245,7 +245,7 @@ func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID) (*mod
 	}
 
 	user := &model.User{}
-	if err := r.db.NewSelect().Model(user).Where("u.id = ?", id).Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(user).Where("u.id = ?", id).Relation("Companies").Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
 		return nil, err
 	}
 
