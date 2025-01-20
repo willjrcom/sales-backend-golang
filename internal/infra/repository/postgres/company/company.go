@@ -87,8 +87,8 @@ func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model
 		return err
 	}
 
-	// Insert to private schema
-	if _, err = tx.NewUpdate().Model(company).Exec(ctx); err != nil {
+	// Update to private schema
+	if _, err = tx.NewUpdate().Model(company).WherePK().Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -117,7 +117,7 @@ func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model
 	}
 
 	// Insert on public schema
-	if _, err = tx.NewInsert().Model(company).Exec(ctx); err != nil {
+	if _, err = tx.NewUpdate().Model(company).WherePK().Exec(ctx); err != nil {
 		return err
 	}
 
