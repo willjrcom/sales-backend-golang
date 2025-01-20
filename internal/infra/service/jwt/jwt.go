@@ -6,16 +6,15 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 )
 
 func CreateAccessToken(user *companyentity.User) (string, error) {
+	userID := user.ID.String()
 	claims := jwt.MapClaims{
-		"user_id":                user.ID,
-		"available_user_schemas": user.GetSchemas(),
-		"sub":                    "access-token",
-		"exp":                    time.Now().UTC().Add(time.Minute * 30).Unix(),
+		"user_id": userID,
+		"sub":     "access-token",
+		"exp":     time.Now().UTC().Add(time.Minute * 30).Unix(),
 	}
 
 	// Criar um token JWT usando a chave secreta
@@ -53,24 +52,24 @@ func ValidateToken(ctx context.Context, tokenString string) (*jwt.Token, error) 
 	})
 }
 
-func GetSchemasFromAccessToken(token *jwt.Token) []interface{} {
-	return token.Claims.(jwt.MapClaims)["available_user_schemas"].([]interface{})
-}
-
 func GetSchemaFromIDToken(token *jwt.Token) string {
-	return token.Claims.(jwt.MapClaims)["current_schema"].(string)
+	claims := token.Claims.(jwt.MapClaims)
+	currentSchema, ok := claims["current_schema"]
+
+	if !ok {
+		return ""
+	}
+
+	return currentSchema.(string)
 }
 
-func GetUserIDFromToken(token *jwt.Token) uuid.UUID {
+func GetUserIDFromToken(token *jwt.Token) string {
 	claims := token.Claims.(jwt.MapClaims)
 
 	userID, ok := claims["user_id"]
 	if !ok {
-		return uuid.Nil
+		return ""
 	}
 
-	userIDString := userID.(string)
-
-	userIDUUID := uuid.MustParse(userIDString)
-	return userIDUUID
+	return userID.(string)
 }

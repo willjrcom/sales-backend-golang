@@ -42,13 +42,14 @@ func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.ShiftUpdateOpenDT
 		return uuid.Nil, ErrShiftAlreadyOpened
 	}
 
-	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(uuid.UUID)
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
 
 	if !ok {
 		return uuid.Nil, errors.New("context user not found")
 	}
 
-	employee, err := s.se.GetEmployeeByUserID(ctx, entitydto.NewIdRequest(userID))
+	userIDUUID := uuid.MustParse(userID)
+	employee, err := s.se.GetEmployeeByUserID(ctx, entitydto.NewIdRequest(userIDUUID))
 	if err != nil {
 		return uuid.Nil, errors.New("user must be an employee")
 	}

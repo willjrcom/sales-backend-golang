@@ -39,12 +39,12 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 		c.Post("/search", h.handlerSearchUser)
 		c.Delete("/", h.handlerDeleteUser)
 		c.Get("/refresh-access-token", h.handlerRefreshAccessToken)
+		c.Get("/companies", h.handlerGetCompanies)
 	})
 
 	unprotectedRoutes := []string{
 		fmt.Sprintf("%s/new", route),
 		fmt.Sprintf("%s/login", route),
-		fmt.Sprintf("%s/access", route),
 		fmt.Sprintf("%s/update/password", route),
 		fmt.Sprintf("%s/forget-password", route),
 	}
@@ -139,13 +139,13 @@ func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	accessToken, err := h.s.LoginUser(ctx, dtoUser)
+	user, err := h.s.LoginUser(ctx, dtoUser)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, accessToken)
+	jsonpkg.ResponseJson(w, r, http.StatusOK, user)
 }
 
 func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) {
@@ -229,4 +229,16 @@ func (h *handlerUserImpl) handlerRefreshAccessToken(w http.ResponseWriter, r *ht
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, newIDToken)
+}
+
+func (h *handlerUserImpl) handlerGetCompanies(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	companies, err := h.s.GetCompanies(ctx)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, companies)
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -128,6 +129,7 @@ func (s *Service) LoginUser(ctx context.Context, dto *companydto.UserLoginDTO) (
 	}
 
 	userLoggedIn := userLoggedInModel.ToDomain()
+	userLoggedIn.Companies = []companyentity.Company{}
 
 	accessToken, err := jwtservice.CreateAccessToken(userLoggedIn)
 
@@ -151,8 +153,13 @@ func (s *Service) Access(ctx context.Context, dto *companydto.UserSchemaDTO, acc
 		return "", err
 	}
 
-	userID := jwtservice.GetUserIDFromToken(accessToken)
-	userModel, err := s.r.GetUserByID(ctx, userID)
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	if !ok {
+		return "", errors.New("context user not found")
+	}
+
+	userIDUUID := uuid.MustParse(userID)
+	userModel, err := s.r.GetUserByID(ctx, userIDUUID)
 	if err != nil {
 		return "", err
 	}
@@ -196,4 +203,27 @@ func (s *Service) DeleteUser(ctx context.Context, dto *companydto.UserDeleteDTO)
 	userModel := &model.User{}
 	userModel.FromDomain(user)
 	return s.r.LoginAndDeleteUser(ctx, userModel)
+}
+
+func (s *Service) GetCompanies(ctx context.Context) ([]companydto.CompanyDTO, error) {
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	if !ok {
+		return nil, errors.New("context user not found")
+	}
+
+	userIDUUID := uuid.MustParse(userID)
+	userModel, err := s.r.GetUserByID(ctx, userIDUUID)
+	if err != nil {
+		return nil, err
+	}
+
+	companyDTOs := []companydto.CompanyDTO{}
+	for _, companyModel := range userModel.Companies {
+		company := companyModel.ToDomain()
+		companyDTO := companydto.CompanyDTO{}
+		companyDTO.FromDomain(company)
+		companyDTOs = append(companyDTOs, companyDTO)
+	}
+
+	return companyDTOs, nil
 }

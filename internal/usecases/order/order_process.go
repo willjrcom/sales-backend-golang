@@ -57,13 +57,14 @@ func (s *OrderProcessService) CreateProcess(ctx context.Context, dto *orderproce
 }
 
 func (s *OrderProcessService) StartProcess(ctx context.Context, dtoID *entitydto.IDRequest) error {
-	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(uuid.UUID)
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
 
 	if !ok {
 		return errors.New("context user not found")
 	}
 
-	employee, err := s.se.GetEmployeeByUserID(ctx, entitydto.NewIdRequest(userID))
+	userIDUUID := uuid.MustParse(userID)
+	employee, err := s.se.GetEmployeeByUserID(ctx, entitydto.NewIdRequest(userIDUUID))
 	if err != nil {
 		return err
 	}
