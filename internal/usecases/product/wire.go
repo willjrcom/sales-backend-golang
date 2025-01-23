@@ -26,7 +26,6 @@ func InitializeService() (*Service, error) {
 
 func InitializeServiceForTest() (*Service, error) {
 	wire.Build(
-		database.NewSQLiteConnection,
 		productrepositorylocal.NewProductRepositoryLocal,          // Provider para ProductRepository
 		productcategoryrepositorylocal.NewCategoryRepositoryLocal, // Provider para CategoryRepository
 		s3service.NewS3Client,                                     // Provider para S3Client

@@ -24,13 +24,8 @@ type Service struct {
 	ss sizeusecases.Service
 }
 
-func NewService(c model.CategoryRepository) *Service {
-	return &Service{r: c}
-}
-
-func (s *Service) AddDependencies(sq quantityusecases.Service, ss sizeusecases.Service) {
-	s.ss = ss
-	s.sq = sq
+func NewService(c model.CategoryRepository, sq *quantityusecases.Service, ss *sizeusecases.Service) *Service {
+	return &Service{r: c, sq: *sq, ss: *ss}
 }
 
 func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.CategoryCreateDTO) (uuid.UUID, error) {

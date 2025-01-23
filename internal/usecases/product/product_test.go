@@ -11,10 +11,6 @@ import (
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
-	productrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
-	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product_category"
-	sizerepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/size"
-	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 	categoryusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category"
 	categorysizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size"
 )
@@ -29,17 +25,10 @@ var (
 func TestMain(m *testing.M) {
 	ctx = context.Background()
 
-	// Repository
-	productrepositorylocal.NewProductRepositoryLocal()
-	rc := categoryrepositorylocal.NewCategoryRepositoryLocal()
-	rs := sizerepositorylocal.NewSizeRepositoryLocal()
-	s3service.NewS3Client()
-
 	// Service
-	productService, _ = InitializeService()
-	sizeService = categorysizeusecases.NewService(rs)
-
-	sizeService.AddDependencies(rc)
+	productService, _ = InitializeServiceForTest()
+	sizeService, _ = categorysizeusecases.InitializeServiceForTest()
+	productCategoryService, _ = categoryusecases.InitializeServiceForTest()
 
 	exitCode := m.Run()
 
@@ -52,12 +41,20 @@ func TestCreateProduct(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, categoryId)
 
-	dtoSize := &sizedto.SizeCreateDTO{Name: "P"}
+	dtoSize := &sizedto.SizeCreateDTO{
+		Name:       "P",
+		CategoryID: categoryId,
+	}
 	sizeId, err := sizeService.CreateSize(ctx, dtoSize)
 	assert.Nil(t, err)
 	assert.NotNil(t, sizeId)
 
-	dto := &productcategorydto.ProductCreateDTO{}
+	dto := &productcategorydto.ProductCreateDTO{
+		CategoryID: &categoryId,
+		SizeID:     &sizeId,
+		Code:       "test",
+		Name:       "Test Product",
+	}
 
 	productId, err := productService.CreateProduct(ctx, dto)
 	assert.Nil(t, err)

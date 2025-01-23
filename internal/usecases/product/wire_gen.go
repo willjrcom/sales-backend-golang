@@ -8,18 +8,28 @@ package productusecases
 
 import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	productrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
-	productcategoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
-	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product_category"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
 // Injectors from wire.go:
 
 func InitializeService() (*Service, error) {
 	db := database.NewPostgreSQLConnection()
-	productRepositoryBun := productrepositorybun.NewProductRepositoryBun(db)
-	productCategoryRepositoryBun := productcategoryrepositorybun.NewProductCategoryRepositoryBun(db)
+	productRepository := productrepositorybun.NewProductRepositoryBun(db)
+	categoryRepository := productcategoryrepositorybun.NewProductCategoryRepositoryBun(db)
 	s3Client := s3service.NewS3Client()
-	service := NewService(productRepositoryBun, productCategoryRepositoryBun, s3Client)
+	service := NewService(productRepository, categoryRepository, s3Client)
+	return service, nil
+}
+
+func InitializeServiceForTest() (*Service, error) {
+	productRepository := productrepositorylocal.NewProductRepositoryLocal()
+	categoryRepository := productcategoryrepositorylocal.NewCategoryRepositoryLocal()
+	s3Client := s3service.NewS3Client()
+	service := NewService(productRepository, categoryRepository, s3Client)
 	return service, nil
 }

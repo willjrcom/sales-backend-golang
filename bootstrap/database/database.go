@@ -8,11 +8,14 @@ import (
 	"log"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
+	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/pgdriver"
+	"github.com/uptrace/bun/driver/sqliteshim"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
@@ -35,40 +38,77 @@ func ConnectDB(ctx context.Context) string {
 	)
 }
 
+var (
+	dbInstance *bun.DB
+	once       sync.Once
+)
+
 func NewPostgreSQLConnection() *bun.DB {
-	ctx := context.Background()
-	connectionParams := ConnectDB(ctx)
+	once.Do(func() {
+		ctx := context.Background()
+		connectionParams := ConnectDB(ctx)
 
-	// Connect to database doing a PING
-	db := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(connectionParams), pgdriver.WithTimeout(time.Second*30)))
+		// Connect to database doing a PING
+		db := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(connectionParams), pgdriver.WithTimeout(time.Second*30)))
 
-	// Verifique se o banco de dados já existe.
-	if err := db.PingContext(ctx); err != nil {
-		log.Printf("erro ao conectar ao banco de dados: %v", err)
+		// Verifique se o banco de dados já existe.
+		if err := db.PingContext(ctx); err != nil {
+			log.Printf("erro ao conectar ao banco de dados: %v", err)
+			panic(err)
+		}
+
+		// set connection settings
+		db.SetMaxOpenConns(5)
+		db.SetMaxIdleConns(5)
+		db.SetConnMaxLifetime(time.Duration(60) * time.Minute)
+
+		dbInstance := bun.NewDB(db, pgdialect.New())
+
+		if err := registerModels(dbInstance); err != nil {
+			panic(err)
+		}
+
+		if err := createAllSchemaTables(ctx, dbInstance); err != nil {
+			panic(err)
+		}
+
+		if err := createPublicTables(ctx, dbInstance); err != nil {
+			panic(err)
+		}
+
+		fmt.Println("Db connected")
+	})
+	return dbInstance
+}
+
+func NewSQLiteConnection() *bun.DB {
+	// Crie um banco SQLite na memória ou em um arquivo
+	db, err := sql.Open(sqliteshim.ShimName, "file::memory:?cache=shared")
+	if err != nil {
 		panic(err)
 	}
 
-	// set connection settings
+	// Configure o número máximo de conexões
 	db.SetMaxOpenConns(5)
 	db.SetMaxIdleConns(5)
 	db.SetConnMaxLifetime(time.Duration(60) * time.Minute)
 
-	dbBun := bun.NewDB(db, pgdialect.New())
+	// Crie a instância do Bun com o driver SQLite
+	dbInstance := bun.NewDB(db, sqlitedialect.New())
 
-	if err := registerModels(dbBun); err != nil {
+	// Registre os modelos necessários
+	if err := registerModels(dbInstance); err != nil {
 		panic(err)
 	}
 
-	if err := createAllSchemaTables(ctx, dbBun); err != nil {
+	// Crie as tabelas no esquema, se necessário
+	ctx := context.Background()
+	if err := createAllSchemaTables(ctx, dbInstance); err != nil {
 		panic(err)
 	}
 
-	if err := createPublicTables(ctx, dbBun); err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Db connected")
-	return dbBun
+	fmt.Println("SQLite connected")
+	return dbInstance
 }
 
 func ChangeSchema(ctx context.Context, db *bun.DB) error {

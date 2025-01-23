@@ -12,7 +12,11 @@ import (
 
 func NewProductCategoryQuantityModule(db *bun.DB, chi *server.ServerChi) (model.QuantityRepository, *quantityusecases.Service, *handler.Handler) {
 	repository := quantityrepositorybun.NewQuantityRepositoryBun(db)
-	service := quantityusecases.NewService(repository)
+	service, err := quantityusecases.InitializeService()
+	if err != nil {
+		panic(err)
+	}
+
 	handler := handlerimpl.NewHandlerQuantity(service)
 	chi.AddHandler(handler)
 	return repository, service, handler

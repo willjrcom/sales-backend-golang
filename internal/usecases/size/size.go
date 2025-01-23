@@ -15,12 +15,8 @@ type Service struct {
 	rc model.CategoryRepository
 }
 
-func NewService(rs model.SizeRepository) *Service {
-	return &Service{rs: rs}
-}
-
-func (s *Service) AddDependencies(rc model.CategoryRepository) {
-	s.rc = rc
+func NewService(rs model.SizeRepository, rc model.CategoryRepository) *Service {
+	return &Service{rs: rs, rc: rc}
 }
 
 func (s *Service) CreateSize(ctx context.Context, dto *sizedto.SizeCreateDTO) (uuid.UUID, error) {

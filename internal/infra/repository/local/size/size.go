@@ -17,7 +17,7 @@ type SizeRepositoryLocal struct {
 	sizes map[uuid.UUID]*model.Size
 }
 
-func NewSizeRepositoryLocal() *SizeRepositoryLocal {
+func NewSizeRepositoryLocal() model.SizeRepository {
 	return &SizeRepositoryLocal{sizes: make(map[uuid.UUID]*model.Size)}
 }
 

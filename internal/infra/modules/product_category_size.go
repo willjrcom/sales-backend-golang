@@ -12,7 +12,11 @@ import (
 
 func NewProductCategorySizeModule(db *bun.DB, chi *server.ServerChi) (model.SizeRepository, *productcategorysizeusecases.Service, *handler.Handler) {
 	repository := productcategorysizerepositorybun.NewSizeRepositoryBun(db)
-	service := productcategorysizeusecases.NewService(repository)
+	service, err := productcategorysizeusecases.InitializeService()
+	if err != nil {
+		panic(err)
+	}
+
 	handler := handlerimpl.NewHandlerSize(service)
 	chi.AddHandler(handler)
 	return repository, service, handler
