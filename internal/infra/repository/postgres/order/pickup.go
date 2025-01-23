@@ -14,7 +14,7 @@ type OrderPickupRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewOrderPickupRepositoryBun(db *bun.DB) *OrderPickupRepositoryBun {
+func NewOrderPickupRepositoryBun(db *bun.DB) model.OrderPickupRepository {
 	return &OrderPickupRepositoryBun{db: db}
 }
 

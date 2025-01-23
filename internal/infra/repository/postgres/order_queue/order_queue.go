@@ -14,7 +14,7 @@ type QueueRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewOrderQueueRepositoryBun(db *bun.DB) *QueueRepositoryBun {
+func NewOrderQueueRepositoryBun(db *bun.DB) model.QueueRepository {
 	return &QueueRepositoryBun{db: db}
 }
 

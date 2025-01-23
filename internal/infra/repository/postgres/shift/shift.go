@@ -14,7 +14,7 @@ type ShiftRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewShiftRepositoryBun(db *bun.DB) *ShiftRepositoryBun {
+func NewShiftRepositoryBun(db *bun.DB) model.ShiftRepository {
 	return &ShiftRepositoryBun{db: db}
 }
 

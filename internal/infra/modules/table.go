@@ -5,11 +5,12 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	tablerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/table"
 	tableusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table"
 )
 
-func NewTableModule(db *bun.DB, chi *server.ServerChi) (*tablerepositorybun.TableRepositoryBun, *tableusecases.Service, *handler.Handler) {
+func NewTableModule(db *bun.DB, chi *server.ServerChi) (model.TableRepository, *tableusecases.Service, *handler.Handler) {
 	repository := tablerepositorybun.NewTableRepositoryBun(db)
 	service := tableusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerTable(service)

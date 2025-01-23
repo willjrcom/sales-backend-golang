@@ -16,7 +16,7 @@ type UserRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewUserRepositoryBun(db *bun.DB) *UserRepositoryBun {
+func NewUserRepositoryBun(db *bun.DB) model.UserRepository {
 	return &UserRepositoryBun{db: db}
 }
 

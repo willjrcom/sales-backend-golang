@@ -14,7 +14,7 @@ type SizeRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewSizeRepositoryBun(db *bun.DB) *SizeRepositoryBun {
+func NewSizeRepositoryBun(db *bun.DB) model.SizeRepository {
 	return &SizeRepositoryBun{db: db}
 }
 

@@ -14,7 +14,7 @@ type AddressRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewAddressRepositoryBun(db *bun.DB) *AddressRepositoryBun {
+func NewAddressRepositoryBun(db *bun.DB) model.AddressRepository {
 	return &AddressRepositoryBun{db: db}
 }
 

@@ -14,7 +14,7 @@ type QuantityRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewQuantityRepositoryBun(db *bun.DB) *QuantityRepositoryBun {
+func NewQuantityRepositoryBun(db *bun.DB) model.QuantityRepository {
 	return &QuantityRepositoryBun{db: db}
 }
 

@@ -14,7 +14,7 @@ type DeliveryDriverRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewDeliveryDriverRepositoryBun(db *bun.DB) *DeliveryDriverRepositoryBun {
+func NewDeliveryDriverRepositoryBun(db *bun.DB) model.DeliveryDriverRepository {
 	return &DeliveryDriverRepositoryBun{db: db}
 }
 

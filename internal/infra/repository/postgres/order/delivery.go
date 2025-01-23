@@ -15,7 +15,7 @@ type OrderDeliveryRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewOrderDeliveryRepositoryBun(db *bun.DB) *OrderDeliveryRepositoryBun {
+func NewOrderDeliveryRepositoryBun(db *bun.DB) model.OrderDeliveryRepository {
 	return &OrderDeliveryRepositoryBun{db: db}
 }
 

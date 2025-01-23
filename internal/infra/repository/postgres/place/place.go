@@ -15,7 +15,7 @@ type PlaceRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewPlaceRepositoryBun(db *bun.DB) *PlaceRepositoryBun {
+func NewPlaceRepositoryBun(db *bun.DB) model.PlaceRepository {
 	return &PlaceRepositoryBun{db: db}
 }
 

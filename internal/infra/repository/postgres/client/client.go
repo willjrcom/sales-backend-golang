@@ -15,7 +15,7 @@ type ClientRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewClientRepositoryBun(db *bun.DB) *ClientRepositoryBun {
+func NewClientRepositoryBun(db *bun.DB) model.ClientRepository {
 	return &ClientRepositoryBun{db: db}
 }
 

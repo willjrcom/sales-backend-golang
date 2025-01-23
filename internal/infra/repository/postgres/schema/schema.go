@@ -5,6 +5,7 @@ import (
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	"golang.org/x/net/context"
 )
 
@@ -13,7 +14,7 @@ type SchemaRepositoryBun struct {
 	mu sync.Mutex
 }
 
-func NewSchemaRepositoryBun(db *bun.DB) *SchemaRepositoryBun {
+func NewSchemaRepositoryBun(db *bun.DB) model.SchemaRepository {
 	return &SchemaRepositoryBun{db: db}
 }
 

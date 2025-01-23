@@ -9,7 +9,7 @@ import (
 type EmployeeRepositoryLocal struct {
 }
 
-func NewEmployeeRepositoryLocal() *EmployeeRepositoryLocal {
+func NewEmployeeRepositoryLocal() model.EmployeeRepository {
 	return &EmployeeRepositoryLocal{}
 }
 
@@ -26,6 +26,10 @@ func (r *EmployeeRepositoryLocal) DeleteEmployee(ctx context.Context, id string)
 }
 
 func (r *EmployeeRepositoryLocal) GetEmployeeById(ctx context.Context, id string) (*model.Employee, error) {
+	return nil, nil
+}
+
+func (r *EmployeeRepositoryLocal) GetEmployeeByUserID(ctx context.Context, userID string) (*model.Employee, error) {
 	return nil, nil
 }
 

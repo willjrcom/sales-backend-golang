@@ -19,7 +19,7 @@ type ProductRepositoryLocal struct {
 	products map[uuid.UUID]*model.Product
 }
 
-func NewProductRepositoryLocal() *ProductRepositoryLocal {
+func NewProductRepositoryLocal() model.ProductRepository {
 	return &ProductRepositoryLocal{products: make(map[uuid.UUID]*model.Product)}
 }
 

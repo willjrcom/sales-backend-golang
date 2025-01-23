@@ -14,7 +14,7 @@ type EmployeeRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewEmployeeRepositoryBun(db *bun.DB) *EmployeeRepositoryBun {
+func NewEmployeeRepositoryBun(db *bun.DB) model.EmployeeRepository {
 	return &EmployeeRepositoryBun{db: db}
 }
 

@@ -17,7 +17,7 @@ type CategoryRepositoryLocal struct {
 	productCategories map[uuid.UUID]*model.ProductCategory
 }
 
-func NewCategoryRepositoryLocal() *CategoryRepositoryLocal {
+func NewCategoryRepositoryLocal() model.CategoryRepository {
 	return &CategoryRepositoryLocal{productCategories: make(map[uuid.UUID]*model.ProductCategory)}
 }
 

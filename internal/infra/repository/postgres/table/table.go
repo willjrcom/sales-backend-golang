@@ -14,7 +14,7 @@ type TableRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewTableRepositoryBun(db *bun.DB) *TableRepositoryBun {
+func NewTableRepositoryBun(db *bun.DB) model.TableRepository {
 	return &TableRepositoryBun{db: db}
 }
 

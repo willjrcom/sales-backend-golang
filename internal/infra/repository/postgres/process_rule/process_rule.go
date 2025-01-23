@@ -17,7 +17,7 @@ type ProcessRuleRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewProcessRuleRepositoryBun(db *bun.DB) *ProcessRuleRepositoryBun {
+func NewProcessRuleRepositoryBun(db *bun.DB) model.ProcessRuleRepository {
 	return &ProcessRuleRepositoryBun{db: db}
 }
 

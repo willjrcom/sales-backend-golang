@@ -14,7 +14,7 @@ type ContactRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewContactRepositoryBun(db *bun.DB) *ContactRepositoryBun {
+func NewContactRepositoryBun(db *bun.DB) model.ContactRepository {
 	return &ContactRepositoryBun{db: db}
 }
 

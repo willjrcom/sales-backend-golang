@@ -9,7 +9,7 @@ import (
 type ClientRepositoryLocal struct {
 }
 
-func NewClientRepositoryLocal() *ClientRepositoryLocal {
+func NewClientRepositoryLocal() model.ClientRepository {
 	return &ClientRepositoryLocal{}
 }
 
@@ -29,6 +29,6 @@ func (r *ClientRepositoryLocal) GetClientById(ctx context.Context, id string) (*
 	return nil, nil
 }
 
-func (r *ClientRepositoryLocal) GetAllClient(ctx context.Context) ([]model.Client, error) {
+func (r *ClientRepositoryLocal) GetAllClients(ctx context.Context) ([]model.Client, error) {
 	return nil, nil
 }

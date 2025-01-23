@@ -5,11 +5,12 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	quantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity"
 	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
 )
 
-func NewProductCategoryQuantityModule(db *bun.DB, chi *server.ServerChi) (*quantityrepositorybun.QuantityRepositoryBun, *quantityusecases.Service, *handler.Handler) {
+func NewProductCategoryQuantityModule(db *bun.DB, chi *server.ServerChi) (model.QuantityRepository, *quantityusecases.Service, *handler.Handler) {
 	repository := quantityrepositorybun.NewQuantityRepositoryBun(db)
 	service := quantityusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerQuantity(service)

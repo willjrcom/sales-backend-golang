@@ -12,7 +12,7 @@ type OrderRepositoryLocal struct {
 	orders map[uuid.UUID]*model.Order
 }
 
-func NewOrderRepositoryLocal() *OrderRepositoryLocal {
+func NewOrderRepositoryLocal() model.OrderRepository {
 	return &OrderRepositoryLocal{orders: make(map[uuid.UUID]*model.Order)}
 }
 
@@ -61,6 +61,10 @@ func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context) ([]model.Order,
 	}
 
 	return orders, nil
+}
+
+func (r *OrderRepositoryLocal) GetAllOrdersWithDelivery(ctx context.Context) ([]model.Order, error) {
+	return nil, nil
 }
 
 func (r *OrderRepositoryLocal) UpdateOrderDelivery(ctx context.Context, delivery *model.OrderDelivery) error {

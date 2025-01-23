@@ -5,11 +5,12 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	contactrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/contact"
 	contactusecases "github.com/willjrcom/sales-backend-go/internal/usecases/contact"
 )
 
-func NewContactModule(db *bun.DB, chi *server.ServerChi) (*contactrepositorybun.ContactRepositoryBun, *contactusecases.Service, *handler.Handler) {
+func NewContactModule(db *bun.DB, chi *server.ServerChi) (model.ContactRepository, *contactusecases.Service, *handler.Handler) {
 	repository := contactrepositorybun.NewContactRepositoryBun(db)
 	service := contactusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerContactPerson(service)

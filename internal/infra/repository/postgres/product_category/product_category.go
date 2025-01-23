@@ -16,7 +16,7 @@ type ProductCategoryRepositoryBun struct {
 	db *bun.DB
 }
 
-func NewProductCategoryRepositoryBun(db *bun.DB) *ProductCategoryRepositoryBun {
+func NewProductCategoryRepositoryBun(db *bun.DB) model.CategoryRepository {
 	return &ProductCategoryRepositoryBun{db: db}
 }
 

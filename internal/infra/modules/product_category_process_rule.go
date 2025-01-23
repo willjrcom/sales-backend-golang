@@ -5,11 +5,12 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	processrulerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/process_rule"
 	processruleusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_rule"
 )
 
-func NewProductCategoryProcessRuleModule(db *bun.DB, chi *server.ServerChi) (*processrulerepositorybun.ProcessRuleRepositoryBun, *processruleusecases.Service, *handler.Handler) {
+func NewProductCategoryProcessRuleModule(db *bun.DB, chi *server.ServerChi) (model.ProcessRuleRepository, *processruleusecases.Service, *handler.Handler) {
 	repository := processrulerepositorybun.NewProcessRuleRepositoryBun(db)
 	service := processruleusecases.NewService(repository)
 	handler := handlerimpl.NewHandlerProcessRuleCategory(service)
