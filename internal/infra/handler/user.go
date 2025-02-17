@@ -151,7 +151,14 @@ func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Reques
 func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	validToken, err := headerservice.GetAnyValidToken(ctx, r)
+	token, err := headerservice.GetAccessTokenFromHeader(r)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
+		return
+	}
+
+	validToken, err := jwtservice.ValidateToken(ctx, token)
+
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 		return
