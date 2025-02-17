@@ -62,7 +62,7 @@ func NewPostgreSQLConnection() *bun.DB {
 		db.SetMaxIdleConns(5)
 		db.SetConnMaxLifetime(time.Duration(60) * time.Minute)
 
-		dbInstance := bun.NewDB(db, pgdialect.New())
+		dbInstance = bun.NewDB(db, pgdialect.New())
 
 		if err := registerModels(dbInstance); err != nil {
 			panic(err)
