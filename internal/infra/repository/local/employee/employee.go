@@ -18,13 +18,11 @@ var (
 type EmployeeRepositoryLocal struct {
 	mu        sync.RWMutex
 	employees map[uuid.UUID]*model.Employee
-	payments  map[string][]model.PaymentEmployee
 }
 
 func NewEmployeeRepositoryLocal() model.EmployeeRepository {
 	return &EmployeeRepositoryLocal{
 		employees: make(map[uuid.UUID]*model.Employee),
-		payments:  make(map[string][]model.PaymentEmployee),
 	}
 }
 
@@ -92,11 +90,14 @@ func (r *EmployeeRepositoryLocal) GetAllEmployees(_ context.Context) ([]model.Em
 func (r *EmployeeRepositoryLocal) AddPaymentEmployee(_ context.Context, p *model.PaymentEmployee) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	key := p.EmployeeID.String()
+
 	// ensure employee exists
-	if _, ok := r.employees[p.EmployeeID]; !ok {
+	employee, ok := r.employees[p.EmployeeID]
+	if !ok {
 		return errEmployeeNotFound
 	}
-	r.payments[key] = append(r.payments[key], *p)
+
+	employee.Payments = append(employee.Payments, *p)
+	r.employees[p.EmployeeID] = employee
 	return nil
 }
