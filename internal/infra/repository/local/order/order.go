@@ -4,39 +4,60 @@ import (
 	"context"
 	"errors"
 
+	"sync"
+
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type OrderRepositoryLocal struct {
 	orders map[uuid.UUID]*model.Order
+	mu     sync.RWMutex
 }
 
 func NewOrderRepositoryLocal() model.OrderRepository {
-	return &OrderRepositoryLocal{orders: make(map[uuid.UUID]*model.Order)}
+	return &OrderRepositoryLocal{
+		orders: make(map[uuid.UUID]*model.Order),
+	}
 }
 
 func (r *OrderRepositoryLocal) CreateOrder(ctx context.Context, order *model.Order) error {
-	if _, ok := r.orders[order.Entity.ID]; ok {
+	if order == nil || order.Entity.ID == uuid.Nil {
+		return errors.New("invalid order")
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if _, exists := r.orders[order.Entity.ID]; exists {
 		return errors.New("order already exists")
 	}
-
-	r.orders[order.ID] = order
+	r.orders[order.Entity.ID] = order
 	return nil
 }
 
 func (r *OrderRepositoryLocal) DeleteOrder(ctx context.Context, id string) error {
-	if _, ok := r.orders[uuid.MustParse(id)]; !ok {
-
+	if id == "" {
+		return errors.New("invalid id")
+	}
+	urid, err := uuid.Parse(id)
+	if err != nil {
+		return err
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if _, exists := r.orders[urid]; !exists {
 		return errors.New("order not found")
 	}
-
-	delete(r.orders, uuid.MustParse(id))
+	delete(r.orders, urid)
 	return nil
 }
 
 func (r *OrderRepositoryLocal) PendingOrder(ctx context.Context, order *model.Order) error {
-	r.orders[order.ID] = order
+	if order == nil || order.Entity.ID == uuid.Nil {
+		return errors.New("invalid order")
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.orders[order.Entity.ID] = order
 	return nil
 }
 
