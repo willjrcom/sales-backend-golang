@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 )
 
@@ -17,7 +18,7 @@ var (
 
 type EmployeePaymentCreateDTO struct {
 	EmployeeID uuid.UUID                    `json:"employee_id"`
-	Amount     float64                      `json:"amount"`
+	Amount     decimal.Decimal              `json:"amount"`
 	Status     employeeentity.PaymentStatus `json:"status"`
 	Method     employeeentity.PaymentMethod `json:"method"`
 	PayDate    time.Time                    `json:"pay_date"`
@@ -25,9 +26,10 @@ type EmployeePaymentCreateDTO struct {
 }
 
 func (u *EmployeePaymentCreateDTO) validate() error {
-	if u.Amount < 0 {
+	if u.Amount.IsNegative() {
 		return ErrAmountInvalid
 	}
+
 	validMethod := false
 	for _, m := range employeeentity.GetAllPaymentMethods() {
 		if m == u.Method {

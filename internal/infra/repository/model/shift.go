@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
@@ -18,18 +19,18 @@ type Shift struct {
 }
 
 type ShiftCommonAttributes struct {
-	CurrentOrderNumber int        `bun:"current_order_number,notnull"`
-	Orders             []Order    `bun:"rel:has-many,join:id=shift_id"`
-	Redeems            []Redeem   `bun:"redeems,type:jsonb"`
-	StartChange        float64    `bun:"start_change"`
-	EndChange          *float64   `bun:"end_change"`
-	AttendantID        *uuid.UUID `bun:"column:attendant_id,type:uuid"`
-	Attendant          *Employee  `bun:"rel:belongs-to"`
+	CurrentOrderNumber int              `bun:"current_order_number,notnull"`
+	Orders             []Order          `bun:"rel:has-many,join:id=shift_id"`
+	Redeems            []Redeem         `bun:"redeems,type:jsonb"`
+	StartChange        decimal.Decimal  `bun:"start_change"`
+	EndChange          *decimal.Decimal `bun:"end_change"`
+	AttendantID        *uuid.UUID       `bun:"column:attendant_id,type:uuid"`
+	Attendant          *Employee        `bun:"rel:belongs-to"`
 }
 
 type Redeem struct {
-	Name  string  `bun:"name,notnull"`
-	Value float64 `bun:"value,notnull"`
+	Name  string          `bun:"name,notnull"`
+	Value decimal.Decimal `bun:"value,notnull"`
 }
 
 type ShiftTimeLogs struct {

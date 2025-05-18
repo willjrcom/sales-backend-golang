@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
@@ -26,14 +27,14 @@ type OrderCommonAttributes struct {
 }
 
 type OrderDetail struct {
-	TotalPayable  float64    `bun:"total_payable"`
-	TotalPaid     float64    `bun:"total_paid"`
-	TotalChange   float64    `bun:"total_change"`
-	QuantityItems float64    `bun:"quantity_items"`
-	Observation   string     `bun:"observation"`
-	AttendantID   *uuid.UUID `bun:"column:attendant_id,type:uuid,notnull"`
-	Attendant     *Employee  `bun:"rel:belongs-to"`
-	ShiftID       uuid.UUID  `bun:"column:shift_id,type:uuid,notnull"`
+	TotalPayable  decimal.Decimal `bun:"total_payable"`
+	TotalPaid     decimal.Decimal `bun:"total_paid"`
+	TotalChange   decimal.Decimal `bun:"total_change"`
+	QuantityItems float64         `bun:"quantity_items"`
+	Observation   string          `bun:"observation"`
+	AttendantID   *uuid.UUID      `bun:"column:attendant_id,type:uuid,notnull"`
+	Attendant     *Employee       `bun:"rel:belongs-to"`
+	ShiftID       uuid.UUID       `bun:"column:shift_id,type:uuid,notnull"`
 }
 
 type OrderType struct {

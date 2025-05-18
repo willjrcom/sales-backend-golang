@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
@@ -18,8 +19,8 @@ type OrderDeliveryDTO struct {
 
 type OrderDeliveryCommonAttributes struct {
 	Status        orderentity.StatusOrderDelivery      `json:"status"`
-	DeliveryTax   *float64                             `json:"delivery_tax"`
-	Change        float64                              `json:"change"`
+	DeliveryTax   *decimal.Decimal                     `json:"delivery_tax"`
+	Change        decimal.Decimal                      `json:"change"`
 	PaymentMethod string                               `json:"payment_method"`
 	ClientID      uuid.UUID                            `json:"client_id"`
 	Client        *clientdto.ClientDTO                 `json:"client"`

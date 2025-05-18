@@ -1,11 +1,11 @@
 package orderentity
 
 import (
-	"errors"
-	"strings"
-
-	"github.com/google/uuid"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+   "errors"
+   "strings"
+   "github.com/shopspring/decimal"
+   "github.com/google/uuid"
+   "github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 var (
@@ -20,31 +20,32 @@ type Item struct {
 	ItemCommonAttributes
 }
 
-type ItemCommonAttributes struct {
-	Name            string
-	Observation     string
-	Price           float64
-	TotalPrice      float64
-	Size            string
-	Quantity        float64
-	GroupItemID     uuid.UUID
-	CategoryID      uuid.UUID
-	IsAdditional    bool
-	AdditionalItems []Item
-	RemovedItems    []string
-	ProductID       uuid.UUID
-}
+   type ItemCommonAttributes struct {
+       Name            string
+       Observation     string
+       Price           decimal.Decimal
+       TotalPrice      decimal.Decimal
+       Size            string
+       Quantity        float64
+       GroupItemID     uuid.UUID
+       CategoryID      uuid.UUID
+       IsAdditional    bool
+       AdditionalItems []Item
+       RemovedItems    []string
+       ProductID       uuid.UUID
+   }
 
-func NewItem(name string, price float64, quantity float64, size string, productID uuid.UUID, categoryID uuid.UUID) *Item {
-	itemAdditionalCommonAttributes := ItemCommonAttributes{
-		Name:       name,
-		Price:      price,
-		TotalPrice: price * quantity,
-		Size:       size,
-		Quantity:   quantity,
-		ProductID:  productID,
-		CategoryID: categoryID,
-	}
+// NewItem creates a new order item with initial price and total
+func NewItem(name string, price decimal.Decimal, quantity float64, size string, productID uuid.UUID, categoryID uuid.UUID) *Item {
+   itemAdditionalCommonAttributes := ItemCommonAttributes{
+       Name:       name,
+       Price:      price,
+       TotalPrice: price.Mul(decimal.NewFromFloat(quantity)),
+       Size:       size,
+       Quantity:   quantity,
+       ProductID:  productID,
+       CategoryID: categoryID,
+   }
 
 	return &Item{
 		Entity:               entity.NewEntity(),
@@ -72,13 +73,12 @@ func (i *Item) RemoveRemovedItem(name string) {
 	}
 }
 
-func (i *Item) CalculateTotalPrice() float64 {
-	totalPrice := i.Price
-
-	for _, additionalItem := range i.AdditionalItems {
-		totalPrice += additionalItem.TotalPrice
-	}
-
-	i.TotalPrice = totalPrice
-	return i.TotalPrice
+// CalculateTotalPrice computes the total price including additional items, updates TotalPrice, and returns it
+func (i *Item) CalculateTotalPrice() decimal.Decimal {
+   total := i.Price
+   for _, additionalItem := range i.AdditionalItems {
+       total = total.Add(additionalItem.TotalPrice)
+   }
+   i.TotalPrice = total
+   return total
 }

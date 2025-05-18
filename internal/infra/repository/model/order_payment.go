@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
@@ -17,9 +18,9 @@ type PaymentOrder struct {
 }
 
 type PaymentCommonAttributes struct {
-	TotalPaid float64   `bun:"total_paid"`
-	Method    string    `bun:"method,notnull"`
-	OrderID   uuid.UUID `bun:"column:order_id,type:uuid,notnull"`
+	TotalPaid decimal.Decimal `bun:"total_paid"`
+	Method    string          `bun:"method,notnull"`
+	OrderID   uuid.UUID       `bun:"column:order_id,type:uuid,notnull"`
 }
 
 type PaymentTimeLogs struct {

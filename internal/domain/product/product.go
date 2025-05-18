@@ -1,10 +1,10 @@
 package productentity
 
 import (
-	"errors"
-
-	"github.com/google/uuid"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+   "errors"
+   "github.com/shopspring/decimal"
+   "github.com/google/uuid"
+   "github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 var (
@@ -18,18 +18,18 @@ type Product struct {
 }
 
 type ProductCommonAttributes struct {
-	Code        string
-	Name        string
-	Flavors     []string
-	ImagePath   *string
-	Description string
-	Price       float64
-	Cost        float64
-	IsAvailable bool
-	CategoryID  uuid.UUID
-	Category    *ProductCategory
-	SizeID      uuid.UUID
-	Size        *Size
+   Code        string
+   Name        string
+   Flavors     []string
+   ImagePath   *string
+   Description string
+   Price       decimal.Decimal
+   Cost        decimal.Decimal
+   IsAvailable bool
+   CategoryID  uuid.UUID
+   Category    *ProductCategory
+   SizeID      uuid.UUID
+   Size        *Size
 }
 
 func NewProduct(productCommonAttributes ProductCommonAttributes) *Product {

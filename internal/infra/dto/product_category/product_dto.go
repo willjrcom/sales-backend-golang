@@ -2,6 +2,7 @@ package productcategorydto
 
 import (
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
 )
@@ -13,8 +14,8 @@ type ProductDTO struct {
 	Flavors     []string         `json:"flavors"`
 	ImagePath   *string          `json:"image_path"`
 	Description string           `json:"description"`
-	Price       float64          `json:"price"`
-	Cost        float64          `json:"cost"`
+	Price       decimal.Decimal  `json:"price"`
+	Cost        decimal.Decimal  `json:"cost"`
 	IsAvailable bool             `json:"is_available"`
 	CategoryID  uuid.UUID        `json:"category_id"`
 	Category    *CategoryDTO     `json:"category"`

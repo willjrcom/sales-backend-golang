@@ -3,6 +3,7 @@ package addressdto
 import (
 	"errors"
 
+	"github.com/shopspring/decimal"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 )
 
@@ -25,7 +26,7 @@ type AddressCreateDTO struct {
 	UF           string                    `json:"uf"`
 	Cep          string                    `json:"cep"`
 	AddressType  addressentity.AddressType `json:"address_type"`
-	DeliveryTax  *float64                  `json:"delivery_tax"`
+	DeliveryTax  *decimal.Decimal          `json:"delivery_tax"`
 	Coordinates  Coordinates               `json:"coordinates"`
 }
 

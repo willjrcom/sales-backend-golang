@@ -2,22 +2,23 @@ package itemdto
 
 import (
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 type ItemDTO struct {
-	ID              uuid.UUID `json:"id"`
-	Name            string    `json:"name"`
-	Observation     string    `json:"observation"`
-	Price           float64   `json:"price"`
-	TotalPrice      float64   `json:"total_price"`
-	Size            string    `json:"size"`
-	Quantity        float64   `json:"quantity"`
-	GroupItemID     uuid.UUID `json:"group_item_id"`
-	CategoryID      uuid.UUID `json:"category_id"`
-	AdditionalItems []ItemDTO `json:"additional_items"`
-	RemovedItems    []string  `json:"removed_items"`
-	ProductID       uuid.UUID `json:"product_id"`
+	ID              uuid.UUID       `json:"id"`
+	Name            string          `json:"name"`
+	Observation     string          `json:"observation"`
+	Price           decimal.Decimal `json:"price"`
+	TotalPrice      decimal.Decimal `json:"total_price"`
+	Size            string          `json:"size"`
+	Quantity        float64         `json:"quantity"`
+	GroupItemID     uuid.UUID       `json:"group_item_id"`
+	CategoryID      uuid.UUID       `json:"category_id"`
+	AdditionalItems []ItemDTO       `json:"additional_items"`
+	RemovedItems    []string        `json:"removed_items"`
+	ProductID       uuid.UUID       `json:"product_id"`
 }
 
 func (i *ItemDTO) FromDomain(item *orderentity.Item) {

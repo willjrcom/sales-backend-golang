@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	employeedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/employee"
 	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
@@ -23,9 +24,9 @@ type OrderDTO struct {
 }
 
 type OrderDetail struct {
-	TotalPayable  float64                  `json:"total_payable"`
-	TotalPaid     float64                  `json:"total_paid"`
-	TotalChange   float64                  `json:"total_change"`
+	TotalPayable  decimal.Decimal          `json:"total_payable"`
+	TotalPaid     decimal.Decimal          `json:"total_paid"`
+	TotalChange   decimal.Decimal          `json:"total_change"`
 	QuantityItems float64                  `json:"quantity_items"`
 	Observation   string                   `json:"observation"`
 	AttendantID   *uuid.UUID               `json:"attendant_id"`

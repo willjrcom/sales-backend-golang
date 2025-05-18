@@ -2,6 +2,8 @@ package shiftdto
 
 import (
 	"errors"
+
+	"github.com/shopspring/decimal"
 )
 
 var (
@@ -9,21 +11,21 @@ var (
 )
 
 type ShiftUpdateOpenDTO struct {
-	StartChange *float64 `json:"start_change"`
+	StartChange decimal.Decimal `json:"start_change"`
 }
 
 func (o *ShiftUpdateOpenDTO) validate() (err error) {
-	if o.StartChange == nil || *o.StartChange == 0 {
+	if o.StartChange.IsZero() {
 		return ErrStartChangeRequired
 	}
 
 	return
 }
 
-func (o *ShiftUpdateOpenDTO) ToDomain() (startChange float64, err error) {
-	if err = o.validate(); err != nil {
-		return 0, err
+func (o *ShiftUpdateOpenDTO) ToDomain() (decimal.Decimal, error) {
+	if err := o.validate(); err != nil {
+		return decimal.Zero, err
 	}
 
-	return startChange, nil
+	return o.StartChange, nil
 }

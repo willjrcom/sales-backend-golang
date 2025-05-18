@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
@@ -17,17 +18,17 @@ type OrderDelivery struct {
 }
 
 type OrderDeliveryCommonAttributes struct {
-	Status        string          `bun:"status"`
-	DeliveryTax   *float64        `bun:"delivery_tax"`
-	Change        float64         `bun:"change"`
-	PaymentMethod string          `bun:"payment_method"`
-	ClientID      uuid.UUID       `bun:"column:client_id,type:uuid,notnull"`
-	Client        *Client         `bun:"rel:belongs-to"`
-	AddressID     uuid.UUID       `bun:"column:address_id,type:uuid,notnull"`
-	Address       *Address        `bun:"rel:belongs-to"`
-	DriverID      *uuid.UUID      `bun:"column:driver_id,type:uuid"`
-	Driver        *DeliveryDriver `bun:"rel:belongs-to"`
-	OrderID       uuid.UUID       `bun:"column:order_id,type:uuid,notnull"`
+	Status        string           `bun:"status"`
+	DeliveryTax   *decimal.Decimal `bun:"delivery_tax"`
+	Change        decimal.Decimal  `bun:"change"`
+	PaymentMethod string           `bun:"payment_method"`
+	ClientID      uuid.UUID        `bun:"column:client_id,type:uuid,notnull"`
+	Client        *Client          `bun:"rel:belongs-to"`
+	AddressID     uuid.UUID        `bun:"column:address_id,type:uuid,notnull"`
+	Address       *Address         `bun:"rel:belongs-to"`
+	DriverID      *uuid.UUID       `bun:"column:driver_id,type:uuid"`
+	Driver        *DeliveryDriver  `bun:"rel:belongs-to"`
+	OrderID       uuid.UUID        `bun:"column:order_id,type:uuid,notnull"`
 }
 
 type DeliveryTimeLogs struct {

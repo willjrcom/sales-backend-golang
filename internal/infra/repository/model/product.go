@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
@@ -19,8 +20,8 @@ type ProductCommonAttributes struct {
 	Flavors     []string         `bun:"flavors,type:jsonb"`
 	ImagePath   *string          `bun:"image_path"`
 	Description string           `bun:"description"`
-	Price       float64          `bun:"price,notnull"`
-	Cost        float64          `bun:"cost"`
+	Price       decimal.Decimal  `bun:"price,notnull"`
+	Cost        decimal.Decimal  `bun:"cost"`
 	IsAvailable bool             `bun:"is_available"`
 	CategoryID  uuid.UUID        `bun:"column:category_id,type:uuid,notnull"`
 	Category    *ProductCategory `bun:"rel:belongs-to"`

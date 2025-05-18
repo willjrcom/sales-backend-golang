@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
@@ -39,9 +40,9 @@ type OrderCommonAttributes struct {
 }
 
 type OrderDetail struct {
-	TotalPayable  float64
-	TotalPaid     float64
-	TotalChange   float64
+	TotalPayable  decimal.Decimal
+	TotalPaid     decimal.Decimal
+	TotalChange   decimal.Decimal
 	QuantityItems float64
 	Observation   string
 	AttendantID   *uuid.UUID
@@ -70,8 +71,8 @@ func NewDefaultOrder(shiftID uuid.UUID, currentOrderNumber int, attendantID *uui
 			OrderDetail: OrderDetail{
 				ShiftID:     shiftID,
 				AttendantID: attendantID,
-				TotalPaid:   0,
-				TotalChange: 0,
+				TotalPaid:   decimal.Zero,
+				TotalChange: decimal.Zero,
 			},
 		},
 	}
@@ -149,12 +150,12 @@ func (o *Order) FinishOrder() (err error) {
 		return ErrDeliveryOrderMustBeDelivered
 	}
 
-	totalPaid := 0.00
+	totalPaid := decimal.Zero
 	for _, payment := range o.Payments {
-		totalPaid += payment.TotalPaid
+		totalPaid = totalPaid.Add(payment.TotalPaid)
 	}
 
-	if totalPaid < o.TotalPayable {
+	if totalPaid.LessThan(o.TotalPayable) {
 		return ErrOrderPaidLessThanTotal
 	}
 
@@ -213,7 +214,8 @@ func (o *Order) UnarchiveOrder() (err error) {
 }
 
 func (o *Order) ValidatePayments() error {
-	if o.TotalPayable <= o.TotalPaid {
+	// Error if the total paid exceeds the total payable
+	if o.TotalPaid.GreaterThan(o.TotalPayable) {
 		return ErrOrderPaidMoreThanTotal
 	}
 
@@ -221,32 +223,32 @@ func (o *Order) ValidatePayments() error {
 }
 
 func (o *Order) AddPayment(payment *PaymentOrder) {
-	o.TotalPaid += payment.TotalPaid
+	o.TotalPaid = o.TotalPaid.Add(payment.TotalPaid)
 	o.Payments = append(o.Payments, *payment)
 }
 
 func (o *Order) CalculateTotalPrice() {
-	o.TotalPayable = 0.00
-	o.QuantityItems = 0.00
+	o.TotalPayable = decimal.Zero
+	o.QuantityItems = 0.0
 
 	for i := range o.GroupItems {
 		o.GroupItems[i].CalculateTotalPrice()
-		o.TotalPayable += o.GroupItems[i].TotalPrice
+		o.TotalPayable = o.TotalPayable.Add(o.GroupItems[i].TotalPrice)
 		o.QuantityItems += o.GroupItems[i].Quantity
 	}
 
-	o.TotalPaid = 0.00
+	o.TotalPaid = decimal.Zero
 	for _, payment := range o.Payments {
-		o.TotalPaid += payment.TotalPaid
+		o.TotalPaid = o.TotalPaid.Add(payment.TotalPaid)
 	}
 
 	if o.Delivery != nil && o.Delivery.DeliveryTax != nil {
-		o.TotalPayable += *o.Delivery.DeliveryTax
+		o.TotalPayable = o.TotalPayable.Add(*o.Delivery.DeliveryTax)
 	}
 
-	if o.TotalPayable < o.TotalPaid {
-		o.TotalChange = o.TotalPaid - o.TotalPayable
+	if o.TotalPaid.GreaterThan(o.TotalPayable) {
+		o.TotalChange = o.TotalPaid.Sub(o.TotalPayable)
 	} else {
-		o.TotalChange = 0
+		o.TotalChange = decimal.Zero
 	}
 }

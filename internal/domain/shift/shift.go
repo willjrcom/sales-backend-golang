@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
@@ -19,15 +20,15 @@ type ShiftCommonAttributes struct {
 	CurrentOrderNumber int
 	Orders             []orderentity.Order
 	Redeems            []Redeem
-	StartChange        float64
-	EndChange          *float64
+	StartChange        decimal.Decimal
+	EndChange          *decimal.Decimal
 	AttendantID        *uuid.UUID
 	Attendant          *employeeentity.Employee
 }
 
 type Redeem struct {
 	Name  string
-	Value float64
+	Value decimal.Decimal
 }
 
 type ShiftTimeLogs struct {
@@ -35,25 +36,27 @@ type ShiftTimeLogs struct {
 	ClosedAt *time.Time
 }
 
-func NewShift(startChange float64) *Shift {
+// NewShift creates a new shift with initial start change
+func NewShift(startChange decimal.Decimal) *Shift {
+	now := time.Now().UTC()
 	shift := &Shift{
 		Entity: entity.NewEntity(),
 		ShiftCommonAttributes: ShiftCommonAttributes{
 			CurrentOrderNumber: 0,
+			StartChange:        startChange,
 		},
 		ShiftTimeLogs: ShiftTimeLogs{
-			OpenedAt: &time.Time{},
+			OpenedAt: &now,
 		},
 	}
-
-	*shift.OpenedAt = time.Now().UTC()
 	return shift
 }
 
-func (s *Shift) CloseShift(endChange float64) (err error) {
+// CloseShift closes the shift with final change
+func (s *Shift) CloseShift(endChange decimal.Decimal) (err error) {
+	now := time.Now().UTC()
 	s.EndChange = &endChange
-	s.ClosedAt = &time.Time{}
-	*s.ClosedAt = time.Now().UTC()
+	s.ClosedAt = &now
 	return nil
 }
 

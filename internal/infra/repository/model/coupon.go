@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
@@ -15,10 +16,10 @@ type Coupon struct {
 }
 
 type CouponCommonAttributes struct {
-	Discount float64    `bun:"discount"`
-	Min      float64    `bun:"min"`
-	StartAt  *time.Time `bun:"start_at"`
-	EndAt    *time.Time `bun:"end_at"`
+	Discount decimal.Decimal `bun:"discount"`
+	Min      decimal.Decimal `bun:"min"`
+	StartAt  *time.Time      `bun:"start_at"`
+	EndAt    *time.Time      `bun:"end_at"`
 }
 
 func (c *Coupon) FromDomain(coupon *orderentity.Coupon) {

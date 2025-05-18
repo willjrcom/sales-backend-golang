@@ -1,8 +1,9 @@
 package addressentity
 
 import (
-	"github.com/google/uuid"
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+   "github.com/google/uuid"
+   "github.com/shopspring/decimal"
+   "github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 type Address struct {
@@ -21,7 +22,7 @@ type AddressCommonAttributes struct {
 	UF           string
 	Cep          string
 	AddressType  AddressType
-	DeliveryTax  float64
+   DeliveryTax  decimal.Decimal
 	Coordinates  Coordinates
 }
 

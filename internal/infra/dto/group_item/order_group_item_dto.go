@@ -2,6 +2,7 @@ package groupitemdto
 
 import (
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	itemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/item"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
@@ -11,7 +12,7 @@ type GroupItemDTO struct {
 	ID               uuid.UUID                       `json:"id"`
 	Size             string                          `json:"size"`
 	Status           orderentity.StatusGroupItem     `json:"status"`
-	TotalPrice       float64                         `json:"total_price"`
+	TotalPrice       decimal.Decimal                 `json:"total_price"`
 	Quantity         float64                         `json:"quantity"`
 	NeedPrint        bool                            `json:"need_print"`
 	UseProcessRule   bool                            `json:"use_process_rule"`

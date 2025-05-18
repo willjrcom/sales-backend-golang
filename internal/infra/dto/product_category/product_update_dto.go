@@ -2,20 +2,21 @@ package productcategorydto
 
 import (
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
 type ProductUpdateDTO struct {
-	Code        *string    `json:"code"`
-	Name        *string    `json:"name"`
-	Flavors     []string   `json:"flavors,omitempty"`
-	ImagePath   *string    `json:"image_path"`
-	Description *string    `json:"description"`
-	Price       *float64   `json:"price"`
-	Cost        *float64   `json:"cost"`
-	IsAvailable *bool      `json:"is_available"`
-	CategoryID  *uuid.UUID `json:"category_id"`
-	SizeID      *uuid.UUID `json:"size_id"`
+	Code        *string          `json:"code"`
+	Name        *string          `json:"name"`
+	Flavors     []string         `json:"flavors,omitempty"`
+	ImagePath   *string          `json:"image_path"`
+	Description *string          `json:"description"`
+	Price       *decimal.Decimal `json:"price"`
+	Cost        *decimal.Decimal `json:"cost"`
+	IsAvailable *bool            `json:"is_available"`
+	CategoryID  *uuid.UUID       `json:"category_id"`
+	SizeID      *uuid.UUID       `json:"size_id"`
 }
 
 func (p *ProductUpdateDTO) Validate(product *productentity.Product) error {
@@ -25,7 +26,7 @@ func (p *ProductUpdateDTO) Validate(product *productentity.Product) error {
 	if product.Name == "" {
 		return ErrNameRequired
 	}
-	if product.Price < product.Cost {
+	if product.Price.LessThan(product.Cost) {
 		return ErrCostGreaterThanPrice
 	}
 

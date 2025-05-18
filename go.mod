@@ -72,6 +72,7 @@ require (
 	github.com/google/wire v0.6.0
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/uptrace/bun/driver/pgdriver v1.1.14
 	golang.org/x/net v0.24.0

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
@@ -26,7 +27,7 @@ type GroupCommonAttributes struct {
 type GroupDetails struct {
 	Size             string           `bun:"size,notnull"`
 	Status           string           `bun:"status,notnull"`
-	TotalPrice       float64          `bun:"total_price"`
+	TotalPrice       decimal.Decimal  `bun:"total_price"`
 	Quantity         float64          `bun:"quantity"`
 	NeedPrint        bool             `bun:"need_print"`
 	UseProcessRule   bool             `bun:"use_process_rule"`

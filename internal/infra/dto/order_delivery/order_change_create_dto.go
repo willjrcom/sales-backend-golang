@@ -3,6 +3,7 @@ package orderdeliverydto
 import (
 	"errors"
 
+	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
@@ -12,7 +13,7 @@ var (
 )
 
 type OrderChangeCreateDTO struct {
-	Change        float64               `json:"change"`
+	Change        decimal.Decimal       `json:"change"`
 	PaymentMethod orderentity.PayMethod `json:"payment_method"`
 }
 
@@ -25,7 +26,7 @@ func (u *OrderChangeCreateDTO) validate() error {
 }
 
 func (u *OrderChangeCreateDTO) validatePayMethod() error {
-	if u.Change <= 0 {
+	if u.Change.IsZero() {
 		return ErrChangeInvalid
 	}
 
@@ -39,9 +40,9 @@ func (u *OrderChangeCreateDTO) validatePayMethod() error {
 	return ErrMethodInvalid
 }
 
-func (u *OrderChangeCreateDTO) ToDomain() (float64, *orderentity.PayMethod, error) {
+func (u *OrderChangeCreateDTO) ToDomain() (decimal.Decimal, *orderentity.PayMethod, error) {
 	if err := u.validate(); err != nil {
-		return 0, nil, err
+		return decimal.Zero, nil, err
 	}
 
 	return u.Change, &u.PaymentMethod, nil

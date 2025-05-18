@@ -1,10 +1,11 @@
 package orderentity
 
 import (
-	"errors"
-	"time"
+   "errors"
+   "time"
 
-	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+   "github.com/shopspring/decimal"
+   "github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 var (
@@ -19,16 +20,16 @@ type Coupon struct {
 }
 
 type CouponCommonAttributes struct {
-	Discount float64
-	Min      float64
+   Discount decimal.Decimal
+   Min      decimal.Decimal
 	StartAt  *time.Time
 	EndAt    *time.Time
 }
 
 func NewCoupon(couponCommonAttributes CouponCommonAttributes) (*Coupon, error) {
-	if couponCommonAttributes.Discount <= 0 {
-		return nil, ErrDiscountMustBePositive
-	}
+   if couponCommonAttributes.Discount.LessThanOrEqual(decimal.Zero) {
+       return nil, ErrDiscountMustBePositive
+   }
 
 	if couponCommonAttributes.StartAt == nil || couponCommonAttributes.EndAt == nil {
 		return nil, ErrStartAndEndAtRequired

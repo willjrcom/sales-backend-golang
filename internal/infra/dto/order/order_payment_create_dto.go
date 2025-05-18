@@ -3,6 +3,7 @@ package orderdto
 import (
 	"errors"
 
+	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
@@ -12,7 +13,7 @@ var (
 )
 
 type OrderPaymentCreateDTO struct {
-	TotalPaid float64               `json:"total_paid"`
+	TotalPaid decimal.Decimal       `json:"total_paid"`
 	Method    orderentity.PayMethod `json:"method"`
 }
 
@@ -25,7 +26,7 @@ func (u *OrderPaymentCreateDTO) validate() error {
 }
 
 func (u *OrderPaymentCreateDTO) validatePayMethod() error {
-	if u.TotalPaid <= 0 {
+	if u.TotalPaid.IsNegative() {
 		return ErrTotalPaidInvalid
 	}
 

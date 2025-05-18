@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 )
 
@@ -15,7 +16,7 @@ type EmployeePaymentDTO struct {
 
 type PaymentCommonAttributes struct {
 	EmployeeID uuid.UUID                    `json:"employee_id"`
-	Amount     float64                      `json:"amount"`
+	Amount     decimal.Decimal              `json:"amount"`
 	Status     employeeentity.PaymentStatus `json:"status"`
 	Method     employeeentity.PaymentMethod `json:"method"`
 	Notes      string                       `json:"notes"`

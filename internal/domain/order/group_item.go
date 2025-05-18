@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
@@ -33,7 +34,7 @@ type GroupCommonAttributes struct {
 type GroupDetails struct {
 	Size             string
 	Status           StatusGroupItem
-	TotalPrice       float64
+	TotalPrice       decimal.Decimal
 	Quantity         float64
 	NeedPrint        bool
 	UseProcessRule   bool
@@ -111,17 +112,19 @@ func (i *GroupItem) CancelGroupItem() {
 
 func (i *GroupItem) CalculateTotalPrice() {
 	qtdItems := 0.0
-	totalPrice := 0.0
+	totalPrice := decimal.Zero
 
 	for _, item := range i.Items {
-		totalPrice += item.CalculateTotalPrice() // item + additionals
+		totalPrice = totalPrice.Add(item.CalculateTotalPrice())
 		qtdItems += item.Quantity
 	}
 
 	if i.ComplementItem != nil {
 		i.ComplementItem.Quantity = qtdItems
-		i.ComplementItem.TotalPrice = i.ComplementItem.Price * qtdItems
-		totalPrice += i.ComplementItem.TotalPrice
+		// price * quantity
+		compTotal := i.ComplementItem.Price.Mul(decimal.NewFromFloat(qtdItems))
+		i.ComplementItem.TotalPrice = compTotal
+		totalPrice = totalPrice.Add(compTotal)
 	}
 
 	i.GroupDetails.Quantity = qtdItems

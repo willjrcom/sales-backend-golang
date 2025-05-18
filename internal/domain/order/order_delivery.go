@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
@@ -23,8 +24,8 @@ type OrderDelivery struct {
 
 type OrderDeliveryCommonAttributes struct {
 	Status        StatusOrderDelivery
-	DeliveryTax   *float64
-	Change        float64
+	DeliveryTax   *decimal.Decimal
+	Change        decimal.Decimal
 	PaymentMethod PayMethod
 	ClientID      uuid.UUID
 	Client        *cliententity.Client
@@ -53,7 +54,8 @@ func NewOrderDelivery(clientID uuid.UUID) *OrderDelivery {
 	}
 }
 
-func (d *OrderDelivery) AddChange(change float64, paymentMethod PayMethod) {
+// AddChange updates the uncollected change and payment method
+func (d *OrderDelivery) AddChange(change decimal.Decimal, paymentMethod PayMethod) {
 	d.Change = change
 	d.PaymentMethod = paymentMethod
 }

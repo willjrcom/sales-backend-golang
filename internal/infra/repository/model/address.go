@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
@@ -15,17 +16,17 @@ type Address struct {
 }
 
 type AddressCommonAttributes struct {
-	Street       string      `bun:"street,notnull"`
-	Number       string      `bun:"number,notnull"`
-	Complement   string      `bun:"complement"`
-	Reference    string      `bun:"reference"`
-	Neighborhood string      `bun:"neighborhood,notnull"`
-	City         string      `bun:"city,notnull"`
-	UF           string      `bun:"uf,notnull"`
-	Cep          string      `bun:"cep"`
-	AddressType  string      `bun:"address_type,notnull"`
-	DeliveryTax  float64     `bun:"delivery_tax,notnull"`
-	Coordinates  Coordinates `bun:"coordinates,type:jsonb"`
+	Street       string          `bun:"street,notnull"`
+	Number       string          `bun:"number,notnull"`
+	Complement   string          `bun:"complement"`
+	Reference    string          `bun:"reference"`
+	Neighborhood string          `bun:"neighborhood,notnull"`
+	City         string          `bun:"city,notnull"`
+	UF           string          `bun:"uf,notnull"`
+	Cep          string          `bun:"cep"`
+	AddressType  string          `bun:"address_type,notnull"`
+	DeliveryTax  decimal.Decimal `bun:"delivery_tax,notnull"`
+	Coordinates  Coordinates     `bun:"coordinates,type:jsonb"`
 }
 
 func (a *Address) FromDomain(address *addressentity.Address) {

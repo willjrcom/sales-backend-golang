@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -90,53 +91,53 @@ func TestCreateProduct(t *testing.T) {
 }
 
 func TestCreateProductError(t *testing.T) {
-   // Test 1 - No Code
-   dto := &productcategorydto.ProductCreateDTO{}
-   _, err := productService.CreateProduct(ctx, dto)
-   assert.EqualError(t, err, productcategorydto.ErrCodeRequired.Error())
+	// Test 1 - No Code
+	dto := &productcategorydto.ProductCreateDTO{}
+	_, err := productService.CreateProduct(ctx, dto)
+	assert.EqualError(t, err, productcategorydto.ErrCodeRequired.Error())
 
-   // Test 2 - No Name
-   dto = &productcategorydto.ProductCreateDTO{
-       Code:       "code",
-       CategoryID: ptrUUID(uuid.Nil),
-       SizeID:     ptrUUID(uuid.Nil),
-   }
-   _, err = productService.CreateProduct(ctx, dto)
-   assert.EqualError(t, err, productcategorydto.ErrNameRequired.Error())
+	// Test 2 - No Name
+	dto = &productcategorydto.ProductCreateDTO{
+		Code:       "code",
+		CategoryID: ptrUUID(uuid.Nil),
+		SizeID:     ptrUUID(uuid.Nil),
+	}
+	_, err = productService.CreateProduct(ctx, dto)
+	assert.EqualError(t, err, productcategorydto.ErrNameRequired.Error())
 
-   // Test 3 - Price less than Cost
-   dto = &productcategorydto.ProductCreateDTO{
-       Code:       "code",
-       Name:       "name",
-       Price:      1.0,
-       Cost:       2.0,
-       CategoryID: ptrUUID(uuid.Nil),
-       SizeID:     ptrUUID(uuid.Nil),
-   }
-   _, err = productService.CreateProduct(ctx, dto)
-   assert.EqualError(t, err, productcategorydto.ErrCostGreaterThanPrice.Error())
+	// Test 3 - Price less than Cost
+	dto = &productcategorydto.ProductCreateDTO{
+		Code:       "code",
+		Name:       "name",
+		Price:      decimal.NewFromInt(1),
+		Cost:       decimal.NewFromInt(2),
+		CategoryID: ptrUUID(uuid.Nil),
+		SizeID:     ptrUUID(uuid.Nil),
+	}
+	_, err = productService.CreateProduct(ctx, dto)
+	assert.EqualError(t, err, productcategorydto.ErrCostGreaterThanPrice.Error())
 
-   // Test 4 - No Category
-   dto = &productcategorydto.ProductCreateDTO{
-       Code:   "code",
-       Name:   "name",
-       Price:  2.0,
-       Cost:   1.0,
-       SizeID: ptrUUID(uuid.Nil),
-   }
-   _, err = productService.CreateProduct(ctx, dto)
-   assert.EqualError(t, err, productcategorydto.ErrCategoryRequired.Error())
+	// Test 4 - No Category
+	dto = &productcategorydto.ProductCreateDTO{
+		Code:   "code",
+		Name:   "name",
+		Price:  decimal.NewFromInt(2),
+		Cost:   decimal.NewFromInt(1),
+		SizeID: ptrUUID(uuid.Nil),
+	}
+	_, err = productService.CreateProduct(ctx, dto)
+	assert.EqualError(t, err, productcategorydto.ErrCategoryRequired.Error())
 
-   // Test 5 - No Size
-   dto = &productcategorydto.ProductCreateDTO{
-       Code:       "code",
-       Name:       "name",
-       Price:      2.0,
-       Cost:       1.0,
-       CategoryID: ptrUUID(uuid.Nil),
-   }
-   _, err = productService.CreateProduct(ctx, dto)
-   assert.EqualError(t, err, productcategorydto.ErrSizeRequired.Error())
+	// Test 5 - No Size
+	dto = &productcategorydto.ProductCreateDTO{
+		Code:       "code",
+		Name:       "name",
+		Price:      decimal.NewFromInt(2),
+		Cost:       decimal.NewFromInt(1),
+		CategoryID: ptrUUID(uuid.Nil),
+	}
+	_, err = productService.CreateProduct(ctx, dto)
+	assert.EqualError(t, err, productcategorydto.ErrSizeRequired.Error())
 }
 
 func TestUpdateProduct(t *testing.T) {
@@ -166,7 +167,7 @@ func TestUpdateProduct(t *testing.T) {
 
 	err = productService.UpdateProduct(ctx, dtoId, dto)
 	assert.EqualError(t, err, productcategorydto.ErrCostGreaterThanPrice.Error())
-	*dto.Cost = float64(90.0)
+	*dto.Cost = decimal.NewFromInt(90)
 }
 
 func TestGetAll(t *testing.T) {

@@ -3,6 +3,7 @@ package shiftdto
 import (
 	"errors"
 
+	"github.com/shopspring/decimal"
 	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
 )
 
@@ -12,15 +13,15 @@ var (
 )
 
 type ShiftRedeemCreateDTO struct {
-	Name  string  `json:"name"`
-	Value float64 `json:"value"`
+	Name  string          `json:"name"`
+	Value decimal.Decimal `json:"value"`
 }
 
 func (r *ShiftRedeemCreateDTO) validate() error {
 	if r.Name == "" {
 		return ErrNameRequired
 	}
-	if r.Value == 0 {
+	if r.Value.IsZero() {
 		return ErrValueRequired
 	}
 

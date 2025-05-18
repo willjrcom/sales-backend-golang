@@ -5,6 +5,7 @@ import (
 	"mime/multipart"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -21,8 +22,8 @@ type ProductCreateDTO struct {
 	Name        string          `json:"name"`
 	Flavors     []string        `json:"flavors"`
 	Description string          `json:"description"`
-	Price       float64         `json:"price"`
-	Cost        float64         `json:"cost"`
+	Price       decimal.Decimal `json:"price"`
+	Cost        decimal.Decimal `json:"cost"`
 	IsAvailable bool            `json:"is_available"`
 	CategoryID  *uuid.UUID      `json:"category_id"`
 	SizeID      *uuid.UUID      `json:"size_id"`
@@ -36,7 +37,7 @@ func (p *ProductCreateDTO) validate() error {
 	if p.Name == "" {
 		return ErrNameRequired
 	}
-	if p.Price > 0 && p.Cost > 0 && p.Price < p.Cost {
+	if p.Price.LessThan(p.Cost) {
 		return ErrCostGreaterThanPrice
 	}
 	if p.CategoryID == nil || len(p.CategoryID.String()) == 0 {

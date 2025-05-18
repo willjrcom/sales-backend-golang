@@ -31,7 +31,7 @@ func (r *ClientUpdateDTO) validate() error {
 		return ErrInvalidEmail
 	}
 
-	if r.Address != nil && r.Address.DeliveryTax != nil && *r.Address.DeliveryTax == 0 {
+	if r.Address != nil && r.Address.DeliveryTax != nil && r.Address.DeliveryTax.IsZero() {
 		return ErrDeliveryTaxRequired
 	}
 

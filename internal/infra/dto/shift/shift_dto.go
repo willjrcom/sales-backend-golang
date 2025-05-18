@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
 	employeedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/employee"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
@@ -19,8 +20,8 @@ type ShiftCommonAttributes struct {
 	CurrentOrderNumber int                      `json:"current_order_number"`
 	Orders             []orderdto.OrderDTO      `json:"orders"`
 	Redeems            []RedeemDTO              `json:"redeems"`
-	StartChange        float64                  `json:"start_change"`
-	EndChange          *float64                 `json:"end_change"`
+	StartChange        decimal.Decimal          `json:"start_change"`
+	EndChange          *decimal.Decimal         `json:"end_change"`
 	AttendantID        *uuid.UUID               `json:"attendant_id"`
 	Attendant          *employeedto.EmployeeDTO `json:"attendant"`
 }
