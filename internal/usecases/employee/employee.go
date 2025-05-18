@@ -113,6 +113,28 @@ func (s *Service) GetAllEmployees(ctx context.Context) ([]employeedto.EmployeeDT
 	}
 }
 
+// AddPayment records a payment for an employee.
+func (s *Service) AddPayment(ctx context.Context, dtoId *entitydto.IDRequest, dtoPayment *employeedto.EmployeePaymentCreateDTO) error {
+	if _, err := s.re.GetEmployeeById(ctx, dtoId.ID.String()); err != nil {
+		return err
+	}
+
+	dtoPayment.EmployeeID = dtoId.ID
+
+	payment, err := dtoPayment.ToDomain()
+	if err != nil {
+		return err
+	}
+
+	paymentModel := &model.PaymentEmployee{}
+	paymentModel.FromDomain(payment)
+	if err := s.re.AddPaymentEmployee(ctx, paymentModel); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func modelsToDTOs(employeeModels []model.Employee) []employeedto.EmployeeDTO {
 	dtos := make([]employeedto.EmployeeDTO, len(employeeModels))
 	for i, employeeModel := range employeeModels {

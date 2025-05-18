@@ -27,6 +27,7 @@ func NewHandlerEmployee(employeeService *employeeusecases.Service) *handler.Hand
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerCreateEmployee)
 		c.Patch("/update/{id}", h.handlerUpdateEmployee)
+		c.Put("/update/{id}/payment", h.handlerAddPayment)
 		c.Delete("/{id}", h.handlerDeleteEmployee)
 		c.Get("/{id}", h.handlerGetEmployee)
 		c.Get("/all", h.handlerGetAllEmployees)
@@ -129,4 +130,30 @@ func (h *handlerEmployeeImpl) handlerGetAllEmployees(w http.ResponseWriter, r *h
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
+}
+
+// handlerAddPayment adds a payment record for an employee.
+func (h *handlerEmployeeImpl) handlerAddPayment(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+
+	dtoPayment := &employeedto.EmployeePaymentCreateDTO{}
+	if err := jsonpkg.ParseBody(r, dtoPayment); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := h.s.AddPayment(ctx, dtoId, dtoPayment); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
