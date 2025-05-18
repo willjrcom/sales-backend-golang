@@ -2,37 +2,73 @@ package employeerepositorylocal
 
 import (
 	"context"
+	"errors"
 
+	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
+var (
+	errEmployeeExists   = errors.New("employee already exists")
+	errEmployeeNotFound = errors.New("employee not found")
+)
+
 type EmployeeRepositoryLocal struct {
+	employees map[uuid.UUID]*model.Employee
 }
 
 func NewEmployeeRepositoryLocal() model.EmployeeRepository {
-	return &EmployeeRepositoryLocal{}
+	return &EmployeeRepositoryLocal{employees: make(map[uuid.UUID]*model.Employee)}
 }
 
-func (r *EmployeeRepositoryLocal) CreateEmployee(ctx context.Context, p *model.Employee) error {
+func (r *EmployeeRepositoryLocal) CreateEmployee(_ context.Context, p *model.Employee) error {
+	if _, ok := r.employees[p.ID]; ok {
+		return errEmployeeExists
+	}
+	r.employees[p.ID] = p
 	return nil
 }
 
-func (r *EmployeeRepositoryLocal) UpdateEmployee(ctx context.Context, p *model.Employee) error {
+func (r *EmployeeRepositoryLocal) UpdateEmployee(_ context.Context, p *model.Employee) error {
+	r.employees[p.ID] = p
 	return nil
 }
 
-func (r *EmployeeRepositoryLocal) DeleteEmployee(ctx context.Context, id string) error {
+func (r *EmployeeRepositoryLocal) DeleteEmployee(_ context.Context, id string) error {
+	uid := uuid.MustParse(id)
+	if _, ok := r.employees[uid]; !ok {
+		return errEmployeeNotFound
+	}
+	delete(r.employees, uid)
 	return nil
 }
 
-func (r *EmployeeRepositoryLocal) GetEmployeeById(ctx context.Context, id string) (*model.Employee, error) {
-	return nil, nil
+func (r *EmployeeRepositoryLocal) GetEmployeeById(_ context.Context, id string) (*model.Employee, error) {
+	uid := uuid.MustParse(id)
+	if e, ok := r.employees[uid]; ok {
+		return e, nil
+	}
+	return nil, errEmployeeNotFound
 }
 
-func (r *EmployeeRepositoryLocal) GetEmployeeByUserID(ctx context.Context, userID string) (*model.Employee, error) {
-	return nil, nil
+func (r *EmployeeRepositoryLocal) GetEmployeeByUserID(_ context.Context, userID string) (*model.Employee, error) {
+	uid := uuid.MustParse(userID)
+	for _, e := range r.employees {
+		if e.UserID == uid {
+			return e, nil
+		}
+	}
+	return nil, errEmployeeNotFound
 }
 
-func (r *EmployeeRepositoryLocal) GetAllEmployees(ctx context.Context) ([]model.Employee, error) {
-	return nil, nil
+func (r *EmployeeRepositoryLocal) GetAllEmployees(_ context.Context) ([]model.Employee, error) {
+	list := make([]model.Employee, 0, len(r.employees))
+	for _, e := range r.employees {
+		list = append(list, *e)
+	}
+	return list, nil
+}
+
+func (r *EmployeeRepositoryLocal) AddPaymentEmployee(_ context.Context, p *model.PaymentEmployee) error {
+	return nil
 }

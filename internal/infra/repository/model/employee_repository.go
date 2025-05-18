@@ -9,4 +9,6 @@ type EmployeeRepository interface {
 	GetEmployeeById(ctx context.Context, id string) (*Employee, error)
 	GetEmployeeByUserID(ctx context.Context, userID string) (*Employee, error)
 	GetAllEmployees(ctx context.Context) ([]Employee, error)
+	// AddPaymentEmployee records a payment for an employee.
+	AddPaymentEmployee(ctx context.Context, p *PaymentEmployee) error
 }

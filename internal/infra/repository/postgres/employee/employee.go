@@ -114,3 +114,16 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]model.Em
 
 	return employees, nil
 }
+
+func (r *EmployeeRepositoryBun) AddPaymentEmployee(ctx context.Context, p *model.PaymentEmployee) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+	if _, err := r.db.NewInsert().Model(p).Exec(ctx); err != nil {
+		return err
+	}
+	return nil
+}
