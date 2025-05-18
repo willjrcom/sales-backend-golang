@@ -1,0 +1,39 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  GO_VERSION: "1.21"  # Versão do Go a ser usada
+  CGO_ENABLED: "0"    # Desativar CGO para builds mais simples
+  GOFLAGS: "-mod=readonly"  # Para evitar que o Go modifique `go.mod` ou `go.sum`
+  RENDER_DEPLOY_HOOK: "https://api.render.com/deploy/srv-cu4m9k8gph6c739ahtbg?key=8SRCp4-ntBc"
+
+build:
+  stage: build
+  image: golang:${GO_VERSION}  # Usa a imagem oficial do Golang
+  script:
+    - echo "Building the application..."
+    - go build -o app main.go httpserver
+  artifacts:
+    paths:
+      - app  # O executável gerado será armazenado como artefato
+
+test:
+  stage: test
+  image: golang:${GO_VERSION}
+  script:
+    - echo "Running tests..."
+    - go test ./... -v
+  dependencies:
+    - build  # Depende do stage de build
+
+deploy:
+  stage: deploy
+  image: alpine:latest  # Usa uma imagem leve para o deploy
+  script:
+  - echo "Triggering deploy on Render..."
+  - curl -X POST "$RENDER_DEPLOY_HOOK"
+
+  only:
+    - main  # Executa o deploy apenas no branch `main`

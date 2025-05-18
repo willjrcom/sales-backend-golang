@@ -92,6 +92,18 @@ func (s *Service) DeleteSize(ctx context.Context, dto *entitydto.IDRequest) erro
 
 	return nil
 }
+
+func (s *Service) GetSizeById(ctx context.Context, dto *entitydto.IDRequest) (*sizedto.SizeDTO, error) {
+	if sizeModel, err := s.rs.GetSizeById(ctx, dto.ID.String()); err != nil {
+		return nil, err
+	} else {
+		size := sizeModel.ToDomain()
+		sizeDto := &sizedto.SizeDTO{}
+		sizeDto.FromDomain(size)
+		return sizeDto, nil
+	}
+}
+
 func (s *Service) AddSizesByValues(ctx context.Context, dto *sizedto.SizeCreateBatchDTO) error {
 	sizes, categoryID, err := dto.ToDomain()
 	if err != nil {

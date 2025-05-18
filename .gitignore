@@ -1,1 +1,6 @@
 __debug_bin*
+
+# Temporary directories to ignore
+.gocache/
+.tmp/
+tmp/

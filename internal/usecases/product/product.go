@@ -11,9 +11,6 @@ import (
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
-var (
-	ErrSizeIsInvalid = errors.New("size is invalid")
-)
 
 type Service struct {
 	rp        model.ProductRepository
@@ -45,17 +42,12 @@ func (s *Service) CreateProduct(ctx context.Context, dto *productcategorydto.Pro
 	}
 
 	categoryModel, err := s.rc.GetCategoryById(ctx, product.CategoryID.String())
-	if err == nil {
+	if err != nil {
 		return uuid.Nil, err
 	}
 
 	category := categoryModel.ToDomain()
-
 	product.Category = category
-
-	if exists, err := product.FindSizeInCategory(); !exists {
-		return uuid.Nil, err
-	}
 
 	productModel := &model.Product{}
 	productModel.FromDomain(product)

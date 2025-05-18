@@ -39,7 +39,7 @@ func (p *ProductCreateDTO) validate() error {
 	if p.Price > 0 && p.Cost > 0 && p.Price < p.Cost {
 		return ErrCostGreaterThanPrice
 	}
-	if len(p.CategoryID.String()) == 0 || p.CategoryID == nil {
+	if p.CategoryID == nil || len(p.CategoryID.String()) == 0 {
 		return ErrCategoryRequired
 	}
 	if p.SizeID == nil {

@@ -8,31 +8,52 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
-	categoryusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category"
-	categorysizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size"
+
+	categoryrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category"
+	productrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
+	quantityrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/quantity"
+	sizerepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/size"
+
+	productcategoryusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category"
+	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
+	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size"
+
+	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
 var (
 	productService         *Service
-	sizeService            *categorysizeusecases.Service
-	productCategoryService *categoryusecases.Service
+	sizeService            *sizeusecases.Service
+	productCategoryService *productcategoryusecases.Service
 	ctx                    context.Context
 )
+
+// ptrUUID returns a pointer to the given UUID.
+func ptrUUID(u uuid.UUID) *uuid.UUID {
+	return &u
+}
 
 func TestMain(m *testing.M) {
 	ctx = context.Background()
 
-	// Service
-	productService, _ = InitializeServiceForTest()
-	sizeService, _ = categorysizeusecases.InitializeServiceForTest()
-	productCategoryService, _ = categoryusecases.InitializeServiceForTest()
+	// Shared in-memory repositories for test isolation
+	catRepo := categoryrepolocal.NewCategoryRepositoryLocal()
+	qtyRepo := quantityrepolocal.NewQuantityRepositoryLocal()
+	szRepo := sizerepolocal.NewSizeRepositoryLocal()
+	prdRepo := productrepolocal.NewProductRepositoryLocal()
 
-	exitCode := m.Run()
+	// Use-case services with shared category repository
+	qtySvc := quantityusecases.NewService(qtyRepo, catRepo)
+	szSvc := sizeusecases.NewService(szRepo, catRepo)
+	productCategoryService = productcategoryusecases.NewService(catRepo, qtySvc, szSvc)
+	sizeService = sizeusecases.NewService(szRepo, catRepo)
+	productService = NewService(prdRepo, catRepo, s3service.NewS3Client())
 
-	os.Exit(exitCode)
+	os.Exit(m.Run())
 }
 
 func TestCreateProduct(t *testing.T) {
@@ -69,33 +90,53 @@ func TestCreateProduct(t *testing.T) {
 }
 
 func TestCreateProductError(t *testing.T) {
-	// Teste 1 - No Code
-	dto := &productcategorydto.ProductCreateDTO{}
+   // Test 1 - No Code
+   dto := &productcategorydto.ProductCreateDTO{}
+   _, err := productService.CreateProduct(ctx, dto)
+   assert.EqualError(t, err, productcategorydto.ErrCodeRequired.Error())
 
-	_, err := productService.CreateProduct(ctx, dto)
-	assert.NotNil(t, err)
-	assert.EqualError(t, err, productcategorydto.ErrCodeRequired.Error())
+   // Test 2 - No Name
+   dto = &productcategorydto.ProductCreateDTO{
+       Code:       "code",
+       CategoryID: ptrUUID(uuid.Nil),
+       SizeID:     ptrUUID(uuid.Nil),
+   }
+   _, err = productService.CreateProduct(ctx, dto)
+   assert.EqualError(t, err, productcategorydto.ErrNameRequired.Error())
 
-	// Test 2 - No Name
-	dto = &productcategorydto.ProductCreateDTO{}
+   // Test 3 - Price less than Cost
+   dto = &productcategorydto.ProductCreateDTO{
+       Code:       "code",
+       Name:       "name",
+       Price:      1.0,
+       Cost:       2.0,
+       CategoryID: ptrUUID(uuid.Nil),
+       SizeID:     ptrUUID(uuid.Nil),
+   }
+   _, err = productService.CreateProduct(ctx, dto)
+   assert.EqualError(t, err, productcategorydto.ErrCostGreaterThanPrice.Error())
 
-	_, err = productService.CreateProduct(ctx, dto)
-	assert.NotNil(t, err)
-	assert.EqualError(t, err, productcategorydto.ErrNameRequired.Error())
+   // Test 4 - No Category
+   dto = &productcategorydto.ProductCreateDTO{
+       Code:   "code",
+       Name:   "name",
+       Price:  2.0,
+       Cost:   1.0,
+       SizeID: ptrUUID(uuid.Nil),
+   }
+   _, err = productService.CreateProduct(ctx, dto)
+   assert.EqualError(t, err, productcategorydto.ErrCategoryRequired.Error())
 
-	// Test 3 - Price greater than cost
-	dto = &productcategorydto.ProductCreateDTO{}
-
-	_, err = productService.CreateProduct(ctx, dto)
-	assert.NotNil(t, err)
-	assert.EqualError(t, err, productcategorydto.ErrCostGreaterThanPrice.Error())
-
-	// Test 4 - No category
-	dto = &productcategorydto.ProductCreateDTO{}
-
-	_, err = productService.CreateProduct(ctx, dto)
-	assert.NotNil(t, err)
-	assert.EqualError(t, err, productcategorydto.ErrCategoryRequired.Error())
+   // Test 5 - No Size
+   dto = &productcategorydto.ProductCreateDTO{
+       Code:       "code",
+       Name:       "name",
+       Price:      2.0,
+       Cost:       1.0,
+       CategoryID: ptrUUID(uuid.Nil),
+   }
+   _, err = productService.CreateProduct(ctx, dto)
+   assert.EqualError(t, err, productcategorydto.ErrSizeRequired.Error())
 }
 
 func TestUpdateProduct(t *testing.T) {
