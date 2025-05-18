@@ -1,13 +1,11 @@
 package orderrepositorylocal
 
 import (
-	"context"
-	"errors"
-
-	"sync"
-
-	"github.com/google/uuid"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+   "context"
+   "errors"
+   "sync"
+   "github.com/google/uuid"
+   "github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type OrderRepositoryLocal struct {
@@ -85,25 +83,76 @@ func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context) ([]model.Order,
 }
 
 func (r *OrderRepositoryLocal) GetAllOrdersWithDelivery(ctx context.Context) ([]model.Order, error) {
-	return nil, nil
+   r.mu.RLock()
+   defer r.mu.RUnlock()
+   out := []model.Order{}
+   for _, o := range r.orders {
+       if o.Delivery != nil {
+           out = append(out, *o)
+       }
+   }
+   return out, nil
 }
 
 func (r *OrderRepositoryLocal) UpdateOrderDelivery(ctx context.Context, delivery *model.OrderDelivery) error {
-	return nil
+   r.mu.Lock()
+   defer r.mu.Unlock()
+   orderID := delivery.OrderID.String()
+   for _, o := range r.orders {
+       if o.ID.String() == orderID {
+           o.Delivery = delivery
+           return nil
+       }
+   }
+   return errors.New("order not found")
 }
 
 func (r *OrderRepositoryLocal) DeleteOrderDelivery(ctx context.Context, id string) error {
-	return nil
+   r.mu.Lock()
+   defer r.mu.Unlock()
+   for _, o := range r.orders {
+       if o.Delivery != nil && o.Delivery.ID.String() == id {
+           o.Delivery = nil
+           return nil
+       }
+   }
+   return errors.New("delivery not found")
 }
 
 func (r *OrderRepositoryLocal) UpdateOrderTable(ctx context.Context, table *model.OrderTable) error {
-	return nil
+   r.mu.Lock()
+   defer r.mu.Unlock()
+   orderID := table.OrderID.String()
+   for _, o := range r.orders {
+       if o.ID.String() == orderID {
+           o.Table = table
+           return nil
+       }
+   }
+   return errors.New("order not found")
 }
 
 func (r *OrderRepositoryLocal) DeleteOrderTable(ctx context.Context, id string) error {
-	return nil
+   r.mu.Lock()
+   defer r.mu.Unlock()
+   for _, o := range r.orders {
+       if o.Table != nil && o.Table.ID.String() == id {
+           o.Table = nil
+           return nil
+       }
+   }
+   return errors.New("table not found")
 }
 
 func (r *OrderRepositoryLocal) AddPaymentOrder(ctx context.Context, payment *model.PaymentOrder) error {
-	return nil
+   r.mu.Lock()
+   defer r.mu.Unlock()
+   orderID := payment.OrderID.String()
+   for _, o := range r.orders {
+       if o.ID.String() == orderID {
+           o.Payments = append(o.Payments, *payment)
+           return nil
+       }
+   }
+   return errors.New("order not found")
 }

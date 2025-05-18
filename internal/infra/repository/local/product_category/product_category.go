@@ -3,6 +3,7 @@ package productcategoryrepositorylocal
 import (
 	"context"
 	"errors"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -14,6 +15,7 @@ var (
 )
 
 type CategoryRepositoryLocal struct {
+	mu                sync.RWMutex
 	productCategories map[uuid.UUID]*model.ProductCategory
 }
 
@@ -77,5 +79,15 @@ func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context) ([]model.P
 }
 
 func (r *CategoryRepositoryLocal) GetAllCategoriesWithProcessRulesAndOrderProcess(_ context.Context) ([]model.ProductCategoryWithOrderProcess, error) {
-	return nil, nil
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	out := make([]model.ProductCategoryWithOrderProcess, 0, len(r.productCategories))
+	for _, pc := range r.productCategories {
+		// Convert DB model to domain, then to combined DTO
+		dom := pc.ToDomain()
+		var cp model.ProductCategoryWithOrderProcess
+		cp.FromDomain(dom)
+		out = append(out, cp)
+	}
+	return out, nil
 }

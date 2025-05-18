@@ -2,21 +2,16 @@ package userrepositorylocal
 
 import (
 	"context"
-	"github.com/google/uuid"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
-)
-
-import (
-	"context"
 	"errors"
 	"sync"
+
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type UserRepositoryLocal struct {
 	users map[uuid.UUID]*model.User
-	mu sync.RWMutex
+	mu    sync.RWMutex
 }
 
 func NewUserRepositoryLocal() model.UserRepository {
@@ -100,7 +95,7 @@ func (r *UserRepositoryLocal) GetIDByEmailOrCPF(ctx context.Context, email strin
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	for _, u := range r.users {
-		if (email != "" && u.Email == email) || (cpf != "" && u.CPF == cpf) {
+		if (email != "" && u.Email == email) || (cpf != "" && u.Cpf == cpf) {
 			return &u.Entity.ID, nil
 		}
 	}
@@ -118,7 +113,6 @@ func (r *UserRepositoryLocal) GetUserByID(ctx context.Context, id uuid.UUID) (*m
 		return nil, errors.New("user not found")
 	}
 	return u, nil
-}
 }
 
 func (r *UserRepositoryLocal) GetByCPF(ctx context.Context, cpf string) (*model.User, error) {
