@@ -25,7 +25,7 @@ type AddressCommonAttributes struct {
 	UF           string          `bun:"uf,notnull"`
 	Cep          string          `bun:"cep"`
 	AddressType  string          `bun:"address_type,notnull"`
-	DeliveryTax  decimal.Decimal `bun:"delivery_tax,notnull"`
+	DeliveryTax  decimal.Decimal `bun:"delivery_tax,type:decimal(10,2),notnull"`
 	Coordinates  Coordinates     `bun:"coordinates,type:jsonb"`
 }
 

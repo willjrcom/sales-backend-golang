@@ -18,7 +18,7 @@ type PaymentOrder struct {
 }
 
 type PaymentCommonAttributes struct {
-	TotalPaid decimal.Decimal `bun:"total_paid"`
+	TotalPaid decimal.Decimal `bun:"total_paid,type:decimal(10,2)"`
 	Method    string          `bun:"method,notnull"`
 	OrderID   uuid.UUID       `bun:"column:order_id,type:uuid,notnull"`
 }

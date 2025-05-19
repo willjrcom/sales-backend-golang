@@ -19,8 +19,8 @@ type OrderDelivery struct {
 
 type OrderDeliveryCommonAttributes struct {
 	Status        string           `bun:"status"`
-	DeliveryTax   *decimal.Decimal `bun:"delivery_tax"`
-	Change        decimal.Decimal  `bun:"change"`
+	DeliveryTax   *decimal.Decimal `bun:"delivery_tax,type:decimal(10,2)"`
+	Change        decimal.Decimal  `bun:"change,type:decimal(10,2)"`
 	PaymentMethod string           `bun:"payment_method"`
 	ClientID      uuid.UUID        `bun:"column:client_id,type:uuid,notnull"`
 	Client        *Client          `bun:"rel:belongs-to"`

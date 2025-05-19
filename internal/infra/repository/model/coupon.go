@@ -16,8 +16,8 @@ type Coupon struct {
 }
 
 type CouponCommonAttributes struct {
-	Discount decimal.Decimal `bun:"discount"`
-	Min      decimal.Decimal `bun:"min"`
+	Discount decimal.Decimal `bun:"discount,type:decimal(10,2)"`
+	Min      decimal.Decimal `bun:"min,type:decimal(10,2)"`
 	StartAt  *time.Time      `bun:"start_at"`
 	EndAt    *time.Time      `bun:"end_at"`
 }

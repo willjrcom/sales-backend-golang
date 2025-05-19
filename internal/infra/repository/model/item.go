@@ -17,8 +17,8 @@ type Item struct {
 type ItemCommonAttributes struct {
 	Name            string          `bun:"name,notnull"`
 	Observation     string          `bun:"observation"`
-	Price           decimal.Decimal `bun:"price,notnull"`
-	TotalPrice      decimal.Decimal `bun:"total_price,notnull"`
+	Price           decimal.Decimal `bun:"price,type:decimal(10,2),notnull"`
+	TotalPrice      decimal.Decimal `bun:"total_price,type:decimal(10,2),notnull"`
 	Size            string          `bun:"size,notnull"`
 	Quantity        float64         `bun:"quantity,notnull"`
 	GroupItemID     uuid.UUID       `bun:"group_item_id,type:uuid"`

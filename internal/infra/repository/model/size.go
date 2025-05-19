@@ -9,7 +9,7 @@ import (
 
 type Size struct {
 	entitymodel.Entity
-	bun.BaseModel `bun:"table:sizes"`
+	bun.BaseModel `bun:"table:sizes,alias:size"`
 	SizeCommonAttributes
 }
 

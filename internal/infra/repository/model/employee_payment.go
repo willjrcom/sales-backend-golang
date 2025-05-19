@@ -19,7 +19,7 @@ type PaymentEmployee struct {
 
 type EmployeePaymentCommonAttributes struct {
 	EmployeeID uuid.UUID                    `bun:"employee_id,type:uuid,notnull"`
-	Amount     decimal.Decimal              `bun:"amount,notnull"`
+	Amount     decimal.Decimal              `bun:"amount,type:decimal(10,2),notnull"`
 	Status     employeeentity.PaymentStatus `bun:"status,notnull"`
 	Method     employeeentity.PaymentMethod `bun:"method,notnull"`
 	Notes      string                       `bun:"notes"`

@@ -8,7 +8,7 @@ import (
 
 type ProductCategory struct {
 	entitymodel.Entity
-	bun.BaseModel `bun:"table:product_categories"`
+	bun.BaseModel `bun:"table:product_categories,alias:category"`
 	ProductCategoryCommonAttributes
 }
 

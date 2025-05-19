@@ -10,7 +10,7 @@ import (
 
 type Product struct {
 	entitymodel.Entity
-	bun.BaseModel `bun:"table:products"`
+	bun.BaseModel `bun:"table:products,alias:product"`
 	ProductCommonAttributes
 }
 
@@ -20,12 +20,12 @@ type ProductCommonAttributes struct {
 	Flavors     []string         `bun:"flavors,type:jsonb"`
 	ImagePath   *string          `bun:"image_path"`
 	Description string           `bun:"description"`
-	Price       decimal.Decimal  `bun:"price,notnull"`
-	Cost        decimal.Decimal  `bun:"cost"`
+	Price       decimal.Decimal  `bun:"price,type:decimal(10,2),notnull"`
+	Cost        decimal.Decimal  `bun:"cost,type:decimal(10,2)"`
 	IsAvailable bool             `bun:"is_available"`
 	CategoryID  uuid.UUID        `bun:"column:category_id,type:uuid,notnull"`
 	Category    *ProductCategory `bun:"rel:belongs-to"`
-	SizeID      uuid.UUID        `bun:"column:size_id,type:uuid,notnull"`
+	SizeID      uuid.UUID        `bun:"size_id,type:uuid,notnull"`
 	Size        *Size            `bun:"rel:belongs-to"`
 }
 

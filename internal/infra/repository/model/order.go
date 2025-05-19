@@ -27,9 +27,9 @@ type OrderCommonAttributes struct {
 }
 
 type OrderDetail struct {
-	TotalPayable  decimal.Decimal `bun:"total_payable"`
-	TotalPaid     decimal.Decimal `bun:"total_paid"`
-	TotalChange   decimal.Decimal `bun:"total_change"`
+	TotalPayable  decimal.Decimal `bun:"total_payable,type:decimal(10,2)"`
+	TotalPaid     decimal.Decimal `bun:"total_paid,type:decimal(10,2)"`
+	TotalChange   decimal.Decimal `bun:"total_change,type:decimal(10,2)"`
 	QuantityItems float64         `bun:"quantity_items"`
 	Observation   string          `bun:"observation"`
 	AttendantID   *uuid.UUID      `bun:"column:attendant_id,type:uuid,notnull"`
