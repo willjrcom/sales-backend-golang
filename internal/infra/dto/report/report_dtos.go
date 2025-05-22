@@ -272,3 +272,92 @@ type EmployeePaymentsReportResponse struct {
     EmployeeID string          `json:"employee_id"`
     Total      decimal.Decimal `json:"total"`
 }
+// SalesByPlaceRequest filters for sales by place.
+type SalesByPlaceRequest struct {
+    Schema string    `json:"schema"`
+    Start  time.Time `json:"start"`
+    End    time.Time `json:"end"`
+}
+
+// SalesByPlaceResponse holds total sales per place.
+type SalesByPlaceResponse struct {
+    Place string          `json:"place"`
+    Total decimal.Decimal `json:"total"`
+}
+
+// SalesBySizeRequest filters for sales by product size.
+type SalesBySizeRequest struct {
+    Schema string    `json:"schema"`
+    Start  time.Time `json:"start"`
+    End    time.Time `json:"end"`
+}
+
+// SalesBySizeResponse holds quantity sold per size.
+type SalesBySizeResponse struct {
+    Size     string  `json:"size"`
+    Quantity float64 `json:"quantity"`
+}
+
+// AdditionalItemsRequest filters for additional items sold.
+type AdditionalItemsRequest struct {
+    Schema string    `json:"schema"`
+    Start  time.Time `json:"start"`
+    End    time.Time `json:"end"`
+}
+
+// AdditionalItemsResponse holds name and quantity of additionals.
+type AdditionalItemsResponse struct {
+    Name     string  `json:"name"`
+    Quantity float64 `json:"quantity"`
+}
+
+// AvgPickupTimeRequest filters for average pickup wait time.
+type AvgPickupTimeRequest struct {
+    Schema string    `json:"schema"`
+    Start  time.Time `json:"start"`
+    End    time.Time `json:"end"`
+}
+
+// AvgPickupTimeResponse holds average waiting time in seconds.
+type AvgPickupTimeResponse struct {
+    AvgSeconds float64 `json:"avg_seconds"`
+}
+
+// GroupItemsByStatusRequest filters for group item status counts.
+type GroupItemsByStatusRequest struct {
+    Schema string    `json:"schema"`
+    Start  time.Time `json:"start"`
+    End    time.Time `json:"end"`
+}
+
+// GroupItemsByStatusResponse holds status and count.
+type GroupItemsByStatusResponse struct {
+    Status string `json:"status"`
+    Count  int    `json:"count"`
+}
+
+// DeliveriesByCepRequest filters by delivery date range for heatmap.
+type DeliveriesByCepRequest struct {
+    Schema string    `json:"schema"`
+    Start  time.Time `json:"start"`
+    End    time.Time `json:"end"`
+}
+
+// DeliveriesByCepResponse holds CEP and delivery count.
+type DeliveriesByCepResponse struct {
+    Cep   string `json:"cep"`
+    Count int    `json:"count"`
+}
+
+// ProcessedCountByRuleRequest filters for processed count by rule.
+type ProcessedCountByRuleRequest struct {
+    Schema string    `json:"schema"`
+    Start  time.Time `json:"start"`
+    End    time.Time `json:"end"`
+}
+
+// ProcessedCountByRuleResponse holds rule ID and count.
+type ProcessedCountByRuleResponse struct {
+    RuleID string `json:"rule_id"`
+    Count  int    `json:"count"`
+}

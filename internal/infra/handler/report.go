@@ -38,6 +38,14 @@ func NewHandlerReport(s *reportusecases.Service) *handler.Handler {
     r.Get("/orders-per-table", h.handleOrdersPerTable)
     r.Post("/sales-by-shift", h.handleSalesByShift)
     r.Post("/payments-by-method", h.handlePaymentsByMethod)
+    // Custom reports 26–33
+    r.Post("/sales-by-place", h.handleSalesByPlace)
+    r.Post("/sales-by-size", h.handleSalesBySize)
+    r.Post("/additional-items-sold", h.handleAdditionalItemsSold)
+    r.Post("/avg-pickup-time", h.handleAvgPickupTime)
+    r.Post("/group-items-status", h.handleGroupItemsByStatus)
+    r.Post("/deliveries-by-cep", h.handleDeliveriesByCep)
+    r.Post("/processed-count-by-rule", h.handleProcessedCountByRule)
     r.Post("/employee-payments-report", h.handleEmployeePaymentsReport)
 
     unprotected := []string{}
@@ -414,5 +422,69 @@ func (h *handlerReportImpl) handleEmployeePaymentsReport(w http.ResponseWriter, 
         jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
         return
     }
+    jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+// Custom reports handlers:
+func (h *handlerReportImpl) handleSalesByPlace(w http.ResponseWriter, r *http.Request) {
+    var req reportdto.SalesByPlaceRequest
+    if !parseBody(r, &req, w) { return }
+    if req.Schema == "" { jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required")); return }
+    resp, err := h.s.SalesByPlace(r.Context(), &req)
+    if err != nil { jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err); return }
+    jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+func (h *handlerReportImpl) handleSalesBySize(w http.ResponseWriter, r *http.Request) {
+    var req reportdto.SalesBySizeRequest
+    if !parseBody(r, &req, w) { return }
+    if req.Schema == "" { jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required")); return }
+    resp, err := h.s.SalesBySize(r.Context(), &req)
+    if err != nil { jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err); return }
+    jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+func (h *handlerReportImpl) handleAdditionalItemsSold(w http.ResponseWriter, r *http.Request) {
+    var req reportdto.AdditionalItemsRequest
+    if !parseBody(r, &req, w) { return }
+    if req.Schema == "" { jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required")); return }
+    resp, err := h.s.AdditionalItemsSold(r.Context(), &req)
+    if err != nil { jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err); return }
+    jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+func (h *handlerReportImpl) handleAvgPickupTime(w http.ResponseWriter, r *http.Request) {
+    var req reportdto.AvgPickupTimeRequest
+    if !parseBody(r, &req, w) { return }
+    if req.Schema == "" { jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required")); return }
+    resp, err := h.s.AvgPickupTime(r.Context(), &req)
+    if err != nil { jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err); return }
+    jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+func (h *handlerReportImpl) handleGroupItemsByStatus(w http.ResponseWriter, r *http.Request) {
+    var req reportdto.GroupItemsByStatusRequest
+    if !parseBody(r, &req, w) { return }
+    if req.Schema == "" { jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required")); return }
+    resp, err := h.s.GroupItemsByStatus(r.Context(), &req)
+    if err != nil { jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err); return }
+    jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+func (h *handlerReportImpl) handleDeliveriesByCep(w http.ResponseWriter, r *http.Request) {
+    var req reportdto.DeliveriesByCepRequest
+    if !parseBody(r, &req, w) { return }
+    if req.Schema == "" { jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required")); return }
+    resp, err := h.s.DeliveriesByCep(r.Context(), &req)
+    if err != nil { jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err); return }
+    jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+func (h *handlerReportImpl) handleProcessedCountByRule(w http.ResponseWriter, r *http.Request) {
+    var req reportdto.ProcessedCountByRuleRequest
+    if !parseBody(r, &req, w) { return }
+    if req.Schema == "" { jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required")); return }
+    resp, err := h.s.ProcessedCountByRule(r.Context(), &req)
+    if err != nil { jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err); return }
     jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
 }

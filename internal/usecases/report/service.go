@@ -295,3 +295,89 @@ func (s *Service) EmployeePaymentsReport(ctx context.Context, req *reportdto.Emp
 	}
 	return resp, nil
 }
+// SalesByPlace returns total sales per place.
+func (s *Service) SalesByPlace(ctx context.Context, req *reportdto.SalesByPlaceRequest) ([]reportdto.SalesByPlaceResponse, error) {
+    data, err := s.reportSvc.SalesByPlace(ctx, req.Schema, req.Start, req.End)
+    if err != nil {
+        return nil, err
+    }
+    resp := make([]reportdto.SalesByPlaceResponse, len(data))
+    for i, d := range data {
+        resp[i] = reportdto.SalesByPlaceResponse{Place: d.Place, Total: d.Total}
+    }
+    return resp, nil
+}
+
+// SalesBySize returns total quantity sold per size.
+func (s *Service) SalesBySize(ctx context.Context, req *reportdto.SalesBySizeRequest) ([]reportdto.SalesBySizeResponse, error) {
+    data, err := s.reportSvc.SalesBySize(ctx, req.Schema, req.Start, req.End)
+    if err != nil {
+        return nil, err
+    }
+    resp := make([]reportdto.SalesBySizeResponse, len(data))
+    for i, d := range data {
+        resp[i] = reportdto.SalesBySizeResponse{Size: d.Size, Quantity: d.Quantity}
+    }
+    return resp, nil
+}
+
+// AdditionalItemsSold returns total quantity of additional items.
+func (s *Service) AdditionalItemsSold(ctx context.Context, req *reportdto.AdditionalItemsRequest) ([]reportdto.AdditionalItemsResponse, error) {
+    data, err := s.reportSvc.AdditionalItemsSold(ctx, req.Schema, req.Start, req.End)
+    if err != nil {
+        return nil, err
+    }
+    resp := make([]reportdto.AdditionalItemsResponse, len(data))
+    for i, d := range data {
+        resp[i] = reportdto.AdditionalItemsResponse{Name: d.Name, Quantity: d.Quantity}
+    }
+    return resp, nil
+}
+
+// AvgPickupTime returns average pickup wait time.
+func (s *Service) AvgPickupTime(ctx context.Context, req *reportdto.AvgPickupTimeRequest) (reportdto.AvgPickupTimeResponse, error) {
+    d, err := s.reportSvc.AvgPickupTime(ctx, req.Schema, req.Start, req.End)
+    if err != nil {
+        return reportdto.AvgPickupTimeResponse{}, err
+    }
+    return reportdto.AvgPickupTimeResponse{AvgSeconds: d.AvgSeconds}, nil
+}
+
+// GroupItemsByStatus returns count of group items by status.
+func (s *Service) GroupItemsByStatus(ctx context.Context, req *reportdto.GroupItemsByStatusRequest) ([]reportdto.GroupItemsByStatusResponse, error) {
+    data, err := s.reportSvc.GroupItemsByStatus(ctx, req.Schema, req.Start, req.End)
+    if err != nil {
+        return nil, err
+    }
+    resp := make([]reportdto.GroupItemsByStatusResponse, len(data))
+    for i, d := range data {
+        resp[i] = reportdto.GroupItemsByStatusResponse{Status: d.Status, Count: d.Count}
+    }
+    return resp, nil
+}
+
+// DeliveriesByCep returns number of deliveries per CEP.
+func (s *Service) DeliveriesByCep(ctx context.Context, req *reportdto.DeliveriesByCepRequest) ([]reportdto.DeliveriesByCepResponse, error) {
+    data, err := s.reportSvc.DeliveriesByCep(ctx, req.Schema, req.Start, req.End)
+    if err != nil {
+        return nil, err
+    }
+    resp := make([]reportdto.DeliveriesByCepResponse, len(data))
+    for i, d := range data {
+        resp[i] = reportdto.DeliveriesByCepResponse{Cep: d.Cep, Count: d.Count}
+    }
+    return resp, nil
+}
+
+// ProcessedCountByRule returns processed counts by rule.
+func (s *Service) ProcessedCountByRule(ctx context.Context, req *reportdto.ProcessedCountByRuleRequest) ([]reportdto.ProcessedCountByRuleResponse, error) {
+    data, err := s.reportSvc.ProcessedCountByRule(ctx, req.Schema, req.Start, req.End)
+    if err != nil {
+        return nil, err
+    }
+    resp := make([]reportdto.ProcessedCountByRuleResponse, len(data))
+    for i, d := range data {
+        resp[i] = reportdto.ProcessedCountByRuleResponse{RuleID: d.RuleID, Count: d.Count}
+    }
+    return resp, nil
+}

@@ -579,4 +579,175 @@ func (s *ReportService) EmployeePaymentsReport(ctx context.Context, schema strin
 	return resp, nil
 }
 
-// TODO: implement remaining methods 26–35...
+// SalesByPlaceDTO holds total sales per place.
+type SalesByPlaceDTO struct {
+    Place string          `bun:"place"`
+    Total decimal.Decimal `bun:"total"`
+}
+
+// SalesByPlace returns total sales per place within the period.
+func (s *ReportService) SalesByPlace(ctx context.Context, schema string, start, end time.Time) ([]SalesByPlaceDTO, error) {
+    if _, err := s.db.ExecContext(ctx, fmt.Sprintf("SET search_path=%s", schema)); err != nil {
+        return nil, err
+    }
+    var resp []SalesByPlaceDTO
+    query := `
+        SELECT pl.name AS place, SUM(o.total_payable) AS total
+        FROM orders o
+        JOIN order_tables ot ON ot.order_id = o.id
+        JOIN place_to_tables pt ON pt.table_id = ot.table_id
+        JOIN places pl ON pl.id = pt.place_id
+        WHERE o.created_at BETWEEN ? AND ?
+        GROUP BY pl.name`
+    if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+        return nil, err
+    }
+    return resp, nil
+}
+
+// SalesBySizeDTO holds total quantity sold per product size.
+type SalesBySizeDTO struct {
+    Size     string  `bun:"size"`
+    Quantity float64 `bun:"quantity"`
+}
+
+// SalesBySize returns total quantity sold grouped by product size.
+func (s *ReportService) SalesBySize(ctx context.Context, schema string, start, end time.Time) ([]SalesBySizeDTO, error) {
+    if _, err := s.db.ExecContext(ctx, fmt.Sprintf("SET search_path=%s", schema)); err != nil {
+        return nil, err
+    }
+    var resp []SalesBySizeDTO
+    query := `
+        SELECT i.size AS size, SUM(i.quantity) AS quantity
+        FROM order_items i
+        JOIN order_group_items g ON g.id = i.group_item_id
+        JOIN orders o ON o.id = g.order_id
+        WHERE o.created_at BETWEEN ? AND ?
+        GROUP BY i.size`
+    if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+        return nil, err
+    }
+    return resp, nil
+}
+
+// AdditionalItemsDTO holds total quantity of additional items sold.
+type AdditionalItemsDTO struct {
+    Name     string  `bun:"name"`
+    Quantity float64 `bun:"quantity"`
+}
+
+// AdditionalItemsSold returns total quantity of additional items sold.
+func (s *ReportService) AdditionalItemsSold(ctx context.Context, schema string, start, end time.Time) ([]AdditionalItemsDTO, error) {
+    if _, err := s.db.ExecContext(ctx, fmt.Sprintf("SET search_path=%s", schema)); err != nil {
+        return nil, err
+    }
+    var resp []AdditionalItemsDTO
+    query := `
+        SELECT i.name AS name, SUM(i.quantity) AS quantity
+        FROM order_items i
+        JOIN order_group_items g ON g.id = i.group_item_id
+        JOIN orders o ON o.id = g.order_id
+        WHERE o.created_at BETWEEN ? AND ? AND i.is_additional = TRUE
+        GROUP BY i.name`
+    if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+        return nil, err
+    }
+    return resp, nil
+}
+
+// AvgPickupTimeDTO holds average waiting time for pickups in seconds.
+type AvgPickupTimeDTO struct {
+    AvgSeconds float64 `bun:"avg_seconds"`
+}
+
+// AvgPickupTime returns average time between pending and ready for pickups.
+func (s *ReportService) AvgPickupTime(ctx context.Context, schema string, start, end time.Time) (AvgPickupTimeDTO, error) {
+    if _, err := s.db.ExecContext(ctx, fmt.Sprintf("SET search_path=%s", schema)); err != nil {
+        return AvgPickupTimeDTO{}, err
+    }
+    var resp AvgPickupTimeDTO
+    query := `
+        SELECT AVG(EXTRACT(EPOCH FROM (ready_at - pending_at))) AS avg_seconds
+        FROM order_pickups p
+        JOIN orders o ON o.id = p.order_id
+        WHERE p.ready_at IS NOT NULL AND p.pending_at IS NOT NULL AND o.created_at BETWEEN ? AND ?`
+    if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+        return AvgPickupTimeDTO{}, err
+    }
+    return resp, nil
+}
+
+// GroupItemsStatusDTO holds count of group items by status.
+type GroupItemsStatusDTO struct {
+    Status string `bun:"status"`
+    Count  int    `bun:"count"`
+}
+
+// GroupItemsByStatus returns count of group items per status.
+func (s *ReportService) GroupItemsByStatus(ctx context.Context, schema string, start, end time.Time) ([]GroupItemsStatusDTO, error) {
+    if _, err := s.db.ExecContext(ctx, fmt.Sprintf("SET search_path=%s", schema)); err != nil {
+        return nil, err
+    }
+    var resp []GroupItemsStatusDTO
+    query := `
+        SELECT g.status AS status, COUNT(*) AS count
+        FROM order_group_items g
+        JOIN orders o ON o.id = g.order_id
+        WHERE o.created_at BETWEEN ? AND ?
+        GROUP BY g.status`
+    if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+        return nil, err
+    }
+    return resp, nil
+}
+
+// DeliveriesByCepDTO holds count of deliveries per CEP.
+type DeliveriesByCepDTO struct {
+    Cep   string `bun:"cep"`
+    Count int    `bun:"count"`
+}
+
+// DeliveriesByCep returns number of deliveries per ZIP code.
+func (s *ReportService) DeliveriesByCep(ctx context.Context, schema string, start, end time.Time) ([]DeliveriesByCepDTO, error) {
+    if _, err := s.db.ExecContext(ctx, fmt.Sprintf("SET search_path=%s", schema)); err != nil {
+        return nil, err
+    }
+    var resp []DeliveriesByCepDTO
+    query := `
+        SELECT a.cep AS cep, COUNT(*) AS count
+        FROM order_deliveries d
+        JOIN addresses a ON a.id = d.address_id
+        JOIN orders o ON o.id = d.order_id
+        WHERE d.delivered_at BETWEEN ? AND ?
+        GROUP BY a.cep`
+    if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+        return nil, err
+    }
+    return resp, nil
+}
+
+// ProcessedByRuleDTO holds count of orders processed per process rule.
+type ProcessedByRuleDTO struct {
+    RuleID string `bun:"rule_id"`
+    Count  int    `bun:"count"`
+}
+
+// ProcessedCountByRule returns number of processed items per rule.
+func (s *ReportService) ProcessedCountByRule(ctx context.Context, schema string, start, end time.Time) ([]ProcessedByRuleDTO, error) {
+    if _, err := s.db.ExecContext(ctx, fmt.Sprintf("SET search_path=%s", schema)); err != nil {
+        return nil, err
+    }
+    var resp []ProcessedByRuleDTO
+    query := `
+        SELECT pr.process_rule_id::text AS rule_id, COUNT(*) AS count
+        FROM order_processes pr
+        JOIN order_group_items g ON g.id = pr.group_item_id
+        JOIN orders o ON o.id = g.order_id
+        WHERE pr.finished_at IS NOT NULL AND pr.started_at IS NOT NULL
+          AND o.created_at BETWEEN ? AND ?
+        GROUP BY pr.process_rule_id`
+    if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+        return nil, err
+    }
+    return resp, nil
+}
