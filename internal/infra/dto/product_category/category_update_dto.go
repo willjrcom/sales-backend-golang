@@ -40,6 +40,7 @@ func (c *CategoryUpdateDTO) UpdateDomain(category *productentity.ProductCategory
 	}
 
 	if c.AdditionalCategories != nil {
+		category.AdditionalCategories = make([]productentity.ProductCategory, len(c.AdditionalCategories))
 		for i := range c.AdditionalCategories {
 			category.AdditionalCategories[i] = productentity.ProductCategory{
 				Entity: entity.Entity{
@@ -50,6 +51,7 @@ func (c *CategoryUpdateDTO) UpdateDomain(category *productentity.ProductCategory
 	}
 
 	if c.ComplementCategories != nil {
+		category.ComplementCategories = make([]productentity.ProductCategory, len(c.ComplementCategories))
 		for i := range c.ComplementCategories {
 			category.ComplementCategories[i] = productentity.ProductCategory{
 				Entity: entity.Entity{
