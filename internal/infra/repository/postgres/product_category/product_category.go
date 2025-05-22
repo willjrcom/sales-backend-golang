@@ -251,15 +251,36 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context) ([]
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&categories).
+	// first, load all relations except nested Products.Size
+	baseQuery := r.db.NewSelect().Model(&categories).
 		Relation("Products").
 		Relation("Sizes").
 		Relation("Quantities").
 		Relation("ProcessRules").
 		Relation("AdditionalCategories").
-		Relation("ComplementCategories").
-		Scan(ctx); err != nil {
+		Relation("ComplementCategories")
+	if err := baseQuery.Scan(ctx); err != nil {
 		return nil, err
+	}
+	// then, fetch Products.Size separately for all products in one query
+	var products []*model.Product
+	var productIDs []uuid.UUID
+	for i := range categories {
+		for j := range categories[i].Products {
+			p := &categories[i].Products[j]
+			products = append(products, p)
+			productIDs = append(productIDs, p.ID)
+		}
+	}
+
+	if len(products) > 0 {
+		if err := r.db.NewSelect().
+			Model(&products).
+			Relation("Size").
+			Where("product.id IN (?)", bun.In(productIDs)).
+			Scan(ctx); err != nil {
+			return nil, err
+		}
 	}
 
 	return categories, nil
