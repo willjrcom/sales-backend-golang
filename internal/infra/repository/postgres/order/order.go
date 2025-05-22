@@ -234,7 +234,6 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		return nil, err
 	}
 
-	// load complement items for group items in a single query
 	var complementItems []model.Item
 	var complementIDs []uuid.UUID
 	for _, g := range order.GroupItems {
@@ -292,17 +291,48 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]model.Order, e
 			return q.Where("is_additional = ?", false)
 		}).
 		Relation("GroupItems.Items.AdditionalItems").
-		Relation("GroupItems.ComplementItem").
 		Relation("Attendant").
 		Relation("Payments").
 		Relation("Table").
 		Relation("Delivery").
 		Relation("Pickup")
-	if err := query.Scan(ctx); err != nil {
-		return nil, err
-	}
+    if err := query.Scan(ctx); err != nil {
+        return nil, err
+    }
 
-	return orders, nil
+    var complementItems []model.Item
+    var complementIDs []uuid.UUID
+    for i := range orders {
+        for j := range orders[i].GroupItems {
+            if orders[i].GroupItems[j].ComplementItemID != nil {
+                complementIDs = append(complementIDs, *orders[i].GroupItems[j].ComplementItemID)
+            }
+        }
+    }
+    if len(complementIDs) > 0 {
+        if err := r.db.NewSelect().Model(&complementItems).
+            Where("id IN (?)", bun.In(complementIDs)).
+            Scan(ctx); err != nil {
+            return nil, err
+        }
+        compMap := make(map[uuid.UUID]*model.Item, len(complementItems))
+        for k := range complementItems {
+            ci := complementItems[k]
+            compMap[ci.ID] = &ci
+        }
+        for i := range orders {
+            for j := range orders[i].GroupItems {
+                g := &orders[i].GroupItems[j]
+                if g.ComplementItemID != nil {
+                    if ci, ok := compMap[*g.ComplementItemID]; ok {
+                        g.ComplementItem = ci
+                    }
+                }
+            }
+        }
+    }
+
+    return orders, nil
 }
 
 func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context) ([]model.Order, error) {
