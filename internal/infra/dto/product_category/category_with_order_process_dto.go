@@ -22,10 +22,14 @@ func (c *CategoryWithOrderProcessDTO) FromDomain(category *productentity.Product
 		return
 	}
 	*c = CategoryWithOrderProcessDTO{
-		ID:           category.ID,
-		Name:         category.Name,
-		ImagePath:    category.ImagePath,
-		ProcessRules: []processruledto.ProcessRuleWithOrderProcessDTO{},
+		ID:             category.ID,
+		Name:           category.Name,
+		ImagePath:      category.ImagePath,
+		UseProcessRule: category.UseProcessRule,
+		IsAdditional:   category.IsAdditional,
+		IsComplement:   category.IsComplement,
+		NeedPrint:      category.NeedPrint,
+		ProcessRules:   []processruledto.ProcessRuleWithOrderProcessDTO{},
 	}
 
 	for _, processRule := range category.ProcessRules {

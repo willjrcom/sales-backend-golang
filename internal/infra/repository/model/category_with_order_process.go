@@ -13,9 +13,13 @@ type ProductCategoryWithOrderProcess struct {
 }
 
 type ProductCategoryWithOrderProcessCommonAttributes struct {
-	Name         string                        `bun:"name,notnull"`
-	ImagePath    string                        `bun:"image_path"`
-	ProcessRules []ProcessRuleWithOrderProcess `bun:"rel:has-many,join:id=category_id"`
+	Name           string                        `bun:"name,notnull"`
+	ImagePath      string                        `bun:"image_path"`
+	UseProcessRule bool                          `bun:"use_process_rule"`
+	IsAdditional   bool                          `bun:"is_additional"`
+	IsComplement   bool                          `bun:"is_complement"`
+	NeedPrint      bool                          `bun:"need_print"`
+	ProcessRules   []ProcessRuleWithOrderProcess `bun:"rel:has-many,join:id=category_id"`
 }
 
 func (c *ProductCategoryWithOrderProcess) FromDomain(category *productentity.ProductCategory) {
@@ -25,9 +29,13 @@ func (c *ProductCategoryWithOrderProcess) FromDomain(category *productentity.Pro
 	*c = ProductCategoryWithOrderProcess{
 		Entity: entitymodel.FromDomain(category.Entity),
 		ProductCategoryWithOrderProcessCommonAttributes: ProductCategoryWithOrderProcessCommonAttributes{
-			Name:         category.Name,
-			ImagePath:    category.ImagePath,
-			ProcessRules: []ProcessRuleWithOrderProcess{},
+			Name:           category.Name,
+			ImagePath:      category.ImagePath,
+			UseProcessRule: category.UseProcessRule,
+			IsAdditional:   category.IsAdditional,
+			IsComplement:   category.IsComplement,
+			NeedPrint:      category.NeedPrint,
+			ProcessRules:   []ProcessRuleWithOrderProcess{},
 		},
 	}
 
@@ -45,9 +53,13 @@ func (c *ProductCategoryWithOrderProcess) ToDomain() *productentity.ProductCateg
 	category := &productentity.ProductCategoryWithOrderProcess{
 		Entity: c.Entity.ToDomain(),
 		ProductCategoryWithOrderProcessCommonAttributes: productentity.ProductCategoryWithOrderProcessCommonAttributes{
-			Name:         c.Name,
-			ImagePath:    c.ImagePath,
-			ProcessRules: []productentity.ProcessRuleWithOrderProcess{},
+			Name:           c.Name,
+			ImagePath:      c.ImagePath,
+			UseProcessRule: c.UseProcessRule,
+			IsAdditional:   c.IsAdditional,
+			IsComplement:   c.IsComplement,
+			NeedPrint:      c.NeedPrint,
+			ProcessRules:   []productentity.ProcessRuleWithOrderProcess{},
 		},
 	}
 
