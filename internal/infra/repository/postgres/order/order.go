@@ -227,12 +227,40 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		Relation("GroupItems.Items.AdditionalItems").
 		Relation("Attendant").
 		Relation("Payments").
-		Relation("GroupItems.ComplementItem").
 		Relation("Table").
 		Relation("Delivery").
 		Relation("Pickup").
 		Scan(ctx); err != nil {
 		return nil, err
+	}
+
+	// load complement items for group items in a single query
+	var complementItems []model.Item
+	var complementIDs []uuid.UUID
+	for _, g := range order.GroupItems {
+		if g.ComplementItemID != nil {
+			complementIDs = append(complementIDs, *g.ComplementItemID)
+		}
+	}
+	if len(complementIDs) > 0 {
+		if err := r.db.NewSelect().Model(&complementItems).
+			Where("id IN (?)", bun.In(complementIDs)).
+			Scan(ctx); err != nil {
+			return nil, err
+		}
+		compMap := make(map[uuid.UUID]*model.Item, len(complementItems))
+		for i := range complementItems {
+			ci := complementItems[i]
+			compMap[ci.ID] = &ci
+		}
+		for i := range order.GroupItems {
+			g := &order.GroupItems[i]
+			if g.ComplementItemID != nil {
+				if ci, ok := compMap[*g.ComplementItemID]; ok {
+					g.ComplementItem = ci
+				}
+			}
+		}
 	}
 
 	if order.Delivery != nil {

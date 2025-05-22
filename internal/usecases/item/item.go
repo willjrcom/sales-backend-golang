@@ -185,6 +185,10 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest)
 			return err
 		}
 
+		if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
+			return err
+		}
+
 		return nil
 	}
 
