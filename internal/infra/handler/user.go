@@ -215,27 +215,29 @@ func (h *handlerUserImpl) handlerDeleteUser(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *handlerUserImpl) handlerRefreshAccessToken(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	accessToken, err := headerservice.GetAccessTokenFromHeader(r)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
-		return
-	}
+		ctx := r.Context()
 
-	validToken, err := jwtservice.ValidateToken(ctx, accessToken)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
-		return
-	}
+		// require an existing ID token to refresh
+		idTokenStr, err := headerservice.GetIDTokenFromHeader(r)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
+			return
+		}
 
-	currentSchema := jwtservice.GetSchemaFromIDToken(validToken)
-	newIDToken, err := jwtservice.CreateIDToken(validToken, currentSchema)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-		return
-	}
+		validToken, err := jwtservice.ValidateToken(ctx, idTokenStr)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
+			return
+		}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, newIDToken)
+		schema := jwtservice.GetSchemaFromIDToken(validToken)
+		newIDToken, err := jwtservice.CreateIDToken(validToken, schema)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+			return
+		}
+
+		jsonpkg.ResponseJson(w, r, http.StatusOK, newIDToken)
 }
 
 func (h *handlerUserImpl) handlerGetCompanies(w http.ResponseWriter, r *http.Request) {

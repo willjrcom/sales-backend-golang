@@ -31,7 +31,7 @@ func CreateIDToken(accessToken *jwt.Token, schema string) (string, error) {
 		"user_id":        oldClaims["user_id"],
 		"current_schema": schema,
 		"sub":            "id-token",
-		"exp":            time.Now().UTC().Add(time.Hour * 6).Unix(),
+		"exp":            time.Now().UTC().Add(time.Minute * 10).Unix(),
 	}
 
 	// Criar um token JWT usando a chave secreta
