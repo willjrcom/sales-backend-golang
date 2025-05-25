@@ -30,7 +30,10 @@ func FormatOrder(o *orderentity.Order) ([]byte, error) {
 	var buf bytes.Buffer
 	buf.WriteString(escInit)
 	formatHeader(&buf, o)
+	formatDeliverySection(&buf, o)
+	formatOrderDetailSection(&buf, o)
 	printGroupItemsSection(&buf, o.GroupItems)
+	formatPaymentsSection(&buf, o)
 	formatFooter(&buf, o)
 	buf.WriteString(newline + newline + newline)
 	buf.WriteString(escCut)
@@ -82,6 +85,22 @@ func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 	buf.WriteString(escBoldOff)
 	// Quantity of group
 	buf.WriteString(fmt.Sprintf("Qtd:%36.0f%s", group.Quantity, newline))
+	// Group time logs
+	if group.StartAt != nil {
+		buf.WriteString(fmt.Sprintf("Agendado: %s%s", group.StartAt.Format("02/01/2006 15:04"), newline))
+	}
+	if group.PendingAt != nil {
+		buf.WriteString(fmt.Sprintf("Pendente: %s%s", group.PendingAt.Format("02/01/2006 15:04"), newline))
+	}
+	if group.StartedAt != nil {
+		buf.WriteString(fmt.Sprintf("Iniciado: %s%s", group.StartedAt.Format("02/01/2006 15:04"), newline))
+	}
+	if group.ReadyAt != nil {
+		buf.WriteString(fmt.Sprintf("Pronto: %s%s", group.ReadyAt.Format("02/01/2006 15:04"), newline))
+	}
+	if group.CanceledAt != nil {
+		buf.WriteString(fmt.Sprintf("Cancelado: %s%s", group.CanceledAt.Format("02/01/2006 15:04"), newline))
+	}
 	// Observation
 	if obs := group.Observation; obs != "" {
 		buf.WriteString(fmt.Sprintf("Obs: %s%s", obs, newline))
@@ -134,6 +153,81 @@ func printAdditionalItem(buf *bytes.Buffer, add *orderentity.Item) {
 // formatFooter writes the total payable amount to the buffer.
 func formatFooter(buf *bytes.Buffer, o *orderentity.Order) {
 	buf.WriteString(fmt.Sprintf("TOTAL:%31.2f%s", d2f(o.TotalPayable), newline))
+}
+
+// formatDeliverySection prints delivery-related details if present.
+func formatDeliverySection(buf *bytes.Buffer, o *orderentity.Order) {
+	if o.Delivery == nil {
+		return
+	}
+	buf.WriteString(escAlignLeft)
+	// Delivery time logs
+	if pa := o.Delivery.PendingAt; pa != nil {
+		buf.WriteString(fmt.Sprintf("Pendente: %s%s", pa.Format("02/01/2006 15:04"), newline))
+	}
+	if sa := o.Delivery.ShippedAt; sa != nil {
+		buf.WriteString(fmt.Sprintf("Despachado: %s%s", sa.Format("02/01/2006 15:04"), newline))
+	}
+	// Client name
+	if o.Delivery.Client != nil && o.Delivery.Client.Name != "" {
+		buf.WriteString(fmt.Sprintf("Cliente: %s%s", o.Delivery.Client.Name, newline))
+	}
+	// Address
+	if a := o.Delivery.Address; a != nil {
+		buf.WriteString(fmt.Sprintf("Endereço: %s, %s%s", a.Street, a.Number, newline))
+		if a.Complement != "" {
+			buf.WriteString(fmt.Sprintf("Complemento: %s%s", a.Complement, newline))
+		}
+		if a.Reference != "" {
+			buf.WriteString(fmt.Sprintf("Ref: %s%s", a.Reference, newline))
+		}
+		buf.WriteString(fmt.Sprintf("Bairro: %s%s", a.Neighborhood, newline))
+		buf.WriteString(fmt.Sprintf("Cidade: %s - %s%s", a.City, a.UF, newline))
+		buf.WriteString(fmt.Sprintf("CEP: %s%s", a.Cep, newline))
+	}
+	// Delivery driver
+	if d := o.Delivery.Driver; d != nil && d.Employee != nil && d.Employee.User != nil {
+		buf.WriteString(fmt.Sprintf("Motoboy: %s%s", d.Employee.User.Name, newline))
+	}
+	// Delivery tax
+	if t := o.Delivery.DeliveryTax; t != nil {
+		buf.WriteString(fmt.Sprintf("Taxa entrega: %7.2f%s", d2f(*t), newline))
+	}
+	// Change for delivery
+	buf.WriteString(fmt.Sprintf("Troco entrega: %7.2f%s", d2f(o.Delivery.Change), newline))
+	// Payment method for delivery
+	buf.WriteString(fmt.Sprintf("Pagamento entrega: %s%s", o.Delivery.PaymentMethod, newline))
+	buf.WriteString(strings.Repeat("-", 40) + newline)
+}
+
+// formatOrderDetailSection prints order detail fields: observation, items count, paid and change totals.
+func formatOrderDetailSection(buf *bytes.Buffer, o *orderentity.Order) {
+	buf.WriteString(escAlignLeft)
+	// Observation
+	if obs := o.Observation; obs != "" {
+		buf.WriteString(fmt.Sprintf("Observação: %s%s", obs, newline))
+	}
+	// Total items
+	if o.QuantityItems > 0 {
+		buf.WriteString(fmt.Sprintf("Itens:%36.0f%s", o.QuantityItems, newline))
+	}
+	// Total paid
+	buf.WriteString(fmt.Sprintf("Pago:%31.2f%s", d2f(o.TotalPaid), newline))
+	// Total change
+	buf.WriteString(fmt.Sprintf("Troco:%31.2f%s", d2f(o.TotalChange), newline))
+	buf.WriteString(strings.Repeat("-", 40) + newline)
+}
+
+// formatPaymentsSection writes each payment entry of the order.
+func formatPaymentsSection(buf *bytes.Buffer, o *orderentity.Order) {
+	if len(o.Payments) == 0 {
+		return
+	}
+	buf.WriteString(escAlignLeft)
+	for _, p := range o.Payments {
+		buf.WriteString(fmt.Sprintf("%s:%7.2f%s", p.Method, d2f(p.TotalPaid), newline))
+	}
+	buf.WriteString(strings.Repeat("-", 40) + newline)
 }
 
 // FormatGroupItem generates ESC/POS bytes for a 40-column receipt section for a single group of items.

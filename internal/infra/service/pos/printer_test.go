@@ -325,4 +325,30 @@ func Test_FormatOrder(t *testing.T) {
 	assert.True(t, strings.HasPrefix(s, escInit))
 	assert.True(t, strings.Contains(s, fmt.Sprintf("PEDIDO %d%s", o.OrderNumber, newline)))
 	assert.True(t, strings.HasSuffix(s, escCut))
+	// Delivery time logs
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Pendente: %s%s", now.Format("02/01/2006 15:04"), newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Despachado: %s%s", now.Format("02/01/2006 15:04"), newline)))
+	// Delivery info
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Cliente: %s%s", o.Delivery.Client.Name, newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Endereço: %s, %s%s", o.Delivery.Address.Street, o.Delivery.Address.Number, newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Complemento: %s%s", o.Delivery.Address.Complement, newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Ref: %s%s", o.Delivery.Address.Reference, newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Bairro: %s%s", o.Delivery.Address.Neighborhood, newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Cidade: %s - %s%s", o.Delivery.Address.City, o.Delivery.Address.UF, newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("CEP: %s%s", o.Delivery.Address.Cep, newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Motoboy: %s%s", o.Delivery.Driver.Employee.User.Name, newline)))
+	// Delivery charges
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Taxa entrega: %7.2f%s", decimalValue.InexactFloat64(), newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Troco entrega: %7.2f%s", decimalValue.InexactFloat64(), newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Pagamento entrega: %s%s", o.Delivery.PaymentMethod, newline)))
+	// Order details
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Observação: %s%s", o.Observation, newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Itens:%36.0f%s", o.QuantityItems, newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Pago:%31.2f%s", decimal.NewFromFloat(120.45).InexactFloat64(), newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("Troco:%31.2f%s", decimal.NewFromFloat(30.45).InexactFloat64(), newline)))
+	// Payments
+	assert.True(t, strings.Contains(s, fmt.Sprintf("%s:%7.2f%s", o.Payments[0].Method, decimal.NewFromFloat(30.45).InexactFloat64(), newline)))
+	assert.True(t, strings.Contains(s, fmt.Sprintf("%s:%7.2f%s", o.Payments[1].Method, decimal.NewFromFloat(20).InexactFloat64(), newline)))
+	// Total payable
+	assert.True(t, strings.Contains(s, fmt.Sprintf("TOTAL:%31.2f%s", decimal.NewFromFloat(150.45).InexactFloat64(), newline)))
 }
