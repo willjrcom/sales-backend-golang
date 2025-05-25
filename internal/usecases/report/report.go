@@ -5,7 +5,7 @@ import (
 	"time"
 
 	reportdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/report"
-	report "github.com/willjrcom/sales-backend-go/internal/report"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/report"
 )
 
 // Service wraps internal report generation logic.
@@ -20,7 +20,7 @@ func NewService(reportSvc *report.ReportService) *Service {
 
 // SalesTotalByDay returns total sales per day in the period.
 func (s *Service) SalesTotalByDay(ctx context.Context, req *reportdto.SalesTotalByDayRequest) ([]reportdto.SalesByDayResponse, error) {
-	data, err := s.reportSvc.SalesTotalByDay(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.SalesTotalByDay(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func (s *Service) SalesTotalByDay(ctx context.Context, req *reportdto.SalesTotal
 
 // RevenueCumulativeByMonth returns cumulative revenue by month.
 func (s *Service) RevenueCumulativeByMonth(ctx context.Context, req *reportdto.RevenueCumulativeByMonthRequest) ([]reportdto.RevenueCumulativeByMonthResponse, error) {
-	data, err := s.reportSvc.RevenueCumulativeByMonth(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.RevenueCumulativeByMonth(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (s *Service) RevenueCumulativeByMonth(ctx context.Context, req *reportdto.R
 
 // SalesByHour returns total sales per hour for a specific day.
 func (s *Service) SalesByHour(ctx context.Context, req *reportdto.SalesByHourRequest) ([]reportdto.SalesByHourResponse, error) {
-	data, err := s.reportSvc.SalesByHour(ctx, req.Schema, req.Day)
+	data, err := s.reportSvc.SalesByHour(ctx, req.Day)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (s *Service) SalesByHour(ctx context.Context, req *reportdto.SalesByHourReq
 
 // SalesByChannel returns total sales per channel.
 func (s *Service) SalesByChannel(ctx context.Context, req *reportdto.SalesByChannelRequest) ([]reportdto.SalesByChannelResponse, error) {
-	data, err := s.reportSvc.SalesByChannel(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.SalesByChannel(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (s *Service) SalesByChannel(ctx context.Context, req *reportdto.SalesByChan
 
 // AvgTicketByDay returns average ticket per day.
 func (s *Service) AvgTicketByDay(ctx context.Context, req *reportdto.AvgTicketByDayRequest) ([]reportdto.AvgTicketByDayResponse, error) {
-	data, err := s.reportSvc.AvgTicketByDay(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.AvgTicketByDay(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func (s *Service) AvgTicketByDay(ctx context.Context, req *reportdto.AvgTicketBy
 
 // AvgTicketByChannel returns average ticket per channel.
 func (s *Service) AvgTicketByChannel(ctx context.Context, req *reportdto.AvgTicketByChannelRequest) ([]reportdto.AvgTicketByChannelResponse, error) {
-	data, err := s.reportSvc.AvgTicketByChannel(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.AvgTicketByChannel(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (s *Service) AvgTicketByChannel(ctx context.Context, req *reportdto.AvgTick
 
 // ProductsSoldByDay returns total quantity of items sold per day.
 func (s *Service) ProductsSoldByDay(ctx context.Context, req *reportdto.ProductsSoldByDayRequest) ([]reportdto.ProductsSoldByDayResponse, error) {
-	data, err := s.reportSvc.ProductsSoldByDay(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.ProductsSoldByDay(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func (s *Service) ProductsSoldByDay(ctx context.Context, req *reportdto.Products
 
 // TopProducts returns top N products by quantity sold.
 func (s *Service) TopProducts(ctx context.Context, req *reportdto.TopProductsRequest) ([]reportdto.TopProductsResponse, error) {
-	data, err := s.reportSvc.TopProducts(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.TopProducts(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (s *Service) TopProducts(ctx context.Context, req *reportdto.TopProductsReq
 
 // SalesByCategory returns sales grouped by product category.
 func (s *Service) SalesByCategory(ctx context.Context, req *reportdto.SalesByCategoryRequest) ([]reportdto.SalesByCategoryResponse, error) {
-	data, err := s.reportSvc.SalesByCategory(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.SalesByCategory(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +137,7 @@ func (s *Service) SalesByCategory(ctx context.Context, req *reportdto.SalesByCat
 
 // CurrentStockByCategory returns current stock per product category.
 func (s *Service) CurrentStockByCategory(ctx context.Context, req *reportdto.CurrentStockRequest) ([]reportdto.CurrentStockResponse, error) {
-	data, err := s.reportSvc.CurrentStockByCategory(ctx, req.Schema)
+	data, err := s.reportSvc.CurrentStockByCategory(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func (s *Service) CurrentStockByCategory(ctx context.Context, req *reportdto.Cur
 
 // ClientsRegisteredByDay returns count of clients registered per day.
 func (s *Service) ClientsRegisteredByDay(ctx context.Context, req *reportdto.ClientsRegisteredByDayRequest) ([]reportdto.ClientsRegisteredByDayResponse, error) {
-	data, err := s.reportSvc.ClientsRegisteredByDay(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.ClientsRegisteredByDay(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (s *Service) ClientsRegisteredByDay(ctx context.Context, req *reportdto.Cli
 
 // NewVsRecurringClients returns count of new vs recurring clients.
 func (s *Service) NewVsRecurringClients(ctx context.Context, req *reportdto.NewVsRecurringClientsRequest) ([]reportdto.NewVsRecurringClientsResponse, error) {
-	data, err := s.reportSvc.NewVsRecurringClients(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.NewVsRecurringClients(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +176,7 @@ func (s *Service) NewVsRecurringClients(ctx context.Context, req *reportdto.NewV
 
 // OrdersByStatus returns count of orders per status.
 func (s *Service) OrdersByStatus(ctx context.Context, req *reportdto.OrdersByStatusRequest) ([]reportdto.OrdersByStatusResponse, error) {
-	data, err := s.reportSvc.OrdersByStatus(ctx, req.Schema)
+	data, err := s.reportSvc.OrdersByStatus(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +189,7 @@ func (s *Service) OrdersByStatus(ctx context.Context, req *reportdto.OrdersBySta
 
 // AvgProcessStepDurationByRule returns average duration per process rule.
 func (s *Service) AvgProcessStepDurationByRule(ctx context.Context, req *reportdto.AvgProcessStepDurationRequest) ([]reportdto.AvgProcessStepDurationResponse, error) {
-	data, err := s.reportSvc.AvgProcessStepDurationByRule(ctx, req.Schema)
+	data, err := s.reportSvc.AvgProcessStepDurationByRule(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +202,7 @@ func (s *Service) AvgProcessStepDurationByRule(ctx context.Context, req *reportd
 
 // CancellationRate returns the cancellation rate of orders.
 func (s *Service) CancellationRate(ctx context.Context, req *reportdto.CancellationRateRequest) (reportdto.CancellationRateResponse, error) {
-	d, err := s.reportSvc.CancellationRate(ctx, req.Schema)
+	d, err := s.reportSvc.CancellationRate(ctx)
 	if err != nil {
 		return reportdto.CancellationRateResponse{}, err
 	}
@@ -211,7 +211,7 @@ func (s *Service) CancellationRate(ctx context.Context, req *reportdto.Cancellat
 
 // CurrentQueueLength returns the number of items currently in queue.
 func (s *Service) CurrentQueueLength(ctx context.Context, req *reportdto.CurrentQueueLengthRequest) (reportdto.CurrentQueueLengthResponse, error) {
-	d, err := s.reportSvc.CurrentQueueLength(ctx, req.Schema)
+	d, err := s.reportSvc.CurrentQueueLength(ctx)
 	if err != nil {
 		return reportdto.CurrentQueueLengthResponse{}, err
 	}
@@ -220,7 +220,7 @@ func (s *Service) CurrentQueueLength(ctx context.Context, req *reportdto.Current
 
 // AvgDeliveryTimeByDriver returns average delivery time per driver.
 func (s *Service) AvgDeliveryTimeByDriver(ctx context.Context, req *reportdto.AvgDeliveryTimeByDriverRequest) ([]reportdto.AvgDeliveryTimeByDriverResponse, error) {
-	data, err := s.reportSvc.AvgDeliveryTimeByDriver(ctx, req.Schema)
+	data, err := s.reportSvc.AvgDeliveryTimeByDriver(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +233,7 @@ func (s *Service) AvgDeliveryTimeByDriver(ctx context.Context, req *reportdto.Av
 
 // DeliveriesPerDriver returns number of deliveries per driver.
 func (s *Service) DeliveriesPerDriver(ctx context.Context, req *reportdto.DeliveriesPerDriverRequest) ([]reportdto.DeliveriesPerDriverResponse, error) {
-	data, err := s.reportSvc.DeliveriesPerDriver(ctx, req.Schema)
+	data, err := s.reportSvc.DeliveriesPerDriver(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -246,7 +246,7 @@ func (s *Service) DeliveriesPerDriver(ctx context.Context, req *reportdto.Delive
 
 // OrdersPerTable returns number of orders per table.
 func (s *Service) OrdersPerTable(ctx context.Context, req *reportdto.OrdersPerTableRequest) ([]reportdto.OrdersPerTableResponse, error) {
-	data, err := s.reportSvc.OrdersPerTable(ctx, req.Schema)
+	data, err := s.reportSvc.OrdersPerTable(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +259,7 @@ func (s *Service) OrdersPerTable(ctx context.Context, req *reportdto.OrdersPerTa
 
 // SalesByShift returns total sales per shift.
 func (s *Service) SalesByShift(ctx context.Context, req *reportdto.SalesByShiftRequest) ([]reportdto.SalesByShiftResponse, error) {
-	data, err := s.reportSvc.SalesByShift(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.SalesByShift(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -272,7 +272,7 @@ func (s *Service) SalesByShift(ctx context.Context, req *reportdto.SalesByShiftR
 
 // PaymentsByMethod returns total payments by payment method.
 func (s *Service) PaymentsByMethod(ctx context.Context, req *reportdto.PaymentsByMethodRequest) ([]reportdto.PaymentsByMethodResponse, error) {
-	data, err := s.reportSvc.PaymentsByMethod(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.PaymentsByMethod(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -285,7 +285,7 @@ func (s *Service) PaymentsByMethod(ctx context.Context, req *reportdto.PaymentsB
 
 // EmployeePaymentsReport returns sum of employee payments by employee.
 func (s *Service) EmployeePaymentsReport(ctx context.Context, req *reportdto.EmployeePaymentsReportRequest) ([]reportdto.EmployeePaymentsReportResponse, error) {
-	data, err := s.reportSvc.EmployeePaymentsReport(ctx, req.Schema, req.Start, req.End)
+	data, err := s.reportSvc.EmployeePaymentsReport(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -295,89 +295,99 @@ func (s *Service) EmployeePaymentsReport(ctx context.Context, req *reportdto.Emp
 	}
 	return resp, nil
 }
+
 // SalesByPlace returns total sales per place.
 func (s *Service) SalesByPlace(ctx context.Context, req *reportdto.SalesByPlaceRequest) ([]reportdto.SalesByPlaceResponse, error) {
-    data, err := s.reportSvc.SalesByPlace(ctx, req.Schema, req.Start, req.End)
-    if err != nil {
-        return nil, err
-    }
-    resp := make([]reportdto.SalesByPlaceResponse, len(data))
-    for i, d := range data {
-        resp[i] = reportdto.SalesByPlaceResponse{Place: d.Place, Total: d.Total}
-    }
-    return resp, nil
+	data, err := s.reportSvc.SalesByPlace(ctx, req.Start, req.End)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.SalesByPlaceResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.SalesByPlaceResponse{Place: d.Place, Total: d.Total}
+	}
+	return resp, nil
 }
 
 // SalesBySize returns total quantity sold per size.
 func (s *Service) SalesBySize(ctx context.Context, req *reportdto.SalesBySizeRequest) ([]reportdto.SalesBySizeResponse, error) {
-    data, err := s.reportSvc.SalesBySize(ctx, req.Schema, req.Start, req.End)
-    if err != nil {
-        return nil, err
-    }
-    resp := make([]reportdto.SalesBySizeResponse, len(data))
-    for i, d := range data {
-        resp[i] = reportdto.SalesBySizeResponse{Size: d.Size, Quantity: d.Quantity}
-    }
-    return resp, nil
+	data, err := s.reportSvc.SalesBySize(ctx, req.Start, req.End)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.SalesBySizeResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.SalesBySizeResponse{Size: d.Size, Quantity: d.Quantity}
+	}
+	return resp, nil
 }
 
 // AdditionalItemsSold returns total quantity of additional items.
 func (s *Service) AdditionalItemsSold(ctx context.Context, req *reportdto.AdditionalItemsRequest) ([]reportdto.AdditionalItemsResponse, error) {
-    data, err := s.reportSvc.AdditionalItemsSold(ctx, req.Schema, req.Start, req.End)
-    if err != nil {
-        return nil, err
-    }
-    resp := make([]reportdto.AdditionalItemsResponse, len(data))
-    for i, d := range data {
-        resp[i] = reportdto.AdditionalItemsResponse{Name: d.Name, Quantity: d.Quantity}
-    }
-    return resp, nil
+	data, err := s.reportSvc.AdditionalItemsSold(ctx, req.Start, req.End)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.AdditionalItemsResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.AdditionalItemsResponse{Name: d.Name, Quantity: d.Quantity}
+	}
+	return resp, nil
 }
 
 // AvgPickupTime returns average pickup wait time.
 func (s *Service) AvgPickupTime(ctx context.Context, req *reportdto.AvgPickupTimeRequest) (reportdto.AvgPickupTimeResponse, error) {
-    d, err := s.reportSvc.AvgPickupTime(ctx, req.Schema, req.Start, req.End)
-    if err != nil {
-        return reportdto.AvgPickupTimeResponse{}, err
-    }
-    return reportdto.AvgPickupTimeResponse{AvgSeconds: d.AvgSeconds}, nil
+	d, err := s.reportSvc.AvgPickupTime(ctx, req.Start, req.End)
+	if err != nil {
+		return reportdto.AvgPickupTimeResponse{}, err
+	}
+	return reportdto.AvgPickupTimeResponse{AvgSeconds: d.AvgSeconds}, nil
 }
 
 // GroupItemsByStatus returns count of group items by status.
 func (s *Service) GroupItemsByStatus(ctx context.Context, req *reportdto.GroupItemsByStatusRequest) ([]reportdto.GroupItemsByStatusResponse, error) {
-    data, err := s.reportSvc.GroupItemsByStatus(ctx, req.Schema, req.Start, req.End)
-    if err != nil {
-        return nil, err
-    }
-    resp := make([]reportdto.GroupItemsByStatusResponse, len(data))
-    for i, d := range data {
-        resp[i] = reportdto.GroupItemsByStatusResponse{Status: d.Status, Count: d.Count}
-    }
-    return resp, nil
+	data, err := s.reportSvc.GroupItemsByStatus(ctx, req.Start, req.End)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.GroupItemsByStatusResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.GroupItemsByStatusResponse{Status: d.Status, Count: d.Count}
+	}
+	return resp, nil
 }
 
 // DeliveriesByCep returns number of deliveries per CEP.
 func (s *Service) DeliveriesByCep(ctx context.Context, req *reportdto.DeliveriesByCepRequest) ([]reportdto.DeliveriesByCepResponse, error) {
-    data, err := s.reportSvc.DeliveriesByCep(ctx, req.Schema, req.Start, req.End)
-    if err != nil {
-        return nil, err
-    }
-    resp := make([]reportdto.DeliveriesByCepResponse, len(data))
-    for i, d := range data {
-        resp[i] = reportdto.DeliveriesByCepResponse{Cep: d.Cep, Count: d.Count}
-    }
-    return resp, nil
+	data, err := s.reportSvc.DeliveriesByCep(ctx, req.Start, req.End)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.DeliveriesByCepResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.DeliveriesByCepResponse{Cep: d.Cep, Count: d.Count}
+	}
+	return resp, nil
 }
 
 // ProcessedCountByRule returns processed counts by rule.
 func (s *Service) ProcessedCountByRule(ctx context.Context, req *reportdto.ProcessedCountByRuleRequest) ([]reportdto.ProcessedCountByRuleResponse, error) {
-    data, err := s.reportSvc.ProcessedCountByRule(ctx, req.Schema, req.Start, req.End)
-    if err != nil {
-        return nil, err
-    }
-    resp := make([]reportdto.ProcessedCountByRuleResponse, len(data))
-    for i, d := range data {
-        resp[i] = reportdto.ProcessedCountByRuleResponse{RuleID: d.RuleID, Count: d.Count}
-    }
-    return resp, nil
+	data, err := s.reportSvc.ProcessedCountByRule(ctx, req.Start, req.End)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.ProcessedCountByRuleResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.ProcessedCountByRuleResponse{RuleID: d.RuleID, Count: d.Count}
+	}
+	return resp, nil
+}
+
+// DailySales returns summary metrics for a specific day.
+func (s *Service) DailySales(ctx context.Context, req *reportdto.DailySalesRequest) (reportdto.DailySalesResponse, error) {
+	data, err := s.reportSvc.DailySales(ctx, req.Day)
+	if err != nil {
+		return reportdto.DailySalesResponse{}, err
+	}
+	return reportdto.DailySalesResponse{TotalOrders: data.TotalOrders, TotalSales: data.TotalSales}, nil
 }

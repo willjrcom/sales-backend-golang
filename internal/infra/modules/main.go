@@ -40,6 +40,10 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	_, schemaService := NewSchemaModule(db, chi)
 	userRepository, userService, _ := NewUserModule(db, chi)
 
+	orderPrintService, _ := NewOrderPrintModule(db, chi)
+
+	NewReportModule(db, chi)
+
 	clientService.AddDependencies(contactRepository)
 	employeeService.AddDependencies(contactRepository, userRepository)
 
@@ -55,8 +59,8 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	orderTableService.AddDependencies(tableRepository, orderService)
 	orderPickupService.AddDependencies(orderService)
 
-    shiftService.AddDependencies(employeeService)
-    companyService.AddDependencies(addressRepository, *schemaService, userRepository, *userService)
-    // Register report module endpoints
-    NewReportModule(db, chi)
+	shiftService.AddDependencies(employeeService)
+	companyService.AddDependencies(addressRepository, *schemaService, userRepository, *userService)
+
+	orderPrintService.AddDependencies(orderService, shiftService)
 }
