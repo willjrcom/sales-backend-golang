@@ -3,6 +3,7 @@ package pos
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -321,6 +322,9 @@ func Test_FormatOrder(t *testing.T) {
 
 	out, err := FormatOrder(o)
 	assert.NoError(t, err)
+	if err := os.WriteFile("printer_output.txt", out, 0644); err != nil {
+		t.Fatalf("failed to write printer buffer to file: %v", err)
+	}
 	s := string(out)
 	assert.True(t, strings.HasPrefix(s, escInit))
 	assert.True(t, strings.Contains(s, fmt.Sprintf("PEDIDO %d%s", o.OrderNumber, newline)))

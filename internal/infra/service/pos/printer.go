@@ -71,20 +71,27 @@ func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 	buf.WriteString(escAlignLeft)
 	buf.WriteString(escBoldOn)
 	var parts []string
+
 	if c := group.Category; c != nil && c.Name != "" {
 		parts = append(parts, c.Name)
 	}
+
 	if s := group.Size; s != "" {
 		parts = append(parts, s)
 	}
+
 	header := strings.Join(parts, " - ")
+
 	if header == "" {
 		header = "Grupo"
 	}
+
 	buf.WriteString(fmt.Sprintf("%-40s%s", header, newline))
 	buf.WriteString(escBoldOff)
+
 	// Quantity of group
 	buf.WriteString(fmt.Sprintf("Qtd:%36.0f%s", group.Quantity, newline))
+
 	// Group time logs
 	if group.StartAt != nil {
 		buf.WriteString(fmt.Sprintf("Agendado: %s%s", group.StartAt.Format("02/01/2006 15:04"), newline))
@@ -101,6 +108,7 @@ func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 	if group.CanceledAt != nil {
 		buf.WriteString(fmt.Sprintf("Cancelado: %s%s", group.CanceledAt.Format("02/01/2006 15:04"), newline))
 	}
+
 	// Observation
 	if obs := group.Observation; obs != "" {
 		buf.WriteString(fmt.Sprintf("Obs: %s%s", obs, newline))
@@ -111,12 +119,17 @@ func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 	}
 	// Complement item
 	if comp := group.ComplementItem; comp != nil {
-		buf.WriteString(escBoldOn)
-		buf.WriteString(fmt.Sprintf("%2.0f x %-20s %7.2f%s", group.Quantity, comp.Name, d2f(comp.TotalPrice), newline))
-		buf.WriteString(escBoldOff)
+		printComplementItem(buf, comp, group)
 	}
+
 	// Subtotal for this group
 	buf.WriteString(fmt.Sprintf("Subtotal:%31.2f%s", d2f(group.TotalPrice), newline))
+}
+
+func printComplementItem(buf *bytes.Buffer, comp *orderentity.Item, group *orderentity.GroupItem) {
+	buf.WriteString(escBoldOn)
+	buf.WriteString(fmt.Sprintf("%2.0f x %-20s %7.2f%s", group.Quantity, comp.Name, d2f(comp.TotalPrice), newline))
+	buf.WriteString(escBoldOff)
 }
 
 // printItem writes a single order item and its additional items to the buffer.
@@ -125,14 +138,17 @@ func printItem(buf *bytes.Buffer, item *orderentity.Item) {
 	if len(name) > 20 {
 		name = name[:20]
 	}
+
 	buf.WriteString(fmt.Sprintf("%2.0f x %-20s %7.2f%s", item.Quantity, name, d2f(item.TotalPrice), newline))
 	for _, add := range item.AdditionalItems {
 		printAdditionalItem(buf, &add)
 	}
+
 	// Observation for item
 	if obs := item.Observation; obs != "" {
 		buf.WriteString(fmt.Sprintf("   Obs: %s%s", obs, newline))
 	}
+
 	// Removed items for item
 	if len(item.RemovedItems) > 0 {
 		for _, rm := range item.RemovedItems {
@@ -147,6 +163,7 @@ func printAdditionalItem(buf *bytes.Buffer, add *orderentity.Item) {
 	if len(name) > 17 {
 		name = name[:17]
 	}
+
 	buf.WriteString(fmt.Sprintf("   + %-17s %7.2f%s", name, d2f(add.TotalPrice), newline))
 }
 
@@ -161,6 +178,7 @@ func formatDeliverySection(buf *bytes.Buffer, o *orderentity.Order) {
 		return
 	}
 	buf.WriteString(escAlignLeft)
+
 	// Delivery time logs
 	if pa := o.Delivery.PendingAt; pa != nil {
 		buf.WriteString(fmt.Sprintf("Pendente: %s%s", pa.Format("02/01/2006 15:04"), newline))
