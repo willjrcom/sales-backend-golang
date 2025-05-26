@@ -38,9 +38,12 @@ type ShiftTimeLogs struct {
 
 // NewShift creates a new shift with initial start change
 func NewShift(startChange decimal.Decimal) *Shift {
+	newEntity := entity.NewEntity()
 	now := time.Now().UTC()
+	newEntity.CreatedAt = now
+
 	shift := &Shift{
-		Entity: entity.NewEntity(),
+		Entity: newEntity,
 		ShiftCommonAttributes: ShiftCommonAttributes{
 			CurrentOrderNumber: 0,
 			StartChange:        startChange,

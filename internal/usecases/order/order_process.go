@@ -208,8 +208,11 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 			}
 			return uuid.Nil, nil
 		}
+		// finished last process for this group item, no next process
+		return uuid.Nil, nil
 	}
 
+	// Start next queue
 	startQueueInput := &orderqueuedto.QueueCreateDTO{
 		GroupItemID: process.GroupItemID,
 		JoinedAt:    *process.FinishedAt,
