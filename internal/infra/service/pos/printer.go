@@ -29,23 +29,27 @@ const (
 func FormatOrder(o *orderentity.Order) ([]byte, error) {
 	var buf bytes.Buffer
 	buf.WriteString(escInit)
-	formatHeader(&buf, o)
-	formatDeliverySection(&buf, o)
+
+	// Print section based on order type: Delivery, Pickup, or Table
+	switch {
+	case o.Delivery != nil:
+		formatDeliverySection(&buf, o)
+	case o.Pickup != nil:
+		formatPickupSection(&buf, o)
+	case o.Table != nil:
+		formatTableSection(&buf, o)
+	}
+
 	formatOrderDetailSection(&buf, o)
 	printGroupItemsSection(&buf, o.GroupItems)
 	formatPaymentsSection(&buf, o)
 	formatFooter(&buf, o)
-	buf.WriteString(newline + newline + newline)
+	buf.WriteString(strings.Repeat(newline, 3))
 	buf.WriteString(escCut)
 	return buf.Bytes(), nil
 }
 
 func formatHeader(buf *bytes.Buffer, o *orderentity.Order) {
-	buf.WriteString(escAlignCenter)
-	buf.WriteString(escBoldOn)
-	buf.WriteString(fmt.Sprintf("PEDIDO %d%s", o.OrderNumber, newline))
-	buf.WriteString(escBoldOff)
-	buf.WriteString(escAlignLeft)
 	if o.PendingAt != nil {
 		buf.WriteString(fmt.Sprintf("Gerado: %s%s", o.PendingAt.Format("02/01/2006 15:04"), newline))
 	}
@@ -53,8 +57,6 @@ func formatHeader(buf *bytes.Buffer, o *orderentity.Order) {
 	if o.Attendant != nil && o.Attendant.User != nil {
 		buf.WriteString(fmt.Sprintf("Atendente: %s%s", o.Attendant.User.Name, newline))
 	}
-
-	buf.WriteString(strings.Repeat("-", 40) + newline)
 }
 
 // printGroupItemsSection prints all item groups of the order.
@@ -62,6 +64,7 @@ func printGroupItemsSection(buf *bytes.Buffer, groups []orderentity.GroupItem) {
 	for _, grp := range groups {
 		printGroupItem(buf, &grp)
 	}
+
 	buf.WriteString(strings.Repeat("-", 40) + newline)
 }
 
@@ -82,10 +85,6 @@ func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 
 	header := strings.Join(parts, " - ")
 
-	if header == "" {
-		header = "Grupo"
-	}
-
 	buf.WriteString(fmt.Sprintf("%-40s%s", header, newline))
 	buf.WriteString(escBoldOff)
 
@@ -96,39 +95,45 @@ func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 	if group.StartAt != nil {
 		buf.WriteString(fmt.Sprintf("Agendado: %s%s", group.StartAt.Format("02/01/2006 15:04"), newline))
 	}
-	if group.PendingAt != nil {
-		buf.WriteString(fmt.Sprintf("Pendente: %s%s", group.PendingAt.Format("02/01/2006 15:04"), newline))
-	}
-	if group.StartedAt != nil {
-		buf.WriteString(fmt.Sprintf("Iniciado: %s%s", group.StartedAt.Format("02/01/2006 15:04"), newline))
-	}
+	// if group.PendingAt != nil {
+	// 	buf.WriteString(fmt.Sprintf("Pendente: %s%s", group.PendingAt.Format("02/01/2006 15:04"), newline))
+	// }
+	// if group.StartedAt != nil {
+	// 	buf.WriteString(fmt.Sprintf("Iniciado: %s%s", group.StartedAt.Format("02/01/2006 15:04"), newline))
+	// }
 	if group.ReadyAt != nil {
 		buf.WriteString(fmt.Sprintf("Pronto: %s%s", group.ReadyAt.Format("02/01/2006 15:04"), newline))
 	}
-	if group.CanceledAt != nil {
-		buf.WriteString(fmt.Sprintf("Cancelado: %s%s", group.CanceledAt.Format("02/01/2006 15:04"), newline))
-	}
+	// if group.CanceledAt != nil {
+	// 	buf.WriteString(fmt.Sprintf("Cancelado: %s%s", group.CanceledAt.Format("02/01/2006 15:04"), newline))
+	// }
 
 	// Observation
 	if obs := group.Observation; obs != "" {
+		buf.WriteString(escBoldOn)
 		buf.WriteString(fmt.Sprintf("Obs: %s%s", obs, newline))
+		buf.WriteString(escBoldOff)
 	}
+
 	// Items
 	for _, item := range group.Items {
 		printItem(buf, &item)
 	}
+
 	// Complement item
 	if comp := group.ComplementItem; comp != nil {
 		printComplementItem(buf, comp, group)
 	}
 
 	// Subtotal for this group
+	buf.WriteString(escBoldOn)
 	buf.WriteString(fmt.Sprintf("Subtotal:%31.2f%s", d2f(group.TotalPrice), newline))
+	buf.WriteString(escBoldOff)
 }
 
 func printComplementItem(buf *bytes.Buffer, comp *orderentity.Item, group *orderentity.GroupItem) {
 	buf.WriteString(escBoldOn)
-	buf.WriteString(fmt.Sprintf("%2.0f x %-20s %7.2f%s", group.Quantity, comp.Name, d2f(comp.TotalPrice), newline))
+	buf.WriteString(fmt.Sprintf("%4.1f x %-20s %7.2f%s", group.Quantity, comp.Name, d2f(comp.TotalPrice), newline))
 	buf.WriteString(escBoldOff)
 }
 
@@ -139,22 +144,26 @@ func printItem(buf *bytes.Buffer, item *orderentity.Item) {
 		name = name[:20]
 	}
 
-	buf.WriteString(fmt.Sprintf("%2.0f x %-20s %7.2f%s", item.Quantity, name, d2f(item.TotalPrice), newline))
+	buf.WriteString(fmt.Sprintf("%4.1f x %-20s %7.2f%s", item.Quantity, name, d2f(item.TotalPrice), newline))
 	for _, add := range item.AdditionalItems {
 		printAdditionalItem(buf, &add)
-	}
-
-	// Observation for item
-	if obs := item.Observation; obs != "" {
-		buf.WriteString(fmt.Sprintf("   Obs: %s%s", obs, newline))
 	}
 
 	// Removed items for item
 	if len(item.RemovedItems) > 0 {
 		for _, rm := range item.RemovedItems {
-			buf.WriteString(fmt.Sprintf("   Removido: %s%s", rm, newline))
+			buf.WriteString(fmt.Sprintf("   - %s%s", rm, newline))
 		}
 	}
+
+	// Observation for item
+	if obs := item.Observation; obs != "" {
+		buf.WriteString(escBoldOn)
+		buf.WriteString(fmt.Sprintf("   Obs: %s%s", obs, newline))
+		buf.WriteString(escBoldOff)
+	}
+
+	buf.WriteString(newline)
 }
 
 // printAdditionalItem writes a single additional item to the buffer.
@@ -177,12 +186,19 @@ func formatDeliverySection(buf *bytes.Buffer, o *orderentity.Order) {
 	if o.Delivery == nil {
 		return
 	}
+
+	buf.WriteString(escAlignCenter)
+	buf.WriteString(escBoldOn)
+	buf.WriteString(fmt.Sprintf("PEDIDO DE ENTREGA %d%s", o.OrderNumber, newline))
+	buf.WriteString(escBoldOff)
+
+	formatHeader(buf, o)
 	buf.WriteString(escAlignLeft)
 
 	// Delivery time logs
-	if pa := o.Delivery.PendingAt; pa != nil {
-		buf.WriteString(fmt.Sprintf("Pendente: %s%s", pa.Format("02/01/2006 15:04"), newline))
-	}
+	// if pa := o.Delivery.PendingAt; pa != nil {
+	// 	buf.WriteString(fmt.Sprintf("Pendente: %s%s", pa.Format("02/01/2006 15:04"), newline))
+	// }
 	if sa := o.Delivery.ShippedAt; sa != nil {
 		buf.WriteString(fmt.Sprintf("Despachado: %s%s", sa.Format("02/01/2006 15:04"), newline))
 	}
@@ -193,28 +209,90 @@ func formatDeliverySection(buf *bytes.Buffer, o *orderentity.Order) {
 	// Address
 	if a := o.Delivery.Address; a != nil {
 		buf.WriteString(fmt.Sprintf("Endereço: %s, %s%s", a.Street, a.Number, newline))
+
 		if a.Complement != "" {
 			buf.WriteString(fmt.Sprintf("Complemento: %s%s", a.Complement, newline))
 		}
+
 		if a.Reference != "" {
 			buf.WriteString(fmt.Sprintf("Ref: %s%s", a.Reference, newline))
 		}
+
 		buf.WriteString(fmt.Sprintf("Bairro: %s%s", a.Neighborhood, newline))
 		buf.WriteString(fmt.Sprintf("Cidade: %s - %s%s", a.City, a.UF, newline))
 		buf.WriteString(fmt.Sprintf("CEP: %s%s", a.Cep, newline))
 	}
+
 	// Delivery driver
 	if d := o.Delivery.Driver; d != nil && d.Employee != nil && d.Employee.User != nil {
 		buf.WriteString(fmt.Sprintf("Motoboy: %s%s", d.Employee.User.Name, newline))
 	}
+
 	// Delivery tax
 	if t := o.Delivery.DeliveryTax; t != nil {
 		buf.WriteString(fmt.Sprintf("Taxa entrega: %7.2f%s", d2f(*t), newline))
 	}
+
 	// Change for delivery
 	buf.WriteString(fmt.Sprintf("Troco entrega: %7.2f%s", d2f(o.Delivery.Change), newline))
+
 	// Payment method for delivery
 	buf.WriteString(fmt.Sprintf("Pagamento entrega: %s%s", o.Delivery.PaymentMethod, newline))
+	buf.WriteString(strings.Repeat("-", 40) + newline)
+}
+
+// formatPickupSection prints pickup-related details if present.
+func formatPickupSection(buf *bytes.Buffer, o *orderentity.Order) {
+	if o.Pickup == nil {
+		return
+	}
+
+	buf.WriteString(escAlignCenter)
+	buf.WriteString(escBoldOn)
+	buf.WriteString(fmt.Sprintf("PEDIDO DE RETIRADA %d%s", o.OrderNumber, newline))
+	buf.WriteString(escBoldOff)
+
+	formatHeader(buf, o)
+	buf.WriteString(escAlignLeft)
+
+	// if pa := o.Pickup.PendingAt; pa != nil {
+	// 	buf.WriteString(fmt.Sprintf("Pendente: %s%s", pa.Format("02/01/2006 15:04"), newline))
+	// }
+	if ra := o.Pickup.ReadyAt; ra != nil {
+		buf.WriteString(fmt.Sprintf("Pronto: %s%s", ra.Format("02/01/2006 15:04"), newline))
+	}
+	if name := o.Pickup.Name; name != "" {
+		buf.WriteString(fmt.Sprintf("Cliente: %s%s", name, newline))
+	}
+	buf.WriteString(strings.Repeat("-", 40) + newline)
+}
+
+// formatTableSection prints table-related details if present.
+func formatTableSection(buf *bytes.Buffer, o *orderentity.Order) {
+	if o.Table == nil {
+		return
+	}
+
+	buf.WriteString(escAlignCenter)
+	buf.WriteString(escBoldOn)
+	buf.WriteString(fmt.Sprintf("PEDIDO DE MESA %d%s", o.OrderNumber, newline))
+	buf.WriteString(escBoldOff)
+
+	formatHeader(buf, o)
+	buf.WriteString(escAlignLeft)
+
+	// if pa := o.Table.PendingAt; pa != nil {
+	// 	buf.WriteString(fmt.Sprintf("Pendente: %s%s", pa.Format("02/01/2006 15:04"), newline))
+	// }
+	// if ca := o.Table.ClosedAt; ca != nil {
+	// 	buf.WriteString(fmt.Sprintf("Fechado: %s%s", ca.Format("02/01/2006 15:04"), newline))
+	// }
+	if name := o.Table.Name; name != "" {
+		buf.WriteString(fmt.Sprintf("Nome: %s%s", name, newline))
+	}
+	if contact := o.Table.Contact; contact != "" {
+		buf.WriteString(fmt.Sprintf("Contato: %s%s", contact, newline))
+	}
 	buf.WriteString(strings.Repeat("-", 40) + newline)
 }
 
@@ -223,14 +301,19 @@ func formatOrderDetailSection(buf *bytes.Buffer, o *orderentity.Order) {
 	buf.WriteString(escAlignLeft)
 	// Observation
 	if obs := o.Observation; obs != "" {
+		buf.WriteString(escBoldOn)
 		buf.WriteString(fmt.Sprintf("Observação: %s%s", obs, newline))
+		buf.WriteString(escBoldOff)
 	}
+
 	// Total items
 	if o.QuantityItems > 0 {
 		buf.WriteString(fmt.Sprintf("Itens:%36.0f%s", o.QuantityItems, newline))
 	}
+
 	// Total paid
 	buf.WriteString(fmt.Sprintf("Pago:%31.2f%s", d2f(o.TotalPaid), newline))
+
 	// Total change
 	buf.WriteString(fmt.Sprintf("Troco:%31.2f%s", d2f(o.TotalChange), newline))
 	buf.WriteString(strings.Repeat("-", 40) + newline)
