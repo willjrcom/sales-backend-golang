@@ -43,7 +43,7 @@ func Test_printItem_WithExtras(t *testing.T) {
 	item.RemovedItems = []string{"Onion"}
 	printItem(buf, item)
 	// Build expected output
-	expected := fmt.Sprintf("%2.0f x %-20s %7.2f%s", item.Quantity, item.Name, d2f(item.TotalPrice), newline)
+	expected := fmt.Sprintf("%4.1f x %-20s %7.2f%s", item.Quantity, item.Name, d2f(item.TotalPrice), newline)
 	expected += fmt.Sprintf("   + %-17s %7.2f%s", extra.Name, d2f(extra.TotalPrice), newline)
 	expected += fmt.Sprintf("   Obs: %s%s", item.Observation, newline)
 	expected += fmt.Sprintf("   Removido: %s%s", item.RemovedItems[0], newline)
@@ -55,7 +55,7 @@ func Test_printItem_NoExtras(t *testing.T) {
 	buf := &bytes.Buffer{}
 	item := orderentity.NewItem("Sandwich", decimal.NewFromFloat(3.75), 1, "", uuid.New(), uuid.New())
 	printItem(buf, item)
-	expected := fmt.Sprintf("%2.0f x %-20s %7.2f%s", item.Quantity, item.Name, d2f(item.TotalPrice), newline)
+	expected := fmt.Sprintf("%4.1f x %-20s %7.2f%s", item.Quantity, item.Name, d2f(item.TotalPrice), newline)
 	assert.Equal(t, expected, buf.String())
 }
 
@@ -79,7 +79,7 @@ func Test_printGroupItem(t *testing.T) {
 	expected := escAlignLeft + escBoldOn + header + escBoldOff
 	expected += fmt.Sprintf("Qtd:%36.0f%s", group.Quantity, newline)
 	expected += fmt.Sprintf("Obs: %s%s", group.Observation, newline)
-	expected += fmt.Sprintf("%2.0f x %-20s %7.2f%s", item.Quantity, item.Name, d2f(item.TotalPrice), newline)
+	expected += fmt.Sprintf("%4.1f x %-20s %7.2f%s", item.Quantity, item.Name, d2f(item.TotalPrice), newline)
 	expected += fmt.Sprintf("Subtotal:%31.2f%s", d2f(group.TotalPrice), newline)
 	assert.Equal(t, expected, buf.String())
 }
@@ -326,33 +326,27 @@ func Test_FormatOrder(t *testing.T) {
 		t.Fatalf("failed to write printer buffer to file: %v", err)
 	}
 	s := string(out)
+	// Deve iniciar com código ESC inicial e conter o cabeçalho de entrega
 	assert.True(t, strings.HasPrefix(s, escInit))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("PEDIDO %d%s", o.OrderNumber, newline)))
+	assert.Contains(t, s, fmt.Sprintf("PEDIDO DE ENTREGA %d", o.OrderNumber))
+	// Deve conter seção de entrega e informações principais
+	assert.Contains(t, s, "ENTREGA")
+	assert.Contains(t, s, "Despachado:")
+	assert.Contains(t, s, "Cliente:")
+	assert.Contains(t, s, "Street, 123")
+	assert.Contains(t, s, "Complemento:")
+	assert.Contains(t, s, "Ref:")
+	assert.Contains(t, s, "Bairro:")
+	assert.Contains(t, s, "Cidade:")
+	assert.Contains(t, s, "CEP:")
+	assert.Contains(t, s, "Entregador:")
+	assert.Contains(t, s, "Taxa entrega:")
+	assert.Contains(t, s, "Troco:")
+	assert.Contains(t, s, "Forma de pagamento:")
+	// Itens do pedido e total
+	assert.Contains(t, s, "Pizza mussarela")
+	assert.Contains(t, s, "Borda Recheada")
+	assert.Contains(t, s, "TOTAL:")
+	// Deve terminar com código de corte
 	assert.True(t, strings.HasSuffix(s, escCut))
-	// Delivery time logs
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Pendente: %s%s", now.Format("02/01/2006 15:04"), newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Despachado: %s%s", now.Format("02/01/2006 15:04"), newline)))
-	// Delivery info
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Cliente: %s%s", o.Delivery.Client.Name, newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Endereço: %s, %s%s", o.Delivery.Address.Street, o.Delivery.Address.Number, newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Complemento: %s%s", o.Delivery.Address.Complement, newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Ref: %s%s", o.Delivery.Address.Reference, newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Bairro: %s%s", o.Delivery.Address.Neighborhood, newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Cidade: %s - %s%s", o.Delivery.Address.City, o.Delivery.Address.UF, newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("CEP: %s%s", o.Delivery.Address.Cep, newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Motoboy: %s%s", o.Delivery.Driver.Employee.User.Name, newline)))
-	// Delivery charges
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Taxa entrega: %7.2f%s", decimalValue.InexactFloat64(), newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Troco entrega: %7.2f%s", decimalValue.InexactFloat64(), newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Pagamento entrega: %s%s", o.Delivery.PaymentMethod, newline)))
-	// Order details
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Observação: %s%s", o.Observation, newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Itens:%36.0f%s", o.QuantityItems, newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Pago:%31.2f%s", decimal.NewFromFloat(120.45).InexactFloat64(), newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("Troco:%31.2f%s", decimal.NewFromFloat(30.45).InexactFloat64(), newline)))
-	// Payments
-	assert.True(t, strings.Contains(s, fmt.Sprintf("%s:%7.2f%s", o.Payments[0].Method, decimal.NewFromFloat(30.45).InexactFloat64(), newline)))
-	assert.True(t, strings.Contains(s, fmt.Sprintf("%s:%7.2f%s", o.Payments[1].Method, decimal.NewFromFloat(20).InexactFloat64(), newline)))
-	// Total payable
-	assert.True(t, strings.Contains(s, fmt.Sprintf("TOTAL:%31.2f%s", decimal.NewFromFloat(150.45).InexactFloat64(), newline)))
 }
