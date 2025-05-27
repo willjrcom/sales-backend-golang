@@ -131,14 +131,14 @@ func (s *Service) LoginUser(ctx context.Context, dto *companydto.UserLoginDTO) (
 	userLoggedIn := userLoggedInModel.ToDomain()
 	userLoggedIn.Companies = []companyentity.Company{}
 
-	accessToken, err := jwtservice.CreateIDToken(userLoggedIn)
+	idToken, err := jwtservice.CreateIDToken(userLoggedIn)
 
 	if err != nil {
 		return nil, err
 	}
 
 	data = &companydto.UserTokenDTO{
-		IDToken: accessToken,
+		IDToken: idToken,
 	}
 
 	data.User.FromDomain(userLoggedIn)
