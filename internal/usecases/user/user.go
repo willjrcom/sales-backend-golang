@@ -138,7 +138,7 @@ func (s *Service) LoginUser(ctx context.Context, dto *companydto.UserLoginDTO) (
 	}
 
 	data = &companydto.UserTokenDTO{
-		AccessToken: accessToken,
+		IDToken: accessToken,
 	}
 
 	data.User.FromDomain(userLoggedIn)
