@@ -8,7 +8,8 @@ import (
 )
 
 type OrderTableDTO struct {
-	ID uuid.UUID `json:"id"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
 	OrderTableCommonAttributes
 	OrderTableTimeLogs
 }
@@ -31,7 +32,8 @@ func (t *OrderTableDTO) FromDomain(table *orderentity.OrderTable) {
 		return
 	}
 	*t = OrderTableDTO{
-		ID: table.ID,
+		ID:        table.ID,
+		CreatedAt: table.CreatedAt,
 		OrderTableCommonAttributes: OrderTableCommonAttributes{
 			Name:    table.Name,
 			Contact: table.Contact,
