@@ -46,7 +46,7 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 				return
 			}
 
-			ctx = context.WithValue(ctx, model.Schema("schema"), jwtservice.GetSchemaFromIDToken(validToken))
+			ctx = context.WithValue(ctx, model.Schema("schema"), jwtservice.GetSchemaFromAccessToken(validToken))
 			ctx = context.WithValue(ctx, companyentity.UserValue("user_id"), jwtservice.GetUserIDFromToken(validToken))
 		}
 

@@ -9,12 +9,12 @@ import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 )
 
-func CreateAccessToken(user *companyentity.User) (string, error) {
+func CreateIDToken(user *companyentity.User) (string, error) {
 	userID := user.ID.String()
 	claims := jwt.MapClaims{
 		"user_id": userID,
-		"sub":     "access-token",
-		"exp":     time.Now().UTC().Add(time.Minute * 30).Unix(),
+		"sub":     "id-token",
+		"exp":     time.Now().UTC().Add(30 * time.Minute).Unix(),
 	}
 
 	// Criar um token JWT usando a chave secreta
@@ -24,14 +24,14 @@ func CreateAccessToken(user *companyentity.User) (string, error) {
 	return token.SignedString([]byte(secretKey))
 }
 
-func CreateIDToken(accessToken *jwt.Token, schema string) (string, error) {
+func CreateAccessToken(accessToken *jwt.Token, schema string) (string, error) {
 	oldClaims := accessToken.Claims.(jwt.MapClaims)
 
 	claims := jwt.MapClaims{
 		"user_id":        oldClaims["user_id"],
 		"current_schema": schema,
-		"sub":            "id-token",
-		"exp":            time.Now().UTC().Add(time.Minute * 10).Unix(),
+		"sub":            "access-token",
+		"exp":            time.Now().UTC().Add(2 * time.Hour).Unix(),
 	}
 
 	// Criar um token JWT usando a chave secreta
@@ -52,7 +52,7 @@ func ValidateToken(ctx context.Context, tokenString string) (*jwt.Token, error) 
 	})
 }
 
-func GetSchemaFromIDToken(token *jwt.Token) string {
+func GetSchemaFromAccessToken(token *jwt.Token) string {
 	claims := token.Claims.(jwt.MapClaims)
 	currentSchema, ok := claims["current_schema"]
 

@@ -131,7 +131,7 @@ func (s *Service) LoginUser(ctx context.Context, dto *companydto.UserLoginDTO) (
 	userLoggedIn := userLoggedInModel.ToDomain()
 	userLoggedIn.Companies = []companyentity.Company{}
 
-	accessToken, err := jwtservice.CreateAccessToken(userLoggedIn)
+	accessToken, err := jwtservice.CreateIDToken(userLoggedIn)
 
 	if err != nil {
 		return nil, err
@@ -166,7 +166,7 @@ func (s *Service) Access(ctx context.Context, dto *companydto.UserSchemaDTO, acc
 
 	for _, company := range userModel.Companies {
 		if company.SchemaName == *schema {
-			return jwtservice.CreateIDToken(accessToken, *schema)
+			return jwtservice.CreateAccessToken(accessToken, *schema)
 		}
 	}
 
