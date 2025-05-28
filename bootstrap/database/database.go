@@ -244,6 +244,7 @@ func registerModels(db *bun.DB) error {
 	db.RegisterModel((*model.Contact)(nil))
 	db.RegisterModel((*model.Client)(nil))
 	db.RegisterModel((*model.Employee)(nil))
+	db.RegisterModel((*model.PaymentEmployee)(nil))
 
 	db.RegisterModel((*model.OrderProcessToProductToGroupItem)(nil))
 	db.RegisterModel((*model.OrderProcess)(nil))
@@ -336,6 +337,10 @@ func createTables(ctx context.Context, db *bun.DB) error {
 	}
 
 	if err := createTableIfNotExists(ctx, db, (*model.Employee)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, db, (*model.PaymentEmployee)(nil)); err != nil {
 		return err
 	}
 

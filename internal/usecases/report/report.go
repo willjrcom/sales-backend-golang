@@ -13,6 +13,19 @@ type Service struct {
 	reportSvc *report.ReportService
 }
 
+// TopTables returns the top 10 most used tables in the given period.
+func (s *Service) TopTables(ctx context.Context, req *reportdto.TopTablesRequest) ([]reportdto.TopTablesResponse, error) {
+	data, err := s.reportSvc.TopTables(ctx, req.Start, req.End)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.TopTablesResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.TopTablesResponse{TableID: d.TableID, Count: d.Count}
+	}
+	return resp, nil
+}
+
 // NewService creates a new report usecase service.
 func NewService(reportSvc *report.ReportService) *Service {
 	return &Service{reportSvc: reportSvc}
@@ -390,4 +403,46 @@ func (s *Service) DailySales(ctx context.Context, req *reportdto.DailySalesReque
 		return reportdto.DailySalesResponse{}, err
 	}
 	return reportdto.DailySalesResponse{TotalOrders: data.TotalOrders, TotalSales: data.TotalSales}, nil
+}
+
+// AvgQueueDuration returns average duration of all queues.
+func (s *Service) AvgQueueDuration(ctx context.Context, req *reportdto.AvgQueueDurationRequest) (reportdto.AvgQueueDurationResponse, error) {
+	d, err := s.reportSvc.AvgQueueDuration(ctx)
+	if err != nil {
+		return reportdto.AvgQueueDurationResponse{}, err
+	}
+	return reportdto.AvgQueueDurationResponse{AvgSeconds: d.AvgSeconds}, nil
+}
+
+// AvgProcessDurationByProduct returns average process duration by product.
+func (s *Service) AvgProcessDurationByProduct(ctx context.Context, req *reportdto.AvgProcessDurationByProductRequest) ([]reportdto.AvgProcessDurationByProductResponse, error) {
+	data, err := s.reportSvc.AvgProcessDurationByProduct(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.AvgProcessDurationByProductResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.AvgProcessDurationByProductResponse{
+			ProductID:   d.ProductID,
+			ProductName: d.ProductName,
+			AvgSeconds:  d.AvgSeconds,
+		}
+	}
+	return resp, nil
+}
+
+// TotalQueueTimeByGroupItem returns total sum of queue durations per group item.
+func (s *Service) TotalQueueTimeByGroupItem(ctx context.Context, req *reportdto.TotalQueueTimeByGroupItemRequest) ([]reportdto.TotalQueueTimeByGroupItemResponse, error) {
+	data, err := s.reportSvc.TotalQueueTimeByGroupItem(ctx)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.TotalQueueTimeByGroupItemResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.TotalQueueTimeByGroupItemResponse{
+			GroupItemID:  d.GroupItemID,
+			TotalSeconds: d.TotalSeconds,
+		}
+	}
+	return resp, nil
 }

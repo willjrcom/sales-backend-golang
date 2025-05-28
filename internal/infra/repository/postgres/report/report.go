@@ -437,6 +437,80 @@ func (s *ReportService) CurrentQueueLength(ctx context.Context) (CurrentQueueLen
 	return resp, nil
 }
 
+// AvgQueueDurationDTO holds average queue duration in seconds.
+type AvgQueueDurationDTO struct {
+	AvgSeconds float64 `bun:"avg_seconds"`
+}
+
+// AvgQueueDuration returns the average duration (in seconds) of all process queues.
+func (s *ReportService) AvgQueueDuration(ctx context.Context) (AvgQueueDurationDTO, error) {
+	if err := database.ChangeSchema(ctx, s.db); err != nil {
+		return AvgQueueDurationDTO{}, err
+	}
+	var resp AvgQueueDurationDTO
+   // duration is stored as bigint nanoseconds; convert to seconds
+   query := `
+       SELECT AVG(duration) / 1000000000.0 AS avg_seconds
+       FROM order_queues`
+	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+		return AvgQueueDurationDTO{}, err
+	}
+	return resp, nil
+}
+
+// AvgProcessByProductDTO holds average process duration per product.
+type AvgProcessByProductDTO struct {
+	ProductID   string  `bun:"product_id"`
+	ProductName string  `bun:"product_name"`
+	AvgSeconds  float64 `bun:"avg_seconds"`
+}
+
+// AvgProcessDurationByProduct returns average duration (seconds) of processes by product.
+func (s *ReportService) AvgProcessDurationByProduct(ctx context.Context) ([]AvgProcessByProductDTO, error) {
+	if err := database.ChangeSchema(ctx, s.db); err != nil {
+		return nil, err
+	}
+	var resp []AvgProcessByProductDTO
+   // p.duration is bigint nanoseconds; average and convert to seconds
+   query := `
+       SELECT prod.id::text AS product_id,
+              prod.name AS product_name,
+              AVG(p.duration) / 1000000000.0 AS avg_seconds
+         FROM process_to_product_to_group_item t
+         JOIN order_processes p ON p.id = t.process_id
+         JOIN products prod ON prod.id = t.product_id
+        GROUP BY prod.id, prod.name
+        ORDER BY prod.name`
+	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// TotalQueueTimeByGroupItemDTO holds total queue time per group item in seconds.
+type TotalQueueTimeByGroupItemDTO struct {
+	GroupItemID  string  `bun:"group_item_id"`
+	TotalSeconds float64 `bun:"total_seconds"`
+}
+
+// TotalQueueTimeByGroupItem returns total sum of queue durations per group item.
+func (s *ReportService) TotalQueueTimeByGroupItem(ctx context.Context) ([]TotalQueueTimeByGroupItemDTO, error) {
+	if err := database.ChangeSchema(ctx, s.db); err != nil {
+		return nil, err
+	}
+	var resp []TotalQueueTimeByGroupItemDTO
+   // duration is bigint nanoseconds; sum and convert to seconds
+   query := `
+       SELECT group_item_id::text AS group_item_id,
+              SUM(duration) / 1000000000.0 AS total_seconds
+         FROM order_queues
+        GROUP BY group_item_id`
+	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
 // AvgDeliveryTimeDTO holds average delivery time per driver.
 type AvgDeliveryTimeDTO struct {
 	DriverID   string  `bun:"driver_id"`
@@ -480,6 +554,33 @@ func (s *ReportService) DeliveriesPerDriver(ctx context.Context) ([]DeliveriesCo
         FROM order_deliveries
         GROUP BY driver_id`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// TopTablesDTO holds the table usage count.
+type TopTablesDTO struct {
+	TableID string `bun:"table_id"`
+	Count   int    `bun:"count"`
+}
+
+// TopTables returns the top 10 most used tables (by order count) in a period.
+func (s *ReportService) TopTables(ctx context.Context, start, end time.Time) ([]TopTablesDTO, error) {
+	if err := database.ChangeSchema(ctx, s.db); err != nil {
+		return nil, err
+	}
+	var resp []TopTablesDTO
+	query := `
+       SELECT ot.table_id::text AS table_id,
+              COUNT(*) AS count
+         FROM order_tables ot
+         JOIN orders o ON o.id = ot.order_id
+        WHERE o.created_at BETWEEN ? AND ?
+        GROUP BY ot.table_id
+        ORDER BY count DESC
+        LIMIT 10`
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil

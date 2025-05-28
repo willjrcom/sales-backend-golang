@@ -36,7 +36,13 @@ func NewHandlerReport(s *reportusecases.Service) *handler.Handler {
 	r.Get("/avg-delivery-time-by-driver", h.handleAvgDeliveryTimeByDriver)
 	r.Get("/deliveries-per-driver", h.handleDeliveriesPerDriver)
 	r.Get("/orders-per-table", h.handleOrdersPerTable)
-	r.Post("/sales-by-shift", h.handleSalesByShift)
+	r.Get("/avg-queue-duration", h.handleAvgQueueDuration)
+	r.Get("/avg-process-duration-by-product", h.handleAvgProcessDurationByProduct)
+	r.Get("/total-queue-time-by-group-item", h.handleTotalQueueTimeByGroupItem)
+	// Sales by shift
+   r.Post("/sales-by-shift", h.handleSalesByShift)
+  	// Top 10 mesas mais utilizadas
+   r.Post("/top-tables", h.handleTopTables)
 	r.Post("/payments-by-method", h.handlePaymentsByMethod)
 	// Custom reports 26–33
 	r.Post("/sales-by-place", h.handleSalesByPlace)
@@ -354,6 +360,53 @@ func (h *handlerReportImpl) handleOrdersPerTable(w http.ResponseWriter, r *http.
 	}
 	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
 }
+// handleAvgQueueDuration handles average queue duration report.
+func (h *handlerReportImpl) handleAvgQueueDuration(w http.ResponseWriter, r *http.Request) {
+   schema := r.URL.Query().Get("schema")
+   if schema == "" {
+       jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
+       return
+   }
+   req := reportdto.AvgQueueDurationRequest{}
+   resp, err := h.s.AvgQueueDuration(r.Context(), &req)
+   if err != nil {
+       jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+       return
+   }
+   jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+// handleAvgProcessDurationByProduct handles average process duration by product report.
+func (h *handlerReportImpl) handleAvgProcessDurationByProduct(w http.ResponseWriter, r *http.Request) {
+   schema := r.URL.Query().Get("schema")
+   if schema == "" {
+       jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
+       return
+   }
+   req := reportdto.AvgProcessDurationByProductRequest{}
+   resp, err := h.s.AvgProcessDurationByProduct(r.Context(), &req)
+   if err != nil {
+       jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+       return
+   }
+   jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+// handleTotalQueueTimeByGroupItem handles total queue time per group item report.
+func (h *handlerReportImpl) handleTotalQueueTimeByGroupItem(w http.ResponseWriter, r *http.Request) {
+   schema := r.URL.Query().Get("schema")
+   if schema == "" {
+       jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
+       return
+   }
+   req := reportdto.TotalQueueTimeByGroupItemRequest{}
+   resp, err := h.s.TotalQueueTimeByGroupItem(r.Context(), &req)
+   if err != nil {
+       jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+       return
+   }
+   jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
 
 func (h *handlerReportImpl) handleSalesByShift(w http.ResponseWriter, r *http.Request) {
 	var req reportdto.SalesByShiftRequest
@@ -367,6 +420,19 @@ func (h *handlerReportImpl) handleSalesByShift(w http.ResponseWriter, r *http.Re
 		return
 	}
 	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+// handleTopTables handles the report for top 10 most used tables.
+func (h *handlerReportImpl) handleTopTables(w http.ResponseWriter, r *http.Request) {
+   var req reportdto.TopTablesRequest
+   if !parseBody(r, &req, w) {
+       return
+   }
+   resp, err := h.s.TopTables(r.Context(), &req)
+   if err != nil {
+       jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+       return
+   }
+   jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
 }
 
 func (h *handlerReportImpl) handlePaymentsByMethod(w http.ResponseWriter, r *http.Request) {
