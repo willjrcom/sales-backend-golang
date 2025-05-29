@@ -9,7 +9,7 @@ type CompanyUpdateDTO struct {
 	Cnpj        *string                   `json:"cnpj"`
 	Email       *string                   `json:"email"`
 	Contacts    []string                  `json:"contacts"`
-	Preferences companyentity.Preferences `json:"preferentes"`
+	Preferences companyentity.Preferences `json:"preferences"`
 }
 
 func (c *CompanyUpdateDTO) validate() error {

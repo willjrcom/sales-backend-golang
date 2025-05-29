@@ -16,7 +16,7 @@ type CompanyDTO struct {
 	Contacts     []string                  `json:"contacts"`
 	Address      *addressdto.AddressDTO    `json:"address,omitempty"`
 	Users        []UserDTO                 `json:"users,omitempty"`
-	Preferences  companyentity.Preferences `json:"preferentes,omitempty"`
+	Preferences  companyentity.Preferences `json:"preferences,omitempty"`
 }
 
 func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
