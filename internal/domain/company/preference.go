@@ -1,4 +1,4 @@
-package preference
+package companyentity
 
 import (
 	"fmt"
@@ -11,8 +11,8 @@ import (
 type Key string
 
 const (
-	// ConsumptionTaxRate is the percentage rate applied for table consumption (e.g., 0.10 for 10%).
-	ConsumptionTaxRate Key = "consumption_tax_rate"
+	// TableTaxRate is the percentage rate applied for table consumption (e.g., 0.10 for 10%).
+	TableTaxRate Key = "table_tax_rate"
 	// MinOrderValueForFreeDelivery is the minimum order value to qualify for free delivery.
 	MinOrderValueForFreeDelivery Key = "min_order_value_for_free_delivery"
 	// EnableMinOrderValueForFreeDelivery toggles the free delivery minimum order value rule.
@@ -21,8 +21,8 @@ const (
 	EnableDelivery Key = "enable_delivery"
 	// EnableTables toggles table service availability.
 	EnableTables Key = "enable_tables"
-	// MinDeliveryFee is the minimum fee applied for delivery.
-	MinDeliveryFee Key = "min_delivery_fee"
+	// MinDeliveryTax is the minimum fee applied for delivery.
+	MinDeliveryTax Key = "min_delivery_tax"
 )
 
 // Preference holds a single key-value pair.
@@ -41,6 +41,17 @@ func NewPreferences(entries []Preference) Preferences {
 		prefs[e.Key] = e.Value
 	}
 	return prefs
+}
+
+func NewDefaultPreferences() Preferences {
+	return Preferences{
+		EnableDelivery:                     "true",
+		EnableTables:                       "true",
+		EnableMinOrderValueForFreeDelivery: "true",
+		TableTaxRate:                       "0.10",
+		MinDeliveryTax:                     "0.00",
+		MinOrderValueForFreeDelivery:       "0.00",
+	}
 }
 
 // GetString returns the raw string value for the given key, or an error if missing.

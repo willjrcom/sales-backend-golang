@@ -7,15 +7,16 @@ import (
 )
 
 type CompanyDTO struct {
-	ID           uuid.UUID              `json:"id"`
-	SchemaName   string                 `json:"schema_name"`
-	BusinessName string                 `json:"business_name"`
-	TradeName    string                 `json:"trade_name"`
-	Cnpj         string                 `json:"cnpj"`
-	Email        string                 `json:"email"`
-	Contacts     []string               `json:"contacts"`
-	Address      *addressdto.AddressDTO `json:"address,omitempty"`
-	Users        []UserDTO              `json:"users,omitempty"`
+	ID           uuid.UUID                 `json:"id"`
+	SchemaName   string                    `json:"schema_name"`
+	BusinessName string                    `json:"business_name"`
+	TradeName    string                    `json:"trade_name"`
+	Cnpj         string                    `json:"cnpj"`
+	Email        string                    `json:"email"`
+	Contacts     []string                  `json:"contacts"`
+	Address      *addressdto.AddressDTO    `json:"address,omitempty"`
+	Users        []UserDTO                 `json:"users,omitempty"`
+	Preferences  companyentity.Preferences `json:"preferentes,omitempty"`
 }
 
 func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
@@ -32,6 +33,7 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 		Contacts:     company.Contacts,
 		Address:      &addressdto.AddressDTO{},
 		Users:        []UserDTO{},
+		Preferences:  company.Preferences,
 	}
 
 	c.Address.FromDomain(company.Address)

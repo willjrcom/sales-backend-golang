@@ -24,6 +24,7 @@ type CompanyCommonAttributes struct {
 	Contacts     []string
 	Address      *addressentity.Address
 	Users        []User
+	Preferences  Preferences
 }
 
 type CompanyToUsers struct {
@@ -43,6 +44,7 @@ func NewCompany(cnpjData *cnpj.Cnpj) *Company {
 			TradeName:    cnpjData.TradeName,
 			Cnpj:         cnpjData.Cnpj,
 			SchemaName:   schema,
+			Preferences:  NewDefaultPreferences(),
 		},
 	}
 

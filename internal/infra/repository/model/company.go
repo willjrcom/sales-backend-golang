@@ -13,14 +13,15 @@ type Company struct {
 }
 
 type CompanyCommonAttributes struct {
-	SchemaName   string   `bun:"schema_name,notnull"`
-	BusinessName string   `bun:"business_name,notnull"`
-	TradeName    string   `bun:"trade_name,notnull"`
-	Cnpj         string   `bun:"cnpj,notnull"`
-	Email        string   `bun:"email"`
-	Contacts     []string `bun:"contacts,type:jsonb"`
-	Address      *Address `bun:"rel:has-one,join:id=object_id,notnull"`
-	Users        []User   `bun:"m2m:public.company_to_users,join:Company=User"`
+	SchemaName   string                    `bun:"schema_name,notnull"`
+	BusinessName string                    `bun:"business_name,notnull"`
+	TradeName    string                    `bun:"trade_name,notnull"`
+	Cnpj         string                    `bun:"cnpj,notnull"`
+	Email        string                    `bun:"email"`
+	Contacts     []string                  `bun:"contacts,type:jsonb"`
+	Address      *Address                  `bun:"rel:has-one,join:id=object_id,notnull"`
+	Users        []User                    `bun:"m2m:public.company_to_users,join:Company=User"`
+	Preferences  companyentity.Preferences `bun:"preferences,type:jsonb"`
 }
 
 func (c *Company) FromDomain(company *companyentity.Company) {
@@ -38,6 +39,7 @@ func (c *Company) FromDomain(company *companyentity.Company) {
 			Contacts:     company.Contacts,
 			Address:      &Address{},
 			Users:        []User{},
+			Preferences:  company.Preferences,
 		},
 	}
 
@@ -71,6 +73,7 @@ func (c *Company) ToDomain() *companyentity.Company {
 			Contacts:     c.Contacts,
 			Address:      c.Address.ToDomain(),
 			Users:        users,
+			Preferences:  c.Preferences,
 		},
 	}
 }
