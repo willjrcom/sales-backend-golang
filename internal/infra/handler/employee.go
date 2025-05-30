@@ -3,6 +3,7 @@ package handlerimpl
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -122,14 +123,28 @@ func (h *handlerEmployeeImpl) handlerGetEmployee(w http.ResponseWriter, r *http.
 
 func (h *handlerEmployeeImpl) handlerGetAllEmployees(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
-	categories, err := h.s.GetAllEmployees(ctx)
+	// parse pagination query params
+	page := 1
+	if p := r.URL.Query().Get("page"); p != "" {
+		if iv, err := strconv.Atoi(p); err == nil && iv > 0 {
+			page = iv
+		}
+	}
+	perPage := 10
+	if pp := r.URL.Query().Get("per_page"); pp != "" {
+		if ipv, err := strconv.Atoi(pp); err == nil && ipv > 0 {
+			perPage = ipv
+		}
+	}
+	// fetch paginated employees
+	employees, total, err := h.s.GetAllEmployees(ctx, page, perPage)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
+	// set total count header
+	w.Header().Set("X-Total-Count", strconv.Itoa(total))
+	jsonpkg.ResponseJson(w, r, http.StatusOK, employees)
 }
 
 // handlerAddPayment adds a payment record for an employee.

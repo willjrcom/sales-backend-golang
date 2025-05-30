@@ -3,6 +3,7 @@ package handlerimpl
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -147,12 +148,27 @@ func (h *handlerClientImpl) handlerGetClientByContact(w http.ResponseWriter, r *
 
 func (h *handlerClientImpl) handlerGetAllClients(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
-	categories, err := h.s.GetAllClients(ctx)
+	// parse pagination query params
+	page := 1
+	if p := r.URL.Query().Get("page"); p != "" {
+		if iv, err := strconv.Atoi(p); err == nil && iv > 0 {
+			page = iv
+		}
+	}
+	perPage := 10
+	if pp := r.URL.Query().Get("per_page"); pp != "" {
+		if ipv, err := strconv.Atoi(pp); err == nil && ipv > 0 {
+			perPage = ipv
+		}
+	}
+	// fetch paginated clients from service
+	clients, total, err := h.s.GetAllClients(ctx, page, perPage)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
+	// set total count header
+	w.Header().Set("X-Total-Count", strconv.Itoa(total))
+	// respond with paginated clients
+	jsonpkg.ResponseJson(w, r, http.StatusOK, clients)
 }

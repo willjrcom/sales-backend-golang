@@ -99,20 +99,33 @@ func (r *EmployeeRepositoryBun) GetEmployeeByUserID(ctx context.Context, userID 
 	return employee, nil
 }
 
-func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context) ([]model.Employee, error) {
+// GetAllEmployees retrieves a paginated list of employees and the total count.
+func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context, offset, limit int) ([]model.Employee, int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-
+	// count total records
+	totalCount, err := r.db.NewSelect().Model((*model.Employee)(nil)).Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	// fetch paginated records
 	employees := []model.Employee{}
-	if err := r.db.NewSelect().Model(&employees).Relation("User").Relation("User.Address").Relation("User.Contact").Scan(ctx); err != nil {
-		return nil, err
+	err = r.db.NewSelect().
+		Model(&employees).
+		Relation("User").
+		Relation("User.Address").
+		Relation("User.Contact").
+		Limit(limit).
+		Offset(offset).
+		Scan(ctx)
+	if err != nil {
+		return nil, 0, err
 	}
-
-	return employees, nil
+	return employees, int(totalCount), nil
 }
 
 func (r *EmployeeRepositoryBun) AddPaymentEmployee(ctx context.Context, p *model.PaymentEmployee) error {

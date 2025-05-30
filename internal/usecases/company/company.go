@@ -147,21 +147,27 @@ func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyDTO, error
 	}
 }
 
-func (s *Service) GetCompanyUsers(ctx context.Context) ([]companydto.UserDTO, error) {
-	companyModel, err := s.r.GetCompany(ctx)
+// GetCompanyUsers retrieves a paginated list of users and the total count.
+func (s *Service) GetCompanyUsers(ctx context.Context, page, perPage int) ([]companydto.UserDTO, int, error) {
+	if page < 1 {
+		page = 1
+	}
+	if perPage < 1 {
+		perPage = 10
+	}
+	offset := (page - 1) * perPage
+	userModels, total, err := s.r.GetCompanyUsers(ctx, offset, perPage)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-
-	users := []companydto.UserDTO{}
-	for _, userModel := range companyModel.Users {
+	dtos := make([]companydto.UserDTO, len(userModels))
+	for i, userModel := range userModels {
 		user := userModel.ToDomain()
-		userDTO := &companydto.UserDTO{}
-		userDTO.FromDomain(user)
-		users = append(users, *userDTO)
+		dto := &companydto.UserDTO{}
+		dto.FromDomain(user)
+		dtos[i] = *dto
 	}
-
-	return users, nil
+	return dtos, total, nil
 }
 func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserToCompanyDTO) error {
 	email, err := dto.ToDomain()

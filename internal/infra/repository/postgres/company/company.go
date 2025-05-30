@@ -219,5 +219,40 @@ func (r *CompanyRepositoryBun) RemoveUserFromPublicCompany(ctx context.Context, 
 	_, err := r.db.NewDelete().Model(&model.CompanyToUsers{}).Where("company_id = ? AND user_id = ?", company.ID, userID).Exec(ctx)
 
 	return err
+}
 
+// GetCompanyUsers retrieves a paginated list of users for the public company and the total count.
+func (r *CompanyRepositoryBun) GetCompanyUsers(ctx context.Context, offset, limit int) ([]model.User, int, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	// switch to public schema
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+		return nil, 0, err
+	}
+	// find company by schema name
+	schema := ctx.Value(model.Schema("schema")).(string)
+	company := &model.Company{}
+	if err := r.db.NewSelect().Model(company).Where("schema_name = ?", schema).Scan(ctx); err != nil {
+		return nil, 0, err
+	}
+	// count total users
+	totalCount, err := r.db.NewSelect().Model((*model.CompanyToUsers)(nil)).Where("company_id = ?", company.ID).Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	// fetch paginated user records via join
+	users := []model.User{}
+	if err := r.db.NewSelect().
+		Model(&users).
+		TableExpr("public.company_to_users cu").
+		Join("INNER JOIN public.users u ON cu.user_id = u.id").
+		Relation("Contact").
+		Relation("Address").
+		Where("cu.company_id = ?", company.ID).
+		Limit(limit).
+		Offset(offset).
+		Scan(ctx); err != nil {
+		return nil, 0, err
+	}
+	return users, int(totalCount), nil
 }

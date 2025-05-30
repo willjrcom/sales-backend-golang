@@ -104,13 +104,21 @@ func (s *Service) GetEmployeeByUserID(ctx context.Context, dto *entitydto.IDRequ
 	}
 }
 
-func (s *Service) GetAllEmployees(ctx context.Context) ([]employeedto.EmployeeDTO, error) {
-	if employeeModels, err := s.re.GetAllEmployees(ctx); err != nil {
-		return nil, err
-	} else {
-		dtos := modelsToDTOs(employeeModels)
-		return dtos, nil
+// GetAllEmployees retrieves a paginated list of employees and the total count.
+func (s *Service) GetAllEmployees(ctx context.Context, page, perPage int) ([]employeedto.EmployeeDTO, int, error) {
+	if page < 1 {
+		page = 1
 	}
+	if perPage < 1 {
+		perPage = 10
+	}
+	offset := (page - 1) * perPage
+	employeeModels, total, err := s.re.GetAllEmployees(ctx, offset, perPage)
+	if err != nil {
+		return nil, 0, err
+	}
+	dtos := modelsToDTOs(employeeModels)
+	return dtos, total, nil
 }
 
 // AddPayment records a payment for an employee.

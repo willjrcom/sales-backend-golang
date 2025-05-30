@@ -3,6 +3,7 @@ package employeerepositorylocal
 import (
 	"context"
 	"errors"
+	"sort"
 	"sync"
 
 	"github.com/google/uuid"
@@ -76,14 +77,42 @@ func (r *EmployeeRepositoryLocal) GetEmployeeByUserID(_ context.Context, userID 
 	return nil, errEmployeeNotFound
 }
 
-func (r *EmployeeRepositoryLocal) GetAllEmployees(_ context.Context) ([]model.Employee, error) {
+// GetAllEmployees retrieves a paginated list of employees and the total count.
+func (r *EmployeeRepositoryLocal) GetAllEmployees(_ context.Context, offset, limit int) ([]model.Employee, int, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	list := make([]model.Employee, 0, len(r.employees))
-	for _, e := range r.employees {
-		list = append(list, *e)
+	total := len(r.employees)
+	if total == 0 {
+		return []model.Employee{}, 0, nil
 	}
-	return list, nil
+	// collect and sort IDs for deterministic ordering
+	ids := make([]uuid.UUID, 0, total)
+	for id := range r.employees {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool {
+		return ids[i].String() < ids[j].String()
+	})
+	// normalize offset and limit
+	if offset < 0 {
+		offset = 0
+	}
+	if limit <= 0 {
+		limit = total
+	}
+	if offset > total {
+		offset = total
+	}
+	end := offset + limit
+	if end > total {
+		end = total
+	}
+	// build paginated list
+	list := make([]model.Employee, 0, end-offset)
+	for _, id := range ids[offset:end] {
+		list = append(list, *r.employees[id])
+	}
+	return list, total, nil
 }
 
 // AddPaymentEmployee records a payment for an employee in memory

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"errors"
+	"sort"
 	"sync"
 
 	"github.com/google/uuid"
@@ -73,12 +74,35 @@ func (r *ClientRepositoryLocal) GetClientById(ctx context.Context, id string) (*
 	return c, nil
 }
 
-func (r *ClientRepositoryLocal) GetAllClients(ctx context.Context) ([]model.Client, error) {
+// GetAllClients retrieves a paginated list of clients and the total count.
+func (r *ClientRepositoryLocal) GetAllClients(ctx context.Context, offset, limit int) ([]model.Client, int, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
-	var clients []model.Client
-	for _, c := range r.clients {
-		clients = append(clients, *c)
+	total := len(r.clients)
+	if total == 0 {
+		return []model.Client{}, 0, nil
 	}
-	return clients, nil
+	ids := make([]string, 0, total)
+	for id := range r.clients {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+	if offset < 0 {
+		offset = 0
+	}
+	if limit <= 0 {
+		limit = total
+	}
+	if offset > total {
+		offset = total
+	}
+	end := offset + limit
+	if end > total {
+		end = total
+	}
+	clients := make([]model.Client, 0, end-offset)
+	for _, id := range ids[offset:end] {
+		clients = append(clients, *r.clients[id])
+	}
+	return clients, total, nil
 }

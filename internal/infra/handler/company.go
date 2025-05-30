@@ -2,6 +2,7 @@ package handlerimpl
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
@@ -84,14 +85,28 @@ func (h *handlerCompanyImpl) handlerGetCompany(w http.ResponseWriter, r *http.Re
 func (h *handlerCompanyImpl) handlerGetCompanyUsers(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	users, err := h.s.GetCompanyUsers(ctx)
+	// parse pagination query params
+	page := 1
+	if p := r.URL.Query().Get("page"); p != "" {
+		if iv, err := strconv.Atoi(p); err == nil && iv > 0 {
+			page = iv
+		}
+	}
+	perPage := 10
+	if pp := r.URL.Query().Get("per_page"); pp != "" {
+		if ipv, err := strconv.Atoi(pp); err == nil && ipv > 0 {
+			perPage = ipv
+		}
+	}
+	users, total, err := h.s.GetCompanyUsers(ctx, page, perPage)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
-
+	w.Header().Set("X-Total-Count", strconv.Itoa(total))
 	jsonpkg.ResponseJson(w, r, http.StatusOK, users)
 }
+
 func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 

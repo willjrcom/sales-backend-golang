@@ -166,18 +166,30 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*mo
 	return client, nil
 }
 
-func (r *ClientRepositoryBun) GetAllClients(ctx context.Context) ([]model.Client, error) {
-	clients := []model.Client{}
+// GetAllClients retrieves a paginated list of clients and the total count.
+func (r *ClientRepositoryBun) GetAllClients(ctx context.Context, offset, limit int) ([]model.Client, int, error) {
+	var clients []model.Client
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	if err := r.db.NewSelect().Model(&clients).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
-		return nil, err
+	// count total records
+	totalCount, err := r.db.NewSelect().Model((*model.Client)(nil)).Count(ctx)
+	if err != nil {
+		return nil, 0, err
 	}
-
-	return clients, nil
+	// fetch paginated records
+	if err := r.db.NewSelect().
+		Model(&clients).
+		Relation("Address").
+		Relation("Contact").
+		Limit(limit).
+		Offset(offset).
+		Scan(ctx); err != nil {
+		return nil, 0, err
+	}
+	return clients, int(totalCount), nil
 }

@@ -119,13 +119,21 @@ func (s *Service) GetClientByContact(ctx context.Context, dto *contactdto.Contac
 	}
 }
 
-func (s *Service) GetAllClients(ctx context.Context) ([]clientdto.ClientDTO, error) {
-	if clients, err := s.rclient.GetAllClients(ctx); err != nil {
-		return nil, err
-	} else {
-		dtos := modelsToDTOs(clients)
-		return dtos, nil
+// GetAllClients retrieves a paginated list of clients and the total count.
+func (s *Service) GetAllClients(ctx context.Context, page, perPage int) ([]clientdto.ClientDTO, int, error) {
+	if page < 1 {
+		page = 1
 	}
+	if perPage < 1 {
+		perPage = 10
+	}
+	offset := (page - 1) * perPage
+	clientModels, total, err := s.rclient.GetAllClients(ctx, offset, perPage)
+	if err != nil {
+		return nil, 0, err
+	}
+	dtos := modelsToDTOs(clientModels)
+	return dtos, total, nil
 }
 
 func modelsToDTOs(clientModels []model.Client) []clientdto.ClientDTO {
