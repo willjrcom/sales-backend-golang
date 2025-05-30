@@ -1,9 +1,10 @@
 package companyrepositorylocal
 
 import (
-	"context"
-	"errors"
-	"sync"
+   "context"
+   "errors"
+   "sort"
+   "sync"
 
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -82,4 +83,44 @@ func (r *CompanyRepositoryLocal) RemoveUserFromPublicCompany(ctx context.Context
 	defer r.mu.Unlock()
 	delete(r.publicCompanyUsers, userID)
 	return nil
+}
+
+// GetCompanyUsers retrieves a paginated list of users in the public company and the total count.
+func (r *CompanyRepositoryLocal) GetCompanyUsers(ctx context.Context, offset, limit int) ([]model.User, int, error) {
+   r.mu.RLock()
+   defer r.mu.RUnlock()
+   total := len(r.publicCompanyUsers)
+   if total == 0 {
+       return []model.User{}, 0, nil
+   }
+   // collect and sort user IDs for consistent ordering
+   ids := make([]uuid.UUID, 0, total)
+   for id := range r.publicCompanyUsers {
+       ids = append(ids, id)
+   }
+   sort.Slice(ids, func(i, j int) bool {
+       return ids[i].String() < ids[j].String()
+   })
+   // normalize pagination parameters
+   if offset < 0 {
+       offset = 0
+   }
+   if limit <= 0 {
+       limit = total
+   }
+   if offset > total {
+       offset = total
+   }
+   end := offset + limit
+   if end > total {
+       end = total
+   }
+   // build result slice
+   users := make([]model.User, 0, end-offset)
+   for _, id := range ids[offset:end] {
+       u := model.User{}
+       u.Entity.ID = id
+       users = append(users, u)
+   }
+   return users, total, nil
 }
