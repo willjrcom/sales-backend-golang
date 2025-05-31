@@ -35,6 +35,7 @@ func (c *ServerChi) newServer() {
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true,
+		ExposedHeaders:   []string{"X-Total-Count"},
 	})
 	c.Router.Use(Cors.Handler)
 	c.Router.Use(c.middlewareAuthUser)
