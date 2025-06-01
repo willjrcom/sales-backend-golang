@@ -149,14 +149,7 @@ func (s *Service) GetCompany(ctx context.Context) (*companydto.CompanyDTO, error
 
 // GetCompanyUsers retrieves a paginated list of users and the total count.
 func (s *Service) GetCompanyUsers(ctx context.Context, page, perPage int) ([]companydto.UserDTO, int, error) {
-	if page < 1 {
-		page = 1
-	}
-	if perPage < 1 {
-		perPage = 10
-	}
-	offset := (page - 1) * perPage
-	userModels, total, err := s.r.GetCompanyUsers(ctx, offset, perPage)
+	userModels, total, err := s.r.GetCompanyUsers(ctx, perPage, perPage)
 	if err != nil {
 		return nil, 0, err
 	}

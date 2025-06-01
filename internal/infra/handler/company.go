@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -86,18 +87,8 @@ func (h *handlerCompanyImpl) handlerGetCompanyUsers(w http.ResponseWriter, r *ht
 	ctx := r.Context()
 
 	// parse pagination query params
-	page := 1
-	if p := r.URL.Query().Get("page"); p != "" {
-		if iv, err := strconv.Atoi(p); err == nil && iv > 0 {
-			page = iv
-		}
-	}
-	perPage := 10
-	if pp := r.URL.Query().Get("per_page"); pp != "" {
-		if ipv, err := strconv.Atoi(pp); err == nil && ipv > 0 {
-			perPage = ipv
-		}
-	}
+	page, perPage := headerservice.GetPageAndPerPage(r, 1, 10)
+
 	users, total, err := h.s.GetCompanyUsers(ctx, page, perPage)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)

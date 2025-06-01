@@ -167,7 +167,7 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*mo
 }
 
 // GetAllClients retrieves a paginated list of clients and the total count.
-func (r *ClientRepositoryBun) GetAllClients(ctx context.Context, offset, limit int) ([]model.Client, int, error) {
+func (r *ClientRepositoryBun) GetAllClients(ctx context.Context, page, perPage int) ([]model.Client, int, error) {
 	var clients []model.Client
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -186,8 +186,8 @@ func (r *ClientRepositoryBun) GetAllClients(ctx context.Context, offset, limit i
 		Model(&clients).
 		Relation("Address").
 		Relation("Contact").
-		Limit(limit).
-		Offset(offset).
+		Limit(perPage).
+		Offset((page - 1) * perPage).
 		Scan(ctx); err != nil {
 		return nil, 0, err
 	}

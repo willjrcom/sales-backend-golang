@@ -78,14 +78,13 @@ func (r *EmployeeRepositoryLocal) GetEmployeeByUserID(_ context.Context, userID 
 }
 
 // GetAllEmployees retrieves a paginated list of employees and the total count.
-func (r *EmployeeRepositoryLocal) GetAllEmployees(_ context.Context, offset, limit int) ([]model.Employee, int, error) {
+func (r *EmployeeRepositoryLocal) GetAllEmployees(_ context.Context, page, perPage int) ([]model.Employee, int, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	total := len(r.employees)
 	if total == 0 {
 		return []model.Employee{}, 0, nil
 	}
-	// collect and sort IDs for deterministic ordering
 	ids := make([]uuid.UUID, 0, total)
 	for id := range r.employees {
 		ids = append(ids, id)
@@ -93,26 +92,26 @@ func (r *EmployeeRepositoryLocal) GetAllEmployees(_ context.Context, offset, lim
 	sort.Slice(ids, func(i, j int) bool {
 		return ids[i].String() < ids[j].String()
 	})
-	// normalize offset and limit
-	if offset < 0 {
-		offset = 0
+	if page < 1 {
+		page = 1
 	}
-	if limit <= 0 {
-		limit = total
+	if perPage < 1 {
+		perPage = total
 	}
-	if offset > total {
-		offset = total
+	offset := (page - 1) * perPage
+	if offset >= total {
+		return []model.Employee{}, total, nil
 	}
-	end := offset + limit
+	end := offset + perPage
 	if end > total {
 		end = total
 	}
-	// build paginated list
-	list := make([]model.Employee, 0, end-offset)
-	for _, id := range ids[offset:end] {
-		list = append(list, *r.employees[id])
+	segment := ids[offset:end]
+	result := make([]model.Employee, 0, len(segment))
+	for _, id := range segment {
+		result = append(result, *r.employees[id])
 	}
-	return list, total, nil
+	return result, total, nil
 }
 
 // AddPaymentEmployee records a payment for an employee in memory

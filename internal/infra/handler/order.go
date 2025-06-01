@@ -9,6 +9,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -78,7 +79,9 @@ func (h *handlerOrderImpl) handlerGetAllOrders(w http.ResponseWriter, r *http.Re
 func (h *handlerOrderImpl) GetAllOrdersWithDelivery(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	orders, err := h.s.GetAllOrdersWithDelivery(ctx)
+	page, perPage := headerservice.GetPageAndPerPage(r, 1, 20)
+
+	orders, err := h.s.GetAllOrdersWithDelivery(ctx, page, perPage)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

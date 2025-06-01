@@ -11,6 +11,7 @@ import (
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
 	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -149,18 +150,8 @@ func (h *handlerClientImpl) handlerGetClientByContact(w http.ResponseWriter, r *
 func (h *handlerClientImpl) handlerGetAllClients(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	// parse pagination query params
-	page := 1
-	if p := r.URL.Query().Get("page"); p != "" {
-		if iv, err := strconv.Atoi(p); err == nil && iv > 0 {
-			page = iv
-		}
-	}
-	perPage := 10
-	if pp := r.URL.Query().Get("per_page"); pp != "" {
-		if ipv, err := strconv.Atoi(pp); err == nil && ipv > 0 {
-			perPage = ipv
-		}
-	}
+	page, perPage := headerservice.GetPageAndPerPage(r, 1, 10)
+
 	// fetch paginated clients from service
 	clients, total, err := h.s.GetAllClients(ctx, page, perPage)
 	if err != nil {

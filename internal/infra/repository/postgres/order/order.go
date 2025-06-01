@@ -296,46 +296,46 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]model.Order, e
 		Relation("Table").
 		Relation("Delivery").
 		Relation("Pickup")
-    if err := query.Scan(ctx); err != nil {
-        return nil, err
-    }
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
 
-    var complementItems []model.Item
-    var complementIDs []uuid.UUID
-    for i := range orders {
-        for j := range orders[i].GroupItems {
-            if orders[i].GroupItems[j].ComplementItemID != nil {
-                complementIDs = append(complementIDs, *orders[i].GroupItems[j].ComplementItemID)
-            }
-        }
-    }
-    if len(complementIDs) > 0 {
-        if err := r.db.NewSelect().Model(&complementItems).
-            Where("id IN (?)", bun.In(complementIDs)).
-            Scan(ctx); err != nil {
-            return nil, err
-        }
-        compMap := make(map[uuid.UUID]*model.Item, len(complementItems))
-        for k := range complementItems {
-            ci := complementItems[k]
-            compMap[ci.ID] = &ci
-        }
-        for i := range orders {
-            for j := range orders[i].GroupItems {
-                g := &orders[i].GroupItems[j]
-                if g.ComplementItemID != nil {
-                    if ci, ok := compMap[*g.ComplementItemID]; ok {
-                        g.ComplementItem = ci
-                    }
-                }
-            }
-        }
-    }
+	var complementItems []model.Item
+	var complementIDs []uuid.UUID
+	for i := range orders {
+		for j := range orders[i].GroupItems {
+			if orders[i].GroupItems[j].ComplementItemID != nil {
+				complementIDs = append(complementIDs, *orders[i].GroupItems[j].ComplementItemID)
+			}
+		}
+	}
+	if len(complementIDs) > 0 {
+		if err := r.db.NewSelect().Model(&complementItems).
+			Where("id IN (?)", bun.In(complementIDs)).
+			Scan(ctx); err != nil {
+			return nil, err
+		}
+		compMap := make(map[uuid.UUID]*model.Item, len(complementItems))
+		for k := range complementItems {
+			ci := complementItems[k]
+			compMap[ci.ID] = &ci
+		}
+		for i := range orders {
+			for j := range orders[i].GroupItems {
+				g := &orders[i].GroupItems[j]
+				if g.ComplementItemID != nil {
+					if ci, ok := compMap[*g.ComplementItemID]; ok {
+						g.ComplementItem = ci
+					}
+				}
+			}
+		}
+	}
 
-    return orders, nil
+	return orders, nil
 }
 
-func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context) ([]model.Order, error) {
+func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, page, perPage int) ([]model.Order, error) {
 	orders := []model.Order{}
 
 	r.mu.Lock()
@@ -349,7 +349,9 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context) ([]mo
 		Where("delivery.id IS NOT NULL").
 		Relation("Delivery.Client").
 		Relation("Delivery.Address").
-		Relation("Delivery.Driver")
+		Relation("Delivery.Driver").
+		Limit(perPage).
+		Offset((page - 1) * perPage)
 
 	if err := query.Scan(ctx); err != nil {
 		return nil, err

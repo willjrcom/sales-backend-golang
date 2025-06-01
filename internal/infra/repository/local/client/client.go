@@ -75,7 +75,7 @@ func (r *ClientRepositoryLocal) GetClientById(ctx context.Context, id string) (*
 }
 
 // GetAllClients retrieves a paginated list of clients and the total count.
-func (r *ClientRepositoryLocal) GetAllClients(ctx context.Context, offset, limit int) ([]model.Client, int, error) {
+func (r *ClientRepositoryLocal) GetAllClients(ctx context.Context, page, perPage int) ([]model.Client, int, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	total := len(r.clients)
@@ -87,22 +87,24 @@ func (r *ClientRepositoryLocal) GetAllClients(ctx context.Context, offset, limit
 		ids = append(ids, id)
 	}
 	sort.Strings(ids)
-	if offset < 0 {
-		offset = 0
+	if page < 1 {
+		page = 1
 	}
-	if limit <= 0 {
-		limit = total
+	if perPage < 1 {
+		perPage = total
 	}
-	if offset > total {
-		offset = total
+	offset := (page - 1) * perPage
+	if offset >= total {
+		return []model.Client{}, total, nil
 	}
-	end := offset + limit
+	end := offset + perPage
 	if end > total {
 		end = total
 	}
-	clients := make([]model.Client, 0, end-offset)
-	for _, id := range ids[offset:end] {
-		clients = append(clients, *r.clients[id])
+	segment := ids[offset:end]
+	result := make([]model.Client, 0, len(segment))
+	for _, id := range segment {
+		result = append(result, *r.clients[id])
 	}
-	return clients, total, nil
+	return result, total, nil
 }

@@ -34,8 +34,8 @@ func (s *Service) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, error)
 	}
 }
 
-func (s *Service) GetAllOrdersWithDelivery(ctx context.Context) ([]orderdto.OrderDTO, error) {
-	if orderModels, err := s.ro.GetAllOrdersWithDelivery(ctx); err != nil {
+func (s *Service) GetAllOrdersWithDelivery(ctx context.Context, page, perPage int) ([]orderdto.OrderDTO, error) {
+	if orderModels, err := s.ro.GetAllOrdersWithDelivery(ctx, page, perPage); err != nil {
 		return nil, err
 	} else {
 		orders := make([]orderdto.OrderDTO, 0)

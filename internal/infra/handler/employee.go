@@ -10,6 +10,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	employeedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/employee"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -123,19 +124,9 @@ func (h *handlerEmployeeImpl) handlerGetEmployee(w http.ResponseWriter, r *http.
 
 func (h *handlerEmployeeImpl) handlerGetAllEmployees(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	// parse pagination query params
-	page := 1
-	if p := r.URL.Query().Get("page"); p != "" {
-		if iv, err := strconv.Atoi(p); err == nil && iv > 0 {
-			page = iv
-		}
-	}
-	perPage := 10
-	if pp := r.URL.Query().Get("per_page"); pp != "" {
-		if ipv, err := strconv.Atoi(pp); err == nil && ipv > 0 {
-			perPage = ipv
-		}
-	}
+
+	page, perPage := headerservice.GetPageAndPerPage(r, 1, 10)
+
 	// fetch paginated employees
 	employees, total, err := h.s.GetAllEmployees(ctx, page, perPage)
 	if err != nil {

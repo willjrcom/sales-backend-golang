@@ -11,6 +11,6 @@ type OrderRepository interface {
 	DeleteOrder(ctx context.Context, id string) error
 	GetOrderById(ctx context.Context, id string) (*Order, error)
 	GetAllOrders(ctx context.Context) ([]Order, error)
-	GetAllOrdersWithDelivery(ctx context.Context) ([]Order, error)
+	GetAllOrdersWithDelivery(ctx context.Context, page, perPage int) ([]Order, error)
 	AddPaymentOrder(ctx context.Context, payment *PaymentOrder) error
 }

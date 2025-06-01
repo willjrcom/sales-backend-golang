@@ -222,7 +222,7 @@ func (r *CompanyRepositoryBun) RemoveUserFromPublicCompany(ctx context.Context, 
 }
 
 // GetCompanyUsers retrieves a paginated list of users for the public company and the total count.
-func (r *CompanyRepositoryBun) GetCompanyUsers(ctx context.Context, offset, limit int) ([]model.User, int, error) {
+func (r *CompanyRepositoryBun) GetCompanyUsers(ctx context.Context, page, perPage int) ([]model.User, int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	// switch to public schema
@@ -249,8 +249,8 @@ func (r *CompanyRepositoryBun) GetCompanyUsers(ctx context.Context, offset, limi
 		Relation("Contact").
 		Relation("Address").
 		Where("cu.company_id = ?", company.ID).
-		Limit(limit).
-		Offset(offset).
+		Limit(perPage).
+		Offset((page - 1) * perPage).
 		Scan(ctx); err != nil {
 		return nil, 0, err
 	}

@@ -100,7 +100,7 @@ func (r *EmployeeRepositoryBun) GetEmployeeByUserID(ctx context.Context, userID 
 }
 
 // GetAllEmployees retrieves a paginated list of employees and the total count.
-func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context, offset, limit int) ([]model.Employee, int, error) {
+func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context, page, perPage int) ([]model.Employee, int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -119,8 +119,8 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context, offset, lim
 		Relation("User").
 		Relation("User.Address").
 		Relation("User.Contact").
-		Limit(limit).
-		Offset(offset).
+		Limit(perPage).
+		Offset((page - 1) * perPage).
 		Scan(ctx)
 	if err != nil {
 		return nil, 0, err

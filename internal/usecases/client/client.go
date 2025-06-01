@@ -3,6 +3,7 @@ package clientusecases
 import (
 	"context"
 	"errors"
+	"strings"
 
 	"github.com/google/uuid"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
@@ -39,6 +40,9 @@ func (s *Service) CreateClient(ctx context.Context, dto *clientdto.ClientCreateD
 	clientModel := &model.Client{}
 	clientModel.FromDomain(client)
 	if err := s.rclient.CreateClient(ctx, clientModel); err != nil {
+		if strings.Contains(err.Error(), `duplicate key value violates unique constraint "idx_unique_contact"`) {
+			return uuid.Nil, errors.New("contact already exists")
+		}
 		return uuid.Nil, err
 	}
 
@@ -121,14 +125,7 @@ func (s *Service) GetClientByContact(ctx context.Context, dto *contactdto.Contac
 
 // GetAllClients retrieves a paginated list of clients and the total count.
 func (s *Service) GetAllClients(ctx context.Context, page, perPage int) ([]clientdto.ClientDTO, int, error) {
-	if page < 1 {
-		page = 1
-	}
-	if perPage < 1 {
-		perPage = 10
-	}
-	offset := (page - 1) * perPage
-	clientModels, total, err := s.rclient.GetAllClients(ctx, offset, perPage)
+	clientModels, total, err := s.rclient.GetAllClients(ctx, page, perPage)
 	if err != nil {
 		return nil, 0, err
 	}
