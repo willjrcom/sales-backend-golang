@@ -251,38 +251,47 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context) ([]
 		return nil, err
 	}
 
-	// first, load all relations except nested Products.Size
-	baseQuery := r.db.NewSelect().Model(&categories).
-		Relation("Products").
+	// load categories with their simple relations
+	if err := r.db.NewSelect().
+		Model(&categories).
 		Relation("Sizes").
 		Relation("Quantities").
 		Relation("ProcessRules").
 		Relation("AdditionalCategories").
-		Relation("ComplementCategories")
-	if err := baseQuery.Scan(ctx); err != nil {
+		Relation("ComplementCategories").
+		Scan(ctx); err != nil {
 		return nil, err
 	}
-	// then, fetch Products.Size separately for all products in one query
-	var products []*model.Product
-	var productIDs []uuid.UUID
-	for i := range categories {
-		for j := range categories[i].Products {
-			p := &categories[i].Products[j]
-			products = append(products, p)
-			productIDs = append(productIDs, p.ID)
-		}
+	// fetch products for all categories and their sizes
+	// collect category IDs
+	categoryIDs := make([]uuid.UUID, len(categories))
+	for i, cat := range categories {
+		categoryIDs[i] = cat.ID
 	}
-
-	if len(products) > 0 {
+	// load products with Size relation
+	var products []model.Product
+	if len(categoryIDs) > 0 {
 		if err := r.db.NewSelect().
 			Model(&products).
 			Relation("Size").
-			Where("product.id IN (?)", bun.In(productIDs)).
+			Where("product.category_id IN (?)", bun.In(categoryIDs)).
 			Scan(ctx); err != nil {
 			return nil, err
 		}
 	}
-
+	// group products by their category
+	prodByCat := make(map[uuid.UUID][]model.Product, len(categories))
+	for _, p := range products {
+		prodByCat[p.CategoryID] = append(prodByCat[p.CategoryID], p)
+	}
+	// assign grouped products to categories
+	for i := range categories {
+		if ps, ok := prodByCat[categories[i].ID]; ok {
+			categories[i].Products = ps
+		} else {
+			categories[i].Products = nil
+		}
+	}
 	return categories, nil
 }
 
