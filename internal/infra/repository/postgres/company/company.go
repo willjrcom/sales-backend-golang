@@ -242,13 +242,14 @@ func (r *CompanyRepositoryBun) GetCompanyUsers(ctx context.Context, page, perPag
 	}
 	// fetch paginated user records via join
 	users := []model.User{}
+	// select users and join with company_to_users to filter by company
 	if err := r.db.NewSelect().
 		Model(&users).
-		TableExpr("public.company_to_users cu").
-		Join("INNER JOIN public.users u ON cu.user_id = u.id").
+		// FROM public.users AS u defined by Model; join membership
+		Join("INNER JOIN public.company_to_users ctu ON ctu.user_id = u.id").
+		Where("ctu.company_id = ?", company.ID).
 		Relation("Contact").
 		Relation("Address").
-		Where("cu.company_id = ?", company.ID).
 		Limit(perPage).
 		Offset((page - 1) * perPage).
 		Scan(ctx); err != nil {
