@@ -82,9 +82,9 @@ func (c *ProductCategory) FromDomain(category *productentity.ProductCategory) {
 	}
 
 	for _, complementCategory := range category.ComplementCategories {
-		c := ProductCategory{}
-		c.FromDomain(&complementCategory)
-		c.ComplementCategories = append(c.ComplementCategories, c)
+		a := ProductCategory{}
+		a.FromDomain(&complementCategory)
+		c.ComplementCategories = append(c.ComplementCategories, a)
 	}
 }
 
