@@ -125,7 +125,7 @@ func (h *handlerEmployeeImpl) handlerGetEmployee(w http.ResponseWriter, r *http.
 func (h *handlerEmployeeImpl) handlerGetAllEmployees(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	page, perPage := headerservice.GetPageAndPerPage(r, 1, 10)
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
 
 	// fetch paginated employees
 	employees, total, err := h.s.GetAllEmployees(ctx, page, perPage)

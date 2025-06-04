@@ -351,7 +351,7 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, page,
 		Relation("Delivery.Address").
 		Relation("Delivery.Driver").
 		Limit(perPage).
-		Offset((page - 1) * perPage)
+		Offset(page * perPage)
 
 	if err := query.Scan(ctx); err != nil {
 		return nil, err

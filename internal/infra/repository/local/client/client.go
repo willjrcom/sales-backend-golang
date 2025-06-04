@@ -87,13 +87,13 @@ func (r *ClientRepositoryLocal) GetAllClients(ctx context.Context, page, perPage
 		ids = append(ids, id)
 	}
 	sort.Strings(ids)
-	if page < 1 {
-		page = 1
+	if page < 0 {
+		page = 0
 	}
 	if perPage < 1 {
 		perPage = total
 	}
-	offset := (page - 1) * perPage
+	offset := page * perPage
 	if offset >= total {
 		return []model.Client{}, total, nil
 	}

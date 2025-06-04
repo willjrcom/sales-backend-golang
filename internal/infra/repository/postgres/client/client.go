@@ -182,13 +182,13 @@ func (r *ClientRepositoryBun) GetAllClients(ctx context.Context, page, perPage i
 		return nil, 0, err
 	}
 	// fetch paginated records
-	if err := r.db.NewSelect().
-		Model(&clients).
-		Relation("Address").
-		Relation("Contact").
-		Limit(perPage).
-		Offset((page - 1) * perPage).
-		Scan(ctx); err != nil {
+		if err := r.db.NewSelect().
+			Model(&clients).
+			Relation("Address").
+			Relation("Contact").
+			Limit(perPage).
+			Offset(page * perPage).
+			Scan(ctx); err != nil {
 		return nil, 0, err
 	}
 	return clients, int(totalCount), nil

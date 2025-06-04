@@ -251,7 +251,7 @@ func (r *CompanyRepositoryBun) GetCompanyUsers(ctx context.Context, page, perPag
 		Relation("Contact").
 		Relation("Address").
 		Limit(perPage).
-		Offset((page - 1) * perPage).
+		Offset(page * perPage).
 		Scan(ctx); err != nil {
 		return nil, 0, err
 	}

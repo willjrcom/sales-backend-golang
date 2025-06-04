@@ -150,7 +150,7 @@ func (h *handlerClientImpl) handlerGetClientByContact(w http.ResponseWriter, r *
 func (h *handlerClientImpl) handlerGetAllClients(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	// parse pagination query params
-	page, perPage := headerservice.GetPageAndPerPage(r, 1, 10)
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
 
 	// fetch paginated clients from service
 	clients, total, err := h.s.GetAllClients(ctx, page, perPage)

@@ -79,7 +79,7 @@ func (h *handlerOrderImpl) handlerGetAllOrders(w http.ResponseWriter, r *http.Re
 func (h *handlerOrderImpl) GetAllOrdersWithDelivery(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	page, perPage := headerservice.GetPageAndPerPage(r, 1, 20)
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 20)
 
 	orders, err := h.s.GetAllOrdersWithDelivery(ctx, page, perPage)
 	if err != nil {

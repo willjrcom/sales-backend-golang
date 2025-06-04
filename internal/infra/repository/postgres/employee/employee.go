@@ -120,7 +120,7 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context, page, perPa
 		Relation("User.Address").
 		Relation("User.Contact").
 		Limit(perPage).
-		Offset((page - 1) * perPage).
+		Offset(page * perPage).
 		Scan(ctx)
 	if err != nil {
 		return nil, 0, err

@@ -87,7 +87,7 @@ func (h *handlerCompanyImpl) handlerGetCompanyUsers(w http.ResponseWriter, r *ht
 	ctx := r.Context()
 
 	// parse pagination query params
-	page, perPage := headerservice.GetPageAndPerPage(r, 1, 10)
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
 
 	users, total, err := h.s.GetCompanyUsers(ctx, page, perPage)
 	if err != nil {
