@@ -34,7 +34,7 @@ func (i *Item) FromDomain(item *orderentity.Item) {
 		return
 	}
 	*i = Item{
-		Entity: entitymodel.Entity{ID: item.ID},
+		Entity: entitymodel.FromDomain(item.Entity),
 		ItemCommonAttributes: ItemCommonAttributes{
 			Name:            item.Name,
 			Observation:     item.Observation,
