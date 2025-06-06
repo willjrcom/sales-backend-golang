@@ -50,15 +50,3 @@ func TestPreferences_GetBool(t *testing.T) {
 	_, err = prefs.GetBool(companyentity.EnableTables)
 	require.Error(t, err)
 }
-
-func TestPreferences_MustHelpers(t *testing.T) {
-	entries := []companyentity.Preference{
-		{Key: companyentity.MinOrderValueForFreeDelivery, Value: "100.00"},
-		{Key: companyentity.EnableMinOrderValueForFreeDelivery, Value: "true"},
-	}
-	prefs := companyentity.NewPreferences(entries)
-	d := prefs.MustDecimal(companyentity.MinOrderValueForFreeDelivery)
-	require.True(t, d.Equal(decimal.RequireFromString("100.00")))
-	b := prefs.MustBool(companyentity.EnableMinOrderValueForFreeDelivery)
-	require.True(t, b)
-}

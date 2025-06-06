@@ -42,6 +42,13 @@ func (s *Service) CreateOrderTable(ctx context.Context, dto *ordertabledto.Creat
 		orderTable.Name = table.Name + " - " + orderTable.Name
 	}
 
+	company, err := s.cs.GetCompany(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	orderTable.UpdatePreferences(company.Preferences)
+
 	orderTableModel := &model.OrderTable{}
 	orderTableModel.FromDomain(orderTable)
 	if err = s.rto.CreateOrderTable(ctx, orderTableModel); err != nil {

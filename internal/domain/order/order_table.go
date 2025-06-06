@@ -4,6 +4,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
@@ -17,6 +19,7 @@ type OrderTableCommonAttributes struct {
 	Name    string
 	Contact string
 	Status  StatusOrderTable
+	TaxRate decimal.Decimal
 	OrderID uuid.UUID
 	TableID uuid.UUID
 }
@@ -51,4 +54,8 @@ func (t *OrderTable) Close() error {
 	t.ClosedAt = &time.Time{}
 	*t.ClosedAt = time.Now().UTC()
 	return nil
+}
+
+func (t *OrderTable) UpdatePreferences(preferences companyentity.Preferences) {
+	t.TaxRate, _ = preferences.GetDecimal(companyentity.TableTaxRate)
 }

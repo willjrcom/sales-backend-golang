@@ -60,10 +60,10 @@ func (p Preferences) GetString(key Key) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("preference %q not found", key)
 	}
+
 	return v, nil
 }
 
-// GetDecimal parses the value for key as decimal.Decimal.
 func (p Preferences) GetDecimal(key Key) (decimal.Decimal, error) {
 	raw, err := p.GetString(key)
 	if err != nil {
@@ -73,6 +73,7 @@ func (p Preferences) GetDecimal(key Key) (decimal.Decimal, error) {
 	if err != nil {
 		return decimal.Zero, fmt.Errorf("invalid decimal for %q: %w", key, err)
 	}
+
 	return dec, nil
 }
 
@@ -86,23 +87,6 @@ func (p Preferences) GetBool(key Key) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("invalid bool for %q: %w", key, err)
 	}
+
 	return b, nil
-}
-
-// MustDecimal returns the parsed decimal or panics if error.
-func (p Preferences) MustDecimal(key Key) decimal.Decimal {
-	d, err := p.GetDecimal(key)
-	if err != nil {
-		panic(err)
-	}
-	return d
-}
-
-// MustBool returns the parsed bool or panics if error.
-func (p Preferences) MustBool(key Key) bool {
-	b, err := p.GetBool(key)
-	if err != nil {
-		panic(err)
-	}
-	return b
 }

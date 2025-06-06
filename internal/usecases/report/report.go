@@ -148,19 +148,6 @@ func (s *Service) SalesByCategory(ctx context.Context, req *reportdto.SalesByCat
 	return resp, nil
 }
 
-// CurrentStockByCategory returns current stock per product category.
-func (s *Service) CurrentStockByCategory(ctx context.Context, req *reportdto.CurrentStockRequest) ([]reportdto.CurrentStockResponse, error) {
-	data, err := s.reportSvc.CurrentStockByCategory(ctx)
-	if err != nil {
-		return nil, err
-	}
-	resp := make([]reportdto.CurrentStockResponse, len(data))
-	for i, d := range data {
-		resp[i] = reportdto.CurrentStockResponse{Category: d.Category, Quantity: d.Quantity}
-	}
-	return resp, nil
-}
-
 // ClientsRegisteredByDay returns count of clients registered per day.
 func (s *Service) ClientsRegisteredByDay(ctx context.Context, req *reportdto.ClientsRegisteredByDayRequest) ([]reportdto.ClientsRegisteredByDayResponse, error) {
 	data, err := s.reportSvc.ClientsRegisteredByDay(ctx, req.Start, req.End)

@@ -26,7 +26,6 @@ func NewHandlerReport(s *reportusecases.Service) *handler.Handler {
 	r.Post("/products-sold-by-day", h.handleProductsSoldByDay)
 	r.Post("/top-products", h.handleTopProducts)
 	r.Post("/sales-by-category", h.handleSalesByCategory)
-	r.Post("/current-stock-by-category", h.handleCurrentStockByCategory)
 	r.Post("/clients-registered-by-day", h.handleClientsRegisteredByDay)
 	r.Post("/new-vs-recurring-clients", h.handleNewVsRecurringClients)
 	r.Get("/orders-by-status", h.handleOrdersByStatus)
@@ -40,9 +39,9 @@ func NewHandlerReport(s *reportusecases.Service) *handler.Handler {
 	r.Get("/avg-process-duration-by-product", h.handleAvgProcessDurationByProduct)
 	r.Get("/total-queue-time-by-group-item", h.handleTotalQueueTimeByGroupItem)
 	// Sales by shift
-   r.Post("/sales-by-shift", h.handleSalesByShift)
-  	// Top 10 mesas mais utilizadas
-   r.Post("/top-tables", h.handleTopTables)
+	r.Post("/sales-by-shift", h.handleSalesByShift)
+	// Top 10 mesas mais utilizadas
+	r.Post("/top-tables", h.handleTopTables)
 	r.Post("/payments-by-method", h.handlePaymentsByMethod)
 	// Custom reports 26–33
 	r.Post("/sales-by-place", h.handleSalesByPlace)
@@ -214,20 +213,6 @@ func (h *handlerReportImpl) handleSalesByCategory(w http.ResponseWriter, r *http
 	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
 }
 
-func (h *handlerReportImpl) handleCurrentStockByCategory(w http.ResponseWriter, r *http.Request) {
-	var req reportdto.CurrentStockRequest
-	if !parseBody(r, &req, w) {
-		return
-	}
-
-	resp, err := h.s.CurrentStockByCategory(r.Context(), &req)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-		return
-	}
-	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
-}
-
 func (h *handlerReportImpl) handleClientsRegisteredByDay(w http.ResponseWriter, r *http.Request) {
 	var req reportdto.ClientsRegisteredByDayRequest
 	if !parseBody(r, &req, w) {
@@ -360,52 +345,53 @@ func (h *handlerReportImpl) handleOrdersPerTable(w http.ResponseWriter, r *http.
 	}
 	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
 }
+
 // handleAvgQueueDuration handles average queue duration report.
 func (h *handlerReportImpl) handleAvgQueueDuration(w http.ResponseWriter, r *http.Request) {
-   schema := r.URL.Query().Get("schema")
-   if schema == "" {
-       jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-       return
-   }
-   req := reportdto.AvgQueueDurationRequest{}
-   resp, err := h.s.AvgQueueDuration(r.Context(), &req)
-   if err != nil {
-       jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-       return
-   }
-   jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+	schema := r.URL.Query().Get("schema")
+	if schema == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
+		return
+	}
+	req := reportdto.AvgQueueDurationRequest{}
+	resp, err := h.s.AvgQueueDuration(r.Context(), &req)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
 }
 
 // handleAvgProcessDurationByProduct handles average process duration by product report.
 func (h *handlerReportImpl) handleAvgProcessDurationByProduct(w http.ResponseWriter, r *http.Request) {
-   schema := r.URL.Query().Get("schema")
-   if schema == "" {
-       jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-       return
-   }
-   req := reportdto.AvgProcessDurationByProductRequest{}
-   resp, err := h.s.AvgProcessDurationByProduct(r.Context(), &req)
-   if err != nil {
-       jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-       return
-   }
-   jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+	schema := r.URL.Query().Get("schema")
+	if schema == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
+		return
+	}
+	req := reportdto.AvgProcessDurationByProductRequest{}
+	resp, err := h.s.AvgProcessDurationByProduct(r.Context(), &req)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
 }
 
 // handleTotalQueueTimeByGroupItem handles total queue time per group item report.
 func (h *handlerReportImpl) handleTotalQueueTimeByGroupItem(w http.ResponseWriter, r *http.Request) {
-   schema := r.URL.Query().Get("schema")
-   if schema == "" {
-       jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-       return
-   }
-   req := reportdto.TotalQueueTimeByGroupItemRequest{}
-   resp, err := h.s.TotalQueueTimeByGroupItem(r.Context(), &req)
-   if err != nil {
-       jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-       return
-   }
-   jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+	schema := r.URL.Query().Get("schema")
+	if schema == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
+		return
+	}
+	req := reportdto.TotalQueueTimeByGroupItemRequest{}
+	resp, err := h.s.TotalQueueTimeByGroupItem(r.Context(), &req)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
 }
 
 func (h *handlerReportImpl) handleSalesByShift(w http.ResponseWriter, r *http.Request) {
@@ -421,18 +407,19 @@ func (h *handlerReportImpl) handleSalesByShift(w http.ResponseWriter, r *http.Re
 	}
 	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
 }
+
 // handleTopTables handles the report for top 10 most used tables.
 func (h *handlerReportImpl) handleTopTables(w http.ResponseWriter, r *http.Request) {
-   var req reportdto.TopTablesRequest
-   if !parseBody(r, &req, w) {
-       return
-   }
-   resp, err := h.s.TopTables(r.Context(), &req)
-   if err != nil {
-       jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-       return
-   }
-   jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+	var req reportdto.TopTablesRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
+	resp, err := h.s.TopTables(r.Context(), &req)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
 }
 
 func (h *handlerReportImpl) handlePaymentsByMethod(w http.ResponseWriter, r *http.Request) {

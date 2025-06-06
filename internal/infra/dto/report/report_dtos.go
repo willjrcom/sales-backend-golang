@@ -11,48 +11,49 @@ type SalesTotalByDayRequest struct {
 	Start time.Time `json:"start"`
 	End   time.Time `json:"end"`
 }
+
 // TopTablesRequest filters for top 10 most used tables.
 type TopTablesRequest struct {
-   Start time.Time `json:"start"`
-   End   time.Time `json:"end"`
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
 }
 
 // TopTablesResponse holds the table ID and usage count.
 type TopTablesResponse struct {
-   TableID string `json:"table_id"`
-   Count   int    `json:"count"`
+	TableID string `json:"table_id"`
+	Count   int    `json:"count"`
 }
 
 // AvgQueueDurationRequest filters for average queue duration.
-type AvgQueueDurationRequest struct {}
+type AvgQueueDurationRequest struct{}
 
 // AvgQueueDurationResponse holds average duration of all queues in seconds.
 type AvgQueueDurationResponse struct {
-   AvgSeconds float64 `json:"avg_seconds"`
+	AvgSeconds float64 `json:"avg_seconds"`
 }
 
 // AvgProcessDurationByProductRequest filters for average process duration by product.
-type AvgProcessDurationByProductRequest struct {}
+type AvgProcessDurationByProductRequest struct{}
 
 // AvgProcessDurationByProductResponse holds average process duration per product.
 type AvgProcessDurationByProductResponse struct {
-   ProductID   string  `json:"product_id"`
-   ProductName string  `json:"product_name"`
-   AvgSeconds  float64 `json:"avg_seconds"`
+	ProductID   string  `json:"product_id"`
+	ProductName string  `json:"product_name"`
+	AvgSeconds  float64 `json:"avg_seconds"`
 }
 
 // TotalQueueTimeByGroupItemRequest filters for total queue time by group item.
-type TotalQueueTimeByGroupItemRequest struct {}
+type TotalQueueTimeByGroupItemRequest struct{}
 
 // TotalQueueTimeByGroupItemResponse holds total queue time per group item in seconds.
 type TotalQueueTimeByGroupItemResponse struct {
-   GroupItemID  string  `json:"group_item_id"`
-   TotalSeconds float64 `json:"total_seconds"`
+	GroupItemID  string  `json:"group_item_id"`
+	TotalSeconds float64 `json:"total_seconds"`
 }
 
 // SalesByDayResponse holds total sales for a day.
 type SalesByDayResponse struct {
-	Day   time.Time       `json:"day"`
+	Day   string          `json:"day"`
 	Total decimal.Decimal `json:"total"`
 }
 
@@ -134,8 +135,8 @@ type ProductsSoldByDayRequest struct {
 
 // ProductsSoldByDayResponse holds total products sold for a day.
 type ProductsSoldByDayResponse struct {
-	Day      time.Time `json:"day"`
-	Quantity float64   `json:"quantity"`
+	Day      string  `json:"day"`
+	Quantity float64 `json:"quantity"`
 }
 
 // TopProductsRequest filters for top products.
@@ -180,8 +181,8 @@ type ClientsRegisteredByDayRequest struct {
 
 // ClientsRegisteredByDayResponse holds date and count of new clients.
 type ClientsRegisteredByDayResponse struct {
-	Day   time.Time `json:"day"`
-	Count int       `json:"count"`
+	Day   string `json:"day"`
+	Count int    `json:"count"`
 }
 
 // NewVsRecurringClientsRequest filters for new vs recurring clients.

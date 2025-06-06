@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
@@ -17,11 +18,12 @@ type OrderTable struct {
 }
 
 type OrderTableCommonAttributes struct {
-	Name    string    `bun:"name,notnull"`
-	Contact string    `bun:"contact,notnull"`
-	Status  string    `bun:"status,notnull"`
-	OrderID uuid.UUID `bun:"column:order_id,type:uuid,notnull"`
-	TableID uuid.UUID `bun:"column:table_id,type:uuid,notnull"`
+	Name    string          `bun:"name,notnull"`
+	Contact string          `bun:"contact,notnull"`
+	Status  string          `bun:"status,notnull"`
+	TaxRate decimal.Decimal `bun:"tax_rate,type:decimal(10,2),notnull"`
+	OrderID uuid.UUID       `bun:"column:order_id,type:uuid,notnull"`
+	TableID uuid.UUID       `bun:"column:table_id,type:uuid,notnull"`
 }
 
 type OrderTableTimeLogs struct {
@@ -39,6 +41,7 @@ func (t *OrderTable) FromDomain(table *orderentity.OrderTable) {
 			Name:    table.Name,
 			Contact: table.Contact,
 			Status:  string(table.Status),
+			TaxRate: table.TaxRate,
 			OrderID: table.OrderID,
 			TableID: table.TableID,
 		},
@@ -59,6 +62,7 @@ func (t *OrderTable) ToDomain() *orderentity.OrderTable {
 			Name:    t.Name,
 			Contact: t.Contact,
 			Status:  orderentity.StatusOrderTable(t.Status),
+			TaxRate: t.TaxRate,
 			OrderID: t.OrderID,
 			TableID: t.TableID,
 		},

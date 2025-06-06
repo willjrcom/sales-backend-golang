@@ -21,7 +21,7 @@ func NewReportRepository(db *bun.DB) *ReportService {
 
 // SalesByDayDTO holds total payable grouped by day.
 type SalesByDayDTO struct {
-	Day   time.Time       `bun:"day"`
+	Day   string          `bun:"day"`
 	Total decimal.Decimal `bun:"total"`
 }
 
@@ -33,7 +33,7 @@ func (s *ReportService) SalesTotalByDay(ctx context.Context, start, end time.Tim
 
 	var resp []SalesByDayDTO
 	query := `
-        SELECT date(created_at) AS day, SUM(total_payable) AS total
+        SELECT TO_CHAR(created_at, 'DD/MM') AS day, SUM(total_payable) AS total
         FROM orders
         WHERE created_at BETWEEN ? AND ?
         GROUP BY day
@@ -188,8 +188,8 @@ func (s *ReportService) AvgTicketByChannel(ctx context.Context, start, end time.
 
 // ProductsSoldByDayDTO holds daily sum of items sold.
 type ProductsSoldByDayDTO struct {
-	Day      time.Time `bun:"day"`
-	Quantity float64   `bun:"quantity"`
+	Day      string  `bun:"day"`
+	Quantity float64 `bun:"quantity"`
 }
 
 // ProductsSoldByDay returns sum of quantity_items per day.
@@ -200,11 +200,13 @@ func (s *ReportService) ProductsSoldByDay(ctx context.Context, start, end time.T
 
 	var resp []ProductsSoldByDayDTO
 	query := `
-        SELECT date(created_at) AS day, SUM(quantity_items) AS quantity
-        FROM orders
-        WHERE created_at BETWEEN ? AND ?
-        GROUP BY day
-        ORDER BY day`
+		SELECT TO_CHAR(created_at, 'DD/MM') AS day, SUM(quantity_items) AS quantity
+		FROM orders
+		WHERE created_at BETWEEN ? AND ?
+		GROUP BY day
+		ORDER BY day
+	`
+
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
@@ -266,35 +268,10 @@ func (s *ReportService) SalesByCategory(ctx context.Context, start, end time.Tim
 	return resp, nil
 }
 
-// CurrentStockDTO holds current stock by category.
-type CurrentStockDTO struct {
-	Category string  `bun:"category"`
-	Quantity float64 `bun:"quantity"`
-}
-
-// CurrentStockByCategory returns current stock level per product category.
-func (s *ReportService) CurrentStockByCategory(ctx context.Context) ([]CurrentStockDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
-		return nil, err
-	}
-
-	var resp []CurrentStockDTO
-	query := `
-        SELECT pc.name AS category, q.quantity
-        FROM quantities q
-        JOIN product_categories pc ON pc.id = q.category_id`
-	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// TODO: implement MovimentacaoEstoque (requires inventory log table)
-
 // ClientsRegisteredDTO holds count of new clients by day.
 type ClientsRegisteredDTO struct {
-	Day   time.Time `bun:"day"`
-	Count int       `bun:"count"`
+	Day   string `bun:"day"`
+	Count int    `bun:"count"`
 }
 
 // ClientsRegisteredByDay returns the number of clients registered per day.
@@ -305,7 +282,7 @@ func (s *ReportService) ClientsRegisteredByDay(ctx context.Context, start, end t
 
 	var resp []ClientsRegisteredDTO
 	query := `
-        SELECT date(created_at) AS day, COUNT(*) AS count
+        SELECT TO_CHAR(created_at, 'DD/MM') AS day, COUNT(*) AS count
         FROM clients
         WHERE created_at BETWEEN ? AND ?
         GROUP BY day
@@ -448,8 +425,8 @@ func (s *ReportService) AvgQueueDuration(ctx context.Context) (AvgQueueDurationD
 		return AvgQueueDurationDTO{}, err
 	}
 	var resp AvgQueueDurationDTO
-   // duration is stored as bigint nanoseconds; convert to seconds
-   query := `
+	// duration is stored as bigint nanoseconds; convert to seconds
+	query := `
        SELECT AVG(duration) / 1000000000.0 AS avg_seconds
        FROM order_queues`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
@@ -471,8 +448,8 @@ func (s *ReportService) AvgProcessDurationByProduct(ctx context.Context) ([]AvgP
 		return nil, err
 	}
 	var resp []AvgProcessByProductDTO
-   // p.duration is bigint nanoseconds; average and convert to seconds
-   query := `
+	// p.duration is bigint nanoseconds; average and convert to seconds
+	query := `
        SELECT prod.id::text AS product_id,
               prod.name AS product_name,
               AVG(p.duration) / 1000000000.0 AS avg_seconds
@@ -499,8 +476,8 @@ func (s *ReportService) TotalQueueTimeByGroupItem(ctx context.Context) ([]TotalQ
 		return nil, err
 	}
 	var resp []TotalQueueTimeByGroupItemDTO
-   // duration is bigint nanoseconds; sum and convert to seconds
-   query := `
+	// duration is bigint nanoseconds; sum and convert to seconds
+	query := `
        SELECT group_item_id::text AS group_item_id,
               SUM(duration) / 1000000000.0 AS total_seconds
          FROM order_queues

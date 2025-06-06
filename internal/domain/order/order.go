@@ -242,6 +242,10 @@ func (o *Order) CalculateTotalPrice() {
 		o.TotalPaid = o.TotalPaid.Add(payment.TotalPaid)
 	}
 
+	if o.Table != nil {
+		o.TotalPayable = o.TotalPayable.Add(o.Table.TaxRate)
+	}
+
 	if o.Delivery != nil && o.Delivery.DeliveryTax != nil {
 		o.TotalPayable = o.TotalPayable.Add(*o.Delivery.DeliveryTax)
 	}
