@@ -257,12 +257,12 @@ func (s *ReportService) SalesByCategory(ctx context.Context, start, end time.Tim
 	var resp []SalesByCategoryDTO
 	query := `
         SELECT pc.name AS category, SUM(i.quantity) AS quantity
-        FROM order_items i
-        JOIN product_categories pc ON pc.id = i.category_id
+        FROM loja_gazaltech_qrqzpl_hg.order_items i
+        JOIN loja_gazaltech_qrqzpl_hg.product_categories pc ON pc.id = i.category_id
         WHERE i.created_at BETWEEN ? AND ?
         GROUP BY pc.name
         ORDER BY category`
-	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+	if err := s.db.NewRaw(query, start.Format("2005-01-02"), end.Format("2005-01-02")).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
