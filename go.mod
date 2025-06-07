@@ -1,6 +1,6 @@
 module github.com/willjrcom/sales-backend-go
 
-go 1.22.0
+go 1.23.0
 
 toolchain go1.23.3
 
@@ -20,7 +20,7 @@ require (
 	github.com/uptrace/bun/dialect/pgdialect v1.2.8
 	github.com/uptrace/bun/dialect/sqlitedialect v1.2.8
 	github.com/uptrace/bun/driver/sqliteshim v1.2.8
-	golang.org/x/crypto v0.22.0
+	golang.org/x/crypto v0.39.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
 
@@ -75,7 +75,7 @@ require (
 	github.com/shopspring/decimal v1.4.0
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/uptrace/bun/driver/pgdriver v1.1.14
-	golang.org/x/net v0.24.0
-	golang.org/x/sys v0.29.0 // indirect
+	golang.org/x/net v0.41.0
+	golang.org/x/sys v0.33.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

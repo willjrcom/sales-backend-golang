@@ -23,18 +23,38 @@ import (
 type Environment string
 
 func ConnectDB(ctx context.Context) string {
-	dbHost := os.Getenv("DB_HOST")
-	if dbHost != "" {
-		return dbHost
+	host := os.Getenv("DB_HOST")
+	if host == "" {
+		host = "localhost"
 	}
-
+	port := os.Getenv("DB_PORT")
+	if port == "" {
+		port = "5432"
+	}
+	user := os.Getenv("DB_USER")
+	if user == "" {
+		user = "admin"
+	}
+	password := os.Getenv("DB_PASSWORD")
+	if password == "" {
+		password = "Pass!"
+	}
+	dbName := os.Getenv("DB_NAME")
+	if dbName == "" {
+		dbName = "sales-db"
+	}
+	sslmode := os.Getenv("DB_SSLMODE")
+	if sslmode == "" {
+		sslmode = "disable"
+	}
 	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		"admin",
-		"admin",
-		"localhost",
-		"5432",
-		"sales-db",
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		user,
+		password,
+		host,
+		port,
+		dbName,
+		sslmode,
 	)
 }
 
