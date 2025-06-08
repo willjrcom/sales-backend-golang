@@ -2,6 +2,7 @@ package orderusecases
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
@@ -11,7 +12,7 @@ import (
 func (s *Service) CreateDefaultOrder(ctx context.Context) (uuid.UUID, error) {
 	shift, err := s.rs.GetCurrentShift(ctx)
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil, fmt.Errorf("must open a new shift")
 	}
 
 	currentOrderNumber, err := s.rs.IncrementCurrentOrder(shift.ID.String())

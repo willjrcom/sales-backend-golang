@@ -257,8 +257,8 @@ func (s *ReportService) SalesByCategory(ctx context.Context, start, end time.Tim
 	var resp []SalesByCategoryDTO
 	query := `
         SELECT pc.name AS category, SUM(i.quantity) AS quantity
-        FROM loja_gazaltech_qrqzpl_hg.order_items i
-        JOIN loja_gazaltech_qrqzpl_hg.product_categories pc ON pc.id = i.category_id
+        FROM order_items i
+        JOIN product_categories pc ON pc.id = i.category_id
         WHERE i.created_at BETWEEN ? AND ?
         GROUP BY pc.name
         ORDER BY category`
@@ -347,8 +347,8 @@ func (s *ReportService) OrdersByStatus(ctx context.Context) ([]OrdersByStatusDTO
 
 // AvgProcessStepDTO holds average duration (in seconds) per process rule.
 type AvgProcessStepDTO struct {
-	ProcessRuleID string  `bun:"process_rule_id"`
-	AvgSeconds    float64 `bun:"avg_seconds"`
+	ProcessRuleName string  `bun:"process_rule_name"`
+	AvgSeconds      float64 `bun:"avg_seconds"`
 }
 
 // AvgProcessStepDurationByRule returns average time per process rule.
@@ -359,10 +359,13 @@ func (s *ReportService) AvgProcessStepDurationByRule(ctx context.Context) ([]Avg
 
 	var resp []AvgProcessStepDTO
 	query := `
-        SELECT process_rule_id, AVG(EXTRACT(EPOCH FROM (finished_at - started_at))) AS avg_seconds
-        FROM order_processes
-        WHERE finished_at IS NOT NULL AND started_at IS NOT NULL
-        GROUP BY process_rule_id`
+        SELECT pr.name AS process_rule_name,
+			AVG(EXTRACT(EPOCH FROM (op.finished_at - op.started_at))) AS avg_seconds
+		FROM order_processes op
+		JOIN process_rules pr ON pr.id = op.process_rule_id
+		WHERE op.finished_at IS NOT NULL
+		AND op.started_at IS NOT NULL
+		GROUP BY pr.name`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
@@ -427,8 +430,8 @@ func (s *ReportService) AvgQueueDuration(ctx context.Context) (AvgQueueDurationD
 	var resp AvgQueueDurationDTO
 	// duration is stored as bigint nanoseconds; convert to seconds
 	query := `
-       SELECT AVG(duration) / 1000000000.0 AS avg_seconds
-       FROM order_queues`
+		SELECT AVG(duration) / 1000000000.0 AS avg_seconds
+		FROM order_queues`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
 		return AvgQueueDurationDTO{}, err
 	}

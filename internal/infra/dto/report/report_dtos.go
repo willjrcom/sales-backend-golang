@@ -212,9 +212,10 @@ type AvgProcessStepDurationRequest struct {
 }
 
 // AvgProcessStepDurationResponse holds process rule ID and average seconds.
+// AvgProcessStepDurationResponse holds process rule name and average seconds.
 type AvgProcessStepDurationResponse struct {
-	ProcessRuleID string  `json:"process_rule_id"`
-	AvgSeconds    float64 `json:"avg_seconds"`
+   ProcessRuleName string  `json:"process_rule_name"`
+   AvgSeconds      float64 `json:"avg_seconds"`
 }
 
 // CancellationRateRequest filters for cancellation rate.

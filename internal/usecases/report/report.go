@@ -195,7 +195,7 @@ func (s *Service) AvgProcessStepDurationByRule(ctx context.Context, req *reportd
 	}
 	resp := make([]reportdto.AvgProcessStepDurationResponse, len(data))
 	for i, d := range data {
-		resp[i] = reportdto.AvgProcessStepDurationResponse{ProcessRuleID: d.ProcessRuleID, AvgSeconds: d.AvgSeconds}
+		resp[i] = reportdto.AvgProcessStepDurationResponse{ProcessRuleName: d.ProcessRuleName, AvgSeconds: d.AvgSeconds}
 	}
 	return resp, nil
 }
