@@ -38,7 +38,7 @@ func FormatOrder(o *orderentity.Order) ([]byte, error) {
 	formatOrderDetailSection(&raw, o)
 	printGroupItemsSection(&raw, o.GroupItems)
 	formatPaymentsSection(&raw, o)
-	formatFooter(&raw, o)
+	formatTotalFooter(&raw, o)
 	raw.WriteString(strings.Repeat(newline, 3))
 
 	// Align columns using tabwriter into main buffer, checking for errors
@@ -181,8 +181,8 @@ func printAdditionalItem(buf *bytes.Buffer, add *orderentity.Item) {
 	buf.WriteString(fmt.Sprintf("+\t%-17s\t%.2f%s", name, d2f(add.TotalPrice), newline))
 }
 
-// formatFooter writes the total payable amount to the buffer.
-func formatFooter(buf *bytes.Buffer, o *orderentity.Order) {
+// formatTotalFooter writes the total payable amount to the buffer.
+func formatTotalFooter(buf *bytes.Buffer, o *orderentity.Order) {
 	buf.WriteString(fmt.Sprintf("TOTAL:\t\t%.2f%s", d2f(o.TotalPayable), newline))
 }
 

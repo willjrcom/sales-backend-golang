@@ -22,7 +22,11 @@ func NewHandlerOrderPrint(svc *orderprintusecases.Service) *handler.Handler {
 	r := chi.NewRouter()
 	h := &handlerOrderPrintImpl{s: svc}
 	r.With().Group(func(r chi.Router) {
+		// Kitchen print: only items and complements
+		r.Get("/kitchen/{id}", h.handlePrintGroupItemKitchen)
+		// Full order print
 		r.Get("/{id}", h.handlePrintOrder)
+		// Daily report print
 		r.Post("/daily", h.handlePrintByShift)
 	})
 	return handler.NewHandler("/order-print", r)
@@ -65,4 +69,23 @@ func (h *handlerOrderPrintImpl) handlePrintByShift(w http.ResponseWriter, r *htt
 		return
 	}
 	jsonpkg.ResponseJson(w, r, http.StatusOK, res)
+}
+
+// handlePrintGroupItemKitchen handles GET /order-print/kitchen/{id} for kitchen tickets.
+func (h *handlerOrderPrintImpl) handlePrintGroupItemKitchen(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+	data, err := h.s.PrintGroupItemKitchen(ctx, dtoId)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(data)
 }
