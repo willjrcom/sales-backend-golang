@@ -11,7 +11,7 @@ import (
 
 // FormatOrder generates ESC/POS bytes for a 40-column receipt of the given order.
 // It initializes the printer, prints the header, item groups, footer, and cuts the paper.
-func FormatOrder(o *orderentity.Order) (string, error) {
+func FormatOrder(o *orderentity.Order) ([]byte, error) {
 	var buf bytes.Buffer
 	buf.WriteString(escInit)
 
@@ -37,7 +37,7 @@ func FormatOrder(o *orderentity.Order) (string, error) {
 	tw.Flush()
 
 	buf.WriteString(escCut)
-	return buf.String(), nil
+	return buf.Bytes(), nil
 }
 
 func formatHeader(buf *bytes.Buffer, o *orderentity.Order) {

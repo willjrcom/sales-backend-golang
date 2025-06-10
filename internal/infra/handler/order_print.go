@@ -43,7 +43,9 @@ func (h *handlerOrderPrintImpl) handlePrintOrder(w http.ResponseWriter, r *http.
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
-	jsonpkg.ResponseJson(w, r, http.StatusOK, order)
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(order)
 }
 
 // handlePrintByShift handles POST /order-print/daily to generate daily sales report.

@@ -30,7 +30,7 @@ func (s *Service) AddDependencies(orderService *orderusecases.Service, orderRepo
 }
 
 // PrintOrder retrieves the order by ID and returns its printable representation.
-func (s *Service) PrintOrder(ctx context.Context, req *entitydto.IDRequest) (*string, error) {
+func (s *Service) PrintOrder(ctx context.Context, req *entitydto.IDRequest) ([]byte, error) {
 	model, err := s.orderRepository.GetOrderById(ctx, req.ID.String())
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func (s *Service) PrintOrder(ctx context.Context, req *entitydto.IDRequest) (*st
 		return nil, err
 	}
 
-	return &data, nil
+	return data, nil
 }
 
 // PrintDailyReport retrieves daily sales summary for a specific day.
