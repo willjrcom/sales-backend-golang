@@ -13,6 +13,7 @@ type ProductCategoryCommonAttributes struct {
 	Name                 string
 	ImagePath            string
 	NeedPrint            bool
+	PrinterName          string
 	UseProcessRule       bool
 	RemovableIngredients []string
 	Sizes                []Size

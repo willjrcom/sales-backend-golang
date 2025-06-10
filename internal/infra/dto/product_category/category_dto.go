@@ -14,6 +14,7 @@ type CategoryDTO struct {
 	Name                 string                          `json:"name"`
 	ImagePath            string                          `json:"image_path,omitempty"`
 	NeedPrint            bool                            `json:"need_print"`
+	PrinterName          string                          `json:"printer_name,omitempty"`
 	UseProcessRule       bool                            `json:"use_process_rule"`
 	IsAdditional         bool                            `json:"is_additional"`
 	IsComplement         bool                            `json:"is_complement"`
@@ -35,6 +36,7 @@ func (c *CategoryDTO) FromDomain(category *productentity.ProductCategory) {
 		Name:                 category.Name,
 		ImagePath:            category.ImagePath,
 		NeedPrint:            category.NeedPrint,
+		PrinterName:          category.PrinterName,
 		UseProcessRule:       category.UseProcessRule,
 		IsAdditional:         category.IsAdditional,
 		IsComplement:         category.IsComplement,

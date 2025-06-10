@@ -12,6 +12,7 @@ type CategoryUpdateDTO struct {
 	Name                 *string               `json:"name"`
 	ImagePath            *string               `json:"image_path"`
 	NeedPrint            *bool                 `json:"need_print"`
+	PrinterName          string                `json:"printer_name"`
 	UseProcessRule       *bool                 `json:"use_process_rule"`
 	RemovableIngredients []string              `json:"removable_ingredients"`
 	AdditionalCategories []entitydto.IDRequest `json:"additional_categories"`
@@ -29,6 +30,7 @@ func (c *CategoryUpdateDTO) UpdateDomain(category *productentity.ProductCategory
 
 	if c.NeedPrint != nil {
 		category.NeedPrint = *c.NeedPrint
+		category.PrinterName = c.PrinterName
 	}
 
 	if c.UseProcessRule != nil {

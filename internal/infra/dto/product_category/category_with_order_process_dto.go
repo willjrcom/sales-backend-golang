@@ -11,6 +11,7 @@ type CategoryWithOrderProcessDTO struct {
 	Name           string                                          `json:"name"`
 	ImagePath      string                                          `json:"image_path,omitempty"`
 	NeedPrint      bool                                            `json:"need_print"`
+	PrinterName    string                                          `json:"printer_name,omitempty"`
 	UseProcessRule bool                                            `json:"use_process_rule"`
 	IsAdditional   bool                                            `json:"is_additional"`
 	IsComplement   bool                                            `json:"is_complement"`
@@ -29,6 +30,7 @@ func (c *CategoryWithOrderProcessDTO) FromDomain(category *productentity.Product
 		IsAdditional:   category.IsAdditional,
 		IsComplement:   category.IsComplement,
 		NeedPrint:      category.NeedPrint,
+		PrinterName:    category.PrinterName,
 		ProcessRules:   []processruledto.ProcessRuleWithOrderProcessDTO{},
 	}
 

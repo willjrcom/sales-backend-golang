@@ -19,6 +19,7 @@ type ProductCategoryWithOrderProcessCommonAttributes struct {
 	IsAdditional   bool                          `bun:"is_additional"`
 	IsComplement   bool                          `bun:"is_complement"`
 	NeedPrint      bool                          `bun:"need_print"`
+	PrinterName    string                        `bun:"printer_name"`
 	ProcessRules   []ProcessRuleWithOrderProcess `bun:"rel:has-many,join:id=category_id"`
 }
 
@@ -35,6 +36,7 @@ func (c *ProductCategoryWithOrderProcess) FromDomain(category *productentity.Pro
 			IsAdditional:   category.IsAdditional,
 			IsComplement:   category.IsComplement,
 			NeedPrint:      category.NeedPrint,
+			PrinterName:    category.PrinterName,
 			ProcessRules:   []ProcessRuleWithOrderProcess{},
 		},
 	}
@@ -59,6 +61,7 @@ func (c *ProductCategoryWithOrderProcess) ToDomain() *productentity.ProductCateg
 			IsAdditional:   c.IsAdditional,
 			IsComplement:   c.IsComplement,
 			NeedPrint:      c.NeedPrint,
+			PrinterName:    c.PrinterName,
 			ProcessRules:   []productentity.ProcessRuleWithOrderProcess{},
 		},
 	}

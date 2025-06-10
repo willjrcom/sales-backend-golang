@@ -37,6 +37,7 @@ type GroupDetails struct {
 	TotalPrice       decimal.Decimal
 	Quantity         float64
 	NeedPrint        bool
+	PrinterName      string
 	UseProcessRule   bool
 	Observation      string
 	CategoryID       uuid.UUID

@@ -30,6 +30,7 @@ type GroupDetails struct {
 	TotalPrice       decimal.Decimal  `bun:"total_price,type:decimal(10,2)"`
 	Quantity         float64          `bun:"quantity"`
 	NeedPrint        bool             `bun:"need_print"`
+	PrinterName      string           `bun:"printer_name"`
 	UseProcessRule   bool             `bun:"use_process_rule"`
 	Observation      string           `bun:"observation"`
 	CategoryID       uuid.UUID        `bun:"column:category_id,type:uuid,notnull"`
@@ -68,6 +69,7 @@ func (g *GroupItem) FromDomain(groupItem *orderentity.GroupItem) {
 				TotalPrice:       groupItem.TotalPrice,
 				Quantity:         groupItem.Quantity,
 				NeedPrint:        groupItem.NeedPrint,
+				PrinterName:      groupItem.PrinterName,
 				UseProcessRule:   groupItem.UseProcessRule,
 				Observation:      groupItem.Observation,
 				CategoryID:       groupItem.CategoryID,
@@ -110,6 +112,7 @@ func (g *GroupItem) ToDomain() *orderentity.GroupItem {
 				TotalPrice:       g.TotalPrice,
 				Quantity:         g.Quantity,
 				NeedPrint:        g.NeedPrint,
+				PrinterName:      g.PrinterName,
 				UseProcessRule:   g.UseProcessRule,
 				Observation:      g.Observation,
 				CategoryID:       g.CategoryID,

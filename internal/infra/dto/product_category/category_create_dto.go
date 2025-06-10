@@ -14,6 +14,7 @@ type CategoryCreateDTO struct {
 	Name                 string   `json:"name"`
 	ImagePath            string   `json:"image_path"`
 	NeedPrint            bool     `json:"need_print"`
+	PrinterName          string   `json:"printer_name"`
 	UseProcessRule       bool     `json:"use_process_rule"`
 	RemovableIngredients []string `json:"removable_ingredients"`
 	IsAdditional         bool     `json:"is_additional"`
@@ -37,6 +38,7 @@ func (c *CategoryCreateDTO) ToDomain() (*productentity.ProductCategory, error) {
 		Name:                 c.Name,
 		ImagePath:            c.ImagePath,
 		NeedPrint:            c.NeedPrint,
+		PrinterName:          c.PrinterName,
 		UseProcessRule:       c.UseProcessRule,
 		RemovableIngredients: c.RemovableIngredients,
 		IsAdditional:         c.IsAdditional,

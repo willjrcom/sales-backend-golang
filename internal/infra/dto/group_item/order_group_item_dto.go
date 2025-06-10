@@ -15,6 +15,7 @@ type GroupItemDTO struct {
 	TotalPrice       decimal.Decimal                 `json:"total_price"`
 	Quantity         float64                         `json:"quantity"`
 	NeedPrint        bool                            `json:"need_print"`
+	PrinterName      string                          `json:"printer_name"`
 	UseProcessRule   bool                            `json:"use_process_rule"`
 	Observation      string                          `json:"observation"`
 	CategoryID       uuid.UUID                       `json:"category_id"`
@@ -36,6 +37,7 @@ func (i *GroupItemDTO) FromDomain(groupItem *orderentity.GroupItem) {
 		TotalPrice:       groupItem.TotalPrice,
 		Quantity:         groupItem.Quantity,
 		NeedPrint:        groupItem.NeedPrint,
+		PrinterName:      groupItem.PrinterName,
 		UseProcessRule:   groupItem.UseProcessRule,
 		Observation:      groupItem.Observation,
 		CategoryID:       groupItem.CategoryID,

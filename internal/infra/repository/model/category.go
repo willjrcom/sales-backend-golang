@@ -16,6 +16,7 @@ type ProductCategoryCommonAttributes struct {
 	Name                 string            `bun:"name,notnull"`
 	ImagePath            string            `bun:"image_path"`
 	NeedPrint            bool              `bun:"need_print,notnull"`
+	PrinterName          string            `bun:"printer_name"`
 	UseProcessRule       bool              `bun:"use_process_rule,notnull"`
 	RemovableIngredients []string          `bun:"removable_ingredients,type:jsonb"`
 	Sizes                []Size            `bun:"rel:has-many,join:id=category_id"`
@@ -38,6 +39,7 @@ func (c *ProductCategory) FromDomain(category *productentity.ProductCategory) {
 			Name:                 category.Name,
 			ImagePath:            category.ImagePath,
 			NeedPrint:            category.NeedPrint,
+			PrinterName:          category.PrinterName,
 			UseProcessRule:       category.UseProcessRule,
 			RemovableIngredients: category.RemovableIngredients,
 			Sizes:                []Size{},
@@ -98,6 +100,7 @@ func (c *ProductCategory) ToDomain() *productentity.ProductCategory {
 			Name:                 c.Name,
 			ImagePath:            c.ImagePath,
 			NeedPrint:            c.NeedPrint,
+			PrinterName:          c.PrinterName,
 			UseProcessRule:       c.UseProcessRule,
 			RemovableIngredients: c.RemovableIngredients,
 			Sizes:                []productentity.Size{},

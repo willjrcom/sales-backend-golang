@@ -16,5 +16,6 @@ type ProductCategoryWithOrderProcessCommonAttributes struct {
 	IsAdditional   bool
 	IsComplement   bool
 	NeedPrint      bool
+	PrinterName    string
 	ProcessRules   []ProcessRuleWithOrderProcess
 }

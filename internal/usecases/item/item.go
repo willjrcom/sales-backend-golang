@@ -383,6 +383,7 @@ func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *
 			CategoryID:     product.CategoryID,
 			Size:           product.Size.Name,
 			NeedPrint:      product.Category.NeedPrint,
+			PrinterName:    product.Category.PrinterName,
 			UseProcessRule: product.Category.UseProcessRule,
 		},
 	}
