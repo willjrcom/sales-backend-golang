@@ -23,6 +23,8 @@ const (
 	EnableTables Key = "enable_tables"
 	// MinDeliveryTax is the minimum fee applied for delivery.
 	MinDeliveryTax Key = "min_delivery_tax"
+
+	PrintOrder Key = "print_order"
 )
 
 // Preference holds a single key-value pair.
