@@ -9,11 +9,21 @@ import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
+// truncate returns a string truncated to at most max runes, preserving UTF-8 boundaries
+func truncate(s string, max int) string {
+	runes := []rune(s)
+	if len(runes) > max {
+		return string(runes[:max])
+	}
+	return s
+}
+
 // FormatOrder generates ESC/POS bytes for a 40-column receipt of the given order.
-// It initializes the printer, prints the header, item groups, footer, and cuts the paper.
+// It initializes the printer, selects Latin-1 code page, prints the header, item groups, footer, and cuts the paper.
 func FormatOrder(o *orderentity.Order) ([]byte, error) {
 	var buf bytes.Buffer
 	buf.WriteString(escInit)
+	buf.WriteString(escCodePageLatin1)
 
 	// Build raw text for receipt
 	var raw bytes.Buffer
@@ -31,16 +41,21 @@ func FormatOrder(o *orderentity.Order) ([]byte, error) {
 	formatFooter(&raw, o)
 	raw.WriteString(strings.Repeat(newline, 3))
 
-	// Align columns using tabwriter into main buffer
+	// Align columns using tabwriter into main buffer, checking for errors
 	tw := tabwriter.NewWriter(&buf, 6, 11, 2, ' ', 0)
-	tw.Write(raw.Bytes())
-	tw.Flush()
+	if _, err := tw.Write(raw.Bytes()); err != nil {
+		return nil, err
+	}
+	if err := tw.Flush(); err != nil {
+		return nil, err
+	}
 
 	buf.WriteString(escCut)
 	return buf.Bytes(), nil
 }
 
 func formatHeader(buf *bytes.Buffer, o *orderentity.Order) {
+	buf.WriteString(escAlignLeft)
 	if o.PendingAt != nil {
 		buf.WriteString(fmt.Sprintf("Gerado:\t\t%s%s", o.PendingAt.Format("15:04"), newline))
 	}
@@ -125,18 +140,18 @@ func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 
 func printComplementItem(buf *bytes.Buffer, comp *orderentity.Item, group *orderentity.GroupItem) {
 	buf.WriteString(escBoldOn)
-	buf.WriteString(fmt.Sprintf("%4.1f\t%-20.20s\t%7.2f%s", group.Quantity, comp.Name, d2f(comp.TotalPrice), newline))
+	// truncate complement name to 20 runes to avoid breaking UTF-8
+	name := truncate(comp.Name, 20)
+	buf.WriteString(fmt.Sprintf("%4.1f\t%-20s\t%7.2f%s", group.Quantity, name, d2f(comp.TotalPrice), newline))
 	buf.WriteString(escBoldOff)
 }
 
 // printItem writes a single order item and its additional items to the buffer.
+// printItem writes a single order item and its additional items to the buffer.
 func printItem(buf *bytes.Buffer, item *orderentity.Item) {
-	name := item.Name
-	if len(name) > 20 {
-		name = name[:20]
-	}
-
-	buf.WriteString(fmt.Sprintf("%.1f\t%-20.20s\t%.2f%s", item.Quantity, name, d2f(item.TotalPrice), newline))
+	// truncate item name to 20 runes to avoid breaking UTF-8
+	name := truncate(item.Name, 20)
+	buf.WriteString(fmt.Sprintf("%.1f\t%-20s\t%.2f%s", item.Quantity, name, d2f(item.TotalPrice), newline))
 
 	for _, add := range item.AdditionalItems {
 		printAdditionalItem(buf, &add)
@@ -161,11 +176,8 @@ func printItem(buf *bytes.Buffer, item *orderentity.Item) {
 
 // printAdditionalItem writes a single additional item to the buffer.
 func printAdditionalItem(buf *bytes.Buffer, add *orderentity.Item) {
-	name := add.Name
-	if len(name) > 17 {
-		name = name[:17]
-	}
-
+	// truncate additional item name to 17 runes to avoid breaking UTF-8
+	name := truncate(add.Name, 17)
 	buf.WriteString(fmt.Sprintf("+\t%-17s\t%.2f%s", name, d2f(add.TotalPrice), newline))
 }
 
@@ -202,7 +214,9 @@ func formatDeliverySection(buf *bytes.Buffer, o *orderentity.Order) {
 
 	// Client name
 	if o.Delivery.Client != nil && o.Delivery.Client.Name != "" {
-		buf.WriteString(fmt.Sprintf("Cliente:\t\t%-20.20s%s", o.Delivery.Client.Name, newline))
+		// truncate client name to 20 runes to avoid breaking UTF-8
+		clientName := truncate(o.Delivery.Client.Name, 20)
+		buf.WriteString(fmt.Sprintf("Cliente:\t\t%-20s%s", clientName, newline))
 	}
 
 	// Address

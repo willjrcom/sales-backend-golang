@@ -13,5 +13,8 @@ const (
 	escAlignLeft   = "\x1ba\x00" // Align left
 	escAlignCenter = "\x1ba\x01" // Align center
 	escCut         = "\x1dV\x00" // Full cut
-	newline        = "\n"
+	// newline is carriage return + line feed for ESC/POS
+	newline        = "\r\n"
+	// escCodePageLatin1 selects code page 16 (Latin-1) for accented characters
+	escCodePageLatin1 = "\x1bt\x10"
 )
