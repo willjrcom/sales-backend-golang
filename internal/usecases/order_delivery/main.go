@@ -18,7 +18,7 @@ type IService interface {
 	IStatusService
 }
 type ISetupService interface {
-	AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, so *orderusecases.Service, rdd model.DeliveryDriverRepository)
+	AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, so *orderusecases.OrderService, rdd model.DeliveryDriverRepository)
 }
 
 type ICreateService interface {
@@ -51,7 +51,7 @@ type Service struct {
 	ra  model.AddressRepository
 	rc  model.ClientRepository
 	ro  model.OrderRepository
-	so  *orderusecases.Service
+	so  *orderusecases.OrderService
 	rdd model.DeliveryDriverRepository
 }
 
@@ -59,7 +59,7 @@ func NewService(rdo model.OrderDeliveryRepository) IService {
 	return &Service{rdo: rdo}
 }
 
-func (s *Service) AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, os *orderusecases.Service, rdd model.DeliveryDriverRepository) {
+func (s *Service) AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, os *orderusecases.OrderService, rdd model.DeliveryDriverRepository) {
 	s.ra = ra
 	s.rc = rc
 	s.ro = ro

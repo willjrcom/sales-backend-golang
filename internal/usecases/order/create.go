@@ -9,18 +9,18 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
-func (s *Service) CreateDefaultOrder(ctx context.Context) (uuid.UUID, error) {
-	shift, err := s.rs.GetCurrentShift(ctx)
+func (s *OrderService) CreateDefaultOrder(ctx context.Context) (uuid.UUID, error) {
+	shiftModel, err := s.rs.GetCurrentShift(ctx)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("must open a new shift")
 	}
 
-	currentOrderNumber, err := s.rs.IncrementCurrentOrder(shift.ID.String())
+	currentOrderNumber, err := s.rs.IncrementCurrentOrder(shiftModel.ID.String())
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	order := orderentity.NewDefaultOrder(shift.ID, currentOrderNumber, shift.AttendantID)
+	order := orderentity.NewDefaultOrder(shiftModel.ID, currentOrderNumber, shiftModel.AttendantID)
 
 	orderModel := &model.Order{}
 	orderModel.FromDomain(order)

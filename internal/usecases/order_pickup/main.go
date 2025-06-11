@@ -17,7 +17,7 @@ type IService interface {
 }
 
 type ISetupService interface {
-	AddDependencies(os *orderusecases.Service)
+	AddDependencies(os *orderusecases.OrderService)
 }
 
 type ICreateService interface {
@@ -38,13 +38,13 @@ type IUpdateService interface {
 
 type Service struct {
 	rp model.OrderPickupRepository
-	os *orderusecases.Service
+	os *orderusecases.OrderService
 }
 
 func NewService(rp model.OrderPickupRepository) IService {
 	return &Service{rp: rp}
 }
 
-func (s *Service) AddDependencies(os *orderusecases.Service) {
+func (s *Service) AddDependencies(os *orderusecases.OrderService) {
 	s.os = os
 }

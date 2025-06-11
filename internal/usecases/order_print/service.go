@@ -13,7 +13,7 @@ import (
 // Service provides print operations for orders.
 // Service provides print operations for orders and daily reports.
 type Service struct {
-	orderService        *orderusecases.Service
+	orderService        *orderusecases.OrderService
 	shiftService        *shiftusecases.Service
 	orderRepository     model.OrderRepository
 	groupItemRepository model.GroupItemRepository
@@ -24,7 +24,7 @@ func NewService() *Service {
 	return &Service{}
 }
 
-func (s *Service) AddDependencies(orderService *orderusecases.Service, orderRepository model.OrderRepository, shiftService *shiftusecases.Service, groupItemRepository model.GroupItemRepository) {
+func (s *Service) AddDependencies(orderService *orderusecases.OrderService, orderRepository model.OrderRepository, shiftService *shiftusecases.Service, groupItemRepository model.GroupItemRepository) {
 	s.orderService = orderService
 	s.orderRepository = orderRepository
 	s.shiftService = shiftService

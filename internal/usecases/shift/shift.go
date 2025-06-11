@@ -73,7 +73,7 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 		return err
 	}
 
-	shiftModel, err := s.r.GetCurrentShift(ctx)
+	shiftModel, err := s.r.GetFullCurrentShift(ctx)
 
 	if err != nil {
 		return err
@@ -108,7 +108,7 @@ func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IDRequest) 
 }
 
 func (s *Service) GetCurrentShift(ctx context.Context) (shiftDTO *shiftdto.ShiftDTO, err error) {
-	shiftModel, err := s.r.GetCurrentShift(ctx)
+	shiftModel, err := s.r.GetFullCurrentShift(ctx)
 	if err != nil {
 		return nil, err
 	}

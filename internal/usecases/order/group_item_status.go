@@ -5,6 +5,7 @@ import (
 
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
+	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
 )
 
 func (s *GroupItemService) UpdateScheduleGroupItem(ctx context.Context, dtoId *entitydto.IDRequest, dto *groupitemdto.OrderGroupItemUpdateScheduleDTO) (err error) {
@@ -68,5 +69,27 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, dto *entitydto.I
 	groupItem := groupItemModel.ToDomain()
 	groupItem.CancelGroupItem()
 
-	return s.r.UpdateGroupItem(ctx, groupItemModel)
+	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
+		return err
+	}
+
+	reason := "group item canceled"
+	processes, err := s.sop.GetProcessesByGroupItemID(ctx, dto)
+	if err != nil {
+		return err
+	}
+
+	if len(processes) == 0 {
+		return nil
+	}
+
+	for _, process := range processes {
+		dtoProcessID := entitydto.NewIdRequest(process.ID)
+		orderProcessCancelDTO := &orderprocessdto.OrderProcessCancelDTO{Reason: &reason}
+		if err = s.sop.CancelProcess(ctx, dtoProcessID, orderProcessCancelDTO); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

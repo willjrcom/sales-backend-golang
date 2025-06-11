@@ -15,6 +15,25 @@ var (
 	ErrMustBeReason  = errors.New("reason is required")
 )
 
+type OrderProcessType string
+
+const (
+	ProcessDeliveryType OrderProcessType = "delivery"
+	ProcessPickupType   OrderProcessType = "pickup"
+	ProcessTableType    OrderProcessType = "table"
+)
+
+func GetTypeOrderProcessFromOrder(orderType orderentity.OrderType) OrderProcessType {
+	if orderType.Table != nil {
+		return ProcessDeliveryType
+	}
+	if orderType.Pickup != nil {
+		return ProcessPickupType
+	}
+
+	return ProcessDeliveryType
+}
+
 type OrderProcess struct {
 	entity.Entity
 	OrderProcessTimeLogs
@@ -22,6 +41,8 @@ type OrderProcess struct {
 }
 
 type OrderProcessCommonAttributes struct {
+	OrderNumber   int
+	OrderType     OrderProcessType
 	EmployeeID    *uuid.UUID
 	GroupItemID   uuid.UUID
 	GroupItem     *orderentity.GroupItem
@@ -43,8 +64,10 @@ type OrderProcessTimeLogs struct {
 	TotalPaused       int8
 }
 
-func NewOrderProcess(groupItemID uuid.UUID, processRuleID uuid.UUID) *OrderProcess {
+func NewOrderProcess(groupItemID uuid.UUID, processRuleID uuid.UUID, orderNumber int, orderType OrderProcessType) *OrderProcess {
 	orderProcessCommonAttributes := OrderProcessCommonAttributes{
+		OrderNumber:   orderNumber,
+		OrderType:     orderType,
 		GroupItemID:   groupItemID,
 		ProcessRuleID: processRuleID,
 		Status:        ProcessStatusPending,

@@ -90,6 +90,23 @@ func (r *ShiftRepositoryBun) GetCurrentShift(ctx context.Context) (*model.Shift,
 		return nil, err
 	}
 
+	if err := r.db.NewSelect().Model(shift).Where("shift.closed_at is NULL AND shift.end_change is NULL").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return shift, nil
+}
+
+func (r *ShiftRepositoryBun) GetFullCurrentShift(ctx context.Context) (*model.Shift, error) {
+	shift := &model.Shift{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
 	if err := r.db.NewSelect().Model(shift).Where("shift.closed_at is NULL AND shift.end_change is NULL").Relation("Attendant").Relation("Orders").Scan(ctx); err != nil {
 		return nil, err
 	}

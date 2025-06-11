@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
@@ -276,7 +277,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	return order, nil
 }
 
-func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]model.Order, error) {
+func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string) ([]model.Order, error) {
 	orders := []model.Order{}
 
 	r.mu.Lock()
@@ -286,7 +287,15 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]model.Order, e
 		return nil, err
 	}
 
+	validStatuses := []string{
+		string(orderentity.OrderStatusStaging),
+		string(orderentity.OrderStatusPending),
+		string(orderentity.OrderStatusReady),
+	}
+
 	query := r.db.NewSelect().Model(&orders).
+		// use quoted alias for reserved keyword 'order'
+		Where(`"order"."status" IN (?) OR "order"."shift_id" = ?`, bun.In(validStatuses), shiftID).
 		Relation("GroupItems.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Where("is_additional = ?", false)
 		}).
@@ -296,6 +305,7 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]model.Order, e
 		Relation("Table").
 		Relation("Delivery").
 		Relation("Pickup")
+
 	if err := query.Scan(ctx); err != nil {
 		return nil, err
 	}
@@ -335,7 +345,7 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context) ([]model.Order, e
 	return orders, nil
 }
 
-func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, page, perPage int) ([]model.Order, error) {
+func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
 	orders := []model.Order{}
 
 	r.mu.Lock()
@@ -345,11 +355,18 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, page,
 		return nil, err
 	}
 
+	validStatuses := []string{
+		string(orderentity.OrderStatusStaging),
+		string(orderentity.OrderStatusPending),
+		string(orderentity.OrderStatusReady),
+	}
+
 	query := r.db.NewSelect().Model(&orders).
 		Where("delivery.id IS NOT NULL").
 		Relation("Delivery.Client").
 		Relation("Delivery.Address").
 		Relation("Delivery.Driver").
+		Where(`"order"."status" IN (?) OR "order"."shift_id" = ?`, bun.In(validStatuses), shiftID).
 		Limit(perPage).
 		Offset(page * perPage)
 

@@ -18,6 +18,8 @@ type OrderProcess struct {
 }
 
 type OrderProcessCommonAttributes struct {
+	OrderNumber   int         `bun:"order_number,notnull"`
+	OrderType     string      `bun:"order_type,notnull"`
 	EmployeeID    *uuid.UUID  `bun:"employee_id,type:uuid"`
 	GroupItemID   uuid.UUID   `bun:"group_item_id,type:uuid,notnull"`
 	GroupItem     *GroupItem  `bun:"rel:belongs-to,join:group_item_id=id"`
@@ -49,6 +51,17 @@ func (op *OrderProcess) FromDomain(orderProcess *orderprocessentity.OrderProcess
 			CreatedAt: orderProcess.CreatedAt,
 			UpdatedAt: orderProcess.UpdatedAt,
 		},
+		OrderProcessCommonAttributes: OrderProcessCommonAttributes{
+			OrderNumber:   orderProcess.OrderNumber,
+			OrderType:     string(orderProcess.OrderType),
+			EmployeeID:    orderProcess.EmployeeID,
+			GroupItemID:   orderProcess.GroupItemID,
+			GroupItem:     &GroupItem{},
+			ProcessRuleID: orderProcess.ProcessRuleID,
+			Status:        string(orderProcess.Status),
+			Products:      []Product{},
+			Queue:         &OrderQueue{},
+		},
 		OrderProcessTimeLogs: OrderProcessTimeLogs{
 			StartedAt:         orderProcess.StartedAt,
 			PausedAt:          orderProcess.PausedAt,
@@ -59,15 +72,6 @@ func (op *OrderProcess) FromDomain(orderProcess *orderprocessentity.OrderProcess
 			Duration:          orderProcess.Duration,
 			DurationFormatted: orderProcess.Duration.String(),
 			TotalPaused:       orderProcess.TotalPaused,
-		},
-		OrderProcessCommonAttributes: OrderProcessCommonAttributes{
-			EmployeeID:    orderProcess.EmployeeID,
-			GroupItemID:   orderProcess.GroupItemID,
-			GroupItem:     &GroupItem{},
-			ProcessRuleID: orderProcess.ProcessRuleID,
-			Status:        string(orderProcess.Status),
-			Products:      []Product{},
-			Queue:         &OrderQueue{},
 		},
 	}
 
@@ -88,6 +92,8 @@ func (op *OrderProcess) ToDomain() *orderprocessentity.OrderProcess {
 	orderProcess := &orderprocessentity.OrderProcess{
 		Entity: op.Entity.ToDomain(),
 		OrderProcessCommonAttributes: orderprocessentity.OrderProcessCommonAttributes{
+			OrderNumber:   op.OrderNumber,
+			OrderType:     orderprocessentity.OrderProcessType(op.OrderType),
 			EmployeeID:    op.EmployeeID,
 			GroupItemID:   op.GroupItemID,
 			GroupItem:     op.GroupItem.ToDomain(),

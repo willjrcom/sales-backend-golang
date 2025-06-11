@@ -7,7 +7,7 @@ import (
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 )
 
-func (s *Service) GetOrderById(ctx context.Context, dto *entitydto.IDRequest) (*orderdto.OrderDTO, error) {
+func (s *OrderService) GetOrderById(ctx context.Context, dto *entitydto.IDRequest) (*orderdto.OrderDTO, error) {
 	if orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
@@ -19,8 +19,13 @@ func (s *Service) GetOrderById(ctx context.Context, dto *entitydto.IDRequest) (*
 	}
 }
 
-func (s *Service) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, error) {
-	if orderModels, err := s.ro.GetAllOrders(ctx); err != nil {
+func (s *OrderService) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, error) {
+	shiftModel, err := s.rs.GetCurrentShift(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if orderModels, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String()); err != nil {
 		return nil, err
 	} else {
 		orders := make([]orderdto.OrderDTO, 0)
@@ -34,8 +39,13 @@ func (s *Service) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, error)
 	}
 }
 
-func (s *Service) GetAllOrdersWithDelivery(ctx context.Context, page, perPage int) ([]orderdto.OrderDTO, error) {
-	if orderModels, err := s.ro.GetAllOrdersWithDelivery(ctx, page, perPage); err != nil {
+func (s *OrderService) GetAllOrdersWithDelivery(ctx context.Context, page, perPage int) ([]orderdto.OrderDTO, error) {
+	shiftModel, err := s.rs.GetCurrentShift(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if orderModels, err := s.ro.GetAllOrdersWithDelivery(ctx, shiftModel.ID.String(), page, perPage); err != nil {
 		return nil, err
 	} else {
 		orders := make([]orderdto.OrderDTO, 0)

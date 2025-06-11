@@ -8,7 +8,6 @@ import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
-	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
@@ -234,10 +233,10 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 
 	// Create next process
 	createProcessInput := &orderprocessdto.OrderProcessCreateDTO{
-		OrderProcessCommonAttributes: orderprocessentity.OrderProcessCommonAttributes{
-			GroupItemID:   process.GroupItemID,
-			ProcessRuleID: nextProcessRule.ID,
-		},
+		OrderNumber:   process.OrderNumber,
+		OrderType:     process.OrderType,
+		GroupItemID:   process.GroupItemID,
+		ProcessRuleID: nextProcessRule.ID,
 	}
 
 	nextProcessID, err = s.CreateProcess(ctx, createProcessInput)

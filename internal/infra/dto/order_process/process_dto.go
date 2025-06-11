@@ -11,23 +11,25 @@ import (
 )
 
 type OrderProcessDTO struct {
-	ID                uuid.UUID                        `json:"id,omitempty"`
-	EmployeeID        *uuid.UUID                       `json:"employee_id,omitempty"`
-	GroupItemID       uuid.UUID                        `json:"group_item_id,omitempty"`
-	GroupItem         *groupitemdto.GroupItemDTO       `json:"group_item,omitempty"`
-	ProcessRuleID     uuid.UUID                        `json:"process_rule_id,omitempty"`
-	Status            orderprocessentity.StatusProcess `json:"status,omitempty"`
-	Products          []productcategorydto.ProductDTO  `json:"products,omitempty"`
-	Queue             *orderqueuedto.QueueDTO          `json:"queue,omitempty"`
-	StartedAt         *time.Time                       `json:"started_at,omitempty"`
-	PausedAt          *time.Time                       `json:"paused_at,omitempty"`
-	ContinuedAt       *time.Time                       `json:"continued_at,omitempty"`
-	FinishedAt        *time.Time                       `json:"finished_at,omitempty"`
-	CanceledAt        *time.Time                       `json:"canceled_at,omitempty"`
-	CanceledReason    *string                          `json:"canceled_reason,omitempty"`
-	Duration          time.Duration                    `json:"duration,omitempty"`
-	DurationFormatted string                           `json:"duration_formatted,omitempty"`
-	TotalPaused       int8                             `json:"total_paused,omitempty"`
+	ID                uuid.UUID                           `json:"id,omitempty"`
+	OrderNumber       int                                 `json:"order_number"`
+	OrderType         orderprocessentity.OrderProcessType `json:"order_type"`
+	EmployeeID        *uuid.UUID                          `json:"employee_id,omitempty"`
+	GroupItemID       uuid.UUID                           `json:"group_item_id,omitempty"`
+	GroupItem         *groupitemdto.GroupItemDTO          `json:"group_item,omitempty"`
+	ProcessRuleID     uuid.UUID                           `json:"process_rule_id,omitempty"`
+	Status            orderprocessentity.StatusProcess    `json:"status,omitempty"`
+	Products          []productcategorydto.ProductDTO     `json:"products,omitempty"`
+	Queue             *orderqueuedto.QueueDTO             `json:"queue,omitempty"`
+	StartedAt         *time.Time                          `json:"started_at,omitempty"`
+	PausedAt          *time.Time                          `json:"paused_at,omitempty"`
+	ContinuedAt       *time.Time                          `json:"continued_at,omitempty"`
+	FinishedAt        *time.Time                          `json:"finished_at,omitempty"`
+	CanceledAt        *time.Time                          `json:"canceled_at,omitempty"`
+	CanceledReason    *string                             `json:"canceled_reason,omitempty"`
+	Duration          time.Duration                       `json:"duration,omitempty"`
+	DurationFormatted string                              `json:"duration_formatted,omitempty"`
+	TotalPaused       int8                                `json:"total_paused,omitempty"`
 }
 
 func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProcess) {
@@ -36,6 +38,8 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 	}
 	*s = OrderProcessDTO{
 		ID:                orderProcess.ID,
+		OrderNumber:       orderProcess.OrderNumber,
+		OrderType:         orderProcess.OrderType,
 		EmployeeID:        orderProcess.EmployeeID,
 		GroupItemID:       orderProcess.GroupItemID,
 		GroupItem:         &groupitemdto.GroupItemDTO{},

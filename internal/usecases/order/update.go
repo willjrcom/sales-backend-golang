@@ -14,7 +14,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
-func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) error {
+func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) error {
 	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -51,10 +51,10 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) er
 		groupItemIDs = append(groupItemIDs, groupItem.ID)
 
 		createProcessInput := &orderprocessdto.OrderProcessCreateDTO{
-			OrderProcessCommonAttributes: orderprocessentity.OrderProcessCommonAttributes{
-				GroupItemID:   groupItem.ID,
-				ProcessRuleID: processRuleID,
-			},
+			OrderNumber:   order.OrderNumber,
+			OrderType:     orderprocessentity.GetTypeOrderProcessFromOrder(order.OrderType),
+			GroupItemID:   groupItem.ID,
+			ProcessRuleID: processRuleID,
 		}
 
 		// Create process for each group item
@@ -87,7 +87,7 @@ func (s *Service) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) er
 	return nil
 }
 
-func (s *Service) ReadyOrder(ctx context.Context, dto *entitydto.IDRequest) error {
+func (s *OrderService) ReadyOrder(ctx context.Context, dto *entitydto.IDRequest) error {
 	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -107,7 +107,7 @@ func (s *Service) ReadyOrder(ctx context.Context, dto *entitydto.IDRequest) erro
 	return nil
 }
 
-func (s *Service) FinishOrder(ctx context.Context, dto *entitydto.IDRequest) error {
+func (s *OrderService) FinishOrder(ctx context.Context, dto *entitydto.IDRequest) error {
 	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -127,8 +127,8 @@ func (s *Service) FinishOrder(ctx context.Context, dto *entitydto.IDRequest) err
 	return nil
 }
 
-func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IDRequest) (err error) {
-	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
+func (s *OrderService) CancelOrder(ctx context.Context, dtoOrderID *entitydto.IDRequest) (err error) {
+	orderModel, err := s.ro.GetOrderById(ctx, dtoOrderID.ID.String())
 
 	if err != nil {
 		return err
@@ -144,17 +144,36 @@ func (s *Service) CancelOrder(ctx context.Context, dto *entitydto.IDRequest) (er
 		return err
 	}
 
+	reason := "order canceled"
+
 	for _, groupItem := range order.GroupItems {
-		dtoID := entitydto.NewIdRequest(groupItem.ID)
-		if err = s.sgi.CancelGroupItem(ctx, dtoID); err != nil {
+		dtoGroupItemID := entitydto.NewIdRequest(groupItem.ID)
+		if err = s.sgi.CancelGroupItem(ctx, dtoGroupItemID); err != nil {
 			return err
+		}
+
+		processes, err := s.sop.GetProcessesByGroupItemID(ctx, dtoGroupItemID)
+		if err != nil {
+			return err
+		}
+
+		if len(processes) == 0 {
+			continue
+		}
+
+		for _, process := range processes {
+			dtoProcessID := entitydto.NewIdRequest(process.ID)
+			orderProcessCancelDTO := &orderprocessdto.OrderProcessCancelDTO{Reason: &reason}
+			if err = s.sop.CancelProcess(ctx, dtoProcessID, orderProcessCancelDTO); err != nil {
+				return err
+			}
 		}
 	}
 
 	return nil
 }
 
-func (s *Service) ArchiveOrder(ctx context.Context, dto *entitydto.IDRequest) (err error) {
+func (s *OrderService) ArchiveOrder(ctx context.Context, dto *entitydto.IDRequest) (err error) {
 	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -174,7 +193,7 @@ func (s *Service) ArchiveOrder(ctx context.Context, dto *entitydto.IDRequest) (e
 	return nil
 }
 
-func (s *Service) UnarchiveOrder(ctx context.Context, dto *entitydto.IDRequest) error {
+func (s *OrderService) UnarchiveOrder(ctx context.Context, dto *entitydto.IDRequest) error {
 	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -194,7 +213,7 @@ func (s *Service) UnarchiveOrder(ctx context.Context, dto *entitydto.IDRequest) 
 	return nil
 }
 
-func (s *Service) AddPayment(ctx context.Context, dto *entitydto.IDRequest, dtoPayment *orderdto.OrderPaymentCreateDTO) error {
+func (s *OrderService) AddPayment(ctx context.Context, dto *entitydto.IDRequest, dtoPayment *orderdto.OrderPaymentCreateDTO) error {
 	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
 
 	if err != nil {
@@ -229,7 +248,7 @@ func (s *Service) AddPayment(ctx context.Context, dto *entitydto.IDRequest, dtoP
 	return nil
 }
 
-func (s *Service) UpdateOrderObservation(ctx context.Context, dtoId *entitydto.IDRequest, dto *orderdto.OrderUpdateObservationDTO) error {
+func (s *OrderService) UpdateOrderObservation(ctx context.Context, dtoId *entitydto.IDRequest, dto *orderdto.OrderUpdateObservationDTO) error {
 	orderModel, err := s.ro.GetOrderById(ctx, dtoId.ID.String())
 
 	if err != nil {
@@ -246,7 +265,7 @@ func (s *Service) UpdateOrderObservation(ctx context.Context, dtoId *entitydto.I
 	return nil
 }
 
-func (s *Service) UpdateOrderTotal(ctx context.Context, id string) error {
+func (s *OrderService) UpdateOrderTotal(ctx context.Context, id string) error {
 	orderModel, err := s.ro.GetOrderById(ctx, id)
 	if err != nil {
 		return err

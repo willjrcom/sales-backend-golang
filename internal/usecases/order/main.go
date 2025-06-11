@@ -6,7 +6,7 @@ import (
 	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 )
 
-type Service struct {
+type OrderService struct {
 	ro  model.OrderRepository
 	rs  model.ShiftRepository
 	rp  model.ProductRepository
@@ -16,11 +16,11 @@ type Service struct {
 	sq  *orderqueueusecases.Service
 }
 
-func NewService(ro model.OrderRepository) *Service {
-	return &Service{ro: ro}
+func NewService(ro model.OrderRepository) *OrderService {
+	return &OrderService{ro: ro}
 }
 
-func (s *Service) AddDependencies(
+func (s *OrderService) AddDependencies(
 	ro model.OrderRepository,
 	rs model.ShiftRepository,
 	rp model.ProductRepository,
@@ -39,20 +39,22 @@ func (s *Service) AddDependencies(
 }
 
 type GroupItemService struct {
-	r  model.GroupItemRepository
-	ri model.ItemRepository
-	rp model.ProductRepository
-	so *Service
+	r   model.GroupItemRepository
+	ri  model.ItemRepository
+	rp  model.ProductRepository
+	sop *OrderProcessService
+	so  *OrderService
 }
 
 func NewGroupItemService(rgi model.GroupItemRepository) *GroupItemService {
 	return &GroupItemService{r: rgi}
 }
 
-func (s *GroupItemService) AddDependencies(ri model.ItemRepository, rp model.ProductRepository, so *Service) {
+func (s *GroupItemService) AddDependencies(ri model.ItemRepository, rp model.ProductRepository, so *OrderService, sop *OrderProcessService) {
 	s.ri = ri
 	s.rp = rp
 	s.so = so
+	s.sop = sop
 }
 
 type OrderProcessService struct {

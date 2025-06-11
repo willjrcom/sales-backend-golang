@@ -13,7 +13,11 @@ var (
 )
 
 type OrderProcessCreateDTO struct {
-	orderprocessentity.OrderProcessCommonAttributes
+	OrderNumber   int                                 `json:"order_number"`
+	OrderType     orderprocessentity.OrderProcessType `json:"order_type"`
+	EmployeeID    *uuid.UUID                          `json:"employee_id"`
+	GroupItemID   uuid.UUID                           `json:"group_item_id"`
+	ProcessRuleID uuid.UUID                           `json:"process_rule_id"`
 }
 
 func (s *OrderProcessCreateDTO) validate() error {
@@ -33,5 +37,5 @@ func (s *OrderProcessCreateDTO) ToDomain() (*orderprocessentity.OrderProcess, er
 		return nil, err
 	}
 
-	return orderprocessentity.NewOrderProcess(s.GroupItemID, s.ProcessRuleID), nil
+	return orderprocessentity.NewOrderProcess(s.GroupItemID, s.ProcessRuleID, s.OrderNumber, s.OrderType), nil
 }

@@ -29,7 +29,7 @@ type Service struct {
 	rp  model.ProductRepository
 	rq  model.QuantityRepository
 	rc  model.CategoryRepository
-	so  *orderusecases.Service
+	so  *orderusecases.OrderService
 	sgi *orderusecases.GroupItemService
 }
 
@@ -37,7 +37,7 @@ func NewService(ri model.ItemRepository) *Service {
 	return &Service{ri: ri}
 }
 
-func (s *Service) AddDependencies(rgi model.GroupItemRepository, ro model.OrderRepository, rp model.ProductRepository, rq model.QuantityRepository, rc model.CategoryRepository, so *orderusecases.Service, sgi *orderusecases.GroupItemService) {
+func (s *Service) AddDependencies(rgi model.GroupItemRepository, ro model.OrderRepository, rp model.ProductRepository, rq model.QuantityRepository, rc model.CategoryRepository, so *orderusecases.OrderService, sgi *orderusecases.GroupItemService) {
 	s.rgi = rgi
 	s.ro = ro
 	s.rp = rp

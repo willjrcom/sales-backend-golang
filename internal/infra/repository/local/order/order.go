@@ -73,7 +73,7 @@ func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*mo
 	return nil, errors.New("order not found")
 }
 
-func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context) ([]model.Order, error) {
+func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context, shiftID string) ([]model.Order, error) {
 	orders := make([]model.Order, 0)
 
 	for _, p := range r.orders {
@@ -84,7 +84,7 @@ func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context) ([]model.Order,
 }
 
 // GetAllOrdersWithDelivery returns orders with delivery information, paginated by page and perPage
-func (r *OrderRepositoryLocal) GetAllOrdersWithDelivery(ctx context.Context, page, perPage int) ([]model.Order, error) {
+func (r *OrderRepositoryLocal) GetAllOrdersWithDelivery(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	all := []model.Order{}

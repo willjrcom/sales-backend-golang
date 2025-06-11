@@ -15,10 +15,10 @@ import (
 )
 
 type handlerOrderImpl struct {
-	s *orderusecases.Service
+	s *orderusecases.OrderService
 }
 
-func NewHandlerOrder(orderService *orderusecases.Service) *handler.Handler {
+func NewHandlerOrder(orderService *orderusecases.OrderService) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerOrderImpl{
