@@ -69,6 +69,7 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, dto *entitydto.I
 	groupItem := groupItemModel.ToDomain()
 	groupItem.CancelGroupItem()
 
+	groupItemModel.FromDomain(groupItem)
 	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
 		return err
 	}

@@ -146,9 +146,14 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 		return nil, err
 	}
 
+	validStatus := []orderprocessentity.StatusProcess{
+		orderprocessentity.ProcessStatusFinished,
+		orderprocessentity.ProcessStatusCanceled,
+	}
+
 	if err := r.db.NewSelect().Model(&processes).
-		Where("process.process_rule_id = ? and process.status != ?",
-			id, orderprocessentity.ProcessStatusFinished).
+		Where("\"process\".process_rule_id = ? and \"process\".status NOT IN (?)",
+			id, bun.In(validStatus)).
 		Relation("GroupItem").
 		Relation("GroupItem.Items", func(sq *bun.SelectQuery) *bun.SelectQuery {
 			return sq.Where("is_additional = ?", false)
