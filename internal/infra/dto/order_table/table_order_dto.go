@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
@@ -18,6 +19,7 @@ type OrderTableCommonAttributes struct {
 	Name    string                       `json:"name"`
 	Contact string                       `json:"contact"`
 	Status  orderentity.StatusOrderTable `json:"status"`
+	TaxRate decimal.Decimal              `json:"tax_rate"`
 	OrderID uuid.UUID                    `json:"order_id"`
 	TableID uuid.UUID                    `json:"table_id"`
 }
@@ -38,6 +40,7 @@ func (t *OrderTableDTO) FromDomain(table *orderentity.OrderTable) {
 			Name:    table.Name,
 			Contact: table.Contact,
 			Status:  table.Status,
+			TaxRate: table.TaxRate,
 			OrderID: table.OrderID,
 			TableID: table.TableID,
 		},
