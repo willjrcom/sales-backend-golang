@@ -9,15 +9,15 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	ordertabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_table"
-	ordertableusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_table"
+	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
 type handlerOrderTableImpl struct {
-	s *ordertableusecases.Service
+	s *orderusecases.OrderTableService
 }
 
-func NewHandlerOrderTable(orderService *ordertableusecases.Service) *handler.Handler {
+func NewHandlerOrderTable(orderService *orderusecases.OrderTableService) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerOrderTableImpl{

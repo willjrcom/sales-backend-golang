@@ -12,7 +12,7 @@ import (
 
 func NewOrderModule(db *bun.DB, chi *server.ServerChi) (model.OrderRepository, *orderusecases.OrderService, *handler.Handler) {
 	repository := orderrepositorybun.NewOrderRepositoryBun(db)
-	service := orderusecases.NewService(repository)
+	service := orderusecases.NewOrderService(repository)
 	handler := handlerimpl.NewHandlerOrder(service)
 	chi.AddHandler(handler)
 	return repository, service, handler

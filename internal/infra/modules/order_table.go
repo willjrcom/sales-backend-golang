@@ -7,12 +7,12 @@ import (
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	orderrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/order"
-	ordertableusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_table"
+	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 )
 
-func NewOrderTableModule(db *bun.DB, chi *server.ServerChi) (model.OrderTableRepository, *ordertableusecases.Service, *handler.Handler) {
+func NewOrderTableModule(db *bun.DB, chi *server.ServerChi) (model.OrderTableRepository, *orderusecases.OrderTableService, *handler.Handler) {
 	repository := orderrepositorybun.NewOrderTableRepositoryBun(db)
-	service := ordertableusecases.NewService(repository)
+	service := orderusecases.NewOrderTableService(repository)
 	handler := handlerimpl.NewHandlerOrderTable(service)
 	chi.AddHandler(handler)
 	return repository, service, handler

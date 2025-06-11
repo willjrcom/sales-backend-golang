@@ -9,15 +9,15 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderpickupdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_pickup"
-	orderpickupusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_pickup"
+	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
 type handlerOrderPickupImpl struct {
-	orderpickupusecases.IService
+	orderusecases.IPickupService
 }
 
-func NewHandlerOrderPickup(orderService orderpickupusecases.IService) *handler.Handler {
+func NewHandlerOrderPickup(orderService orderusecases.IPickupService) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerOrderPickupImpl{orderService}
@@ -43,7 +43,7 @@ func (h *handlerOrderPickupImpl) handlerCreateOrderPickup(w http.ResponseWriter,
 		return
 	}
 
-	id, err := h.IService.CreateOrderPickup(ctx, dtoPickup)
+	id, err := h.IPickupService.CreateOrderPickup(ctx, dtoPickup)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -64,7 +64,7 @@ func (h *handlerOrderPickupImpl) handlerGetPickupById(w http.ResponseWriter, r *
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	Pickup, err := h.IService.GetPickupById(ctx, dtoId)
+	Pickup, err := h.IPickupService.GetPickupById(ctx, dtoId)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -76,7 +76,7 @@ func (h *handlerOrderPickupImpl) handlerGetPickupById(w http.ResponseWriter, r *
 func (h *handlerOrderPickupImpl) handlerGetAllPickups(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	orders, err := h.IService.GetAllPickups(ctx)
+	orders, err := h.IPickupService.GetAllPickups(ctx)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -97,7 +97,7 @@ func (h *handlerOrderPickupImpl) handlerPendingOrder(w http.ResponseWriter, r *h
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	if err := h.IService.PendingOrder(ctx, dtoId); err != nil {
+	if err := h.IPickupService.PendingOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
@@ -117,7 +117,7 @@ func (h *handlerOrderPickupImpl) handlerReadyOrder(w http.ResponseWriter, r *htt
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	if err := h.IService.ReadyOrder(ctx, dtoId); err != nil {
+	if err := h.IPickupService.ReadyOrder(ctx, dtoId); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
@@ -143,7 +143,7 @@ func (h *handlerOrderPickupImpl) handlerUpdateName(w http.ResponseWriter, r *htt
 		return
 	}
 
-	if err := h.IService.UpdateName(ctx, dtoId, dtoPickup); err != nil {
+	if err := h.IPickupService.UpdateName(ctx, dtoId, dtoPickup); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}

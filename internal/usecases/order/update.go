@@ -144,6 +144,23 @@ func (s *OrderService) CancelOrder(ctx context.Context, dtoOrderID *entitydto.ID
 		return err
 	}
 
+	if order.Delivery != nil {
+		deliveryDtoID := entitydto.NewIdRequest(order.Delivery.ID)
+		if err := s.sd.CancelOrderDelivery(ctx, deliveryDtoID); err != nil {
+			return err
+		}
+	} else if order.Pickup != nil {
+		pickupDtoID := entitydto.NewIdRequest(order.Pickup.ID)
+		if err := s.sp.CancelOrderPickup(ctx, pickupDtoID); err != nil {
+			return err
+		}
+	} else if order.Table != nil {
+		tableDtoID := entitydto.NewIdRequest(order.Table.ID)
+		if err := s.st.CancelOrderTable(ctx, tableDtoID); err != nil {
+			return err
+		}
+	}
+
 	reason := "order canceled"
 
 	for _, groupItem := range order.GroupItems {

@@ -9,15 +9,15 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdeliverydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_delivery"
-	orderdeliveryusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_delivery"
+	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
 type handlerOrderDeliveryImpl struct {
-	orderdeliveryusecases.IService
+	orderusecases.IDeliveryService
 }
 
-func NewHandlerOrderDelivery(orderService orderdeliveryusecases.IService) *handler.Handler {
+func NewHandlerOrderDelivery(orderService orderusecases.IDeliveryService) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerOrderDeliveryImpl{orderService}
@@ -46,7 +46,7 @@ func (h *handlerOrderDeliveryImpl) handlerCreateOrderDelivery(w http.ResponseWri
 		return
 	}
 
-	id, err := h.IService.CreateOrderDelivery(ctx, dtoDelivery)
+	id, err := h.IDeliveryService.CreateOrderDelivery(ctx, dtoDelivery)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -67,7 +67,7 @@ func (h *handlerOrderDeliveryImpl) handlerGetDeliveryById(w http.ResponseWriter,
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	delivery, err := h.IService.GetDeliveryById(ctx, dtoId)
+	delivery, err := h.IDeliveryService.GetDeliveryById(ctx, dtoId)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -79,7 +79,7 @@ func (h *handlerOrderDeliveryImpl) handlerGetDeliveryById(w http.ResponseWriter,
 func (h *handlerOrderDeliveryImpl) handlerGetAllDeliveries(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	orders, err := h.IService.GetAllDeliveries(ctx)
+	orders, err := h.IDeliveryService.GetAllDeliveries(ctx)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -100,7 +100,7 @@ func (h *handlerOrderDeliveryImpl) handlerPendOrderDelivery(w http.ResponseWrite
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	if err := h.IService.PendOrderDelivery(ctx, dtoId); err != nil {
+	if err := h.IDeliveryService.PendOrderDelivery(ctx, dtoId); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
@@ -117,7 +117,7 @@ func (h *handlerOrderDeliveryImpl) handlerShipOrderDelivery(w http.ResponseWrite
 		return
 	}
 
-	if err := h.IService.ShipOrderDelivery(ctx, dtoDelivery); err != nil {
+	if err := h.IDeliveryService.ShipOrderDelivery(ctx, dtoDelivery); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
@@ -137,7 +137,7 @@ func (h *handlerOrderDeliveryImpl) handlerDeliveryOrderDelivery(w http.ResponseW
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	if err := h.IService.OrderDelivery(ctx, dtoId); err != nil {
+	if err := h.IDeliveryService.OrderDelivery(ctx, dtoId); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
@@ -157,7 +157,7 @@ func (h *handlerOrderDeliveryImpl) handlerUpdateDeliveryAddress(w http.ResponseW
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	if err := h.IService.UpdateDeliveryAddress(ctx, dtoId); err != nil {
+	if err := h.IDeliveryService.UpdateDeliveryAddress(ctx, dtoId); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
@@ -183,7 +183,7 @@ func (h *handlerOrderDeliveryImpl) handlerUpdateDriver(w http.ResponseWriter, r 
 		return
 	}
 
-	if err := h.IService.UpdateDeliveryDriver(ctx, dtoId, dtoDelivery); err != nil {
+	if err := h.IDeliveryService.UpdateDeliveryDriver(ctx, dtoId, dtoDelivery); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
@@ -209,7 +209,7 @@ func (h *handlerOrderDeliveryImpl) handlerUpdateChange(w http.ResponseWriter, r 
 		return
 	}
 
-	if err := h.IService.UpdateDeliveryChange(ctx, dtoId, dtoDelivery); err != nil {
+	if err := h.IDeliveryService.UpdateDeliveryChange(ctx, dtoId, dtoDelivery); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}

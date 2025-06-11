@@ -7,12 +7,12 @@ import (
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	orderrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/order"
-	orderpickupusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_pickup"
+	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 )
 
-func NewOrderPickupModule(db *bun.DB, chi *server.ServerChi) (model.OrderPickupRepository, orderpickupusecases.IService, *handler.Handler) {
+func NewOrderPickupModule(db *bun.DB, chi *server.ServerChi) (model.OrderPickupRepository, orderusecases.IPickupService, *handler.Handler) {
 	repository := orderrepositorybun.NewOrderPickupRepositoryBun(db)
-	service := orderpickupusecases.NewService(repository)
+	service := orderusecases.NewPickupService(repository)
 	handler := handlerimpl.NewHandlerOrderPickup(service)
 	chi.AddHandler(handler)
 	return repository, service, handler

@@ -14,9 +14,12 @@ type OrderService struct {
 	sgi *GroupItemService
 	sop *OrderProcessService
 	sq  *orderqueueusecases.Service
+	sd  IDeliveryService
+	sp  IPickupService
+	st  *OrderTableService
 }
 
-func NewService(ro model.OrderRepository) *OrderService {
+func NewOrderService(ro model.OrderRepository) *OrderService {
 	return &OrderService{ro: ro}
 }
 
@@ -28,6 +31,9 @@ func (s *OrderService) AddDependencies(
 	sgi *GroupItemService,
 	sop *OrderProcessService,
 	sq *orderqueueusecases.Service,
+	sd IDeliveryService,
+	sp IPickupService,
+	st *OrderTableService,
 ) {
 	s.ro = ro
 	s.rs = rs
@@ -36,6 +42,9 @@ func (s *OrderService) AddDependencies(
 	s.sgi = sgi
 	s.sq = sq
 	s.sop = sop
+	s.sd = sd
+	s.sp = sp
+	s.st = st
 }
 
 type GroupItemService struct {

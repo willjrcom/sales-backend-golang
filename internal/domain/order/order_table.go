@@ -25,8 +25,9 @@ type OrderTableCommonAttributes struct {
 }
 
 type OrderTableTimeLogs struct {
-	PendingAt *time.Time
-	ClosedAt  *time.Time
+	PendingAt  *time.Time
+	ClosedAt   *time.Time
+	CanceledAt *time.Time
 }
 
 func NewTable(orderTableCommonAttributes OrderTableCommonAttributes) *OrderTable {
@@ -53,6 +54,13 @@ func (t *OrderTable) Close() error {
 	t.Status = OrderTableStatusClosed
 	t.ClosedAt = &time.Time{}
 	*t.ClosedAt = time.Now().UTC()
+	return nil
+}
+
+func (t *OrderTable) Cancel() error {
+	t.Status = OrderTableStatusCanceled
+	t.CanceledAt = &time.Time{}
+	*t.CanceledAt = time.Now().UTC()
 	return nil
 }
 

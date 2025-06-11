@@ -40,6 +40,7 @@ type DeliveryTimeLogs struct {
 	PendingAt   *time.Time
 	ShippedAt   *time.Time
 	DeliveredAt *time.Time
+	CanceledAt  *time.Time
 }
 
 func NewOrderDelivery(clientID uuid.UUID) *OrderDelivery {
@@ -80,6 +81,13 @@ func (d *OrderDelivery) Ship(driverID *uuid.UUID) error {
 	d.ShippedAt = &time.Time{}
 	*d.ShippedAt = time.Now().UTC()
 	d.Status = OrderDeliveryStatusShipped
+	return nil
+}
+
+func (d *OrderDelivery) Cancel() error {
+	d.CanceledAt = &time.Time{}
+	*d.CanceledAt = time.Now().UTC()
+	d.Status = OrderDeliveryStatusCanceled
 	return nil
 }
 

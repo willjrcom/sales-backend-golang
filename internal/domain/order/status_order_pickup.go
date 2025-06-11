@@ -3,9 +3,10 @@ package orderentity
 type StatusOrderPickup string
 
 const (
-	OrderPickupStatusStaging StatusOrderPickup = "Staging"
-	OrderPickupStatusPending StatusOrderPickup = "Pending"
-	OrderPickupStatusReady   StatusOrderPickup = "Ready"
+	OrderPickupStatusStaging  StatusOrderPickup = "Staging"
+	OrderPickupStatusPending  StatusOrderPickup = "Pending"
+	OrderPickupStatusReady    StatusOrderPickup = "Ready"
+	OrderPickupStatusCanceled StatusOrderPickup = "Canceled"
 )
 
 func GetAllPickupStatus() []StatusOrderPickup {
@@ -13,5 +14,6 @@ func GetAllPickupStatus() []StatusOrderPickup {
 		OrderPickupStatusStaging,
 		OrderPickupStatusPending,
 		OrderPickupStatusReady,
+		OrderPickupStatusCanceled,
 	}
 }

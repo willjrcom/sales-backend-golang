@@ -23,8 +23,9 @@ type OrderPickupCommonAttributes struct {
 }
 
 type PickupTimeLogs struct {
-	PendingAt *time.Time `bun:"pending_at"`
-	ReadyAt   *time.Time `bun:"ready_at"`
+	PendingAt  *time.Time `bun:"pending_at"`
+	ReadyAt    *time.Time `bun:"ready_at"`
+	CanceledAt *time.Time `bun:"canceled_at"`
 }
 
 func (p *OrderPickup) FromDomain(pickup *orderentity.OrderPickup) {
@@ -34,8 +35,9 @@ func (p *OrderPickup) FromDomain(pickup *orderentity.OrderPickup) {
 	*p = OrderPickup{
 		Entity: entitymodel.FromDomain(pickup.Entity),
 		PickupTimeLogs: PickupTimeLogs{
-			PendingAt: pickup.PendingAt,
-			ReadyAt:   pickup.ReadyAt,
+			PendingAt:  pickup.PendingAt,
+			ReadyAt:    pickup.ReadyAt,
+			CanceledAt: pickup.CanceledAt,
 		},
 		OrderPickupCommonAttributes: OrderPickupCommonAttributes{
 			Name:    pickup.Name,
@@ -52,8 +54,9 @@ func (p *OrderPickup) ToDomain() *orderentity.OrderPickup {
 	return &orderentity.OrderPickup{
 		Entity: p.Entity.ToDomain(),
 		PickupTimeLogs: orderentity.PickupTimeLogs{
-			PendingAt: p.PendingAt,
-			ReadyAt:   p.ReadyAt,
+			PendingAt:  p.PendingAt,
+			ReadyAt:    p.ReadyAt,
+			CanceledAt: p.CanceledAt,
 		},
 		OrderPickupCommonAttributes: orderentity.OrderPickupCommonAttributes{
 			Name:    p.Name,
