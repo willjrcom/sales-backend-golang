@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/shopspring/decimal"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	ordertabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_table"
 )
@@ -68,6 +69,53 @@ func (s *Service) ChangeTable(ctx context.Context, dtoOrderTable *entitydto.IDRe
 
 	return s.rto.UpdateOrderTable(ctx, orderTable)
 
+}
+
+// AddTableTax applies the configured table tax rate to the order-table.
+func (s *Service) AddTableTax(ctx context.Context, dtoID *entitydto.IDRequest) error {
+	// Retrieve existing order-table record
+	orderTableModel, err := s.rto.GetOrderTableById(ctx, dtoID.ID.String())
+	if err != nil {
+		return err
+	}
+	// Convert to domain
+	orderTable := orderTableModel.ToDomain()
+	// Get company preferences
+	companyDTO, err := s.cs.GetCompany(ctx)
+	if err != nil {
+		return err
+	}
+	// Update tax rate based on preferences
+	orderTable.UpdatePreferences(companyDTO.Preferences)
+
+	// Persist changes
+	orderTableModel.FromDomain(orderTable)
+	if err := s.rto.UpdateOrderTable(ctx, orderTableModel); err != nil {
+		return err
+	}
+
+	return s.os.UpdateOrderTotal(ctx, orderTable.OrderID.String())
+}
+
+// RemoveTableTax sets the table tax rate to zero for the order-table.
+func (s *Service) RemoveTableTax(ctx context.Context, dtoID *entitydto.IDRequest) error {
+	// Retrieve existing order-table record
+	orderTableModel, err := s.rto.GetOrderTableById(ctx, dtoID.ID.String())
+	if err != nil {
+		return err
+	}
+
+	// Convert to domain and clear tax rate
+	orderTable := orderTableModel.ToDomain()
+	orderTable.TaxRate = decimal.Zero
+
+	// Persist changes
+	orderTableModel.FromDomain(orderTable)
+	if err := s.rto.UpdateOrderTable(ctx, orderTableModel); err != nil {
+		return err
+	}
+
+	return s.os.UpdateOrderTotal(ctx, orderTable.OrderID.String())
 }
 
 func (s *Service) CloseOrderTable(ctx context.Context, dtoID *entitydto.IDRequest) error {

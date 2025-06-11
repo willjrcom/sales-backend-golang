@@ -28,6 +28,8 @@ func NewHandlerOrderTable(orderService *ordertableusecases.Service) *handler.Han
 		c.Post("/new", h.handlerCreateOrderTable)
 		c.Post("/update/change-table/{id}", h.handlerChangeTable)
 		c.Post("/update/close/{id}", h.handlerCloseOrderTable)
+		c.Post("/update/add-tax/{id}", h.handlerAddTableTax)
+		c.Post("/update/remove-tax/{id}", h.handlerRemoveTableTax)
 		c.Get("/{id}", h.handlerGetOrderTableById)
 		c.Get("/all", h.handlerGetAllTables)
 	})
@@ -129,4 +131,36 @@ func (h *handlerOrderTableImpl) handlerGetAllTables(w http.ResponseWriter, r *ht
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
+}
+
+// handlerAddTableTax handles POST /order-table/update/add-tax/{id}
+func (h *handlerOrderTableImpl) handlerAddTableTax(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+	if err := h.s.AddTableTax(ctx, dtoId); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+// handlerRemoveTableTax handles POST /order-table/update/remove-tax/{id}
+func (h *handlerOrderTableImpl) handlerRemoveTableTax(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+	if err := h.s.RemoveTableTax(ctx, dtoId); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
