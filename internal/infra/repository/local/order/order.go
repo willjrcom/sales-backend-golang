@@ -74,7 +74,7 @@ func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*mo
 	return nil, errors.New("order not found")
 }
 
-func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder) ([]model.Order, error) {
+func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder, withCategory bool) ([]model.Order, error) {
 	orders := make([]model.Order, 0)
 
 	for _, p := range r.orders {

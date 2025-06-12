@@ -234,7 +234,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		Scan(ctx); err != nil {
 		return nil, err
 	}
-
+	// load complement items separately
 	var complementItems []model.Item
 	var complementIDs []uuid.UUID
 	for _, g := range order.GroupItems {
@@ -277,7 +277,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	return order, nil
 }
 
-func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder) ([]model.Order, error) {
+func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder, withCategory bool) ([]model.Order, error) {
 	orders := []model.Order{}
 
 	r.mu.Lock()
@@ -335,7 +335,36 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 			}
 		}
 	}
-
+	// optionally load categories if requested
+	if withCategory {
+		var categories []model.ProductCategory
+		var categoryIDs []uuid.UUID
+		for i := range orders {
+			for j := range orders[i].GroupItems {
+				categoryIDs = append(categoryIDs, orders[i].GroupItems[j].CategoryID)
+			}
+		}
+		if len(categoryIDs) > 0 {
+			if err := r.db.NewSelect().Model(&categories).
+				Where("id IN (?)", bun.In(categoryIDs)).
+				Scan(ctx); err != nil {
+				return nil, err
+			}
+			catMap := make(map[uuid.UUID]*model.ProductCategory, len(categories))
+			for k := range categories {
+				ci := categories[k]
+				catMap[ci.ID] = &ci
+			}
+			for i := range orders {
+				for j := range orders[i].GroupItems {
+					g := &orders[i].GroupItems[j]
+					if cat, ok := catMap[g.CategoryID]; ok {
+						g.Category = cat
+					}
+				}
+			}
+		}
+	}
 	return orders, nil
 }
 

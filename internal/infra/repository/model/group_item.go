@@ -34,9 +34,9 @@ type GroupDetails struct {
 	UseProcessRule   bool             `bun:"use_process_rule"`
 	Observation      string           `bun:"observation"`
 	CategoryID       uuid.UUID        `bun:"column:category_id,type:uuid,notnull"`
-	Category         *ProductCategory `bun:"rel:belongs-to"`
+	Category         *ProductCategory `bun:"rel:belongs-to,join:category_id=id"`
 	ComplementItemID *uuid.UUID       `bun:"column:complement_item_id,type:uuid"`
-	ComplementItem   *Item            `bun:"rel:belongs-to"`
+	ComplementItem   *Item            `bun:"rel:belongs-to,join:complement_item_id=id"`
 }
 
 type GroupItemTimeLogs struct {
