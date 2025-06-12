@@ -59,7 +59,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	orderTableService.AddDependencies(tableRepository, orderService, companyService)
 	orderPickupService.AddDependencies(orderService)
 
-	shiftService.AddDependencies(employeeService)
+	shiftService.AddDependencies(employeeService, orderRepository)
 	companyService.AddDependencies(addressRepository, *schemaService, userRepository, *userService)
 
 	orderPrintService.AddDependencies(orderService, orderRepository, shiftService, groupItemRepository)

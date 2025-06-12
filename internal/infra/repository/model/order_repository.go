@@ -2,6 +2,8 @@ package model
 
 import (
 	"context"
+
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 type OrderRepository interface {
@@ -10,7 +12,7 @@ type OrderRepository interface {
 	UpdateOrder(ctx context.Context, order *Order) error
 	DeleteOrder(ctx context.Context, id string) error
 	GetOrderById(ctx context.Context, id string) (*Order, error)
-	GetAllOrders(ctx context.Context, shiftID string) ([]Order, error)
+	GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder) ([]Order, error)
 	GetAllOrdersWithDelivery(ctx context.Context, shiftID string, page, perPage int) ([]Order, error)
 	AddPaymentOrder(ctx context.Context, payment *PaymentOrder) error
 }

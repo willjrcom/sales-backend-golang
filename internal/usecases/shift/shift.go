@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	shiftdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/shift"
@@ -20,6 +21,7 @@ var (
 
 type Service struct {
 	r  model.ShiftRepository
+	ro model.OrderRepository
 	se *employeeusecases.Service
 }
 
@@ -27,8 +29,9 @@ func NewService(c model.ShiftRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) AddDependencies(se *employeeusecases.Service) {
+func (s *Service) AddDependencies(se *employeeusecases.Service, ro model.OrderRepository) {
 	s.se = se
+	s.ro = ro
 }
 
 func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.ShiftUpdateOpenDTO) (id uuid.UUID, err error) {
@@ -84,6 +87,15 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 		return ErrShiftAlreadyClosed
 	}
 
+	orderStatus := orderentity.GetAllOrderStatus()
+	orders, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), orderStatus)
+	if err != nil {
+		return err
+	}
+
+	shiftModel.Orders = orders
+	shift = shiftModel.ToDomain()
+
 	shift.CloseShift(endChange)
 
 	shiftModel.FromDomain(shift)
@@ -113,6 +125,13 @@ func (s *Service) GetCurrentShift(ctx context.Context) (shiftDTO *shiftdto.Shift
 		return nil, err
 	}
 
+	orderStatus := orderentity.GetAllOrderStatus()
+	orders, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), orderStatus)
+	if err != nil {
+		return nil, err
+	}
+
+	shiftModel.Orders = orders
 	shift := shiftModel.ToDomain()
 
 	shiftDTO = &shiftdto.ShiftDTO{}

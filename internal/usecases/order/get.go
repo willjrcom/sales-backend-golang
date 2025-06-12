@@ -3,6 +3,7 @@ package orderusecases
 import (
 	"context"
 
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 )
@@ -25,7 +26,13 @@ func (s *OrderService) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, e
 		return nil, err
 	}
 
-	if orderModels, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String()); err != nil {
+	validStatuses := []orderentity.StatusOrder{
+		orderentity.OrderStatusStaging,
+		orderentity.OrderStatusPending,
+		orderentity.OrderStatusReady,
+	}
+
+	if orderModels, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), validStatuses); err != nil {
 		return nil, err
 	} else {
 		orders := make([]orderdto.OrderDTO, 0)
