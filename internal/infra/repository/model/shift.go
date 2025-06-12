@@ -26,6 +26,13 @@ type ShiftCommonAttributes struct {
 	EndChange          *decimal.Decimal `bun:"end_change,type:decimal(10,2)"`
 	AttendantID        *uuid.UUID       `bun:"column:attendant_id,type:uuid"`
 	Attendant          *Employee        `bun:"rel:belongs-to"`
+
+	TotalOrders            int                        `bun:"total_orders"`
+	TotalSales             decimal.Decimal            `bun:"total_sales,type:decimal(10,2)"`
+	SalesByCategory        map[string]decimal.Decimal `bun:"sales_by_category,type:jsonb"`
+	ProductsSoldByCategory map[string]float64         `bun:"products_sold_by_category,type:jsonb"`
+	TotalItemsSold         float64                    `bun:"total_items_sold"`
+	AverageOrderValue      decimal.Decimal            `bun:"average_order_value,type:decimal(10,2)"`
 }
 
 type Redeem struct {
@@ -49,13 +56,19 @@ func (s *Shift) FromDomain(shift *shiftentity.Shift) {
 			ClosedAt: shift.ClosedAt,
 		},
 		ShiftCommonAttributes: ShiftCommonAttributes{
-			CurrentOrderNumber: shift.CurrentOrderNumber,
-			StartChange:        shift.StartChange,
-			EndChange:          shift.EndChange,
-			AttendantID:        shift.AttendantID,
-			Redeems:            []Redeem{},
-			Orders:             []Order{},
-			Attendant:          &Employee{},
+			CurrentOrderNumber:     shift.CurrentOrderNumber,
+			StartChange:            shift.StartChange,
+			EndChange:              shift.EndChange,
+			AttendantID:            shift.AttendantID,
+			Redeems:                []Redeem{},
+			Orders:                 []Order{},
+			Attendant:              &Employee{},
+			TotalOrders:            shift.TotalOrders,
+			TotalSales:             shift.TotalSales,
+			SalesByCategory:        shift.SalesByCategory,
+			ProductsSoldByCategory: shift.ProductsSoldByCategory,
+			TotalItemsSold:         shift.TotalItemsSold,
+			AverageOrderValue:      shift.AverageOrderValue,
 		},
 	}
 
@@ -87,13 +100,19 @@ func (s *Shift) ToDomain() *shiftentity.Shift {
 			ClosedAt: s.ClosedAt,
 		},
 		ShiftCommonAttributes: shiftentity.ShiftCommonAttributes{
-			CurrentOrderNumber: s.CurrentOrderNumber,
-			StartChange:        s.StartChange,
-			EndChange:          s.EndChange,
-			AttendantID:        s.AttendantID,
-			Redeems:            []shiftentity.Redeem{},
-			Orders:             []orderentity.Order{},
-			Attendant:          s.Attendant.ToDomain(),
+			CurrentOrderNumber:     s.CurrentOrderNumber,
+			StartChange:            s.StartChange,
+			EndChange:              s.EndChange,
+			AttendantID:            s.AttendantID,
+			Redeems:                []shiftentity.Redeem{},
+			Orders:                 []orderentity.Order{},
+			Attendant:              s.Attendant.ToDomain(),
+			TotalOrders:            s.TotalOrders,
+			TotalSales:             s.TotalSales,
+			SalesByCategory:        s.SalesByCategory,
+			ProductsSoldByCategory: s.ProductsSoldByCategory,
+			TotalItemsSold:         s.TotalItemsSold,
+			AverageOrderValue:      s.AverageOrderValue,
 		},
 	}
 

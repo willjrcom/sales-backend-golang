@@ -36,7 +36,6 @@ type ShiftCommonAttributes struct {
 	ProductsSoldByCategory map[string]float64
 	TotalItemsSold         float64         // soma de todas as quantidades de itens, para medir o “pulo de prato”
 	AverageOrderValue      decimal.Decimal // TotalSales ÷ TotalOrders, para análise de ticket médio
-
 }
 
 type Redeem struct {
@@ -65,6 +64,7 @@ func NewShift(startChange decimal.Decimal) *Shift {
 			OpenedAt: &now,
 		},
 	}
+
 	return shift
 }
 
@@ -80,16 +80,22 @@ func (s *Shift) CloseShift(endChange decimal.Decimal) (err error) {
 	s.SalesByCategory = make(map[string]decimal.Decimal)
 	s.ProductsSoldByCategory = make(map[string]float64)
 	s.TotalItemsSold = 0
+
 	// aggregate orders data
 	for _, o := range s.Orders {
+		if o.Status != orderentity.OrderStatusFinished {
+			continue
+		}
+
 		// ensure totals are up to date
-		o.CalculateTotalPrice()
+		// o.CalculateTotalPrice()
 		s.TotalSales = s.TotalSales.Add(o.TotalPayable)
 		for _, g := range o.GroupItems {
 			cat := ""
 			if g.Category != nil {
 				cat = g.Category.Name
 			}
+
 			// sum revenue by category
 			rev := g.TotalPrice
 			if prev, ok := s.SalesByCategory[cat]; ok {
@@ -97,18 +103,20 @@ func (s *Shift) CloseShift(endChange decimal.Decimal) (err error) {
 			} else {
 				s.SalesByCategory[cat] = rev
 			}
+
 			// sum quantities by category and total items
 			qty := g.Quantity
 			s.ProductsSoldByCategory[cat] += qty
 			s.TotalItemsSold += qty
 		}
 	}
+
+	s.AverageOrderValue = decimal.Zero
 	// average order value
 	if s.TotalOrders > 0 {
 		s.AverageOrderValue = s.TotalSales.Div(decimal.NewFromInt(int64(s.TotalOrders)))
-	} else {
-		s.AverageOrderValue = decimal.Zero
 	}
+
 	return nil
 }
 

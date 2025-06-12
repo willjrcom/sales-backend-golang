@@ -24,6 +24,13 @@ type ShiftCommonAttributes struct {
 	EndChange          *decimal.Decimal         `json:"end_change"`
 	AttendantID        *uuid.UUID               `json:"attendant_id"`
 	Attendant          *employeedto.EmployeeDTO `json:"attendant"`
+
+	TotalOrders            int                        `json:"total_orders"`
+	TotalSales             decimal.Decimal            `json:"total_sales"`
+	SalesByCategory        map[string]decimal.Decimal `json:"sales_by_category"`
+	ProductsSoldByCategory map[string]float64         `json:"products_sold_by_category"`
+	TotalItemsSold         float64                    `json:"total_items_sold"`
+	AverageOrderValue      decimal.Decimal            `json:"average_order_value"`
 }
 
 type ShiftTimeLogs struct {
@@ -42,13 +49,19 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 			ClosedAt: shift.ClosedAt,
 		},
 		ShiftCommonAttributes: ShiftCommonAttributes{
-			CurrentOrderNumber: shift.CurrentOrderNumber,
-			Orders:             []orderdto.OrderDTO{},
-			Redeems:            []RedeemDTO{},
-			StartChange:        shift.StartChange,
-			EndChange:          shift.EndChange,
-			AttendantID:        shift.AttendantID,
-			Attendant:          &employeedto.EmployeeDTO{},
+			CurrentOrderNumber:     shift.CurrentOrderNumber,
+			Orders:                 []orderdto.OrderDTO{},
+			Redeems:                []RedeemDTO{},
+			StartChange:            shift.StartChange,
+			EndChange:              shift.EndChange,
+			AttendantID:            shift.AttendantID,
+			Attendant:              &employeedto.EmployeeDTO{},
+			TotalOrders:            shift.TotalOrders,
+			TotalSales:             shift.TotalSales,
+			SalesByCategory:        shift.SalesByCategory,
+			ProductsSoldByCategory: shift.ProductsSoldByCategory,
+			TotalItemsSold:         shift.TotalItemsSold,
+			AverageOrderValue:      shift.AverageOrderValue,
 		},
 	}
 
