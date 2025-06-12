@@ -69,7 +69,7 @@ func NewShift(startChange decimal.Decimal) *Shift {
 }
 
 // CloseShift closes the shift with final change
-func (s *Shift) CloseShift(endChange decimal.Decimal) (err error) {
+func (s *Shift) CloseShift(endChange decimal.Decimal) {
 	now := time.Now().UTC()
 	s.EndChange = &endChange
 	s.ClosedAt = &now
@@ -116,8 +116,6 @@ func (s *Shift) CloseShift(endChange decimal.Decimal) (err error) {
 	if s.TotalOrders > 0 {
 		s.AverageOrderValue = s.TotalSales.Div(decimal.NewFromInt(int64(s.TotalOrders)))
 	}
-
-	return nil
 }
 
 func (s *Shift) IncrementCurrentOrder() {

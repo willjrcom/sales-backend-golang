@@ -125,7 +125,11 @@ func (s *Service) GetCurrentShift(ctx context.Context) (shiftDTO *shiftdto.Shift
 		return nil, err
 	}
 
-	orderStatus := orderentity.GetAllOrderStatus()
+	orderStatus := []orderentity.StatusOrder{
+		orderentity.OrderStatusStaging,
+		orderentity.OrderStatusPending,
+		orderentity.OrderStatusReady,
+	}
 	orders, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), orderStatus, false)
 	if err != nil {
 		return nil, err
