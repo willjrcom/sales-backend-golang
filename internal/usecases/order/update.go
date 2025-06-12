@@ -121,9 +121,11 @@ func (s *OrderService) FinishOrder(ctx context.Context, dto *entitydto.IDRequest
 
 	// Update order to new shift
 	currentShift, _ := s.rs.GetCurrentShift(ctx)
-	if currentShift != nil && order.ShiftID != currentShift.ID {
-		order.ShiftID = currentShift.ID
+	if currentShift == nil {
+		return fmt.Errorf("must open a new shift")
 	}
+
+	order.ShiftID = currentShift.ID
 
 	orderModel.FromDomain(order)
 	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
