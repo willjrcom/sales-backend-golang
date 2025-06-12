@@ -18,15 +18,7 @@ type OrderPaymentCreateDTO struct {
 }
 
 func (u *OrderPaymentCreateDTO) validate() error {
-	if err := u.validatePayMethod(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (u *OrderPaymentCreateDTO) validatePayMethod() error {
-	if u.TotalPaid.IsNegative() {
+	if u.TotalPaid.IsZero() || u.TotalPaid.IsNegative() {
 		return ErrTotalPaidInvalid
 	}
 
