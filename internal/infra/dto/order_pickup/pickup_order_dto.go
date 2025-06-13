@@ -20,8 +20,9 @@ type OrderPickupCommonAttributes struct {
 }
 
 type PickupTimeLogs struct {
-	PendingAt *time.Time `json:"pending_at"`
-	ReadyAt   *time.Time `json:"ready_at"`
+	PendingAt   *time.Time `json:"pending_at"`
+	ReadyAt     *time.Time `json:"ready_at"`
+	DeliveredAt *time.Time `json:"delivered_at"`
 }
 
 func (o *OrderPickupDTO) FromDomain(pickup *orderentity.OrderPickup) {
@@ -30,14 +31,15 @@ func (o *OrderPickupDTO) FromDomain(pickup *orderentity.OrderPickup) {
 	}
 	*o = OrderPickupDTO{
 		ID: pickup.ID,
-		PickupTimeLogs: PickupTimeLogs{
-			PendingAt: pickup.PendingAt,
-			ReadyAt:   pickup.ReadyAt,
-		},
 		OrderPickupCommonAttributes: OrderPickupCommonAttributes{
 			Name:    pickup.Name,
 			Status:  pickup.Status,
 			OrderID: pickup.OrderID,
+		},
+		PickupTimeLogs: PickupTimeLogs{
+			PendingAt:   pickup.PendingAt,
+			ReadyAt:     pickup.ReadyAt,
+			DeliveredAt: pickup.DeliveredAt,
 		},
 	}
 }

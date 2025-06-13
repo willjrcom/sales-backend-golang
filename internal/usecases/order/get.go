@@ -65,3 +65,23 @@ func (s *OrderService) GetAllOrdersWithDelivery(ctx context.Context, page, perPa
 		return orders, nil
 	}
 }
+
+func (s *OrderService) GetAllOrdersWithPickup(ctx context.Context, page, perPage int) ([]orderdto.OrderDTO, error) {
+	shiftModel, err := s.rs.GetCurrentShift(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if orderModels, err := s.ro.GetAllOrdersWithPickup(ctx, shiftModel.ID.String(), page, perPage); err != nil {
+		return nil, err
+	} else {
+		orders := make([]orderdto.OrderDTO, 0)
+		for _, orderModel := range orderModels {
+			order := orderModel.ToDomain()
+			orderDTO := &orderdto.OrderDTO{}
+			orderDTO.FromDomain(order)
+			orders = append(orders, *orderDTO)
+		}
+		return orders, nil
+	}
+}

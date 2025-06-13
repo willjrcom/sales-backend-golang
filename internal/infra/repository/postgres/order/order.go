@@ -379,8 +379,6 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 	}
 
 	validStatuses := []string{
-		string(orderentity.OrderStatusStaging),
-		string(orderentity.OrderStatusPending),
 		string(orderentity.OrderStatusReady),
 	}
 
@@ -389,6 +387,34 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 		Relation("Delivery.Client").
 		Relation("Delivery.Address").
 		Relation("Delivery.Driver").
+		Where(`"order"."status" IN (?) OR "order"."shift_id" = ?`, bun.In(validStatuses), shiftID).
+		Limit(perPage).
+		Offset(page * perPage)
+
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return orders, nil
+}
+
+func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
+	orders := []model.Order{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	validStatuses := []string{
+		string(orderentity.OrderStatusReady),
+	}
+
+	query := r.db.NewSelect().Model(&orders).
+		Where("table.id IS NOT NULL").
+		Relation("Table").
 		Where(`"order"."status" IN (?) OR "order"."shift_id" = ?`, bun.In(validStatuses), shiftID).
 		Limit(perPage).
 		Offset(page * perPage)

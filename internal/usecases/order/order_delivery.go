@@ -36,6 +36,7 @@ type IGetDeliveryService interface {
 
 type IUpdateDeliveryService interface {
 	PendOrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
+	ReadyOrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
 	ShipOrderDelivery(ctx context.Context, dtoDriver *orderdeliverydto.DeliveryOrderUpdateShipDTO) (err error)
 	CancelOrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
 	OrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
@@ -142,6 +143,25 @@ func (s *OrderDeliveryService) PendOrderDelivery(ctx context.Context, dtoID *ent
 
 	orderDelivery := orderDeliveryModel.ToDomain()
 	if err := orderDelivery.Pend(); err != nil {
+		return err
+	}
+
+	orderDeliveryModel.FromDomain(orderDelivery)
+	if err = s.rdo.UpdateOrderDelivery(ctx, orderDeliveryModel); err != nil {
+		return err
+	}
+
+	return nil
+}
+func (s *OrderDeliveryService) ReadyOrderDelivery(ctx context.Context, dtoID *entitydto.IDRequest) (err error) {
+	orderDeliveryModel, err := s.rdo.GetDeliveryById(ctx, dtoID.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	orderDelivery := orderDeliveryModel.ToDomain()
+	if err := orderDelivery.Ready(); err != nil {
 		return err
 	}
 

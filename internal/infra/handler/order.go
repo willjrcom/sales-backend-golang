@@ -29,6 +29,7 @@ func NewHandlerOrder(orderService *orderusecases.OrderService) *handler.Handler 
 		c.Get("/{id}", h.handlerGetOrderById)
 		c.Get("/all", h.handlerGetAllOrders)
 		c.Get("/all/delivery", h.GetAllOrdersWithDelivery)
+		c.Get("/all/pickup", h.GetAllOrdersWithDelivery)
 		c.Put("/update/{id}/observation", h.handlerUpdateObservation)
 		c.Put("/update/{id}/payment", h.handlerUpdatePaymentMethod)
 		c.Post("/pending/{id}", h.handlerPendingOrder)
@@ -82,6 +83,20 @@ func (h *handlerOrderImpl) GetAllOrdersWithDelivery(w http.ResponseWriter, r *ht
 	page, perPage := headerservice.GetPageAndPerPage(r, 0, 20)
 
 	orders, err := h.s.GetAllOrdersWithDelivery(ctx, page, perPage)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
+}
+
+func (h *handlerOrderImpl) GetAllOrdersWithPickup(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 20)
+
+	orders, err := h.s.GetAllOrdersWithPickup(ctx, page, perPage)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

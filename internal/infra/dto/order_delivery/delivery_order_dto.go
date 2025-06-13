@@ -33,6 +33,7 @@ type OrderDeliveryCommonAttributes struct {
 
 type DeliveryTimeLogs struct {
 	PendingAt   *time.Time `json:"pending_at"`
+	ReadyAt     *time.Time `json:"ready_at"`
 	ShippedAt   *time.Time `json:"shipped_at"`
 	DeliveredAt *time.Time `json:"delivered_at"`
 }
@@ -58,6 +59,7 @@ func (o *OrderDeliveryDTO) FromDomain(delivery *orderentity.OrderDelivery) {
 		},
 		DeliveryTimeLogs: DeliveryTimeLogs{
 			PendingAt:   delivery.PendingAt,
+			ReadyAt:     delivery.ReadyAt,
 			ShippedAt:   delivery.ShippedAt,
 			DeliveredAt: delivery.DeliveredAt,
 		},

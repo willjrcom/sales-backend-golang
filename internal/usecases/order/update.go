@@ -104,6 +104,23 @@ func (s *OrderService) ReadyOrder(ctx context.Context, dto *entitydto.IDRequest)
 		return err
 	}
 
+	if order.Delivery != nil {
+		dtoDelivery := &entitydto.IDRequest{
+			ID: order.Delivery.ID,
+		}
+		if err := s.sd.ReadyOrderDelivery(ctx, dtoDelivery); err != nil {
+			return err
+		}
+
+	} else if order.Pickup != nil {
+		dtoPickup := &entitydto.IDRequest{
+			ID: order.Pickup.ID,
+		}
+		if err := s.sp.ReadyOrder(ctx, dtoPickup); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
