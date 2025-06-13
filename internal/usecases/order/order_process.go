@@ -157,13 +157,13 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 		return uuid.Nil, err
 	}
 
-	last, err := s.rpr.IsLastProcessRuleByID(ctx, process.ProcessRuleID)
+	isLast, err := s.rpr.IsLastProcessRuleByID(ctx, process.ProcessRuleID)
 	if err != nil {
 		return uuid.Nil, err
 	}
 
 	// Processes finished
-	if last {
+	if isLast {
 		entityDtoID := &entitydto.IDRequest{ID: process.GroupItemID}
 		if err := s.sgi.ReadyGroupItem(ctx, entityDtoID); err != nil {
 			return uuid.Nil, err

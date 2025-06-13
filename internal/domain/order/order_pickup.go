@@ -25,9 +25,10 @@ type OrderPickupCommonAttributes struct {
 }
 
 type PickupTimeLogs struct {
-	PendingAt  *time.Time
-	ReadyAt    *time.Time
-	CanceledAt *time.Time
+	PendingAt   *time.Time
+	ReadyAt     *time.Time
+	DeliveredAt *time.Time
+	CanceledAt  *time.Time
 }
 
 func NewOrderPickup(name string) *OrderPickup {
@@ -61,6 +62,17 @@ func (d *OrderPickup) Ready() error {
 	d.ReadyAt = &time.Time{}
 	*d.ReadyAt = time.Now().UTC()
 	d.Status = OrderPickupStatusReady
+	return nil
+}
+
+func (d *OrderPickup) Delivery() error {
+	if d.Status != OrderPickupStatusReady {
+		return ErrOrderPickupMustBeReady
+	}
+
+	d.DeliveredAt = &time.Time{}
+	*d.DeliveredAt = time.Now().UTC()
+	d.Status = OrderPickupStatusDelivered
 	return nil
 }
 

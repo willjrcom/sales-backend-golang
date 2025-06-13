@@ -13,6 +13,7 @@ import (
 
 var (
 	ErrOrderDeliveryMustBePending = errors.New("order delivery must be pending")
+	ErrOrderDeliveryMustBeReady   = errors.New("order delivery must be ready")
 	ErrOrderDeliveryMustBeShipped = errors.New("order delivery must be shipped")
 )
 
@@ -38,6 +39,7 @@ type OrderDeliveryCommonAttributes struct {
 
 type DeliveryTimeLogs struct {
 	PendingAt   *time.Time
+	ReadyAt     *time.Time
 	ShippedAt   *time.Time
 	DeliveredAt *time.Time
 	CanceledAt  *time.Time
@@ -72,9 +74,20 @@ func (d *OrderDelivery) Pend() error {
 	return nil
 }
 
-func (d *OrderDelivery) Ship(driverID *uuid.UUID) error {
+func (d *OrderDelivery) Ready() error {
 	if d.Status != OrderDeliveryStatusPending {
-		return ErrOrderDeliveryMustBePending
+		return nil
+	}
+
+	d.ReadyAt = &time.Time{}
+	*d.ReadyAt = time.Now().UTC()
+	d.Status = OrderDeliveryStatusReady
+	return nil
+}
+
+func (d *OrderDelivery) Ship(driverID *uuid.UUID) error {
+	if d.Status != OrderDeliveryStatusReady {
+		return ErrOrderDeliveryMustBeReady
 	}
 
 	d.DriverID = driverID

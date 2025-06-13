@@ -31,6 +31,7 @@ type IGetPickupService interface {
 type IUpdatePickupService interface {
 	PendingOrder(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
 	ReadyOrder(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
+	DeliveryOrder(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
 	CancelOrderPickup(ctx context.Context, dtoID *entitydto.IDRequest) (err error)
 	UpdateName(ctx context.Context, dtoID *entitydto.IDRequest, dtoPickup *orderpickupdto.UpdateOrderPickupInput) (err error)
 }
@@ -102,6 +103,26 @@ func (s *OrderPickupService) ReadyOrder(ctx context.Context, dtoID *entitydto.ID
 
 	orderPickup := orderPickupModel.ToDomain()
 	if err := orderPickup.Ready(); err != nil {
+		return err
+	}
+
+	orderPickupModel.FromDomain(orderPickup)
+	if err = s.rp.UpdateOrderPickup(ctx, orderPickupModel); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *OrderPickupService) DeliveryOrder(ctx context.Context, dtoID *entitydto.IDRequest) (err error) {
+	orderPickupModel, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
+
+	if err != nil {
+		return err
+	}
+
+	orderPickup := orderPickupModel.ToDomain()
+	if err := orderPickup.Delivery(); err != nil {
 		return err
 	}
 
