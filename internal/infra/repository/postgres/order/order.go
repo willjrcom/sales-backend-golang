@@ -413,8 +413,8 @@ func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID
 	}
 
 	query := r.db.NewSelect().Model(&orders).
-		Where("table.id IS NOT NULL").
-		Relation("Table").
+		Where("pickup.id IS NOT NULL").
+		Relation("Pickup").
 		Where(`"order"."status" IN (?) OR "order"."shift_id" = ?`, bun.In(validStatuses), shiftID).
 		Limit(perPage).
 		Offset(page * perPage)

@@ -24,6 +24,7 @@ var (
 	ErrDeliveryOrderMustBeDelivered = errors.New("order delivery must be delivered")
 	ErrOrderTableMustBeClosed       = errors.New("order table must be closed")
 	ErrOrderPickupMustBeReady       = errors.New("order pickup must be ready")
+	ErrOrderPickupMustBeDelivered   = errors.New("order pickup must be delivered")
 )
 
 type Order struct {
@@ -163,8 +164,8 @@ func (o *Order) FinishOrder() (err error) {
 		return ErrDeliveryOrderMustBeDelivered
 	} else if o.Table != nil && o.Table.Status != OrderTableStatusClosed {
 		return ErrOrderTableMustBeClosed
-	} else if o.Pickup != nil && o.Pickup.Status != OrderPickupStatusReady {
-		return ErrOrderPickupMustBeReady
+	} else if o.Pickup != nil && o.Pickup.Status != OrderPickupStatusDelivered {
+		return ErrOrderPickupMustBeDelivered
 	}
 
 	totalPaid := decimal.Zero

@@ -29,7 +29,7 @@ func NewHandlerOrder(orderService *orderusecases.OrderService) *handler.Handler 
 		c.Get("/{id}", h.handlerGetOrderById)
 		c.Get("/all", h.handlerGetAllOrders)
 		c.Get("/all/delivery", h.GetAllOrdersWithDelivery)
-		c.Get("/all/pickup", h.GetAllOrdersWithDelivery)
+		c.Get("/all/pickup", h.GetAllOrdersWithPickup)
 		c.Put("/update/{id}/observation", h.handlerUpdateObservation)
 		c.Put("/update/{id}/payment", h.handlerUpdatePaymentMethod)
 		c.Post("/pending/{id}", h.handlerPendingOrder)
