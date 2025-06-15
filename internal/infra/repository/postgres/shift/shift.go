@@ -114,7 +114,7 @@ func (r *ShiftRepositoryBun) GetFullCurrentShift(ctx context.Context) (*model.Sh
 	return shift, nil
 }
 
-func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context) ([]model.Shift, error) {
+func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context, page int, perPage int) ([]model.Shift, error) {
 	Shifts := []model.Shift{}
 
 	r.mu.Lock()
@@ -124,7 +124,10 @@ func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context) ([]model.Shift, e
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&Shifts).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&Shifts).
+		Limit(perPage).
+		Offset(page * perPage).
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 

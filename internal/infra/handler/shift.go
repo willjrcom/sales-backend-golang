@@ -9,6 +9,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	shiftdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/shift"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	shiftusecases "github.com/willjrcom/sales-backend-go/internal/usecases/shift"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -107,7 +108,10 @@ func (h *handlerShiftImpl) handlerGetCurrentShift(w http.ResponseWriter, r *http
 func (h *handlerShiftImpl) handlerGetAllShifts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if shifts, err := h.s.GetAllShifts(ctx); err != nil {
+	// parse pagination query params
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
+
+	if shifts, err := h.s.GetAllShifts(ctx, page, perPage); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 	} else {
 		jsonpkg.ResponseJson(w, r, http.StatusOK, shifts)

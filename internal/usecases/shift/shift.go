@@ -145,8 +145,8 @@ func (s *Service) GetCurrentShift(ctx context.Context) (shiftDTO *shiftdto.Shift
 	return shiftDTO, nil
 }
 
-func (s *Service) GetAllShifts(ctx context.Context) (shift []shiftdto.ShiftDTO, err error) {
-	shiftModels, err := s.r.GetAllShifts(ctx)
+func (s *Service) GetAllShifts(ctx context.Context, page int, perPage int) (shift []shiftdto.ShiftDTO, err error) {
+	shiftModels, err := s.r.GetAllShifts(ctx, page, perPage)
 	if err != nil {
 		return nil, err
 	}

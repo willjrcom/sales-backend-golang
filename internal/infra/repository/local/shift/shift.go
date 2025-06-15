@@ -68,7 +68,7 @@ func (r *ShiftRepositoryLocal) GetFullCurrentShift(ctx context.Context) (*model.
 	return nil, nil
 }
 
-func (r *ShiftRepositoryLocal) GetAllShifts(ctx context.Context) ([]model.Shift, error) {
+func (r *ShiftRepositoryLocal) GetAllShifts(ctx context.Context, page int, perPage int) ([]model.Shift, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	list := make([]model.Shift, 0, len(r.shifts))
