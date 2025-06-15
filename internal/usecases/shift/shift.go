@@ -99,6 +99,7 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 	shift = shiftModel.ToDomain()
 
 	shift.CloseShift(endChange)
+	shift.Load()
 
 	shiftModel.FromDomain(shift)
 	if err := s.r.UpdateShift(ctx, shiftModel); err != nil {
@@ -115,7 +116,7 @@ func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IDRequest) 
 	}
 
 	shift := shiftModel.ToDomain()
-
+	shift.Load()
 	shiftDTO = &shiftdto.ShiftDTO{}
 	shiftDTO.FromDomain(shift)
 	return shiftDTO, nil
@@ -131,14 +132,18 @@ func (s *Service) GetCurrentShift(ctx context.Context) (shiftDTO *shiftdto.Shift
 		orderentity.OrderStatusStaging,
 		orderentity.OrderStatusPending,
 		orderentity.OrderStatusReady,
+		orderentity.OrderStatusFinished,
+		orderentity.OrderStatusCanceled,
 	}
-	orders, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), orderStatus, false)
+	orders, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), orderStatus, true)
 	if err != nil {
 		return nil, err
 	}
 
 	shiftModel.Orders = orders
+
 	shift := shiftModel.ToDomain()
+	shift.Load()
 
 	shiftDTO = &shiftdto.ShiftDTO{}
 	shiftDTO.FromDomain(shift)

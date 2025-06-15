@@ -125,6 +125,7 @@ func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context, page int, perPage
 	}
 
 	if err := r.db.NewSelect().Model(&Shifts).
+		Relation("Orders").
 		Limit(perPage).
 		Offset(page * perPage).
 		Scan(ctx); err != nil {

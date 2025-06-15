@@ -70,6 +70,10 @@ func (s *Shift) CloseShift(endChange decimal.Decimal) {
 	s.EndChange = &endChange
 	s.ClosedAt = &now
 
+	s.Load()
+}
+
+func (s *Shift) Load() {
 	// compute analytics for reporting
 	s.TotalOrdersFinished = 0
 	s.TotalOrdersCanceled = 0
@@ -96,7 +100,6 @@ func (s *Shift) CloseShift(endChange decimal.Decimal) {
 		s.Payments = append(s.Payments, o.Payments...)
 
 		// ensure totals are up to date
-		// o.CalculateTotalPrice()
 		s.TotalSales = s.TotalSales.Add(o.TotalPayable)
 		for _, g := range o.GroupItems {
 			cat := ""
