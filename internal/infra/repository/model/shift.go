@@ -27,12 +27,14 @@ type ShiftCommonAttributes struct {
 	AttendantID        *uuid.UUID       `bun:"column:attendant_id,type:uuid"`
 	Attendant          *Employee        `bun:"rel:belongs-to"`
 
-	TotalOrders            int                        `bun:"total_orders"`
+	TotalOrdersFinished    int                        `bun:"total_orders_finished"`
+	TotalOrdersCanceled    int                        `bun:"total_orders_canceled"`
 	TotalSales             decimal.Decimal            `bun:"total_sales,type:decimal(10,2)"`
 	SalesByCategory        map[string]decimal.Decimal `bun:"sales_by_category,type:jsonb"`
 	ProductsSoldByCategory map[string]float64         `bun:"products_sold_by_category,type:jsonb"`
 	TotalItemsSold         float64                    `bun:"total_items_sold"`
 	AverageOrderValue      decimal.Decimal            `bun:"average_order_value,type:decimal(10,2)"`
+	Payments               []PaymentOrder             `bun:"payments,type:jsonb"`
 }
 
 type Redeem struct {
@@ -63,12 +65,14 @@ func (s *Shift) FromDomain(shift *shiftentity.Shift) {
 			Redeems:                []Redeem{},
 			Orders:                 []Order{},
 			Attendant:              &Employee{},
-			TotalOrders:            shift.TotalOrders,
+			TotalOrdersFinished:    shift.TotalOrdersFinished,
+			TotalOrdersCanceled:    shift.TotalOrdersCanceled,
 			TotalSales:             shift.TotalSales,
 			SalesByCategory:        shift.SalesByCategory,
 			ProductsSoldByCategory: shift.ProductsSoldByCategory,
 			TotalItemsSold:         shift.TotalItemsSold,
 			AverageOrderValue:      shift.AverageOrderValue,
+			Payments:               []PaymentOrder{},
 		},
 	}
 
@@ -84,6 +88,12 @@ func (s *Shift) FromDomain(shift *shiftentity.Shift) {
 			Value: redeem.Value,
 		}
 		s.Redeems = append(s.Redeems, r)
+	}
+
+	for _, payment := range shift.Payments {
+		p := PaymentOrder{}
+		p.FromDomain(&payment)
+		s.Payments = append(s.Payments, p)
 	}
 
 	s.Attendant.FromDomain(shift.Attendant)
@@ -107,12 +117,14 @@ func (s *Shift) ToDomain() *shiftentity.Shift {
 			Redeems:                []shiftentity.Redeem{},
 			Orders:                 []orderentity.Order{},
 			Attendant:              s.Attendant.ToDomain(),
-			TotalOrders:            s.TotalOrders,
+			TotalOrdersFinished:    s.TotalOrdersFinished,
+			TotalOrdersCanceled:    s.TotalOrdersCanceled,
 			TotalSales:             s.TotalSales,
 			SalesByCategory:        s.SalesByCategory,
 			ProductsSoldByCategory: s.ProductsSoldByCategory,
 			TotalItemsSold:         s.TotalItemsSold,
 			AverageOrderValue:      s.AverageOrderValue,
+			Payments:               []orderentity.PaymentOrder{},
 		},
 	}
 
@@ -125,6 +137,10 @@ func (s *Shift) ToDomain() *shiftentity.Shift {
 			Name:  redeem.Name,
 			Value: redeem.Value,
 		})
+	}
+
+	for _, payment := range s.Payments {
+		shift.Payments = append(shift.Payments, *payment.ToDomain())
 	}
 
 	return shift

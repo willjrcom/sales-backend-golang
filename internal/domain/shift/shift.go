@@ -17,25 +17,21 @@ type Shift struct {
 }
 
 type ShiftCommonAttributes struct {
-	CurrentOrderNumber int
-	Orders             []orderentity.Order
-	Redeems            []Redeem
-	StartChange        decimal.Decimal
-	EndChange          *decimal.Decimal
-	AttendantID        *uuid.UUID
-	Attendant          *employeeentity.Employee
-
-	// Analytics fields for reporting
-	// TotalOrders is the count of orders processed in this shift.
-	TotalOrders int
-	// TotalSales is the sum of TotalPayable of all orders in this shift.
-	TotalSales decimal.Decimal
-	// SalesByCategory maps each product category name to the summed revenue for that category.
-	SalesByCategory map[string]decimal.Decimal
-	// ProductsSoldByCategory maps each product category name to the total quantity sold.
+	CurrentOrderNumber     int
+	Orders                 []orderentity.Order
+	Redeems                []Redeem
+	StartChange            decimal.Decimal
+	EndChange              *decimal.Decimal
+	AttendantID            *uuid.UUID
+	Attendant              *employeeentity.Employee
+	TotalOrdersFinished    int
+	TotalOrdersCanceled    int
+	TotalSales             decimal.Decimal
+	SalesByCategory        map[string]decimal.Decimal
 	ProductsSoldByCategory map[string]float64
 	TotalItemsSold         float64         // soma de todas as quantidades de itens, para medir o “pulo de prato”
 	AverageOrderValue      decimal.Decimal // TotalSales ÷ TotalOrders, para análise de ticket médio
+	Payments               []orderentity.PaymentOrder
 }
 
 type Redeem struct {
@@ -73,19 +69,31 @@ func (s *Shift) CloseShift(endChange decimal.Decimal) {
 	now := time.Now().UTC()
 	s.EndChange = &endChange
 	s.ClosedAt = &now
+
 	// compute analytics for reporting
-	s.TotalOrders = len(s.Orders)
+	s.TotalOrdersFinished = 0
+	s.TotalOrdersCanceled = 0
 	s.TotalSales = decimal.Zero
+
 	// initialize maps
 	s.SalesByCategory = make(map[string]decimal.Decimal)
 	s.ProductsSoldByCategory = make(map[string]float64)
 	s.TotalItemsSold = 0
+	s.Payments = make([]orderentity.PaymentOrder, 0)
 
 	// aggregate orders data
 	for _, o := range s.Orders {
+		if o.Status == orderentity.OrderStatusCanceled {
+			s.TotalOrdersCanceled++
+			continue
+		}
+
 		if o.Status != orderentity.OrderStatusFinished {
 			continue
 		}
+
+		s.TotalOrdersFinished++
+		s.Payments = append(s.Payments, o.Payments...)
 
 		// ensure totals are up to date
 		// o.CalculateTotalPrice()
@@ -113,8 +121,8 @@ func (s *Shift) CloseShift(endChange decimal.Decimal) {
 
 	s.AverageOrderValue = decimal.Zero
 	// average order value
-	if s.TotalOrders > 0 {
-		s.AverageOrderValue = s.TotalSales.Div(decimal.NewFromInt(int64(s.TotalOrders)))
+	if s.TotalOrdersFinished > 0 {
+		s.AverageOrderValue = s.TotalSales.Div(decimal.NewFromInt(int64(s.TotalOrdersFinished)))
 	}
 }
 

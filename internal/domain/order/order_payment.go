@@ -1,10 +1,11 @@
 package orderentity
 
 import (
-   "time"
-   "github.com/google/uuid"
-   "github.com/shopspring/decimal"
-   "github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 type PaymentOrder struct {
@@ -14,7 +15,7 @@ type PaymentOrder struct {
 }
 
 type PaymentCommonAttributes struct {
-   TotalPaid decimal.Decimal
+	TotalPaid decimal.Decimal
 	Method    PayMethod
 	OrderID   uuid.UUID
 }
@@ -25,17 +26,17 @@ type PaymentTimeLogs struct {
 
 // NewPayment creates a new payment record for an order
 func NewPayment(totalPaid decimal.Decimal, method PayMethod, orderID uuid.UUID) *PaymentOrder {
-   return &PaymentOrder{
-       Entity: entity.NewEntity(),
-       PaymentCommonAttributes: PaymentCommonAttributes{
-           TotalPaid: totalPaid,
-           Method:    method,
-           OrderID:   orderID,
-       },
-       PaymentTimeLogs: PaymentTimeLogs{
-           PaidAt: time.Now().UTC(),
-       },
-   }
+	return &PaymentOrder{
+		Entity: entity.NewEntity(),
+		PaymentCommonAttributes: PaymentCommonAttributes{
+			TotalPaid: totalPaid,
+			Method:    method,
+			OrderID:   orderID,
+		},
+		PaymentTimeLogs: PaymentTimeLogs{
+			PaidAt: time.Now().UTC(),
+		},
+	}
 }
 
 type PayMethod string

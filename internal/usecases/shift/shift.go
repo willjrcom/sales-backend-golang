@@ -77,7 +77,6 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 	}
 
 	shiftModel, err := s.r.GetFullCurrentShift(ctx)
-
 	if err != nil {
 		return err
 	}
@@ -87,7 +86,10 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 		return ErrShiftAlreadyClosed
 	}
 
-	orderStatus := orderentity.GetAllOrderStatus()
+	orderStatus := []orderentity.StatusOrder{
+		orderentity.OrderStatusFinished,
+		orderentity.OrderStatusCanceled,
+	}
 	orders, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), orderStatus, true)
 	if err != nil {
 		return err

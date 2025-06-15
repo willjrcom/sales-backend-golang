@@ -17,20 +17,21 @@ type ShiftDTO struct {
 }
 
 type ShiftCommonAttributes struct {
-	CurrentOrderNumber int                      `json:"current_order_number"`
-	Orders             []orderdto.OrderDTO      `json:"orders"`
-	Redeems            []RedeemDTO              `json:"redeems"`
-	StartChange        decimal.Decimal          `json:"start_change"`
-	EndChange          *decimal.Decimal         `json:"end_change"`
-	AttendantID        *uuid.UUID               `json:"attendant_id"`
-	Attendant          *employeedto.EmployeeDTO `json:"attendant"`
-
-	TotalOrders            int                        `json:"total_orders"`
+	CurrentOrderNumber     int                        `json:"current_order_number"`
+	Orders                 []orderdto.OrderDTO        `json:"orders"`
+	Redeems                []RedeemDTO                `json:"redeems"`
+	StartChange            decimal.Decimal            `json:"start_change"`
+	EndChange              *decimal.Decimal           `json:"end_change"`
+	AttendantID            *uuid.UUID                 `json:"attendant_id"`
+	Attendant              *employeedto.EmployeeDTO   `json:"attendant"`
+	TotalOrdersFinished    int                        `json:"total_orders_finished"`
+	TotalOrdersCanceled    int                        `json:"total_orders_canceled"`
 	TotalSales             decimal.Decimal            `json:"total_sales"`
 	SalesByCategory        map[string]decimal.Decimal `json:"sales_by_category"`
 	ProductsSoldByCategory map[string]float64         `json:"products_sold_by_category"`
 	TotalItemsSold         float64                    `json:"total_items_sold"`
 	AverageOrderValue      decimal.Decimal            `json:"average_order_value"`
+	Payments               []orderdto.PaymentOrderDTO `json:"payments"`
 }
 
 type ShiftTimeLogs struct {
@@ -56,12 +57,14 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 			EndChange:              shift.EndChange,
 			AttendantID:            shift.AttendantID,
 			Attendant:              &employeedto.EmployeeDTO{},
-			TotalOrders:            shift.TotalOrders,
+			TotalOrdersFinished:    shift.TotalOrdersFinished,
+			TotalOrdersCanceled:    shift.TotalOrdersCanceled,
 			TotalSales:             shift.TotalSales,
 			SalesByCategory:        shift.SalesByCategory,
 			ProductsSoldByCategory: shift.ProductsSoldByCategory,
 			TotalItemsSold:         shift.TotalItemsSold,
 			AverageOrderValue:      shift.AverageOrderValue,
+			Payments:               []orderdto.PaymentOrderDTO{},
 		},
 	}
 
@@ -75,6 +78,12 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 		r := RedeemDTO{}
 		r.FromDomain(&redeem)
 		s.Redeems = append(s.Redeems, r)
+	}
+
+	for _, payment := range shift.Payments {
+		p := orderdto.PaymentOrderDTO{}
+		p.FromDomain(&payment)
+		s.Payments = append(s.Payments, p)
 	}
 
 	s.Attendant.FromDomain(shift.Attendant)
