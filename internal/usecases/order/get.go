@@ -3,6 +3,7 @@ package orderusecases
 import (
 	"context"
 
+	"github.com/google/uuid"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
@@ -21,9 +22,10 @@ func (s *OrderService) GetOrderById(ctx context.Context, dto *entitydto.IDReques
 }
 
 func (s *OrderService) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, error) {
-	shiftModel, err := s.rs.GetCurrentShift(ctx)
-	if err != nil {
-		return nil, err
+	shiftID := uuid.Nil
+	shiftModel, _ := s.rs.GetCurrentShift(ctx)
+	if shiftModel != nil {
+		shiftID = shiftModel.ID
 	}
 
 	validStatuses := []orderentity.StatusOrder{
@@ -32,7 +34,7 @@ func (s *OrderService) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, e
 		orderentity.OrderStatusReady,
 	}
 
-	if orderModels, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), validStatuses, false); err != nil {
+	if orderModels, err := s.ro.GetAllOrders(ctx, shiftID.String(), validStatuses, false); err != nil {
 		return nil, err
 	} else {
 		orders := make([]orderdto.OrderDTO, 0)
@@ -47,12 +49,13 @@ func (s *OrderService) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, e
 }
 
 func (s *OrderService) GetAllOrdersWithDelivery(ctx context.Context, page, perPage int) ([]orderdto.OrderDTO, error) {
-	shiftModel, err := s.rs.GetCurrentShift(ctx)
-	if err != nil {
-		return nil, err
+	shiftID := uuid.Nil
+	shiftModel, _ := s.rs.GetCurrentShift(ctx)
+	if shiftModel != nil {
+		shiftID = shiftModel.ID
 	}
 
-	if orderModels, err := s.ro.GetAllOrdersWithDelivery(ctx, shiftModel.ID.String(), page, perPage); err != nil {
+	if orderModels, err := s.ro.GetAllOrdersWithDelivery(ctx, shiftID.String(), page, perPage); err != nil {
 		return nil, err
 	} else {
 		orders := make([]orderdto.OrderDTO, 0)
@@ -67,12 +70,13 @@ func (s *OrderService) GetAllOrdersWithDelivery(ctx context.Context, page, perPa
 }
 
 func (s *OrderService) GetAllOrdersWithPickup(ctx context.Context, page, perPage int) ([]orderdto.OrderDTO, error) {
-	shiftModel, err := s.rs.GetCurrentShift(ctx)
-	if err != nil {
-		return nil, err
+	shiftID := uuid.Nil
+	shiftModel, _ := s.rs.GetCurrentShift(ctx)
+	if shiftModel != nil {
+		shiftID = shiftModel.ID
 	}
 
-	if orderModels, err := s.ro.GetAllOrdersWithPickup(ctx, shiftModel.ID.String(), page, perPage); err != nil {
+	if orderModels, err := s.ro.GetAllOrdersWithPickup(ctx, shiftID.String(), page, perPage); err != nil {
 		return nil, err
 	} else {
 		orders := make([]orderdto.OrderDTO, 0)

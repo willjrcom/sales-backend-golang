@@ -378,8 +378,8 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 		return nil, err
 	}
 
-	validStatuses := []string{
-		string(orderentity.OrderStatusReady),
+	validStatuses := []orderentity.StatusOrder{
+		orderentity.OrderStatusReady,
 	}
 
 	query := r.db.NewSelect().Model(&orders).
