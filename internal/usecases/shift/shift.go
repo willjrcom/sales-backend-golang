@@ -129,9 +129,6 @@ func (s *Service) GetCurrentShift(ctx context.Context) (shiftDTO *shiftdto.Shift
 	}
 
 	orderStatus := []orderentity.StatusOrder{
-		orderentity.OrderStatusStaging,
-		orderentity.OrderStatusPending,
-		orderentity.OrderStatusReady,
 		orderentity.OrderStatusFinished,
 		orderentity.OrderStatusCanceled,
 	}
