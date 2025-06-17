@@ -76,7 +76,7 @@ func (i *Item) RemoveRemovedItem(name string) {
 
 // CalculateTotalPrice computes the total price including additional items, updates TotalPrice, and returns it
 func (i *Item) CalculateTotalPrice() decimal.Decimal {
-	total := i.TotalPrice
+	total := i.Price
 	for _, additionalItem := range i.AdditionalItems {
 		total = total.Add(additionalItem.TotalPrice)
 	}
