@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -45,13 +44,6 @@ type GroupItemTimeLogs struct {
 	StartedAt  *time.Time `bun:"started_at"`
 	ReadyAt    *time.Time `bun:"ready_at"`
 	CanceledAt *time.Time `bun:"canceled_at"`
-}
-
-func (i *GroupItem) BeforeUpdate(ctx context.Context, query *bun.UpdateQuery) error {
-	if _, ok := query.GetModel().Value().(*GroupItem); ok {
-		//model.CalculateTotalPrice()
-	}
-	return nil
 }
 
 func (g *GroupItem) FromDomain(groupItem *orderentity.GroupItem) {

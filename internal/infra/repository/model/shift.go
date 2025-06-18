@@ -35,6 +35,7 @@ type ShiftCommonAttributes struct {
 	TotalItemsSold         float64                    `bun:"total_items_sold"`
 	AverageOrderValue      decimal.Decimal            `bun:"average_order_value,type:decimal(10,2)"`
 	Payments               []PaymentOrder             `bun:"payments,type:jsonb"`
+	DeliveryDrivers        []DeliveryDriverTax        `bun:"delivery_drivers,type:jsonb"`
 }
 
 type Redeem struct {
@@ -73,6 +74,7 @@ func (s *Shift) FromDomain(shift *shiftentity.Shift) {
 			TotalItemsSold:         shift.TotalItemsSold,
 			AverageOrderValue:      shift.AverageOrderValue,
 			Payments:               []PaymentOrder{},
+			DeliveryDrivers:        []DeliveryDriverTax{},
 		},
 	}
 
@@ -94,6 +96,12 @@ func (s *Shift) FromDomain(shift *shiftentity.Shift) {
 		p := PaymentOrder{}
 		p.FromDomain(&payment)
 		s.Payments = append(s.Payments, p)
+	}
+
+	for _, driver := range shift.DeliveryDrivers {
+		d := DeliveryDriverTax{}
+		d.FromDomain(&driver)
+		s.DeliveryDrivers = append(s.DeliveryDrivers, d)
 	}
 
 	s.Attendant.FromDomain(shift.Attendant)
@@ -125,6 +133,7 @@ func (s *Shift) ToDomain() *shiftentity.Shift {
 			TotalItemsSold:         s.TotalItemsSold,
 			AverageOrderValue:      s.AverageOrderValue,
 			Payments:               []orderentity.PaymentOrder{},
+			DeliveryDrivers:        []shiftentity.DeliveryDriverTax{},
 		},
 	}
 
@@ -141,6 +150,10 @@ func (s *Shift) ToDomain() *shiftentity.Shift {
 
 	for _, payment := range s.Payments {
 		shift.Payments = append(shift.Payments, *payment.ToDomain())
+	}
+
+	for _, driver := range s.DeliveryDrivers {
+		shift.DeliveryDrivers = append(shift.DeliveryDrivers, *driver.ToDomain())
 	}
 
 	return shift

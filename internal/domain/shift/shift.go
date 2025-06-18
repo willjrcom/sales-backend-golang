@@ -32,6 +32,7 @@ type ShiftCommonAttributes struct {
 	TotalItemsSold         float64         // soma de todas as quantidades de itens, para medir o “pulo de prato”
 	AverageOrderValue      decimal.Decimal // TotalSales ÷ TotalOrders, para análise de ticket médio
 	Payments               []orderentity.PaymentOrder
+	DeliveryDrivers        []DeliveryDriverTax
 }
 
 type Redeem struct {

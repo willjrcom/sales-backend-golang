@@ -32,6 +32,7 @@ type ShiftCommonAttributes struct {
 	TotalItemsSold         float64                    `json:"total_items_sold"`
 	AverageOrderValue      decimal.Decimal            `json:"average_order_value"`
 	Payments               []orderdto.PaymentOrderDTO `json:"payments"`
+	DeliveryDrivers        []DeliveryDriverTaxDTO     `json:"delivery_drivers_tax"`
 }
 
 type ShiftTimeLogs struct {
@@ -65,6 +66,7 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 			TotalItemsSold:         shift.TotalItemsSold,
 			AverageOrderValue:      shift.AverageOrderValue,
 			Payments:               []orderdto.PaymentOrderDTO{},
+			DeliveryDrivers:        []DeliveryDriverTaxDTO{},
 		},
 	}
 
@@ -84,6 +86,12 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 		p := orderdto.PaymentOrderDTO{}
 		p.FromDomain(&payment)
 		s.Payments = append(s.Payments, p)
+	}
+
+	for _, tax := range shift.DeliveryDrivers {
+		t := DeliveryDriverTaxDTO{}
+		t.FromDomain(&tax)
+		s.DeliveryDrivers = append(s.DeliveryDrivers, t)
 	}
 
 	s.Attendant.FromDomain(shift.Attendant)

@@ -273,7 +273,7 @@ func registerModels(db *bun.DB) error {
 	db.RegisterModel((*model.Item)(nil))
 	db.RegisterModel((*model.GroupItem)(nil))
 
-	var _ bun.BeforeUpdateHook = (*model.GroupItem)(nil)
+	// var _ bun.BeforeUpdateHook = (*model.GroupItem)(nil)
 
 	db.RegisterModel((*model.OrderPickup)(nil))
 	db.RegisterModel((*model.OrderDelivery)(nil))
