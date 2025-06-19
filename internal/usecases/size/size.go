@@ -2,12 +2,17 @@ package sizeusecases
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+)
+
+var (
+	ErrProductsExists = errors.New("size is used in products")
 )
 
 type Service struct {
@@ -82,8 +87,13 @@ func (s *Service) UpdateSize(ctx context.Context, dtoId *entitydto.IDRequest, dt
 }
 
 func (s *Service) DeleteSize(ctx context.Context, dto *entitydto.IDRequest) error {
-	if _, err := s.rs.GetSizeById(ctx, dto.ID.String()); err != nil {
+	size, err := s.rs.GetSizeByIdWithProducts(ctx, dto.ID.String())
+	if err != nil {
 		return err
+	}
+
+	if len(size.Products) > 0 {
+		return ErrProductsExists
 	}
 
 	if err := s.rs.DeleteSize(ctx, dto.ID.String()); err != nil {

@@ -54,3 +54,12 @@ func (r *SizeRepositoryLocal) GetSizeById(_ context.Context, id string) (*model.
 
 	return nil, errSizeNotFound
 }
+
+func (r *SizeRepositoryLocal) GetSizeByIdWithProducts(_ context.Context, id string) (*model.Size, error) {
+
+	if p, ok := r.sizes[uuid.MustParse(id)]; ok {
+		return p, nil
+	}
+
+	return nil, errSizeNotFound
+}

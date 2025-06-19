@@ -15,7 +15,8 @@ import (
 )
 
 var (
-	ErrSizeIsUsed = errors.New("size is used in products")
+	ErrSizeIsUsed     = errors.New("size is used in products")
+	ErrProductsExists = errors.New("product category has products")
 )
 
 type Service struct {
@@ -100,8 +101,13 @@ func (s *Service) UpdateCategory(ctx context.Context, dtoId *entitydto.IDRequest
 }
 
 func (s *Service) DeleteCategoryById(ctx context.Context, dto *entitydto.IDRequest) error {
-	if _, err := s.r.GetCategoryById(ctx, dto.ID.String()); err != nil {
+	category, err := s.r.GetCategoryById(ctx, dto.ID.String())
+	if err != nil {
 		return err
+	}
+
+	if len(category.Products) > 0 {
+		return ErrProductsExists
 	}
 
 	if err := s.r.DeleteCategory(ctx, dto.ID.String()); err != nil {

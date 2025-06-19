@@ -79,3 +79,20 @@ func (r *SizeRepositoryBun) GetSizeById(ctx context.Context, id string) (*model.
 
 	return size, nil
 }
+
+func (r *SizeRepositoryBun) GetSizeByIdWithProducts(ctx context.Context, id string) (*model.Size, error) {
+	size := &model.Size{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(size).Where("id = ?", id).Relation("Products").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return size, nil
+}

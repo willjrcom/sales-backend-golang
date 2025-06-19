@@ -7,4 +7,5 @@ type SizeRepository interface {
 	UpdateSize(ctx context.Context, Size *Size) error
 	DeleteSize(ctx context.Context, id string) error
 	GetSizeById(ctx context.Context, id string) (*Size, error)
+	GetSizeByIdWithProducts(ctx context.Context, id string) (*Size, error)
 }
