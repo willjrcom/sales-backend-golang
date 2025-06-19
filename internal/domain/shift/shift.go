@@ -35,11 +35,6 @@ type ShiftCommonAttributes struct {
 	DeliveryDrivers        []DeliveryDriverTax
 }
 
-type Redeem struct {
-	Name  string
-	Value decimal.Decimal
-}
-
 type ShiftTimeLogs struct {
 	OpenedAt *time.Time
 	ClosedAt *time.Time
@@ -85,6 +80,7 @@ func (s *Shift) Load() {
 	s.ProductsSoldByCategory = make(map[string]float64)
 	s.TotalItemsSold = 0
 	s.Payments = make([]orderentity.PaymentOrder, 0)
+	s.DeliveryDrivers = make([]DeliveryDriverTax, 0)
 
 	// aggregate orders data
 	for _, o := range s.Orders {
@@ -99,6 +95,18 @@ func (s *Shift) Load() {
 
 		s.TotalOrdersFinished++
 		s.Payments = append(s.Payments, o.Payments...)
+
+		if o.Delivery != nil && o.Delivery.Driver != nil && o.Delivery.Driver.Employee != nil && o.Delivery.Driver.Employee.User != nil {
+			deliveryDriverTax := DeliveryDriverTax{
+				DeliveryDriverID:   o.Delivery.Driver.ID,
+				DeliveryDriverName: o.Delivery.Driver.Employee.User.Name,
+				OrderNumber:        o.OrderNumber,
+				DeliveryID:         o.Delivery.ID,
+				DeliveryTax:        *o.Delivery.DeliveryTax,
+			}
+
+			s.DeliveryDrivers = append(s.DeliveryDrivers, deliveryDriverTax)
+		}
 
 		// ensure totals are up to date
 		s.TotalSales = s.TotalSales.Add(o.TotalPayable)

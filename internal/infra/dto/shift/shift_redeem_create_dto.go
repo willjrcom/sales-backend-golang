@@ -33,8 +33,5 @@ func (r *ShiftRedeemCreateDTO) ToDomain() (*shiftentity.Redeem, error) {
 		return nil, err
 	}
 
-	return &shiftentity.Redeem{
-		Name:  r.Name,
-		Value: r.Value,
-	}, nil
+	return shiftentity.NewRedeem(r.Name, r.Value), nil
 }

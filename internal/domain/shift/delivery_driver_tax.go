@@ -8,6 +8,7 @@ import (
 type DeliveryDriverTax struct {
 	DeliveryDriverID   uuid.UUID
 	DeliveryDriverName string
+	OrderNumber        int
 	DeliveryID         uuid.UUID
 	DeliveryTax        decimal.Decimal
 }

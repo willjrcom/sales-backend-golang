@@ -9,6 +9,7 @@ import (
 type DeliveryDriverTaxDTO struct {
 	DeliveryDriverID   uuid.UUID       `json:"delivery_driver_id"`
 	DeliveryDriverName string          `json:"delivery_driver_name"`
+	OrderNumber        int             `json:"order_number"`
 	DeliveryID         uuid.UUID       `json:"delivery_id"`
 	DeliveryTax        decimal.Decimal `json:"delivery_tax"`
 }
@@ -20,6 +21,7 @@ func (d *DeliveryDriverTaxDTO) FromDomain(deliveryDriverTax *shiftentity.Deliver
 	*d = DeliveryDriverTaxDTO{
 		DeliveryDriverID:   deliveryDriverTax.DeliveryDriverID,
 		DeliveryDriverName: deliveryDriverTax.DeliveryDriverName,
+		OrderNumber:        deliveryDriverTax.OrderNumber,
 		DeliveryID:         deliveryDriverTax.DeliveryID,
 		DeliveryTax:        deliveryDriverTax.DeliveryTax,
 	}
