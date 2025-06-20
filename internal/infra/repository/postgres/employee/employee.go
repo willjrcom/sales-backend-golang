@@ -140,3 +140,33 @@ func (r *EmployeeRepositoryBun) AddPaymentEmployee(ctx context.Context, p *model
 	}
 	return nil
 }
+
+// GetAllEmployeeDeleted retrieves a paginated list of soft-deleted employees and the total count.
+func (r *EmployeeRepositoryBun) GetAllEmployeeDeleted(ctx context.Context, page, perPage int) ([]model.Employee, int, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, 0, err
+	}
+	// count total deleted records
+	totalCount, err := r.db.NewSelect().Model((*model.Employee)(nil)).WhereDeleted().Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	// fetch paginated deleted records
+	employees := []model.Employee{}
+	err = r.db.NewSelect().
+		Model(&employees).
+		WhereAllWithDeleted().
+		Relation("User").
+		Relation("User.Address").
+		Relation("User.Contact").
+		Limit(perPage).
+		Offset(page * perPage).
+		Scan(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+	return employees, int(totalCount), nil
+}

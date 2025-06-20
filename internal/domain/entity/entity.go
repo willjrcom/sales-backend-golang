@@ -10,7 +10,7 @@ type Entity struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt *time.Time
+	DeletedAt time.Time
 }
 
 func NewEntity() Entity {

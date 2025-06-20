@@ -114,6 +114,43 @@ func (r *EmployeeRepositoryLocal) GetAllEmployees(_ context.Context, page, perPa
 	return result, total, nil
 }
 
+// GetAllEmployees retrieves a paginated list of employees and the total count.
+func (r *EmployeeRepositoryLocal) GetAllEmployeeDeleted(_ context.Context, page, perPage int) ([]model.Employee, int, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	total := len(r.employees)
+	if total == 0 {
+		return []model.Employee{}, 0, nil
+	}
+	ids := make([]uuid.UUID, 0, total)
+	for id := range r.employees {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool {
+		return ids[i].String() < ids[j].String()
+	})
+	if page < 1 {
+		page = 1
+	}
+	if perPage < 1 {
+		perPage = total
+	}
+	offset := (page - 1) * perPage
+	if offset >= total {
+		return []model.Employee{}, total, nil
+	}
+	end := offset + perPage
+	if end > total {
+		end = total
+	}
+	segment := ids[offset:end]
+	result := make([]model.Employee, 0, len(segment))
+	for _, id := range segment {
+		result = append(result, *r.employees[id])
+	}
+	return result, total, nil
+}
+
 // AddPaymentEmployee records a payment for an employee in memory
 func (r *EmployeeRepositoryLocal) AddPaymentEmployee(_ context.Context, p *model.PaymentEmployee) error {
 	r.mu.Lock()

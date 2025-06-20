@@ -8,15 +8,15 @@ import (
 
 type Employee struct {
 	entity.Entity
-   UserID   uuid.UUID
-   User     *companyentity.User
-   Payments []PaymentEmployee
+	UserID   uuid.UUID
+	User     *companyentity.User
+	Payments []PaymentEmployee
 }
 
 func NewEmployee(userID uuid.UUID) *Employee {
-   return &Employee{
-       Entity:   entity.NewEntity(),
-       UserID:   userID,
-       Payments: make([]PaymentEmployee, 0),
-   }
+	return &Employee{
+		Entity:   entity.NewEntity(),
+		UserID:   userID,
+		Payments: make([]PaymentEmployee, 0),
+	}
 }

@@ -136,6 +136,16 @@ func (s *Service) AddPayment(ctx context.Context, dtoId *entitydto.IDRequest, dt
 	return nil
 }
 
+// GetAllEmployeeDeleted retrieves a paginated list of soft-deleted employees and the total count.
+func (s *Service) GetAllEmployeeDeleted(ctx context.Context, page, perPage int) ([]employeedto.EmployeeDTO, int, error) {
+	employeeModels, total, err := s.re.GetAllEmployeeDeleted(ctx, page, perPage)
+	if err != nil {
+		return nil, 0, err
+	}
+	dtos := modelsToDTOs(employeeModels)
+	return dtos, total, nil
+}
+
 func modelsToDTOs(employeeModels []model.Employee) []employeedto.EmployeeDTO {
 	dtos := make([]employeedto.EmployeeDTO, len(employeeModels))
 	for i, employeeModel := range employeeModels {

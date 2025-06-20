@@ -33,6 +33,7 @@ func NewHandlerEmployee(employeeService *employeeusecases.Service) *handler.Hand
 		c.Delete("/{id}", h.handlerDeleteEmployee)
 		c.Get("/{id}", h.handlerGetEmployee)
 		c.Get("/all", h.handlerGetAllEmployees)
+		c.Get("/deleted", h.handlerGetAllEmployeeDeleted)
 	})
 
 	return handler.NewHandler("/employee", c)
@@ -162,4 +163,20 @@ func (h *handlerEmployeeImpl) handlerAddPayment(w http.ResponseWriter, r *http.R
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerEmployeeImpl) handlerGetAllEmployeeDeleted(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
+
+	// fetch paginated deleted employees
+	employees, total, err := h.s.GetAllEmployeeDeleted(ctx, page, perPage)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	// set total count header
+	w.Header().Set("X-Total-Count", strconv.Itoa(total))
+	jsonpkg.ResponseJson(w, r, http.StatusOK, employees)
 }
