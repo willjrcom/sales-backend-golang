@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 type EmployeeSalaryHistoryCreateDTO struct {
@@ -20,6 +21,7 @@ type EmployeeSalaryHistoryCreateDTO struct {
 
 func (dto *EmployeeSalaryHistoryCreateDTO) ToDomain() *employeeentity.EmployeeSalaryHistory {
 	return &employeeentity.EmployeeSalaryHistory{
+		Entity:     entity.NewEntity(),
 		EmployeeID: dto.EmployeeID,
 		StartDate:  dto.StartDate,
 		EndDate:    dto.EndDate,
