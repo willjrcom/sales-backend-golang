@@ -37,6 +37,19 @@ func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.EmployeeC
 		return nil, errors.New("user ID not found")
 	}
 
+	deletedEmployee, _ := s.re.GetEmployeeDeletedByUserID(ctx, employee.UserID.String())
+	if deletedEmployee != nil && deletedEmployee.DeletedAt != nil {
+		// Reativar funcionário: setar DeletedAt = nil e atualizar campos necessários
+		deletedEmployee.DeletedAt = nil
+
+		// Atualize outros campos se necessário
+		if err := s.re.UpdateEmployee(ctx, deletedEmployee); err != nil {
+			return &deletedEmployee.ID, err
+		}
+
+		return &deletedEmployee.ID, nil
+	}
+
 	if employeeExists, _ := s.re.GetEmployeeByUserID(ctx, employee.UserID.String()); employeeExists != nil {
 		return nil, errors.New("employee already exists")
 	}
@@ -154,4 +167,14 @@ func modelsToDTOs(employeeModels []model.Employee) []employeedto.EmployeeDTO {
 	}
 
 	return dtos
+}
+
+// GetSalaryHistory retorna o histórico salarial do funcionário
+func (s *Service) GetSalaryHistory(ctx context.Context, employeeID uuid.UUID) ([]model.EmployeeSalaryHistory, error) {
+	return s.re.GetSalaryHistory(ctx, employeeID)
+}
+
+// GetPayments retorna os pagamentos do funcionário
+func (s *Service) GetPayments(ctx context.Context, employeeID uuid.UUID) ([]model.PaymentEmployee, error) {
+	return s.re.GetPayments(ctx, employeeID)
 }

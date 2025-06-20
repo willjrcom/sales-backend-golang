@@ -26,7 +26,7 @@ type EmployeePaymentCommonAttributes struct {
 }
 
 type EmployeePaymentTimeLogs struct {
-	PayDate time.Time `bun:"pay_date,notnull"`
+	PaymentDate time.Time `bun:"payment_date,notnull"`
 }
 
 func (p *PaymentEmployee) FromDomain(payment *employeeentity.PaymentEmployee) {
@@ -43,7 +43,7 @@ func (p *PaymentEmployee) FromDomain(payment *employeeentity.PaymentEmployee) {
 			Notes:      payment.Notes,
 		},
 		EmployeePaymentTimeLogs: EmployeePaymentTimeLogs{
-			PayDate: payment.PayDate,
+			PaymentDate: payment.PayDate,
 		},
 	}
 }
@@ -62,7 +62,7 @@ func (p *PaymentEmployee) ToDomain() *employeeentity.PaymentEmployee {
 			Notes:      p.Notes,
 		},
 		PaymentTimeLogs: employeeentity.PaymentTimeLogs{
-			PayDate: p.PayDate,
+			PayDate: p.PaymentDate,
 		},
 	}
 }

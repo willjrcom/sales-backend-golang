@@ -34,6 +34,8 @@ func NewHandlerEmployee(employeeService *employeeusecases.Service) *handler.Hand
 		c.Get("/{id}", h.handlerGetEmployee)
 		c.Get("/all", h.handlerGetAllEmployees)
 		c.Get("/deleted", h.handlerGetAllEmployeeDeleted)
+		c.Get("/{id}/salary-history", h.handlerGetSalaryHistory)
+		c.Get("/{id}/payments", h.handlerGetPayments)
 	})
 
 	return handler.NewHandler("/employee", c)
@@ -179,4 +181,44 @@ func (h *handlerEmployeeImpl) handlerGetAllEmployeeDeleted(w http.ResponseWriter
 	// set total count header
 	w.Header().Set("X-Total-Count", strconv.Itoa(total))
 	jsonpkg.ResponseJson(w, r, http.StatusOK, employees)
+}
+
+func (h *handlerEmployeeImpl) handlerGetSalaryHistory(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+	employeeID, err := uuid.Parse(id)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+	history, err := h.s.GetSalaryHistory(ctx, employeeID)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, history)
+}
+
+func (h *handlerEmployeeImpl) handlerGetPayments(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+	employeeID, err := uuid.Parse(id)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+	payments, err := h.s.GetPayments(ctx, employeeID)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, payments)
 }

@@ -1,10 +1,11 @@
 package employeeentity
 
 import (
-   "time"
-   "github.com/google/uuid"
-   "github.com/shopspring/decimal"
-   "github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 type PaymentEmployee struct {
@@ -14,8 +15,8 @@ type PaymentEmployee struct {
 }
 
 type PaymentCommonAttributes struct {
-   EmployeeID uuid.UUID
-   Amount     decimal.Decimal
+	EmployeeID uuid.UUID
+	Amount     decimal.Decimal
 	Status     PaymentStatus
 	Method     PaymentMethod
 	Notes      string
@@ -61,8 +62,8 @@ func GetAllPaymentMethods() []PaymentMethod {
 
 // NewPaymentEmployee creates a new payment record for an employee
 func NewPaymentEmployee(
-   employeeID uuid.UUID,
-   amount decimal.Decimal,
+	employeeID uuid.UUID,
+	amount decimal.Decimal,
 	status PaymentStatus,
 	method PaymentMethod,
 	payDate time.Time,

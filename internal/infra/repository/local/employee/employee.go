@@ -77,6 +77,18 @@ func (r *EmployeeRepositoryLocal) GetEmployeeByUserID(_ context.Context, userID 
 	return nil, errEmployeeNotFound
 }
 
+func (r *EmployeeRepositoryLocal) GetEmployeeDeletedByUserID(_ context.Context, userID string) (*model.Employee, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	uid := uuid.MustParse(userID)
+	for _, e := range r.employees {
+		if e.UserID == uid {
+			return e, nil
+		}
+	}
+	return nil, errEmployeeNotFound
+}
+
 // GetAllEmployees retrieves a paginated list of employees and the total count.
 func (r *EmployeeRepositoryLocal) GetAllEmployees(_ context.Context, page, perPage int) ([]model.Employee, int, error) {
 	r.mu.RLock()
@@ -165,4 +177,14 @@ func (r *EmployeeRepositoryLocal) AddPaymentEmployee(_ context.Context, p *model
 	employee.Payments = append(employee.Payments, *p)
 	r.employees[p.EmployeeID] = employee
 	return nil
+}
+
+func (r *EmployeeRepositoryLocal) GetSalaryHistory(_ context.Context, employeeID uuid.UUID) ([]model.EmployeeSalaryHistory, error) {
+	// Retorna slice vazio para ambiente local (mock)
+	return []model.EmployeeSalaryHistory{}, nil
+}
+
+func (r *EmployeeRepositoryLocal) GetPayments(_ context.Context, employeeID uuid.UUID) ([]model.PaymentEmployee, error) {
+	// Retorna slice vazio para ambiente local (mock)
+	return []model.PaymentEmployee{}, nil
 }

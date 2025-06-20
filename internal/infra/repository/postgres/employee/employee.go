@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -99,6 +100,23 @@ func (r *EmployeeRepositoryBun) GetEmployeeByUserID(ctx context.Context, userID 
 	return employee, nil
 }
 
+func (r *EmployeeRepositoryBun) GetEmployeeDeletedByUserID(ctx context.Context, userID string) (*model.Employee, error) {
+	employee := &model.Employee{}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	if err := r.db.NewSelect().Model(employee).Where("employee.user_id = ?", userID).WhereAllWithDeleted().Relation("User").Relation("User.Address").Relation("User.Contact").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return employee, nil
+}
+
 // GetAllEmployees retrieves a paginated list of employees and the total count.
 func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context, page, perPage int) ([]model.Employee, int, error) {
 	r.mu.Lock()
@@ -169,4 +187,24 @@ func (r *EmployeeRepositoryBun) GetAllEmployeeDeleted(ctx context.Context, page,
 		return nil, 0, err
 	}
 	return employees, int(totalCount), nil
+}
+
+// GetSalaryHistory retorna o histórico salarial do funcionário
+func (r *EmployeeRepositoryBun) GetSalaryHistory(ctx context.Context, employeeID uuid.UUID) ([]model.EmployeeSalaryHistory, error) {
+	histories := []model.EmployeeSalaryHistory{}
+	if err := r.db.NewSelect().Model(&histories).Where("employee_id = ?", employeeID).Order("start_date DESC").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return histories, nil
+}
+
+// GetPayments retorna os pagamentos do funcionário
+func (r *EmployeeRepositoryBun) GetPayments(ctx context.Context, employeeID uuid.UUID) ([]model.PaymentEmployee, error) {
+	payments := []model.PaymentEmployee{}
+	if err := r.db.NewSelect().Model(&payments).Where("employee_id = ?", employeeID).Order("payment_date DESC").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return payments, nil
 }
