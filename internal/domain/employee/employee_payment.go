@@ -12,6 +12,7 @@ type PaymentEmployee struct {
 	entity.Entity
 	PaymentCommonAttributes
 	PaymentTimeLogs
+	SalaryHistoryID *uuid.UUID
 }
 
 type PaymentCommonAttributes struct {

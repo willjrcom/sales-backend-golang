@@ -15,6 +15,7 @@ type PaymentEmployee struct {
 	bun.BaseModel `bun:"table:employee_payments,alias:payment"`
 	EmployeePaymentCommonAttributes
 	EmployeePaymentTimeLogs
+	SalaryHistoryID *uuid.UUID `bun:"salary_history_id,type:uuid"`
 }
 
 type EmployeePaymentCommonAttributes struct {
@@ -45,6 +46,7 @@ func (p *PaymentEmployee) FromDomain(payment *employeeentity.PaymentEmployee) {
 		EmployeePaymentTimeLogs: EmployeePaymentTimeLogs{
 			PaymentDate: payment.PayDate,
 		},
+		SalaryHistoryID: payment.SalaryHistoryID,
 	}
 }
 
@@ -64,5 +66,6 @@ func (p *PaymentEmployee) ToDomain() *employeeentity.PaymentEmployee {
 		PaymentTimeLogs: employeeentity.PaymentTimeLogs{
 			PayDate: p.PaymentDate,
 		},
+		SalaryHistoryID: p.SalaryHistoryID,
 	}
 }

@@ -135,10 +135,21 @@ func (s *Service) AddPayment(ctx context.Context, dtoId *entitydto.IDRequest, dt
 
 	dtoPayment.EmployeeID = dtoId.ID
 
+	// Buscar histórico salarial vigente
+	salaryHistories, err := s.re.GetSalaryHistory(ctx, dtoId.ID)
+	if err != nil {
+		return err
+	}
+	var salaryHistoryID *uuid.UUID
+	if len(salaryHistories) > 0 {
+		salaryHistoryID = &salaryHistories[0].ID
+	}
+
 	payment, err := dtoPayment.ToDomain()
 	if err != nil {
 		return err
 	}
+	payment.SalaryHistoryID = salaryHistoryID
 
 	paymentModel := &model.PaymentEmployee{}
 	paymentModel.FromDomain(payment)
