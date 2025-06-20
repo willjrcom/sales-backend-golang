@@ -27,6 +27,19 @@ func (s *GroupItemService) UpdateScheduleGroupItem(ctx context.Context, dtoId *e
 	return s.r.UpdateGroupItem(ctx, groupItemModel)
 }
 
+func (s *GroupItemService) UpdateObservationGroupItem(ctx context.Context, dtoId *entitydto.IDRequest, dto *groupitemdto.OrderGroupItemUpdateObservationDTO) (err error) {
+	groupItemModel, err := s.r.GetGroupByID(ctx, dtoId.ID.String(), false)
+	if err != nil {
+		return err
+	}
+
+	groupItem := groupItemModel.ToDomain()
+	groupItem.Observation = dto.Observation
+
+	groupItemModel.FromDomain(groupItem)
+	return s.r.UpdateGroupItem(ctx, groupItemModel)
+}
+
 func (s *GroupItemService) StartGroupItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
 	groupItemModel, err := s.r.GetGroupByID(ctx, dto.ID.String(), false)
 

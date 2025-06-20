@@ -27,6 +27,7 @@ func NewHandlerGroupItem(itemService *orderusecases.GroupItemService) *handler.H
 	c.With().Group(func(c chi.Router) {
 		c.Get("/{id}", h.handlerGetGroupByID)
 		c.Post("/update/schedule/{id}", h.handlerScheduleGroupByID)
+		c.Post("/update/observation/{id}", h.handlerObservationGroupByID)
 		c.Post("/start/{id}", h.handlerStartGroupByID)
 		c.Post("/ready/{id}", h.handlerReadyGroupByID)
 		c.Post("/cancel/{id}", h.handlerCancelGroupByID)
@@ -78,6 +79,32 @@ func (h *handlerGroupItemImpl) handlerScheduleGroupByID(w http.ResponseWriter, r
 	}
 
 	if err := h.s.UpdateScheduleGroupItem(ctx, dtoId, dtoSchedule); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerGroupItemImpl) handlerObservationGroupByID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+
+	dtoSchedule := &groupitemdto.OrderGroupItemUpdateObservationDTO{}
+	if err := jsonpkg.ParseBody(r, dtoSchedule); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := h.s.UpdateObservationGroupItem(ctx, dtoId, dtoSchedule); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}

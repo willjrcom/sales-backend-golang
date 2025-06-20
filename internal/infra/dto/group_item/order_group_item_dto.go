@@ -1,6 +1,8 @@
 package groupitemdto
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
@@ -9,6 +11,7 @@ import (
 )
 
 type GroupItemDTO struct {
+	GroupItemTimeLogsDTO
 	ID               uuid.UUID                       `json:"id"`
 	Size             string                          `json:"size"`
 	Status           orderentity.StatusGroupItem     `json:"status"`
@@ -24,6 +27,14 @@ type GroupItemDTO struct {
 	ComplementItem   *itemdto.ItemDTO                `json:"complement_item"`
 	Items            []itemdto.ItemDTO               `json:"items"`
 	OrderID          uuid.UUID                       `json:"order_id"`
+}
+
+type GroupItemTimeLogsDTO struct {
+	StartAt    *time.Time `json:"start_at"`
+	PendingAt  *time.Time `json:"pending_at"`
+	StartedAt  *time.Time `json:"started_at"`
+	ReadyAt    *time.Time `json:"ready_at"`
+	CanceledAt *time.Time `json:"canceled_at"`
 }
 
 func (i *GroupItemDTO) FromDomain(groupItem *orderentity.GroupItem) {
@@ -46,6 +57,13 @@ func (i *GroupItemDTO) FromDomain(groupItem *orderentity.GroupItem) {
 		ComplementItem:   &itemdto.ItemDTO{},
 		Items:            []itemdto.ItemDTO{},
 		OrderID:          groupItem.OrderID,
+		GroupItemTimeLogsDTO: GroupItemTimeLogsDTO{
+			StartAt:    groupItem.StartAt,
+			PendingAt:  groupItem.PendingAt,
+			StartedAt:  groupItem.StartedAt,
+			ReadyAt:    groupItem.ReadyAt,
+			CanceledAt: groupItem.CanceledAt,
+		},
 	}
 
 	i.Category.FromDomain(groupItem.Category)
