@@ -18,4 +18,5 @@ type EmployeeRepository interface {
 	GetAllEmployeeDeleted(ctx context.Context, page, perPage int) ([]Employee, int, error)
 	GetSalaryHistory(ctx context.Context, employeeID uuid.UUID) ([]EmployeeSalaryHistory, error)
 	GetPayments(ctx context.Context, employeeID uuid.UUID) ([]PaymentEmployee, error)
+	CreateSalaryHistory(ctx context.Context, h *EmployeeSalaryHistory) error
 }

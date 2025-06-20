@@ -24,7 +24,7 @@ type PaymentCommonAttributes struct {
 }
 
 type PaymentTimeLogs struct {
-	PayDate time.Time
+	PaymentDate time.Time
 }
 
 type PaymentStatus string
@@ -45,29 +45,13 @@ func GetAllPaymentStatus() []PaymentStatus {
 
 type PaymentMethod string
 
-const (
-	MethodCash         PaymentMethod = "Cash"
-	MethodBankTransfer PaymentMethod = "BankTransfer"
-	MethodCheck        PaymentMethod = "Check"
-	MethodOther        PaymentMethod = "Other"
-)
-
-func GetAllPaymentMethods() []PaymentMethod {
-	return []PaymentMethod{
-		MethodCash,
-		MethodBankTransfer,
-		MethodCheck,
-		MethodOther,
-	}
-}
-
 // NewPaymentEmployee creates a new payment record for an employee
 func NewPaymentEmployee(
 	employeeID uuid.UUID,
 	amount decimal.Decimal,
 	status PaymentStatus,
 	method PaymentMethod,
-	payDate time.Time,
+	paymentDate time.Time,
 	notes string,
 ) *PaymentEmployee {
 	return &PaymentEmployee{
@@ -80,7 +64,7 @@ func NewPaymentEmployee(
 			Notes:      notes,
 		},
 		PaymentTimeLogs: PaymentTimeLogs{
-			PayDate: payDate,
+			PaymentDate: paymentDate,
 		},
 	}
 }

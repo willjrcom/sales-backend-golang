@@ -181,11 +181,76 @@ func modelsToDTOs(employeeModels []model.Employee) []employeedto.EmployeeDTO {
 }
 
 // GetSalaryHistory retorna o histórico salarial do funcionário
-func (s *Service) GetSalaryHistory(ctx context.Context, employeeID uuid.UUID) ([]model.EmployeeSalaryHistory, error) {
-	return s.re.GetSalaryHistory(ctx, employeeID)
+func (s *Service) GetSalaryHistory(ctx context.Context, employeeID uuid.UUID) ([]employeedto.EmployeeSalaryHistoryDTO, error) {
+	models, err := s.re.GetSalaryHistory(ctx, employeeID)
+	if err != nil {
+		return nil, err
+	}
+	dtos := make([]employeedto.EmployeeSalaryHistoryDTO, len(models))
+	for i, m := range models {
+		var dto employeedto.EmployeeSalaryHistoryDTO
+		dto.FromDomain(m.ToDomain())
+		dtos[i] = dto
+	}
+	return dtos, nil
 }
 
 // GetPayments retorna os pagamentos do funcionário
-func (s *Service) GetPayments(ctx context.Context, employeeID uuid.UUID) ([]model.PaymentEmployee, error) {
-	return s.re.GetPayments(ctx, employeeID)
+func (s *Service) GetPayments(ctx context.Context, employeeID uuid.UUID) ([]employeedto.EmployeePaymentDTO, error) {
+	models, err := s.re.GetPayments(ctx, employeeID)
+	if err != nil {
+		return nil, err
+	}
+	dtos := make([]employeedto.EmployeePaymentDTO, len(models))
+	for i, m := range models {
+		var dto employeedto.EmployeePaymentDTO
+		dto.FromDomain(m.ToDomain())
+		dtos[i] = dto
+	}
+	return dtos, nil
+}
+
+// Cria um novo histórico salarial para o funcionário
+func (s *Service) CreateSalaryHistory(ctx context.Context, employeeID uuid.UUID, dto *employeedto.EmployeeSalaryHistoryCreateDTO) (*employeedto.EmployeeSalaryHistoryDTO, error) {
+	if dto.EmployeeID == uuid.Nil {
+		dto.EmployeeID = employeeID
+	}
+	historyDomain := dto.ToDomain()
+	historyModel := &model.EmployeeSalaryHistory{}
+	historyModel.FromDomain(historyDomain)
+	if err := s.re.CreateSalaryHistory(ctx, historyModel); err != nil {
+		return nil, err
+	}
+	historyDTO := &employeedto.EmployeeSalaryHistoryDTO{}
+	historyDTO.FromDomain(historyDomain)
+	return historyDTO, nil
+}
+
+// Cria um novo pagamento para o funcionário
+func (s *Service) CreatePayment(ctx context.Context, employeeID uuid.UUID, dto *employeedto.EmployeePaymentCreateDTO) (*employeedto.EmployeePaymentDTO, error) {
+	if dto.EmployeeID == uuid.Nil {
+		dto.EmployeeID = employeeID
+	}
+	payment, err := dto.ToDomain()
+	if err != nil {
+		return nil, err
+	}
+	// Buscar histórico salarial vigente
+	salaryHistories, err := s.re.GetSalaryHistory(ctx, employeeID)
+	if err != nil {
+		return nil, err
+	}
+	var salaryHistoryID *uuid.UUID
+	if len(salaryHistories) > 0 {
+		salaryHistoryID = &salaryHistories[0].ID
+	}
+	payment.SalaryHistoryID = salaryHistoryID
+	paymentModel := &model.PaymentEmployee{}
+	paymentModel.FromDomain(payment)
+	if err := s.re.AddPaymentEmployee(ctx, paymentModel); err != nil {
+		return nil, err
+	}
+	paymentDTO := &employeedto.EmployeePaymentDTO{}
+	paymentDTO.FromDomain(payment)
+	return paymentDTO, nil
 }

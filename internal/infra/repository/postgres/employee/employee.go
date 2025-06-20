@@ -208,3 +208,16 @@ func (r *EmployeeRepositoryBun) GetPayments(ctx context.Context, employeeID uuid
 
 	return payments, nil
 }
+
+func (r *EmployeeRepositoryBun) CreateSalaryHistory(ctx context.Context, h *model.EmployeeSalaryHistory) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeSchema(ctx, r.db); err != nil {
+		return err
+	}
+	if _, err := r.db.NewInsert().Model(h).Exec(ctx); err != nil {
+		return err
+	}
+	return nil
+}

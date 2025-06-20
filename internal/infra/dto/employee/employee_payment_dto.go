@@ -23,7 +23,7 @@ type PaymentCommonAttributes struct {
 }
 
 type PaymentTimeLogs struct {
-	PayDate time.Time `json:"pay_date"`
+	PaymentDate time.Time `json:"payment_date"`
 }
 
 func (d *EmployeePaymentDTO) FromDomain(payment *employeeentity.PaymentEmployee) {
@@ -40,7 +40,7 @@ func (d *EmployeePaymentDTO) FromDomain(payment *employeeentity.PaymentEmployee)
 			Notes:      payment.Notes,
 		},
 		PaymentTimeLogs: PaymentTimeLogs{
-			PayDate: payment.PayDate,
+			PaymentDate: payment.PaymentDate,
 		},
 	}
 }

@@ -44,7 +44,7 @@ func (p *PaymentEmployee) FromDomain(payment *employeeentity.PaymentEmployee) {
 			Notes:      payment.Notes,
 		},
 		EmployeePaymentTimeLogs: EmployeePaymentTimeLogs{
-			PaymentDate: payment.PayDate,
+			PaymentDate: payment.PaymentDate,
 		},
 		SalaryHistoryID: payment.SalaryHistoryID,
 	}
@@ -64,7 +64,7 @@ func (p *PaymentEmployee) ToDomain() *employeeentity.PaymentEmployee {
 			Notes:      p.Notes,
 		},
 		PaymentTimeLogs: employeeentity.PaymentTimeLogs{
-			PayDate: p.PaymentDate,
+			PaymentDate: p.PaymentDate,
 		},
 		SalaryHistoryID: p.SalaryHistoryID,
 	}

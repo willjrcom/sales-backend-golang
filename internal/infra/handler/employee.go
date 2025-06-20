@@ -36,6 +36,8 @@ func NewHandlerEmployee(employeeService *employeeusecases.Service) *handler.Hand
 		c.Get("/deleted", h.handlerGetAllEmployeeDeleted)
 		c.Get("/{id}/salary-history", h.handlerGetSalaryHistory)
 		c.Get("/{id}/payments", h.handlerGetPayments)
+		c.Post("/{id}/salary-history", h.handlerCreateSalaryHistory)
+		c.Post("/{id}/payments", h.handlerCreatePayment)
 	})
 
 	return handler.NewHandler("/employee", c)
@@ -221,4 +223,54 @@ func (h *handlerEmployeeImpl) handlerGetPayments(w http.ResponseWriter, r *http.
 		return
 	}
 	jsonpkg.ResponseJson(w, r, http.StatusOK, payments)
+}
+
+func (h *handlerEmployeeImpl) handlerCreateSalaryHistory(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+	employeeID, err := uuid.Parse(id)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+	dto := &employeedto.EmployeeSalaryHistoryCreateDTO{}
+	if err := jsonpkg.ParseBody(r, dto); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+	history, err := h.s.CreateSalaryHistory(ctx, employeeID, dto)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, history)
+}
+
+func (h *handlerEmployeeImpl) handlerCreatePayment(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+	employeeID, err := uuid.Parse(id)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+	dto := &employeedto.EmployeePaymentCreateDTO{}
+	if err := jsonpkg.ParseBody(r, dto); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+	payment, err := h.s.CreatePayment(ctx, employeeID, dto)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, payment)
 }

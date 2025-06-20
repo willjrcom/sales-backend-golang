@@ -1,7 +1,10 @@
 package employeeentity
 
 import (
+	"time"
+
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
@@ -19,4 +22,15 @@ func NewEmployee(userID uuid.UUID) *Employee {
 		UserID:   userID,
 		Payments: make([]PaymentEmployee, 0),
 	}
+}
+
+type EmployeeSalaryHistory struct {
+	entity.Entity
+	EmployeeID uuid.UUID
+	StartDate  time.Time
+	EndDate    *time.Time
+	SalaryType string
+	BaseSalary decimal.Decimal
+	HourlyRate decimal.Decimal
+	Commission decimal.Decimal
 }

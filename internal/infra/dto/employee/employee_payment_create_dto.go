@@ -17,12 +17,12 @@ var (
 )
 
 type EmployeePaymentCreateDTO struct {
-	EmployeeID uuid.UUID                    `json:"employee_id"`
-	Amount     decimal.Decimal              `json:"amount"`
-	Status     employeeentity.PaymentStatus `json:"status"`
-	Method     employeeentity.PaymentMethod `json:"method"`
-	PayDate    time.Time                    `json:"pay_date"`
-	Notes      string                       `json:"notes"`
+	EmployeeID  uuid.UUID                    `json:"employee_id"`
+	Amount      decimal.Decimal              `json:"amount"`
+	Status      employeeentity.PaymentStatus `json:"status"`
+	Method      employeeentity.PaymentMethod `json:"method"`
+	PaymentDate time.Time                    `json:"payment_date"`
+	Notes       string                       `json:"notes"`
 }
 
 func (u *EmployeePaymentCreateDTO) validate() error {
@@ -30,16 +30,6 @@ func (u *EmployeePaymentCreateDTO) validate() error {
 		return ErrAmountInvalid
 	}
 
-	validMethod := false
-	for _, m := range employeeentity.GetAllPaymentMethods() {
-		if m == u.Method {
-			validMethod = true
-			break
-		}
-	}
-	if !validMethod {
-		return ErrMethodInvalid
-	}
 	validStatus := false
 	for _, s := range employeeentity.GetAllPaymentStatus() {
 		if s == u.Status {
@@ -65,7 +55,7 @@ func (u *EmployeePaymentCreateDTO) ToDomain() (*employeeentity.PaymentEmployee, 
 		u.Amount,
 		u.Status,
 		u.Method,
-		u.PayDate,
+		u.PaymentDate,
 		u.Notes,
 	), nil
 }

@@ -188,3 +188,8 @@ func (r *EmployeeRepositoryLocal) GetPayments(_ context.Context, employeeID uuid
 	// Retorna slice vazio para ambiente local (mock)
 	return []model.PaymentEmployee{}, nil
 }
+
+func (r *EmployeeRepositoryLocal) CreateSalaryHistory(_ context.Context, h *model.EmployeeSalaryHistory) error {
+	// Mock: não faz nada, apenas retorna nil
+	return nil
+}
