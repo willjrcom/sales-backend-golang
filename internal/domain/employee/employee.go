@@ -32,5 +32,5 @@ type EmployeeSalaryHistory struct {
 	SalaryType string
 	BaseSalary decimal.Decimal
 	HourlyRate decimal.Decimal
-	Commission decimal.Decimal
+	Commission float64
 }

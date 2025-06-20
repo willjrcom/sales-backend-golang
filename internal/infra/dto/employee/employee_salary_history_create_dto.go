@@ -16,7 +16,7 @@ type EmployeeSalaryHistoryCreateDTO struct {
 	SalaryType string          `json:"salary_type"`
 	BaseSalary decimal.Decimal `json:"base_salary"`
 	HourlyRate decimal.Decimal `json:"hourly_rate"`
-	Commission decimal.Decimal `json:"commission"`
+	Commission float64         `json:"commission"`
 }
 
 func (dto *EmployeeSalaryHistoryCreateDTO) ToDomain() *employeeentity.EmployeeSalaryHistory {
@@ -40,7 +40,7 @@ type EmployeeSalaryHistoryDTO struct {
 	SalaryType string          `json:"salary_type"`
 	BaseSalary decimal.Decimal `json:"base_salary"`
 	HourlyRate decimal.Decimal `json:"hourly_rate"`
-	Commission decimal.Decimal `json:"commission"`
+	Commission float64         `json:"commission"`
 }
 
 func (d *EmployeeSalaryHistoryDTO) FromDomain(h *employeeentity.EmployeeSalaryHistory) {

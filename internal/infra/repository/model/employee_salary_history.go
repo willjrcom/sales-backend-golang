@@ -23,7 +23,7 @@ type EmployeeSalaryHistoryCommonAttributes struct {
 	SalaryType string          `bun:"salary_type,notnull"`
 	BaseSalary decimal.Decimal `bun:"base_salary,type:numeric,notnull"`
 	HourlyRate decimal.Decimal `bun:"hourly_rate,type:numeric,notnull"`
-	Commission decimal.Decimal `bun:"commission,type:numeric,notnull"`
+	Commission float64         `bun:"commission,type:numeric,notnull"`
 }
 
 func (h *EmployeeSalaryHistory) FromDomain(domain *employeeentity.EmployeeSalaryHistory) {
