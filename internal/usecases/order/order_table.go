@@ -142,6 +142,7 @@ func (s *OrderTableService) ChangeTable(ctx context.Context, dtoOrderTable *enti
 	}
 
 	table := tableModel.ToDomain()
+	orderTable.Name = newTableModel.Name
 
 	tablesOrdersTogether, err := s.rto.GetPendingOrderTablesByTableId(ctx, orderTable.TableID.String())
 	if err != nil {
