@@ -93,12 +93,7 @@ func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model(&model.Address{}).Where("object_id = ?", company.ID).Exec(ctx); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	if _, err = tx.NewInsert().Model(company.Address).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(company.Address).WherePK().Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -121,12 +116,7 @@ func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model(&model.Address{}).Where("object_id = ?", company.ID).Exec(ctx); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	if _, err = tx.NewInsert().Model(company.Address).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(company.Address).WherePK().Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
