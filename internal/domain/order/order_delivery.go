@@ -24,18 +24,19 @@ type OrderDelivery struct {
 }
 
 type OrderDeliveryCommonAttributes struct {
-	Status        StatusOrderDelivery
-	DeliveryTax   *decimal.Decimal
-	Change        decimal.Decimal
-	PaymentMethod PayMethod
-	ClientID      uuid.UUID
-	Client        *cliententity.Client
-	AddressID     uuid.UUID
-	Address       *addressentity.Address
-	DriverID      *uuid.UUID
-	Driver        *DeliveryDriver
-	OrderID       uuid.UUID
-	OrderNumber   int
+	Status         StatusOrderDelivery
+	DeliveryTax    *decimal.Decimal
+	IsDeliveryFree bool
+	Change         decimal.Decimal
+	PaymentMethod  PayMethod
+	ClientID       uuid.UUID
+	Client         *cliententity.Client
+	AddressID      uuid.UUID
+	Address        *addressentity.Address
+	DriverID       *uuid.UUID
+	Driver         *DeliveryDriver
+	OrderID        uuid.UUID
+	OrderNumber    int
 }
 
 type DeliveryTimeLogs struct {

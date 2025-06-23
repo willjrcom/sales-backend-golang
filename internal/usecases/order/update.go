@@ -2,6 +2,7 @@ package orderusecases
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -317,8 +318,58 @@ func (s *OrderService) UpdateOrderTotal(ctx context.Context, id string) error {
 
 	order.CalculateTotalPrice()
 
+	if err := s.updateFreeDelivery(ctx, order); err != nil {
+		return err
+	}
+
 	orderModel.FromDomain(order)
 	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *OrderService) updateFreeDelivery(ctx context.Context, order *orderentity.Order) error {
+	if order.Delivery == nil {
+		return errors.New("order must be delivery")
+	}
+
+	IsDeliveryFreeUpdated := order.Delivery.IsDeliveryFree
+
+	company, err := s.sc.GetCompany(ctx)
+	if err != nil {
+		return err
+	}
+
+	isMinOrderForFreeEnabled, err := company.Preferences.GetBool("enable_min_order_value_for_free_delivery")
+	if err != nil {
+		return err
+	}
+
+	if isMinOrderForFreeEnabled {
+		minOrderForFree, err := company.Preferences.GetDecimal("min_order_value_for_free_delivery")
+		if err != nil {
+			return err
+		}
+
+		order.Delivery.IsDeliveryFree = false
+		if order.TotalPayable.LessThanOrEqual(minOrderForFree) {
+			order.Delivery.IsDeliveryFree = true
+		}
+	}
+
+	if IsDeliveryFreeUpdated == order.Delivery.IsDeliveryFree {
+		return nil
+	}
+
+	// Run again with IsDeliveryFree changes
+	order.CalculateTotalPrice()
+
+	deliveryModel := &model.OrderDelivery{}
+
+	deliveryModel.FromDomain(order.Delivery)
+	if err := s.rdo.UpdateOrderDelivery(ctx, deliveryModel); err != nil {
 		return err
 	}
 

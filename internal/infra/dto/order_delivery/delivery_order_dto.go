@@ -18,18 +18,19 @@ type OrderDeliveryDTO struct {
 }
 
 type OrderDeliveryCommonAttributes struct {
-	Status        orderentity.StatusOrderDelivery      `json:"status"`
-	DeliveryTax   *decimal.Decimal                     `json:"delivery_tax"`
-	Change        decimal.Decimal                      `json:"change"`
-	PaymentMethod string                               `json:"payment_method"`
-	ClientID      uuid.UUID                            `json:"client_id"`
-	Client        *clientdto.ClientDTO                 `json:"client"`
-	AddressID     uuid.UUID                            `json:"address_id"`
-	Address       *addressdto.AddressDTO               `json:"address"`
-	DriverID      *uuid.UUID                           `json:"driver_id"`
-	Driver        *deliverydriverdto.DeliveryDriverDTO `json:"driver"`
-	OrderID       uuid.UUID                            `json:"order_id"`
-	OrderNumber   int                                  `json:"order_number"`
+	Status         orderentity.StatusOrderDelivery      `json:"status"`
+	DeliveryTax    *decimal.Decimal                     `json:"delivery_tax"`
+	IsDeliveryFree bool                                 `json:"is_delivery_free"`
+	Change         decimal.Decimal                      `json:"change"`
+	PaymentMethod  string                               `json:"payment_method"`
+	ClientID       uuid.UUID                            `json:"client_id"`
+	Client         *clientdto.ClientDTO                 `json:"client"`
+	AddressID      uuid.UUID                            `json:"address_id"`
+	Address        *addressdto.AddressDTO               `json:"address"`
+	DriverID       *uuid.UUID                           `json:"driver_id"`
+	Driver         *deliverydriverdto.DeliveryDriverDTO `json:"driver"`
+	OrderID        uuid.UUID                            `json:"order_id"`
+	OrderNumber    int                                  `json:"order_number"`
 }
 
 type DeliveryTimeLogs struct {
@@ -46,18 +47,19 @@ func (o *OrderDeliveryDTO) FromDomain(delivery *orderentity.OrderDelivery) {
 	*o = OrderDeliveryDTO{
 		ID: delivery.ID,
 		OrderDeliveryCommonAttributes: OrderDeliveryCommonAttributes{
-			Status:        delivery.Status,
-			DeliveryTax:   delivery.DeliveryTax,
-			Change:        delivery.Change,
-			PaymentMethod: string(delivery.PaymentMethod),
-			ClientID:      delivery.ClientID,
-			Client:        &clientdto.ClientDTO{},
-			AddressID:     delivery.AddressID,
-			Address:       &addressdto.AddressDTO{},
-			DriverID:      delivery.DriverID,
-			Driver:        &deliverydriverdto.DeliveryDriverDTO{},
-			OrderID:       delivery.OrderID,
-			OrderNumber:   delivery.OrderNumber,
+			Status:         delivery.Status,
+			DeliveryTax:    delivery.DeliveryTax,
+			IsDeliveryFree: delivery.IsDeliveryFree,
+			Change:         delivery.Change,
+			PaymentMethod:  string(delivery.PaymentMethod),
+			ClientID:       delivery.ClientID,
+			Client:         &clientdto.ClientDTO{},
+			AddressID:      delivery.AddressID,
+			Address:        &addressdto.AddressDTO{},
+			DriverID:       delivery.DriverID,
+			Driver:         &deliverydriverdto.DeliveryDriverDTO{},
+			OrderID:        delivery.OrderID,
+			OrderNumber:    delivery.OrderNumber,
 		},
 		DeliveryTimeLogs: DeliveryTimeLogs{
 			PendingAt:   delivery.PendingAt,

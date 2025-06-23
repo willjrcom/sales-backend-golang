@@ -2,6 +2,7 @@ package orderusecases
 
 import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
 	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 )
@@ -11,12 +12,14 @@ type OrderService struct {
 	rs  model.ShiftRepository
 	rp  model.ProductRepository
 	rpr model.ProcessRuleRepository
+	rdo model.OrderDeliveryRepository
 	sgi *GroupItemService
 	sop *OrderProcessService
 	sq  *orderqueueusecases.Service
 	sd  IDeliveryService
 	sp  IPickupService
 	st  *OrderTableService
+	sc  *companyusecases.Service
 }
 
 func NewOrderService(ro model.OrderRepository) *OrderService {
@@ -28,23 +31,27 @@ func (s *OrderService) AddDependencies(
 	rs model.ShiftRepository,
 	rp model.ProductRepository,
 	rpr model.ProcessRuleRepository,
+	rdo model.OrderDeliveryRepository,
 	sgi *GroupItemService,
 	sop *OrderProcessService,
 	sq *orderqueueusecases.Service,
 	sd IDeliveryService,
 	sp IPickupService,
 	st *OrderTableService,
+	sc *companyusecases.Service,
 ) {
 	s.ro = ro
 	s.rs = rs
 	s.rp = rp
 	s.rpr = rpr
+	s.rdo = rdo
 	s.sgi = sgi
 	s.sq = sq
 	s.sop = sop
 	s.sd = sd
 	s.sp = sp
 	s.st = st
+	s.sc = sc
 }
 
 type GroupItemService struct {

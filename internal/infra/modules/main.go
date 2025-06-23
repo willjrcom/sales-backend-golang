@@ -27,7 +27,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	_, orderQueueService, _ := NewOrderqueueModule(db, chi)
 
 	orderRepository, orderService, _ := NewOrderModule(db, chi)
-	_, orderDeliveryService, _ := NewOrderDeliveryModule(db, chi)
+	orderDeliveryRepository, orderDeliveryService, _ := NewOrderDeliveryModule(db, chi)
 	deliveryDriverRepository, deliveryDriverService, _ := NewDeliveryDriverModule(db, chi)
 
 	_, orderTableService, _ := NewOrderTableModule(db, chi)
@@ -53,7 +53,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	itemService.AddDependencies(groupItemRepository, orderRepository, productRepository, quantityRepository, productCategoryRepository, orderService, groupItemService)
 	groupItemService.AddDependencies(itemRepository, productRepository, orderService, orderProcessService)
 
-	orderService.AddDependencies(orderRepository, shiftRepository, productRepository, processRuleRepository, groupItemService, orderProcessService, orderQueueService, orderDeliveryService, orderPickupService, orderTableService)
+	orderService.AddDependencies(orderRepository, shiftRepository, productRepository, processRuleRepository, orderDeliveryRepository, groupItemService, orderProcessService, orderQueueService, orderDeliveryService, orderPickupService, orderTableService, companyService)
 	orderDeliveryService.AddDependencies(addressRepository, clientRepository, orderRepository, orderService, deliveryDriverRepository, companyService)
 	deliveryDriverService.AddDependencies(employeeRepository)
 	orderTableService.AddDependencies(tableRepository, orderService, companyService)
