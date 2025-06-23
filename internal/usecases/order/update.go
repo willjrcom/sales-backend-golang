@@ -354,7 +354,7 @@ func (s *OrderService) updateFreeDelivery(ctx context.Context, order *orderentit
 		}
 
 		order.Delivery.IsDeliveryFree = false
-		if order.TotalPayable.LessThanOrEqual(minOrderForFree) {
+		if order.TotalPayable.GreaterThan(minOrderForFree) {
 			order.Delivery.IsDeliveryFree = true
 		}
 	}
