@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdeliverydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_delivery"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 )
 
 var (
@@ -22,7 +24,7 @@ type IDeliveryService interface {
 	IUpdateDeliveryService
 }
 type ISetupDeliveryService interface {
-	AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, so *OrderService, rdd model.DeliveryDriverRepository)
+	AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, so *OrderService, rdd model.DeliveryDriverRepository, cs *companyusecases.Service)
 }
 
 type ICreateDeliveryService interface {
@@ -50,20 +52,22 @@ type OrderDeliveryService struct {
 	ra  model.AddressRepository
 	rc  model.ClientRepository
 	ro  model.OrderRepository
-	so  *OrderService
 	rdd model.DeliveryDriverRepository
+	so  *OrderService
+	cs  *companyusecases.Service
 }
 
 func NewDeliveryService(rdo model.OrderDeliveryRepository) IDeliveryService {
 	return &OrderDeliveryService{rdo: rdo}
 }
 
-func (s *OrderDeliveryService) AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, os *OrderService, rdd model.DeliveryDriverRepository) {
+func (s *OrderDeliveryService) AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, os *OrderService, rdd model.DeliveryDriverRepository, cs *companyusecases.Service) {
 	s.ra = ra
 	s.rc = rc
 	s.ro = ro
 	s.so = os
 	s.rdd = rdd
+	s.cs = cs
 }
 
 func (s *OrderDeliveryService) CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto.DeliveryOrderCreateDTO) (*orderdeliverydto.OrderDeliveryIDDTO, error) {
@@ -71,6 +75,16 @@ func (s *OrderDeliveryService) CreateOrderDelivery(ctx context.Context, dto *ord
 
 	if err != nil {
 		return nil, err
+	}
+
+	company, err := s.cs.GetCompany(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	enableDelivery, err := company.Preferences.GetBool(companyentity.EnableDelivery)
+	if err == nil && !enableDelivery {
+		return nil, errors.New("order tables is disabled")
 	}
 
 	orderID, err := s.so.CreateDefaultOrder(ctx)

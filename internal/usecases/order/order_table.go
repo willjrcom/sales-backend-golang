@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/shopspring/decimal"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	ordertabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_table"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -40,6 +41,16 @@ func (s *OrderTableService) CreateOrderTable(ctx context.Context, dto *ordertabl
 		return nil, err
 	}
 
+	company, err := s.cs.GetCompany(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	enableTable, err := company.Preferences.GetBool(companyentity.EnableTable)
+	if err == nil && !enableTable {
+		return nil, errors.New("order tables is disabled")
+	}
+
 	orderID, err := s.os.CreateDefaultOrder(ctx)
 
 	if err != nil {
@@ -69,11 +80,6 @@ func (s *OrderTableService) CreateOrderTable(ctx context.Context, dto *ordertabl
 		orderTable.Name = table.Name
 	} else {
 		orderTable.Name = table.Name + " - " + orderTable.Name
-	}
-
-	company, err := s.cs.GetCompany(ctx)
-	if err != nil {
-		return nil, err
 	}
 
 	orderTable.UpdatePreferences(company.Preferences)

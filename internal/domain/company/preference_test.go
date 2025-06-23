@@ -38,15 +38,15 @@ func TestPreferences_GetDecimal(t *testing.T) {
 
 func TestPreferences_GetBool(t *testing.T) {
 	entries := []companyentity.Preference{
-		{Key: companyentity.EnableTables, Value: "false"},
+		{Key: companyentity.EnableTable, Value: "false"},
 	}
 	prefs := companyentity.NewPreferences(entries)
-	b, err := prefs.GetBool(companyentity.EnableTables)
+	b, err := prefs.GetBool(companyentity.EnableTable)
 	require.NoError(t, err)
 	require.False(t, b)
 
 	// invalid bool
-	prefs = companyentity.NewPreferences([]companyentity.Preference{{Key: companyentity.EnableTables, Value: "notabool"}})
-	_, err = prefs.GetBool(companyentity.EnableTables)
+	prefs = companyentity.NewPreferences([]companyentity.Preference{{Key: companyentity.EnableTable, Value: "notabool"}})
+	_, err = prefs.GetBool(companyentity.EnableTable)
 	require.Error(t, err)
 }

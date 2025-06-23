@@ -19,12 +19,21 @@ const (
 	EnableMinOrderValueForFreeDelivery Key = "enable_min_order_value_for_free_delivery"
 	// EnableDelivery toggles delivery availability.
 	EnableDelivery Key = "enable_delivery"
-	// EnableTables toggles table service availability.
-	EnableTables Key = "enable_tables"
+	// EnableTable toggles table service availability.
+	EnableTable Key = "enable_table"
 	// MinDeliveryTax is the minimum fee applied for delivery.
 	MinDeliveryTax Key = "min_delivery_tax"
 
-	PrintOrder Key = "print_order"
+	// EnablePrintOrderOnShipOrder toggles printing when launching an order.
+	EnablePrintOrderOnShipOrder Key = "enable_print_order_on_pend_order"
+	// PrinterOrderOnPendOrder is the printer used for orders.
+	PrinterOrderOnPendOrder Key = "printer_order_on_pend_order"
+	// EnablePrintOrderOnShipDelivery toggles printing when launching a delivery.
+	EnablePrintOrderOnShipDelivery Key = "enable_print_order_on_ship_delivery"
+	// PrinterDeliveryOnShipDelivery is the printer used for deliveries.
+	PrinterDeliveryOnShipDelivery Key = "printer_delivery_on_ship_delivery"
+	// EnablePrintOrderOnShipDelivery toggles printing when finish a process.
+	EnablePrintItemsOnFinishProcess Key = "enable_print_items_on_finish_process"
 )
 
 // Preference holds a single key-value pair.
@@ -48,7 +57,7 @@ func NewPreferences(entries []Preference) Preferences {
 func NewDefaultPreferences() Preferences {
 	return Preferences{
 		EnableDelivery:                     "true",
-		EnableTables:                       "true",
+		EnableTable:                        "true",
 		EnableMinOrderValueForFreeDelivery: "true",
 		TableTaxRate:                       "0.10",
 		MinDeliveryTax:                     "0.00",
