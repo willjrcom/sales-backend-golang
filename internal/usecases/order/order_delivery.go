@@ -81,6 +81,14 @@ func (s *OrderDeliveryService) CreateOrderDelivery(ctx context.Context, dto *ord
 
 	delivery.OrderID = orderID
 
+	// Buscar o pedido para obter o OrderNumber
+	orderModel, err := s.ro.GetOrderById(ctx, orderID.String())
+	if err != nil {
+		return nil, err
+	}
+	order := orderModel.ToDomain()
+	delivery.OrderNumber = order.OrderNumber
+
 	// Validate client
 	clientModel, err := s.rc.GetClientById(ctx, delivery.ClientID.String())
 	if err != nil {

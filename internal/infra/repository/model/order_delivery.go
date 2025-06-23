@@ -29,6 +29,7 @@ type OrderDeliveryCommonAttributes struct {
 	DriverID      *uuid.UUID       `bun:"column:driver_id,type:uuid"`
 	Driver        *DeliveryDriver  `bun:"rel:belongs-to"`
 	OrderID       uuid.UUID        `bun:"column:order_id,type:uuid,notnull"`
+	OrderNumber   int              `bun:"order_number,notnull"`
 }
 
 type DeliveryTimeLogs struct {
@@ -57,6 +58,7 @@ func (d *OrderDelivery) FromDomain(delivery *orderentity.OrderDelivery) {
 			DriverID:      delivery.DriverID,
 			Driver:        &DeliveryDriver{},
 			OrderID:       delivery.OrderID,
+			OrderNumber:   delivery.OrderNumber,
 		},
 		DeliveryTimeLogs: DeliveryTimeLogs{
 			PendingAt:   delivery.PendingAt,
@@ -90,6 +92,7 @@ func (d *OrderDelivery) ToDomain() *orderentity.OrderDelivery {
 			DriverID:      d.DriverID,
 			Driver:        d.Driver.ToDomain(),
 			OrderID:       d.OrderID,
+			OrderNumber:   d.OrderNumber,
 		},
 		DeliveryTimeLogs: orderentity.DeliveryTimeLogs{
 			PendingAt:   d.PendingAt,

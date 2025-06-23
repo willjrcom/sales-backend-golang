@@ -48,6 +48,14 @@ func (s *OrderTableService) CreateOrderTable(ctx context.Context, dto *ordertabl
 
 	orderTable.OrderID = orderID
 
+	// Buscar o pedido para obter o OrderNumber
+	orderModel, err := s.os.ro.GetOrderById(ctx, orderID.String())
+	if err != nil {
+		return nil, err
+	}
+	order := orderModel.ToDomain()
+	orderTable.OrderNumber = order.OrderNumber
+
 	tableModel, err := s.rt.GetTableById(ctx, orderTable.TableID.String())
 
 	if err != nil {

@@ -17,9 +17,10 @@ type OrderPickup struct {
 }
 
 type OrderPickupCommonAttributes struct {
-	Name    string    `bun:"name,notnull"`
-	Status  string    `bun:"status"`
-	OrderID uuid.UUID `bun:"column:order_id,type:uuid,notnull"`
+	Name        string    `bun:"name,notnull"`
+	Status      string    `bun:"status"`
+	OrderID     uuid.UUID `bun:"column:order_id,type:uuid,notnull"`
+	OrderNumber int       `bun:"order_number,notnull"`
 }
 
 type PickupTimeLogs struct {
@@ -42,9 +43,10 @@ func (p *OrderPickup) FromDomain(pickup *orderentity.OrderPickup) {
 			CanceledAt:  pickup.CanceledAt,
 		},
 		OrderPickupCommonAttributes: OrderPickupCommonAttributes{
-			Name:    pickup.Name,
-			Status:  string(pickup.Status),
-			OrderID: pickup.OrderID,
+			Name:        pickup.Name,
+			Status:      string(pickup.Status),
+			OrderID:     pickup.OrderID,
+			OrderNumber: pickup.OrderNumber,
 		},
 	}
 }
@@ -62,9 +64,10 @@ func (p *OrderPickup) ToDomain() *orderentity.OrderPickup {
 			CanceledAt:  p.CanceledAt,
 		},
 		OrderPickupCommonAttributes: orderentity.OrderPickupCommonAttributes{
-			Name:    p.Name,
-			Status:  orderentity.StatusOrderPickup(p.Status),
-			OrderID: p.OrderID,
+			Name:        p.Name,
+			Status:      orderentity.StatusOrderPickup(p.Status),
+			OrderID:     p.OrderID,
+			OrderNumber: p.OrderNumber,
 		},
 	}
 }

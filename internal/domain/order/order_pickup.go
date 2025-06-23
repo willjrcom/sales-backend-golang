@@ -19,9 +19,10 @@ type OrderPickup struct {
 }
 
 type OrderPickupCommonAttributes struct {
-	Name    string
-	Status  StatusOrderPickup
-	OrderID uuid.UUID
+	Name        string
+	Status      StatusOrderPickup
+	OrderID     uuid.UUID
+	OrderNumber int
 }
 
 type PickupTimeLogs struct {

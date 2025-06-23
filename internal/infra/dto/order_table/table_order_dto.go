@@ -16,12 +16,13 @@ type OrderTableDTO struct {
 }
 
 type OrderTableCommonAttributes struct {
-	Name    string                       `json:"name"`
-	Contact string                       `json:"contact"`
-	Status  orderentity.StatusOrderTable `json:"status"`
-	TaxRate decimal.Decimal              `json:"tax_rate"`
-	OrderID uuid.UUID                    `json:"order_id"`
-	TableID uuid.UUID                    `json:"table_id"`
+	Name        string                       `json:"name"`
+	Contact     string                       `json:"contact"`
+	Status      orderentity.StatusOrderTable `json:"status"`
+	TaxRate     decimal.Decimal              `json:"tax_rate"`
+	OrderID     uuid.UUID                    `json:"order_id"`
+	TableID     uuid.UUID                    `json:"table_id"`
+	OrderNumber int                          `json:"order_number"`
 }
 
 type OrderTableTimeLogs struct {
@@ -37,12 +38,13 @@ func (t *OrderTableDTO) FromDomain(table *orderentity.OrderTable) {
 		ID:        table.ID,
 		CreatedAt: table.CreatedAt,
 		OrderTableCommonAttributes: OrderTableCommonAttributes{
-			Name:    table.Name,
-			Contact: table.Contact,
-			Status:  table.Status,
-			TaxRate: table.TaxRate,
-			OrderID: table.OrderID,
-			TableID: table.TableID,
+			Name:        table.Name,
+			Contact:     table.Contact,
+			Status:      table.Status,
+			TaxRate:     table.TaxRate,
+			OrderID:     table.OrderID,
+			TableID:     table.TableID,
+			OrderNumber: table.OrderNumber,
 		},
 		OrderTableTimeLogs: OrderTableTimeLogs{
 			PendingAt: table.PendingAt,

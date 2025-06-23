@@ -16,12 +16,13 @@ type OrderTable struct {
 }
 
 type OrderTableCommonAttributes struct {
-	Name    string
-	Contact string
-	Status  StatusOrderTable
-	TaxRate decimal.Decimal
-	OrderID uuid.UUID
-	TableID uuid.UUID
+	Name        string
+	Contact     string
+	Status      StatusOrderTable
+	TaxRate     decimal.Decimal
+	OrderID     uuid.UUID
+	TableID     uuid.UUID
+	OrderNumber int
 }
 
 type OrderTableTimeLogs struct {

@@ -35,6 +35,7 @@ type OrderDeliveryCommonAttributes struct {
 	DriverID      *uuid.UUID
 	Driver        *DeliveryDriver
 	OrderID       uuid.UUID
+	OrderNumber   int
 }
 
 type DeliveryTimeLogs struct {

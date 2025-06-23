@@ -14,9 +14,10 @@ type OrderPickupDTO struct {
 }
 
 type OrderPickupCommonAttributes struct {
-	Name    string                        `json:"name"`
-	Status  orderentity.StatusOrderPickup `json:"status"`
-	OrderID uuid.UUID                     `json:"order_id"`
+	Name        string                        `json:"name"`
+	Status      orderentity.StatusOrderPickup `json:"status"`
+	OrderID     uuid.UUID                     `json:"order_id"`
+	OrderNumber int                           `json:"order_number"`
 }
 
 type PickupTimeLogs struct {
@@ -32,9 +33,10 @@ func (o *OrderPickupDTO) FromDomain(pickup *orderentity.OrderPickup) {
 	*o = OrderPickupDTO{
 		ID: pickup.ID,
 		OrderPickupCommonAttributes: OrderPickupCommonAttributes{
-			Name:    pickup.Name,
-			Status:  pickup.Status,
-			OrderID: pickup.OrderID,
+			Name:        pickup.Name,
+			Status:      pickup.Status,
+			OrderID:     pickup.OrderID,
+			OrderNumber: pickup.OrderNumber,
 		},
 		PickupTimeLogs: PickupTimeLogs{
 			PendingAt:   pickup.PendingAt,

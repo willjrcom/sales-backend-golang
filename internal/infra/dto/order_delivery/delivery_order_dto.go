@@ -29,6 +29,7 @@ type OrderDeliveryCommonAttributes struct {
 	DriverID      *uuid.UUID                           `json:"driver_id"`
 	Driver        *deliverydriverdto.DeliveryDriverDTO `json:"driver"`
 	OrderID       uuid.UUID                            `json:"order_id"`
+	OrderNumber   int                                  `json:"order_number"`
 }
 
 type DeliveryTimeLogs struct {
@@ -56,6 +57,7 @@ func (o *OrderDeliveryDTO) FromDomain(delivery *orderentity.OrderDelivery) {
 			DriverID:      delivery.DriverID,
 			Driver:        &deliverydriverdto.DeliveryDriverDTO{},
 			OrderID:       delivery.OrderID,
+			OrderNumber:   delivery.OrderNumber,
 		},
 		DeliveryTimeLogs: DeliveryTimeLogs{
 			PendingAt:   delivery.PendingAt,

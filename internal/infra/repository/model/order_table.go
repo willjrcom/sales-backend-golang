@@ -18,12 +18,13 @@ type OrderTable struct {
 }
 
 type OrderTableCommonAttributes struct {
-	Name    string          `bun:"name,notnull"`
-	Contact string          `bun:"contact,notnull"`
-	Status  string          `bun:"status,notnull"`
-	TaxRate decimal.Decimal `bun:"tax_rate,type:decimal(10,2),notnull"`
-	OrderID uuid.UUID       `bun:"column:order_id,type:uuid,notnull"`
-	TableID uuid.UUID       `bun:"column:table_id,type:uuid,notnull"`
+	Name        string          `bun:"name,notnull"`
+	Contact     string          `bun:"contact,notnull"`
+	Status      string          `bun:"status,notnull"`
+	TaxRate     decimal.Decimal `bun:"tax_rate,type:decimal(10,2),notnull"`
+	OrderID     uuid.UUID       `bun:"column:order_id,type:uuid,notnull"`
+	TableID     uuid.UUID       `bun:"column:table_id,type:uuid,notnull"`
+	OrderNumber int             `bun:"order_number,notnull"`
 }
 
 type OrderTableTimeLogs struct {
@@ -39,12 +40,13 @@ func (t *OrderTable) FromDomain(table *orderentity.OrderTable) {
 	*t = OrderTable{
 		Entity: entitymodel.FromDomain(table.Entity),
 		OrderTableCommonAttributes: OrderTableCommonAttributes{
-			Name:    table.Name,
-			Contact: table.Contact,
-			Status:  string(table.Status),
-			TaxRate: table.TaxRate,
-			OrderID: table.OrderID,
-			TableID: table.TableID,
+			Name:        table.Name,
+			Contact:     table.Contact,
+			Status:      string(table.Status),
+			TaxRate:     table.TaxRate,
+			OrderID:     table.OrderID,
+			TableID:     table.TableID,
+			OrderNumber: table.OrderNumber,
 		},
 		OrderTableTimeLogs: OrderTableTimeLogs{
 			PendingAt:  table.PendingAt,
@@ -61,12 +63,13 @@ func (t *OrderTable) ToDomain() *orderentity.OrderTable {
 	return &orderentity.OrderTable{
 		Entity: t.Entity.ToDomain(),
 		OrderTableCommonAttributes: orderentity.OrderTableCommonAttributes{
-			Name:    t.Name,
-			Contact: t.Contact,
-			Status:  orderentity.StatusOrderTable(t.Status),
-			TaxRate: t.TaxRate,
-			OrderID: t.OrderID,
-			TableID: t.TableID,
+			Name:        t.Name,
+			Contact:     t.Contact,
+			Status:      orderentity.StatusOrderTable(t.Status),
+			TaxRate:     t.TaxRate,
+			OrderID:     t.OrderID,
+			TableID:     t.TableID,
+			OrderNumber: t.OrderNumber,
 		},
 		OrderTableTimeLogs: orderentity.OrderTableTimeLogs{
 			PendingAt:  t.PendingAt,
