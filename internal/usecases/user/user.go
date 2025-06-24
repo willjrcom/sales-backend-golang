@@ -3,6 +3,7 @@ package userusecases
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
@@ -164,13 +165,22 @@ func (s *Service) Access(ctx context.Context, dto *companydto.UserSchemaDTO, acc
 		return "", err
 	}
 
-	for _, company := range userModel.Companies {
-		if company.SchemaName == *schema {
-			return jwtservice.CreateAccessToken(accessToken, *schema)
+	var company *model.Company
+	for _, c := range userModel.Companies {
+		if c.SchemaName == *schema {
+			company = &c
 		}
 	}
 
-	return "", errors.New("schema not found in schemas in token")
+	if company == nil {
+		return "", errors.New("schema not found in schemas in token")
+	}
+
+	if company.IsBlocked {
+		return "", fmt.Errorf("company %s is blocked", company.BusinessName)
+	}
+
+	return jwtservice.CreateAccessToken(accessToken, *schema)
 }
 
 func (s *Service) SearchUser(ctx context.Context, dto *companydto.UserSearchDTO) (*companydto.UserDTO, error) {

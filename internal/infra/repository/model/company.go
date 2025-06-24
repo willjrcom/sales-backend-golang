@@ -22,6 +22,7 @@ type CompanyCommonAttributes struct {
 	Address      *Address                  `bun:"rel:has-one,join:id=object_id,notnull"`
 	Users        []User                    `bun:"m2m:public.company_to_users,join:Company=User"`
 	Preferences  companyentity.Preferences `bun:"preferences,type:jsonb"`
+	IsBlocked    bool                      `bun:"is_blocked"`
 }
 
 func (c *Company) FromDomain(company *companyentity.Company) {
@@ -40,6 +41,7 @@ func (c *Company) FromDomain(company *companyentity.Company) {
 			Address:      &Address{},
 			Users:        []User{},
 			Preferences:  company.Preferences,
+			IsBlocked:    company.IsBlocked,
 		},
 	}
 
@@ -74,6 +76,7 @@ func (c *Company) ToDomain() *companyentity.Company {
 			Address:      c.Address.ToDomain(),
 			Users:        users,
 			Preferences:  c.Preferences,
+			IsBlocked:    c.IsBlocked,
 		},
 	}
 }

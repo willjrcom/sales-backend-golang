@@ -25,6 +25,7 @@ type CompanyCommonAttributes struct {
 	Address      *addressentity.Address
 	Users        []User
 	Preferences  Preferences
+	IsBlocked    bool
 }
 
 type CompanyToUsers struct {

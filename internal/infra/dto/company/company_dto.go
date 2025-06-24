@@ -17,6 +17,7 @@ type CompanyDTO struct {
 	Address      *addressdto.AddressDTO    `json:"address,omitempty"`
 	Users        []UserDTO                 `json:"users,omitempty"`
 	Preferences  companyentity.Preferences `json:"preferences,omitempty"`
+	IsBlocked    bool                      `json:"is_blocked,omitempty"`
 }
 
 func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
@@ -34,6 +35,7 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 		Address:      &addressdto.AddressDTO{},
 		Users:        []UserDTO{},
 		Preferences:  company.Preferences,
+		IsBlocked:    company.IsBlocked,
 	}
 
 	c.Address.FromDomain(company.Address)
