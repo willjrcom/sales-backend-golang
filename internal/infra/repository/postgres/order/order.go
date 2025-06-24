@@ -297,7 +297,7 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 		Relation("Attendant").
 		Relation("Payments").
 		Relation("Table").
-		Relation("Delivery.Driver.Employee.User").
+		Relation("Delivery.Driver").
 		Relation("Pickup")
 
 	if err := query.Scan(ctx); err != nil {

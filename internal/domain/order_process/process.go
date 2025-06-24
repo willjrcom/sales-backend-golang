@@ -176,6 +176,11 @@ func (p *OrderProcess) CancelProcess(reason *string) error {
 		return ErrMustBeReason
 	}
 
+	if p.StartedAt == nil {
+		p.StartedAt = &time.Time{}
+		*p.StartedAt = time.Now().UTC()
+	}
+
 	p.CanceledReason = reason
 	p.CanceledAt = &time.Time{}
 	*p.CanceledAt = time.Now().UTC()

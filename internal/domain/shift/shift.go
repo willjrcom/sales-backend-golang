@@ -65,11 +65,9 @@ func (s *Shift) CloseShift(endChange decimal.Decimal) {
 	now := time.Now().UTC()
 	s.EndChange = &endChange
 	s.ClosedAt = &now
-
-	s.Load()
 }
 
-func (s *Shift) Load() {
+func (s *Shift) Load(deliveryDrivers map[uuid.UUID]orderentity.DeliveryDriver) {
 	// compute analytics for reporting
 	s.TotalOrdersFinished = 0
 	s.TotalOrdersCanceled = 0
@@ -96,16 +94,19 @@ func (s *Shift) Load() {
 		s.TotalOrdersFinished++
 		s.Payments = append(s.Payments, o.Payments...)
 
-		if o.Delivery != nil && o.Delivery.Driver != nil && o.Delivery.Driver.Employee != nil && o.Delivery.Driver.Employee.User != nil {
-			deliveryDriverTax := DeliveryDriverTax{
-				DeliveryDriverID:   o.Delivery.Driver.ID,
-				DeliveryDriverName: o.Delivery.Driver.Employee.User.Name,
-				OrderNumber:        o.OrderNumber,
-				DeliveryID:         o.Delivery.ID,
-				DeliveryTax:        *o.Delivery.DeliveryTax,
-			}
+		if o.Delivery != nil && o.Delivery.DriverID != nil {
+			deliveryDriver, ok := deliveryDrivers[*o.Delivery.DriverID]
+			if ok {
+				deliveryDriverTax := DeliveryDriverTax{
+					DeliveryDriverID:   deliveryDriver.ID,
+					DeliveryDriverName: deliveryDriver.Employee.User.Name,
+					OrderNumber:        o.OrderNumber,
+					DeliveryID:         o.Delivery.ID,
+					DeliveryTax:        *o.Delivery.DeliveryTax,
+				}
 
-			s.DeliveryDrivers = append(s.DeliveryDrivers, deliveryDriverTax)
+				s.DeliveryDrivers = append(s.DeliveryDrivers, deliveryDriverTax)
+			}
 		}
 
 		// ensure totals are up to date

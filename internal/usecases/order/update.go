@@ -187,29 +187,10 @@ func (s *OrderService) CancelOrder(ctx context.Context, dtoOrderID *entitydto.ID
 		}
 	}
 
-	reason := "order canceled"
-
 	for _, groupItem := range order.GroupItems {
 		dtoGroupItemID := entitydto.NewIdRequest(groupItem.ID)
 		if err = s.sgi.CancelGroupItem(ctx, dtoGroupItemID); err != nil {
 			return err
-		}
-
-		processes, err := s.sop.GetProcessesByGroupItemID(ctx, dtoGroupItemID)
-		if err != nil {
-			return err
-		}
-
-		if len(processes) == 0 {
-			continue
-		}
-
-		for _, process := range processes {
-			dtoProcessID := entitydto.NewIdRequest(process.ID)
-			orderProcessCancelDTO := &orderprocessdto.OrderProcessCancelDTO{Reason: &reason}
-			if err = s.sop.CancelProcess(ctx, dtoProcessID, orderProcessCancelDTO); err != nil {
-				return err
-			}
 		}
 	}
 

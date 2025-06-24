@@ -263,6 +263,10 @@ func (s *OrderProcessService) CancelProcess(ctx context.Context, dtoID *entitydt
 		return err
 	}
 
+	if err := s.sq.FinishQueue(ctx, process); err != nil {
+		return err
+	}
+
 	processModel.FromDomain(process)
 	if err := s.r.UpdateProcess(ctx, processModel); err != nil {
 		return err

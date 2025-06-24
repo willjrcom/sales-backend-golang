@@ -22,6 +22,7 @@ var (
 type Service struct {
 	r  model.ShiftRepository
 	ro model.OrderRepository
+	rd model.DeliveryDriverRepository
 	se *employeeusecases.Service
 }
 
@@ -29,9 +30,10 @@ func NewService(c model.ShiftRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) AddDependencies(se *employeeusecases.Service, ro model.OrderRepository) {
+func (s *Service) AddDependencies(se *employeeusecases.Service, ro model.OrderRepository, rd model.DeliveryDriverRepository) {
 	s.se = se
 	s.ro = ro
+	s.rd = rd
 }
 
 func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.ShiftUpdateOpenDTO) (id uuid.UUID, err error) {
@@ -95,11 +97,19 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 		return err
 	}
 
+	deliveryDriversModel, err := s.rd.GetAllDeliveryDrivers(ctx)
+	if err != nil {
+		return err
+	}
+
+	deliveryDrivers := deliveryDriversModelToMap(deliveryDriversModel)
+
 	shiftModel.Orders = orders
 	shift = shiftModel.ToDomain()
 
 	shift.CloseShift(endChange)
-	shift.Load()
+
+	shift.Load(deliveryDrivers)
 
 	shiftModel.FromDomain(shift)
 	if err := s.r.UpdateShift(ctx, shiftModel); err != nil {
@@ -115,8 +125,15 @@ func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IDRequest) 
 		return nil, err
 	}
 
+	deliveryDriversModel, err := s.rd.GetAllDeliveryDrivers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	deliveryDrivers := deliveryDriversModelToMap(deliveryDriversModel)
+
 	shift := shiftModel.ToDomain()
-	shift.Load()
+	shift.Load(deliveryDrivers)
 	shiftDTO = &shiftdto.ShiftDTO{}
 	shiftDTO.FromDomain(shift)
 	return shiftDTO, nil
@@ -137,10 +154,16 @@ func (s *Service) GetCurrentShift(ctx context.Context) (shiftDTO *shiftdto.Shift
 		return nil, err
 	}
 
+	deliveryDriversModel, err := s.rd.GetAllDeliveryDrivers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	deliveryDrivers := deliveryDriversModelToMap(deliveryDriversModel)
 	shiftModel.Orders = orders
 
 	shift := shiftModel.ToDomain()
-	shift.Load()
+	shift.Load(deliveryDrivers)
 
 	shiftDTO = &shiftdto.ShiftDTO{}
 	shiftDTO.FromDomain(shift)
@@ -186,4 +209,15 @@ func (s *Service) AddRedeem(ctx context.Context, dtoRedeem *shiftdto.ShiftRedeem
 	}
 
 	return nil
+}
+
+func deliveryDriversModelToMap(deliveryDriversModel []model.DeliveryDriver) map[uuid.UUID]orderentity.DeliveryDriver {
+	deliveryDrivers := map[uuid.UUID]orderentity.DeliveryDriver{}
+
+	for _, driverModel := range deliveryDriversModel {
+		driver := *driverModel.ToDomain()
+		deliveryDrivers[driverModel.ID] = driver
+	}
+
+	return deliveryDrivers
 }
