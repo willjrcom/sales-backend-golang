@@ -427,7 +427,7 @@ func (s *Service) TotalQueueTimeByGroupItem(ctx context.Context, req *reportdto.
 	resp := make([]reportdto.TotalQueueTimeByGroupItemResponse, len(data))
 	for i, d := range data {
 		resp[i] = reportdto.TotalQueueTimeByGroupItemResponse{
-			GroupItemID:  d.GroupItemID,
+			GroupItemID:  d.Name,
 			TotalSeconds: d.TotalSeconds,
 		}
 	}

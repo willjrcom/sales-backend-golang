@@ -469,7 +469,7 @@ func (s *ReportService) AvgProcessDurationByProduct(ctx context.Context) ([]AvgP
 
 // TotalQueueTimeByGroupItemDTO holds total queue time per group item in seconds.
 type TotalQueueTimeByGroupItemDTO struct {
-	GroupItemID  string  `bun:"group_item_id"`
+	Name         string  `bun:"name"`
 	TotalSeconds float64 `bun:"total_seconds"`
 }
 
@@ -481,10 +481,11 @@ func (s *ReportService) TotalQueueTimeByGroupItem(ctx context.Context) ([]TotalQ
 	var resp []TotalQueueTimeByGroupItemDTO
 	// duration is bigint nanoseconds; sum and convert to seconds
 	query := `
-       SELECT group_item_id::text AS group_item_id,
+       SELECT pr.name::text AS name,
               SUM(duration) / 1000000000.0 AS total_seconds
-         FROM order_queues
-        GROUP BY group_item_id`
+         FROM order_queues oq
+		 JOIN process_rules pr ON pr.id = oq.process_rule_id
+        GROUP BY pr.name`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
