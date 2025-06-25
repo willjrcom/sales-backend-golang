@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	shiftdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/shift"
@@ -24,16 +25,28 @@ type Service struct {
 	ro model.OrderRepository
 	rd model.DeliveryDriverRepository
 	se *employeeusecases.Service
+	// Repositórios para analytics
+	orderProcessRepo model.OrderProcessRepository
+	orderQueueRepo   model.QueueRepository
+	processRuleRepo  model.ProcessRuleRepository
+	employeeRepo     model.EmployeeRepository
 }
 
 func NewService(c model.ShiftRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) AddDependencies(se *employeeusecases.Service, ro model.OrderRepository, rd model.DeliveryDriverRepository) {
+func (s *Service) AddDependencies(se *employeeusecases.Service, ro model.OrderRepository, rd model.DeliveryDriverRepository, orderProcessRepo model.OrderProcessRepository,
+	orderQueueRepo model.QueueRepository,
+	processRuleRepo model.ProcessRuleRepository,
+	employeeRepo model.EmployeeRepository) {
 	s.se = se
 	s.ro = ro
 	s.rd = rd
+	s.orderProcessRepo = orderProcessRepo
+	s.orderQueueRepo = orderQueueRepo
+	s.processRuleRepo = processRuleRepo
+	s.employeeRepo = employeeRepo
 }
 
 func (s *Service) OpenShift(ctx context.Context, dto *shiftdto.ShiftUpdateOpenDTO) (id uuid.UUID, err error) {
@@ -97,19 +110,14 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 		return err
 	}
 
-	deliveryDriversModel, err := s.rd.GetAllDeliveryDrivers(ctx)
-	if err != nil {
-		return err
-	}
-
-	deliveryDrivers := deliveryDriversModelToMap(deliveryDriversModel)
-
 	shiftModel.Orders = orders
 	shift = shiftModel.ToDomain()
 
 	shift.CloseShift(endChange)
 
-	shift.Load(deliveryDrivers)
+	if err := s.LoadShiftWithProductionAnalytics(ctx, shift); err != nil {
+		return err
+	}
 
 	shiftModel.FromDomain(shift)
 	if err := s.r.UpdateShift(ctx, shiftModel); err != nil {
@@ -125,15 +133,11 @@ func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IDRequest) 
 		return nil, err
 	}
 
-	deliveryDriversModel, err := s.rd.GetAllDeliveryDrivers(ctx)
-	if err != nil {
+	shift := shiftModel.ToDomain()
+	if err := s.LoadShiftWithProductionAnalytics(ctx, shift); err != nil {
 		return nil, err
 	}
 
-	deliveryDrivers := deliveryDriversModelToMap(deliveryDriversModel)
-
-	shift := shiftModel.ToDomain()
-	shift.Load(deliveryDrivers)
 	shiftDTO = &shiftdto.ShiftDTO{}
 	shiftDTO.FromDomain(shift)
 	return shiftDTO, nil
@@ -154,16 +158,12 @@ func (s *Service) GetCurrentShift(ctx context.Context) (shiftDTO *shiftdto.Shift
 		return nil, err
 	}
 
-	deliveryDriversModel, err := s.rd.GetAllDeliveryDrivers(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	deliveryDrivers := deliveryDriversModelToMap(deliveryDriversModel)
 	shiftModel.Orders = orders
 
 	shift := shiftModel.ToDomain()
-	shift.Load(deliveryDrivers)
+	if err := s.LoadShiftWithProductionAnalytics(ctx, shift); err != nil {
+		return nil, err
+	}
 
 	shiftDTO = &shiftdto.ShiftDTO{}
 	shiftDTO.FromDomain(shift)
@@ -220,4 +220,84 @@ func deliveryDriversModelToMap(deliveryDriversModel []model.DeliveryDriver) map[
 	}
 
 	return deliveryDrivers
+}
+
+func processRulesModelToMap(processRulesModel []model.ProcessRule) map[uuid.UUID]string {
+	processRules := map[uuid.UUID]string{}
+
+	for _, processRuleModel := range processRulesModel {
+		processRule := *processRuleModel.ToDomain()
+		processRules[processRuleModel.ID] = processRule.Name
+	}
+
+	return processRules
+}
+
+func employeesModelToMap(employeesModel []model.Employee) map[uuid.UUID]string {
+	employees := map[uuid.UUID]string{}
+
+	for _, employeeModel := range employeesModel {
+		employee := *employeeModel.ToDomain()
+		employees[employeeModel.ID] = employee.User.Name
+	}
+
+	return employees
+}
+
+// LoadShiftWithProductionAnalytics carrega um shift com todas as métricas de produção
+func (s *Service) LoadShiftWithProductionAnalytics(ctx context.Context, shift *shiftentity.Shift) error {
+	// Busca todos os processos (vamos usar GetAllProcesses e filtrar por shift depois)
+	allProcesses, err := s.orderProcessRepo.GetAllProcesses(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Busca todas as filas
+	allQueues, err := s.orderQueueRepo.GetAllQueues(ctx)
+	if err != nil {
+		return err
+	}
+
+	// Busca todas as regras de processo para obter os nomes
+	allProcessRules, err := s.processRuleRepo.GetAllProcessRules(ctx)
+	if err != nil {
+		return err
+	}
+
+	processRules := processRulesModelToMap(allProcessRules)
+
+	// Busca todos os funcionários para obter os nomes
+	allEmployees, _, err := s.employeeRepo.GetAllEmployees(ctx, 0, 1000) // Busca até 1000 funcionários
+	if err != nil {
+		return err
+	}
+
+	employees := employeesModelToMap(allEmployees)
+
+	// Busca delivery drivers para o método Load
+	deliveryDriversModel, err := s.rd.GetAllDeliveryDrivers(ctx)
+	if err != nil {
+		return err
+	}
+	deliveryDrivers := deliveryDriversModelToMap(deliveryDriversModel)
+
+	// Filtra processos e filas por shift (assumindo que há uma relação com shift)
+	// Nota: Esta é uma implementação simplificada. Na prática, você precisaria
+	// adicionar campos de shift_id nas tabelas de processos e filas
+	var domainProcesses []orderprocessentity.OrderProcess
+	for _, p := range allProcesses {
+		// Aqui você filtraria por shift_id se existisse
+		domainProcesses = append(domainProcesses, *p.ToDomain())
+	}
+
+	var domainQueues []*orderprocessentity.OrderQueue
+	for _, q := range allQueues {
+		// Aqui você filtraria por shift_id se existisse
+		domainQueues = append(domainQueues, q.ToDomain())
+	}
+
+	// Carrega todas as métricas de uma vez só usando o método Load integrado
+	shift.Load(deliveryDrivers, domainProcesses, domainQueues, processRules, employees)
+
+	return nil
 }

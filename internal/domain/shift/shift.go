@@ -8,6 +8,7 @@ import (
 	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 )
 
 type Shift struct {
@@ -29,10 +30,18 @@ type ShiftCommonAttributes struct {
 	TotalSales             decimal.Decimal
 	SalesByCategory        map[string]decimal.Decimal
 	ProductsSoldByCategory map[string]float64
-	TotalItemsSold         float64         // soma de todas as quantidades de itens, para medir o “pulo de prato”
+	TotalItemsSold         float64         // soma de todas as quantidades de itens, para medir o "pulo de prato"
 	AverageOrderValue      decimal.Decimal // TotalSales ÷ TotalOrders, para análise de ticket médio
 	Payments               []orderentity.PaymentOrder
 	DeliveryDrivers        []DeliveryDriverTax
+	// Novos campos para analytics de produção
+	OrderProcessAnalytics  map[uuid.UUID]*OrderProcessAnalytics // ProcessRuleID -> Analytics
+	QueueAnalytics         map[uuid.UUID]*QueueAnalytics        // ProcessRuleID -> Queue Analytics
+	TotalProcesses         int
+	TotalQueues            int
+	AverageProcessTime     time.Duration
+	AverageQueueTime       time.Duration
+	ProcessEfficiencyScore decimal.Decimal
 }
 
 type ShiftTimeLogs struct {
@@ -49,8 +58,10 @@ func NewShift(startChange decimal.Decimal) *Shift {
 	shift := &Shift{
 		Entity: newEntity,
 		ShiftCommonAttributes: ShiftCommonAttributes{
-			CurrentOrderNumber: 0,
-			StartChange:        startChange,
+			CurrentOrderNumber:    0,
+			StartChange:           startChange,
+			OrderProcessAnalytics: make(map[uuid.UUID]*OrderProcessAnalytics),
+			QueueAnalytics:        make(map[uuid.UUID]*QueueAnalytics),
 		},
 		ShiftTimeLogs: ShiftTimeLogs{
 			OpenedAt: &now,
@@ -67,7 +78,7 @@ func (s *Shift) CloseShift(endChange decimal.Decimal) {
 	s.ClosedAt = &now
 }
 
-func (s *Shift) Load(deliveryDrivers map[uuid.UUID]orderentity.DeliveryDriver) {
+func (s *Shift) Load(deliveryDrivers map[uuid.UUID]orderentity.DeliveryDriver, processes []orderprocessentity.OrderProcess, queues []*orderprocessentity.OrderQueue, processRules map[uuid.UUID]string, employees map[uuid.UUID]string) {
 	// compute analytics for reporting
 	s.TotalOrdersFinished = 0
 	s.TotalOrdersCanceled = 0
@@ -137,6 +148,144 @@ func (s *Shift) Load(deliveryDrivers map[uuid.UUID]orderentity.DeliveryDriver) {
 	if s.TotalOrdersFinished > 0 {
 		s.AverageOrderValue = s.TotalSales.Div(decimal.NewFromInt(int64(s.TotalOrdersFinished)))
 	}
+
+	// Carrega métricas de produção se os dados estiverem disponíveis
+	if processes != nil && queues != nil && processRules != nil && employees != nil {
+		s.loadOrderProcessAnalytics(processes, queues, processRules, employees)
+	}
+}
+
+// loadOrderProcessAnalytics carrega e calcula as métricas de processos de produção (método privado)
+func (s *Shift) loadOrderProcessAnalytics(processes []orderprocessentity.OrderProcess, queues []*orderprocessentity.OrderQueue, processRules map[uuid.UUID]string, employees map[uuid.UUID]string) {
+	s.TotalProcesses = 0
+	s.TotalQueues = 0
+	s.AverageProcessTime = 0
+	s.AverageQueueTime = 0
+	s.ProcessEfficiencyScore = decimal.Zero
+	s.OrderProcessAnalytics = map[uuid.UUID]*OrderProcessAnalytics{}
+	s.QueueAnalytics = map[uuid.UUID]*QueueAnalytics{}
+
+	var totalProcessTime time.Duration
+	var totalQueueTime time.Duration
+	var completedProcesses int
+
+	// Processa os processos
+	for _, process := range processes {
+		s.TotalProcesses++
+
+		// Obtém o nome da regra de processo
+		processRuleName := ""
+		if name, exists := processRules[process.ProcessRuleID]; exists {
+			processRuleName = name
+		}
+
+		// Obtém o nome do funcionário
+		employeeName := ""
+		if process.EmployeeID != nil {
+			if name, exists := employees[*process.EmployeeID]; exists {
+				employeeName = name
+			}
+		}
+
+		// Inicializa analytics para esta regra de processo se não existir
+		if _, exists := s.OrderProcessAnalytics[process.ProcessRuleID]; !exists {
+			s.OrderProcessAnalytics[process.ProcessRuleID] = NewOrderProcessAnalytics(process.ProcessRuleID, processRuleName)
+		}
+
+		// Adiciona o processo às métricas
+		s.OrderProcessAnalytics[process.ProcessRuleID].AddProcess(&process, employeeName)
+
+		// Calcula métricas gerais
+		if process.Status == orderprocessentity.ProcessStatusFinished {
+			completedProcesses++
+			totalProcessTime += process.Duration
+		}
+	}
+
+	// Processa as filas
+	for _, queue := range queues {
+		s.TotalQueues++
+
+		// Obtém o nome da regra de processo
+		processRuleName := ""
+		if name, exists := processRules[queue.ProcessRuleID]; exists {
+			processRuleName = name
+		}
+
+		// Inicializa analytics para esta regra de processo se não existir
+		if _, exists := s.QueueAnalytics[queue.ProcessRuleID]; !exists {
+			s.QueueAnalytics[queue.ProcessRuleID] = NewQueueAnalytics(queue.ProcessRuleID, processRuleName)
+		}
+
+		// Adiciona a fila às métricas
+		s.QueueAnalytics[queue.ProcessRuleID].AddQueue(queue)
+
+		// Calcula métricas gerais
+		if queue.LeftAt != nil {
+			totalQueueTime += queue.Duration
+		}
+	}
+
+	// Calcula médias gerais
+	if completedProcesses > 0 {
+		s.AverageProcessTime = time.Duration(int64(totalProcessTime) / int64(completedProcesses))
+	}
+
+	if s.TotalQueues > 0 {
+		s.AverageQueueTime = time.Duration(int64(totalQueueTime) / int64(s.TotalQueues))
+	}
+
+	// Calcula score de eficiência geral (exemplo: tempo esperado de 5 minutos)
+	expectedTime := 5 * time.Minute
+	s.ProcessEfficiencyScore = s.calculateOverallEfficiencyScore(expectedTime)
+}
+
+// calculateOverallEfficiencyScore calcula o score de eficiência geral
+func (s *Shift) calculateOverallEfficiencyScore(expectedTime time.Duration) decimal.Decimal {
+	if s.AverageProcessTime == 0 || expectedTime == 0 {
+		return decimal.Zero
+	}
+
+	// Score baseado na relação entre tempo esperado e tempo real
+	ratio := float64(expectedTime) / float64(s.AverageProcessTime)
+	return decimal.NewFromFloat(ratio * 100) // Score de 0-100
+}
+
+// GetProcessAnalyticsByRule retorna as métricas de uma regra de processo específica
+func (s *Shift) GetProcessAnalyticsByRule(processRuleID uuid.UUID) *OrderProcessAnalytics {
+	if analytics, exists := s.OrderProcessAnalytics[processRuleID]; exists {
+		return analytics
+	}
+	return nil
+}
+
+// GetQueueAnalyticsByRule retorna as métricas de fila de uma regra de processo específica
+func (s *Shift) GetQueueAnalyticsByRule(processRuleID uuid.UUID) *QueueAnalytics {
+	if analytics, exists := s.QueueAnalytics[processRuleID]; exists {
+		return analytics
+	}
+	return nil
+}
+
+// GetTopPerformingEmployees retorna os funcionários com melhor performance
+func (s *Shift) GetTopPerformingEmployees(limit int) []EmployeeProcessMetrics {
+	var allEmployees []EmployeeProcessMetrics
+
+	// Coleta todos os funcionários de todas as regras de processo
+	for _, analytics := range s.OrderProcessAnalytics {
+		for _, employee := range analytics.EmployeePerformance {
+			allEmployees = append(allEmployees, employee)
+		}
+	}
+
+	// Ordena por score de eficiência (se implementado) ou por tempo médio
+	// Aqui você pode implementar a lógica de ordenação desejada
+
+	if limit > 0 && len(allEmployees) > limit {
+		return allEmployees[:limit]
+	}
+
+	return allEmployees
 }
 
 func (s *Shift) IncrementCurrentOrder() {

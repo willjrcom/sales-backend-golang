@@ -33,11 +33,62 @@ type ShiftCommonAttributes struct {
 	AverageOrderValue      decimal.Decimal            `json:"average_order_value"`
 	Payments               []orderdto.PaymentOrderDTO `json:"payments"`
 	DeliveryDrivers        []DeliveryDriverTaxDTO     `json:"delivery_drivers_tax"`
+	// Campos de analytics de produção
+	OrderProcessAnalytics  map[string]*OrderProcessAnalyticsDTO `json:"order_process_analytics"`
+	QueueAnalytics         map[string]*QueueAnalyticsDTO        `json:"queue_analytics"`
+	TotalProcesses         int                                  `json:"total_processes"`
+	TotalQueues            int                                  `json:"total_queues"`
+	AverageProcessTime     int64                                `json:"average_process_time"` // em segundos
+	AverageQueueTime       int64                                `json:"average_queue_time"`   // em segundos
+	ProcessEfficiencyScore decimal.Decimal                      `json:"process_efficiency_score"`
 }
 
 type ShiftTimeLogs struct {
 	OpenedAt *time.Time `json:"opened_at"`
 	ClosedAt *time.Time `json:"closed_at"`
+}
+
+// OrderProcessAnalyticsDTO representa as métricas de uma regra de processo
+type OrderProcessAnalyticsDTO struct {
+	ProcessRuleID       uuid.UUID                             `json:"process_rule_id"`
+	ProcessRuleName     string                                `json:"process_rule_name"`
+	TotalProcesses      int                                   `json:"total_processes"`
+	CompletedProcesses  int                                   `json:"completed_processes"`
+	CanceledProcesses   int                                   `json:"canceled_processes"`
+	AverageProcessTime  int64                                 `json:"average_process_time"` // em segundos
+	TotalProcessTime    int64                                 `json:"total_process_time"`   // em segundos
+	TotalPausedCount    int                                   `json:"total_paused_count"`
+	EfficiencyScore     decimal.Decimal                       `json:"efficiency_score"`
+	CategoriesProcessed map[string]*CategoryProcessMetricsDTO `json:"categories_processed"`
+	EmployeePerformance map[string]*EmployeeProcessMetricsDTO `json:"employee_performance"`
+}
+
+// QueueAnalyticsDTO representa as métricas de fila
+type QueueAnalyticsDTO struct {
+	ProcessRuleID    uuid.UUID `json:"process_rule_id"`
+	ProcessRuleName  string    `json:"process_rule_name"`
+	TotalQueues      int       `json:"total_queues"`
+	CompletedQueues  int       `json:"completed_queues"`
+	AverageQueueTime int64     `json:"average_queue_time"` // em segundos
+	TotalQueueTime   int64     `json:"total_queue_time"`   // em segundos
+}
+
+// CategoryProcessMetricsDTO representa métricas por categoria
+type CategoryProcessMetricsDTO struct {
+	CategoryID         uuid.UUID `json:"category_id"`
+	CategoryName       string    `json:"category_name"`
+	TotalProcesses     int       `json:"total_processes"`
+	AverageProcessTime int64     `json:"average_process_time"` // em segundos
+}
+
+// EmployeeProcessMetricsDTO representa métricas por funcionário
+type EmployeeProcessMetricsDTO struct {
+	EmployeeID         uuid.UUID       `json:"employee_id"`
+	EmployeeName       string          `json:"employee_name"`
+	TotalProcesses     int             `json:"total_processes"`
+	CompletedProcesses int             `json:"completed_processes"`
+	AverageProcessTime int64           `json:"average_process_time"` // em segundos
+	EfficiencyScore    decimal.Decimal `json:"efficiency_score"`
 }
 
 func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
@@ -67,6 +118,14 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 			AverageOrderValue:      shift.AverageOrderValue,
 			Payments:               []orderdto.PaymentOrderDTO{},
 			DeliveryDrivers:        []DeliveryDriverTaxDTO{},
+			// Analytics de produção
+			OrderProcessAnalytics:  make(map[string]*OrderProcessAnalyticsDTO),
+			QueueAnalytics:         make(map[string]*QueueAnalyticsDTO),
+			TotalProcesses:         shift.TotalProcesses,
+			TotalQueues:            shift.TotalQueues,
+			AverageProcessTime:     int64(shift.AverageProcessTime.Seconds()),
+			AverageQueueTime:       int64(shift.AverageQueueTime.Seconds()),
+			ProcessEfficiencyScore: shift.ProcessEfficiencyScore,
 		},
 	}
 
@@ -94,6 +153,57 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 		s.DeliveryDrivers = append(s.DeliveryDrivers, t)
 	}
 
+	// Converte analytics de produção
+	for _, analytics := range shift.OrderProcessAnalytics {
+		s.OrderProcessAnalytics[analytics.ProcessRuleName] = &OrderProcessAnalyticsDTO{
+			ProcessRuleID:       analytics.ProcessRuleID,
+			ProcessRuleName:     analytics.ProcessRuleName,
+			TotalProcesses:      analytics.TotalProcesses,
+			CompletedProcesses:  analytics.CompletedProcesses,
+			CanceledProcesses:   analytics.CanceledProcesses,
+			AverageProcessTime:  int64(analytics.AverageProcessTime.Seconds()),
+			TotalProcessTime:    int64(analytics.TotalProcessTime.Seconds()),
+			TotalPausedCount:    analytics.TotalPausedCount,
+			EfficiencyScore:     analytics.GetEfficiencyScore(5 * time.Minute), // 5 min esperado
+			CategoriesProcessed: make(map[string]*CategoryProcessMetricsDTO),
+			EmployeePerformance: make(map[string]*EmployeeProcessMetricsDTO),
+		}
+
+		// Converte categorias
+		for categoryID, categoryMetrics := range analytics.CategoriesProcessed {
+			s.OrderProcessAnalytics[analytics.ProcessRuleName].CategoriesProcessed[categoryMetrics.CategoryName] = &CategoryProcessMetricsDTO{
+				CategoryID:         categoryID,
+				CategoryName:       categoryMetrics.CategoryName,
+				TotalProcesses:     categoryMetrics.TotalProcessed,
+				AverageProcessTime: int64(categoryMetrics.AverageProcessTime.Seconds()),
+			}
+		}
+
+		// Converte funcionários
+		for employeeID, employeeMetrics := range analytics.EmployeePerformance {
+			s.OrderProcessAnalytics[analytics.ProcessRuleName].EmployeePerformance[employeeMetrics.EmployeeName] = &EmployeeProcessMetricsDTO{
+				EmployeeID:         employeeID,
+				EmployeeName:       employeeMetrics.EmployeeName,
+				TotalProcesses:     employeeMetrics.TotalProcessed,
+				CompletedProcesses: employeeMetrics.TotalProcessed, // Assumindo que todos os processos processados foram completados
+				AverageProcessTime: int64(employeeMetrics.AverageProcessTime.Seconds()),
+				EfficiencyScore:    employeeMetrics.EfficiencyScore,
+			}
+		}
+	}
+
+	// Converte analytics de fila
+	for _, queueAnalytics := range shift.QueueAnalytics {
+		s.QueueAnalytics[queueAnalytics.ProcessRuleName] = &QueueAnalyticsDTO{
+			ProcessRuleID:    queueAnalytics.ProcessRuleID,
+			ProcessRuleName:  queueAnalytics.ProcessRuleName,
+			TotalQueues:      queueAnalytics.TotalQueued,
+			CompletedQueues:  queueAnalytics.TotalQueued, // Assumindo que todas as filas foram completadas
+			AverageQueueTime: int64(queueAnalytics.AverageQueueTime.Seconds()),
+			TotalQueueTime:   int64(queueAnalytics.TotalQueueTime.Seconds()),
+		}
+	}
+
 	s.Attendant.FromDomain(shift.Attendant)
 
 	if len(shift.Orders) == 0 {
@@ -104,5 +214,11 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 	}
 	if shift.Attendant == nil {
 		s.Attendant = nil
+	}
+	if len(s.OrderProcessAnalytics) == 0 {
+		s.OrderProcessAnalytics = nil
+	}
+	if len(s.QueueAnalytics) == 0 {
+		s.QueueAnalytics = nil
 	}
 }
