@@ -196,14 +196,16 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 		}
 
 		if orderIsReady {
-			// Update order status
-			if err := order.ReadyOrder(); err != nil {
-				return uuid.Nil, err
-			}
+			// Update order status only if it's not already Ready or Finished
+			if order.Status == orderentity.OrderStatusPending {
+				if err := order.ReadyOrder(); err != nil {
+					return uuid.Nil, err
+				}
 
-			orderModel.FromDomain(order)
-			if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
-				return uuid.Nil, err
+				orderModel.FromDomain(order)
+				if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
+					return uuid.Nil, err
+				}
 			}
 			return uuid.Nil, nil
 		}
