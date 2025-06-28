@@ -2,7 +2,6 @@ package productcategorydto
 
 import (
 	"errors"
-	"mime/multipart"
 
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -27,7 +26,7 @@ type ProductCreateDTO struct {
 	IsAvailable bool            `json:"is_available"`
 	CategoryID  *uuid.UUID      `json:"category_id"`
 	SizeID      *uuid.UUID      `json:"size_id"`
-	Image       *multipart.File `json:"image"`
+	ImagePath   string          `json:"image_path"`
 }
 
 func (p *ProductCreateDTO) validate() error {
@@ -65,6 +64,7 @@ func (p *ProductCreateDTO) ToDomain() (*productentity.Product, error) {
 		IsAvailable: p.IsAvailable,
 		CategoryID:  *p.CategoryID,
 		SizeID:      *p.SizeID,
+		ImagePath:   &p.ImagePath,
 	}
 
 	return productentity.NewProduct(productCommonAttributes), nil

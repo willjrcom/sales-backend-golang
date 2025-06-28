@@ -37,14 +37,6 @@ func NewHandlerProduct(productService *productusecases.Service) *handler.Handler
 }
 
 func (h *HandlerProductImpl) handlerCreateProduct(w http.ResponseWriter, r *http.Request) {
-	// file, _, err := r.FormFile("image")
-	// if err != nil && err.Error() != "http: no such file" {
-	// 	jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
-	// 	return
-	// }
-
-	// defer file.Close()
-
 	ctx := r.Context()
 
 	dtoProduct := &productcategorydto.ProductCreateDTO{}
@@ -52,10 +44,6 @@ func (h *HandlerProductImpl) handlerCreateProduct(w http.ResponseWriter, r *http
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
-
-	// if file != nil {
-	// 	product.Image = &file
-	// }
 
 	id, err := h.s.CreateProduct(ctx, dtoProduct)
 	if err != nil {
