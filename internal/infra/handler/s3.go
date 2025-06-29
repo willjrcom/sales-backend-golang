@@ -23,6 +23,7 @@ func NewHandlerS3() *handler.Handler {
 	c.With().Group(func(c chi.Router) {
 		c.Post("/presign", handlerGeneratePresignedURL)
 		c.Options("/presign", handlerGeneratePresignedURL)
+		c.Post("/upload", handlerUploadImage)
 	})
 
 	unprotectedRoutes := []string{}
@@ -95,4 +96,64 @@ func handlerGeneratePresignedURL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, response)
+}
+
+func handlerUploadImage(w http.ResponseWriter, r *http.Request) {
+	// Limite de 10MB
+	err := r.ParseMultipartForm(10 << 20)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, fmt.Errorf("erro ao processar upload: %w", err))
+		return
+	}
+
+	file, handler, err := r.FormFile("image")
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, fmt.Errorf("arquivo não encontrado: %w", err))
+		return
+	}
+	defer file.Close()
+
+	schemaName := r.FormValue("schema_name")
+
+	// Gera nome único
+	filename := handler.Filename
+	sanitizedName := filename
+	key := ""
+	if schemaName != "" {
+		key = fmt.Sprintf("images/%s/%d-%s", schemaName, time.Now().Unix(), sanitizedName)
+	} else {
+		key = fmt.Sprintf("images/%d-%s", time.Now().Unix(), sanitizedName)
+	}
+
+	// Carrega config AWS
+	ctx := r.Context()
+	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(os.Getenv("AWS_REGION")))
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, fmt.Errorf("erro AWS config: %w", err))
+		return
+	}
+	s3Client := awss3.NewFromConfig(cfg)
+
+	// Upload para o S3
+	_, err = s3Client.PutObject(ctx, &awss3.PutObjectInput{
+		Bucket:      aws.String(os.Getenv("S3_BUCKET_NAME")),
+		Key:         aws.String(key),
+		Body:        file,
+		ContentType: aws.String(handler.Header.Get("Content-Type")),
+		ACL:         "public-read",
+	})
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, fmt.Errorf("erro ao enviar para o S3: %w", err))
+		return
+	}
+
+	region := os.Getenv("AWS_REGION")
+	bucket := os.Getenv("S3_BUCKET_NAME")
+	publicUrl := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucket, region, key)
+
+	response := s3dto.PresignResponseDTO{
+		Key:       key,
+		PublicUrl: publicUrl,
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusCreated, response)
 }
