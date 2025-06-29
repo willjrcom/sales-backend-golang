@@ -3,6 +3,7 @@ package modules
 import (
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
+	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
@@ -43,6 +44,9 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	orderPrintService, _ := NewOrderPrintModule(db, chi)
 
 	NewReportModule(db, chi)
+
+	// Add S3 handler
+	chi.AddHandler(handlerimpl.NewHandlerS3())
 
 	clientService.AddDependencies(contactRepository)
 	employeeService.AddDependencies(contactRepository, userRepository)
