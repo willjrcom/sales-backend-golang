@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	awss3 "github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/go-chi/chi/v5"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	s3dto "github.com/willjrcom/sales-backend-go/internal/infra/dto/s3"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
@@ -113,7 +114,7 @@ func handlerUploadImage(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	schemaName := r.FormValue("schema_name")
+	schemaName, _ := database.GetCurrentSchema(r.Context())
 
 	// Gera nome único
 	filename := handler.Filename
@@ -134,9 +135,11 @@ func handlerUploadImage(w http.ResponseWriter, r *http.Request) {
 	}
 	s3Client := awss3.NewFromConfig(cfg)
 
+	bucket := os.Getenv("S3_BUCKET_NAME")
+
 	// Upload para o S3
 	_, err = s3Client.PutObject(ctx, &awss3.PutObjectInput{
-		Bucket:      aws.String(os.Getenv("S3_BUCKET_NAME")),
+		Bucket:      aws.String(bucket),
 		Key:         aws.String(key),
 		Body:        file,
 		ContentType: aws.String(handler.Header.Get("Content-Type")),
@@ -148,7 +151,6 @@ func handlerUploadImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	region := os.Getenv("AWS_REGION")
-	bucket := os.Getenv("S3_BUCKET_NAME")
 	publicUrl := fmt.Sprintf("https://%s.s3.%s.amazonaws.com/%s", bucket, region, key)
 
 	response := s3dto.PresignResponseDTO{

@@ -13,5 +13,9 @@
             "args": [
             "httpserver", //"--environment", "prod"
             ],
+            "env": {
+                "S3_BUCKET_NAME": "gfood361769556033",
+                "AWS_REGION": "us-east-1"
+            },
         }]
 }
