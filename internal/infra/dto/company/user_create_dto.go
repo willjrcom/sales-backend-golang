@@ -18,6 +18,7 @@ var (
 
 type UserCreateDTO struct {
 	Email            string                       `json:"email"`
+	ImagePath        string                       `json:"image_path"`
 	Password         string                       `json:"password"`
 	GeneratePassword bool                         `json:"generate_password"`
 	Name             string                       `json:"name"`
@@ -64,11 +65,13 @@ func (u *UserCreateDTO) ToDomain() (*companyentity.User, error) {
 	}
 
 	personCommonAttributes := &personentity.PersonCommonAttributes{
-		Name:     u.Name,
-		Email:    u.Email,
-		Cpf:      u.Cpf,
-		Birthday: u.Birthday,
+		Name:      u.Name,
+		ImagePath: u.ImagePath,
+		Email:     u.Email,
+		Cpf:       u.Cpf,
+		Birthday:  u.Birthday,
 	}
+
 	person := personentity.NewPerson(personCommonAttributes)
 
 	userCommonAttributes := &companyentity.UserCommonAttributes{

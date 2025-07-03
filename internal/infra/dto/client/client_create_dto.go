@@ -19,12 +19,13 @@ var (
 )
 
 type ClientCreateDTO struct {
-	Name     string                       `json:"name"`
-	Email    *string                      `json:"email"`
-	Cpf      *string                      `json:"cpf"`
-	Birthday *time.Time                   `json:"birthday"`
-	Contact  *contactdto.ContactCreateDTO `json:"contact"`
-	Address  *addressdto.AddressCreateDTO `json:"address"`
+	Name      string                       `json:"name"`
+	ImagePath string                       `json:"image_path"`
+	Email     *string                      `json:"email"`
+	Cpf       *string                      `json:"cpf"`
+	Birthday  *time.Time                   `json:"birthday"`
+	Contact   *contactdto.ContactCreateDTO `json:"contact"`
+	Address   *addressdto.AddressCreateDTO `json:"address"`
 }
 
 func (r *ClientCreateDTO) validate() error {
@@ -50,7 +51,8 @@ func (r *ClientCreateDTO) ToDomain() (*cliententity.Client, error) {
 	}
 
 	personCommonAttributes := &personentity.PersonCommonAttributes{
-		Name: r.Name,
+		Name:      r.Name,
+		ImagePath: r.ImagePath,
 	}
 
 	// Create person

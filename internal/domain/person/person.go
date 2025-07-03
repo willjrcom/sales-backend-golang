@@ -11,12 +11,13 @@ type Person struct {
 }
 
 type PersonCommonAttributes struct {
-	Name     string
-	Email    string
-	Cpf      string
-	Birthday *time.Time
-	Contact  *Contact
-	Address  *addressentity.Address
+	ImagePath string
+	Name      string
+	Email     string
+	Cpf       string
+	Birthday  *time.Time
+	Contact   *Contact
+	Address   *addressentity.Address
 }
 
 func NewPerson(personCommonAttributes *PersonCommonAttributes) *Person {

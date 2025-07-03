@@ -18,12 +18,13 @@ var (
 )
 
 type ClientUpdateDTO struct {
-	Name     *string                      `json:"name"`
-	Email    *string                      `json:"email"`
-	Cpf      *string                      `json:"cpf"`
-	Birthday *time.Time                   `json:"birthday"`
-	Contact  *contactdto.ContactUpdateDTO `json:"contact"`
-	Address  *addressdto.AddressUpdateDTO `json:"address"`
+	Name      *string                      `json:"name"`
+	ImagePath string                       `json:"image_path"`
+	Email     *string                      `json:"email"`
+	Cpf       *string                      `json:"cpf"`
+	Birthday  *time.Time                   `json:"birthday"`
+	Contact   *contactdto.ContactUpdateDTO `json:"contact"`
+	Address   *addressdto.AddressUpdateDTO `json:"address"`
 }
 
 func (r *ClientUpdateDTO) validate() error {
@@ -45,6 +46,9 @@ func (r *ClientUpdateDTO) UpdateDomain(client *cliententity.Client) error {
 
 	if r.Name != nil {
 		client.Name = *r.Name
+	}
+	if r.ImagePath != "" {
+		client.ImagePath = r.ImagePath
 	}
 	if r.Email != nil {
 		client.Email = *r.Email

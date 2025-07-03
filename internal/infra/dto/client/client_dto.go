@@ -10,13 +10,14 @@ import (
 )
 
 type ClientDTO struct {
-	ID       uuid.UUID              `json:"id"`
-	Name     string                 `json:"name"`
-	Email    string                 `json:"email"`
-	Cpf      string                 `json:"cpf"`
-	Birthday *time.Time             `json:"birthday"`
-	Contact  *contactdto.ContactDTO `json:"contact"`
-	Address  *addressdto.AddressDTO `json:"address"`
+	ID        uuid.UUID              `json:"id"`
+	Name      string                 `json:"name"`
+	ImagePath string                 `json:"image_path"`
+	Email     string                 `json:"email"`
+	Cpf       string                 `json:"cpf"`
+	Birthday  *time.Time             `json:"birthday"`
+	Contact   *contactdto.ContactDTO `json:"contact"`
+	Address   *addressdto.AddressDTO `json:"address"`
 }
 
 func (c *ClientDTO) FromDomain(client *cliententity.Client) {
@@ -24,13 +25,14 @@ func (c *ClientDTO) FromDomain(client *cliententity.Client) {
 		return
 	}
 	*c = ClientDTO{
-		ID:       client.ID,
-		Name:     client.Name,
-		Email:    client.Email,
-		Cpf:      client.Cpf,
-		Birthday: client.Birthday,
-		Contact:  &contactdto.ContactDTO{},
-		Address:  &addressdto.AddressDTO{},
+		ID:        client.ID,
+		Name:      client.Name,
+		ImagePath: client.ImagePath,
+		Email:     client.Email,
+		Cpf:       client.Cpf,
+		Birthday:  client.Birthday,
+		Contact:   &contactdto.ContactDTO{},
+		Address:   &addressdto.AddressDTO{},
 	}
 
 	c.Contact.FromDomain(client.Contact)

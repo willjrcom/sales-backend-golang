@@ -11,8 +11,9 @@ import (
 
 type UserDTO struct {
 	ID        uuid.UUID              `json:"id"`
-	Email     string                 `json:"email"`
 	Name      string                 `json:"name"`
+	ImagePath string                 `json:"image_path"`
+	Email     string                 `json:"email"`
 	Cpf       string                 `json:"cpf,omitempty"`
 	Birthday  *time.Time             `json:"birthday,omitempty"`
 	Contact   *contactdto.ContactDTO `json:"contact,omitempty"`
@@ -26,8 +27,9 @@ func (u *UserDTO) FromDomain(user *companyentity.User) {
 	}
 	*u = UserDTO{
 		ID:        user.ID,
-		Email:     user.Email,
 		Name:      user.Name,
+		ImagePath: user.ImagePath,
+		Email:     user.Email,
 		Cpf:       user.Cpf,
 		Birthday:  user.Birthday,
 		Contact:   &contactdto.ContactDTO{},
