@@ -12,7 +12,7 @@ type Employee struct {
 	bun.BaseModel `bun:"table:employees"`
 	EmployeeCommonAttributes
 	Payments    []PaymentEmployee `bun:"rel:has-many,join:id=employee_id"`
-	Permissions map[string]string `bun:"type:jsonb"`
+	Permissions map[string]bool   `bun:"type:jsonb"`
 }
 
 type EmployeeCommonAttributes struct {
@@ -31,7 +31,7 @@ func (e *Employee) FromDomain(employee *employeeentity.Employee) {
 			User:   &User{},
 		},
 		Payments:    []PaymentEmployee{},
-		Permissions: make(map[string]string),
+		Permissions: make(map[string]bool),
 	}
 
 	e.User.FromDomain(employee.User)

@@ -7,10 +7,10 @@ import (
 )
 
 type EmployeeDTO struct {
-	ID     uuid.UUID `json:"id"`
-	UserID uuid.UUID `json:"user_id"`
 	companydto.UserDTO
-	Permissions map[string]string `json:"permissions"`
+	ID          uuid.UUID       `json:"id"`
+	UserID      uuid.UUID       `json:"user_id"`
+	Permissions map[string]bool `json:"permissions"`
 }
 
 func (c *EmployeeDTO) FromDomain(employee *employeeentity.Employee) {
@@ -22,7 +22,7 @@ func (c *EmployeeDTO) FromDomain(employee *employeeentity.Employee) {
 		ID:          employee.ID,
 		UserID:      employee.UserID,
 		UserDTO:     companydto.UserDTO{},
-		Permissions: make(map[string]string),
+		Permissions: make(map[string]bool),
 	}
 
 	c.UserDTO.FromDomain(employee.User)

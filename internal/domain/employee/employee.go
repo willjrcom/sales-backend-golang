@@ -2,7 +2,6 @@ package employeeentity
 
 import (
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -51,11 +50,11 @@ const (
 // Permission representa um par chave-valor de permissão.
 type Permission struct {
 	Key   PermissionKey
-	Value string
+	Value bool
 }
 
 // Permissions é um map de permissões.
-type Permissions map[PermissionKey]string
+type Permissions map[PermissionKey]bool
 
 // NewPermissions cria um map de permissões a partir de um slice de Permission.
 func NewPermissions(entries []Permission) Permissions {
@@ -67,22 +66,10 @@ func NewPermissions(entries []Permission) Permissions {
 }
 
 // Métodos utilitários para acessar permissões
-func (p Permissions) GetString(key PermissionKey) (string, error) {
+func (p Permissions) GetBool(key PermissionKey) (bool, error) {
 	v, ok := p[key]
 	if !ok {
-		return "", fmt.Errorf("permission %q not found", key)
+		return false, fmt.Errorf("permission %q not found", key)
 	}
 	return v, nil
-}
-
-func (p Permissions) GetBool(key PermissionKey) (bool, error) {
-	raw, err := p.GetString(key)
-	if err != nil {
-		return false, err
-	}
-	b, err := strconv.ParseBool(raw)
-	if err != nil {
-		return false, fmt.Errorf("invalid bool for %q: %w", key, err)
-	}
-	return b, nil
 }

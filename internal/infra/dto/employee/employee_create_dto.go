@@ -12,8 +12,8 @@ var (
 )
 
 type EmployeeCreateDTO struct {
-	UserID      *uuid.UUID        `json:"user_id"`
-	Permissions map[string]string `json:"permissions"`
+	UserID      *uuid.UUID      `json:"user_id"`
+	Permissions map[string]bool `json:"permissions"`
 }
 
 func (r *EmployeeCreateDTO) validate() error {

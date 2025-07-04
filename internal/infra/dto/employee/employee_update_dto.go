@@ -5,7 +5,7 @@ import (
 )
 
 type EmployeeUpdateDTO struct {
-	Permissions map[string]string `json:"permissions"`
+	Permissions map[string]bool `json:"permissions"`
 }
 
 func (r *EmployeeUpdateDTO) validate() error {
