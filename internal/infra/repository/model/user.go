@@ -34,17 +34,10 @@ func (u *User) FromDomain(user *companyentity.User) {
 	*u = User{
 		Entity: entitymodel.FromDomain(user.Entity),
 		UserCommonAttributes: UserCommonAttributes{
-			PublicPerson: PublicPerson{
-				Name:     user.Name,
-				Email:    user.Email,
-				Cpf:      user.Cpf,
-				Birthday: user.Birthday,
-				Contact:  &PublicContact{},
-				Address:  &PublicAddress{},
-			},
-			Password:  user.Password,
-			Hash:      user.Hash,
-			Companies: []Company{},
+			Password:     user.Password,
+			Hash:         user.Hash,
+			PublicPerson: PublicPerson{},
+			Companies:    []Company{},
 		},
 	}
 
@@ -54,6 +47,7 @@ func (u *User) FromDomain(user *companyentity.User) {
 		u.Companies = append(u.Companies, c)
 	}
 
+	u.PublicPerson.FromDomain(&user.Person)
 	u.Contact.FromDomain(user.Contact)
 	u.Address.FromDomain(user.Address)
 

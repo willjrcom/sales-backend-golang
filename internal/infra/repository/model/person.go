@@ -7,12 +7,13 @@ import (
 )
 
 type Person struct {
-	Name     string     `bun:"name,notnull"`
-	Email    string     `bun:"email"`
-	Cpf      string     `bun:"cpf"`
-	Birthday *time.Time `bun:"birthday"`
-	Contact  *Contact   `bun:"rel:has-one,join:id=object_id,notnull"`
-	Address  *Address   `bun:"rel:has-one,join:id=object_id,notnull"`
+	ImagePath string     `bun:"image_path"`
+	Name      string     `bun:"name,notnull"`
+	Email     string     `bun:"email"`
+	Cpf       string     `bun:"cpf"`
+	Birthday  *time.Time `bun:"birthday"`
+	Contact   *Contact   `bun:"rel:has-one,join:id=object_id,notnull"`
+	Address   *Address   `bun:"rel:has-one,join:id=object_id,notnull"`
 }
 
 func (p *Person) FromDomain(person *personentity.Person) {
@@ -20,12 +21,13 @@ func (p *Person) FromDomain(person *personentity.Person) {
 		return
 	}
 	*p = Person{
-		Name:     person.Name,
-		Email:    person.Email,
-		Cpf:      person.Cpf,
-		Birthday: person.Birthday,
-		Contact:  &Contact{},
-		Address:  &Address{},
+		ImagePath: person.ImagePath,
+		Name:      person.Name,
+		Email:     person.Email,
+		Cpf:       person.Cpf,
+		Birthday:  person.Birthday,
+		Contact:   &Contact{},
+		Address:   &Address{},
 	}
 
 	p.Contact.FromDomain(person.Contact)
@@ -38,12 +40,13 @@ func (p *Person) ToDomain() *personentity.Person {
 	}
 	return &personentity.Person{
 		PersonCommonAttributes: personentity.PersonCommonAttributes{
-			Name:     p.Name,
-			Email:    p.Email,
-			Cpf:      p.Cpf,
-			Birthday: p.Birthday,
-			Contact:  p.Contact.ToDomain(),
-			Address:  p.Address.ToDomain(),
+			ImagePath: p.ImagePath,
+			Name:      p.Name,
+			Email:     p.Email,
+			Cpf:       p.Cpf,
+			Birthday:  p.Birthday,
+			Contact:   p.Contact.ToDomain(),
+			Address:   p.Address.ToDomain(),
 		},
 	}
 }
