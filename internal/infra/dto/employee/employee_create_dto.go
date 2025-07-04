@@ -12,7 +12,8 @@ var (
 )
 
 type EmployeeCreateDTO struct {
-	UserID *uuid.UUID `json:"user_id"`
+	UserID      *uuid.UUID        `json:"user_id"`
+	Permissions map[string]string `json:"permissions"`
 }
 
 func (r *EmployeeCreateDTO) validate() error {
@@ -28,6 +29,15 @@ func (r *EmployeeCreateDTO) ToDomain() (*employeeentity.Employee, error) {
 		return nil, err
 	}
 
-	// Get exists user
-	return employeeentity.NewEmployee(*r.UserID), nil
+	employee := employeeentity.NewEmployee(*r.UserID)
+
+	// Copia as permissões do DTO para o domain
+	if r.Permissions != nil {
+		employee.Permissions = make(employeeentity.Permissions)
+		for k, v := range r.Permissions {
+			employee.Permissions[employeeentity.PermissionKey(k)] = v
+		}
+	}
+
+	return employee, nil
 }

@@ -11,7 +11,8 @@ type Employee struct {
 	entitymodel.Entity
 	bun.BaseModel `bun:"table:employees"`
 	EmployeeCommonAttributes
-	Payments []PaymentEmployee `bun:"rel:has-many,join:id=employee_id"`
+	Payments    []PaymentEmployee `bun:"rel:has-many,join:id=employee_id"`
+	Permissions map[string]string `bun:"type:jsonb"`
 }
 
 type EmployeeCommonAttributes struct {
@@ -29,7 +30,8 @@ func (e *Employee) FromDomain(employee *employeeentity.Employee) {
 			UserID: employee.UserID,
 			User:   &User{},
 		},
-		Payments: []PaymentEmployee{},
+		Payments:    []PaymentEmployee{},
+		Permissions: make(map[string]string),
 	}
 
 	e.User.FromDomain(employee.User)
@@ -39,6 +41,10 @@ func (e *Employee) FromDomain(employee *employeeentity.Employee) {
 		p.FromDomain(&pay)
 		e.Payments = append(e.Payments, p)
 	}
+	// map permissions from domain
+	for k, v := range employee.Permissions {
+		e.Permissions[string(k)] = v
+	}
 }
 
 func (e *Employee) ToDomain() *employeeentity.Employee {
@@ -46,14 +52,19 @@ func (e *Employee) ToDomain() *employeeentity.Employee {
 		return nil
 	}
 	dom := &employeeentity.Employee{
-		Entity:   e.Entity.ToDomain(),
-		UserID:   e.UserID,
-		User:     e.User.ToDomain(),
-		Payments: make([]employeeentity.PaymentEmployee, 0, len(e.Payments)),
+		Entity:      e.Entity.ToDomain(),
+		UserID:      e.UserID,
+		User:        e.User.ToDomain(),
+		Payments:    make([]employeeentity.PaymentEmployee, 0, len(e.Payments)),
+		Permissions: make(employeeentity.Permissions),
 	}
 	// map payments to domain
 	for _, p := range e.Payments {
 		dom.Payments = append(dom.Payments, *p.ToDomain())
+	}
+	// map permissions to domain
+	for k, v := range e.Permissions {
+		dom.Permissions[employeeentity.PermissionKey(k)] = v
 	}
 	return dom
 }

@@ -5,6 +5,7 @@ import (
 )
 
 type EmployeeUpdateDTO struct {
+	Permissions map[string]string `json:"permissions"`
 }
 
 func (r *EmployeeUpdateDTO) validate() error {
@@ -14,6 +15,14 @@ func (r *EmployeeUpdateDTO) validate() error {
 func (r *EmployeeUpdateDTO) UpdateDomain(employee *employeeentity.Employee) error {
 	if err := r.validate(); err != nil {
 		return err
+	}
+
+	// Atualiza as permissões se fornecidas
+	if r.Permissions != nil {
+		employee.Permissions = make(employeeentity.Permissions)
+		for k, v := range r.Permissions {
+			employee.Permissions[employeeentity.PermissionKey(k)] = v
+		}
 	}
 
 	return nil
