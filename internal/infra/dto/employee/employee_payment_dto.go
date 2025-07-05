@@ -9,7 +9,8 @@ import (
 )
 
 type EmployeePaymentDTO struct {
-	ID uuid.UUID `json:"id"`
+	ID        uuid.UUID `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
 	PaymentTimeLogs
 	PaymentCommonAttributes
 }
@@ -31,7 +32,8 @@ func (d *EmployeePaymentDTO) FromDomain(payment *employeeentity.PaymentEmployee)
 		return
 	}
 	*d = EmployeePaymentDTO{
-		ID: payment.ID,
+		ID:        payment.ID,
+		CreatedAt: payment.CreatedAt,
 		PaymentCommonAttributes: PaymentCommonAttributes{
 			EmployeeID: payment.EmployeeID,
 			Amount:     payment.Amount,
