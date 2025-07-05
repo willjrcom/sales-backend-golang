@@ -6,7 +6,7 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-func SendEmail(destination *string) {
+func SendEmail(destination *string) error {
 	// Configurações do e-mail
 	smtpHost := "smtp.gmail.com" // Por exemplo, para Gmail
 	smtpPort := 587              // Porta do servidor SMTP
@@ -26,8 +26,9 @@ func SendEmail(destination *string) {
 	// Enviar o e-mail
 	if err := d.DialAndSend(m); err != nil {
 		fmt.Printf("Erro ao enviar o e-mail: %v\n", err)
-		return
+		return err
 	}
 
 	fmt.Println("E-mail enviado com sucesso!")
+	return nil
 }

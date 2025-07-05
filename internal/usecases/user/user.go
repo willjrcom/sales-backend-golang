@@ -94,7 +94,10 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 	}
 
 	// Send email service
-	emailservice.SendEmail(email)
+	if err := emailservice.SendEmail(email); err != nil {
+		return err
+	}
+
 	return nil
 }
 
