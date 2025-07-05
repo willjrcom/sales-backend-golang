@@ -4,6 +4,7 @@ __debug_bin*
 .gocache/
 .cursor
 .tmp/
+/.vscode
 tmp/
 
 .env.local
