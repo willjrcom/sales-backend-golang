@@ -2,6 +2,7 @@ package emailservice
 
 import (
 	"fmt"
+	"os"
 
 	"gopkg.in/gomail.v2"
 )
@@ -10,8 +11,8 @@ func SendEmail(destination *string) error {
 	// Configurações do e-mail
 	smtpHost := "smtp.gmail.com" // Por exemplo, para Gmail
 	smtpPort := 587              // Porta do servidor SMTP
-	senderEmail := "email"
-	senderPass := "pass" // Ou utilize tokens de aplicativo para maior segurança
+	senderEmail := os.Getenv("EMAIL_SERVICE")
+	senderPass := os.Getenv("PASSWORD_EMAIL_SERVICE")
 
 	// Criar mensagem
 	m := gomail.NewMessage()
