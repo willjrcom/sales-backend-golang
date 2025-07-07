@@ -9,7 +9,9 @@ import (
 type UserRepository interface {
 	CreateUser(ctx context.Context, user *User) error
 	UpdateUser(ctx context.Context, user *User) error
+	UpdateUserPassword(ctx context.Context, user *User) error
 	LoginAndDeleteUser(ctx context.Context, user *User) error
+	GetUser(ctx context.Context, email string) (*User, error)
 	LoginUser(ctx context.Context, user *User) (*User, error)
 	GetIDByEmail(ctx context.Context, email string) (*uuid.UUID, error)
 	GetIDByEmailOrCPF(ctx context.Context, email string, cpf string) (*uuid.UUID, error)

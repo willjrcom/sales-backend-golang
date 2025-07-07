@@ -7,7 +7,13 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-func SendEmail(destination *string) error {
+type BodyEmail struct {
+	Email   string
+	Subject string
+	Body    string
+}
+
+func SendEmail(bodyEmail *BodyEmail) error {
 	// Configurações do e-mail
 	smtpHost := "smtp.gmail.com" // Por exemplo, para Gmail
 	smtpPort := 587              // Porta do servidor SMTP
@@ -17,9 +23,9 @@ func SendEmail(destination *string) error {
 	// Criar mensagem
 	m := gomail.NewMessage()
 	m.SetHeader("From", senderEmail)
-	m.SetHeader("To", *destination)
-	m.SetHeader("Subject", "Teste de envio com GoMail")
-	m.SetBody("text/plain", "Este é um teste de envio de e-mail utilizando a biblioteca GoMail.")
+	m.SetHeader("To", bodyEmail.Email)
+	m.SetHeader("Subject", bodyEmail.Subject)
+	m.SetBody("text/html", bodyEmail.Body)
 
 	// Configurar servidor SMTP
 	d := gomail.NewDialer(smtpHost, smtpPort, senderEmail, senderPass)

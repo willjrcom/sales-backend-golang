@@ -32,6 +32,32 @@ func (r *UserRepositoryLocal) CreateUser(ctx context.Context, user *model.User) 
 	r.users[user.Entity.ID] = user
 	return nil
 }
+func (r *UserRepositoryLocal) GetUser(ctx context.Context, email string) (*model.User, error) {
+	if email == "" {
+		return nil, errors.New("email cannot be empty")
+	}
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for _, u := range r.users {
+		if u.Email == email {
+			return u, nil
+		}
+	}
+	return nil, errors.New("user not found")
+}
+
+func (r *UserRepositoryLocal) UpdateUserPassword(ctx context.Context, user *model.User) error {
+	if user == nil || user.Entity.ID == uuid.Nil {
+		return errors.New("invalid user")
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if _, exists := r.users[user.Entity.ID]; !exists {
+		return errors.New("user not found")
+	}
+	r.users[user.Entity.ID] = user
+	return nil
+}
 
 func (r *UserRepositoryLocal) UpdateUser(ctx context.Context, user *model.User) error {
 	if user == nil || user.Entity.ID == uuid.Nil {

@@ -72,6 +72,43 @@ func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *model.User) er
 	return nil
 }
 
+func (r *UserRepositoryBun) GetUser(ctx context.Context, email string) (*model.User, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+		return nil, err
+	}
+
+	user := &model.User{}
+	if err := r.db.NewSelect().
+		Model(user).
+		Where("u.email = ?", email).
+		Relation("Companies").Relation("Contact").Relation("Address").
+		Limit(1).
+		ExcludeColumn("hash").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (r *UserRepositoryBun) UpdateUserPassword(ctx context.Context, user *model.User) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+		return err
+	}
+
+	if _, err := r.db.NewUpdate().Model(user).WherePK().Column("hash").Exec(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *model.User) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -86,7 +123,7 @@ func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *model.User) er
 		return err
 	}
 
-	if _, err := tx.NewUpdate().Model(user).WherePK().ExcludeColumn("hash").Exec(context.Background()); err != nil {
+	if _, err := tx.NewUpdate().Model(user).WherePK().ExcludeColumn("hash").Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -197,7 +234,7 @@ func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *model.User) (*m
 		Relation("Companies").Relation("Contact").Relation("Address").
 		Limit(1).
 		ExcludeColumn("hash").
-		Scan(context.Background()); err != nil {
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 

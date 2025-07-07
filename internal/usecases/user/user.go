@@ -55,6 +55,27 @@ func (s *Service) CreateUser(ctx context.Context, dto *companydto.UserCreateDTO)
 	return &user.ID, err
 }
 
+func (s *Service) UpdateUserForgetPassword(ctx context.Context, dto *companydto.UserUpdateForgetPasswordDTO) error {
+	user, err := dto.ToDomain()
+
+	if err != nil {
+		return err
+	}
+
+	userModel, _ := s.r.GetUser(ctx, user.Email)
+	if userModel == nil {
+		return ErrInvalidEmail
+	}
+
+	hash, err := bcryptservice.HashPassword(dto.Password)
+	if err != nil {
+		return err
+	}
+
+	userModel.Hash = string(hash)
+	return s.r.UpdateUserPassword(ctx, userModel)
+}
+
 func (s *Service) UpdateUserPassword(ctx context.Context, dto *companydto.UserUpdatePasswordDTO) error {
 	user, err := dto.ToDomain()
 
@@ -84,7 +105,7 @@ func (s *Service) UpdateUserPassword(ctx context.Context, dto *companydto.UserUp
 	userLoggedIn.Hash = string(hash)
 
 	userModel.FromDomain(userLoggedIn)
-	return s.r.UpdateUser(ctx, userModel)
+	return s.r.UpdateUserPassword(ctx, userModel)
 }
 
 func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserForgetPasswordDTO) error {
@@ -93,8 +114,18 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 		return err
 	}
 
+	token, err := jwtservice.CreatePasswordResetToken(*email)
+	if err != nil {
+		return err
+	}
+
+	bodyEmail := &emailservice.BodyEmail{
+		Email:   *email,
+		Subject: "Redefinição de senha",
+		Body:    "<h1>" + token + "</h1>",
+	}
 	// Send email service
-	if err := emailservice.SendEmail(email); err != nil {
+	if err := emailservice.SendEmail(bodyEmail); err != nil {
 		return err
 	}
 

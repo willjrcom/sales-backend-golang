@@ -32,6 +32,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerNewUser)
 		c.Patch("/update/password", h.handlerUpdateUserPassword)
+		c.Patch("/update/forget-password", h.handlerUpdateUserForgetPassword)
 		c.Post("/forget-password", h.handlerForgetUserPassword)
 		c.Patch("/update/{id}", h.handlerUpdateUser)
 		c.Post("/login", h.handlerLoginUser)
@@ -40,13 +41,15 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 		c.Delete("/", h.handlerDeleteUser)
 		c.Get("/refresh-access-token", h.handlerRefreshAccessToken)
 		c.Get("/companies", h.handlerGetCompanies)
+		c.Post("/validate-password-reset-token", h.handlerValidatePasswordResetToken)
 	})
 
 	unprotectedRoutes := []string{
 		fmt.Sprintf("%s/new", route),
 		fmt.Sprintf("%s/login", route),
-		fmt.Sprintf("%s/update/password", route),
+		fmt.Sprintf("%s/update/forget-password", route),
 		fmt.Sprintf("%s/forget-password", route),
+		fmt.Sprintf("%s/validate-password-reset-token", route),
 	}
 
 	return handler.NewHandler(route, c, unprotectedRoutes...)
@@ -68,6 +71,35 @@ func (h *handlerUserImpl) handlerNewUser(w http.ResponseWriter, r *http.Request)
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, id)
+}
+
+func (h *handlerUserImpl) handlerUpdateUserForgetPassword(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	dtoUser := &companydto.UserUpdateForgetPasswordDTO{}
+	if err := jsonpkg.ParseBody(r, dtoUser); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	email, err := jwtservice.ValidatePasswordResetToken(ctx, dtoUser.Token)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	if email != dtoUser.Email {
+		err := fmt.Errorf("email do token invalido!")
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := h.s.UpdateUserForgetPassword(ctx, dtoUser); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
 func (h *handlerUserImpl) handlerUpdateUserPassword(w http.ResponseWriter, r *http.Request) {
@@ -250,4 +282,25 @@ func (h *handlerUserImpl) handlerGetCompanies(w http.ResponseWriter, r *http.Req
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, companies)
+}
+
+func (h *handlerUserImpl) handlerValidatePasswordResetToken(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	req := &companydto.UserResetTokenRequestDTO{}
+	if err := jsonpkg.ParseBody(r, &req); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	email, err := jwtservice.ValidatePasswordResetToken(ctx, req.Token)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, companydto.UserResetTokenResponseDTO{
+		Valid: true,
+		Email: email,
+	})
 }
