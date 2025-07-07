@@ -122,7 +122,43 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 	bodyEmail := &emailservice.BodyEmail{
 		Email:   *email,
 		Subject: "Redefinição de senha",
-		Body:    "<h1>" + token + "</h1>",
+		Body: `<div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px;">
+		<h2 style="color: #eab308; margin-bottom: 16px;">Redefinição de Senha - GazalTech</h2>
+		
+		<p style="color: #333; font-size: 16px; margin-bottom: 24px;">
+			Recebemos uma solicitação para redefinir a senha da sua conta.<br>
+			Use o código abaixo para redefinir sua senha no sistema:
+		</p>
+		
+		<div style="background: #f3f4f6; border-radius: 6px; padding: 20px; text-align: center; margin-bottom: 16px;">
+			<span id="reset-code" style="font-size: 15px; color: #222; word-break: break-word;">` + token + `</span>
+			<br>
+			
+			Copie o código e cole no campo de redefinir senha!
+			</button>
+		</div>
+		
+		<p style="color: #666; font-size: 14px;">
+			Se você não solicitou essa alteração, ignore este e-mail.<br>
+			<b>O código expira em 30 minutos.</b>
+		</p>
+		
+		<p style="color: #999; font-size: 13px; margin-top: 24px;">
+			Atenciosamente,<br>
+			Equipe GazalTech
+		</p>
+
+		<script>
+			function copyText() {
+			const code = document.getElementById("reset-code").innerText;
+			console.log(code)
+			navigator.clipboard.writeText(code)
+				.then(() => alert("Código copiado!"))
+				.catch(err => alert("Erro ao copiar: " + err));
+			}
+		</script>
+		</div>
+`,
 	}
 	// Send email service
 	if err := emailservice.SendEmail(bodyEmail); err != nil {
