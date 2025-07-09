@@ -866,3 +866,163 @@ func (s *ReportService) DailySales(ctx context.Context, day time.Time) (DailySal
 	}
 	return resp, nil
 }
+
+// ProductProfitabilityDTO holds profitability metrics per product.
+type ProductProfitabilityDTO struct {
+	ProductID    string          `bun:"product_id"`
+	ProductName  string          `bun:"product_name"`
+	TotalSold    decimal.Decimal `bun:"total_sold"`
+	TotalCost    decimal.Decimal `bun:"total_cost"`
+	TotalRevenue decimal.Decimal `bun:"total_revenue"`
+	Profit       decimal.Decimal `bun:"profit"`
+	ProfitMargin decimal.Decimal `bun:"profit_margin"`
+}
+
+// ProductProfitability returns profitability analysis per product.
+func (s *ReportService) ProductProfitability(ctx context.Context, start, end time.Time) ([]ProductProfitabilityDTO, error) {
+	if err := database.ChangeSchema(ctx, s.db); err != nil {
+		return nil, err
+	}
+
+	var resp []ProductProfitabilityDTO
+	query := `
+        SELECT 
+            p.id::text AS product_id,
+            p.name AS product_name,
+            SUM(i.quantity) AS total_sold,
+            SUM(i.quantity * p.cost) AS total_cost,
+            SUM(i.quantity * i.price) AS total_revenue,
+            SUM(i.quantity * i.price) - SUM(i.quantity * p.cost) AS profit,
+            CASE 
+                WHEN SUM(i.quantity * i.price) > 0 
+                THEN ((SUM(i.quantity * i.price) - SUM(i.quantity * p.cost)) / SUM(i.quantity * i.price)) * 100
+                ELSE 0 
+            END AS profit_margin
+        FROM order_items i
+        JOIN order_group_items g ON g.id = i.group_item_id
+        JOIN orders o ON o.id = g.order_id
+        JOIN products p ON p.id = i.product_id
+        WHERE o.created_at BETWEEN ? AND ?
+        GROUP BY p.id, p.name
+        ORDER BY profit DESC`
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// CategoryProfitabilityDTO holds profitability metrics per category.
+type CategoryProfitabilityDTO struct {
+	CategoryName string          `bun:"category_name"`
+	TotalSold    decimal.Decimal `bun:"total_sold"`
+	TotalCost    decimal.Decimal `bun:"total_cost"`
+	TotalRevenue decimal.Decimal `bun:"total_revenue"`
+	Profit       decimal.Decimal `bun:"profit"`
+	ProfitMargin decimal.Decimal `bun:"profit_margin"`
+}
+
+// CategoryProfitability returns profitability analysis per product category.
+func (s *ReportService) CategoryProfitability(ctx context.Context, start, end time.Time) ([]CategoryProfitabilityDTO, error) {
+	if err := database.ChangeSchema(ctx, s.db); err != nil {
+		return nil, err
+	}
+
+	var resp []CategoryProfitabilityDTO
+	query := `
+        SELECT 
+            pc.name AS category_name,
+            SUM(i.quantity) AS total_sold,
+            SUM(i.quantity * p.cost) AS total_cost,
+            SUM(i.quantity * i.price) AS total_revenue,
+            SUM(i.quantity * i.price) - SUM(i.quantity * p.cost) AS profit,
+            CASE 
+                WHEN SUM(i.quantity * i.price) > 0 
+                THEN ((SUM(i.quantity * i.price) - SUM(i.quantity * p.cost)) / SUM(i.quantity * i.price)) * 100
+                ELSE 0 
+            END AS profit_margin
+        FROM order_items i
+        JOIN order_group_items g ON g.id = i.group_item_id
+        JOIN orders o ON o.id = g.order_id
+        JOIN products p ON p.id = i.product_id
+        JOIN product_categories pc ON pc.id = p.category_id
+        WHERE o.created_at BETWEEN ? AND ?
+        GROUP BY pc.name
+        ORDER BY profit DESC`
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// LowProfitProductsDTO holds products with low profit margin.
+type LowProfitProductsDTO struct {
+	ProductID    string          `bun:"product_id"`
+	ProductName  string          `bun:"product_name"`
+	Price        decimal.Decimal `bun:"price"`
+	Cost         decimal.Decimal `bun:"cost"`
+	ProfitMargin decimal.Decimal `bun:"profit_margin"`
+}
+
+// LowProfitProducts returns products with profit margin below threshold.
+func (s *ReportService) LowProfitProducts(ctx context.Context, minMargin float64) ([]LowProfitProductsDTO, error) {
+	if err := database.ChangeSchema(ctx, s.db); err != nil {
+		return nil, err
+	}
+
+	var resp []LowProfitProductsDTO
+	query := `
+        SELECT 
+            p.id::text AS product_id,
+            p.name AS product_name,
+            p.price,
+            p.cost,
+            CASE 
+                WHEN p.price > 0 
+                THEN ((p.price - p.cost) / p.price) * 100
+                ELSE 0 
+            END AS profit_margin
+        FROM products p
+        WHERE p.price > 0 
+        AND ((p.price - p.cost) / p.price) * 100 < ?
+        ORDER BY profit_margin ASC`
+	if err := s.db.NewRaw(query, minMargin).Scan(ctx, &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// OverallProfitabilityDTO holds overall profitability metrics.
+type OverallProfitabilityDTO struct {
+	TotalRevenue decimal.Decimal `bun:"total_revenue"`
+	TotalCost    decimal.Decimal `bun:"total_cost"`
+	TotalProfit  decimal.Decimal `bun:"total_profit"`
+	ProfitMargin decimal.Decimal `bun:"profit_margin"`
+}
+
+// OverallProfitability returns overall profitability metrics for the period.
+func (s *ReportService) OverallProfitability(ctx context.Context, start, end time.Time) (OverallProfitabilityDTO, error) {
+	if err := database.ChangeSchema(ctx, s.db); err != nil {
+		return OverallProfitabilityDTO{}, err
+	}
+
+	var resp OverallProfitabilityDTO
+	query := `
+        SELECT 
+            SUM(i.quantity * i.price) AS total_revenue,
+            SUM(i.quantity * p.cost) AS total_cost,
+            SUM(i.quantity * i.price) - SUM(i.quantity * p.cost) AS total_profit,
+            CASE 
+                WHEN SUM(i.quantity * i.price) > 0 
+                THEN ((SUM(i.quantity * i.price) - SUM(i.quantity * p.cost)) / SUM(i.quantity * i.price)) * 100
+                ELSE 0 
+            END AS profit_margin
+        FROM order_items i
+        JOIN order_group_items g ON g.id = i.group_item_id
+        JOIN orders o ON o.id = g.order_id
+        JOIN products p ON p.id = i.product_id
+        WHERE o.created_at BETWEEN ? AND ?`
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+		return OverallProfitabilityDTO{}, err
+	}
+	return resp, nil
+}

@@ -214,8 +214,8 @@ type AvgProcessStepDurationRequest struct {
 // AvgProcessStepDurationResponse holds process rule ID and average seconds.
 // AvgProcessStepDurationResponse holds process rule name and average seconds.
 type AvgProcessStepDurationResponse struct {
-   ProcessRuleName string  `json:"process_rule_name"`
-   AvgSeconds      float64 `json:"avg_seconds"`
+	ProcessRuleName string  `json:"process_rule_name"`
+	AvgSeconds      float64 `json:"avg_seconds"`
 }
 
 // CancellationRateRequest filters for cancellation rate.
@@ -383,4 +383,65 @@ type ProcessedCountByRuleRequest struct {
 type ProcessedCountByRuleResponse struct {
 	RuleID string `json:"rule_id"`
 	Count  int    `json:"count"`
+}
+
+// ProductProfitabilityRequest filters for product profitability analysis.
+type ProductProfitabilityRequest struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
+}
+
+// ProductProfitabilityResponse holds profitability metrics per product.
+type ProductProfitabilityResponse struct {
+	ProductID    string          `json:"product_id"`
+	ProductName  string          `json:"product_name"`
+	TotalSold    decimal.Decimal `json:"total_sold"`
+	TotalCost    decimal.Decimal `json:"total_cost"`
+	TotalRevenue decimal.Decimal `json:"total_revenue"`
+	Profit       decimal.Decimal `json:"profit"`
+	ProfitMargin decimal.Decimal `json:"profit_margin"`
+}
+
+// CategoryProfitabilityRequest filters for category profitability analysis.
+type CategoryProfitabilityRequest struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
+}
+
+// CategoryProfitabilityResponse holds profitability metrics per category.
+type CategoryProfitabilityResponse struct {
+	CategoryName string          `json:"category_name"`
+	TotalSold    decimal.Decimal `json:"total_sold"`
+	TotalCost    decimal.Decimal `json:"total_cost"`
+	TotalRevenue decimal.Decimal `json:"total_revenue"`
+	Profit       decimal.Decimal `json:"profit"`
+	ProfitMargin decimal.Decimal `json:"profit_margin"`
+}
+
+// LowProfitProductsRequest filters for products with low profit margin.
+type LowProfitProductsRequest struct {
+	MinMargin float64 `json:"min_margin"`
+}
+
+// LowProfitProductsResponse holds products with low profit margin.
+type LowProfitProductsResponse struct {
+	ProductID    string          `json:"product_id"`
+	ProductName  string          `json:"product_name"`
+	Price        decimal.Decimal `json:"price"`
+	Cost         decimal.Decimal `json:"cost"`
+	ProfitMargin decimal.Decimal `json:"profit_margin"`
+}
+
+// OverallProfitabilityRequest filters for overall profitability analysis.
+type OverallProfitabilityRequest struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
+}
+
+// OverallProfitabilityResponse holds overall profitability metrics.
+type OverallProfitabilityResponse struct {
+	TotalRevenue decimal.Decimal `json:"total_revenue"`
+	TotalCost    decimal.Decimal `json:"total_cost"`
+	TotalProfit  decimal.Decimal `json:"total_profit"`
+	ProfitMargin decimal.Decimal `json:"profit_margin"`
 }

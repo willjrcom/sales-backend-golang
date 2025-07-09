@@ -433,3 +433,77 @@ func (s *Service) TotalQueueTimeByGroupItem(ctx context.Context, req *reportdto.
 	}
 	return resp, nil
 }
+
+// ProductProfitability returns profitability analysis per product.
+func (s *Service) ProductProfitability(ctx context.Context, req *reportdto.ProductProfitabilityRequest) ([]reportdto.ProductProfitabilityResponse, error) {
+	data, err := s.reportSvc.ProductProfitability(ctx, req.Start, req.End)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.ProductProfitabilityResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.ProductProfitabilityResponse{
+			ProductID:    d.ProductID,
+			ProductName:  d.ProductName,
+			TotalSold:    d.TotalSold,
+			TotalCost:    d.TotalCost,
+			TotalRevenue: d.TotalRevenue,
+			Profit:       d.Profit,
+			ProfitMargin: d.ProfitMargin,
+		}
+	}
+	return resp, nil
+}
+
+// CategoryProfitability returns profitability analysis per category.
+func (s *Service) CategoryProfitability(ctx context.Context, req *reportdto.CategoryProfitabilityRequest) ([]reportdto.CategoryProfitabilityResponse, error) {
+	data, err := s.reportSvc.CategoryProfitability(ctx, req.Start, req.End)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.CategoryProfitabilityResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.CategoryProfitabilityResponse{
+			CategoryName: d.CategoryName,
+			TotalSold:    d.TotalSold,
+			TotalCost:    d.TotalCost,
+			TotalRevenue: d.TotalRevenue,
+			Profit:       d.Profit,
+			ProfitMargin: d.ProfitMargin,
+		}
+	}
+	return resp, nil
+}
+
+// LowProfitProducts returns products with low profit margin.
+func (s *Service) LowProfitProducts(ctx context.Context, req *reportdto.LowProfitProductsRequest) ([]reportdto.LowProfitProductsResponse, error) {
+	data, err := s.reportSvc.LowProfitProducts(ctx, req.MinMargin)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.LowProfitProductsResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.LowProfitProductsResponse{
+			ProductID:    d.ProductID,
+			ProductName:  d.ProductName,
+			Price:        d.Price,
+			Cost:         d.Cost,
+			ProfitMargin: d.ProfitMargin,
+		}
+	}
+	return resp, nil
+}
+
+// OverallProfitability returns overall profitability metrics.
+func (s *Service) OverallProfitability(ctx context.Context, req *reportdto.OverallProfitabilityRequest) (reportdto.OverallProfitabilityResponse, error) {
+	data, err := s.reportSvc.OverallProfitability(ctx, req.Start, req.End)
+	if err != nil {
+		return reportdto.OverallProfitabilityResponse{}, err
+	}
+	return reportdto.OverallProfitabilityResponse{
+		TotalRevenue: data.TotalRevenue,
+		TotalCost:    data.TotalCost,
+		TotalProfit:  data.TotalProfit,
+		ProfitMargin: data.ProfitMargin,
+	}, nil
+}

@@ -54,6 +54,11 @@ func NewHandlerReport(s *reportusecases.Service) *handler.Handler {
 	r.Post("/employee-payments-report", h.handleEmployeePaymentsReport)
 	// Daily sales report for a specific day
 	r.Post("/daily-sales", h.handleDailySales)
+	// Profitability reports
+	r.Post("/product-profitability", h.handleProductProfitability)
+	r.Post("/category-profitability", h.handleCategoryProfitability)
+	r.Post("/low-profit-products", h.handleLowProfitProducts)
+	r.Post("/overall-profitability", h.handleOverallProfitability)
 
 	unprotected := []string{}
 	return handler.NewHandler(base, r, unprotected...)
@@ -542,6 +547,63 @@ func (h *handlerReportImpl) handleProcessedCountByRule(w http.ResponseWriter, r 
 	}
 
 	resp, err := h.s.ProcessedCountByRule(r.Context(), &req)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+// Profitability report handlers:
+func (h *handlerReportImpl) handleProductProfitability(w http.ResponseWriter, r *http.Request) {
+	var req reportdto.ProductProfitabilityRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
+
+	resp, err := h.s.ProductProfitability(r.Context(), &req)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+func (h *handlerReportImpl) handleCategoryProfitability(w http.ResponseWriter, r *http.Request) {
+	var req reportdto.CategoryProfitabilityRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
+
+	resp, err := h.s.CategoryProfitability(r.Context(), &req)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+func (h *handlerReportImpl) handleLowProfitProducts(w http.ResponseWriter, r *http.Request) {
+	var req reportdto.LowProfitProductsRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
+
+	resp, err := h.s.LowProfitProducts(r.Context(), &req)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+func (h *handlerReportImpl) handleOverallProfitability(w http.ResponseWriter, r *http.Request) {
+	var req reportdto.OverallProfitabilityRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
+
+	resp, err := h.s.OverallProfitability(r.Context(), &req)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
