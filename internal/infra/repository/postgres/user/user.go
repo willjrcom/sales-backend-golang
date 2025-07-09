@@ -129,26 +129,14 @@ func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *model.User) er
 	}
 
 	if user.Contact != nil {
-		if _, err := tx.NewDelete().Model(&model.Contact{}).Where("object_id = ?", user.ID).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		// Create contact
-		if _, err := tx.NewInsert().Model(user.Contact).Exec(ctx); err != nil {
+		if _, err := tx.NewUpdate().Model(user.Contact).WherePK().Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
 	if user.Address != nil {
-		if _, err := tx.NewDelete().Model(&model.Address{}).Where("object_id = ?", user.ID).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		// Create addresse
-		if _, err := tx.NewInsert().Model(user.Address).Exec(ctx); err != nil {
+		if _, err := tx.NewUpdate().Model(user.Address).WherePK().Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
