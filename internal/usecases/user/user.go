@@ -151,7 +151,6 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 		<script>
 			function copyText() {
 			const code = document.getElementById("reset-code").innerText;
-			console.log(code)
 			navigator.clipboard.writeText(code)
 				.then(() => alert("Código copiado!"))
 				.catch(err => alert("Erro ao copiar: " + err));
