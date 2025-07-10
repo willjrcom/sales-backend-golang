@@ -2,7 +2,6 @@ package orderusecases
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -313,7 +312,7 @@ func (s *OrderService) UpdateOrderTotal(ctx context.Context, id string) error {
 
 func (s *OrderService) updateFreeDelivery(ctx context.Context, order *orderentity.Order) error {
 	if order.Delivery == nil {
-		return errors.New("order must be delivery")
+		return nil
 	}
 
 	IsDeliveryFreeUpdated := order.Delivery.IsDeliveryFree
