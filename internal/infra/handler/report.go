@@ -59,8 +59,11 @@ func NewHandlerReport(s *reportusecases.Service) *handler.Handler {
 	r.Post("/category-profitability", h.handleCategoryProfitability)
 	r.Post("/low-profit-products", h.handleLowProfitProducts)
 	r.Post("/overall-profitability", h.handleOverallProfitability)
+	r.Post("/debug-products", h.handleDebugProducts) // Endpoint temporário para debug
 
-	unprotected := []string{}
+	unprotected := []string{
+		"/report/debug-products", // Temporariamente desprotegido para debug
+	}
 	return handler.NewHandler(base, r, unprotected...)
 }
 
@@ -604,6 +607,15 @@ func (h *handlerReportImpl) handleOverallProfitability(w http.ResponseWriter, r 
 	}
 
 	resp, err := h.s.OverallProfitability(r.Context(), &req)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+func (h *handlerReportImpl) handleDebugProducts(w http.ResponseWriter, r *http.Request) {
+	resp, err := h.s.DebugProducts(r.Context())
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

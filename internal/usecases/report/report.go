@@ -494,6 +494,10 @@ func (s *Service) LowProfitProducts(ctx context.Context, req *reportdto.LowProfi
 	return resp, nil
 }
 
+func (s *Service) DebugProducts(ctx context.Context) (interface{}, error) {
+	return s.reportSvc.DebugProducts(ctx)
+}
+
 // OverallProfitability returns overall profitability metrics.
 func (s *Service) OverallProfitability(ctx context.Context, req *reportdto.OverallProfitabilityRequest) (reportdto.OverallProfitabilityResponse, error) {
 	data, err := s.reportSvc.OverallProfitability(ctx, req.Start, req.End)

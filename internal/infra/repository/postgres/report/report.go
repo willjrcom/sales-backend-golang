@@ -2,6 +2,7 @@ package report
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -654,7 +655,7 @@ func (s *ReportService) EmployeePaymentsReport(ctx context.Context, start, end t
 	query := `
         SELECT employee_id::text AS employee_id, SUM(amount) AS total
         FROM employee_payments
-        WHERE pay_date BETWEEN ? AND ?
+        WHERE payment_date BETWEEN ? AND ?
         GROUP BY employee_id`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
@@ -869,13 +870,13 @@ func (s *ReportService) DailySales(ctx context.Context, day time.Time) (DailySal
 
 // ProductProfitabilityDTO holds profitability metrics per product.
 type ProductProfitabilityDTO struct {
-	ProductID    string          `bun:"product_id"`
-	ProductName  string          `bun:"product_name"`
-	TotalSold    decimal.Decimal `bun:"total_sold"`
-	TotalCost    decimal.Decimal `bun:"total_cost"`
-	TotalRevenue decimal.Decimal `bun:"total_revenue"`
-	Profit       decimal.Decimal `bun:"profit"`
-	ProfitMargin decimal.Decimal `bun:"profit_margin"`
+	ProductID    string           `bun:"product_id"`
+	ProductName  string           `bun:"product_name"`
+	TotalSold    *decimal.Decimal `bun:"total_sold"`
+	TotalCost    *decimal.Decimal `bun:"total_cost"`
+	TotalRevenue *decimal.Decimal `bun:"total_revenue"`
+	Profit       *decimal.Decimal `bun:"profit"`
+	ProfitMargin *decimal.Decimal `bun:"profit_margin"`
 }
 
 // ProductProfitability returns profitability analysis per product.
@@ -889,13 +890,13 @@ func (s *ReportService) ProductProfitability(ctx context.Context, start, end tim
         SELECT 
             p.id::text AS product_id,
             p.name AS product_name,
-            SUM(i.quantity) AS total_sold,
-            SUM(i.quantity * p.cost) AS total_cost,
-            SUM(i.quantity * i.price) AS total_revenue,
-            SUM(i.quantity * i.price) - SUM(i.quantity * p.cost) AS profit,
+            COALESCE(SUM(i.quantity), 0) AS total_sold,
+            COALESCE(SUM(i.quantity * p.cost), 0) AS total_cost,
+            COALESCE(SUM(i.quantity * i.price), 0) AS total_revenue,
+            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * p.cost), 0) AS profit,
             CASE 
-                WHEN SUM(i.quantity * i.price) > 0 
-                THEN ((SUM(i.quantity * i.price) - SUM(i.quantity * p.cost)) / SUM(i.quantity * i.price)) * 100
+                WHEN COALESCE(SUM(i.quantity * i.price), 0) > 0 
+                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * p.cost), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
                 ELSE 0 
             END AS profit_margin
         FROM order_items i
@@ -913,12 +914,12 @@ func (s *ReportService) ProductProfitability(ctx context.Context, start, end tim
 
 // CategoryProfitabilityDTO holds profitability metrics per category.
 type CategoryProfitabilityDTO struct {
-	CategoryName string          `bun:"category_name"`
-	TotalSold    decimal.Decimal `bun:"total_sold"`
-	TotalCost    decimal.Decimal `bun:"total_cost"`
-	TotalRevenue decimal.Decimal `bun:"total_revenue"`
-	Profit       decimal.Decimal `bun:"profit"`
-	ProfitMargin decimal.Decimal `bun:"profit_margin"`
+	CategoryName string           `bun:"category_name"`
+	TotalSold    *decimal.Decimal `bun:"total_sold"`
+	TotalCost    *decimal.Decimal `bun:"total_cost"`
+	TotalRevenue *decimal.Decimal `bun:"total_revenue"`
+	Profit       *decimal.Decimal `bun:"profit"`
+	ProfitMargin *decimal.Decimal `bun:"profit_margin"`
 }
 
 // CategoryProfitability returns profitability analysis per product category.
@@ -931,13 +932,13 @@ func (s *ReportService) CategoryProfitability(ctx context.Context, start, end ti
 	query := `
         SELECT 
             pc.name AS category_name,
-            SUM(i.quantity) AS total_sold,
-            SUM(i.quantity * p.cost) AS total_cost,
-            SUM(i.quantity * i.price) AS total_revenue,
-            SUM(i.quantity * i.price) - SUM(i.quantity * p.cost) AS profit,
+            COALESCE(SUM(i.quantity), 0) AS total_sold,
+            COALESCE(SUM(i.quantity * p.cost), 0) AS total_cost,
+            COALESCE(SUM(i.quantity * i.price), 0) AS total_revenue,
+            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * p.cost), 0) AS profit,
             CASE 
-                WHEN SUM(i.quantity * i.price) > 0 
-                THEN ((SUM(i.quantity * i.price) - SUM(i.quantity * p.cost)) / SUM(i.quantity * i.price)) * 100
+                WHEN COALESCE(SUM(i.quantity * i.price), 0) > 0 
+                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * p.cost), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
                 ELSE 0 
             END AS profit_margin
         FROM order_items i
@@ -956,11 +957,11 @@ func (s *ReportService) CategoryProfitability(ctx context.Context, start, end ti
 
 // LowProfitProductsDTO holds products with low profit margin.
 type LowProfitProductsDTO struct {
-	ProductID    string          `bun:"product_id"`
-	ProductName  string          `bun:"product_name"`
-	Price        decimal.Decimal `bun:"price"`
-	Cost         decimal.Decimal `bun:"cost"`
-	ProfitMargin decimal.Decimal `bun:"profit_margin"`
+	ProductID    string           `bun:"product_id"`
+	ProductName  string           `bun:"product_name"`
+	Price        *decimal.Decimal `bun:"price"`
+	Cost         *decimal.Decimal `bun:"cost"`
+	ProfitMargin *decimal.Decimal `bun:"profit_margin"`
 }
 
 // LowProfitProducts returns products with profit margin below threshold.
@@ -968,6 +969,32 @@ func (s *ReportService) LowProfitProducts(ctx context.Context, minMargin float64
 	if err := database.ChangeSchema(ctx, s.db); err != nil {
 		return nil, err
 	}
+
+	// Debug: Primeiro vamos verificar se há produtos cadastrados
+	var debugCount int
+	debugQuery := `SELECT COUNT(*) FROM products WHERE is_available = true`
+	if err := s.db.NewRaw(debugQuery).Scan(ctx, &debugCount); err != nil {
+		return nil, err
+	}
+
+	// Debug: Verificar produtos com custo
+	var productsWithCost int
+	costQuery := `SELECT COUNT(*) FROM products WHERE is_available = true AND cost > 0`
+	if err := s.db.NewRaw(costQuery).Scan(ctx, &productsWithCost); err != nil {
+		return nil, err
+	}
+
+	// Debug: Verificar produtos sem custo
+	var productsWithoutCost int
+	noCostQuery := `SELECT COUNT(*) FROM products WHERE is_available = true AND (cost = 0 OR cost IS NULL)`
+	if err := s.db.NewRaw(noCostQuery).Scan(ctx, &productsWithoutCost); err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("Debug - Total produtos disponíveis: %d\n", debugCount)
+	fmt.Printf("Debug - Produtos com custo > 0: %d\n", productsWithCost)
+	fmt.Printf("Debug - Produtos sem custo: %d\n", productsWithoutCost)
+	fmt.Printf("Debug - Margem mínima configurada: %.2f%%\n", minMargin)
 
 	var resp []LowProfitProductsDTO
 	query := `
@@ -977,26 +1004,112 @@ func (s *ReportService) LowProfitProducts(ctx context.Context, minMargin float64
             p.price,
             p.cost,
             CASE 
-                WHEN p.price > 0 
+                WHEN p.price > 0 AND p.cost > 0
                 THEN ((p.price - p.cost) / p.price) * 100
+                WHEN p.price > 0 AND (p.cost = 0 OR p.cost IS NULL)
+                THEN 100
                 ELSE 0 
             END AS profit_margin
         FROM products p
         WHERE p.price > 0 
-        AND ((p.price - p.cost) / p.price) * 100 < ?
+        AND p.is_available = true
+        AND (
+            -- Produtos com margem baixa
+            (p.cost > 0 AND ((p.price - p.cost) / p.price) * 100 < ?)
+            OR 
+            -- Produtos sem custo definido (custo = 0 ou NULL)
+            (p.cost = 0 OR p.cost IS NULL)
+        )
         ORDER BY profit_margin ASC`
 	if err := s.db.NewRaw(query, minMargin).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("Debug - Produtos retornados: %d\n", len(resp))
 	return resp, nil
+}
+
+// DebugProducts returns debug information about products
+func (s *ReportService) DebugProducts(ctx context.Context) (map[string]interface{}, error) {
+	if err := database.ChangeSchema(ctx, s.db); err != nil {
+		return nil, err
+	}
+
+	// Total produtos
+	var totalProducts int
+	totalQuery := `SELECT COUNT(*) FROM products`
+	if err := s.db.NewRaw(totalQuery).Scan(ctx, &totalProducts); err != nil {
+		return nil, err
+	}
+
+	// Produtos disponíveis
+	var availableProducts int
+	availableQuery := `SELECT COUNT(*) FROM products WHERE is_available = true`
+	if err := s.db.NewRaw(availableQuery).Scan(ctx, &availableProducts); err != nil {
+		return nil, err
+	}
+
+	// Produtos com custo
+	var productsWithCost int
+	costQuery := `SELECT COUNT(*) FROM products WHERE is_available = true AND cost > 0`
+	if err := s.db.NewRaw(costQuery).Scan(ctx, &productsWithCost); err != nil {
+		return nil, err
+	}
+
+	// Produtos sem custo
+	var productsWithoutCost int
+	noCostQuery := `SELECT COUNT(*) FROM products WHERE is_available = true AND (cost = 0 OR cost IS NULL)`
+	if err := s.db.NewRaw(noCostQuery).Scan(ctx, &productsWithoutCost); err != nil {
+		return nil, err
+	}
+
+	// Produtos com preço
+	var productsWithPrice int
+	priceQuery := `SELECT COUNT(*) FROM products WHERE is_available = true AND price > 0`
+	if err := s.db.NewRaw(priceQuery).Scan(ctx, &productsWithPrice); err != nil {
+		return nil, err
+	}
+
+	// Lista de produtos para debug
+	var products []map[string]interface{}
+	productsQuery := `
+		SELECT 
+			id::text as product_id,
+			name as product_name,
+			price,
+			cost,
+			is_available,
+			CASE 
+				WHEN price > 0 AND cost > 0
+				THEN ((price - cost) / price) * 100
+				WHEN price > 0 AND (cost = 0 OR cost IS NULL)
+				THEN 100
+				ELSE 0 
+			END AS profit_margin
+		FROM products 
+		WHERE is_available = true 
+		ORDER BY name`
+
+	if err := s.db.NewRaw(productsQuery).Scan(ctx, &products); err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"total_products":        totalProducts,
+		"available_products":    availableProducts,
+		"products_with_cost":    productsWithCost,
+		"products_without_cost": productsWithoutCost,
+		"products_with_price":   productsWithPrice,
+		"products":              products,
+	}, nil
 }
 
 // OverallProfitabilityDTO holds overall profitability metrics.
 type OverallProfitabilityDTO struct {
-	TotalRevenue decimal.Decimal `bun:"total_revenue"`
-	TotalCost    decimal.Decimal `bun:"total_cost"`
-	TotalProfit  decimal.Decimal `bun:"total_profit"`
-	ProfitMargin decimal.Decimal `bun:"profit_margin"`
+	TotalRevenue *decimal.Decimal `bun:"total_revenue"`
+	TotalCost    *decimal.Decimal `bun:"total_cost"`
+	TotalProfit  *decimal.Decimal `bun:"total_profit"`
+	ProfitMargin *decimal.Decimal `bun:"profit_margin"`
 }
 
 // OverallProfitability returns overall profitability metrics for the period.
@@ -1008,12 +1121,12 @@ func (s *ReportService) OverallProfitability(ctx context.Context, start, end tim
 	var resp OverallProfitabilityDTO
 	query := `
         SELECT 
-            SUM(i.quantity * i.price) AS total_revenue,
-            SUM(i.quantity * p.cost) AS total_cost,
-            SUM(i.quantity * i.price) - SUM(i.quantity * p.cost) AS total_profit,
+            COALESCE(SUM(i.quantity * i.price), 0) AS total_revenue,
+            COALESCE(SUM(i.quantity * p.cost), 0) AS total_cost,
+            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * p.cost), 0) AS total_profit,
             CASE 
-                WHEN SUM(i.quantity * i.price) > 0 
-                THEN ((SUM(i.quantity * i.price) - SUM(i.quantity * p.cost)) / SUM(i.quantity * i.price)) * 100
+                WHEN COALESCE(SUM(i.quantity * i.price), 0) > 0 
+                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * p.cost), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
                 ELSE 0 
             END AS profit_margin
         FROM order_items i
