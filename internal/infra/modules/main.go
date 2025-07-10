@@ -4,6 +4,7 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
+	stockrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/stock"
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
@@ -27,7 +28,13 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	orderProcessRepository, orderProcessService, _ := NewOrderProcessModule(db, chi)
 	orderQueueRepository, orderQueueService, _ := NewOrderqueueModule(db, chi)
 
-	orderRepository, orderService, _ := NewOrderModule(db, chi)
+	// Stock module - deve ser inicializado antes do order module
+	stockRepository, _, _ := NewStockModule(db, chi, productRepository)
+
+	// Obter o repositório de movimentos de estoque
+	stockMovementRepository := stockrepositorybun.NewStockMovementRepositoryBun(db)
+
+	orderRepository, orderService, _ := NewOrderModule(db, chi, stockRepository, stockMovementRepository)
 	orderDeliveryRepository, orderDeliveryService, _ := NewOrderDeliveryModule(db, chi)
 	deliveryDriverRepository, deliveryDriverService, _ := NewDeliveryDriverModule(db, chi)
 
@@ -57,7 +64,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	itemService.AddDependencies(groupItemRepository, orderRepository, productRepository, quantityRepository, productCategoryRepository, orderService, groupItemService)
 	groupItemService.AddDependencies(itemRepository, productRepository, orderService, orderProcessService)
 
-	orderService.AddDependencies(orderRepository, shiftRepository, productRepository, processRuleRepository, orderDeliveryRepository, groupItemService, orderProcessService, orderQueueService, orderDeliveryService, orderPickupService, orderTableService, companyService)
+	orderService.AddDependencies(orderRepository, shiftRepository, productRepository, processRuleRepository, orderDeliveryRepository, stockRepository, stockMovementRepository, groupItemService, orderProcessService, orderQueueService, orderDeliveryService, orderPickupService, orderTableService, companyService)
 	orderDeliveryService.AddDependencies(addressRepository, clientRepository, orderRepository, orderService, deliveryDriverRepository, companyService)
 	deliveryDriverService.AddDependencies(employeeRepository)
 	orderTableService.AddDependencies(tableRepository, orderService, companyService)

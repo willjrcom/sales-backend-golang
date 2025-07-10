@@ -260,6 +260,10 @@ func registerModels(db *bun.DB) error {
 	db.RegisterModel((*model.ProcessRuleWithOrderProcess)(nil))
 	db.RegisterModel((*model.Product)(nil))
 
+	db.RegisterModel((*model.Stock)(nil))
+	db.RegisterModel((*model.StockMovement)(nil))
+	db.RegisterModel((*model.StockAlert)(nil))
+
 	db.RegisterModel((*model.Address)(nil))
 	db.RegisterModel((*model.Contact)(nil))
 	db.RegisterModel((*model.Client)(nil))
@@ -332,6 +336,18 @@ func createTables(ctx context.Context, db *bun.DB) error {
 	}
 
 	if err := createTableIfNotExists(ctx, db, (*model.Product)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, db, (*model.Stock)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, db, (*model.StockMovement)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, db, (*model.StockAlert)(nil)); err != nil {
 		return err
 	}
 

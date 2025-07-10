@@ -8,18 +8,20 @@ import (
 )
 
 type OrderService struct {
-	ro  model.OrderRepository
-	rs  model.ShiftRepository
-	rp  model.ProductRepository
-	rpr model.ProcessRuleRepository
-	rdo model.OrderDeliveryRepository
-	sgi *GroupItemService
-	sop *OrderProcessService
-	sq  *orderqueueusecases.Service
-	sd  IDeliveryService
-	sp  IPickupService
-	st  *OrderTableService
-	sc  *companyusecases.Service
+	ro                model.OrderRepository
+	rs                model.ShiftRepository
+	rp                model.ProductRepository
+	rpr               model.ProcessRuleRepository
+	rdo               model.OrderDeliveryRepository
+	stockRepo         model.StockRepository
+	stockMovementRepo model.StockMovementRepository
+	sgi               *GroupItemService
+	sop               *OrderProcessService
+	sq                *orderqueueusecases.Service
+	sd                IDeliveryService
+	sp                IPickupService
+	st                *OrderTableService
+	sc                *companyusecases.Service
 }
 
 func NewOrderService(ro model.OrderRepository) *OrderService {
@@ -32,6 +34,8 @@ func (s *OrderService) AddDependencies(
 	rp model.ProductRepository,
 	rpr model.ProcessRuleRepository,
 	rdo model.OrderDeliveryRepository,
+	stockRepo model.StockRepository,
+	stockMovementRepo model.StockMovementRepository,
 	sgi *GroupItemService,
 	sop *OrderProcessService,
 	sq *orderqueueusecases.Service,
@@ -45,6 +49,8 @@ func (s *OrderService) AddDependencies(
 	s.rp = rp
 	s.rpr = rpr
 	s.rdo = rdo
+	s.stockRepo = stockRepo
+	s.stockMovementRepo = stockMovementRepo
 	s.sgi = sgi
 	s.sq = sq
 	s.sop = sop

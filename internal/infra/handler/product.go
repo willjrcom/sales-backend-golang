@@ -26,11 +26,11 @@ func NewHandlerProduct(productService *productusecases.Service) *handler.Handler
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerCreateProduct)
+		c.Get("/all", h.handlerGetAllProducts)
+		c.Get("/code/{code}", h.handlerGetProductByCode)
 		c.Patch("/update/{id}", h.handlerUpdateProduct)
 		c.Delete("/{id}", h.handlerDeleteProduct)
 		c.Get("/{id}", h.handlerGetProduct)
-		c.Get("/code/{code}", h.handlerGetProductByCode)
-		c.Get("/all", h.handlerGetAllProducts)
 	})
 
 	return handler.NewHandler("/product", c)

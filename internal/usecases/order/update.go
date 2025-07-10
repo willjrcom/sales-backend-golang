@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -25,6 +26,11 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 
 	processRules, err := s.rpr.GetMapProcessRulesByFirstOrder(ctx)
 	if err != nil {
+		return err
+	}
+
+	// Controle de estoque - debitar estoque dos produtos
+	if err := s.debitStockFromOrder(ctx, order); err != nil {
 		return err
 	}
 
@@ -82,6 +88,110 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 	orderModel.FromDomain(order)
 	if err := s.ro.PendingOrder(ctx, orderModel); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// debitStockFromOrder debita estoque dos produtos do pedido
+func (s *OrderService) debitStockFromOrder(ctx context.Context, order *orderentity.Order) error {
+	for _, groupItem := range order.GroupItems {
+		for _, item := range groupItem.Items {
+			if item.ProductID != uuid.Nil {
+				fmt.Printf("DEBUG: Produto %s - Quantidade: %f\n", item.Name, item.Quantity)
+
+				// Buscar estoque do produto
+				stockModel, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
+				if err != nil {
+					// Se não há controle de estoque para o produto, continuar
+					fmt.Printf("Produto %s não tem controle de estoque configurado\n", item.Name)
+					continue
+				}
+
+				stock := stockModel.ToDomain()
+
+				// Reservar estoque (permite estoque negativo)
+				movement, err := stock.ReserveStock(
+					decimal.NewFromFloat(item.Quantity),
+					order.ID,
+					order.OrderNumber,
+					item.Price,
+				)
+				if err != nil {
+					fmt.Printf("Erro ao reservar estoque para produto %s: %v\n", item.Name, err)
+					continue
+				}
+
+				// Salvar movimento
+				movementModel := &model.StockMovement{}
+				movementModel.FromDomain(movement)
+				if err := s.stockMovementRepo.CreateMovement(ctx, movementModel); err != nil {
+					fmt.Printf("Erro ao salvar movimento de estoque: %v\n", err)
+					continue
+				}
+
+				// Atualizar estoque
+				stockModel.FromDomain(stock)
+				if err := s.stockRepo.UpdateStock(ctx, stockModel); err != nil {
+					fmt.Printf("Erro ao atualizar estoque: %v\n", err)
+					continue
+				}
+
+				fmt.Printf("Estoque debitado para produto %s: %f\n", item.Name, item.Quantity)
+			}
+		}
+	}
+
+	return nil
+}
+
+// restoreStockFromOrder restaura estoque dos produtos do pedido cancelado
+func (s *OrderService) restoreStockFromOrder(ctx context.Context, order *orderentity.Order) error {
+	for _, groupItem := range order.GroupItems {
+		for _, item := range groupItem.Items {
+			if item.ProductID != uuid.Nil {
+				fmt.Printf("DEBUG: Restaurando estoque para produto %s - Quantidade: %f\n", item.Name, item.Quantity)
+
+				// Buscar estoque do produto
+				stockModel, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
+				if err != nil {
+					// Se não há controle de estoque para o produto, continuar
+					fmt.Printf("Produto %s não tem controle de estoque configurado\n", item.Name)
+					continue
+				}
+
+				stock := stockModel.ToDomain()
+
+				// Restaurar estoque
+				movement, err := stock.RestoreStock(
+					decimal.NewFromFloat(item.Quantity),
+					order.ID,
+					order.OrderNumber,
+					item.Price,
+				)
+				if err != nil {
+					fmt.Printf("Erro ao restaurar estoque para produto %s: %v\n", item.Name, err)
+					continue
+				}
+
+				// Salvar movimento
+				movementModel := &model.StockMovement{}
+				movementModel.FromDomain(movement)
+				if err := s.stockMovementRepo.CreateMovement(ctx, movementModel); err != nil {
+					fmt.Printf("Erro ao salvar movimento de estoque: %v\n", err)
+					continue
+				}
+
+				// Atualizar estoque
+				stockModel.FromDomain(stock)
+				if err := s.stockRepo.UpdateStock(ctx, stockModel); err != nil {
+					fmt.Printf("Erro ao atualizar estoque: %v\n", err)
+					continue
+				}
+
+				fmt.Printf("Estoque restaurado para produto %s: %f\n", item.Name, item.Quantity)
+			}
+		}
 	}
 
 	return nil
@@ -161,6 +271,11 @@ func (s *OrderService) CancelOrder(ctx context.Context, dtoOrderID *entitydto.ID
 
 	order := orderModel.ToDomain()
 	if err = order.CancelOrder(); err != nil {
+		return err
+	}
+
+	// Restaurar estoque dos produtos do pedido cancelado
+	if err := s.restoreStockFromOrder(ctx, order); err != nil {
 		return err
 	}
 
