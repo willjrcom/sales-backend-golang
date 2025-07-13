@@ -110,7 +110,7 @@ func (r *OrderTableRepositoryBun) GetAllOrderTables(ctx context.Context) (tables
 		return nil, err
 	}
 
-	if err = r.db.NewSelect().Model(&tables).Scan(ctx); err != nil {
+	if err = r.db.NewSelect().Model(&tables).Where("status != 'Closed' AND status != 'Canceled'").Scan(ctx); err != nil {
 		return nil, err
 	}
 
