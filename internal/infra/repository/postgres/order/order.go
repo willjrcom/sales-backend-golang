@@ -297,7 +297,7 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 		Relation("Attendant").
 		Relation("Payments").
 		Relation("Table").
-		Relation("Delivery.Driver").
+		Relation("Delivery").
 		Relation("Pickup")
 
 	if err := query.Scan(ctx); err != nil {
@@ -365,6 +365,39 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 			}
 		}
 	}
+
+	// Coletar todos os DriverIDs dos deliveries
+	var driverIDs []uuid.UUID
+	for i := range orders {
+		if orders[i].Delivery != nil && orders[i].Delivery.DriverID != nil {
+			driverIDs = append(driverIDs, *orders[i].Delivery.DriverID)
+		}
+	}
+
+	// Buscar todos os drivers em uma query separada
+	var drivers []model.DeliveryDriver
+	if len(driverIDs) > 0 {
+		if err := r.db.NewSelect().Model(&drivers).
+			Where("id IN (?)", bun.In(driverIDs)).
+			Scan(ctx); err != nil {
+			return nil, err
+		}
+	}
+
+	// Mapear drivers por ID
+	driverMap := make(map[uuid.UUID]*model.DeliveryDriver, len(drivers))
+	for i := range drivers {
+		d := drivers[i]
+		driverMap[d.ID] = &d
+	}
+	for i := range orders {
+		if orders[i].Delivery != nil && orders[i].Delivery.DriverID != nil {
+			if driver, ok := driverMap[*orders[i].Delivery.DriverID]; ok {
+				orders[i].Delivery.Driver = driver
+			}
+		}
+	}
+
 	return orders, nil
 }
 
@@ -386,13 +419,44 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 		Where("delivery.id IS NOT NULL").
 		Relation("Delivery.Client").
 		Relation("Delivery.Address").
-		Relation("Delivery.Driver").
 		Where(`"order"."status" IN (?) OR "order"."shift_id" = ?`, bun.In(validStatuses), shiftID).
 		Limit(perPage).
 		Offset(page * perPage)
 
 	if err := query.Scan(ctx); err != nil {
 		return nil, err
+	}
+
+	// Coletar todos os DriverIDs
+	var driverIDs []uuid.UUID
+	for i := range orders {
+		if orders[i].Delivery != nil && orders[i].Delivery.DriverID != nil {
+			driverIDs = append(driverIDs, *orders[i].Delivery.DriverID)
+		}
+	}
+
+	// Buscar todos os drivers em uma query separada
+	var drivers []model.DeliveryDriver
+	if len(driverIDs) > 0 {
+		if err := r.db.NewSelect().Model(&drivers).
+			Where("id IN (?)", bun.In(driverIDs)).
+			Scan(ctx); err != nil {
+			return nil, err
+		}
+	}
+
+	// Mapear drivers por ID
+	driverMap := make(map[uuid.UUID]*model.DeliveryDriver, len(drivers))
+	for i := range drivers {
+		d := drivers[i]
+		driverMap[d.ID] = &d
+	}
+	for i := range orders {
+		if orders[i].Delivery != nil && orders[i].Delivery.DriverID != nil {
+			if driver, ok := driverMap[*orders[i].Delivery.DriverID]; ok {
+				orders[i].Delivery.Driver = driver
+			}
+		}
 	}
 
 	return orders, nil
