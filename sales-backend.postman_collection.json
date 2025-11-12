@@ -2316,7 +2316,7 @@
 										}
 									}
 								},
-								"url": "{{server}}/order/all"
+								"url": "{{server}}/order/all/delivery"
 							},
 							"response": [
 								{
@@ -2349,6 +2349,80 @@
 									],
 									"cookie": [],
 									"body": "{\n    \"data\": [\n        {\n            \"id\": \"c6e8cbf3-5dd5-4017-acbc-cfeea793b608\",\n            \"created_at\": \"2024-03-19T20:11:06.297142Z\",\n            \"updated_at\": \"2024-03-19T20:11:06.297142Z\",\n            \"pending_at\": \"2024-03-20T19:15:39.858307Z\",\n            \"finished_at\": \"2024-03-20T19:33:34.662071Z\",\n            \"total_payable\": 0,\n            \"total_paid\": 0,\n            \"total_change\": 0,\n            \"quantity_items\": 0,\n            \"observation\": \"\",\n            \"attendant_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"shift_id\": \"90be08d2-0676-4bff-8880-94018e883963\",\n            \"order_number\": 4,\n            \"status\": \"Finished\",\n            \"groups\": [\n                {\n                    \"id\": \"f9867ba0-ee62-4a44-83bb-244537a2b44f\",\n                    \"created_at\": \"2024-03-19T20:24:39.342752Z\",\n                    \"updated_at\": \"2024-03-19T20:24:39.342752Z\",\n                    \"size\": \"P\",\n                    \"status\": \"Pending\",\n                    \"total\": 330,\n                    \"quantity\": 2,\n                    \"need_print\": false,\n                    \"category_id\": \"896bee80-2431-474f-9918-20153fc419b7\",\n                    \"complement_item_id\": \"d1a851b8-e156-4b15-88d6-cb1b775b7bd0\",\n                    \"complement_item\": {\n                        \"id\": \"d1a851b8-e156-4b15-88d6-cb1b775b7bd0\",\n                        \"created_at\": \"2024-03-20T18:48:52.526376Z\",\n                        \"updated_at\": \"2024-03-20T18:48:52.526376Z\",\n                        \"pending_at\": \"2024-03-20T19:15:38.223602Z\",\n                        \"name\": \"Borda Catupiry\",\n                        \"status\": \"Pending\",\n                        \"description\": \"\",\n                        \"observation\": \"\",\n                        \"price\": 60,\n                        \"total_price\": 0,\n                        \"size\": \"P\",\n                        \"quantity\": 2,\n                        \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                    },\n                    \"pending_at\": \"2024-03-20T19:15:39.858307Z\",\n                    \"items\": [\n                        {\n                            \"id\": \"fc1f82b6-4b92-4bda-a7a3-0cf4270afe85\",\n                            \"created_at\": \"2024-03-19T20:24:43.712847Z\",\n                            \"updated_at\": \"2024-03-19T20:24:43.712847Z\",\n                            \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                            \"name\": \"Pizza Presunto (P)\",\n                            \"status\": \"Pending\",\n                            \"description\": \"mussarela e tomate\",\n                            \"observation\": \"\",\n                            \"price\": 60,\n                            \"total_price\": 0,\n                            \"size\": \"P\",\n                            \"quantity\": 2,\n                            \"group_item_id\": \"f9867ba0-ee62-4a44-83bb-244537a2b44f\",\n                            \"item_to_additional\": [\n                                {\n                                    \"id\": \"30e15ce1-b654-427a-aa9b-c1ffb86fc44c\",\n                                    \"created_at\": \"2024-03-20T18:46:11.773341Z\",\n                                    \"updated_at\": \"2024-03-20T18:46:11.773341Z\",\n                                    \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                                    \"name\": \"Borda Catupiry\",\n                                    \"status\": \"Pending\",\n                                    \"description\": \"\",\n                                    \"observation\": \"\",\n                                    \"price\": 60,\n                                    \"total_price\": 0,\n                                    \"size\": \"P\",\n                                    \"quantity\": 2,\n                                    \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                                },\n                                {\n                                    \"id\": \"b0228e78-bfa8-46fb-b00a-560b4cb8b012\",\n                                    \"created_at\": \"2024-03-20T19:02:23.845536Z\",\n                                    \"updated_at\": \"2024-03-20T19:02:23.845536Z\",\n                                    \"pending_at\": \"2024-03-20T19:15:34.167111Z\",\n                                    \"name\": \"Borda Catupiry\",\n                                    \"status\": \"Pending\",\n                                    \"description\": \"\",\n                                    \"observation\": \"\",\n                                    \"price\": 90,\n                                    \"total_price\": 0,\n                                    \"size\": \"P\",\n                                    \"quantity\": 3,\n                                    \"group_item_id\": \"00000000-0000-0000-0000-000000000000\"\n                                }\n                            ]\n                        }\n                    ],\n                    \"order_id\": \"c6e8cbf3-5dd5-4017-acbc-cfeea793b608\"\n                }\n            ]\n        }\n    ]\n}"
+								}
+							]
+						},
+						{
+							"name": "get all with pickup",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/order/all/pickup"
+							},
+							"response": [
+								{
+									"name": "get all with pickup",
+									"originalRequest": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "// NEED LOGIN\r\n{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": "{{server}}/order/all/pickup"
+									},
+									"status": "OK",
+									"code": 200,
+									"_postman_previewlanguage": "json",
+									"header": [
+										{
+											"key": "Content-Type",
+											"value": "application/json; charset=utf-8"
+										},
+										{
+											"key": "Vary",
+											"value": "Origin"
+										},
+										{
+											"key": "Date",
+											"value": "Sun, 13 Jul 2025 15:53:18 GMT"
+										},
+										{
+											"key": "Content-Length",
+											"value": "1243"
+										}
+									],
+									"cookie": [],
+									"body": "{\n    \"success\": true,\n    \"data\": [\n        {\n            \"delivery\": null,\n            \"table\": null,\n            \"pickup\": {\n                \"id\": \"f0c07c78-65ff-4ba8-9b65-23a1dd87168a\",\n                \"pending_at\": \"2025-06-20T01:51:13.667009Z\",\n                \"ready_at\": \"2025-06-24T17:23:35.292422Z\",\n                \"delivered_at\": null,\n                \"name\": \"William\",\n                \"status\": \"Ready\",\n                \"order_id\": \"dd8de3d3-7f9e-464d-891a-064c0d6b07b2\",\n                \"order_number\": 3\n            },\n            \"total_payable\": \"113\",\n            \"total_paid\": \"0\",\n            \"total_change\": \"0\",\n            \"quantity_items\": 2,\n            \"observation\": \"\",\n            \"attendant_id\": \"56095e6e-d0bd-4ae0-a949-154cfbf4f5b9\",\n            \"attendant\": null,\n            \"shift_id\": \"7283d1b8-7783-4a9f-b854-9366940399b3\",\n            \"id\": \"dd8de3d3-7f9e-464d-891a-064c0d6b07b2\",\n            \"order_number\": 3,\n            \"status\": \"Ready\",\n            \"group_items\": null,\n            \"payments\": null\n        },\n        {\n            \"delivery\": null,\n            \"table\": null,\n            \"pickup\": {\n                \"id\": \"ee6263ab-a97b-4fbe-be1e-ff75e193502f\",\n                \"pending_at\": \"2025-07-10T00:02:30.161197Z\",\n                \"ready_at\": null,\n                \"delivered_at\": null,\n                \"name\": \"dani\",\n                \"status\": \"Pending\",\n                \"order_id\": \"3e18f20e-a886-498b-b033-a605ef702add\",\n                \"order_number\": 14\n            },\n            \"total_payable\": \"129.5\",\n            \"total_paid\": \"0\",\n            \"total_change\": \"0\",\n            \"quantity_items\": 4,\n            \"observation\": \"\",\n            \"attendant_id\": \"56095e6e-d0bd-4ae0-a949-154cfbf4f5b9\",\n            \"attendant\": null,\n            \"shift_id\": \"7283d1b8-7783-4a9f-b854-9366940399b3\",\n            \"id\": \"3e18f20e-a886-498b-b033-a605ef702add\",\n            \"order_number\": 14,\n            \"status\": \"Pending\",\n            \"group_items\": null,\n            \"payments\": null\n        }\n    ]\n}"
 								}
 							]
 						},
@@ -6136,7 +6210,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// NEED LOGIN\n{\n    \"name\": \"William junior 3\",\n    \"contact\": \"11963849111\",\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"state\": \"SP\",\n        \"complement\": \"\",\n        \"reference\": \"\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
+							"raw": "// NEED LOGIN\n{\n    \"name\": \"William junior 3\",\n    \"contact\":{\n        \"ddd\": \"11\",\n        \"number\": \"963849111\"\n    },\n    \"address\": {\n        \"street\": \"Rua piedade\",\n        \"number\": \"226\",\n        \"neighborhood\": \"Jardim Leocadia\",\n        \"city\": \"Sorocaba\",\n        \"uf\": \"SP\",\n        \"complement\": \"\",\n        \"reference\": \"\"\n    },\n    \"cpf\": \"43637799855\",\n    \"email\": \"will@gmail.com\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -7039,6 +7113,77 @@
 							"body": "{\n    \"data\": [\n        {\n            \"id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"name\": \"William junior 3\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\",\n            \"contact\": {\n                \"id\": \"c2e91e35-5be1-4672-88c0-10e671997db9\",\n                \"created_at\": \"2024-03-04T02:05:30.377637Z\",\n                \"updated_at\": \"2024-03-04T02:05:30.377637Z\",\n                \"object_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n                \"ddd\": \"11\",\n                \"number\": \"963849111\",\n                \"type\": \"Employee\"\n            },\n            \"address\": {\n                \"id\": \"86541456-52aa-4e6b-b56f-d2a40bcba60b\",\n                \"created_at\": \"2024-03-04T02:05:30.37764Z\",\n                \"updated_at\": \"2024-03-04T02:05:30.37764Z\",\n                \"object_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n                \"street\": \"Rua piedade\",\n                \"number\": \"226\",\n                \"complement\": \"\",\n                \"reference\": \"\",\n                \"neighborhood\": \"Jardim Leocadia\",\n                \"city\": \"Sorocaba\",\n                \"state\": \"SP\",\n                \"cep\": \"\",\n                \"delivery_tax\": 0\n            }\n        },\n        {\n            \"id\": \"d97f0e43-5fbf-4461-87a0-bf094543c90e\",\n            \"name\": \"William junior\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\",\n            \"contact\": {\n                \"id\": \"5c68229f-3d14-4749-9e31-c7acf35049ff\",\n                \"created_at\": \"2024-03-04T04:11:43.487275Z\",\n                \"updated_at\": \"2024-03-04T04:11:43.487275Z\",\n                \"object_id\": \"d97f0e43-5fbf-4461-87a0-bf094543c90e\",\n                \"ddd\": \"11\",\n                \"number\": \"963849111\",\n                \"type\": \"Employee\"\n            },\n            \"address\": {\n                \"id\": \"a9c5af44-dcce-488d-b880-98419248e930\",\n                \"created_at\": \"2024-03-04T04:11:43.487277Z\",\n                \"updated_at\": \"2024-03-04T04:11:43.487277Z\",\n                \"object_id\": \"d97f0e43-5fbf-4461-87a0-bf094543c90e\",\n                \"street\": \"Rua piedade\",\n                \"number\": \"226\",\n                \"complement\": \"\",\n                \"reference\": \"\",\n                \"neighborhood\": \"Jardim Leocadia\",\n                \"city\": \"Sorocaba\",\n                \"state\": \"SP\",\n                \"cep\": \"\",\n                \"delivery_tax\": 0\n            }\n        }\n    ]\n}"
 						}
 					]
+				},
+				{
+					"name": "get all fired",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/employee/deleted"
+					},
+					"response": [
+						{
+							"name": "get all",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": "{{server}}/employee/all"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 20:59:03 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "1430"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": [\n        {\n            \"id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n            \"name\": \"William junior 3\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\",\n            \"contact\": {\n                \"id\": \"c2e91e35-5be1-4672-88c0-10e671997db9\",\n                \"created_at\": \"2024-03-04T02:05:30.377637Z\",\n                \"updated_at\": \"2024-03-04T02:05:30.377637Z\",\n                \"object_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n                \"ddd\": \"11\",\n                \"number\": \"963849111\",\n                \"type\": \"Employee\"\n            },\n            \"address\": {\n                \"id\": \"86541456-52aa-4e6b-b56f-d2a40bcba60b\",\n                \"created_at\": \"2024-03-04T02:05:30.37764Z\",\n                \"updated_at\": \"2024-03-04T02:05:30.37764Z\",\n                \"object_id\": \"466ff1a2-233e-4767-bd36-399479bbe815\",\n                \"street\": \"Rua piedade\",\n                \"number\": \"226\",\n                \"complement\": \"\",\n                \"reference\": \"\",\n                \"neighborhood\": \"Jardim Leocadia\",\n                \"city\": \"Sorocaba\",\n                \"state\": \"SP\",\n                \"cep\": \"\",\n                \"delivery_tax\": 0\n            }\n        },\n        {\n            \"id\": \"d97f0e43-5fbf-4461-87a0-bf094543c90e\",\n            \"name\": \"William junior\",\n            \"email\": \"will@gmail.com\",\n            \"cpf\": \"43637799855\",\n            \"contact\": {\n                \"id\": \"5c68229f-3d14-4749-9e31-c7acf35049ff\",\n                \"created_at\": \"2024-03-04T04:11:43.487275Z\",\n                \"updated_at\": \"2024-03-04T04:11:43.487275Z\",\n                \"object_id\": \"d97f0e43-5fbf-4461-87a0-bf094543c90e\",\n                \"ddd\": \"11\",\n                \"number\": \"963849111\",\n                \"type\": \"Employee\"\n            },\n            \"address\": {\n                \"id\": \"a9c5af44-dcce-488d-b880-98419248e930\",\n                \"created_at\": \"2024-03-04T04:11:43.487277Z\",\n                \"updated_at\": \"2024-03-04T04:11:43.487277Z\",\n                \"object_id\": \"d97f0e43-5fbf-4461-87a0-bf094543c90e\",\n                \"street\": \"Rua piedade\",\n                \"number\": \"226\",\n                \"complement\": \"\",\n                \"reference\": \"\",\n                \"neighborhood\": \"Jardim Leocadia\",\n                \"city\": \"Sorocaba\",\n                \"state\": \"SP\",\n                \"cep\": \"\",\n                \"delivery_tax\": 0\n            }\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "get payments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/employee/{{employee_id}}/payments"
+					},
+					"response": []
+				},
+				{
+					"name": "get salary history",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "{{server}}/employee/{{employee_id}}/salary-history"
+					},
+					"response": []
 				}
 			]
 		},
@@ -7732,6 +7877,90 @@
 					]
 				},
 				{
+					"name": "get users",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{server}}/company/users",
+							"host": [
+								"{{server}}"
+							],
+							"path": [
+								"company",
+								"users"
+							],
+							"query": [
+								{
+									"key": "schema",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "get",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{server}}/company",
+									"host": [
+										"{{server}}"
+									],
+									"path": [
+										"company"
+									],
+									"query": [
+										{
+											"key": "schema",
+											"value": "",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Wed, 24 Apr 2024 19:18:09 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "604"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"data\": {\n        \"schema_name\": \"loja_ibiti__2qititsr\",\n        \"business_name\": \"GAZALTECH CONSULTORIA DE TI LTDA\",\n        \"trade_name\": \"ibiti\",\n        \"cnpj\": \"46.607.184/0001-53\",\n        \"email\": \"williamjunior68@gmail.com\",\n        \"contacts\": [\n            \"(11)96384-9111\",\n            \"(11)4714-1489\"\n        ],\n        \"address\": {\n            \"id\": \"9ac32ec6-1415-4352-be07-67b862fd1706\",\n            \"created_at\": \"2024-02-19T02:58:47.898633Z\",\n            \"updated_at\": \"2024-02-19T02:58:47.898633Z\",\n            \"object_id\": \"75dd51db-9ee2-4f5f-a834-e74f75243ced\",\n            \"street\": \"RUA GABRIELLA CORRA\",\n            \"number\": \"672\",\n            \"complement\": \"\",\n            \"reference\": \"\",\n            \"neighborhood\": \"PARQUE IBITI RESERVA\",\n            \"city\": \"SOROCABA\",\n            \"state\": \"SP\",\n            \"cep\": \"18.086-757\",\n            \"delivery_tax\": 0\n        }\n    }\n}"
+						}
+					]
+				},
+				{
 					"name": "add user to company",
 					"event": [
 						{
@@ -7989,84 +8218,6 @@
 						"url": "{{server}}/company/test"
 					},
 					"response": []
-				},
-				{
-					"name": "update",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"let response = pm.response.json()",
-									"let company_id = response.data.company_id",
-									"let schema = response.data.schema",
-									"",
-									"if (company_id != null && schema != null) {",
-									"    pm.collectionVariables.set(\"company_id\", company_id)",
-									"    pm.collectionVariables.set(\"schema_name\", schema)",
-									"}"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"preferences\": {\n        \"test\": \"123\"\n    }\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": "{{server}}/company/update"
-					},
-					"response": [
-						{
-							"name": "update",
-							"originalRequest": {
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"preferences\": {\n        \"test\": \"123\"\n    }\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": "{{server}}/company/update"
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json; charset=utf-8"
-								},
-								{
-									"key": "Vary",
-									"value": "Origin"
-								},
-								{
-									"key": "Date",
-									"value": "Thu, 29 May 2025 17:57:16 GMT"
-								},
-								{
-									"key": "Content-Length",
-									"value": "16"
-								}
-							],
-							"cookie": [],
-							"body": "{\n    \"success\": true\n}"
-						}
-					]
 				}
 			]
 		},
@@ -8859,17 +9010,17 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"let response = pm.response.json()",
-									"",
-									"if (response.message) {",
-									"    return",
-									"}",
-									"",
-									"let accessToken = response.data.access_token",
-									"",
-									"if (accessToken != null) {",
-									"    pm.collectionVariables.set(\"access-token\", accessToken)",
-									"}"
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -8883,8 +9034,8 @@
 						"auth": {
 							"type": "apikey",
 							"apikey": {
-								"value": "{{access-token}}",
-								"key": "access-token"
+								"key": "id-token",
+								"value": "{{id-token}}"
 							}
 						},
 						"method": "GET",
@@ -9909,6 +10060,583 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "s3",
+			"item": [
+				{
+					"name": "put image",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "stock",
+			"item": [
+				{
+					"name": "create",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json()",
+									"let client_id = response.data",
+									"",
+									"if (client_id != null) {",
+									"    pm.collectionVariables.set(\"client_id\", client_id)",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\n{\n    \"product_id\": \"{{product_id}}\",\n    \"current_stock\": \"10.0\",\n    \"min_stock\": \"5.0\",\n    \"max_stock\": \"100.0\",\n    \"unit\": \"unidade\",\n    \"is_active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/new"
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{\r\n    \"current_stock\": \"10.0\",\r\n    \"min_stock\": \"5.0\",\r\n    \"max_stock\": \"100.0\",\r\n    \"unit\": \"unidade\",\r\n    \"is_active\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/update/{{stock_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "deletar",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/{{stock_id}}"
+					},
+					"response": []
+				},
+				{
+					"name": "get by id",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/{{stock_id}}"
+					},
+					"response": [
+						{
+							"name": "get by id",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/stock/{{stock_id}}"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 12 Jul 2025 21:36:18 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "297"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"id\": \"7cf6f5d1-00c1-46ec-8e4e-1ce19b39ab3b\",\n        \"product_id\": \"df3db9dc-c2ae-43b9-91a4-f7185c60d603\",\n        \"current_stock\": \"20\",\n        \"min_stock\": \"10\",\n        \"max_stock\": \"100\",\n        \"unit\": \"unidade\",\n        \"is_active\": true,\n        \"created_at\": \"2025-07-12T17:21:51.034723Z\",\n        \"updated_at\": \"2025-07-12T17:21:51.034723Z\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "get by id with product",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/{{stock_id}}/with-product"
+					},
+					"response": [
+						{
+							"name": "get by id with product",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/stock/{{stock_id}}/with-product"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 12 Jul 2025 21:36:32 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "345"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"id\": \"7cf6f5d1-00c1-46ec-8e4e-1ce19b39ab3b\",\n        \"product_id\": \"df3db9dc-c2ae-43b9-91a4-f7185c60d603\",\n        \"current_stock\": \"20\",\n        \"min_stock\": \"10\",\n        \"max_stock\": \"100\",\n        \"unit\": \"unidade\",\n        \"is_active\": true,\n        \"created_at\": \"2025-07-12T17:21:51.034723Z\",\n        \"updated_at\": \"2025-07-12T17:21:51.034723Z\",\n        \"product_name\": \"Mussarela\",\n        \"product_code\": \"ad1\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "get report",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/report"
+					},
+					"response": [
+						{
+							"name": "get report",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/stock/report"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 12 Jul 2025 21:35:11 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "564"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": {\n        \"summary\": {\n            \"total_products\": 1,\n            \"total_low_stock\": 0,\n            \"total_out_of_stock\": 0,\n            \"total_active_alerts\": 0,\n            \"total_stock_value\": \"200\"\n        },\n        \"all_stocks\": [\n            {\n                \"id\": \"7cf6f5d1-00c1-46ec-8e4e-1ce19b39ab3b\",\n                \"product_id\": \"df3db9dc-c2ae-43b9-91a4-f7185c60d603\",\n                \"current_stock\": \"20\",\n                \"min_stock\": \"10\",\n                \"max_stock\": \"100\",\n                \"unit\": \"unidade\",\n                \"is_active\": true,\n                \"created_at\": \"2025-07-12T17:21:51.034723Z\",\n                \"updated_at\": \"2025-07-12T17:21:51.034723Z\"\n            }\n        ],\n        \"low_stock_products\": null,\n        \"out_of_stock_products\": null,\n        \"active_alerts\": null,\n        \"generated_at\": \"2025-07-12T18:35:11.072709-03:00\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "get all",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/all"
+					},
+					"response": [
+						{
+							"name": "get all",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/stock/all"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 12 Jul 2025 21:35:32 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "299"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": [\n        {\n            \"id\": \"7cf6f5d1-00c1-46ec-8e4e-1ce19b39ab3b\",\n            \"product_id\": \"df3db9dc-c2ae-43b9-91a4-f7185c60d603\",\n            \"current_stock\": \"20\",\n            \"min_stock\": \"10\",\n            \"max_stock\": \"100\",\n            \"unit\": \"unidade\",\n            \"is_active\": true,\n            \"created_at\": \"2025-07-12T17:21:51.034723Z\",\n            \"updated_at\": \"2025-07-12T17:21:51.034723Z\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "get out of stock",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/out-of-stock"
+					},
+					"response": [
+						{
+							"name": "get out of stock",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/stock/out-of-stock"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 12 Jul 2025 21:37:18 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "28"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "get low stock",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/low-stock"
+					},
+					"response": [
+						{
+							"name": "get low stock",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/stock/low-stock"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 12 Jul 2025 21:37:24 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "28"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "get all with product",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\r\n{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/all/with-product"
+					},
+					"response": [
+						{
+							"name": "get all with product",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "// NEED LOGIN\r\n{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{server}}/stock/all/with-product"
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Vary",
+									"value": "Origin"
+								},
+								{
+									"key": "Date",
+									"value": "Sat, 12 Jul 2025 21:37:32 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "347"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"data\": [\n        {\n            \"id\": \"7cf6f5d1-00c1-46ec-8e4e-1ce19b39ab3b\",\n            \"product_id\": \"df3db9dc-c2ae-43b9-91a4-f7185c60d603\",\n            \"current_stock\": \"20\",\n            \"min_stock\": \"10\",\n            \"max_stock\": \"100\",\n            \"unit\": \"unidade\",\n            \"is_active\": true,\n            \"created_at\": \"2025-07-12T17:21:51.034723Z\",\n            \"updated_at\": \"2025-07-12T17:21:51.034723Z\",\n            \"product_name\": \"Mussarela\",\n            \"product_code\": \"ad1\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "movement add",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\n{\n    \"stock_id\": \"{{stock_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"type\": \"in\",\n    \"quantity\": \"1.0\",\n    \"reason\": \"reason\",\n    \"order_id\": \"{{order_id}}\",\n    \"order_number\": 1,\n    \"employee_id\": \"{{employee_id}}\",\n    \"employee_name\": \"Will\",\n    \"unit_cost\": \"1.0\",\n    \"notes\": \"obs\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/movement/add"
+					},
+					"response": []
+				},
+				{
+					"name": "movement remove",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\n{\n    \"stock_id\": \"{{stock_id}}\",\n    \"product_id\": \"{{product_id}}\",\n    \"type\": \"out\",\n    \"quantity\": \"1.0\",\n    \"reason\": \"reason\",\n    \"order_id\": \"{{order_id}}\",\n    \"order_number\": 1,\n    \"employee_id\": \"{{employee_id}}\",\n    \"employee_name\": \"Will\",\n    \"unit_cost\": \"1.0\",\n    \"notes\": \"obs\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/movement/remove"
+					},
+					"response": []
+				},
+				{
+					"name": "movement adjust",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "// NEED LOGIN\n{\n    \"movement\": {\n        \"stock_id\": \"{{stock_id}}\",\n        \"product_id\": \"{{product_id}}\",\n        \"type\": \"adjust\",\n        \"quantity\": \"1.0\",\n        \"reason\": \"reason\",\n        \"order_id\": \"{{order_id}}\",\n        \"order_number\": 1,\n        \"employee_id\": \"{{employee_id}}\",\n        \"employee_name\": \"Will\",\n        \"unit_cost\": \"1.0\",\n        \"notes\": \"obs\"\n    },\n    \"new_stock\": \"10.0\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{server}}/stock/movement/adjust"
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"auth": {
@@ -10067,6 +10795,11 @@
 		{
 			"key": "access_token",
 			"value": ""
+		},
+		{
+			"key": "stock_id",
+			"value": " ",
+			"type": "string"
 		}
 	]
 }
