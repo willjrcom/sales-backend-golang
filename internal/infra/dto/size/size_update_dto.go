@@ -22,6 +22,7 @@ func (s *SizeUpdateDTO) validate() error {
 
 	return nil
 }
+
 func (s *SizeUpdateDTO) UpdateDomain(size *productentity.Size) (err error) {
 	if err = s.validate(); err != nil {
 		return err

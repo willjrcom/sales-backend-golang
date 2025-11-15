@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	stockdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/stock"
@@ -33,18 +32,22 @@ func NewHandlerStock(stockService *stockusecases.Service) *handler.Handler {
 		c.Get("/product/{product_id}", h.handlerGetStockByProductID)
 		c.Get("/all", h.handlerGetAllStocks)
 		c.Get("/all/with-product", h.handlerGetAllStocksWithProduct)
-		c.Get("/low-stock", h.handlerGetLowStockProducts)
-		c.Get("/out-of-stock", h.handlerGetOutOfStockProducts)
-		c.Post("/movement/add", h.handlerAddStock)
-		c.Post("/movement/remove", h.handlerRemoveStock)
-		c.Post("/movement/adjust", h.handlerAdjustStock)
+		// Movements
+		c.Post("/{id}/movement/add", h.handlerAddStock)
+		c.Post("/{id}/movement/remove", h.handlerRemoveStock)
+		c.Post("/{id}/movement/adjust", h.handlerAdjustStock)
 		c.Get("/movements/{stock_id}", h.handlerGetMovementsByStockID)
-		// Alertas
+
+		// Alerts
 		c.Get("/alerts", h.handlerGetAllAlerts)
 		c.Get("/alerts/{id}", h.handlerGetAlertByID)
 		c.Put("/alerts/{id}/resolve", h.handlerResolveAlert)
 		c.Delete("/alerts/{id}", h.handlerDeleteAlert)
+
+		// Reports
 		c.Get("/report", h.handlerGetStockReport)
+		c.Get("/low-stock", h.handlerGetLowStockProducts)
+		c.Get("/out-of-stock", h.handlerGetOutOfStockProducts)
 	})
 
 	return handler.NewHandler("/stock", c)
@@ -202,13 +205,22 @@ func (h *handlerStockImpl) handlerGetOutOfStockProducts(w http.ResponseWriter, r
 func (h *handlerStockImpl) handlerAddStock(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+
 	dtoMovement := &stockdto.StockMovementCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoMovement); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	movement, err := h.s.AddStock(ctx, dtoMovement)
+	movement, err := h.s.AddMovementStock(ctx, dtoId, dtoMovement)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -220,13 +232,22 @@ func (h *handlerStockImpl) handlerAddStock(w http.ResponseWriter, r *http.Reques
 func (h *handlerStockImpl) handlerRemoveStock(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoMovement := &stockdto.StockMovementCreateDTO{}
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+
+	dtoMovement := &stockdto.StockMovementRemoveDTO{}
 	if err := jsonpkg.ParseBody(r, dtoMovement); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	movement, err := h.s.RemoveStock(ctx, dtoMovement)
+	movement, err := h.s.RemoveMovementStock(ctx, dtoId, dtoMovement)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -238,17 +259,22 @@ func (h *handlerStockImpl) handlerRemoveStock(w http.ResponseWriter, r *http.Req
 func (h *handlerStockImpl) handlerAdjustStock(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	var request struct {
-		*stockdto.StockMovementCreateDTO `json:"movement"`
-		NewStock                         decimal.Decimal `json:"new_stock"`
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
 	}
 
-	if err := jsonpkg.ParseBody(r, &request); err != nil {
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+
+	stockAdjust := &stockdto.StockMovementAdjustDTO{}
+	if err := jsonpkg.ParseBody(r, &stockAdjust); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	movement, err := h.s.AdjustStock(ctx, request.StockMovementCreateDTO, request.NewStock)
+	movement, err := h.s.AdjustMovementStock(ctx, dtoId, stockAdjust)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

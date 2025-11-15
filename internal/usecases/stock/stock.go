@@ -16,20 +16,24 @@ type Service struct {
 	stockMovementRepo model.StockMovementRepository
 	stockAlertRepo    model.StockAlertRepository
 	productRepo       model.ProductRepository
+	itemRepo          model.ItemRepository
 }
 
 func NewStockService(
 	stockRepo model.StockRepository,
 	stockMovementRepo model.StockMovementRepository,
 	stockAlertRepo model.StockAlertRepository,
-	productRepo model.ProductRepository,
 ) *Service {
 	return &Service{
 		stockRepo:         stockRepo,
 		stockMovementRepo: stockMovementRepo,
 		stockAlertRepo:    stockAlertRepo,
-		productRepo:       productRepo,
 	}
+}
+
+func (s *Service) AddDependencies(productRepo model.ProductRepository, itemRepo model.ItemRepository) {
+	s.itemRepo = itemRepo
+	s.productRepo = productRepo
 }
 
 // CreateStock cria um novo controle de estoque
@@ -80,23 +84,7 @@ func (s *Service) UpdateStock(ctx context.Context, dtoID *entitydto.IDRequest, d
 	}
 
 	stock := stockModel.ToDomain()
-
-	// Atualizar campos
-	if dto.CurrentStock != nil {
-		stock.CurrentStock = *dto.CurrentStock
-	}
-	if dto.MinStock != nil {
-		stock.MinStock = *dto.MinStock
-	}
-	if dto.MaxStock != nil {
-		stock.MaxStock = *dto.MaxStock
-	}
-	if dto.Unit != nil {
-		stock.Unit = *dto.Unit
-	}
-	if dto.IsActive != nil {
-		stock.IsActive = *dto.IsActive
-	}
+	dto.UpdateDomain(stock)
 
 	stockModel.FromDomain(stock)
 	return s.stockRepo.UpdateStock(ctx, stockModel)
@@ -148,181 +136,7 @@ func (s *Service) GetAllStocks(ctx context.Context) ([]stockdto.StockDTO, error)
 	return stocksDTO, nil
 }
 
-// AddStock adiciona estoque manualmente
-func (s *Service) AddStock(ctx context.Context, dto *stockdto.StockMovementCreateDTO) (*stockdto.StockMovementDTO, error) {
-	stockModel, err := s.stockRepo.GetStockByID(ctx, dto.StockID.String())
-	if err != nil {
-		return nil, err
-	}
-
-	stock := stockModel.ToDomain()
-
-	// Adicionar estoque
-	movement, err := stock.AddStock(
-		dto.Quantity,
-		dto.Reason,
-		dto.EmployeeID,
-		dto.UnitCost,
-		dto.Notes,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// Salvar movimento
-	movementModel := &model.StockMovement{}
-	movementModel.FromDomain(movement)
-	if err := s.stockMovementRepo.CreateMovement(ctx, movementModel); err != nil {
-		return nil, err
-	}
-
-	// Atualizar estoque
-	stockModel.FromDomain(stock)
-	if err := s.stockRepo.UpdateStock(ctx, stockModel); err != nil {
-		return nil, err
-	}
-
-	// Verificar alertas
-	alerts := stock.CheckAlerts()
-	for _, alert := range alerts {
-		alertModel := &model.StockAlert{}
-		alertModel.FromDomain(alert)
-		if err := s.stockAlertRepo.CreateAlert(ctx, alertModel); err != nil {
-			fmt.Printf("Erro ao criar alerta: %v\n", err)
-		}
-	}
-
-	// Retornar DTO
-	movementDTO := &stockdto.StockMovementDTO{}
-	movementDTO.FromDomain(movement)
-
-	return movementDTO, nil
-}
-
-// RemoveStock remove estoque manualmente
-func (s *Service) RemoveStock(ctx context.Context, dto *stockdto.StockMovementCreateDTO) (*stockdto.StockMovementDTO, error) {
-	stockModel, err := s.stockRepo.GetStockByID(ctx, dto.StockID.String())
-	if err != nil {
-		return nil, err
-	}
-
-	stock := stockModel.ToDomain()
-
-	// Remover estoque
-	movement, err := stock.RemoveStock(
-		dto.Quantity,
-		dto.Reason,
-		dto.EmployeeID,
-		dto.UnitCost,
-		dto.Notes,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// Salvar movimento
-	movementModel := &model.StockMovement{}
-	movementModel.FromDomain(movement)
-	if err := s.stockMovementRepo.CreateMovement(ctx, movementModel); err != nil {
-		return nil, err
-	}
-
-	// Atualizar estoque
-	stockModel.FromDomain(stock)
-	if err := s.stockRepo.UpdateStock(ctx, stockModel); err != nil {
-		return nil, err
-	}
-
-	// Verificar alertas
-	alerts := stock.CheckAlerts()
-	for _, alert := range alerts {
-		alertModel := &model.StockAlert{}
-		alertModel.FromDomain(alert)
-		if err := s.stockAlertRepo.CreateAlert(ctx, alertModel); err != nil {
-			fmt.Printf("Erro ao criar alerta: %v\n", err)
-		}
-	}
-
-	// Retornar DTO
-	movementDTO := &stockdto.StockMovementDTO{}
-	movementDTO.FromDomain(movement)
-
-	return movementDTO, nil
-}
-
-// AdjustStock ajusta estoque para um valor específico
-func (s *Service) AdjustStock(ctx context.Context, dto *stockdto.StockMovementCreateDTO, newStock decimal.Decimal) (*stockdto.StockMovementDTO, error) {
-	stockModel, err := s.stockRepo.GetStockByID(ctx, dto.StockID.String())
-	if err != nil {
-		return nil, err
-	}
-
-	stock := stockModel.ToDomain()
-
-	// Ajustar estoque
-	movement, err := stock.AdjustStock(
-		newStock,
-		dto.Reason,
-		dto.EmployeeID,
-		dto.UnitCost,
-		dto.Notes,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// Se não houve movimento (mesmo valor), retornar nil
-	if movement == nil {
-		return nil, nil
-	}
-
-	// Salvar movimento
-	movementModel := &model.StockMovement{}
-	movementModel.FromDomain(movement)
-	if err := s.stockMovementRepo.CreateMovement(ctx, movementModel); err != nil {
-		return nil, err
-	}
-
-	// Atualizar estoque
-	stockModel.FromDomain(stock)
-	if err := s.stockRepo.UpdateStock(ctx, stockModel); err != nil {
-		return nil, err
-	}
-
-	// Verificar alertas
-	alerts := stock.CheckAlerts()
-	for _, alert := range alerts {
-		alertModel := &model.StockAlert{}
-		alertModel.FromDomain(alert)
-		if err := s.stockAlertRepo.CreateAlert(ctx, alertModel); err != nil {
-			fmt.Printf("Erro ao criar alerta: %v\n", err)
-		}
-	}
-
-	// Retornar DTO
-	movementDTO := &stockdto.StockMovementDTO{}
-	movementDTO.FromDomain(movement)
-
-	return movementDTO, nil
-}
-
-// GetMovementsByStockID busca movimentos por estoque
-func (s *Service) GetMovementsByStockID(ctx context.Context, stockID string) ([]stockdto.StockMovementDTO, error) {
-	movementsModel, err := s.stockMovementRepo.GetMovementsByStockID(ctx, stockID)
-	if err != nil {
-		return nil, err
-	}
-
-	var movementsDTO []stockdto.StockMovementDTO
-	for _, movementModel := range movementsModel {
-		movement := movementModel.ToDomain()
-		movementDTO := stockdto.StockMovementDTO{}
-		movementDTO.FromDomain(movement)
-		movementsDTO = append(movementsDTO, movementDTO)
-	}
-
-	return movementsDTO, nil
-}
+// AddMovementStock adiciona estoque manualmente
 
 // GetLowStockProducts busca produtos com estoque baixo
 func (s *Service) GetLowStockProducts(ctx context.Context) ([]stockdto.StockDTO, error) {
@@ -368,20 +182,16 @@ func (s *Service) GetStockWithProduct(ctx context.Context, dtoID *entitydto.IDRe
 	}
 
 	stock := stockModel.ToDomain()
-	stockDTO := &stockdto.StockDTO{}
-	stockDTO.FromDomain(stock)
+	stockWithProduct := &stockdto.StockWithProductDTO{}
 
-	// Buscar informações do produto
-	stockWithProduct := &stockdto.StockWithProductDTO{
-		StockDTO: *stockDTO,
+	productModel, err := s.productRepo.GetProductById(ctx, stock.ProductID.String())
+	if err != nil {
+		stockWithProduct.FromDomain(stock, nil)
 	}
 
-	if s.productRepo != nil {
-		product, err := s.productRepo.GetProductById(ctx, stock.ProductID.String())
-		if err == nil && product != nil {
-			stockWithProduct.ProductName = product.Name
-			stockWithProduct.ProductCode = product.Code
-		}
+	if productModel != nil {
+		product := productModel.ToDomain()
+		stockWithProduct.FromDomain(stock, product)
 	}
 
 	return stockWithProduct, nil
@@ -400,17 +210,17 @@ func (s *Service) GetAllStocksWithProduct(ctx context.Context) ([]stockdto.Stock
 		stockDTO := stockdto.StockDTO{}
 		stockDTO.FromDomain(stock)
 
-		stockWithProduct := stockdto.StockWithProductDTO{
-			StockDTO: stockDTO,
-		}
+		stockWithProduct := stockdto.StockWithProductDTO{}
 
 		// Buscar informações do produto
-		if s.productRepo != nil {
-			product, err := s.productRepo.GetProductById(ctx, stock.ProductID.String())
-			if err == nil && product != nil {
-				stockWithProduct.ProductName = product.Name
-				stockWithProduct.ProductCode = product.Code
-			}
+		productModel, err := s.productRepo.GetProductById(ctx, stock.ProductID.String())
+		if err != nil {
+			stockWithProduct.FromDomain(stock, nil)
+		}
+
+		if productModel != nil {
+			product := productModel.ToDomain()
+			stockWithProduct.FromDomain(stock, product)
 		}
 
 		stocksWithProduct = append(stocksWithProduct, stockWithProduct)
@@ -438,32 +248,42 @@ func (s *Service) GetActiveAlerts(ctx context.Context) ([]stockdto.StockAlertDTO
 }
 
 func (s *Service) GetAllAlerts(ctx context.Context) ([]stockdto.StockAlertDTO, error) {
-	alerts, err := s.stockAlertRepo.GetAllAlerts(ctx)
+	alertModels, err := s.stockAlertRepo.GetAllAlerts(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	var alertDTOs []stockdto.StockAlertDTO
-	for _, alert := range alerts {
-		alertDTOs = append(alertDTOs, *alert.ToDTO())
+	for _, alertModel := range alertModels {
+		alert := alertModel.ToDomain()
+		alertDTO := &stockdto.StockAlertDTO{}
+		alertDTO.FromDomain(alert)
+		alertDTOs = append(alertDTOs, *alertDTO)
 	}
 
 	return alertDTOs, nil
 }
 
 func (s *Service) GetAlertByID(ctx context.Context, alertID string) (*stockdto.StockAlertDTO, error) {
-	alert, err := s.stockAlertRepo.GetAlertByID(ctx, alertID)
+	alertModel, err := s.stockAlertRepo.GetAlertByID(ctx, alertID)
 	if err != nil {
 		return nil, err
 	}
 
-	return alert.ToDTO(), nil
+	alert := alertModel.ToDomain()
+	alertDTO := &stockdto.StockAlertDTO{}
+	alertDTO.FromDomain(alert)
+	return alertDTO, nil
 }
 
 func (s *Service) ResolveAlert(ctx context.Context, alertID string) error {
 	alert, err := s.stockAlertRepo.GetAlertByID(ctx, alertID)
 	if err != nil {
 		return err
+	}
+
+	if alert.IsResolved {
+		return fmt.Errorf("alert already resolved")
 	}
 
 	alert.IsResolved = true
@@ -479,7 +299,7 @@ func (s *Service) DeleteAlert(ctx context.Context, alertID string) error {
 
 func (s *Service) GetStockReport(ctx context.Context) (*stockdto.StockReportCompleteDTO, error) {
 	// Buscar todos os estoques
-	stocks, err := s.stockRepo.GetAllStocks(ctx)
+	stockModels, err := s.stockRepo.GetAllStocks(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -503,14 +323,14 @@ func (s *Service) GetStockReport(ctx context.Context) (*stockdto.StockReportComp
 	}
 
 	// Calcular estatísticas
-	totalProducts := len(stocks)
+	totalProducts := len(stockModels)
 	totalLowStock := len(lowStockProducts)
 	totalOutOfStock := len(outOfStockProducts)
 	totalActiveAlerts := len(activeAlerts)
 
 	// Calcular valor total do estoque
 	totalStockValue := decimal.Zero
-	for _, stock := range stocks {
+	for _, stock := range stockModels {
 		// Usar o custo unitário do último movimento ou um valor padrão
 		// Por enquanto, vamos usar um valor estimado baseado no estoque atual
 		estimatedCost := decimal.NewFromFloat(10.0) // Valor estimado por unidade
@@ -519,35 +339,35 @@ func (s *Service) GetStockReport(ctx context.Context) (*stockdto.StockReportComp
 
 	// Converter para DTOs
 	var stockDTOs []stockdto.StockDTO
-	for _, stock := range stocks {
-		stockDTO := stock.ToDTO()
-		if stockDTO != nil {
-			stockDTOs = append(stockDTOs, *stockDTO)
-		}
+	for _, stockModel := range stockModels {
+		stock := stockModel.ToDomain()
+		stockDTO := &stockdto.StockDTO{}
+		stockDTO.FromDomain(stock)
+		stockDTOs = append(stockDTOs, *stockDTO)
 	}
 
 	var lowStockDTOs []stockdto.StockDTO
-	for _, stock := range lowStockProducts {
-		stockDTO := stock.ToDTO()
-		if stockDTO != nil {
-			lowStockDTOs = append(lowStockDTOs, *stockDTO)
-		}
+	for _, stockModel := range lowStockProducts {
+		stock := stockModel.ToDomain()
+		stockDTO := &stockdto.StockDTO{}
+		stockDTO.FromDomain(stock)
+		lowStockDTOs = append(lowStockDTOs, *stockDTO)
 	}
 
 	var outOfStockDTOs []stockdto.StockDTO
-	for _, stock := range outOfStockProducts {
-		stockDTO := stock.ToDTO()
-		if stockDTO != nil {
-			outOfStockDTOs = append(outOfStockDTOs, *stockDTO)
-		}
+	for _, stockModel := range outOfStockProducts {
+		stock := stockModel.ToDomain()
+		stockDTO := &stockdto.StockDTO{}
+		stockDTO.FromDomain(stock)
+		outOfStockDTOs = append(outOfStockDTOs, *stockDTO)
 	}
 
 	var alertDTOs []stockdto.StockAlertDTO
-	for _, alert := range activeAlerts {
-		alertDTO := alert.ToDTO()
-		if alertDTO != nil {
-			alertDTOs = append(alertDTOs, *alertDTO)
-		}
+	for _, alertModel := range activeAlerts {
+		alert := alertModel.ToDomain()
+		alertDTO := &stockdto.StockAlertDTO{}
+		alertDTO.FromDomain(alert)
+		alertDTOs = append(alertDTOs, *alertDTO)
 	}
 
 	report := &stockdto.StockReportCompleteDTO{

@@ -2,7 +2,6 @@ package stockentity
 
 import (
 	"errors"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -31,61 +30,6 @@ type StockCommonAttributes struct {
 	IsActive     bool            `json:"is_active"` // Se o controle de estoque está ativo
 }
 
-// StockMovement representa um movimento de estoque (entrada/saída)
-type StockMovement struct {
-	entity.Entity
-	StockMovementCommonAttributes
-}
-
-type StockMovementCommonAttributes struct {
-	StockID      uuid.UUID       `json:"stock_id"`
-	ProductID    uuid.UUID       `json:"product_id"`
-	Type         MovementType    `json:"type"`
-	Quantity     decimal.Decimal `json:"quantity"`
-	Reason       string          `json:"reason"`
-	OrderID      *uuid.UUID      `json:"order_id,omitempty"`      // Se relacionado a um pedido
-	OrderNumber  *int            `json:"order_number,omitempty"`  // Número do pedido
-	EmployeeID   *uuid.UUID      `json:"employee_id,omitempty"`   // Funcionário responsável
-	EmployeeName *string         `json:"employee_name,omitempty"` // Nome do funcionário
-	UnitCost     decimal.Decimal `json:"unit_cost"`               // Custo unitário no momento do movimento
-	TotalCost    decimal.Decimal `json:"total_cost"`              // Custo total do movimento
-	Notes        string          `json:"notes"`                   // Observações adicionais
-}
-
-// MovementType define o tipo de movimento de estoque
-type MovementType string
-
-const (
-	MovementTypeIn     MovementType = "in"     // Entrada de estoque
-	MovementTypeOut    MovementType = "out"    // Saída de estoque
-	MovementTypeAdjust MovementType = "adjust" // Ajuste manual
-)
-
-// StockAlert representa alertas de estoque (baixo estoque, etc)
-type StockAlert struct {
-	entity.Entity
-	StockAlertCommonAttributes
-}
-
-type StockAlertCommonAttributes struct {
-	StockID    uuid.UUID  `json:"stock_id"`
-	ProductID  uuid.UUID  `json:"product_id"`
-	Type       AlertType  `json:"type"`
-	Message    string     `json:"message"`
-	IsResolved bool       `json:"is_resolved"`
-	ResolvedAt *time.Time `json:"resolved_at,omitempty"`
-	ResolvedBy *uuid.UUID `json:"resolved_by,omitempty"`
-}
-
-// AlertType define o tipo de alerta
-type AlertType string
-
-const (
-	AlertTypeLowStock   AlertType = "low_stock"    // Estoque baixo
-	AlertTypeOutOfStock AlertType = "out_of_stock" // Sem estoque
-	AlertTypeOverStock  AlertType = "over_stock"   // Estoque acima do máximo
-)
-
 // NewStock cria um novo estoque
 func NewStock(productID uuid.UUID, initialStock, minStock, maxStock decimal.Decimal, unit string) *Stock {
 	return &Stock{
@@ -101,8 +45,8 @@ func NewStock(productID uuid.UUID, initialStock, minStock, maxStock decimal.Deci
 	}
 }
 
-// AddStock adiciona estoque manualmente
-func (s *Stock) AddStock(quantity decimal.Decimal, reason string, employeeID *uuid.UUID, unitCost decimal.Decimal, notes string) (*StockMovement, error) {
+// AddMovementStock adiciona estoque manualmente
+func (s *Stock) AddMovementStock(quantity decimal.Decimal, reason string, employeeID uuid.UUID, price decimal.Decimal, totalPrice decimal.Decimal) (*StockMovement, error) {
 	if quantity.LessThanOrEqual(decimal.Zero) {
 		return nil, ErrInvalidQuantity
 	}
@@ -117,22 +61,20 @@ func (s *Stock) AddStock(quantity decimal.Decimal, reason string, employeeID *uu
 		Entity: entity.NewEntity(),
 		StockMovementCommonAttributes: StockMovementCommonAttributes{
 			StockID:    s.ID,
-			ProductID:  s.ProductID,
 			Type:       MovementTypeIn,
 			Quantity:   quantity,
 			Reason:     reason,
 			EmployeeID: employeeID,
-			UnitCost:   unitCost,
-			TotalCost:  unitCost.Mul(quantity),
-			Notes:      notes,
+			Price:      price,
+			TotalPrice: totalPrice,
 		},
 	}
 
 	return movement, nil
 }
 
-// RemoveStock remove estoque manualmente
-func (s *Stock) RemoveStock(quantity decimal.Decimal, reason string, employeeID *uuid.UUID, unitCost decimal.Decimal, notes string) (*StockMovement, error) {
+// RemoveMovementStock remove estoque manualmente
+func (s *Stock) RemoveMovementStock(quantity decimal.Decimal, reason string, employeeID uuid.UUID, price decimal.Decimal, totalPrice decimal.Decimal) (*StockMovement, error) {
 	if quantity.LessThanOrEqual(decimal.Zero) {
 		return nil, ErrInvalidQuantity
 	}
@@ -151,22 +93,20 @@ func (s *Stock) RemoveStock(quantity decimal.Decimal, reason string, employeeID 
 		Entity: entity.NewEntity(),
 		StockMovementCommonAttributes: StockMovementCommonAttributes{
 			StockID:    s.ID,
-			ProductID:  s.ProductID,
 			Type:       MovementTypeOut,
 			Quantity:   quantity,
 			Reason:     reason,
 			EmployeeID: employeeID,
-			UnitCost:   unitCost,
-			TotalCost:  unitCost.Mul(quantity),
-			Notes:      notes,
+			Price:      price,
+			TotalPrice: totalPrice,
 		},
 	}
 
 	return movement, nil
 }
 
-// AdjustStock ajusta o estoque para um valor específico
-func (s *Stock) AdjustStock(newStock decimal.Decimal, reason string, employeeID *uuid.UUID, unitCost decimal.Decimal, notes string) (*StockMovement, error) {
+// AdjustMovementStock ajusta o estoque para um valor específico
+func (s *Stock) AdjustMovementStock(newStock decimal.Decimal, reason string, employeeID uuid.UUID) (*StockMovement, error) {
 	if newStock.LessThan(decimal.Zero) {
 		return nil, ErrInvalidQuantity
 	}
@@ -178,11 +118,11 @@ func (s *Stock) AdjustStock(newStock decimal.Decimal, reason string, employeeID 
 	difference := newStock.Sub(s.CurrentStock)
 	s.CurrentStock = newStock
 
-	movementType := MovementTypeAdjust
+	var movementType MovementType
 	if difference.GreaterThan(decimal.Zero) {
-		movementType = MovementTypeIn
+		movementType = MovementTypeAdjustIn
 	} else if difference.LessThan(decimal.Zero) {
-		movementType = MovementTypeOut
+		movementType = MovementTypeAdjustOut
 		difference = difference.Abs()
 	} else {
 		// Não há diferença, não criar movimento
@@ -193,14 +133,10 @@ func (s *Stock) AdjustStock(newStock decimal.Decimal, reason string, employeeID 
 		Entity: entity.NewEntity(),
 		StockMovementCommonAttributes: StockMovementCommonAttributes{
 			StockID:    s.ID,
-			ProductID:  s.ProductID,
 			Type:       movementType,
 			Quantity:   difference,
 			Reason:     reason,
 			EmployeeID: employeeID,
-			UnitCost:   unitCost,
-			TotalCost:  unitCost.Mul(difference),
-			Notes:      notes,
 		},
 	}
 
@@ -208,7 +144,7 @@ func (s *Stock) AdjustStock(newStock decimal.Decimal, reason string, employeeID 
 }
 
 // ReserveStock reserva estoque para um pedido (quando pedido fica pending)
-func (s *Stock) ReserveStock(quantity decimal.Decimal, orderID uuid.UUID, orderNumber int, unitCost decimal.Decimal) (*StockMovement, error) {
+func (s *Stock) ReserveStock(quantity decimal.Decimal, orderID uuid.UUID, employeeID uuid.UUID, price decimal.Decimal, totalPrice decimal.Decimal) (*StockMovement, error) {
 	if quantity.LessThanOrEqual(decimal.Zero) {
 		return nil, ErrInvalidQuantity
 	}
@@ -226,16 +162,14 @@ func (s *Stock) ReserveStock(quantity decimal.Decimal, orderID uuid.UUID, orderN
 	movement := &StockMovement{
 		Entity: entity.NewEntity(),
 		StockMovementCommonAttributes: StockMovementCommonAttributes{
-			StockID:     s.ID,
-			ProductID:   s.ProductID,
-			Type:        MovementTypeOut,
-			Quantity:    quantity,
-			Reason:      "Reserva automática - Pedido pendente",
-			OrderID:     &orderID,
-			OrderNumber: &orderNumber,
-			UnitCost:    unitCost,
-			TotalCost:   unitCost.Mul(quantity),
-			Notes:       "Débito automático ao deixar pedido pendente",
+			StockID:    s.ID,
+			Type:       MovementTypeOut,
+			Quantity:   quantity,
+			Reason:     "Reserva automática - Pedido pendente",
+			EmployeeID: employeeID,
+			OrderID:    &orderID,
+			Price:      price,
+			TotalPrice: totalPrice,
 		},
 	}
 
@@ -243,7 +177,7 @@ func (s *Stock) ReserveStock(quantity decimal.Decimal, orderID uuid.UUID, orderN
 }
 
 // RestoreStock restaura estoque quando pedido é cancelado
-func (s *Stock) RestoreStock(quantity decimal.Decimal, orderID uuid.UUID, orderNumber int, unitCost decimal.Decimal) (*StockMovement, error) {
+func (s *Stock) RestoreStock(quantity decimal.Decimal, orderID uuid.UUID, employeeID uuid.UUID, price decimal.Decimal, totalPrice decimal.Decimal) (*StockMovement, error) {
 	if quantity.LessThanOrEqual(decimal.Zero) {
 		return nil, ErrInvalidQuantity
 	}
@@ -257,16 +191,14 @@ func (s *Stock) RestoreStock(quantity decimal.Decimal, orderID uuid.UUID, orderN
 	movement := &StockMovement{
 		Entity: entity.NewEntity(),
 		StockMovementCommonAttributes: StockMovementCommonAttributes{
-			StockID:     s.ID,
-			ProductID:   s.ProductID,
-			Type:        MovementTypeIn,
-			Quantity:    quantity,
-			Reason:      "Restauração automática - Pedido cancelado",
-			OrderID:     &orderID,
-			OrderNumber: &orderNumber,
-			UnitCost:    unitCost,
-			TotalCost:   unitCost.Mul(quantity),
-			Notes:       "Crédito automático ao cancelar pedido",
+			StockID:    s.ID,
+			Type:       MovementTypeIn,
+			Quantity:   quantity,
+			Reason:     "Restauração automática - Pedido cancelado",
+			EmployeeID: employeeID,
+			OrderID:    &orderID,
+			Price:      price,
+			TotalPrice: totalPrice,
 		},
 	}
 
@@ -286,9 +218,7 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 		alerts = append(alerts, &StockAlert{
 			Entity: entity.NewEntity(),
 			StockAlertCommonAttributes: StockAlertCommonAttributes{
-				StockID:   s.ID,
-				ProductID: s.ProductID,
-
+				StockID:    s.ID,
 				Type:       AlertTypeLowStock,
 				Message:    "Estoque abaixo do mínimo",
 				IsResolved: false,
@@ -301,9 +231,7 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 		alerts = append(alerts, &StockAlert{
 			Entity: entity.NewEntity(),
 			StockAlertCommonAttributes: StockAlertCommonAttributes{
-				StockID:   s.ID,
-				ProductID: s.ProductID,
-
+				StockID:    s.ID,
 				Type:       AlertTypeOutOfStock,
 				Message:    "Produto sem estoque",
 				IsResolved: false,
@@ -316,9 +244,7 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 		alerts = append(alerts, &StockAlert{
 			Entity: entity.NewEntity(),
 			StockAlertCommonAttributes: StockAlertCommonAttributes{
-				StockID:   s.ID,
-				ProductID: s.ProductID,
-
+				StockID:    s.ID,
 				Type:       AlertTypeOverStock,
 				Message:    "Estoque acima do máximo",
 				IsResolved: false,

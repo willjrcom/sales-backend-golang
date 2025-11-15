@@ -114,8 +114,9 @@ func (s *OrderService) debitStockFromOrder(ctx context.Context, order *orderenti
 				movement, err := stock.ReserveStock(
 					decimal.NewFromFloat(item.Quantity),
 					order.ID,
-					order.OrderNumber,
+					*order.AttendantID,
 					item.Price,
+					item.TotalPrice,
 				)
 				if err != nil {
 					fmt.Printf("Erro ao reservar estoque para produto %s: %v\n", item.Name, err)
@@ -166,8 +167,9 @@ func (s *OrderService) restoreStockFromOrder(ctx context.Context, order *orderen
 				movement, err := stock.RestoreStock(
 					decimal.NewFromFloat(item.Quantity),
 					order.ID,
-					order.OrderNumber,
+					*order.AttendantID,
 					item.Price,
+					item.TotalPrice,
 				)
 				if err != nil {
 					fmt.Printf("Erro ao restaurar estoque para produto %s: %v\n", item.Name, err)
