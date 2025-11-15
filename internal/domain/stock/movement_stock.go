@@ -13,14 +13,14 @@ type StockMovement struct {
 }
 
 type StockMovementCommonAttributes struct {
-	StockID    uuid.UUID       `json:"stock_id"`
-	Type       MovementType    `json:"type"`
-	Quantity   decimal.Decimal `json:"quantity"`
-	Reason     string          `json:"reason"`
-	OrderID    *uuid.UUID      `json:"order_id,omitempty"`    // Se relacionado a um pedido
-	EmployeeID uuid.UUID       `json:"employee_id,omitempty"` // Funcionário responsável
-	Price      decimal.Decimal `json:"price"`                 // Custo unitário no momento do movimento
-	TotalPrice decimal.Decimal `json:"total_price"`           // Custo total do movimento
+	StockID    uuid.UUID
+	Type       MovementType
+	Quantity   decimal.Decimal
+	Reason     string
+	OrderID    *uuid.UUID
+	EmployeeID uuid.UUID
+	Price      decimal.Decimal
+	TotalPrice decimal.Decimal
 }
 
 // MovementType define o tipo de movimento de estoque

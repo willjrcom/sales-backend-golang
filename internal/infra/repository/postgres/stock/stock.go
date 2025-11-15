@@ -78,7 +78,7 @@ func (r *StockRepositoryBun) GetStockByID(ctx context.Context, id string) (*mode
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(stock).Where("stock.id = ?", id).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(stock).Where("stock.id = ?", id).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -95,7 +95,7 @@ func (r *StockRepositoryBun) GetStockByProductID(ctx context.Context, productID 
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(stock).Where("stock.product_id = ?", productID).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(stock).Where("stock.product_id = ?", productID).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -112,7 +112,7 @@ func (r *StockRepositoryBun) GetAllStocks(ctx context.Context) ([]model.Stock, e
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&stocks).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&stocks).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -129,7 +129,7 @@ func (r *StockRepositoryBun) GetActiveStocks(ctx context.Context) ([]model.Stock
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&stocks).Where("stock.is_active = ?", true).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&stocks).Where("stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -146,7 +146,7 @@ func (r *StockRepositoryBun) GetLowStockProducts(ctx context.Context) ([]model.S
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&stocks).Where("stock.current_stock <= stock.min_stock AND stock.is_active = ?", true).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&stocks).Where("stock.current_stock <= stock.min_stock AND stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -163,7 +163,7 @@ func (r *StockRepositoryBun) GetOutOfStockProducts(ctx context.Context) ([]model
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&stocks).Where("stock.current_stock <= 0 AND stock.is_active = ?", true).Scan(ctx); err != nil {
+	if err := r.db.NewSelect().Model(&stocks).Where("stock.current_stock <= 0 AND stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
 	}
 

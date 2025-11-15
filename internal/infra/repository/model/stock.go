@@ -17,6 +17,7 @@ type Stock struct {
 
 type StockCommonAttributes struct {
 	ProductID    uuid.UUID       `bun:"product_id,type:uuid,notnull"`
+	Product      Product         `bun:"product,rel:has-one,join:product_id=id"`
 	CurrentStock decimal.Decimal `bun:"current_stock,type:decimal(10,3),notnull"`
 	MinStock     decimal.Decimal `bun:"min_stock,type:decimal(10,3),notnull"`
 	MaxStock     decimal.Decimal `bun:"max_stock,type:decimal(10,3),notnull"`
@@ -51,6 +52,7 @@ func (s *Stock) ToDomain() *stockentity.Stock {
 		Entity: s.Entity.ToDomain(),
 		StockCommonAttributes: stockentity.StockCommonAttributes{
 			ProductID:    s.ProductID,
+			Product:      *s.Product.ToDomain(),
 			CurrentStock: s.CurrentStock,
 			MinStock:     s.MinStock,
 			MaxStock:     s.MaxStock,

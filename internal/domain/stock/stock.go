@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
 var (
@@ -22,12 +23,13 @@ type Stock struct {
 }
 
 type StockCommonAttributes struct {
-	ProductID    uuid.UUID       `json:"product_id"`
-	CurrentStock decimal.Decimal `json:"current_stock"`
-	MinStock     decimal.Decimal `json:"min_stock"` // Estoque mínimo para alertas
-	MaxStock     decimal.Decimal `json:"max_stock"` // Estoque máximo
-	Unit         string          `json:"unit"`      // Unidade (kg, unidades, etc)
-	IsActive     bool            `json:"is_active"` // Se o controle de estoque está ativo
+	ProductID    uuid.UUID
+	Product      productentity.Product
+	CurrentStock decimal.Decimal
+	MinStock     decimal.Decimal
+	MaxStock     decimal.Decimal
+	Unit         string
+	IsActive     bool
 }
 
 // NewStock cria um novo estoque
