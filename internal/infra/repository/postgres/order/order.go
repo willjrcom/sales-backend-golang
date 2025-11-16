@@ -277,7 +277,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	return order, nil
 }
 
-func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder, withCategory bool) ([]model.Order, error) {
+func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder, withCategory bool, queryCondition string) ([]model.Order, error) {
 	orders := []model.Order{}
 
 	r.mu.Lock()
@@ -287,9 +287,13 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 		return nil, err
 	}
 
+	if queryCondition == "" {
+		queryCondition = "OR"
+	}
+
 	query := r.db.NewSelect().Model(&orders).
 		// use quoted alias for reserved keyword 'order'
-		Where(`"order"."status" IN (?) OR "order"."shift_id" = ?`, bun.In(withStatus), shiftID).
+		Where(`"order"."status" IN (?) `+queryCondition+` "order"."shift_id" = ?`, bun.In(withStatus), shiftID).
 		Relation("GroupItems.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Where("is_additional = ?", false)
 		}).

@@ -34,7 +34,7 @@ func (s *OrderService) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, e
 		orderentity.OrderStatusReady,
 	}
 
-	if orderModels, err := s.ro.GetAllOrders(ctx, shiftID.String(), validStatuses, false); err != nil {
+	if orderModels, err := s.ro.GetAllOrders(ctx, shiftID.String(), validStatuses, false, "OR"); err != nil {
 		return nil, err
 	} else {
 		orders := make([]orderdto.OrderDTO, 0)

@@ -105,7 +105,7 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 		orderentity.OrderStatusFinished,
 		orderentity.OrderStatusCanceled,
 	}
-	orders, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), orderStatus, true)
+	orders, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), orderStatus, true, "AND")
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func (s *Service) GetCurrentShift(ctx context.Context) (shiftDTO *shiftdto.Shift
 		orderentity.OrderStatusFinished,
 		orderentity.OrderStatusCanceled,
 	}
-	orders, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), orderStatus, true)
+	orders, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), orderStatus, true, "AND")
 	if err != nil {
 		return nil, err
 	}
