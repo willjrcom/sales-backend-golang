@@ -1,7 +1,6 @@
 package handlerimpl
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -250,11 +249,6 @@ func (h *handlerReportImpl) handleNewVsRecurringClients(w http.ResponseWriter, r
 }
 
 func (h *handlerReportImpl) handleOrdersByStatus(w http.ResponseWriter, r *http.Request) {
-	schema := r.URL.Query().Get("schema")
-	if schema == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-		return
-	}
 	req := reportdto.OrdersByStatusRequest{}
 	resp, err := h.s.OrdersByStatus(r.Context(), &req)
 	if err != nil {
@@ -265,11 +259,6 @@ func (h *handlerReportImpl) handleOrdersByStatus(w http.ResponseWriter, r *http.
 }
 
 func (h *handlerReportImpl) handleAvgProcessStepDurationByRule(w http.ResponseWriter, r *http.Request) {
-	schema := r.URL.Query().Get("schema")
-	if schema == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-		return
-	}
 	req := reportdto.AvgProcessStepDurationRequest{}
 	resp, err := h.s.AvgProcessStepDurationByRule(r.Context(), &req)
 	if err != nil {
@@ -280,11 +269,6 @@ func (h *handlerReportImpl) handleAvgProcessStepDurationByRule(w http.ResponseWr
 }
 
 func (h *handlerReportImpl) handleCancellationRate(w http.ResponseWriter, r *http.Request) {
-	schema := r.URL.Query().Get("schema")
-	if schema == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-		return
-	}
 	req := reportdto.CancellationRateRequest{}
 	resp, err := h.s.CancellationRate(r.Context(), &req)
 	if err != nil {
@@ -295,11 +279,6 @@ func (h *handlerReportImpl) handleCancellationRate(w http.ResponseWriter, r *htt
 }
 
 func (h *handlerReportImpl) handleCurrentQueueLength(w http.ResponseWriter, r *http.Request) {
-	schema := r.URL.Query().Get("schema")
-	if schema == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-		return
-	}
 	req := reportdto.CurrentQueueLengthRequest{}
 	resp, err := h.s.CurrentQueueLength(r.Context(), &req)
 	if err != nil {
@@ -310,11 +289,6 @@ func (h *handlerReportImpl) handleCurrentQueueLength(w http.ResponseWriter, r *h
 }
 
 func (h *handlerReportImpl) handleAvgDeliveryTimeByDriver(w http.ResponseWriter, r *http.Request) {
-	schema := r.URL.Query().Get("schema")
-	if schema == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-		return
-	}
 	req := reportdto.AvgDeliveryTimeByDriverRequest{}
 	resp, err := h.s.AvgDeliveryTimeByDriver(r.Context(), &req)
 	if err != nil {
@@ -325,11 +299,6 @@ func (h *handlerReportImpl) handleAvgDeliveryTimeByDriver(w http.ResponseWriter,
 }
 
 func (h *handlerReportImpl) handleDeliveriesPerDriver(w http.ResponseWriter, r *http.Request) {
-	schema := r.URL.Query().Get("schema")
-	if schema == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-		return
-	}
 	req := reportdto.DeliveriesPerDriverRequest{}
 	resp, err := h.s.DeliveriesPerDriver(r.Context(), &req)
 	if err != nil {
@@ -340,11 +309,6 @@ func (h *handlerReportImpl) handleDeliveriesPerDriver(w http.ResponseWriter, r *
 }
 
 func (h *handlerReportImpl) handleOrdersPerTable(w http.ResponseWriter, r *http.Request) {
-	schema := r.URL.Query().Get("schema")
-	if schema == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-		return
-	}
 	req := reportdto.OrdersPerTableRequest{}
 	resp, err := h.s.OrdersPerTable(r.Context(), &req)
 	if err != nil {
@@ -356,11 +320,6 @@ func (h *handlerReportImpl) handleOrdersPerTable(w http.ResponseWriter, r *http.
 
 // handleAvgQueueDuration handles average queue duration report.
 func (h *handlerReportImpl) handleAvgQueueDuration(w http.ResponseWriter, r *http.Request) {
-	schema := r.URL.Query().Get("schema")
-	if schema == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-		return
-	}
 	req := reportdto.AvgQueueDurationRequest{}
 	resp, err := h.s.AvgQueueDuration(r.Context(), &req)
 	if err != nil {
@@ -372,11 +331,6 @@ func (h *handlerReportImpl) handleAvgQueueDuration(w http.ResponseWriter, r *htt
 
 // handleAvgProcessDurationByProduct handles average process duration by product report.
 func (h *handlerReportImpl) handleAvgProcessDurationByProduct(w http.ResponseWriter, r *http.Request) {
-	schema := r.URL.Query().Get("schema")
-	if schema == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-		return
-	}
 	req := reportdto.AvgProcessDurationByProductRequest{}
 	resp, err := h.s.AvgProcessDurationByProduct(r.Context(), &req)
 	if err != nil {
@@ -388,11 +342,6 @@ func (h *handlerReportImpl) handleAvgProcessDurationByProduct(w http.ResponseWri
 
 // handleTotalQueueTimeByGroupItem handles total queue time per group item report.
 func (h *handlerReportImpl) handleTotalQueueTimeByGroupItem(w http.ResponseWriter, r *http.Request) {
-	schema := r.URL.Query().Get("schema")
-	if schema == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("schema is required"))
-		return
-	}
 	req := reportdto.TotalQueueTimeByGroupItemRequest{}
 	resp, err := h.s.TotalQueueTimeByGroupItem(r.Context(), &req)
 	if err != nil {

@@ -381,8 +381,8 @@ type ProcessedCountByRuleRequest struct {
 
 // ProcessedCountByRuleResponse holds rule ID and count.
 type ProcessedCountByRuleResponse struct {
-	RuleID string `json:"rule_id"`
-	Count  int    `json:"count"`
+	ProcessRuleName string `json:"process_rule_name"`
+	Count           int    `json:"count"`
 }
 
 // ProductProfitabilityRequest filters for product profitability analysis.
