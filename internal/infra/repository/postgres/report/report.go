@@ -818,8 +818,8 @@ func (s *ReportService) DeliveriesByCep(ctx context.Context, start, end time.Tim
 
 // ProcessedByRuleDTO holds count of orders processed per process rule.
 type ProcessedByRuleDTO struct {
-	RuleID string `bun:"rule_id"`
-	Count  int    `bun:"count"`
+	ProcessRuleName string `bun:"process_rule_name"`
+	Count           int    `bun:"count"`
 }
 
 // ProcessedCountByRule returns number of processed items per rule.
@@ -830,13 +830,14 @@ func (s *ReportService) ProcessedCountByRule(ctx context.Context, start, end tim
 
 	var resp []ProcessedByRuleDTO
 	query := `
-        SELECT pr.process_rule_id::text AS rule_id, COUNT(*) AS count
-        FROM order_processes pr
-        JOIN order_group_items g ON g.id = pr.group_item_id
+        SELECT pr.name AS process_rule_name, COUNT(*) AS count
+        FROM order_processes opr
+        JOIN order_group_items g ON g.id = opr.group_item_id
         JOIN orders o ON o.id = g.order_id
-        WHERE pr.finished_at IS NOT NULL AND pr.started_at IS NOT NULL
+		JOIN process_rules pr ON pr.id = opr.process_rule_id
+        WHERE opr.finished_at IS NOT NULL AND opr.started_at IS NOT NULL
         	AND o.created_at BETWEEN ? AND ?
-        GROUP BY pr.process_rule_id`
+        GROUP BY pr.name`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}

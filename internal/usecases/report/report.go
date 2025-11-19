@@ -378,7 +378,7 @@ func (s *Service) ProcessedCountByRule(ctx context.Context, req *reportdto.Proce
 	}
 	resp := make([]reportdto.ProcessedCountByRuleResponse, len(data))
 	for i, d := range data {
-		resp[i] = reportdto.ProcessedCountByRuleResponse{RuleID: d.RuleID, Count: d.Count}
+		resp[i] = reportdto.ProcessedCountByRuleResponse{RuleID: d.ProcessRuleName, Count: d.Count}
 	}
 	return resp, nil
 }
