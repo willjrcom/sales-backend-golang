@@ -201,21 +201,21 @@ func (s *Service) AvgProcessStepDurationByRule(ctx context.Context, req *reportd
 }
 
 // CancellationRate returns the cancellation rate of orders.
-func (s *Service) CancellationRate(ctx context.Context, req *reportdto.CancellationRateRequest) (reportdto.CancellationRateResponse, error) {
+func (s *Service) CancellationRate(ctx context.Context, req *reportdto.CancellationRateRequest) (*reportdto.CancellationRateResponse, error) {
 	d, err := s.reportSvc.CancellationRate(ctx)
 	if err != nil {
-		return reportdto.CancellationRateResponse{}, err
+		return nil, err
 	}
-	return reportdto.CancellationRateResponse{Rate: d.Rate}, nil
+	return &reportdto.CancellationRateResponse{Rate: d.Rate}, nil
 }
 
 // CurrentQueueLength returns the number of items currently in queue.
-func (s *Service) CurrentQueueLength(ctx context.Context, req *reportdto.CurrentQueueLengthRequest) (reportdto.CurrentQueueLengthResponse, error) {
+func (s *Service) CurrentQueueLength(ctx context.Context, req *reportdto.CurrentQueueLengthRequest) (*reportdto.CurrentQueueLengthResponse, error) {
 	d, err := s.reportSvc.CurrentQueueLength(ctx)
 	if err != nil {
-		return reportdto.CurrentQueueLengthResponse{}, err
+		return nil, err
 	}
-	return reportdto.CurrentQueueLengthResponse{Length: d.Length}, nil
+	return &reportdto.CurrentQueueLengthResponse{Length: d.Length}, nil
 }
 
 // AvgDeliveryTimeByDriver returns average delivery time per driver.
@@ -336,12 +336,12 @@ func (s *Service) AdditionalItemsSold(ctx context.Context, req *reportdto.Additi
 }
 
 // AvgPickupTime returns average pickup wait time.
-func (s *Service) AvgPickupTime(ctx context.Context, req *reportdto.AvgPickupTimeRequest) (reportdto.AvgPickupTimeResponse, error) {
+func (s *Service) AvgPickupTime(ctx context.Context, req *reportdto.AvgPickupTimeRequest) (*reportdto.AvgPickupTimeResponse, error) {
 	d, err := s.reportSvc.AvgPickupTime(ctx, req.Start, req.End)
 	if err != nil {
-		return reportdto.AvgPickupTimeResponse{}, err
+		return nil, err
 	}
-	return reportdto.AvgPickupTimeResponse{AvgSeconds: d.AvgSeconds}, nil
+	return &reportdto.AvgPickupTimeResponse{AvgSeconds: d.AvgSeconds}, nil
 }
 
 // GroupItemsByStatus returns count of group items by status.
@@ -384,21 +384,21 @@ func (s *Service) ProcessedCountByRule(ctx context.Context, req *reportdto.Proce
 }
 
 // DailySales returns summary metrics for a specific day.
-func (s *Service) DailySales(ctx context.Context, req *reportdto.DailySalesRequest) (reportdto.DailySalesResponse, error) {
+func (s *Service) DailySales(ctx context.Context, req *reportdto.DailySalesRequest) (*reportdto.DailySalesResponse, error) {
 	data, err := s.reportSvc.DailySales(ctx, req.Day)
 	if err != nil {
-		return reportdto.DailySalesResponse{}, err
+		return nil, err
 	}
-	return reportdto.DailySalesResponse{TotalOrders: data.TotalOrders, TotalSales: data.TotalSales}, nil
+	return &reportdto.DailySalesResponse{TotalOrders: data.TotalOrders, TotalSales: data.TotalSales}, nil
 }
 
 // AvgQueueDuration returns average duration of all queues.
-func (s *Service) AvgQueueDuration(ctx context.Context, req *reportdto.AvgQueueDurationRequest) (reportdto.AvgQueueDurationResponse, error) {
+func (s *Service) AvgQueueDuration(ctx context.Context, req *reportdto.AvgQueueDurationRequest) (*reportdto.AvgQueueDurationResponse, error) {
 	d, err := s.reportSvc.AvgQueueDuration(ctx)
 	if err != nil {
-		return reportdto.AvgQueueDurationResponse{}, err
+		return nil, err
 	}
-	return reportdto.AvgQueueDurationResponse{AvgSeconds: d.AvgSeconds}, nil
+	return &reportdto.AvgQueueDurationResponse{AvgSeconds: d.AvgSeconds}, nil
 }
 
 // AvgProcessDurationByProduct returns average process duration by product.
@@ -499,15 +499,18 @@ func (s *Service) DebugProducts(ctx context.Context) (interface{}, error) {
 }
 
 // OverallProfitability returns overall profitability metrics.
-func (s *Service) OverallProfitability(ctx context.Context, req *reportdto.OverallProfitabilityRequest) (reportdto.OverallProfitabilityResponse, error) {
+func (s *Service) OverallProfitability(ctx context.Context, req *reportdto.OverallProfitabilityRequest) (*reportdto.OverallProfitabilityResponse, error) {
 	data, err := s.reportSvc.OverallProfitability(ctx, req.Start, req.End)
 	if err != nil {
-		return reportdto.OverallProfitabilityResponse{}, err
+		return nil, err
 	}
-	return reportdto.OverallProfitabilityResponse{
+
+	totalProfit := data.TotalProfit.Round(2)
+	profitMargin := data.ProfitMargin.Round(2)
+	return &reportdto.OverallProfitabilityResponse{
 		TotalRevenue: data.TotalRevenue,
 		TotalCost:    data.TotalCost,
-		TotalProfit:  data.TotalProfit,
-		ProfitMargin: data.ProfitMargin,
+		TotalProfit:  &totalProfit,
+		ProfitMargin: &profitMargin,
 	}, nil
 }

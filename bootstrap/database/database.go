@@ -131,9 +131,8 @@ func NewSQLiteConnection() *bun.DB {
 	return dbInstance
 }
 
-func ChangeSchema(ctx context.Context, db *bun.DB) error {
+func ChangeSchema(ctx context.Context, db *bun.DB, tx ...bun.Tx) error {
 	schemaName, err := GetCurrentSchema(ctx)
-
 	if err != nil {
 		return err
 	}

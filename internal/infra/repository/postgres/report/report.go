@@ -28,14 +28,15 @@ type SalesByDayDTO struct {
 
 // SalesTotalByDay returns total sales (sum of total_payable) per day in the given period.
 func (s *ReportService) SalesTotalByDay(ctx context.Context, start, end time.Time) ([]SalesByDayDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []SalesByDayDTO
 	query := `
         SELECT TO_CHAR(created_at, 'DD/MM') AS day, SUM(total_payable) AS total
-        FROM orders
+        FROM ` + schemaName + `.orders
         WHERE created_at BETWEEN ? AND ?
         GROUP BY day
         ORDER BY day`
@@ -53,7 +54,8 @@ type CumulativeRevenueDTO struct {
 
 // RevenueCumulativeByMonth returns cumulative monthly revenue.
 func (s *ReportService) RevenueCumulativeByMonth(ctx context.Context, start, end time.Time) ([]CumulativeRevenueDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -61,7 +63,7 @@ func (s *ReportService) RevenueCumulativeByMonth(ctx context.Context, start, end
 	query := `
         WITH M AS (
             SELECT date_trunc('month', created_at)::date AS mon, SUM(total_payable) AS rev
-            FROM orders
+            FROM ` + schemaName + `.orders
             WHERE created_at BETWEEN ? AND ?
             GROUP BY mon
         )
@@ -81,7 +83,8 @@ type HourlySalesDTO struct {
 
 // SalesByHour returns total sales per hour for a specific day.
 func (s *ReportService) SalesByHour(ctx context.Context, day time.Time) ([]HourlySalesDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -90,7 +93,7 @@ func (s *ReportService) SalesByHour(ctx context.Context, day time.Time) ([]Hourl
 	end := start.Add(24 * time.Hour)
 	query := `
         SELECT EXTRACT(hour FROM created_at)::int AS hr, SUM(total_payable) AS total
-        FROM orders
+        FROM ` + schemaName + `.orders
         WHERE created_at >= ? AND created_at < ?
         GROUP BY hr
         ORDER BY hr`
@@ -108,7 +111,8 @@ type ChannelSalesDTO struct {
 
 // SalesByChannel returns sum of sales per channel: delivery, pickup, table.
 func (s *ReportService) SalesByChannel(ctx context.Context, start, end time.Time) ([]ChannelSalesDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -122,10 +126,10 @@ func (s *ReportService) SalesByChannel(ctx context.Context, start, end time.Time
                 ELSE 'unknown'
             END AS channel,
             SUM(o.total_payable) AS total
-        FROM orders o
-        LEFT JOIN order_deliveries d ON d.order_id = o.id
-        LEFT JOIN order_tables t ON t.order_id = o.id
-        LEFT JOIN order_pickups p ON p.order_id = o.id
+        FROM ` + schemaName + `.orders o
+        LEFT JOIN ` + schemaName + `.order_deliveries d ON d.order_id = o.id
+        LEFT JOIN ` + schemaName + `.order_tables t ON t.order_id = o.id
+        LEFT JOIN ` + schemaName + `.order_pickups p ON p.order_id = o.id
         WHERE o.created_at BETWEEN ? AND ?
         GROUP BY channel`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
@@ -142,14 +146,15 @@ type AvgTicketDTO struct {
 
 // AvgTicketByDay returns average order total per day.
 func (s *ReportService) AvgTicketByDay(ctx context.Context, start, end time.Time) ([]AvgTicketDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []AvgTicketDTO
 	query := `
         SELECT date(created_at) AS key, AVG(total_payable) AS avg_ticket
-        FROM orders
+        FROM ` + schemaName + `.orders
         WHERE created_at BETWEEN ? AND ?
         GROUP BY key
         ORDER BY key`
@@ -161,7 +166,8 @@ func (s *ReportService) AvgTicketByDay(ctx context.Context, start, end time.Time
 
 // AvgTicketByChannel returns average ticket per channel.
 func (s *ReportService) AvgTicketByChannel(ctx context.Context, start, end time.Time) ([]AvgTicketDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -175,10 +181,10 @@ func (s *ReportService) AvgTicketByChannel(ctx context.Context, start, end time.
                 ELSE 'unknown'
             END AS key,
             AVG(o.total_payable) AS avg_ticket
-        FROM orders o
-        LEFT JOIN order_deliveries d ON d.order_id = o.id
-        LEFT JOIN order_tables t ON t.order_id = o.id
-        LEFT JOIN order_pickups p ON p.order_id = o.id
+        FROM ` + schemaName + `.orders o
+        LEFT JOIN ` + schemaName + `.order_deliveries d ON d.order_id = o.id
+        LEFT JOIN ` + schemaName + `.order_tables t ON t.order_id = o.id
+        LEFT JOIN ` + schemaName + `.order_pickups p ON p.order_id = o.id
         WHERE o.created_at BETWEEN ? AND ?
         GROUP BY key`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
@@ -195,14 +201,15 @@ type ProductsSoldByDayDTO struct {
 
 // ProductsSoldByDay returns sum of quantity_items per day.
 func (s *ReportService) ProductsSoldByDay(ctx context.Context, start, end time.Time) ([]ProductsSoldByDayDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []ProductsSoldByDayDTO
 	query := `
 		SELECT TO_CHAR(created_at, 'DD/MM') AS day, SUM(quantity_items) AS quantity
-		FROM orders
+		FROM ` + schemaName + `.orders
 		WHERE created_at BETWEEN ? AND ?
 		GROUP BY day
 		ORDER BY day
@@ -222,17 +229,18 @@ type TopProductsDTO struct {
 
 // TopProducts returns top 10 products by sold quantity.
 func (s *ReportService) TopProducts(ctx context.Context, start, end time.Time) ([]TopProductsDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []TopProductsDTO
 	query := `
         SELECT p.name, SUM(i.quantity) AS quantity
-        FROM order_items i
-        JOIN order_group_items g ON i.group_item_id = g.id
-        JOIN orders o ON g.order_id = o.id
-        JOIN products p ON p.id = i.product_id
+        FROM ` + schemaName + `.order_items i
+        JOIN ` + schemaName + `.order_group_items g ON i.group_item_id = g.id
+        JOIN ` + schemaName + `.orders o ON g.order_id = o.id
+        JOIN ` + schemaName + `.products p ON p.id = i.product_id
         WHERE o.created_at BETWEEN ? AND ?
         GROUP BY p.name
         ORDER BY quantity DESC
@@ -251,19 +259,21 @@ type SalesByCategoryDTO struct {
 
 // SalesByCategory returns sum of quantities by product category.
 func (s *ReportService) SalesByCategory(ctx context.Context, start, end time.Time) ([]SalesByCategoryDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []SalesByCategoryDTO
 	query := `
         SELECT pc.name AS category, SUM(i.quantity) AS quantity
-        FROM order_items i
-        JOIN product_categories pc ON pc.id = i.category_id
+        FROM ` + schemaName + `.order_items i
+        JOIN ` + schemaName + `.product_categories pc ON pc.id = i.category_id
         WHERE i.created_at BETWEEN ? AND ?
         GROUP BY pc.name
         ORDER BY category`
-	if err := s.db.NewRaw(query, start.Format("2005-01-02"), end.Format("2005-01-02")).Scan(ctx, &resp); err != nil {
+	if err := s.db.NewRaw(query, start, end).
+		Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -277,14 +287,15 @@ type ClientsRegisteredDTO struct {
 
 // ClientsRegisteredByDay returns the number of clients registered per day.
 func (s *ReportService) ClientsRegisteredByDay(ctx context.Context, start, end time.Time) ([]ClientsRegisteredDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []ClientsRegisteredDTO
 	query := `
         SELECT TO_CHAR(created_at, 'DD/MM') AS day, COUNT(*) AS count
-        FROM clients
+        FROM ` + schemaName + `.clients
         WHERE created_at BETWEEN ? AND ?
         GROUP BY day
         ORDER BY day`
@@ -302,7 +313,8 @@ type NewVsRecurringDTO struct {
 
 // NewVsRecurringClients returns counts of new vs recurring clients for deliveries in period.
 func (s *ReportService) NewVsRecurringClients(ctx context.Context, start, end time.Time) ([]NewVsRecurringDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -311,8 +323,8 @@ func (s *ReportService) NewVsRecurringClients(ctx context.Context, start, end ti
         SELECT
             CASE WHEN c.created_at >= ? THEN 'new' ELSE 'recurring' END AS type,
             COUNT(DISTINCT d.client_id) AS count
-        FROM order_deliveries d
-        JOIN clients c ON c.id = d.client_id
+        FROM ` + schemaName + `.order_deliveries d
+        JOIN ` + schemaName + `.clients c ON c.id = d.client_id
         WHERE d.delivered_at BETWEEN ? AND ?
         GROUP BY type`
 	if err := s.db.NewRaw(query, start, start, end).Scan(ctx, &resp); err != nil {
@@ -331,14 +343,15 @@ type OrdersByStatusDTO struct {
 
 // OrdersByStatus returns the number of orders per status.
 func (s *ReportService) OrdersByStatus(ctx context.Context) ([]OrdersByStatusDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []OrdersByStatusDTO
 	query := `
         SELECT status, COUNT(*) AS count
-        FROM orders
+        FROM ` + schemaName + `.orders
         GROUP BY status`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
 		return nil, err
@@ -354,7 +367,8 @@ type AvgProcessStepDTO struct {
 
 // AvgProcessStepDurationByRule returns average time per process rule.
 func (s *ReportService) AvgProcessStepDurationByRule(ctx context.Context) ([]AvgProcessStepDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -362,8 +376,8 @@ func (s *ReportService) AvgProcessStepDurationByRule(ctx context.Context) ([]Avg
 	query := `
         SELECT pr.name AS process_rule_name,
 			AVG(EXTRACT(EPOCH FROM (op.finished_at - op.started_at))) AS avg_seconds
-		FROM order_processes op
-		JOIN process_rules pr ON pr.id = op.process_rule_id
+		FROM ` + schemaName + `.order_processes op
+		JOIN ` + schemaName + `.process_rules pr ON pr.id = op.process_rule_id
 		WHERE op.finished_at IS NOT NULL
 		AND op.started_at IS NOT NULL
 		GROUP BY pr.name`
@@ -379,19 +393,20 @@ type CancellationRateDTO struct {
 }
 
 // CancellationRate returns percentage of orders canceled.
-func (s *ReportService) CancellationRate(ctx context.Context) (CancellationRateDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
-		return CancellationRateDTO{}, err
+func (s *ReportService) CancellationRate(ctx context.Context) (*CancellationRateDTO, error) {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
+		return nil, nil
 	}
 
 	var resp CancellationRateDTO
 	query := `
         SELECT SUM(CASE WHEN status = 'canceled' THEN 1 ELSE 0 END)::float / COUNT(*) AS rate
-        FROM orders`
+        FROM ` + schemaName + `.orders`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
-		return CancellationRateDTO{}, err
+		return nil, err
 	}
-	return resp, nil
+	return &resp, nil
 }
 
 // TODO: implement CancellationReasons (requires cancel_reason field)
@@ -402,20 +417,21 @@ type CurrentQueueLengthDTO struct {
 }
 
 // CurrentQueueLength returns the number of active queued items (left_at IS NULL).
-func (s *ReportService) CurrentQueueLength(ctx context.Context) (CurrentQueueLengthDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
-		return CurrentQueueLengthDTO{}, err
+func (s *ReportService) CurrentQueueLength(ctx context.Context) (*CurrentQueueLengthDTO, error) {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	var resp CurrentQueueLengthDTO
 	query := `
         SELECT COUNT(*) AS length
-        FROM order_queues
+        FROM ` + schemaName + `.order_queues
         WHERE left_at IS NULL`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
-		return CurrentQueueLengthDTO{}, err
+		return nil, err
 	}
-	return resp, nil
+	return &resp, nil
 }
 
 // AvgQueueDurationDTO holds average queue duration in seconds.
@@ -424,19 +440,21 @@ type AvgQueueDurationDTO struct {
 }
 
 // AvgQueueDuration returns the average duration (in seconds) of all process queues.
-func (s *ReportService) AvgQueueDuration(ctx context.Context) (AvgQueueDurationDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
-		return AvgQueueDurationDTO{}, err
+func (s *ReportService) AvgQueueDuration(ctx context.Context) (*AvgQueueDurationDTO, error) {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
+		return nil, err
 	}
+
 	var resp AvgQueueDurationDTO
 	// duration is stored as bigint nanoseconds; convert to seconds
 	query := `
 		SELECT AVG(duration) / 1000000000.0 AS avg_seconds
-		FROM order_queues`
+		FROM ` + schemaName + `.order_queues`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
-		return AvgQueueDurationDTO{}, err
+		return nil, err
 	}
-	return resp, nil
+	return &resp, nil
 }
 
 // AvgProcessByProductDTO holds average process duration per product.
@@ -448,18 +466,19 @@ type AvgProcessByProductDTO struct {
 
 // AvgProcessDurationByProduct returns average duration (seconds) of processes by product.
 func (s *ReportService) AvgProcessDurationByProduct(ctx context.Context) ([]AvgProcessByProductDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 	var resp []AvgProcessByProductDTO
 	// p.duration is bigint nanoseconds; average and convert to seconds
 	query := `
-       SELECT prod.id::text AS product_id,
-              prod.name AS product_name,
-              AVG(p.duration) / 1000000000.0 AS avg_seconds
-         FROM process_to_product_to_group_item t
-         JOIN order_processes p ON p.id = t.process_id
-         JOIN products prod ON prod.id = t.product_id
+		SELECT prod.id::text AS product_id,
+			prod.name AS product_name,
+			AVG(p.duration) / 1000000000.0 AS avg_seconds
+		FROM ` + schemaName + `.process_to_product_to_group_item t
+		JOIN ` + schemaName + `.order_processes p ON p.id = t.process_id
+		JOIN ` + schemaName + `.products prod ON prod.id = t.product_id
         GROUP BY prod.id, prod.name
         ORDER BY prod.name`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
@@ -476,16 +495,17 @@ type TotalQueueTimeByGroupItemDTO struct {
 
 // TotalQueueTimeByGroupItem returns total sum of queue durations per group item.
 func (s *ReportService) TotalQueueTimeByGroupItem(ctx context.Context) ([]TotalQueueTimeByGroupItemDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 	var resp []TotalQueueTimeByGroupItemDTO
 	// duration is bigint nanoseconds; sum and convert to seconds
 	query := `
-       SELECT pr.name::text AS name,
-              SUM(duration) / 1000000000.0 AS total_seconds
-         FROM order_queues oq
-		 JOIN process_rules pr ON pr.id = oq.process_rule_id
+		SELECT pr.name::text AS name,
+			SUM(duration) / 1000000000.0 AS total_seconds
+		FROM ` + schemaName + `.order_queues oq
+		JOIN ` + schemaName + `.process_rules pr ON pr.id = oq.process_rule_id
         GROUP BY pr.name`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
 		return nil, err
@@ -501,7 +521,8 @@ type AvgDeliveryTimeDTO struct {
 
 // AvgDeliveryTimeByDriver returns average time from shipped to delivered per driver.
 func (s *ReportService) AvgDeliveryTimeByDriver(ctx context.Context) ([]AvgDeliveryTimeDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -509,7 +530,7 @@ func (s *ReportService) AvgDeliveryTimeByDriver(ctx context.Context) ([]AvgDeliv
 	query := `
         SELECT driver_id::text AS driver_id,
             AVG(EXTRACT(EPOCH FROM (delivered_at - shipped_at))) AS avg_seconds
-        FROM order_deliveries
+        FROM ` + schemaName + `.order_deliveries
         WHERE delivered_at IS NOT NULL AND shipped_at IS NOT NULL
         GROUP BY driver_id`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
@@ -526,14 +547,15 @@ type DeliveriesCountByDriverDTO struct {
 
 // DeliveriesPerDriver returns number of deliveries made by each driver.
 func (s *ReportService) DeliveriesPerDriver(ctx context.Context) ([]DeliveriesCountByDriverDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []DeliveriesCountByDriverDTO
 	query := `
         SELECT driver_id::text AS driver_id, COUNT(*) AS count
-        FROM order_deliveries
+        FROM ` + schemaName + `.order_deliveries
         GROUP BY driver_id`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
 		return nil, err
@@ -549,15 +571,16 @@ type TopTablesDTO struct {
 
 // TopTables returns the top 10 most used tables (by order count) in a period.
 func (s *ReportService) TopTables(ctx context.Context, start, end time.Time) ([]TopTablesDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 	var resp []TopTablesDTO
 	query := `
-       SELECT ot.table_id::text AS table_id,
-              COUNT(*) AS count
-         FROM order_tables ot
-         JOIN orders o ON o.id = ot.order_id
+		SELECT ot.table_id::text AS table_id,
+			COUNT(*) AS count
+		FROM ` + schemaName + `.order_tables ot
+		JOIN ` + schemaName + `.orders o ON o.id = ot.order_id
         WHERE o.created_at BETWEEN ? AND ?
         GROUP BY ot.table_id
         ORDER BY count DESC
@@ -576,14 +599,15 @@ type OrdersPerTableDTO struct {
 
 // OrdersPerTable returns number of orders per table.
 func (s *ReportService) OrdersPerTable(ctx context.Context) ([]OrdersPerTableDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []OrdersPerTableDTO
 	query := `
         SELECT table_id::text AS table_id, COUNT(*) AS count
-        FROM order_tables
+        FROM ` + schemaName + `.order_tables
         GROUP BY table_id`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
 		return nil, err
@@ -599,14 +623,15 @@ type SalesByShiftDTO struct {
 
 // SalesByShift returns total sales per shift.
 func (s *ReportService) SalesByShift(ctx context.Context, start, end time.Time) ([]SalesByShiftDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []SalesByShiftDTO
 	query := `
         SELECT shift_id::text AS shift_id, SUM(total_payable) AS total
-        FROM orders
+        FROM ` + schemaName + `.orders
         WHERE created_at BETWEEN ? AND ?
         GROUP BY shift_id`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
@@ -623,14 +648,15 @@ type PaymentsByMethodDTO struct {
 
 // PaymentsByMethod returns sum of order payments per method.
 func (s *ReportService) PaymentsByMethod(ctx context.Context, start, end time.Time) ([]PaymentsByMethodDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []PaymentsByMethodDTO
 	query := `
         SELECT method, SUM(total_paid) AS total
-        FROM order_payments
+        FROM ` + schemaName + `.order_payments
         WHERE paid_at BETWEEN ? AND ?
         GROUP BY method`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
@@ -647,14 +673,15 @@ type EmployeePaymentsDTO struct {
 
 // EmployeePaymentsReport returns sum of employee payments by employee.
 func (s *ReportService) EmployeePaymentsReport(ctx context.Context, start, end time.Time) ([]EmployeePaymentsDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []EmployeePaymentsDTO
 	query := `
         SELECT employee_id::text AS employee_id, SUM(amount) AS total
-        FROM employee_payments
+        FROM ` + schemaName + `.employee_payments
         WHERE payment_date BETWEEN ? AND ?
         GROUP BY employee_id`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
@@ -671,17 +698,18 @@ type SalesByPlaceDTO struct {
 
 // SalesByPlace returns total sales per place within the period.
 func (s *ReportService) SalesByPlace(ctx context.Context, start, end time.Time) ([]SalesByPlaceDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []SalesByPlaceDTO
 	query := `
         SELECT pl.name AS place, SUM(o.total_payable) AS total
-        FROM orders o
-        JOIN order_tables ot ON ot.order_id = o.id
-        JOIN place_to_tables pt ON pt.table_id = ot.table_id
-        JOIN places pl ON pl.id = pt.place_id
+        FROM ` + schemaName + `.orders o
+        JOIN ` + schemaName + `.order_tables ot ON ot.order_id = o.id
+        JOIN ` + schemaName + `.place_to_tables pt ON pt.table_id = ot.table_id
+        JOIN ` + schemaName + `.places pl ON pl.id = pt.place_id
         WHERE o.created_at BETWEEN ? AND ?
         GROUP BY pl.name`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
@@ -698,16 +726,17 @@ type SalesBySizeDTO struct {
 
 // SalesBySize returns total quantity sold grouped by product size.
 func (s *ReportService) SalesBySize(ctx context.Context, start, end time.Time) ([]SalesBySizeDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []SalesBySizeDTO
 	query := `
         SELECT i.size AS size, SUM(i.quantity) AS quantity
-        FROM order_items i
-        JOIN order_group_items g ON g.id = i.group_item_id
-        JOIN orders o ON o.id = g.order_id
+        FROM ` + schemaName + `.order_items i
+        JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
+        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
         WHERE o.created_at BETWEEN ? AND ?
         GROUP BY i.size`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
@@ -724,16 +753,17 @@ type AdditionalItemsDTO struct {
 
 // AdditionalItemsSold returns total quantity of additional items sold.
 func (s *ReportService) AdditionalItemsSold(ctx context.Context, start, end time.Time) ([]AdditionalItemsDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []AdditionalItemsDTO
 	query := `
         SELECT i.name AS name, SUM(i.quantity) AS quantity
-        FROM order_items i
-        JOIN order_group_items g ON g.id = i.group_item_id
-        JOIN orders o ON o.id = g.order_id
+        FROM ` + schemaName + `.order_items i
+        JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
+        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
         WHERE o.created_at BETWEEN ? AND ? AND i.is_additional = TRUE
         GROUP BY i.name`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
@@ -748,21 +778,22 @@ type AvgPickupTimeDTO struct {
 }
 
 // AvgPickupTime returns average time between pending and ready for pickups.
-func (s *ReportService) AvgPickupTime(ctx context.Context, start, end time.Time) (AvgPickupTimeDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
-		return AvgPickupTimeDTO{}, err
+func (s *ReportService) AvgPickupTime(ctx context.Context, start, end time.Time) (*AvgPickupTimeDTO, error) {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	var resp AvgPickupTimeDTO
 	query := `
         SELECT AVG(EXTRACT(EPOCH FROM (ready_at - pending_at))) AS avg_seconds
-        FROM order_pickups p
-        JOIN orders o ON o.id = p.order_id
+        FROM ` + schemaName + `.order_pickups p
+        JOIN ` + schemaName + `.orders o ON o.id = p.order_id
         WHERE p.ready_at IS NOT NULL AND p.pending_at IS NOT NULL AND o.created_at BETWEEN ? AND ?`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
-		return AvgPickupTimeDTO{}, err
+		return nil, err
 	}
-	return resp, nil
+	return &resp, nil
 }
 
 // GroupItemsStatusDTO holds count of group items by status.
@@ -773,15 +804,16 @@ type GroupItemsStatusDTO struct {
 
 // GroupItemsByStatus returns count of group items per status.
 func (s *ReportService) GroupItemsByStatus(ctx context.Context, start, end time.Time) ([]GroupItemsStatusDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []GroupItemsStatusDTO
 	query := `
         SELECT g.status AS status, COUNT(*) AS count
-        FROM order_group_items g
-        JOIN orders o ON o.id = g.order_id
+        FROM ` + schemaName + `.order_group_items g
+        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
         WHERE o.created_at BETWEEN ? AND ?
         GROUP BY g.status`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
@@ -798,16 +830,17 @@ type DeliveriesByCepDTO struct {
 
 // DeliveriesByCep returns number of deliveries per ZIP code.
 func (s *ReportService) DeliveriesByCep(ctx context.Context, start, end time.Time) ([]DeliveriesByCepDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []DeliveriesByCepDTO
 	query := `
         SELECT a.cep AS cep, COUNT(*) AS count
-        FROM order_deliveries d
-        JOIN addresses a ON a.id = d.address_id
-        JOIN orders o ON o.id = d.order_id
+        FROM ` + schemaName + `.order_deliveries d
+        JOIN ` + schemaName + `.addresses a ON a.id = d.address_id
+        JOIN ` + schemaName + `.orders o ON o.id = d.order_id
         WHERE d.delivered_at BETWEEN ? AND ?
         GROUP BY a.cep`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
@@ -824,19 +857,20 @@ type ProcessedByRuleDTO struct {
 
 // ProcessedCountByRule returns number of processed items per rule.
 func (s *ReportService) ProcessedCountByRule(ctx context.Context, start, end time.Time) ([]ProcessedByRuleDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	var resp []ProcessedByRuleDTO
 	query := `
         SELECT pr.name AS process_rule_name, COUNT(*) AS count
-        FROM order_processes opr
-        JOIN order_group_items g ON g.id = opr.group_item_id
-        JOIN orders o ON o.id = g.order_id
-		JOIN process_rules pr ON pr.id = opr.process_rule_id
+        FROM ` + schemaName + `.order_processes opr
+        JOIN ` + schemaName + `.order_group_items g ON g.id = opr.group_item_id
+        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
+		JOIN ` + schemaName + `.process_rules pr ON pr.id = opr.process_rule_id
         WHERE opr.finished_at IS NOT NULL AND opr.started_at IS NOT NULL
-        	AND o.created_at BETWEEN ? AND ?
+			AND o.created_at BETWEEN ? AND ?
         GROUP BY pr.name`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
@@ -851,9 +885,10 @@ type DailySalesDTO struct {
 }
 
 // DailySales returns summary metrics for the given day.
-func (s *ReportService) DailySales(ctx context.Context, day time.Time) (DailySalesDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
-		return DailySalesDTO{}, err
+func (s *ReportService) DailySales(ctx context.Context, day time.Time) (*DailySalesDTO, error) {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	start := time.Date(day.Year(), day.Month(), day.Day(), 0, 0, 0, 0, day.Location())
@@ -861,12 +896,12 @@ func (s *ReportService) DailySales(ctx context.Context, day time.Time) (DailySal
 	var resp DailySalesDTO
 	query := `
         SELECT COUNT(*) AS total_orders, SUM(total_payable) AS total_sales
-        FROM orders
+        FROM ` + schemaName + `.orders
         WHERE created_at >= ? AND created_at < ?`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
-		return DailySalesDTO{}, err
+		return nil, err
 	}
-	return resp, nil
+	return &resp, nil
 }
 
 // ProductProfitabilityDTO holds profitability metrics per product.
@@ -882,7 +917,8 @@ type ProductProfitabilityDTO struct {
 
 // ProductProfitability returns profitability analysis per product.
 func (s *ReportService) ProductProfitability(ctx context.Context, start, end time.Time) ([]ProductProfitabilityDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -900,10 +936,10 @@ func (s *ReportService) ProductProfitability(ctx context.Context, start, end tim
                 THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * p.cost), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
                 ELSE 0 
             END AS profit_margin
-        FROM order_items i
-        JOIN order_group_items g ON g.id = i.group_item_id
-        JOIN orders o ON o.id = g.order_id
-        JOIN products p ON p.id = i.product_id
+        FROM ` + schemaName + `.order_items i
+        JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
+        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
+        JOIN ` + schemaName + `.products p ON p.id = i.product_id
         WHERE o.created_at BETWEEN ? AND ?
         GROUP BY p.id, p.name
         ORDER BY profit DESC`
@@ -925,7 +961,8 @@ type CategoryProfitabilityDTO struct {
 
 // CategoryProfitability returns profitability analysis per product category.
 func (s *ReportService) CategoryProfitability(ctx context.Context, start, end time.Time) ([]CategoryProfitabilityDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
@@ -942,11 +979,11 @@ func (s *ReportService) CategoryProfitability(ctx context.Context, start, end ti
                 THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * p.cost), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
                 ELSE 0 
             END AS profit_margin
-        FROM order_items i
-        JOIN order_group_items g ON g.id = i.group_item_id
-        JOIN orders o ON o.id = g.order_id
-        JOIN products p ON p.id = i.product_id
-        JOIN product_categories pc ON pc.id = p.category_id
+        FROM ` + schemaName + `.order_items i
+        JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
+        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
+        JOIN ` + schemaName + `.products p ON p.id = i.product_id
+        JOIN ` + schemaName + `.product_categories pc ON pc.id = p.category_id
         WHERE o.created_at BETWEEN ? AND ?
         GROUP BY pc.name
         ORDER BY profit DESC`
@@ -967,27 +1004,28 @@ type LowProfitProductsDTO struct {
 
 // LowProfitProducts returns products with profit margin below threshold.
 func (s *ReportService) LowProfitProducts(ctx context.Context, minMargin float64) ([]LowProfitProductsDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	// Debug: Primeiro vamos verificar se há produtos cadastrados
 	var debugCount int
-	debugQuery := `SELECT COUNT(*) FROM products WHERE is_available = true`
+	debugQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true`
 	if err := s.db.NewRaw(debugQuery).Scan(ctx, &debugCount); err != nil {
 		return nil, err
 	}
 
 	// Debug: Verificar produtos com custo
 	var productsWithCost int
-	costQuery := `SELECT COUNT(*) FROM products WHERE is_available = true AND cost > 0`
+	costQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true AND cost > 0`
 	if err := s.db.NewRaw(costQuery).Scan(ctx, &productsWithCost); err != nil {
 		return nil, err
 	}
 
 	// Debug: Verificar produtos sem custo
 	var productsWithoutCost int
-	noCostQuery := `SELECT COUNT(*) FROM products WHERE is_available = true AND (cost = 0 OR cost IS NULL)`
+	noCostQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true AND (cost = 0 OR cost IS NULL)`
 	if err := s.db.NewRaw(noCostQuery).Scan(ctx, &productsWithoutCost); err != nil {
 		return nil, err
 	}
@@ -1011,7 +1049,7 @@ func (s *ReportService) LowProfitProducts(ctx context.Context, minMargin float64
                 THEN 100
                 ELSE 0 
             END AS profit_margin
-        FROM products p
+        FROM ` + schemaName + `.products p
         WHERE p.price > 0 
         AND p.is_available = true
         AND (
@@ -1032,41 +1070,42 @@ func (s *ReportService) LowProfitProducts(ctx context.Context, minMargin float64
 
 // DebugProducts returns debug information about products
 func (s *ReportService) DebugProducts(ctx context.Context) (map[string]interface{}, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
 		return nil, err
 	}
 
 	// Total produtos
 	var totalProducts int
-	totalQuery := `SELECT COUNT(*) FROM products`
+	totalQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products`
 	if err := s.db.NewRaw(totalQuery).Scan(ctx, &totalProducts); err != nil {
 		return nil, err
 	}
 
 	// Produtos disponíveis
 	var availableProducts int
-	availableQuery := `SELECT COUNT(*) FROM products WHERE is_available = true`
+	availableQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true`
 	if err := s.db.NewRaw(availableQuery).Scan(ctx, &availableProducts); err != nil {
 		return nil, err
 	}
 
 	// Produtos com custo
 	var productsWithCost int
-	costQuery := `SELECT COUNT(*) FROM products WHERE is_available = true AND cost > 0`
+	costQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true AND cost > 0`
 	if err := s.db.NewRaw(costQuery).Scan(ctx, &productsWithCost); err != nil {
 		return nil, err
 	}
 
 	// Produtos sem custo
 	var productsWithoutCost int
-	noCostQuery := `SELECT COUNT(*) FROM products WHERE is_available = true AND (cost = 0 OR cost IS NULL)`
+	noCostQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true AND (cost = 0 OR cost IS NULL)`
 	if err := s.db.NewRaw(noCostQuery).Scan(ctx, &productsWithoutCost); err != nil {
 		return nil, err
 	}
 
 	// Produtos com preço
 	var productsWithPrice int
-	priceQuery := `SELECT COUNT(*) FROM products WHERE is_available = true AND price > 0`
+	priceQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true AND price > 0`
 	if err := s.db.NewRaw(priceQuery).Scan(ctx, &productsWithPrice); err != nil {
 		return nil, err
 	}
@@ -1087,7 +1126,7 @@ func (s *ReportService) DebugProducts(ctx context.Context) (map[string]interface
 				THEN 100
 				ELSE 0 
 			END AS profit_margin
-		FROM products 
+		FROM ` + schemaName + `.products 
 		WHERE is_available = true 
 		ORDER BY name`
 
@@ -1114,9 +1153,10 @@ type OverallProfitabilityDTO struct {
 }
 
 // OverallProfitability returns overall profitability metrics for the period.
-func (s *ReportService) OverallProfitability(ctx context.Context, start, end time.Time) (OverallProfitabilityDTO, error) {
-	if err := database.ChangeSchema(ctx, s.db); err != nil {
-		return OverallProfitabilityDTO{}, err
+func (s *ReportService) OverallProfitability(ctx context.Context, start, end time.Time) (*OverallProfitabilityDTO, error) {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	var resp OverallProfitabilityDTO
@@ -1130,13 +1170,13 @@ func (s *ReportService) OverallProfitability(ctx context.Context, start, end tim
                 THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * p.cost), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
                 ELSE 0 
             END AS profit_margin
-        FROM order_items i
-        JOIN order_group_items g ON g.id = i.group_item_id
-        JOIN orders o ON o.id = g.order_id
-        JOIN products p ON p.id = i.product_id
+        FROM ` + schemaName + `.order_items i
+        JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
+        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
+        JOIN ` + schemaName + `.products p ON p.id = i.product_id
         WHERE o.created_at BETWEEN ? AND ?`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
-		return OverallProfitabilityDTO{}, err
+		return nil, err
 	}
-	return resp, nil
+	return &resp, nil
 }
