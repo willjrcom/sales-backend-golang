@@ -22,14 +22,18 @@ func (r *ShiftRepositoryBun) CreateShift(ctx context.Context, c *model.Shift) er
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(c).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -37,14 +41,18 @@ func (r *ShiftRepositoryBun) UpdateShift(ctx context.Context, c *model.Shift) er
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -52,14 +60,18 @@ func (r *ShiftRepositoryBun) DeleteShift(ctx context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(&model.Shift{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(&model.Shift{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -69,14 +81,18 @@ func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*mode
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(shift).Where("shift.id = ?", id).Relation("Attendant").Relation("Orders").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(shift).Where("shift.id = ?", id).Relation("Attendant").Relation("Orders").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return shift, nil
 }
 
@@ -86,14 +102,18 @@ func (r *ShiftRepositoryBun) GetCurrentShift(ctx context.Context) (*model.Shift,
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(shift).Where("shift.closed_at is NULL AND shift.end_change is NULL").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(shift).Where("shift.closed_at is NULL AND shift.end_change is NULL").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return shift, nil
 }
 
@@ -103,14 +123,18 @@ func (r *ShiftRepositoryBun) GetFullCurrentShift(ctx context.Context) (*model.Sh
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(shift).Where("shift.closed_at is NULL AND shift.end_change is NULL").Relation("Attendant").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(shift).Where("shift.closed_at is NULL AND shift.end_change is NULL").Relation("Attendant").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return shift, nil
 }
 
@@ -120,11 +144,12 @@ func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context, page int, perPage
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&Shifts).
+	if err := tx.NewSelect().Model(&Shifts).
 		Relation("Orders").
 		Limit(perPage).
 		Offset(page * perPage).
@@ -132,17 +157,18 @@ func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context, page int, perPage
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return Shifts, nil
 }
 
-func (s *ShiftRepositoryBun) IncrementCurrentOrder(id string) (int, error) {
-	ctx := context.Background()
-
-	// Inicia a transação
-	tx, err := s.db.BeginTx(ctx, nil)
+func (s *ShiftRepositoryBun) IncrementCurrentOrder(ctx context.Context, id string) (int, error) {
+	tx, err := database.GetTenantTransaction(ctx, s.db)
 	if err != nil {
 		return 0, err
 	}
+
 	defer tx.Rollback()
 
 	// Busca o turno com "FOR UPDATE" para bloquear a linha

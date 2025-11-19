@@ -22,11 +22,7 @@ func (r *StockRepositoryBun) CreateStock(ctx context.Context, s *model.Stock) er
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.Begin()
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -47,16 +43,12 @@ func (r *StockRepositoryBun) UpdateStock(ctx context.Context, s *model.Stock) er
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.Begin()
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -74,14 +66,18 @@ func (r *StockRepositoryBun) GetStockByID(ctx context.Context, id string) (*mode
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(stock).Where("stock.id = ?", id).Relation("Product").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(stock).Where("stock.id = ?", id).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return stock, nil
 }
 
@@ -91,14 +87,18 @@ func (r *StockRepositoryBun) GetStockByProductID(ctx context.Context, productID 
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(stock).Where("stock.product_id = ?", productID).Relation("Product").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(stock).Where("stock.product_id = ?", productID).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return stock, nil
 }
 
@@ -108,14 +108,18 @@ func (r *StockRepositoryBun) GetAllStocks(ctx context.Context) ([]model.Stock, e
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&stocks).Relation("Product").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&stocks).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return stocks, nil
 }
 
@@ -125,14 +129,18 @@ func (r *StockRepositoryBun) GetActiveStocks(ctx context.Context) ([]model.Stock
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&stocks).Where("stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&stocks).Where("stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return stocks, nil
 }
 
@@ -142,14 +150,18 @@ func (r *StockRepositoryBun) GetLowStockProducts(ctx context.Context) ([]model.S
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&stocks).Where("stock.current_stock <= stock.min_stock AND stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&stocks).Where("stock.current_stock <= stock.min_stock AND stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return stocks, nil
 }
 
@@ -159,13 +171,17 @@ func (r *StockRepositoryBun) GetOutOfStockProducts(ctx context.Context) ([]model
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&stocks).Where("stock.current_stock <= 0 AND stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&stocks).Where("stock.current_stock <= 0 AND stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return stocks, nil
 }

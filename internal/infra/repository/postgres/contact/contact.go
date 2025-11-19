@@ -22,16 +22,19 @@ func (r *ContactRepositoryBun) CreateContact(ctx context.Context, c *model.Conta
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	_, err := r.db.NewInsert().Model(c).Exec(ctx)
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	_, err = tx.NewInsert().Model(c).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -39,16 +42,19 @@ func (r *ContactRepositoryBun) UpdateContact(ctx context.Context, c *model.Conta
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	_, err := r.db.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx)
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	_, err = tx.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -56,16 +62,19 @@ func (r *ContactRepositoryBun) DeleteContact(ctx context.Context, id string) err
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	_, err := r.db.NewDelete().Model(&model.Contact{}).Where("id = ?", id).Exec(ctx)
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	_, err = tx.NewDelete().Model(&model.Contact{}).Where("id = ?", id).Exec(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -75,16 +84,19 @@ func (r *ContactRepositoryBun) GetContactById(ctx context.Context, id string) (*
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return nil, err
-	}
-
-	err := r.db.NewSelect().Model(contact).Where("contact.id = ?", id).Scan(ctx)
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
 
+	err = tx.NewSelect().Model(contact).Where("contact.id = ?", id).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return contact, nil
 }
 
@@ -94,14 +106,18 @@ func (r *ContactRepositoryBun) GetContactByDddAndNumber(ctx context.Context, ddd
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(contact).Where("ddd = ? AND number = ? AND type = ?", ddd, number, contactType).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(contact).Where("ddd = ? AND number = ? AND type = ?", ddd, number, contactType).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return contact, nil
 }
 
@@ -111,10 +127,18 @@ func (r *ContactRepositoryBun) FtSearchContacts(ctx context.Context, text string
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	err = r.db.NewSelect().Model(&contacts).Where("ts @@ websearch_to_tsquery('simple', ?) and type = ?", text, contactType).Scan(ctx)
+	if err = tx.NewSelect().Model(&contacts).Where("ts @@ websearch_to_tsquery('simple', ?) and type = ?", text, contactType).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
 	return
 }

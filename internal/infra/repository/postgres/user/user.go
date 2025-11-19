@@ -24,12 +24,7 @@ func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *model.User) er
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.Begin()
-
+	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -76,12 +71,13 @@ func (r *UserRepositoryBun) GetUser(ctx context.Context, email string) (*model.U
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
 	user := &model.User{}
-	if err := r.db.NewSelect().
+	if err := tx.NewSelect().
 		Model(user).
 		Where("u.email = ?", email).
 		Relation("Companies").Relation("Contact").Relation("Address").
@@ -98,11 +94,12 @@ func (r *UserRepositoryBun) UpdateUserPassword(ctx context.Context, user *model.
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(user).WherePK().Column("hash").Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(user).WherePK().Column("hash").Exec(ctx); err != nil {
 		return err
 	}
 
@@ -113,12 +110,7 @@ func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *model.User) er
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.Begin()
-
+	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -163,12 +155,7 @@ func (r *UserRepositoryBun) LoginAndDeleteUser(ctx context.Context, user *model.
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.Begin()
-
+	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -211,11 +198,12 @@ func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *model.User) (*m
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().
+	if err := tx.NewSelect().
 		Model(user).
 		Where("u.email = ?", user.Email).
 		Where("crypt(?, u.hash) = u.hash", user.Password).
@@ -233,12 +221,13 @@ func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (*uu
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
 	user := &model.User{}
-	if err := r.db.NewSelect().Model(user).Where("u.email = ?", email).Column("id").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(user).Where("u.email = ?", email).Column("id").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -249,12 +238,13 @@ func (r *UserRepositoryBun) GetIDByEmailOrCPF(ctx context.Context, email string,
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
 	user := &model.User{}
-	if err := r.db.NewSelect().Model(user).Where("u.email = ? or u.cpf = ?", email, cpf).Column("id").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(user).Where("u.email = ? or u.cpf = ?", email, cpf).Column("id").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -265,12 +255,13 @@ func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID) (*mod
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
 	user := &model.User{}
-	if err := r.db.NewSelect().Model(user).Where("u.id = ?", id).Relation("Companies").Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(user).Where("u.id = ?", id).Relation("Companies").Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -281,12 +272,13 @@ func (r *UserRepositoryBun) GetByCPF(ctx context.Context, cpf string) (*model.Us
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
 	user := &model.User{}
-	if err := r.db.NewSelect().Model(user).Where("u.cpf = ?", cpf).Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(user).Where("u.cpf = ?", cpf).Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -297,12 +289,13 @@ func (r *UserRepositoryBun) ExistsUserByID(ctx context.Context, id uuid.UUID) (b
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeToPublicSchema(ctx, r.db); err != nil {
+	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
 		return false, err
 	}
 
 	user := &model.User{}
-	if err := r.db.NewSelect().Model(user).Where("u.id = ?", id).Column("id").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(user).Where("u.id = ?", id).Column("id").Scan(ctx); err != nil {
 		return false, err
 	}
 

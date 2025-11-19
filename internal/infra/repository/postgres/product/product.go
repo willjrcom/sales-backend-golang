@@ -22,12 +22,7 @@ func (r *ProductRepositoryBun) CreateProduct(ctx context.Context, p *model.Produ
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.Begin()
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -48,17 +43,12 @@ func (r *ProductRepositoryBun) UpdateProduct(ctx context.Context, p *model.Produ
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.Begin()
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -74,14 +64,18 @@ func (r *ProductRepositoryBun) DeleteProduct(ctx context.Context, id string) err
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&model.Product{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.Product{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -91,14 +85,18 @@ func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(product).Where("product.id = ?", id).Relation("Category").Relation("Size").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(product).Where("product.id = ?", id).Relation("Category").Relation("Size").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return product, nil
 }
 
@@ -108,14 +106,18 @@ func (r *ProductRepositoryBun) GetProductByCode(ctx context.Context, code string
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(product).Where("product.code = ?", code).Relation("Category").Relation("Size").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(product).Where("product.code = ?", code).Relation("Category").Relation("Size").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return product, nil
 }
 
@@ -125,13 +127,17 @@ func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context) ([]model.Prod
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&products).Relation("Category").Relation("Size").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&products).Relation("Category").Relation("Size").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return products, nil
 }

@@ -23,12 +23,7 @@ func (r *ClientRepositoryBun) CreateClient(ctx context.Context, c *model.Client)
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.Begin()
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -62,12 +57,7 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *model.Client)
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.Begin()
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -103,7 +93,6 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *model.Client)
 	}
 
 	if err := tx.Commit(); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -114,12 +103,7 @@ func (r *ClientRepositoryBun) DeleteClient(ctx context.Context, id string) error
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.Begin()
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -155,14 +139,18 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*mo
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(client).Where("client.id = ?", id).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(client).Where("client.id = ?", id).Relation("Address").Relation("Contact").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return client, nil
 }
 
@@ -172,23 +160,28 @@ func (r *ClientRepositoryBun) GetAllClients(ctx context.Context, page, perPage i
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, 0, err
 	}
 
 	// count total records
-	totalCount, err := r.db.NewSelect().Model((*model.Client)(nil)).Count(ctx)
+	totalCount, err := tx.NewSelect().Model((*model.Client)(nil)).Count(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 	// fetch paginated records
-		if err := r.db.NewSelect().
-			Model(&clients).
-			Relation("Address").
-			Relation("Contact").
-			Limit(perPage).
-			Offset(page * perPage).
-			Scan(ctx); err != nil {
+	if err := tx.NewSelect().
+		Model(&clients).
+		Relation("Address").
+		Relation("Contact").
+		Limit(perPage).
+		Offset(page * perPage).
+		Scan(ctx); err != nil {
+		return nil, 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
 		return nil, 0, err
 	}
 	return clients, int(totalCount), nil

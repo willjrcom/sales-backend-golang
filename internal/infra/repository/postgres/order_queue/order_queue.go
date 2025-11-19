@@ -22,14 +22,18 @@ func (r *QueueRepositoryBun) CreateQueue(ctx context.Context, s *model.OrderQueu
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(s).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(s).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -37,14 +41,18 @@ func (r *QueueRepositoryBun) UpdateQueue(ctx context.Context, s *model.OrderQueu
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -52,14 +60,18 @@ func (r *QueueRepositoryBun) DeleteQueue(ctx context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&model.OrderQueue{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.OrderQueue{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -69,14 +81,18 @@ func (r *QueueRepositoryBun) GetQueueById(ctx context.Context, id string) (*mode
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(queue).Where("id = ?", id).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(queue).Where("id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return queue, nil
 }
 
@@ -86,14 +102,18 @@ func (r *QueueRepositoryBun) GetOpenedQueueByGroupItemId(ctx context.Context, id
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(queue).Where("group_item_id = ? AND left_at IS NULL", id).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(queue).Where("group_item_id = ? AND left_at IS NULL", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return queue, nil
 }
 
@@ -103,14 +123,18 @@ func (r *QueueRepositoryBun) GetQueuesByGroupItemId(ctx context.Context, id stri
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&queues).Where("group_item_id = ?", id).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&queues).Where("group_item_id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return queues, nil
 }
 
@@ -120,13 +144,17 @@ func (r *QueueRepositoryBun) GetAllQueues(ctx context.Context) ([]model.OrderQue
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&queuees).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&queuees).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return queuees, nil
 }

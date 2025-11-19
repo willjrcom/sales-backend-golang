@@ -22,13 +22,18 @@ func (r *AddressRepositoryBun) CreateAddress(ctx context.Context, c *model.Addre
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-	if _, err := r.db.NewInsert().Model(c).Exec(ctx); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
+	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -36,14 +41,18 @@ func (r *AddressRepositoryBun) UpdateAddress(ctx context.Context, c *model.Addre
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -51,14 +60,18 @@ func (r *AddressRepositoryBun) DeleteAddress(ctx context.Context, id string) err
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&model.Address{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.Address{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -68,14 +81,18 @@ func (r *AddressRepositoryBun) GetAddressById(ctx context.Context, id string) (*
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(aAddress).Where("address.id = ?", id).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(aAddress).Where("address.id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return aAddress, nil
 }
 
@@ -85,13 +102,17 @@ func (r *AddressRepositoryBun) GetAllAddress(ctx context.Context) ([]model.Addre
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&addresss).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&addresss).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return addresss, nil
 }

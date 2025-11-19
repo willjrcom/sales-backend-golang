@@ -2,7 +2,6 @@ package productcategoryrepositorybun
 
 import (
 	"context"
-	"database/sql"
 	"sync"
 
 	"github.com/google/uuid"
@@ -24,12 +23,7 @@ func (r *ProductCategoryRepositoryBun) CreateCategory(ctx context.Context, cp *m
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -39,12 +33,12 @@ func (r *ProductCategoryRepositoryBun) CreateCategory(ctx context.Context, cp *m
 		return err
 	}
 
-	if err := r.updateAdditionalCategories(ctx, &tx, cp.ID, cp.AdditionalCategories); err != nil {
+	if err := r.updateAdditionalCategories(ctx, tx, cp.ID, cp.AdditionalCategories); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if err := r.updateComplementCategories(ctx, &tx, cp.ID, cp.ComplementCategories); err != nil {
+	if err := r.updateComplementCategories(ctx, tx, cp.ID, cp.ComplementCategories); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -60,12 +54,7 @@ func (r *ProductCategoryRepositoryBun) UpdateCategory(ctx context.Context, c *mo
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -75,12 +64,12 @@ func (r *ProductCategoryRepositoryBun) UpdateCategory(ctx context.Context, c *mo
 		return err
 	}
 
-	if err := r.updateAdditionalCategories(ctx, &tx, c.ID, c.AdditionalCategories); err != nil {
+	if err := r.updateAdditionalCategories(ctx, tx, c.ID, c.AdditionalCategories); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if err := r.updateComplementCategories(ctx, &tx, c.ID, c.ComplementCategories); err != nil {
+	if err := r.updateComplementCategories(ctx, tx, c.ID, c.ComplementCategories); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -93,8 +82,8 @@ func (r *ProductCategoryRepositoryBun) UpdateCategory(ctx context.Context, c *mo
 }
 
 func (r *ProductCategoryRepositoryBun) updateAdditionalCategories(ctx context.Context, tx *bun.Tx, categoryID uuid.UUID, additionalCategories []model.ProductCategory) error {
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
@@ -115,12 +104,15 @@ func (r *ProductCategoryRepositoryBun) updateAdditionalCategories(ctx context.Co
 		}
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (r *ProductCategoryRepositoryBun) updateComplementCategories(ctx context.Context, tx *bun.Tx, categoryID uuid.UUID, complementCategories []model.ProductCategory) error {
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
@@ -141,6 +133,9 @@ func (r *ProductCategoryRepositoryBun) updateComplementCategories(ctx context.Co
 		}
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -148,12 +143,7 @@ func (r *ProductCategoryRepositoryBun) DeleteCategory(ctx context.Context, id st
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -207,14 +197,18 @@ func (r *ProductCategoryRepositoryBun) GetCategoryById(ctx context.Context, id s
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Relation("ComplementCategories").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Relation("ComplementCategories").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return category, nil
 }
 
@@ -224,11 +218,12 @@ func (r *ProductCategoryRepositoryBun) GetCategoryByName(ctx context.Context, na
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	query := r.db.NewSelect().Model(category).Where("name = ?", name)
+	query := tx.NewSelect().Model(category).Where("name = ?", name)
 
 	if withRelation {
 		query.Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Relation("ComplementCategories")
@@ -238,6 +233,9 @@ func (r *ProductCategoryRepositoryBun) GetCategoryByName(ctx context.Context, na
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return category, nil
 }
 
@@ -247,12 +245,13 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context) ([]
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
 	// load categories with their simple relations
-	if err := r.db.NewSelect().
+	if err := tx.NewSelect().
 		Model(&categories).
 		Relation("Sizes").
 		Relation("Quantities").
@@ -271,7 +270,7 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context) ([]
 	// load products with Size relation
 	var products []model.Product
 	if len(categoryIDs) > 0 {
-		if err := r.db.NewSelect().
+		if err := tx.NewSelect().
 			Model(&products).
 			Relation("Size").
 			Where("product.category_id IN (?)", bun.In(categoryIDs)).
@@ -292,6 +291,10 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context) ([]
 			categories[i].Products = nil
 		}
 	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return categories, nil
 }
 
@@ -301,12 +304,13 @@ func (r *ProductCategoryRepositoryBun) GetAllCategoriesWithProcessRulesAndOrderP
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
 	// Busca todas as categorias com suas ProcessRules
-	err := r.db.NewSelect().
+	err = tx.NewSelect().
 		Model(&categories).
 		Relation("ProcessRules").
 		Scan(ctx)
@@ -374,5 +378,8 @@ func (r *ProductCategoryRepositoryBun) GetAllCategoriesWithProcessRulesAndOrderP
 		}
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return categories, nil
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
@@ -18,19 +19,34 @@ func NewEmployeeSalaryHistoryRepositoryBun(db *bun.DB) *EmployeeSalaryHistoryRep
 }
 
 func (r *EmployeeSalaryHistoryRepositoryBun) Create(ctx context.Context, h *model.EmployeeSalaryHistory) error {
-	_, err := r.db.NewInsert().Model(h).Exec(ctx)
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.NewInsert().Model(h).Exec(ctx)
 	return err
 }
 
 func (r *EmployeeSalaryHistoryRepositoryBun) GetByEmployee(ctx context.Context, employeeID uuid.UUID) ([]model.EmployeeSalaryHistory, error) {
 	var history []model.EmployeeSalaryHistory
-	err := r.db.NewSelect().Model(&history).Where("employee_id = ?", employeeID).Order("start_date DESC").Scan(ctx)
+
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+	err = tx.NewSelect().Model(&history).Where("employee_id = ?", employeeID).Order("start_date DESC").Scan(ctx)
 	return history, err
 }
 
 func (r *EmployeeSalaryHistoryRepositoryBun) GetCurrentByEmployee(ctx context.Context, employeeID uuid.UUID) (*model.EmployeeSalaryHistory, error) {
 	var h model.EmployeeSalaryHistory
-	err := r.db.NewSelect().Model(&h).
+
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+	err = tx.NewSelect().Model(&h).
 		Where("employee_id = ?", employeeID).
 		Where("end_date IS NULL").
 		Order("start_date DESC").
@@ -43,7 +59,12 @@ func (r *EmployeeSalaryHistoryRepositoryBun) GetCurrentByEmployee(ctx context.Co
 }
 
 func (r *EmployeeSalaryHistoryRepositoryBun) EndCurrent(ctx context.Context, employeeID uuid.UUID, endDate time.Time) error {
-	_, err := r.db.NewUpdate().
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.NewUpdate().
 		Model((*model.EmployeeSalaryHistory)(nil)).
 		Set("end_date = ?", endDate).
 		Where("employee_id = ?", employeeID).

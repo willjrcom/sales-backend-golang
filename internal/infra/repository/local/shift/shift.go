@@ -78,7 +78,7 @@ func (r *ShiftRepositoryLocal) GetAllShifts(ctx context.Context, page int, perPa
 	return list, nil
 }
 
-func (r *ShiftRepositoryLocal) IncrementCurrentOrder(id string) (int, error) {
+func (r *ShiftRepositoryLocal) IncrementCurrentOrder(ctx context.Context, id string) (int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if s, ok := r.shifts[id]; ok {

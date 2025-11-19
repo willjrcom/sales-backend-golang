@@ -22,11 +22,7 @@ func (r *StockMovementRepositoryBun) CreateMovement(ctx context.Context, m *mode
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.Begin()
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -49,14 +45,18 @@ func (r *StockMovementRepositoryBun) GetMovementsByStockID(ctx context.Context, 
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&movements).Where("stock_movement.stock_id = ?", stockID).Order("created_at DESC").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&movements).Where("stock_movement.stock_id = ?", stockID).Order("created_at DESC").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return movements, nil
 }
 
@@ -66,14 +66,18 @@ func (r *StockMovementRepositoryBun) GetMovementsByProductID(ctx context.Context
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&movements).Where("stock_movement.product_id = ?", productID).Order("created_at DESC").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&movements).Where("stock_movement.product_id = ?", productID).Order("created_at DESC").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return movements, nil
 }
 
@@ -83,14 +87,18 @@ func (r *StockMovementRepositoryBun) GetMovementsByOrderID(ctx context.Context, 
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&movements).Where("stock_movement.order_id = ?", orderID).Order("created_at DESC").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&movements).Where("stock_movement.order_id = ?", orderID).Order("created_at DESC").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return movements, nil
 }
 
@@ -100,14 +108,18 @@ func (r *StockMovementRepositoryBun) GetAllMovements(ctx context.Context) ([]mod
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&movements).Order("created_at DESC").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&movements).Order("created_at DESC").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return movements, nil
 }
 
@@ -117,13 +129,17 @@ func (r *StockMovementRepositoryBun) GetMovementsByDateRange(ctx context.Context
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&movements).Where("stock_movement.created_at BETWEEN ? AND ?", start, end).Order("created_at DESC").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&movements).Where("stock_movement.created_at BETWEEN ? AND ?", start, end).Order("created_at DESC").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return movements, nil
 }

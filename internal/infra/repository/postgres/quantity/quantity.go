@@ -22,14 +22,18 @@ func (r *QuantityRepositoryBun) CreateQuantity(ctx context.Context, s *model.Qua
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(s).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(s).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -37,14 +41,18 @@ func (r *QuantityRepositoryBun) UpdateQuantity(ctx context.Context, s *model.Qua
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -52,14 +60,18 @@ func (r *QuantityRepositoryBun) DeleteQuantity(ctx context.Context, id string) e
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&model.Quantity{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.Quantity{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -69,13 +81,17 @@ func (r *QuantityRepositoryBun) GetQuantityById(ctx context.Context, id string) 
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(quantity).Where("id = ?", id).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(quantity).Where("id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return quantity, nil
 }

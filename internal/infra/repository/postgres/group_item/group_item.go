@@ -2,7 +2,6 @@ package groupitemrepositorybun
 
 import (
 	"context"
-	"database/sql"
 	"sync"
 
 	"github.com/uptrace/bun"
@@ -23,14 +22,18 @@ func (r *GroupItemRepositoryBun) CreateGroupItem(ctx context.Context, p *model.G
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(p).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(p).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -38,14 +41,18 @@ func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *model.G
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -53,12 +60,7 @@ func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string,
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -93,11 +95,12 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	query := r.db.NewSelect().Model(item).Where("group_item.id = ?", id).Relation("Category").Relation("ComplementItem")
+	query := tx.NewSelect().Model(item).Where("group_item.id = ?", id).Relation("Category").Relation("ComplementItem")
 
 	if withRelation {
 		query.
@@ -113,6 +116,9 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return item, nil
 }
 
@@ -122,11 +128,12 @@ func (r *GroupItemRepositoryBun) GetGroupItemsByStatus(ctx context.Context, stat
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&items).
+	if err := tx.NewSelect().Model(&items).
 		Where("group_item.status = ?", status).
 		Relation("Items", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Where("is_additional = ?", false)
@@ -138,6 +145,9 @@ func (r *GroupItemRepositoryBun) GetGroupItemsByStatus(ctx context.Context, stat
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return items, nil
 }
 
@@ -147,11 +157,12 @@ func (r *GroupItemRepositoryBun) GetGroupItemsByOrderIDAndStatus(ctx context.Con
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&items).
+	if err := tx.NewSelect().Model(&items).
 		Where("group_item.order_id = ? AND group_item.status = ?", id, status).
 		Relation("Items", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Where("is_additional = ?", false)
@@ -163,5 +174,8 @@ func (r *GroupItemRepositoryBun) GetGroupItemsByOrderIDAndStatus(ctx context.Con
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return items, nil
 }

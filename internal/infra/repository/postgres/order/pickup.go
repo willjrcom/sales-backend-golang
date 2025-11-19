@@ -22,14 +22,18 @@ func (r *OrderPickupRepositoryBun) CreateOrderPickup(ctx context.Context, orderP
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(orderPickup).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(orderPickup).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -37,14 +41,18 @@ func (r *OrderPickupRepositoryBun) UpdateOrderPickup(ctx context.Context, orderP
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(orderPickup).WherePK().Where("id = ?", orderPickup.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(orderPickup).WherePK().Where("id = ?", orderPickup.ID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -52,14 +60,18 @@ func (r *OrderPickupRepositoryBun) DeleteOrderPickup(ctx context.Context, id str
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&model.OrderPickup{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.OrderPickup{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -69,14 +81,18 @@ func (r *OrderPickupRepositoryBun) GetAllPickups(ctx context.Context) ([]model.O
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&pickups).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&pickups).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return pickups, nil
 }
 
@@ -86,13 +102,17 @@ func (r *OrderPickupRepositoryBun) GetPickupById(ctx context.Context, id string)
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(orderPickup).Where("id = ?", id).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(orderPickup).Where("id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return orderPickup, nil
 }

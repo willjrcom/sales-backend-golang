@@ -22,14 +22,18 @@ func (r *DeliveryDriverRepositoryBun) CreateDeliveryDriver(ctx context.Context, 
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(s).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(s).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -37,14 +41,18 @@ func (r *DeliveryDriverRepositoryBun) UpdateDeliveryDriver(ctx context.Context, 
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -52,14 +60,18 @@ func (r *DeliveryDriverRepositoryBun) DeleteDeliveryDriver(ctx context.Context, 
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&model.DeliveryDriver{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.DeliveryDriver{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -69,14 +81,18 @@ func (r *DeliveryDriverRepositoryBun) GetDeliveryDriverById(ctx context.Context,
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(deliveryDriver).Where("driver.id = ?", id).Relation("Employee.User").Relation("OrderDeliveries").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(deliveryDriver).Where("driver.id = ?", id).Relation("Employee.User").Relation("OrderDeliveries").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return deliveryDriver, nil
 }
 
@@ -86,14 +102,18 @@ func (r *DeliveryDriverRepositoryBun) GetDeliveryDriverByEmployeeId(ctx context.
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(deliveryDriver).Where("driver.employee_id = ?", id).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(deliveryDriver).Where("driver.employee_id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return deliveryDriver, nil
 }
 
@@ -103,13 +123,17 @@ func (r *DeliveryDriverRepositoryBun) GetAllDeliveryDrivers(ctx context.Context)
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&deliveryDrivers).Relation("Employee.User").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&deliveryDrivers).Relation("Employee.User").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return deliveryDrivers, nil
 }

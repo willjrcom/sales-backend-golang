@@ -2,7 +2,6 @@ package orderprocessrepositorybun
 
 import (
 	"context"
-	"database/sql"
 	"strings"
 	"sync"
 
@@ -25,12 +24,7 @@ func (r *ProcessRepositoryBun) CreateProcess(ctx context.Context, s *model.Order
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -70,14 +64,18 @@ func (r *ProcessRepositoryBun) UpdateProcess(ctx context.Context, s *model.Order
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -85,14 +83,18 @@ func (r *ProcessRepositoryBun) DeleteProcess(ctx context.Context, id string) err
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&model.OrderProcess{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.OrderProcess{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -102,11 +104,12 @@ func (r *ProcessRepositoryBun) GetProcessById(ctx context.Context, id string) (*
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(process).Where("process.id = ?", id).
+	if err := tx.NewSelect().Model(process).Where("process.id = ?", id).
 		Relation("GroupItem.Items.AdditionalItems").
 		Relation("GroupItem.ComplementItem").
 		Relation("GroupItem.Category").
@@ -116,6 +119,9 @@ func (r *ProcessRepositoryBun) GetProcessById(ctx context.Context, id string) (*
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return process, nil
 }
 
@@ -125,14 +131,18 @@ func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]model.Ord
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&processes).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&processes).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return processes, nil
 }
 
@@ -142,7 +152,8 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
@@ -151,7 +162,7 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 		orderprocessentity.ProcessStatusCanceled,
 	}
 
-	if err := r.db.NewSelect().Model(&processes).
+	if err := tx.NewSelect().Model(&processes).
 		Where("\"process\".process_rule_id = ? and \"process\".status NOT IN (?)",
 			id, bun.In(validStatus)).
 		Relation("GroupItem").
@@ -167,6 +178,9 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return processes, nil
 }
 
@@ -177,11 +191,12 @@ func (r *ProcessRepositoryBun) GetProcessesByProductID(ctx context.Context, id s
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&processesToProduct).Where("product_id = ?", id).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&processesToProduct).Where("product_id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -190,10 +205,13 @@ func (r *ProcessRepositoryBun) GetProcessesByProductID(ctx context.Context, id s
 		processIDs = append(processIDs, p.ProcessID.String())
 	}
 
-	if err := r.db.NewSelect().Model(&processes).Where("id in (?)", bun.In(processIDs)).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&processes).Where("id in (?)", bun.In(processIDs)).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return processes, nil
 }
 
@@ -204,11 +222,12 @@ func (r *ProcessRepositoryBun) GetProcessesByGroupItemID(ctx context.Context, id
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&processesToGroupItem).Where("group_item_id = ?", id).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&processesToGroupItem).Where("group_item_id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -217,9 +236,12 @@ func (r *ProcessRepositoryBun) GetProcessesByGroupItemID(ctx context.Context, id
 		processIDs = append(processIDs, p.ProcessID.String())
 	}
 
-	if err := r.db.NewSelect().Model(&processes).Where("id in (?)", bun.In(processIDs)).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&processes).Where("id in (?)", bun.In(processIDs)).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return processes, nil
 }

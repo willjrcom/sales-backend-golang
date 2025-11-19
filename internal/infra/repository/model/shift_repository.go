@@ -12,5 +12,5 @@ type ShiftRepository interface {
 	GetCurrentShift(ctx context.Context) (*Shift, error)
 	GetFullCurrentShift(ctx context.Context) (*Shift, error)
 	GetAllShifts(ctx context.Context, page int, perPage int) ([]Shift, error)
-	IncrementCurrentOrder(id string) (int, error)
+	IncrementCurrentOrder(ctx context.Context, id string) (int, error)
 }

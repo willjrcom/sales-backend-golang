@@ -15,7 +15,7 @@ func (s *OrderService) CreateDefaultOrder(ctx context.Context) (uuid.UUID, error
 		return uuid.Nil, fmt.Errorf("must open a new shift")
 	}
 
-	currentOrderNumber, err := s.rs.IncrementCurrentOrder(shiftModel.ID.String())
+	currentOrderNumber, err := s.rs.IncrementCurrentOrder(ctx, shiftModel.ID.String())
 	if err != nil {
 		return uuid.Nil, err
 	}

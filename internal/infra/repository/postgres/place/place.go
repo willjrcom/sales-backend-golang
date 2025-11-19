@@ -23,14 +23,18 @@ func (r *PlaceRepositoryBun) CreatePlace(ctx context.Context, s *model.Place) er
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(s).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(s).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -38,14 +42,18 @@ func (r *PlaceRepositoryBun) UpdatePlace(ctx context.Context, s *model.Place) er
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -53,14 +61,18 @@ func (r *PlaceRepositoryBun) DeletePlace(ctx context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&model.Place{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.Place{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -70,14 +82,18 @@ func (r *PlaceRepositoryBun) GetPlaceById(ctx context.Context, id string) (*mode
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(place).Where("id = ?", id).Relation("Tables.Table").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(place).Where("id = ?", id).Relation("Tables.Table").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return place, nil
 }
 
@@ -87,14 +103,18 @@ func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context) ([]model.Place, e
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&places).Relation("Tables.Table").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&places).Relation("Tables.Table").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return places, nil
 }
 
@@ -102,12 +122,7 @@ func (r *PlaceRepositoryBun) AddTableToPlace(ctx context.Context, placeToTables 
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.Begin()
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -133,16 +148,20 @@ func (r *PlaceRepositoryBun) GetTableToPlaceByTableID(ctx context.Context, table
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
 	placeToTable := &model.PlaceToTables{}
 
-	if err := r.db.NewSelect().Model(placeToTable).Where("table_id = ?", tableID).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(placeToTable).Where("table_id = ?", tableID).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return placeToTable, nil
 }
 
@@ -150,17 +169,21 @@ func (r *PlaceRepositoryBun) GetTableToPlaceByPlaceIDAndPosition(ctx context.Con
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
 	placeToTable := &model.PlaceToTables{}
 
-	if err := r.db.NewSelect().Model(placeToTable).
+	if err := tx.NewSelect().Model(placeToTable).
 		Where("place_id = ? AND \"column\" = ? AND row = ?", placeID.String(), column, row).Relation("Table").Relation("Place").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return placeToTable, nil
 }
 
@@ -168,13 +191,17 @@ func (r *PlaceRepositoryBun) RemoveTableFromPlace(ctx context.Context, tableID u
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&model.PlaceToTables{}).Where("table_id = ?", tableID).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.PlaceToTables{}).Where("table_id = ?", tableID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }

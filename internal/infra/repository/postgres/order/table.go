@@ -24,14 +24,18 @@ func (r *OrderTableRepositoryBun) CreateOrderTable(ctx context.Context, table *m
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(table).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(table).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -39,14 +43,18 @@ func (r *OrderTableRepositoryBun) UpdateOrderTable(ctx context.Context, table *m
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(table).WherePK().Where("id = ?", table.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(table).WherePK().Where("id = ?", table.ID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -54,14 +62,18 @@ func (r *OrderTableRepositoryBun) DeleteOrderTable(ctx context.Context, id strin
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&model.OrderTable{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.OrderTable{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -72,14 +84,18 @@ func (r *OrderTableRepositoryBun) GetOrderTableById(ctx context.Context, id stri
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err = r.db.NewSelect().Model(table).WherePK().Scan(ctx); err != nil {
+	if err = tx.NewSelect().Model(table).WherePK().Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return table, err
 }
 
@@ -89,14 +105,18 @@ func (r *OrderTableRepositoryBun) GetPendingOrderTablesByTableId(ctx context.Con
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&tables).Where("table_id = ? AND status = ?", id, orderentity.OrderTableStatusPending).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&tables).Where("table_id = ? AND status = ?", id, orderentity.OrderTableStatusPending).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return tables, err
 }
 
@@ -106,13 +126,17 @@ func (r *OrderTableRepositoryBun) GetAllOrderTables(ctx context.Context) (tables
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err = r.db.NewSelect().Model(&tables).Where("status != 'Closed' AND status != 'Canceled'").Scan(ctx); err != nil {
+	if err = tx.NewSelect().Model(&tables).Where("status != 'Closed' AND status != 'Canceled'").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return tables, err
 }

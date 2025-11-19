@@ -23,14 +23,18 @@ func (r *OrderDeliveryRepositoryBun) CreateOrderDelivery(ctx context.Context, de
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(delivery).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(delivery).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -38,14 +42,18 @@ func (r *OrderDeliveryRepositoryBun) UpdateOrderDelivery(ctx context.Context, de
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(delivery).Where("id = ?", delivery.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(delivery).Where("id = ?", delivery.ID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -53,14 +61,18 @@ func (r *OrderDeliveryRepositoryBun) DeleteOrderDelivery(ctx context.Context, id
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewDelete().Model(&model.OrderDelivery{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.OrderDelivery{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -70,14 +82,18 @@ func (r *OrderDeliveryRepositoryBun) GetAllDeliveries(ctx context.Context) ([]mo
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&deliveries).Where("delivery.status != ?", orderentity.OrderDeliveryStatusStaging).Relation("Client").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&deliveries).Where("delivery.status != ?", orderentity.OrderDeliveryStatusStaging).Relation("Client").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return deliveries, nil
 }
 
@@ -87,14 +103,18 @@ func (r *OrderDeliveryRepositoryBun) GetDeliveryById(ctx context.Context, id str
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(delivery).Where("delivery.id = ?", id).Relation("Client.Address").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(delivery).Where("delivery.id = ?", id).Relation("Client.Address").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return delivery, nil
 }
 
@@ -104,13 +124,17 @@ func (r *OrderDeliveryRepositoryBun) GetDeliveriesByIds(ctx context.Context, ids
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(&deliveries).Where("delivery.id IN (?)", bun.In(ids)).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&deliveries).Where("delivery.id IN (?)", bun.In(ids)).Scan(ctx); err != nil {
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return deliveries, nil
 }

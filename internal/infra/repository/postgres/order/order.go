@@ -2,7 +2,6 @@ package orderrepositorybun
 
 import (
 	"context"
-	"database/sql"
 	"sync"
 
 	"github.com/google/uuid"
@@ -25,14 +24,18 @@ func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *model.Order
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(order).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(order).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -40,12 +43,7 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *model.Order) e
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -114,14 +112,18 @@ func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *model.Order
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewUpdate().Model(order).Where("id = ?", order.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(order).Where("id = ?", order.ID).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -129,12 +131,7 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
-		return err
-	}
-
-	tx, err := r.db.BeginTx(ctx, &sql.TxOptions{})
-
+	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -217,11 +214,12 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := r.db.NewSelect().Model(order).WherePK().
+	if err := tx.NewSelect().Model(order).WherePK().
 		Relation("GroupItems.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
 			return q.Where("is_additional = ?", false)
 		}).
@@ -243,7 +241,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		}
 	}
 	if len(complementIDs) > 0 {
-		if err := r.db.NewSelect().Model(&complementItems).
+		if err := tx.NewSelect().Model(&complementItems).
 			Where("id IN (?)", bun.In(complementIDs)).
 			Scan(ctx); err != nil {
 			return nil, err
@@ -264,7 +262,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	}
 
 	if order.Delivery != nil {
-		if err := r.db.NewSelect().Model(order.Delivery).WherePK().
+		if err := tx.NewSelect().Model(order.Delivery).WherePK().
 			Relation("Client.Contact").
 			Relation("Client.Address").
 			Relation("Address").
@@ -274,6 +272,9 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		}
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return order, nil
 }
 
@@ -283,7 +284,8 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
@@ -291,7 +293,7 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 		queryCondition = "OR"
 	}
 
-	query := r.db.NewSelect().Model(&orders).
+	query := tx.NewSelect().Model(&orders).
 		// use quoted alias for reserved keyword 'order'
 		Where(`"order"."status" IN (?) `+queryCondition+` "order"."shift_id" = ?`, bun.In(withStatus), shiftID).
 		Relation("GroupItems.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
@@ -318,7 +320,7 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 		}
 	}
 	if len(complementIDs) > 0 {
-		if err := r.db.NewSelect().Model(&complementItems).
+		if err := tx.NewSelect().Model(&complementItems).
 			Where("id IN (?)", bun.In(complementIDs)).
 			Scan(ctx); err != nil {
 			return nil, err
@@ -349,7 +351,7 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 			}
 		}
 		if len(categoryIDs) > 0 {
-			if err := r.db.NewSelect().Model(&categories).
+			if err := tx.NewSelect().Model(&categories).
 				Where("id IN (?)", bun.In(categoryIDs)).
 				Scan(ctx); err != nil {
 				return nil, err
@@ -381,7 +383,7 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 	// Buscar todos os drivers em uma query separada
 	var drivers []model.DeliveryDriver
 	if len(driverIDs) > 0 {
-		if err := r.db.NewSelect().Model(&drivers).
+		if err := tx.NewSelect().Model(&drivers).
 			Where("id IN (?)", bun.In(driverIDs)).
 			Scan(ctx); err != nil {
 			return nil, err
@@ -402,6 +404,9 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 		}
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return orders, nil
 }
 
@@ -411,7 +416,8 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
@@ -419,7 +425,7 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 		orderentity.OrderStatusReady,
 	}
 
-	query := r.db.NewSelect().Model(&orders).
+	query := tx.NewSelect().Model(&orders).
 		Where("delivery.id IS NOT NULL").
 		Relation("Delivery.Client").
 		Relation("Delivery.Address").
@@ -442,7 +448,7 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 	// Buscar todos os drivers em uma query separada
 	var drivers []model.DeliveryDriver
 	if len(driverIDs) > 0 {
-		if err := r.db.NewSelect().Model(&drivers).
+		if err := tx.NewSelect().Model(&drivers).
 			Where("id IN (?)", bun.In(driverIDs)).
 			Scan(ctx); err != nil {
 			return nil, err
@@ -463,6 +469,9 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 		}
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return orders, nil
 }
 
@@ -472,7 +481,8 @@ func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return nil, err
 	}
 
@@ -480,7 +490,7 @@ func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID
 		string(orderentity.OrderStatusReady),
 	}
 
-	query := r.db.NewSelect().Model(&orders).
+	query := tx.NewSelect().Model(&orders).
 		Relation("Pickup").
 		Where("pickup.id IS NOT NULL").
 		Where(`"order"."status" IN (?) AND "order"."shift_id" = ?`, bun.In(validStatuses), shiftID).
@@ -491,6 +501,9 @@ func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return orders, nil
 }
 
@@ -498,13 +511,17 @@ func (r *OrderRepositoryBun) AddPaymentOrder(ctx context.Context, payment *model
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if err := database.ChangeSchema(ctx, r.db); err != nil {
+	tx, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
 		return err
 	}
 
-	if _, err := r.db.NewInsert().Model(payment).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(payment).Exec(ctx); err != nil {
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
