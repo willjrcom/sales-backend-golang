@@ -503,10 +503,10 @@ func (s *ReportService) TotalQueueTimeByGroupItem(ctx context.Context) ([]TotalQ
 	// duration is bigint nanoseconds; sum and convert to seconds
 	query := `
 		SELECT pr.name::text AS name,
-			SUM(duration) / 1000000000.0 AS total_seconds
+		AVG(duration) / 1000000000.0 AS total_seconds
 		FROM ` + schemaName + `.order_queues oq
 		JOIN ` + schemaName + `.process_rules pr ON pr.id = oq.process_rule_id
-        GROUP BY pr.name`
+		GROUP BY pr.name`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
@@ -515,7 +515,7 @@ func (s *ReportService) TotalQueueTimeByGroupItem(ctx context.Context) ([]TotalQ
 
 // AvgDeliveryTimeDTO holds average delivery time per driver.
 type AvgDeliveryTimeDTO struct {
-	DriverID   string  `bun:"driver_id"`
+	DriverName string  `bun:"driver_name"`
 	AvgSeconds float64 `bun:"avg_seconds"`
 }
 
@@ -528,11 +528,15 @@ func (s *ReportService) AvgDeliveryTimeByDriver(ctx context.Context) ([]AvgDeliv
 
 	var resp []AvgDeliveryTimeDTO
 	query := `
-        SELECT driver_id::text AS driver_id,
-            AVG(EXTRACT(EPOCH FROM (delivered_at - shipped_at))) AS avg_seconds
-        FROM ` + schemaName + `.order_deliveries
-        WHERE delivered_at IS NOT NULL AND shipped_at IS NOT NULL
-        GROUP BY driver_id`
+        SELECT us.name::text AS driver_name,
+            AVG(EXTRACT(EPOCH FROM (od.delivered_at - od.shipped_at))) AS avg_seconds
+        FROM ` + schemaName + `.order_deliveries od
+		JOIN ` + schemaName + `.delivery_drivers dd ON dd.id = od.driver_id
+		JOIN ` + schemaName + `.employees em ON em.id = dd.employee_id
+		JOIN public.users us ON us.id = em.user_id
+        WHERE od.delivered_at IS NOT NULL 
+			AND od.shipped_at IS NOT NULL
+        GROUP BY us.name`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
@@ -541,8 +545,8 @@ func (s *ReportService) AvgDeliveryTimeByDriver(ctx context.Context) ([]AvgDeliv
 
 // DeliveriesCountByDriverDTO holds count of deliveries per driver.
 type DeliveriesCountByDriverDTO struct {
-	DriverID string `bun:"driver_id"`
-	Count    int    `bun:"count"`
+	DriverName string `bun:"driver_name"`
+	Count      int    `bun:"count"`
 }
 
 // DeliveriesPerDriver returns number of deliveries made by each driver.
@@ -554,9 +558,12 @@ func (s *ReportService) DeliveriesPerDriver(ctx context.Context) ([]DeliveriesCo
 
 	var resp []DeliveriesCountByDriverDTO
 	query := `
-        SELECT driver_id::text AS driver_id, COUNT(*) AS count
-        FROM ` + schemaName + `.order_deliveries
-        GROUP BY driver_id`
+        SELECT us.name::text AS driver_name, COUNT(*) AS count
+        FROM ` + schemaName + `.order_deliveries od
+		JOIN ` + schemaName + `.delivery_drivers dd ON dd.id = od.driver_id
+		JOIN ` + schemaName + `.employees em ON em.id = dd.employee_id
+		JOIN public.users us ON us.id = em.user_id
+        GROUP BY us.name`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
@@ -565,8 +572,8 @@ func (s *ReportService) DeliveriesPerDriver(ctx context.Context) ([]DeliveriesCo
 
 // TopTablesDTO holds the table usage count.
 type TopTablesDTO struct {
-	TableID string `bun:"table_id"`
-	Count   int    `bun:"count"`
+	TableName string `bun:"table_name"`
+	Count     int    `bun:"count"`
 }
 
 // TopTables returns the top 10 most used tables (by order count) in a period.
@@ -577,12 +584,13 @@ func (s *ReportService) TopTables(ctx context.Context, start, end time.Time) ([]
 	}
 	var resp []TopTablesDTO
 	query := `
-		SELECT ot.table_id::text AS table_id,
+		SELECT t.name::text AS table_name,
 			COUNT(*) AS count
 		FROM ` + schemaName + `.order_tables ot
 		JOIN ` + schemaName + `.orders o ON o.id = ot.order_id
+		JOIN ` + schemaName + `.tables t ON t.id = ot.table_id
         WHERE o.created_at BETWEEN ? AND ?
-        GROUP BY ot.table_id
+        GROUP BY t.name
         ORDER BY count DESC
         LIMIT 10`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
@@ -593,8 +601,8 @@ func (s *ReportService) TopTables(ctx context.Context, start, end time.Time) ([]
 
 // OrdersPerTableDTO holds count of orders per table (utilization proxy).
 type OrdersPerTableDTO struct {
-	TableID string `bun:"table_id"`
-	Count   int    `bun:"count"`
+	TableName string `bun:"table_name"`
+	Count     int    `bun:"count"`
 }
 
 // OrdersPerTable returns number of orders per table.
@@ -606,9 +614,10 @@ func (s *ReportService) OrdersPerTable(ctx context.Context) ([]OrdersPerTableDTO
 
 	var resp []OrdersPerTableDTO
 	query := `
-        SELECT table_id::text AS table_id, COUNT(*) AS count
-        FROM ` + schemaName + `.order_tables
-        GROUP BY table_id`
+        SELECT t.name::text AS table_name, COUNT(*) AS count
+        FROM ` + schemaName + `.order_tables ot
+		JOIN ` + schemaName + `.tables t ON t.id = ot.table_id
+        GROUP BY t.name`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
@@ -617,8 +626,8 @@ func (s *ReportService) OrdersPerTable(ctx context.Context) ([]OrdersPerTableDTO
 
 // SalesByShiftDTO holds sales aggregated by shift.
 type SalesByShiftDTO struct {
-	ShiftID string          `bun:"shift_id"`
-	Total   decimal.Decimal `bun:"total"`
+	OpenedAt string          `bun:"opened_at"`
+	Total    decimal.Decimal `bun:"total"`
 }
 
 // SalesByShift returns total sales per shift.
@@ -630,10 +639,12 @@ func (s *ReportService) SalesByShift(ctx context.Context, start, end time.Time) 
 
 	var resp []SalesByShiftDTO
 	query := `
-        SELECT shift_id::text AS shift_id, SUM(total_payable) AS total
-        FROM ` + schemaName + `.orders
-        WHERE created_at BETWEEN ? AND ?
-        GROUP BY shift_id`
+        SELECT to_char(s.opened_at, 'DD/MM HH24:MI') AS opened_at, SUM(o.total_payable) AS total
+        FROM ` + schemaName + `.orders o
+		JOIN ` + schemaName + `.shifts s ON s.id = o.shift_id
+        WHERE o.created_at BETWEEN ? AND ?
+        GROUP BY s.opened_at
+		ORDER BY s.opened_at`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
@@ -667,8 +678,8 @@ func (s *ReportService) PaymentsByMethod(ctx context.Context, start, end time.Ti
 
 // EmployeePaymentsDTO holds sum of employee payments.
 type EmployeePaymentsDTO struct {
-	EmployeeID string          `bun:"employee_id"`
-	Total      decimal.Decimal `bun:"total"`
+	EmployeeName string          `bun:"employee_name"`
+	Total        decimal.Decimal `bun:"total"`
 }
 
 // EmployeePaymentsReport returns sum of employee payments by employee.
@@ -680,10 +691,12 @@ func (s *ReportService) EmployeePaymentsReport(ctx context.Context, start, end t
 
 	var resp []EmployeePaymentsDTO
 	query := `
-        SELECT employee_id::text AS employee_id, SUM(amount) AS total
-        FROM ` + schemaName + `.employee_payments
-        WHERE payment_date BETWEEN ? AND ?
-        GROUP BY employee_id`
+        SELECT us.name::text AS employee_name, SUM(emp.amount) AS total
+        FROM ` + schemaName + `.employee_payments emp
+		JOIN ` + schemaName + `.employees em ON em.id = emp.employee_id
+		JOIN public.users us ON us.id = em.user_id
+        WHERE emp.payment_date BETWEEN ? AND ?
+        GROUP BY us.name`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}

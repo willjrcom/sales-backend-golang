@@ -20,8 +20,8 @@ type TopTablesRequest struct {
 
 // TopTablesResponse holds the table ID and usage count.
 type TopTablesResponse struct {
-	TableID string `json:"table_id"`
-	Count   int    `json:"count"`
+	TableName string `json:"table_name"`
+	Count     int    `json:"count"`
 }
 
 // AvgQueueDurationRequest filters for average queue duration.
@@ -242,7 +242,7 @@ type AvgDeliveryTimeByDriverRequest struct {
 
 // AvgDeliveryTimeByDriverResponse holds driver ID and average seconds.
 type AvgDeliveryTimeByDriverResponse struct {
-	DriverID   string  `json:"driver_id"`
+	DriverName string  `json:"driver_name"`
 	AvgSeconds float64 `json:"avg_seconds"`
 }
 
@@ -252,8 +252,8 @@ type DeliveriesPerDriverRequest struct {
 
 // DeliveriesPerDriverResponse holds driver ID and count.
 type DeliveriesPerDriverResponse struct {
-	DriverID string `json:"driver_id"`
-	Count    int    `json:"count"`
+	DriverName string `json:"driver_name"`
+	Count      int    `json:"count"`
 }
 
 // OrdersPerTableRequest filters for orders per table.
@@ -262,8 +262,8 @@ type OrdersPerTableRequest struct {
 
 // OrdersPerTableResponse holds table ID and count.
 type OrdersPerTableResponse struct {
-	TableID string `json:"table_id"`
-	Count   int    `json:"count"`
+	TableName string `json:"table_name"`
+	Count     int    `json:"count"`
 }
 
 // SalesByShiftRequest filters for sales by shift.
@@ -274,8 +274,8 @@ type SalesByShiftRequest struct {
 
 // SalesByShiftResponse holds shift ID and total sales.
 type SalesByShiftResponse struct {
-	ShiftID string          `json:"shift_id"`
-	Total   decimal.Decimal `json:"total"`
+	OpenedAt string          `json:"opened_at"`
+	Total    decimal.Decimal `json:"total"`
 }
 
 // PaymentsByMethodRequest filters for payments by method.
@@ -298,8 +298,8 @@ type EmployeePaymentsReportRequest struct {
 
 // EmployeePaymentsReportResponse holds employee ID and total paid.
 type EmployeePaymentsReportResponse struct {
-	EmployeeID string          `json:"employee_id"`
-	Total      decimal.Decimal `json:"total"`
+	EmployeeName string          `json:"employee_name"`
+	Total        decimal.Decimal `json:"total"`
 }
 
 // SalesByPlaceRequest filters for sales by place.

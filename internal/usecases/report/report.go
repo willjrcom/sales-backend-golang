@@ -21,7 +21,7 @@ func (s *Service) TopTables(ctx context.Context, req *reportdto.TopTablesRequest
 	}
 	resp := make([]reportdto.TopTablesResponse, len(data))
 	for i, d := range data {
-		resp[i] = reportdto.TopTablesResponse{TableID: d.TableID, Count: d.Count}
+		resp[i] = reportdto.TopTablesResponse{TableName: d.TableName, Count: d.Count}
 	}
 	return resp, nil
 }
@@ -226,7 +226,7 @@ func (s *Service) AvgDeliveryTimeByDriver(ctx context.Context, req *reportdto.Av
 	}
 	resp := make([]reportdto.AvgDeliveryTimeByDriverResponse, len(data))
 	for i, d := range data {
-		resp[i] = reportdto.AvgDeliveryTimeByDriverResponse{DriverID: d.DriverID, AvgSeconds: d.AvgSeconds}
+		resp[i] = reportdto.AvgDeliveryTimeByDriverResponse{DriverName: d.DriverName, AvgSeconds: d.AvgSeconds}
 	}
 	return resp, nil
 }
@@ -239,7 +239,7 @@ func (s *Service) DeliveriesPerDriver(ctx context.Context, req *reportdto.Delive
 	}
 	resp := make([]reportdto.DeliveriesPerDriverResponse, len(data))
 	for i, d := range data {
-		resp[i] = reportdto.DeliveriesPerDriverResponse{DriverID: d.DriverID, Count: d.Count}
+		resp[i] = reportdto.DeliveriesPerDriverResponse{DriverName: d.DriverName, Count: d.Count}
 	}
 	return resp, nil
 }
@@ -252,7 +252,7 @@ func (s *Service) OrdersPerTable(ctx context.Context, req *reportdto.OrdersPerTa
 	}
 	resp := make([]reportdto.OrdersPerTableResponse, len(data))
 	for i, d := range data {
-		resp[i] = reportdto.OrdersPerTableResponse{TableID: d.TableID, Count: d.Count}
+		resp[i] = reportdto.OrdersPerTableResponse{TableName: d.TableName, Count: d.Count}
 	}
 	return resp, nil
 }
@@ -265,7 +265,7 @@ func (s *Service) SalesByShift(ctx context.Context, req *reportdto.SalesByShiftR
 	}
 	resp := make([]reportdto.SalesByShiftResponse, len(data))
 	for i, d := range data {
-		resp[i] = reportdto.SalesByShiftResponse{ShiftID: d.ShiftID, Total: d.Total}
+		resp[i] = reportdto.SalesByShiftResponse{OpenedAt: d.OpenedAt, Total: d.Total}
 	}
 	return resp, nil
 }
@@ -291,7 +291,7 @@ func (s *Service) EmployeePaymentsReport(ctx context.Context, req *reportdto.Emp
 	}
 	resp := make([]reportdto.EmployeePaymentsReportResponse, len(data))
 	for i, d := range data {
-		resp[i] = reportdto.EmployeePaymentsReportResponse{EmployeeID: d.EmployeeID, Total: d.Total}
+		resp[i] = reportdto.EmployeePaymentsReportResponse{EmployeeName: d.EmployeeName, Total: d.Total}
 	}
 	return resp, nil
 }
