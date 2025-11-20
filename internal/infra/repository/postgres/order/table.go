@@ -2,7 +2,6 @@ package orderrepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -12,7 +11,6 @@ import (
 )
 
 type OrderTableRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -21,8 +19,6 @@ func NewOrderTableRepositoryBun(db *bun.DB) model.OrderTableRepository {
 }
 
 func (r *OrderTableRepositoryBun) CreateOrderTable(ctx context.Context, table *model.OrderTable) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -40,8 +36,6 @@ func (r *OrderTableRepositoryBun) CreateOrderTable(ctx context.Context, table *m
 }
 
 func (r *OrderTableRepositoryBun) UpdateOrderTable(ctx context.Context, table *model.OrderTable) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -59,8 +53,6 @@ func (r *OrderTableRepositoryBun) UpdateOrderTable(ctx context.Context, table *m
 }
 
 func (r *OrderTableRepositoryBun) DeleteOrderTable(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -81,9 +73,6 @@ func (r *OrderTableRepositoryBun) GetOrderTableById(ctx context.Context, id stri
 	table = &model.OrderTable{}
 	table.ID = uuid.MustParse(id)
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -102,9 +91,6 @@ func (r *OrderTableRepositoryBun) GetOrderTableById(ctx context.Context, id stri
 func (r *OrderTableRepositoryBun) GetPendingOrderTablesByTableId(ctx context.Context, id string) (tables []model.OrderTable, err error) {
 	tables = []model.OrderTable{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -122,9 +108,6 @@ func (r *OrderTableRepositoryBun) GetPendingOrderTablesByTableId(ctx context.Con
 
 func (r *OrderTableRepositoryBun) GetAllOrderTables(ctx context.Context) (tables []model.OrderTable, err error) {
 	tables = make([]model.OrderTable, 0)
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

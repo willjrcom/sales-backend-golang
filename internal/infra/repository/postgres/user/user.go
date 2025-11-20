@@ -2,7 +2,6 @@ package userrepositorybun
 
 import (
 	"errors"
-	"sync"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -12,7 +11,6 @@ import (
 )
 
 type UserRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -21,8 +19,6 @@ func NewUserRepositoryBun(db *bun.DB) model.UserRepository {
 }
 
 func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *model.User) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -68,8 +64,6 @@ func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *model.User) er
 }
 
 func (r *UserRepositoryBun) GetUser(ctx context.Context, email string) (*model.User, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -91,8 +85,6 @@ func (r *UserRepositoryBun) GetUser(ctx context.Context, email string) (*model.U
 }
 
 func (r *UserRepositoryBun) UpdateUserPassword(ctx context.Context, user *model.User) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -107,8 +99,6 @@ func (r *UserRepositoryBun) UpdateUserPassword(ctx context.Context, user *model.
 }
 
 func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *model.User) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -152,9 +142,6 @@ func (r *UserRepositoryBun) LoginAndDeleteUser(ctx context.Context, user *model.
 		return errors.New("invalid email or password")
 	}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -195,8 +182,6 @@ func (r *UserRepositoryBun) LoginAndDeleteUser(ctx context.Context, user *model.
 }
 
 func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *model.User) (*model.User, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -218,8 +203,6 @@ func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *model.User) (*m
 }
 
 func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (*uuid.UUID, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -235,8 +218,6 @@ func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (*uu
 }
 
 func (r *UserRepositoryBun) GetIDByEmailOrCPF(ctx context.Context, email string, cpf string) (*uuid.UUID, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -252,8 +233,6 @@ func (r *UserRepositoryBun) GetIDByEmailOrCPF(ctx context.Context, email string,
 }
 
 func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID) (*model.User, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -269,8 +248,6 @@ func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID) (*mod
 }
 
 func (r *UserRepositoryBun) GetByCPF(ctx context.Context, cpf string) (*model.User, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -286,8 +263,6 @@ func (r *UserRepositoryBun) GetByCPF(ctx context.Context, cpf string) (*model.Us
 }
 
 func (r *UserRepositoryBun) ExistsUserByID(ctx context.Context, id uuid.UUID) (bool, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {

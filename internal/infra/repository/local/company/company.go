@@ -27,8 +27,7 @@ func (r *CompanyRepositoryLocal) NewCompany(ctx context.Context, company *model.
 	if company == nil || company.Entity.ID == uuid.Nil {
 		return errors.New("invalid company")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.companies[company.Entity.ID]; exists {
 		return errors.New("company already exists")
 	}
@@ -40,8 +39,7 @@ func (r *CompanyRepositoryLocal) UpdateCompany(ctx context.Context, company *mod
 	if company == nil || company.Entity.ID == uuid.Nil {
 		return errors.New("invalid company")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.companies[company.Entity.ID]; !exists {
 		return errors.New("company not found")
 	}
@@ -69,8 +67,7 @@ func (r *CompanyRepositoryLocal) AddUserToPublicCompany(ctx context.Context, use
 	if userID == uuid.Nil {
 		return errors.New("invalid userID")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	r.publicCompanyUsers[userID] = struct{}{}
 	return nil
 }
@@ -79,8 +76,7 @@ func (r *CompanyRepositoryLocal) RemoveUserFromPublicCompany(ctx context.Context
 	if userID == uuid.Nil {
 		return errors.New("invalid userID")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	delete(r.publicCompanyUsers, userID)
 	return nil
 }

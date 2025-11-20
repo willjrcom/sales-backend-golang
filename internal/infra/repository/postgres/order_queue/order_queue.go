@@ -2,7 +2,6 @@ package orderqueuerepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
@@ -10,7 +9,6 @@ import (
 )
 
 type QueueRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -19,8 +17,6 @@ func NewOrderQueueRepositoryBun(db *bun.DB) model.QueueRepository {
 }
 
 func (r *QueueRepositoryBun) CreateQueue(ctx context.Context, s *model.OrderQueue) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -38,8 +34,6 @@ func (r *QueueRepositoryBun) CreateQueue(ctx context.Context, s *model.OrderQueu
 }
 
 func (r *QueueRepositoryBun) UpdateQueue(ctx context.Context, s *model.OrderQueue) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -57,8 +51,6 @@ func (r *QueueRepositoryBun) UpdateQueue(ctx context.Context, s *model.OrderQueu
 }
 
 func (r *QueueRepositoryBun) DeleteQueue(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -78,9 +70,6 @@ func (r *QueueRepositoryBun) DeleteQueue(ctx context.Context, id string) error {
 func (r *QueueRepositoryBun) GetQueueById(ctx context.Context, id string) (*model.OrderQueue, error) {
 	queue := &model.OrderQueue{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -98,9 +87,6 @@ func (r *QueueRepositoryBun) GetQueueById(ctx context.Context, id string) (*mode
 
 func (r *QueueRepositoryBun) GetOpenedQueueByGroupItemId(ctx context.Context, id string) (*model.OrderQueue, error) {
 	queue := &model.OrderQueue{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -120,9 +106,6 @@ func (r *QueueRepositoryBun) GetOpenedQueueByGroupItemId(ctx context.Context, id
 func (r *QueueRepositoryBun) GetQueuesByGroupItemId(ctx context.Context, id string) ([]model.OrderQueue, error) {
 	queues := []model.OrderQueue{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -140,9 +123,6 @@ func (r *QueueRepositoryBun) GetQueuesByGroupItemId(ctx context.Context, id stri
 
 func (r *QueueRepositoryBun) GetAllQueues(ctx context.Context) ([]model.OrderQueue, error) {
 	queuees := []model.OrderQueue{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

@@ -2,7 +2,6 @@ package stockrepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
@@ -10,7 +9,6 @@ import (
 )
 
 type StockAlertRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -19,8 +17,6 @@ func NewStockAlertRepositoryBun(db *bun.DB) model.StockAlertRepository {
 }
 
 func (r *StockAlertRepositoryBun) CreateAlert(ctx context.Context, a *model.StockAlert) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -40,8 +36,6 @@ func (r *StockAlertRepositoryBun) CreateAlert(ctx context.Context, a *model.Stoc
 }
 
 func (r *StockAlertRepositoryBun) UpdateAlert(ctx context.Context, a *model.StockAlert) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -63,9 +57,6 @@ func (r *StockAlertRepositoryBun) UpdateAlert(ctx context.Context, a *model.Stoc
 func (r *StockAlertRepositoryBun) GetAlertsByStockID(ctx context.Context, stockID string) ([]model.StockAlert, error) {
 	alerts := []model.StockAlert{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -83,9 +74,6 @@ func (r *StockAlertRepositoryBun) GetAlertsByStockID(ctx context.Context, stockI
 
 func (r *StockAlertRepositoryBun) GetActiveAlerts(ctx context.Context) ([]model.StockAlert, error) {
 	alerts := []model.StockAlert{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -105,9 +93,6 @@ func (r *StockAlertRepositoryBun) GetActiveAlerts(ctx context.Context) ([]model.
 func (r *StockAlertRepositoryBun) GetResolvedAlerts(ctx context.Context) ([]model.StockAlert, error) {
 	alerts := []model.StockAlert{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -124,8 +109,6 @@ func (r *StockAlertRepositoryBun) GetResolvedAlerts(ctx context.Context) ([]mode
 }
 
 func (r *StockAlertRepositoryBun) ResolveAlert(ctx context.Context, alertID string, resolvedBy string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

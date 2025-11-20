@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -13,7 +12,6 @@ import (
 )
 
 type ProcessRuleRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -22,8 +20,6 @@ func NewProcessRuleRepositoryBun(db *bun.DB) model.ProcessRuleRepository {
 }
 
 func (r *ProcessRuleRepositoryBun) CreateProcessRule(ctx context.Context, s *model.ProcessRule) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -41,8 +37,6 @@ func (r *ProcessRuleRepositoryBun) CreateProcessRule(ctx context.Context, s *mod
 }
 
 func (r *ProcessRuleRepositoryBun) UpdateProcessRule(ctx context.Context, s *model.ProcessRule) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -60,8 +54,6 @@ func (r *ProcessRuleRepositoryBun) UpdateProcessRule(ctx context.Context, s *mod
 }
 
 func (r *ProcessRuleRepositoryBun) DeleteProcessRule(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -81,9 +73,6 @@ func (r *ProcessRuleRepositoryBun) DeleteProcessRule(ctx context.Context, id str
 func (r *ProcessRuleRepositoryBun) GetProcessRuleById(ctx context.Context, id string) (*model.ProcessRule, error) {
 	processRule := &model.ProcessRule{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -101,9 +90,6 @@ func (r *ProcessRuleRepositoryBun) GetProcessRuleById(ctx context.Context, id st
 
 func (r *ProcessRuleRepositoryBun) GetFirstProcessRuleByCategoryId(ctx context.Context, id string) (*model.ProcessRule, error) {
 	processRule := &model.ProcessRule{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -123,9 +109,6 @@ func (r *ProcessRuleRepositoryBun) GetFirstProcessRuleByCategoryId(ctx context.C
 func (r *ProcessRuleRepositoryBun) GetMapProcessRulesByFirstOrder(ctx context.Context) (map[uuid.UUID]uuid.UUID, error) {
 	processRules := []model.ProcessRule{}
 	mapProcesses := map[uuid.UUID]uuid.UUID{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -149,9 +132,6 @@ func (r *ProcessRuleRepositoryBun) GetMapProcessRulesByFirstOrder(ctx context.Co
 func (r *ProcessRuleRepositoryBun) GetProcessRuleByCategoryIdAndOrder(ctx context.Context, id string, order int8) (*model.ProcessRule, error) {
 	processRule := &model.ProcessRule{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -171,9 +151,6 @@ func (r *ProcessRuleRepositoryBun) GetMapProcessRulesByLastOrder(ctx context.Con
 	processRulesSubquery := []model.ProcessRule{}
 	processRules := []model.ProcessRule{}
 	mapProcesses := map[uuid.UUID]uuid.UUID{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -233,9 +210,6 @@ func (r *ProcessRuleRepositoryBun) IsLastProcessRuleByID(ctx context.Context, id
 func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Context, id string) ([]model.ProcessRule, error) {
 	processRules := []model.ProcessRule{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -254,9 +228,6 @@ func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Conte
 func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context) ([]model.ProcessRule, error) {
 	processRules := []model.ProcessRule{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -274,9 +245,6 @@ func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context) ([]mo
 
 func (r *ProcessRuleRepositoryBun) GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]model.ProcessRule, error) {
 	processRules := []model.ProcessRule{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

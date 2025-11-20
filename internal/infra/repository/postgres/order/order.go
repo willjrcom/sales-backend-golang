@@ -2,7 +2,6 @@ package orderrepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -12,7 +11,6 @@ import (
 )
 
 type OrderRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -21,8 +19,6 @@ func NewOrderRepositoryBun(db *bun.DB) model.OrderRepository {
 }
 
 func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *model.Order) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -40,8 +36,6 @@ func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *model.Order
 }
 
 func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *model.Order) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -109,8 +103,6 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *model.Order) e
 }
 
 func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *model.Order) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -128,8 +120,6 @@ func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *model.Order
 }
 
 func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -211,9 +201,6 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	order = &model.Order{}
 	order.ID = uuid.MustParse(id)
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -280,9 +267,6 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 
 func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder, withCategory bool, queryCondition string) ([]model.Order, error) {
 	orders := []model.Order{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -413,9 +397,6 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
 	orders := []model.Order{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -478,9 +459,6 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
 	orders := []model.Order{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -508,8 +486,6 @@ func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID
 }
 
 func (r *OrderRepositoryBun) AddPaymentOrder(ctx context.Context, payment *model.PaymentOrder) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

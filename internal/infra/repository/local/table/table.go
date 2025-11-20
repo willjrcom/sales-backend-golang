@@ -17,8 +17,7 @@ func NewTableRepositoryLocal() model.TableRepository {
 }
 
 func (r *TableRepositoryLocal) CreateTable(ctx context.Context, table *model.Table) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if r.tables == nil {
 		r.tables = make(map[string]*model.Table)
 	}
@@ -27,8 +26,7 @@ func (r *TableRepositoryLocal) CreateTable(ctx context.Context, table *model.Tab
 }
 
 func (r *TableRepositoryLocal) UpdateTable(ctx context.Context, table *model.Table) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if r.tables == nil {
 		r.tables = make(map[string]*model.Table)
 	}
@@ -37,8 +35,7 @@ func (r *TableRepositoryLocal) UpdateTable(ctx context.Context, table *model.Tab
 }
 
 func (r *TableRepositoryLocal) DeleteTable(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	delete(r.tables, id)
 	return nil
 }

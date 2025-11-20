@@ -24,8 +24,7 @@ func (r *AddressRepositoryLocal) CreateAddress(ctx context.Context, address *mod
 	if address == nil || address.ID == uuid.Nil {
 		return errors.New("invalid address")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.addresses[address.ID.String()]; exists {
 		return errors.New("address already exists")
 	}
@@ -37,8 +36,7 @@ func (r *AddressRepositoryLocal) UpdateAddress(ctx context.Context, address *mod
 	if address == nil || address.ID == uuid.Nil {
 		return errors.New("invalid address")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.addresses[address.ID.String()]; !exists {
 		return errors.New("address not found")
 	}
@@ -50,8 +48,7 @@ func (r *AddressRepositoryLocal) DeleteAddress(ctx context.Context, id string) e
 	if id == "" {
 		return errors.New("invalid id")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.addresses[id]; !exists {
 		return errors.New("address not found")
 	}

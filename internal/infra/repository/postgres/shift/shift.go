@@ -1,8 +1,6 @@
 package shiftrepositorybun
 
 import (
-	"sync"
-
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -10,7 +8,6 @@ import (
 )
 
 type ShiftRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -19,8 +16,6 @@ func NewShiftRepositoryBun(db *bun.DB) model.ShiftRepository {
 }
 
 func (r *ShiftRepositoryBun) CreateShift(ctx context.Context, c *model.Shift) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -38,8 +33,6 @@ func (r *ShiftRepositoryBun) CreateShift(ctx context.Context, c *model.Shift) er
 }
 
 func (r *ShiftRepositoryBun) UpdateShift(ctx context.Context, c *model.Shift) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -57,8 +50,6 @@ func (r *ShiftRepositoryBun) UpdateShift(ctx context.Context, c *model.Shift) er
 }
 
 func (r *ShiftRepositoryBun) DeleteShift(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -78,9 +69,6 @@ func (r *ShiftRepositoryBun) DeleteShift(ctx context.Context, id string) error {
 func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*model.Shift, error) {
 	shift := &model.Shift{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -98,9 +86,6 @@ func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*mode
 
 func (r *ShiftRepositoryBun) GetCurrentShift(ctx context.Context) (*model.Shift, error) {
 	shift := &model.Shift{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -120,9 +105,6 @@ func (r *ShiftRepositoryBun) GetCurrentShift(ctx context.Context) (*model.Shift,
 func (r *ShiftRepositoryBun) GetFullCurrentShift(ctx context.Context) (*model.Shift, error) {
 	shift := &model.Shift{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -140,9 +122,6 @@ func (r *ShiftRepositoryBun) GetFullCurrentShift(ctx context.Context) (*model.Sh
 
 func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context, page int, perPage int) ([]model.Shift, error) {
 	Shifts := []model.Shift{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

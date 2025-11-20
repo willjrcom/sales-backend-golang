@@ -28,8 +28,7 @@ func NewEmployeeRepositoryLocal() model.EmployeeRepository {
 }
 
 func (r *EmployeeRepositoryLocal) CreateEmployee(_ context.Context, p *model.Employee) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, ok := r.employees[p.ID]; ok {
 		return errEmployeeExists
 	}
@@ -38,15 +37,13 @@ func (r *EmployeeRepositoryLocal) CreateEmployee(_ context.Context, p *model.Emp
 }
 
 func (r *EmployeeRepositoryLocal) UpdateEmployee(_ context.Context, p *model.Employee) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	r.employees[p.ID] = p
 	return nil
 }
 
 func (r *EmployeeRepositoryLocal) DeleteEmployee(_ context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	uid := uuid.MustParse(id)
 	if _, ok := r.employees[uid]; !ok {
 		return errEmployeeNotFound
@@ -165,8 +162,6 @@ func (r *EmployeeRepositoryLocal) GetAllEmployeeDeleted(_ context.Context, page,
 
 // AddPaymentEmployee records a payment for an employee in memory
 func (r *EmployeeRepositoryLocal) AddPaymentEmployee(_ context.Context, p *model.PaymentEmployee) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	// ensure employee exists
 	employee, ok := r.employees[p.EmployeeID]

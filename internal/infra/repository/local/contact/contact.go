@@ -25,8 +25,7 @@ func (r *ContactRepositoryLocal) CreateContact(ctx context.Context, c *model.Con
 	if c == nil || c.ID == uuid.Nil {
 		return errors.New("invalid contact")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.contacts[c.ID.String()]; exists {
 		return errors.New("contact already exists")
 	}
@@ -38,8 +37,7 @@ func (r *ContactRepositoryLocal) UpdateContact(ctx context.Context, c *model.Con
 	if c == nil || c.ID == uuid.Nil {
 		return errors.New("invalid contact")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.contacts[c.ID.String()]; !exists {
 		return errors.New("contact not found")
 	}
@@ -51,8 +49,7 @@ func (r *ContactRepositoryLocal) DeleteContact(ctx context.Context, id string) e
 	if id == "" {
 		return errors.New("invalid id")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.contacts[id]; !exists {
 		return errors.New("contact not found")
 	}

@@ -2,7 +2,6 @@ package quantityrepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
@@ -10,7 +9,6 @@ import (
 )
 
 type QuantityRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -19,8 +17,6 @@ func NewQuantityRepositoryBun(db *bun.DB) model.QuantityRepository {
 }
 
 func (r *QuantityRepositoryBun) CreateQuantity(ctx context.Context, s *model.Quantity) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -38,8 +34,6 @@ func (r *QuantityRepositoryBun) CreateQuantity(ctx context.Context, s *model.Qua
 }
 
 func (r *QuantityRepositoryBun) UpdateQuantity(ctx context.Context, s *model.Quantity) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -57,8 +51,6 @@ func (r *QuantityRepositoryBun) UpdateQuantity(ctx context.Context, s *model.Qua
 }
 
 func (r *QuantityRepositoryBun) DeleteQuantity(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -77,9 +69,6 @@ func (r *QuantityRepositoryBun) DeleteQuantity(ctx context.Context, id string) e
 
 func (r *QuantityRepositoryBun) GetQuantityById(ctx context.Context, id string) (*model.Quantity, error) {
 	quantity := &model.Quantity{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

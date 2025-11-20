@@ -2,7 +2,6 @@ package employeerepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -11,7 +10,6 @@ import (
 )
 
 type EmployeeRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -20,8 +18,6 @@ func NewEmployeeRepositoryBun(db *bun.DB) model.EmployeeRepository {
 }
 
 func (r *EmployeeRepositoryBun) CreateEmployee(ctx context.Context, c *model.Employee) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -40,8 +36,6 @@ func (r *EmployeeRepositoryBun) CreateEmployee(ctx context.Context, c *model.Emp
 }
 
 func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *model.Employee) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -59,8 +53,6 @@ func (r *EmployeeRepositoryBun) UpdateEmployee(ctx context.Context, p *model.Emp
 }
 
 func (r *EmployeeRepositoryBun) DeleteEmployee(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -81,9 +73,6 @@ func (r *EmployeeRepositoryBun) DeleteEmployee(ctx context.Context, id string) e
 func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) (*model.Employee, error) {
 	employee := &model.Employee{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -101,9 +90,6 @@ func (r *EmployeeRepositoryBun) GetEmployeeById(ctx context.Context, id string) 
 
 func (r *EmployeeRepositoryBun) GetEmployeeByUserID(ctx context.Context, userID string) (*model.Employee, error) {
 	employee := &model.Employee{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -123,9 +109,6 @@ func (r *EmployeeRepositoryBun) GetEmployeeByUserID(ctx context.Context, userID 
 func (r *EmployeeRepositoryBun) GetEmployeeDeletedByUserID(ctx context.Context, userID string) (*model.Employee, error) {
 	employee := &model.Employee{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -143,8 +126,6 @@ func (r *EmployeeRepositoryBun) GetEmployeeDeletedByUserID(ctx context.Context, 
 
 // GetAllEmployees retrieves a paginated list of employees and the total count.
 func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context, page, perPage int) ([]model.Employee, int, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -176,8 +157,6 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context, page, perPa
 }
 
 func (r *EmployeeRepositoryBun) AddPaymentEmployee(ctx context.Context, p *model.PaymentEmployee) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -196,8 +175,6 @@ func (r *EmployeeRepositoryBun) AddPaymentEmployee(ctx context.Context, p *model
 
 // GetAllEmployeeDeleted retrieves a paginated list of soft-deleted employees and the total count.
 func (r *EmployeeRepositoryBun) GetAllEmployeeDeleted(ctx context.Context, page, perPage int) ([]model.Employee, int, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

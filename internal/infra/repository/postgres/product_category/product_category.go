@@ -2,7 +2,6 @@ package productcategoryrepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -11,7 +10,6 @@ import (
 )
 
 type ProductCategoryRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -20,8 +18,6 @@ func NewProductCategoryRepositoryBun(db *bun.DB) model.CategoryRepository {
 }
 
 func (r *ProductCategoryRepositoryBun) CreateCategory(ctx context.Context, cp *model.ProductCategory) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -51,8 +47,6 @@ func (r *ProductCategoryRepositoryBun) CreateCategory(ctx context.Context, cp *m
 }
 
 func (r *ProductCategoryRepositoryBun) UpdateCategory(ctx context.Context, c *model.ProductCategory) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -140,8 +134,6 @@ func (r *ProductCategoryRepositoryBun) updateComplementCategories(ctx context.Co
 }
 
 func (r *ProductCategoryRepositoryBun) DeleteCategory(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -194,9 +186,6 @@ func (r *ProductCategoryRepositoryBun) DeleteCategory(ctx context.Context, id st
 func (r *ProductCategoryRepositoryBun) GetCategoryById(ctx context.Context, id string) (*model.ProductCategory, error) {
 	category := &model.ProductCategory{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -214,9 +203,6 @@ func (r *ProductCategoryRepositoryBun) GetCategoryById(ctx context.Context, id s
 
 func (r *ProductCategoryRepositoryBun) GetCategoryByName(ctx context.Context, name string, withRelation bool) (*model.ProductCategory, error) {
 	category := &model.ProductCategory{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -241,9 +227,6 @@ func (r *ProductCategoryRepositoryBun) GetCategoryByName(ctx context.Context, na
 
 func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context) ([]model.ProductCategory, error) {
 	categories := []model.ProductCategory{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -300,9 +283,6 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context) ([]
 
 func (r *ProductCategoryRepositoryBun) GetAllCategoriesWithProcessRulesAndOrderProcess(ctx context.Context) ([]model.ProductCategoryWithOrderProcess, error) {
 	categories := []model.ProductCategoryWithOrderProcess{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

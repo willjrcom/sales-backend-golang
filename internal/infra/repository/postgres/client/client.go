@@ -1,8 +1,6 @@
 package clientrepositorybun
 
 import (
-	"sync"
-
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -11,7 +9,6 @@ import (
 )
 
 type ClientRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -20,8 +17,6 @@ func NewClientRepositoryBun(db *bun.DB) model.ClientRepository {
 }
 
 func (r *ClientRepositoryBun) CreateClient(ctx context.Context, c *model.Client) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -54,8 +49,6 @@ func (r *ClientRepositoryBun) CreateClient(ctx context.Context, c *model.Client)
 }
 
 func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *model.Client) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -100,8 +93,6 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *model.Client)
 }
 
 func (r *ClientRepositoryBun) DeleteClient(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -136,9 +127,6 @@ func (r *ClientRepositoryBun) DeleteClient(ctx context.Context, id string) error
 func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*model.Client, error) {
 	client := &model.Client{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -157,8 +145,6 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*mo
 // GetAllClients retrieves a paginated list of clients and the total count.
 func (r *ClientRepositoryBun) GetAllClients(ctx context.Context, page, perPage int) ([]model.Client, int, error) {
 	var clients []model.Client
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

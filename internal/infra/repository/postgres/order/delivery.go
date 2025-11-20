@@ -2,7 +2,6 @@ package orderrepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
@@ -11,7 +10,6 @@ import (
 )
 
 type OrderDeliveryRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -20,8 +18,6 @@ func NewOrderDeliveryRepositoryBun(db *bun.DB) model.OrderDeliveryRepository {
 }
 
 func (r *OrderDeliveryRepositoryBun) CreateOrderDelivery(ctx context.Context, delivery *model.OrderDelivery) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -39,8 +35,6 @@ func (r *OrderDeliveryRepositoryBun) CreateOrderDelivery(ctx context.Context, de
 }
 
 func (r *OrderDeliveryRepositoryBun) UpdateOrderDelivery(ctx context.Context, delivery *model.OrderDelivery) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -58,8 +52,6 @@ func (r *OrderDeliveryRepositoryBun) UpdateOrderDelivery(ctx context.Context, de
 }
 
 func (r *OrderDeliveryRepositoryBun) DeleteOrderDelivery(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -79,9 +71,6 @@ func (r *OrderDeliveryRepositoryBun) DeleteOrderDelivery(ctx context.Context, id
 func (r *OrderDeliveryRepositoryBun) GetAllDeliveries(ctx context.Context) ([]model.OrderDelivery, error) {
 	deliveries := []model.OrderDelivery{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -100,9 +89,6 @@ func (r *OrderDeliveryRepositoryBun) GetAllDeliveries(ctx context.Context) ([]mo
 func (r *OrderDeliveryRepositoryBun) GetDeliveryById(ctx context.Context, id string) (*model.OrderDelivery, error) {
 	delivery := &model.OrderDelivery{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -120,9 +106,6 @@ func (r *OrderDeliveryRepositoryBun) GetDeliveryById(ctx context.Context, id str
 
 func (r *OrderDeliveryRepositoryBun) GetDeliveriesByIds(ctx context.Context, ids []string) ([]model.OrderDelivery, error) {
 	deliveries := []model.OrderDelivery{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

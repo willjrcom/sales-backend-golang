@@ -2,7 +2,6 @@ package placerepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -11,7 +10,6 @@ import (
 )
 
 type PlaceRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -20,8 +18,6 @@ func NewPlaceRepositoryBun(db *bun.DB) model.PlaceRepository {
 }
 
 func (r *PlaceRepositoryBun) CreatePlace(ctx context.Context, s *model.Place) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -39,8 +35,6 @@ func (r *PlaceRepositoryBun) CreatePlace(ctx context.Context, s *model.Place) er
 }
 
 func (r *PlaceRepositoryBun) UpdatePlace(ctx context.Context, s *model.Place) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -58,8 +52,6 @@ func (r *PlaceRepositoryBun) UpdatePlace(ctx context.Context, s *model.Place) er
 }
 
 func (r *PlaceRepositoryBun) DeletePlace(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -79,9 +71,6 @@ func (r *PlaceRepositoryBun) DeletePlace(ctx context.Context, id string) error {
 func (r *PlaceRepositoryBun) GetPlaceById(ctx context.Context, id string) (*model.Place, error) {
 	place := &model.Place{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -100,9 +89,6 @@ func (r *PlaceRepositoryBun) GetPlaceById(ctx context.Context, id string) (*mode
 func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context) ([]model.Place, error) {
 	places := make([]model.Place, 0)
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -119,8 +105,6 @@ func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context) ([]model.Place, e
 }
 
 func (r *PlaceRepositoryBun) AddTableToPlace(ctx context.Context, placeToTables *model.PlaceToTables) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -145,8 +129,6 @@ func (r *PlaceRepositoryBun) AddTableToPlace(ctx context.Context, placeToTables 
 }
 
 func (r *PlaceRepositoryBun) GetTableToPlaceByTableID(ctx context.Context, tableID uuid.UUID) (*model.PlaceToTables, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -166,8 +148,6 @@ func (r *PlaceRepositoryBun) GetTableToPlaceByTableID(ctx context.Context, table
 }
 
 func (r *PlaceRepositoryBun) GetTableToPlaceByPlaceIDAndPosition(ctx context.Context, placeID uuid.UUID, column, row int) (*model.PlaceToTables, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -188,8 +168,6 @@ func (r *PlaceRepositoryBun) GetTableToPlaceByPlaceIDAndPosition(ctx context.Con
 }
 
 func (r *PlaceRepositoryBun) RemoveTableFromPlace(ctx context.Context, tableID uuid.UUID) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

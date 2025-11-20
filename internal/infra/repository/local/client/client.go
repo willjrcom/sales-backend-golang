@@ -26,8 +26,7 @@ func (r *ClientRepositoryLocal) CreateClient(ctx context.Context, p *model.Clien
 	if p == nil || p.ID == uuid.Nil {
 		return errors.New("invalid client")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.clients[p.ID.String()]; exists {
 		return errors.New("client already exists")
 	}
@@ -39,8 +38,7 @@ func (r *ClientRepositoryLocal) UpdateClient(ctx context.Context, p *model.Clien
 	if p == nil || p.ID == uuid.Nil {
 		return errors.New("invalid client")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.clients[p.ID.String()]; !exists {
 		return errors.New("client not found")
 	}
@@ -52,8 +50,7 @@ func (r *ClientRepositoryLocal) DeleteClient(ctx context.Context, id string) err
 	if id == "" {
 		return errors.New("invalid id")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.clients[id]; !exists {
 		return errors.New("client not found")
 	}

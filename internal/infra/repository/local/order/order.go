@@ -25,8 +25,7 @@ func (r *OrderRepositoryLocal) CreateOrder(ctx context.Context, order *model.Ord
 	if order == nil || order.Entity.ID == uuid.Nil {
 		return errors.New("invalid order")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.orders[order.Entity.ID]; exists {
 		return errors.New("order already exists")
 	}
@@ -42,8 +41,7 @@ func (r *OrderRepositoryLocal) DeleteOrder(ctx context.Context, id string) error
 	if err != nil {
 		return err
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.orders[urid]; !exists {
 		return errors.New("order not found")
 	}
@@ -55,8 +53,7 @@ func (r *OrderRepositoryLocal) PendingOrder(ctx context.Context, order *model.Or
 	if order == nil || order.Entity.ID == uuid.Nil {
 		return errors.New("invalid order")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	r.orders[order.Entity.ID] = order
 	return nil
 }
@@ -133,8 +130,7 @@ func (r *OrderRepositoryLocal) GetAllOrdersWithPickup(ctx context.Context, shift
 }
 
 func (r *OrderRepositoryLocal) UpdateOrderDelivery(ctx context.Context, delivery *model.OrderDelivery) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	orderID := delivery.OrderID.String()
 	for _, o := range r.orders {
 		if o.ID.String() == orderID {
@@ -146,8 +142,7 @@ func (r *OrderRepositoryLocal) UpdateOrderDelivery(ctx context.Context, delivery
 }
 
 func (r *OrderRepositoryLocal) DeleteOrderDelivery(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	for _, o := range r.orders {
 		if o.Delivery != nil && o.Delivery.ID.String() == id {
 			o.Delivery = nil
@@ -158,8 +153,7 @@ func (r *OrderRepositoryLocal) DeleteOrderDelivery(ctx context.Context, id strin
 }
 
 func (r *OrderRepositoryLocal) UpdateOrderTable(ctx context.Context, table *model.OrderTable) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	orderID := table.OrderID.String()
 	for _, o := range r.orders {
 		if o.ID.String() == orderID {
@@ -171,8 +165,7 @@ func (r *OrderRepositoryLocal) UpdateOrderTable(ctx context.Context, table *mode
 }
 
 func (r *OrderRepositoryLocal) DeleteOrderTable(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	for _, o := range r.orders {
 		if o.Table != nil && o.Table.ID.String() == id {
 			o.Table = nil
@@ -183,8 +176,7 @@ func (r *OrderRepositoryLocal) DeleteOrderTable(ctx context.Context, id string) 
 }
 
 func (r *OrderRepositoryLocal) AddPaymentOrder(ctx context.Context, payment *model.PaymentOrder) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	orderID := payment.OrderID.String()
 	for _, o := range r.orders {
 		if o.ID.String() == orderID {

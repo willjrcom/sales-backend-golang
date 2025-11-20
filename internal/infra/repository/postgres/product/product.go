@@ -2,7 +2,6 @@ package productrepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
@@ -10,7 +9,6 @@ import (
 )
 
 type ProductRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -19,8 +17,6 @@ func NewProductRepositoryBun(db *bun.DB) model.ProductRepository {
 }
 
 func (r *ProductRepositoryBun) CreateProduct(ctx context.Context, p *model.Product) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -40,8 +36,6 @@ func (r *ProductRepositoryBun) CreateProduct(ctx context.Context, p *model.Produ
 }
 
 func (r *ProductRepositoryBun) UpdateProduct(ctx context.Context, p *model.Product) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -61,8 +55,6 @@ func (r *ProductRepositoryBun) UpdateProduct(ctx context.Context, p *model.Produ
 }
 
 func (r *ProductRepositoryBun) DeleteProduct(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -82,9 +74,6 @@ func (r *ProductRepositoryBun) DeleteProduct(ctx context.Context, id string) err
 func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*model.Product, error) {
 	product := &model.Product{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -103,9 +92,6 @@ func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*
 func (r *ProductRepositoryBun) GetProductByCode(ctx context.Context, code string) (*model.Product, error) {
 	product := &model.Product{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -123,9 +109,6 @@ func (r *ProductRepositoryBun) GetProductByCode(ctx context.Context, code string
 
 func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context) ([]model.Product, error) {
 	products := []model.Product{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

@@ -2,7 +2,6 @@ package companyrepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -11,7 +10,6 @@ import (
 )
 
 type CompanyRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -20,8 +18,6 @@ func NewCompanyRepositoryBun(db *bun.DB) model.CompanyRepository {
 }
 
 func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *model.Company) (err error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -66,8 +62,6 @@ func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *model.Co
 }
 
 func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model.Company) (err error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -113,8 +107,6 @@ func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model
 
 func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*model.Company, error) {
 	company := &model.Company{}
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -134,9 +126,6 @@ func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*model.Company, 
 
 func (r *CompanyRepositoryBun) ValidateUserToPublicCompany(ctx context.Context, userID uuid.UUID) (bool, error) {
 	schema := ctx.Value(model.Schema("schema")).(string)
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -161,9 +150,6 @@ func (r *CompanyRepositoryBun) ValidateUserToPublicCompany(ctx context.Context, 
 
 func (r *CompanyRepositoryBun) AddUserToPublicCompany(ctx context.Context, userID uuid.UUID) error {
 	schema := ctx.Value(model.Schema("schema")).(string)
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -190,9 +176,6 @@ func (r *CompanyRepositoryBun) AddUserToPublicCompany(ctx context.Context, userI
 func (r *CompanyRepositoryBun) RemoveUserFromPublicCompany(ctx context.Context, userID uuid.UUID) error {
 	schema := ctx.Value(model.Schema("schema")).(string)
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -215,8 +198,7 @@ func (r *CompanyRepositoryBun) RemoveUserFromPublicCompany(ctx context.Context, 
 
 // GetCompanyUsers retrieves a paginated list of users for the public company and the total count.
 func (r *CompanyRepositoryBun) GetCompanyUsers(ctx context.Context, page, perPage int) ([]model.User, int, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	// switch to public schema
 
 	tx, err := database.GetPublicTenantTransaction(ctx, r.db)

@@ -17,22 +17,19 @@ func NewShiftRepositoryLocal() model.ShiftRepository {
 }
 
 func (r *ShiftRepositoryLocal) CreateShift(ctx context.Context, shift *model.Shift) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	r.shifts[shift.ID.String()] = shift
 	return nil
 }
 
 func (r *ShiftRepositoryLocal) UpdateShift(ctx context.Context, shift *model.Shift) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	r.shifts[shift.ID.String()] = shift
 	return nil
 }
 
 func (r *ShiftRepositoryLocal) DeleteShift(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	delete(r.shifts, id)
 	return nil
 }
@@ -79,8 +76,7 @@ func (r *ShiftRepositoryLocal) GetAllShifts(ctx context.Context, page int, perPa
 }
 
 func (r *ShiftRepositoryLocal) IncrementCurrentOrder(ctx context.Context, id string) (int, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if s, ok := r.shifts[id]; ok {
 		s.CurrentOrderNumber++
 		return s.CurrentOrderNumber, nil

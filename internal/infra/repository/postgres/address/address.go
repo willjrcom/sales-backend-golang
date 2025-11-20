@@ -2,7 +2,6 @@ package addressrepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
@@ -10,7 +9,6 @@ import (
 )
 
 type AddressRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -19,8 +17,6 @@ func NewAddressRepositoryBun(db *bun.DB) model.AddressRepository {
 }
 
 func (r *AddressRepositoryBun) CreateAddress(ctx context.Context, c *model.Address) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -38,8 +34,6 @@ func (r *AddressRepositoryBun) CreateAddress(ctx context.Context, c *model.Addre
 }
 
 func (r *AddressRepositoryBun) UpdateAddress(ctx context.Context, c *model.Address) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -57,8 +51,6 @@ func (r *AddressRepositoryBun) UpdateAddress(ctx context.Context, c *model.Addre
 }
 
 func (r *AddressRepositoryBun) DeleteAddress(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -78,9 +70,6 @@ func (r *AddressRepositoryBun) DeleteAddress(ctx context.Context, id string) err
 func (r *AddressRepositoryBun) GetAddressById(ctx context.Context, id string) (*model.Address, error) {
 	aAddress := &model.Address{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -98,9 +87,6 @@ func (r *AddressRepositoryBun) GetAddressById(ctx context.Context, id string) (*
 
 func (r *AddressRepositoryBun) GetAllAddress(ctx context.Context) ([]model.Address, error) {
 	addresss := []model.Address{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

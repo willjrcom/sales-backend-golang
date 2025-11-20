@@ -24,8 +24,7 @@ func (r *UserRepositoryLocal) CreateUser(ctx context.Context, user *model.User) 
 	if user == nil || user.Entity.ID == uuid.Nil {
 		return errors.New("invalid user")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.users[user.Entity.ID]; exists {
 		return errors.New("user already exists")
 	}
@@ -50,8 +49,7 @@ func (r *UserRepositoryLocal) UpdateUserPassword(ctx context.Context, user *mode
 	if user == nil || user.Entity.ID == uuid.Nil {
 		return errors.New("invalid user")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.users[user.Entity.ID]; !exists {
 		return errors.New("user not found")
 	}
@@ -63,8 +61,7 @@ func (r *UserRepositoryLocal) UpdateUser(ctx context.Context, user *model.User) 
 	if user == nil || user.Entity.ID == uuid.Nil {
 		return errors.New("invalid user")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.users[user.Entity.ID]; !exists {
 		return errors.New("user not found")
 	}
@@ -76,8 +73,7 @@ func (r *UserRepositoryLocal) LoginAndDeleteUser(ctx context.Context, user *mode
 	if user == nil || user.Entity.ID == uuid.Nil {
 		return errors.New("invalid user")
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	if _, exists := r.users[user.Entity.ID]; !exists {
 		return errors.New("user not found")
 	}

@@ -18,22 +18,19 @@ func NewDeliveryDriverRepositoryLocal() model.DeliveryDriverRepository {
 }
 
 func (r *DeliveryDriverRepositoryLocal) CreateDeliveryDriver(ctx context.Context, p *model.DeliveryDriver) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	r.drivers[p.ID.String()] = p
 	return nil
 }
 
 func (r *DeliveryDriverRepositoryLocal) UpdateDeliveryDriver(ctx context.Context, p *model.DeliveryDriver) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	r.drivers[p.ID.String()] = p
 	return nil
 }
 
 func (r *DeliveryDriverRepositoryLocal) DeleteDeliveryDriver(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+
 	delete(r.drivers, id)
 	return nil
 }

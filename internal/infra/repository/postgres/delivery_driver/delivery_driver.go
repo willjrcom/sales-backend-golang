@@ -2,7 +2,6 @@ package deliverydriverrepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
@@ -10,7 +9,6 @@ import (
 )
 
 type DeliveryDriverRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -19,8 +17,6 @@ func NewDeliveryDriverRepositoryBun(db *bun.DB) model.DeliveryDriverRepository {
 }
 
 func (r *DeliveryDriverRepositoryBun) CreateDeliveryDriver(ctx context.Context, s *model.DeliveryDriver) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -38,8 +34,6 @@ func (r *DeliveryDriverRepositoryBun) CreateDeliveryDriver(ctx context.Context, 
 }
 
 func (r *DeliveryDriverRepositoryBun) UpdateDeliveryDriver(ctx context.Context, s *model.DeliveryDriver) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -57,8 +51,6 @@ func (r *DeliveryDriverRepositoryBun) UpdateDeliveryDriver(ctx context.Context, 
 }
 
 func (r *DeliveryDriverRepositoryBun) DeleteDeliveryDriver(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -78,9 +70,6 @@ func (r *DeliveryDriverRepositoryBun) DeleteDeliveryDriver(ctx context.Context, 
 func (r *DeliveryDriverRepositoryBun) GetDeliveryDriverById(ctx context.Context, id string) (*model.DeliveryDriver, error) {
 	deliveryDriver := &model.DeliveryDriver{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -99,9 +88,6 @@ func (r *DeliveryDriverRepositoryBun) GetDeliveryDriverById(ctx context.Context,
 func (r *DeliveryDriverRepositoryBun) GetDeliveryDriverByEmployeeId(ctx context.Context, id string) (*model.DeliveryDriver, error) {
 	deliveryDriver := &model.DeliveryDriver{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -119,9 +105,6 @@ func (r *DeliveryDriverRepositoryBun) GetDeliveryDriverByEmployeeId(ctx context.
 
 func (r *DeliveryDriverRepositoryBun) GetAllDeliveryDrivers(ctx context.Context) ([]model.DeliveryDriver, error) {
 	deliveryDrivers := []model.DeliveryDriver{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

@@ -2,7 +2,6 @@ package itemrepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -11,7 +10,6 @@ import (
 )
 
 type ItemRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -20,8 +18,6 @@ func NewItemRepositoryBun(db *bun.DB) model.ItemRepository {
 }
 
 func (r *ItemRepositoryBun) AddItem(ctx context.Context, p *model.Item) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -39,8 +35,6 @@ func (r *ItemRepositoryBun) AddItem(ctx context.Context, p *model.Item) error {
 }
 
 func (r *ItemRepositoryBun) AddAdditionalItem(ctx context.Context, id uuid.UUID, productID uuid.UUID, additionalItem *model.Item) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -77,8 +71,6 @@ func (r *ItemRepositoryBun) AddAdditionalItem(ctx context.Context, id uuid.UUID,
 }
 
 func (r *ItemRepositoryBun) UpdateItem(ctx context.Context, p *model.Item) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -96,8 +88,6 @@ func (r *ItemRepositoryBun) UpdateItem(ctx context.Context, p *model.Item) error
 }
 
 func (r *ItemRepositoryBun) DeleteItem(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -144,8 +134,6 @@ func (r *ItemRepositoryBun) DeleteItem(ctx context.Context, id string) error {
 }
 
 func (r *ItemRepositoryBun) DeleteAdditionalItem(ctx context.Context, idAdditional uuid.UUID) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -173,9 +161,6 @@ func (r *ItemRepositoryBun) DeleteAdditionalItem(ctx context.Context, idAddition
 func (r *ItemRepositoryBun) GetItemById(ctx context.Context, id string) (*model.Item, error) {
 	item := &model.Item{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -194,9 +179,6 @@ func (r *ItemRepositoryBun) GetItemById(ctx context.Context, id string) (*model.
 func (r *ItemRepositoryBun) GetItemByAdditionalItemID(ctx context.Context, idAdditional uuid.UUID) (*model.Item, error) {
 	item := &model.Item{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -214,9 +196,6 @@ func (r *ItemRepositoryBun) GetItemByAdditionalItemID(ctx context.Context, idAdd
 
 func (r *ItemRepositoryBun) GetAllItems(ctx context.Context) ([]model.Item, error) {
 	items := []model.Item{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

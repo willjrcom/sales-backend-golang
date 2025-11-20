@@ -2,7 +2,6 @@ package groupitemrepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
@@ -10,7 +9,6 @@ import (
 )
 
 type GroupItemRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -19,8 +17,6 @@ func NewGroupItemRepositoryBun(db *bun.DB) model.GroupItemRepository {
 }
 
 func (r *GroupItemRepositoryBun) CreateGroupItem(ctx context.Context, p *model.GroupItem) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -38,8 +34,6 @@ func (r *GroupItemRepositoryBun) CreateGroupItem(ctx context.Context, p *model.G
 }
 
 func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *model.GroupItem) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -57,8 +51,6 @@ func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *model.G
 }
 
 func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string, complementItemID *string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -92,8 +84,6 @@ func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string,
 
 func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, withRelation bool) (*model.GroupItem, error) {
 	item := &model.GroupItem{}
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -125,9 +115,6 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 func (r *GroupItemRepositoryBun) GetGroupItemsByStatus(ctx context.Context, status string) ([]model.GroupItem, error) {
 	items := []model.GroupItem{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -153,9 +140,6 @@ func (r *GroupItemRepositoryBun) GetGroupItemsByStatus(ctx context.Context, stat
 
 func (r *GroupItemRepositoryBun) GetGroupItemsByOrderIDAndStatus(ctx context.Context, id string, status string) ([]model.GroupItem, error) {
 	items := []model.GroupItem{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

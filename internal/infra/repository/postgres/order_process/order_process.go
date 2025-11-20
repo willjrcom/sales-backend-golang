@@ -3,7 +3,6 @@ package orderprocessrepositorybun
 import (
 	"context"
 	"strings"
-	"sync"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
@@ -12,7 +11,6 @@ import (
 )
 
 type ProcessRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -21,8 +19,6 @@ func NewOrderProcessRepositoryBun(db *bun.DB) model.OrderProcessRepository {
 }
 
 func (r *ProcessRepositoryBun) CreateProcess(ctx context.Context, s *model.OrderProcess) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -61,8 +57,6 @@ func (r *ProcessRepositoryBun) CreateProcess(ctx context.Context, s *model.Order
 }
 
 func (r *ProcessRepositoryBun) UpdateProcess(ctx context.Context, s *model.OrderProcess) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -80,8 +74,6 @@ func (r *ProcessRepositoryBun) UpdateProcess(ctx context.Context, s *model.Order
 }
 
 func (r *ProcessRepositoryBun) DeleteProcess(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -100,9 +92,6 @@ func (r *ProcessRepositoryBun) DeleteProcess(ctx context.Context, id string) err
 
 func (r *ProcessRepositoryBun) GetProcessById(ctx context.Context, id string) (*model.OrderProcess, error) {
 	process := &model.OrderProcess{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -128,9 +117,6 @@ func (r *ProcessRepositoryBun) GetProcessById(ctx context.Context, id string) (*
 func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]model.OrderProcess, error) {
 	processes := []model.OrderProcess{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -148,9 +134,6 @@ func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]model.Ord
 
 func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, id string) ([]model.OrderProcess, error) {
 	processes := []model.OrderProcess{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -188,9 +171,6 @@ func (r *ProcessRepositoryBun) GetProcessesByProductID(ctx context.Context, id s
 	processes := []model.OrderProcess{}
 	processesToProduct := []model.OrderProcessToProductToGroupItem{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -218,9 +198,6 @@ func (r *ProcessRepositoryBun) GetProcessesByProductID(ctx context.Context, id s
 func (r *ProcessRepositoryBun) GetProcessesByGroupItemID(ctx context.Context, id string) ([]model.OrderProcess, error) {
 	processes := []model.OrderProcess{}
 	processesToGroupItem := []model.OrderProcessToProductToGroupItem{}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {

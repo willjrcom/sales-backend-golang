@@ -2,7 +2,6 @@ package tablerepositorybun
 
 import (
 	"context"
-	"sync"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
@@ -10,7 +9,6 @@ import (
 )
 
 type TableRepositoryBun struct {
-	mu sync.Mutex
 	db *bun.DB
 }
 
@@ -19,8 +17,6 @@ func NewTableRepositoryBun(db *bun.DB) model.TableRepository {
 }
 
 func (r *TableRepositoryBun) CreateTable(ctx context.Context, s *model.Table) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -38,8 +34,6 @@ func (r *TableRepositoryBun) CreateTable(ctx context.Context, s *model.Table) er
 }
 
 func (r *TableRepositoryBun) UpdateTable(ctx context.Context, s *model.Table) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -57,8 +51,6 @@ func (r *TableRepositoryBun) UpdateTable(ctx context.Context, s *model.Table) er
 }
 
 func (r *TableRepositoryBun) DeleteTable(ctx context.Context, id string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -78,9 +70,6 @@ func (r *TableRepositoryBun) DeleteTable(ctx context.Context, id string) error {
 func (r *TableRepositoryBun) GetTableById(ctx context.Context, id string) (*model.Table, error) {
 	table := &model.Table{}
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -99,9 +88,6 @@ func (r *TableRepositoryBun) GetTableById(ctx context.Context, id string) (*mode
 func (r *TableRepositoryBun) GetAllTables(ctx context.Context) ([]model.Table, error) {
 	tables := make([]model.Table, 0)
 
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -119,9 +105,6 @@ func (r *TableRepositoryBun) GetAllTables(ctx context.Context) ([]model.Table, e
 
 func (r *TableRepositoryBun) GetUnusedTables(ctx context.Context) ([]model.Table, error) {
 	tables := make([]model.Table, 0)
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
 	tx, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
