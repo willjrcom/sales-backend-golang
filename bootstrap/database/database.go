@@ -43,18 +43,13 @@ func ConnectDB(ctx context.Context) string {
 	if dbName == "" {
 		dbName = "sales-db"
 	}
-	sslmode := os.Getenv("DB_SSLMODE")
-	if sslmode == "" {
-		sslmode = "disable"
-	}
 	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		"postgres://%s:%s@%s:%s/%s",
 		user,
 		password,
 		host,
 		port,
 		dbName,
-		sslmode,
 	)
 }
 
