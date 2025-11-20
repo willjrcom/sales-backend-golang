@@ -44,7 +44,7 @@ func ConnectDB(ctx context.Context) string {
 		dbName = "sales-db"
 	}
 	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s",
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		user,
 		password,
 		host,
