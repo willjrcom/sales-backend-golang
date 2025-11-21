@@ -17,6 +17,12 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
+		// liberação de preflight
+		if r.Method == http.MethodOptions {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		// Verificar se a URL atual está na lista de URLs afetados
 		shouldValidate := true
 		unprotectUserDelete := r.Method == http.MethodDelete && strings.HasSuffix(r.URL.Path, "/user")
@@ -25,13 +31,14 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 			shouldValidate = false
 		}
 
-		if shouldValidate {
-			for _, url := range c.UnprotectedRoutes {
+		// normalizar caminho
+		path := strings.TrimSuffix(r.URL.Path, "/")
 
-				if strings.Contains(r.URL.Path, url) || unprotectUserDelete {
-					shouldValidate = false
-					break
-				}
+		// usar prefixo (ou exato) em vez de Contains
+		for _, route := range c.UnprotectedRoutes {
+			if strings.HasPrefix(path, route) {
+				shouldValidate = false
+				break
 			}
 		}
 
