@@ -8,11 +8,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"  # Expondo a porta do Go HTTP server
-    environment:
-      - S3_BUCKET_NAME=gfood361769556033
-      - AWS_REGION=us-east-1
-      - EMAIL_SERVICE=williamjunior67@gmail.com
-      - PASSWORD_EMAIL_SERVICE=rlct qnhw grbm czmu
 
     command: ["go", "run", "main.go", "httpserver"]  # Comando para rodar o Go app
     networks:
