@@ -60,26 +60,14 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *model.Client)
 	}
 
 	if c.Contact != nil {
-		if _, err := tx.NewDelete().Model(&model.Contact{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		// Create contact
-		if _, err := tx.NewInsert().Model(c.Contact).Exec(ctx); err != nil {
+		if _, err := tx.NewUpdate().Model(c.Contact).Where("id = ?", c.Contact.ID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
 	if c.Address != nil {
-		if _, err := tx.NewDelete().Model(&model.Address{}).Where("object_id = ?", c.ID).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		// Create addresse
-		if _, err := tx.NewInsert().Model(c.Address).Exec(ctx); err != nil {
+		if _, err := tx.NewUpdate().Model(c.Address).Where("id = ?", c.Address.ID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}

@@ -31,26 +31,14 @@ func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *model.User) er
 	}
 
 	if user.PublicPerson.Contact != nil {
-		if _, err := tx.NewDelete().Model(&model.Contact{}).Where("object_id = ?", user.ID).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		// Create contact
-		if _, err := tx.NewInsert().Model(user.PublicPerson.Contact).Exec(ctx); err != nil {
+		if _, err := tx.NewUpdate().Model(user.PublicPerson.Contact).Where("id = ?", user.PublicPerson.Contact.ID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
 	}
 
 	if user.PublicPerson.Address != nil {
-		if _, err := tx.NewDelete().Model(&model.Address{}).Where("object_id = ?", user.ID).Exec(ctx); err != nil {
-			tx.Rollback()
-			return err
-		}
-
-		// Create addresse
-		if _, err := tx.NewInsert().Model(user.PublicPerson.Address).Exec(ctx); err != nil {
+		if _, err := tx.NewUpdate().Model(user.PublicPerson.Address).Where("id = ?", user.PublicPerson.Address.ID).Exec(ctx); err != nil {
 			tx.Rollback()
 			return err
 		}
