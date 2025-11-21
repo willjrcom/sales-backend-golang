@@ -81,6 +81,9 @@ func (r *UserRepositoryBun) GetUser(ctx context.Context, email string) (*model.U
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return user, nil
 }
 
@@ -95,6 +98,9 @@ func (r *UserRepositoryBun) UpdateUserPassword(ctx context.Context, user *model.
 		return err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -147,29 +153,22 @@ func (r *UserRepositoryBun) LoginAndDeleteUser(ctx context.Context, user *model.
 		return err
 	}
 
-	userToDelete := &model.User{}
-
-	if _, err := tx.NewSelect().Model(userToDelete).Where("u.email = ?", user.Email).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(userLogged).Where("id = ?", userLogged.ID).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model((&model.Person{})).Where("object_id = ?", userToDelete.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model((&model.Address{})).Where("object_id = ?", userLogged.ID).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model((&model.Address{})).Where("object_id = ?", userToDelete.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model((&model.Contact{})).Where("object_id = ?", userLogged.ID).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	if _, err := tx.NewDelete().Model((&model.Contact{})).Where("object_id = ?", userToDelete.ID).Exec(ctx); err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	if _, err := tx.NewDelete().Model(userToDelete).Where("id = ?", userToDelete.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(userLogged).Where("id = ?", userLogged.ID).Exec(ctx); err != nil {
 		tx.Rollback()
 		return err
 	}
@@ -199,6 +198,10 @@ func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *model.User) (*m
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
 	return user, nil
 }
 
@@ -214,6 +217,9 @@ func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (*uu
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return &user.ID, nil
 }
 
@@ -229,6 +235,9 @@ func (r *UserRepositoryBun) GetIDByEmailOrCPF(ctx context.Context, email string,
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return &user.ID, nil
 }
 
@@ -241,6 +250,10 @@ func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID) (*mod
 
 	user := &model.User{}
 	if err := tx.NewSelect().Model(user).Where("u.id = ?", id).Relation("Companies").Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 
@@ -259,6 +272,9 @@ func (r *UserRepositoryBun) GetByCPF(ctx context.Context, cpf string) (*model.Us
 		return nil, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
 	return user, nil
 }
 
@@ -274,5 +290,8 @@ func (r *UserRepositoryBun) ExistsUserByID(ctx context.Context, id uuid.UUID) (b
 		return false, err
 	}
 
+	if err := tx.Commit(); err != nil {
+		return false, err
+	}
 	return user.ID != uuid.Nil, nil
 }
