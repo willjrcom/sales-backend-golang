@@ -39,6 +39,7 @@ func (c *ServerChi) newServer() {
 	})
 	c.Router.Use(Cors.Handler)
 	c.Router.Use(c.middlewareAuthUser)
+	c.Router.Use(c.middlewareRecover)
 }
 
 func (c *ServerChi) StartServer(port string) error {
