@@ -8,10 +8,12 @@ import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
+	employeedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/employee"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
+	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 )
 
@@ -20,6 +22,7 @@ type Service struct {
 	a  model.AddressRepository
 	s  schemaservice.Service
 	u  model.UserRepository
+	es employeeusecases.Service
 	us userusecases.Service
 }
 
@@ -27,11 +30,12 @@ func NewService(r model.CompanyRepository) *Service {
 	return &Service{r: r}
 }
 
-func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Service, u model.UserRepository, us userusecases.Service) {
+func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Service, u model.UserRepository, us userusecases.Service, es employeeusecases.Service) {
 	s.a = a
 	s.s = ss
 	s.u = u
 	s.us = us
+	s.es = es
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (response *companydto.CompanySchemaDTO, err error) {
@@ -91,6 +95,14 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	}
 
 	if err = s.AddUserToCompany(ctx, userInput); err != nil {
+		return nil, err
+	}
+
+	employeeInput := &employeedto.EmployeeCreateDTO{
+		UserID: &userIDUUID,
+	}
+
+	if _, err = s.es.CreateEmployee(ctx, employeeInput); err != nil {
 		return nil, err
 	}
 
