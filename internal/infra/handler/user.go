@@ -50,6 +50,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 		fmt.Sprintf("%s/update/forget-password", route),
 		fmt.Sprintf("%s/forget-password", route),
 		fmt.Sprintf("%s/validate-password-reset-token", route),
+		fmt.Sprintf("%s/refresh-access-token", route),
 	}
 
 	return handler.NewHandler(route, c, unprotectedRoutes...)
