@@ -269,6 +269,11 @@ func (h *handlerUserImpl) handlerRefreshAccessToken(w http.ResponseWriter, r *ht
 	}
 
 	schema := jwtservice.GetSchemaFromAccessToken(validAccessToken)
+	if schema == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("schema not found in token"))
+		return
+	}
+
 	newAccessToken, err := jwtservice.CreateAccessToken(validAccessToken, schema)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
