@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"runtime/debug"
 	"strings"
@@ -19,11 +18,13 @@ import (
 // middlewareRecover captura panics em handlers e evita que a aplicação caia.
 // Ele registra a pilha e retorna 500 com uma mensagem genérica.
 func (c *ServerChi) middlewareRecover(next http.Handler) http.Handler {
+	fmt.Println("middlewareRecover init")
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if rec := recover(); rec != nil {
 				// Logar o panic e stack trace para diagnóstico
-				log.Printf("panic recovered: %v\n%s", rec, debug.Stack())
+				fmt.Printf("panic recovered: %v\n%s", rec, debug.Stack())
 
 				// Responder com erro genérico (não expor detalhes do panic ao cliente)
 				jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, errors.New("internal server error"))
@@ -35,11 +36,14 @@ func (c *ServerChi) middlewareRecover(next http.Handler) http.Handler {
 }
 
 func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
+	fmt.Println("middlewareAuthUser init")
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
 		// liberação de preflight
 		if r.Method == http.MethodOptions {
+			fmt.Println("middlewareAuthUser options")
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -49,6 +53,7 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 		unprotectUserDelete := r.Method == http.MethodDelete && strings.HasSuffix(r.URL.Path, "/user")
 
 		if unprotectUserDelete {
+			fmt.Println("middlewareAuthUser unprotectUserDelete")
 			shouldValidate = false
 		}
 
@@ -59,6 +64,7 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 		for _, route := range c.UnprotectedRoutes {
 			if strings.HasPrefix(path, route) {
 				shouldValidate = false
+				fmt.Println("middlewareAuthUser unprotected route", route)
 				break
 			}
 		}
