@@ -18,10 +18,13 @@ func NewTableRepositoryBun(db *bun.DB) model.TableRepository {
 
 func (r *TableRepositoryBun) CreateTable(ctx context.Context, s *model.Table) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewInsert().Model(s).Exec(ctx); err != nil {
 		return err
@@ -35,10 +38,13 @@ func (r *TableRepositoryBun) CreateTable(ctx context.Context, s *model.Table) er
 
 func (r *TableRepositoryBun) UpdateTable(ctx context.Context, s *model.Table) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
 		return err
@@ -52,10 +58,13 @@ func (r *TableRepositoryBun) UpdateTable(ctx context.Context, s *model.Table) er
 
 func (r *TableRepositoryBun) DeleteTable(ctx context.Context, id string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewDelete().Model(&model.Table{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
@@ -70,10 +79,13 @@ func (r *TableRepositoryBun) DeleteTable(ctx context.Context, id string) error {
 func (r *TableRepositoryBun) GetTableById(ctx context.Context, id string) (*model.Table, error) {
 	table := &model.Table{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(table).Where("id = ?", id).Scan(ctx); err != nil {
 		return nil, err
@@ -88,10 +100,13 @@ func (r *TableRepositoryBun) GetTableById(ctx context.Context, id string) (*mode
 func (r *TableRepositoryBun) GetAllTables(ctx context.Context) ([]model.Table, error) {
 	tables := make([]model.Table, 0)
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&tables).Scan(ctx); err != nil {
 		return nil, err
@@ -106,10 +121,13 @@ func (r *TableRepositoryBun) GetAllTables(ctx context.Context) ([]model.Table, e
 func (r *TableRepositoryBun) GetUnusedTables(ctx context.Context) ([]model.Table, error) {
 	tables := make([]model.Table, 0)
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&tables).Where("id NOT IN (?)", tx.NewSelect().Model((*model.PlaceToTables)(nil)).
 		Column("table_id")).Scan(ctx); err != nil {

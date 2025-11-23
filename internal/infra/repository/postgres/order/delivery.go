@@ -19,10 +19,13 @@ func NewOrderDeliveryRepositoryBun(db *bun.DB) model.OrderDeliveryRepository {
 
 func (r *OrderDeliveryRepositoryBun) CreateOrderDelivery(ctx context.Context, delivery *model.OrderDelivery) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewInsert().Model(delivery).Exec(ctx); err != nil {
 		return err
@@ -36,10 +39,13 @@ func (r *OrderDeliveryRepositoryBun) CreateOrderDelivery(ctx context.Context, de
 
 func (r *OrderDeliveryRepositoryBun) UpdateOrderDelivery(ctx context.Context, delivery *model.OrderDelivery) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewUpdate().Model(delivery).Where("id = ?", delivery.ID).Exec(ctx); err != nil {
 		return err
@@ -53,10 +59,13 @@ func (r *OrderDeliveryRepositoryBun) UpdateOrderDelivery(ctx context.Context, de
 
 func (r *OrderDeliveryRepositoryBun) DeleteOrderDelivery(ctx context.Context, id string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewDelete().Model(&model.OrderDelivery{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
@@ -71,10 +80,13 @@ func (r *OrderDeliveryRepositoryBun) DeleteOrderDelivery(ctx context.Context, id
 func (r *OrderDeliveryRepositoryBun) GetAllDeliveries(ctx context.Context) ([]model.OrderDelivery, error) {
 	deliveries := []model.OrderDelivery{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&deliveries).Where("delivery.status != ?", orderentity.OrderDeliveryStatusStaging).Relation("Client").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
 		return nil, err
@@ -89,10 +101,13 @@ func (r *OrderDeliveryRepositoryBun) GetAllDeliveries(ctx context.Context) ([]mo
 func (r *OrderDeliveryRepositoryBun) GetDeliveryById(ctx context.Context, id string) (*model.OrderDelivery, error) {
 	delivery := &model.OrderDelivery{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(delivery).Where("delivery.id = ?", id).Relation("Client.Address").Relation("Address").Relation("Driver").Scan(ctx); err != nil {
 		return nil, err
@@ -107,10 +122,13 @@ func (r *OrderDeliveryRepositoryBun) GetDeliveryById(ctx context.Context, id str
 func (r *OrderDeliveryRepositoryBun) GetDeliveriesByIds(ctx context.Context, ids []string) ([]model.OrderDelivery, error) {
 	deliveries := []model.OrderDelivery{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&deliveries).Where("delivery.id IN (?)", bun.In(ids)).Scan(ctx); err != nil {
 		return nil, err

@@ -18,10 +18,13 @@ func NewOrderQueueRepositoryBun(db *bun.DB) model.QueueRepository {
 
 func (r *QueueRepositoryBun) CreateQueue(ctx context.Context, s *model.OrderQueue) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewInsert().Model(s).Exec(ctx); err != nil {
 		return err
@@ -35,10 +38,13 @@ func (r *QueueRepositoryBun) CreateQueue(ctx context.Context, s *model.OrderQueu
 
 func (r *QueueRepositoryBun) UpdateQueue(ctx context.Context, s *model.OrderQueue) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
 		return err
@@ -52,10 +58,13 @@ func (r *QueueRepositoryBun) UpdateQueue(ctx context.Context, s *model.OrderQueu
 
 func (r *QueueRepositoryBun) DeleteQueue(ctx context.Context, id string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewDelete().Model(&model.OrderQueue{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
@@ -70,10 +79,13 @@ func (r *QueueRepositoryBun) DeleteQueue(ctx context.Context, id string) error {
 func (r *QueueRepositoryBun) GetQueueById(ctx context.Context, id string) (*model.OrderQueue, error) {
 	queue := &model.OrderQueue{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(queue).Where("id = ?", id).Scan(ctx); err != nil {
 		return nil, err
@@ -88,10 +100,13 @@ func (r *QueueRepositoryBun) GetQueueById(ctx context.Context, id string) (*mode
 func (r *QueueRepositoryBun) GetOpenedQueueByGroupItemId(ctx context.Context, id string) (*model.OrderQueue, error) {
 	queue := &model.OrderQueue{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(queue).Where("group_item_id = ? AND left_at IS NULL", id).Scan(ctx); err != nil {
 		return nil, err
@@ -106,10 +121,13 @@ func (r *QueueRepositoryBun) GetOpenedQueueByGroupItemId(ctx context.Context, id
 func (r *QueueRepositoryBun) GetQueuesByGroupItemId(ctx context.Context, id string) ([]model.OrderQueue, error) {
 	queues := []model.OrderQueue{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&queues).Where("group_item_id = ?", id).Scan(ctx); err != nil {
 		return nil, err
@@ -124,10 +142,13 @@ func (r *QueueRepositoryBun) GetQueuesByGroupItemId(ctx context.Context, id stri
 func (r *QueueRepositoryBun) GetAllQueues(ctx context.Context) ([]model.OrderQueue, error) {
 	queuees := []model.OrderQueue{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&queuees).Scan(ctx); err != nil {
 		return nil, err

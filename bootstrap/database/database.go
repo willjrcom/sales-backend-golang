@@ -126,33 +126,36 @@ func NewSQLiteConnection() *bun.DB {
 	return dbInstance
 }
 
-func GetTenantTransaction(ctx context.Context, db *bun.DB) (*bun.Tx, error) {
+func GetTenantTransaction(ctx context.Context, db *bun.DB) (context.Context, *bun.Tx, context.CancelFunc, error) {
 	schemaName, err := GetCurrentSchema(ctx)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
-	tx, err := db.Begin()
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
-		return nil, err
+		cancel()
+		return nil, nil, nil, err
 	}
 
 	query := fmt.Sprintf("SET search_path=%s", schemaName)
 	if _, err = tx.ExecContext(ctx, query); err != nil {
-		return nil, err
+		cancel()
+		return nil, nil, nil, err
 	}
 
-	return &tx, nil
+	return ctx, &tx, cancel, nil
 }
 
-func GetPublicTenantTransaction(ctx context.Context, db *bun.DB) (*bun.Tx, error) {
+func GetPublicTenantTransaction(ctx context.Context, db *bun.DB) (context.Context, *bun.Tx, context.CancelFunc, error) {
 	ctx = context.WithValue(ctx, model.Schema("schema"), model.PUBLIC_SCHEMA)
 	return GetTenantTransaction(ctx, db)
 }
 
 func GetCurrentSchema(ctx context.Context) (string, error) {
 	schemaName := ctx.Value(model.Schema("schema"))
-	if schemaName == nil {
+	if schemaName == nil || schemaName == "" {
 		return "", errors.New("schema not found")
 	}
 	return schemaName.(string), nil
@@ -177,10 +180,13 @@ func createPublicTables(ctx context.Context, db *bun.DB) error {
 		panic(err)
 	}
 
-	tx, err := GetTenantTransaction(ctx, db)
+	ctx, tx, cancel, err := GetTenantTransaction(ctx, db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := createTableIfNotExists(ctx, tx, (*model.CompanyToUsers)(nil)); err != nil {
 		return err
@@ -245,10 +251,13 @@ func CreateNewCompanySchema(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	tx, err := GetTenantTransaction(ctx, db)
+	ctx, tx, cancel, err := GetTenantTransaction(ctx, db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := createTables(ctx, tx); err != nil {
 		return err

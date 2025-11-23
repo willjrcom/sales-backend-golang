@@ -16,7 +16,6 @@ func NewSchemaRepositoryBun(db *bun.DB) model.SchemaRepository {
 }
 
 func (r *SchemaRepositoryBun) NewSchema(ctx context.Context) error {
-
 	if err := database.CreateNewCompanySchema(ctx, r.db); err != nil {
 		return err
 	}

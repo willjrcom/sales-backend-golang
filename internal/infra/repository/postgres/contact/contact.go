@@ -17,10 +17,13 @@ func NewContactRepositoryBun(db *bun.DB) model.ContactRepository {
 
 func (r *ContactRepositoryBun) CreateContact(ctx context.Context, c *model.Contact) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	_, err = tx.NewInsert().Model(c).Exec(ctx)
 	if err != nil {
@@ -35,10 +38,13 @@ func (r *ContactRepositoryBun) CreateContact(ctx context.Context, c *model.Conta
 
 func (r *ContactRepositoryBun) UpdateContact(ctx context.Context, c *model.Contact) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	_, err = tx.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx)
 	if err != nil {
@@ -53,10 +59,13 @@ func (r *ContactRepositoryBun) UpdateContact(ctx context.Context, c *model.Conta
 
 func (r *ContactRepositoryBun) DeleteContact(ctx context.Context, id string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	_, err = tx.NewDelete().Model(&model.Contact{}).Where("id = ?", id).Exec(ctx)
 	if err != nil {
@@ -72,10 +81,13 @@ func (r *ContactRepositoryBun) DeleteContact(ctx context.Context, id string) err
 func (r *ContactRepositoryBun) GetContactById(ctx context.Context, id string) (*model.Contact, error) {
 	contact := &model.Contact{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	err = tx.NewSelect().Model(contact).Where("contact.id = ?", id).Scan(ctx)
 	if err != nil {
@@ -91,10 +103,13 @@ func (r *ContactRepositoryBun) GetContactById(ctx context.Context, id string) (*
 func (r *ContactRepositoryBun) GetContactByDddAndNumber(ctx context.Context, ddd string, number string, contactType string) (*model.Contact, error) {
 	contact := &model.Contact{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(contact).Where("ddd = ? AND number = ? AND type = ?", ddd, number, contactType).Scan(ctx); err != nil {
 		return nil, err
@@ -109,10 +124,13 @@ func (r *ContactRepositoryBun) GetContactByDddAndNumber(ctx context.Context, ddd
 func (r *ContactRepositoryBun) FtSearchContacts(ctx context.Context, text string, contactType string) (contacts []model.Contact, err error) {
 	contacts = []model.Contact{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err = tx.NewSelect().Model(&contacts).Where("ts @@ websearch_to_tsquery('simple', ?) and type = ?", text, contactType).Scan(ctx); err != nil {
 		return nil, err

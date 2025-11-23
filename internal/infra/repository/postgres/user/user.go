@@ -19,33 +19,31 @@ func NewUserRepositoryBun(db *bun.DB) model.UserRepository {
 }
 
 func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *model.User) error {
-
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	if _, err := tx.NewInsert().Model(user).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if user.PublicPerson.Contact != nil {
 		if _, err := tx.NewUpdate().Model(user.PublicPerson.Contact).Where("id = ?", user.PublicPerson.Contact.ID).Exec(ctx); err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
 
 	if user.PublicPerson.Address != nil {
 		if _, err := tx.NewUpdate().Model(user.PublicPerson.Address).Where("id = ?", user.PublicPerson.Address.ID).Exec(ctx); err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		tx.Rollback()
 		return err
 	}
 	return nil
@@ -53,10 +51,13 @@ func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *model.User) er
 
 func (r *UserRepositoryBun) GetUser(ctx context.Context, email string) (*model.User, error) {
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	user := &model.User{}
 	if err := tx.NewSelect().
@@ -77,10 +78,13 @@ func (r *UserRepositoryBun) GetUser(ctx context.Context, email string) (*model.U
 
 func (r *UserRepositoryBun) UpdateUserPassword(ctx context.Context, user *model.User) error {
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewUpdate().Model(user).WherePK().Column("hash").Exec(ctx); err != nil {
 		return err
@@ -94,32 +98,31 @@ func (r *UserRepositoryBun) UpdateUserPassword(ctx context.Context, user *model.
 
 func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *model.User) error {
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	if _, err := tx.NewUpdate().Model(user).WherePK().ExcludeColumn("hash").Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if user.Contact != nil {
 		if _, err := tx.NewUpdate().Model(user.Contact).WherePK().Exec(ctx); err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
 
 	if user.Address != nil {
 		if _, err := tx.NewUpdate().Model(user.Address).WherePK().Exec(ctx); err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -136,28 +139,27 @@ func (r *UserRepositoryBun) LoginAndDeleteUser(ctx context.Context, user *model.
 		return errors.New("invalid email or password")
 	}
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	if _, err := tx.NewDelete().Model(userLogged).Where("id = ?", userLogged.ID).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model((&model.Address{})).Where("object_id = ?", userLogged.ID).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model((&model.Contact{})).Where("object_id = ?", userLogged.ID).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(userLogged).Where("id = ?", userLogged.ID).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -170,10 +172,13 @@ func (r *UserRepositoryBun) LoginAndDeleteUser(ctx context.Context, user *model.
 
 func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *model.User) (*model.User, error) {
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().
 		Model(user).
@@ -195,10 +200,13 @@ func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *model.User) (*m
 
 func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (*uuid.UUID, error) {
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	user := &model.User{}
 	if err := tx.NewSelect().Model(user).Where("u.email = ?", email).Column("id").Scan(ctx); err != nil {
@@ -213,10 +221,13 @@ func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (*uu
 
 func (r *UserRepositoryBun) GetIDByEmailOrCPF(ctx context.Context, email string, cpf string) (*uuid.UUID, error) {
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	user := &model.User{}
 	if err := tx.NewSelect().Model(user).Where("u.email = ? or u.cpf = ?", email, cpf).Column("id").Scan(ctx); err != nil {
@@ -231,10 +242,13 @@ func (r *UserRepositoryBun) GetIDByEmailOrCPF(ctx context.Context, email string,
 
 func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID) (*model.User, error) {
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	user := &model.User{}
 	if err := tx.NewSelect().Model(user).Where("u.id = ?", id).Relation("Companies").Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
@@ -250,10 +264,13 @@ func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID) (*mod
 
 func (r *UserRepositoryBun) GetByCPF(ctx context.Context, cpf string) (*model.User, error) {
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	user := &model.User{}
 	if err := tx.NewSelect().Model(user).Where("u.cpf = ?", cpf).Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
@@ -268,10 +285,13 @@ func (r *UserRepositoryBun) GetByCPF(ctx context.Context, cpf string) (*model.Us
 
 func (r *UserRepositoryBun) ExistsUserByID(ctx context.Context, id uuid.UUID) (bool, error) {
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return false, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	user := &model.User{}
 	if err := tx.NewSelect().Model(user).Where("u.id = ?", id).Column("id").Scan(ctx); err != nil {

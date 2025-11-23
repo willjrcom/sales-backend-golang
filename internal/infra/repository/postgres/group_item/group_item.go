@@ -18,10 +18,13 @@ func NewGroupItemRepositoryBun(db *bun.DB) model.GroupItemRepository {
 
 func (r *GroupItemRepositoryBun) CreateGroupItem(ctx context.Context, p *model.GroupItem) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewInsert().Model(p).Exec(ctx); err != nil {
 		return err
@@ -35,10 +38,13 @@ func (r *GroupItemRepositoryBun) CreateGroupItem(ctx context.Context, p *model.G
 
 func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *model.GroupItem) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
 		return err
@@ -52,30 +58,29 @@ func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *model.G
 
 func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string, complementItemID *string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	if _, err = tx.NewDelete().Model(&model.GroupItem{}).Where("id = ?", id).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if complementItemID != nil {
 		if _, err = tx.NewDelete().Model(&model.Item{}).Where("id = ?", complementItemID).Exec(ctx); err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
 
 	if _, err = tx.NewDelete().Model(&model.Item{}).Where("group_item_id = ?", id).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if err := tx.Commit(); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -85,10 +90,13 @@ func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string,
 func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, withRelation bool) (*model.GroupItem, error) {
 	item := &model.GroupItem{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	query := tx.NewSelect().Model(item).Where("group_item.id = ?", id).Relation("Category").Relation("ComplementItem")
 
@@ -115,10 +123,13 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 func (r *GroupItemRepositoryBun) GetGroupItemsByStatus(ctx context.Context, status string) ([]model.GroupItem, error) {
 	items := []model.GroupItem{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&items).
 		Where("group_item.status = ?", status).
@@ -141,10 +152,13 @@ func (r *GroupItemRepositoryBun) GetGroupItemsByStatus(ctx context.Context, stat
 func (r *GroupItemRepositoryBun) GetGroupItemsByOrderIDAndStatus(ctx context.Context, id string, status string) ([]model.GroupItem, error) {
 	items := []model.GroupItem{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&items).
 		Where("group_item.order_id = ? AND group_item.status = ?", id, status).

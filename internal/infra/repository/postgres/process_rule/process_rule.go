@@ -21,10 +21,13 @@ func NewProcessRuleRepositoryBun(db *bun.DB) model.ProcessRuleRepository {
 
 func (r *ProcessRuleRepositoryBun) CreateProcessRule(ctx context.Context, s *model.ProcessRule) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewInsert().Model(s).Exec(ctx); err != nil {
 		return err
@@ -38,10 +41,13 @@ func (r *ProcessRuleRepositoryBun) CreateProcessRule(ctx context.Context, s *mod
 
 func (r *ProcessRuleRepositoryBun) UpdateProcessRule(ctx context.Context, s *model.ProcessRule) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
 		return err
@@ -55,10 +61,13 @@ func (r *ProcessRuleRepositoryBun) UpdateProcessRule(ctx context.Context, s *mod
 
 func (r *ProcessRuleRepositoryBun) DeleteProcessRule(ctx context.Context, id string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewDelete().Model(&model.ProcessRule{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
@@ -73,10 +82,13 @@ func (r *ProcessRuleRepositoryBun) DeleteProcessRule(ctx context.Context, id str
 func (r *ProcessRuleRepositoryBun) GetProcessRuleById(ctx context.Context, id string) (*model.ProcessRule, error) {
 	processRule := &model.ProcessRule{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(processRule).Where("id = ?", id).Scan(ctx); err != nil {
 		return nil, err
@@ -91,10 +103,13 @@ func (r *ProcessRuleRepositoryBun) GetProcessRuleById(ctx context.Context, id st
 func (r *ProcessRuleRepositoryBun) GetFirstProcessRuleByCategoryId(ctx context.Context, id string) (*model.ProcessRule, error) {
 	processRule := &model.ProcessRule{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(processRule).Where("category_id = ? and order = 1", id).Scan(ctx); err != nil {
 		return nil, err
@@ -110,10 +125,13 @@ func (r *ProcessRuleRepositoryBun) GetMapProcessRulesByFirstOrder(ctx context.Co
 	processRules := []model.ProcessRule{}
 	mapProcesses := map[uuid.UUID]uuid.UUID{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&processRules).Where("\"order\" = 1").Scan(ctx); err != nil {
 		return nil, err
@@ -132,10 +150,13 @@ func (r *ProcessRuleRepositoryBun) GetMapProcessRulesByFirstOrder(ctx context.Co
 func (r *ProcessRuleRepositoryBun) GetProcessRuleByCategoryIdAndOrder(ctx context.Context, id string, order int8) (*model.ProcessRule, error) {
 	processRule := &model.ProcessRule{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(processRule).Where("category_id = ? and \"order\" = ?", id, order).Scan(ctx); err != nil {
 		return nil, err
@@ -152,10 +173,13 @@ func (r *ProcessRuleRepositoryBun) GetMapProcessRulesByLastOrder(ctx context.Con
 	processRules := []model.ProcessRule{}
 	mapProcesses := map[uuid.UUID]uuid.UUID{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	// Subconsulta para obter o máximo order para cada category_id
 	err = tx.NewSelect().Model(&processRulesSubquery).ColumnExpr("category_id, MAX(\"order\") AS order").
@@ -210,10 +234,13 @@ func (r *ProcessRuleRepositoryBun) IsLastProcessRuleByID(ctx context.Context, id
 func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Context, id string) ([]model.ProcessRule, error) {
 	processRules := []model.ProcessRule{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&processRules).Where("category_id = ?", id).Scan(ctx); err != nil {
 		return nil, err
@@ -228,10 +255,13 @@ func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Conte
 func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context) ([]model.ProcessRule, error) {
 	processRules := []model.ProcessRule{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&processRules).Scan(ctx); err != nil {
 		return nil, err
@@ -246,10 +276,13 @@ func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context) ([]mo
 func (r *ProcessRuleRepositoryBun) GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]model.ProcessRule, error) {
 	processRules := []model.ProcessRule{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&processRules).
 		Relation("", func(q *bun.SelectQuery) *bun.SelectQuery {

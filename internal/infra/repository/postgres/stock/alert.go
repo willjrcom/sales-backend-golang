@@ -18,13 +18,15 @@ func NewStockAlertRepositoryBun(db *bun.DB) model.StockAlertRepository {
 
 func (r *StockAlertRepositoryBun) CreateAlert(ctx context.Context, a *model.StockAlert) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	if _, err := tx.NewInsert().Model(a).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -37,13 +39,15 @@ func (r *StockAlertRepositoryBun) CreateAlert(ctx context.Context, a *model.Stoc
 
 func (r *StockAlertRepositoryBun) UpdateAlert(ctx context.Context, a *model.StockAlert) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	if _, err := tx.NewUpdate().Model(a).Where("id = ?", a.ID).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -57,10 +61,13 @@ func (r *StockAlertRepositoryBun) UpdateAlert(ctx context.Context, a *model.Stoc
 func (r *StockAlertRepositoryBun) GetAlertsByStockID(ctx context.Context, stockID string) ([]model.StockAlert, error) {
 	alerts := []model.StockAlert{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&alerts).Where("stock_alert.stock_id = ?", stockID).Order("created_at DESC").Scan(ctx); err != nil {
 		return nil, err
@@ -75,10 +82,13 @@ func (r *StockAlertRepositoryBun) GetAlertsByStockID(ctx context.Context, stockI
 func (r *StockAlertRepositoryBun) GetActiveAlerts(ctx context.Context) ([]model.StockAlert, error) {
 	alerts := []model.StockAlert{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&alerts).Where("stock_alert.is_resolved = ?", false).Order("created_at DESC").Scan(ctx); err != nil {
 		return nil, err
@@ -93,10 +103,13 @@ func (r *StockAlertRepositoryBun) GetActiveAlerts(ctx context.Context) ([]model.
 func (r *StockAlertRepositoryBun) GetResolvedAlerts(ctx context.Context) ([]model.StockAlert, error) {
 	alerts := []model.StockAlert{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&alerts).Where("stock_alert.is_resolved = ?", true).Order("created_at DESC").Scan(ctx); err != nil {
 		return nil, err
@@ -110,10 +123,13 @@ func (r *StockAlertRepositoryBun) GetResolvedAlerts(ctx context.Context) ([]mode
 
 func (r *StockAlertRepositoryBun) ResolveAlert(ctx context.Context, alertID string, resolvedBy string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	_, err = tx.NewUpdate().Model((*model.StockAlert)(nil)).
 		Set("is_resolved = ?", true).
@@ -122,7 +138,6 @@ func (r *StockAlertRepositoryBun) ResolveAlert(ctx context.Context, alertID stri
 		Where("id = ?", alertID).
 		Exec(ctx)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -136,10 +151,13 @@ func (r *StockAlertRepositoryBun) ResolveAlert(ctx context.Context, alertID stri
 func (r *StockAlertRepositoryBun) GetAlertByID(ctx context.Context, alertID string) (*model.StockAlert, error) {
 	alert := &model.StockAlert{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().
 		Model(alert).
@@ -157,10 +175,13 @@ func (r *StockAlertRepositoryBun) GetAlertByID(ctx context.Context, alertID stri
 func (r *StockAlertRepositoryBun) GetAllAlerts(ctx context.Context) ([]model.StockAlert, error) {
 	var alerts []model.StockAlert
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().
 		Model(&alerts).
@@ -177,10 +198,13 @@ func (r *StockAlertRepositoryBun) GetAllAlerts(ctx context.Context) ([]model.Sto
 
 func (r *StockAlertRepositoryBun) DeleteAlert(ctx context.Context, alertID string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewDelete().
 		Model((*model.StockAlert)(nil)).

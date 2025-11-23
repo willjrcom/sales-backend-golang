@@ -18,10 +18,13 @@ func NewOrderPickupRepositoryBun(db *bun.DB) model.OrderPickupRepository {
 
 func (r *OrderPickupRepositoryBun) CreateOrderPickup(ctx context.Context, orderPickup *model.OrderPickup) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewInsert().Model(orderPickup).Exec(ctx); err != nil {
 		return err
@@ -35,10 +38,13 @@ func (r *OrderPickupRepositoryBun) CreateOrderPickup(ctx context.Context, orderP
 
 func (r *OrderPickupRepositoryBun) UpdateOrderPickup(ctx context.Context, orderPickup *model.OrderPickup) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewUpdate().Model(orderPickup).WherePK().Where("id = ?", orderPickup.ID).Exec(ctx); err != nil {
 		return err
@@ -52,10 +58,13 @@ func (r *OrderPickupRepositoryBun) UpdateOrderPickup(ctx context.Context, orderP
 
 func (r *OrderPickupRepositoryBun) DeleteOrderPickup(ctx context.Context, id string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewDelete().Model(&model.OrderPickup{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
@@ -70,10 +79,13 @@ func (r *OrderPickupRepositoryBun) DeleteOrderPickup(ctx context.Context, id str
 func (r *OrderPickupRepositoryBun) GetAllPickups(ctx context.Context) ([]model.OrderPickup, error) {
 	pickups := []model.OrderPickup{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&pickups).Scan(ctx); err != nil {
 		return nil, err
@@ -88,10 +100,13 @@ func (r *OrderPickupRepositoryBun) GetAllPickups(ctx context.Context) ([]model.O
 func (r *OrderPickupRepositoryBun) GetPickupById(ctx context.Context, id string) (*model.OrderPickup, error) {
 	orderPickup := &model.OrderPickup{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(orderPickup).Where("id = ?", id).Scan(ctx); err != nil {
 		return nil, err

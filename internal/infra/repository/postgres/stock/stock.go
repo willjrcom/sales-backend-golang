@@ -18,13 +18,15 @@ func NewStockRepositoryBun(db *bun.DB) model.StockRepository {
 
 func (r *StockRepositoryBun) CreateStock(ctx context.Context, s *model.Stock) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	if _, err := tx.NewInsert().Model(s).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -37,13 +39,15 @@ func (r *StockRepositoryBun) CreateStock(ctx context.Context, s *model.Stock) er
 
 func (r *StockRepositoryBun) UpdateStock(ctx context.Context, s *model.Stock) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -57,10 +61,13 @@ func (r *StockRepositoryBun) UpdateStock(ctx context.Context, s *model.Stock) er
 func (r *StockRepositoryBun) GetStockByID(ctx context.Context, id string) (*model.Stock, error) {
 	stock := &model.Stock{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(stock).Where("stock.id = ?", id).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
@@ -75,10 +82,13 @@ func (r *StockRepositoryBun) GetStockByID(ctx context.Context, id string) (*mode
 func (r *StockRepositoryBun) GetStockByProductID(ctx context.Context, productID string) (*model.Stock, error) {
 	stock := &model.Stock{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(stock).Where("stock.product_id = ?", productID).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
@@ -93,10 +103,13 @@ func (r *StockRepositoryBun) GetStockByProductID(ctx context.Context, productID 
 func (r *StockRepositoryBun) GetAllStocks(ctx context.Context) ([]model.Stock, error) {
 	stocks := []model.Stock{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&stocks).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
@@ -111,10 +124,13 @@ func (r *StockRepositoryBun) GetAllStocks(ctx context.Context) ([]model.Stock, e
 func (r *StockRepositoryBun) GetActiveStocks(ctx context.Context) ([]model.Stock, error) {
 	stocks := []model.Stock{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&stocks).Where("stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
@@ -129,10 +145,13 @@ func (r *StockRepositoryBun) GetActiveStocks(ctx context.Context) ([]model.Stock
 func (r *StockRepositoryBun) GetLowStockProducts(ctx context.Context) ([]model.Stock, error) {
 	stocks := []model.Stock{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&stocks).Where("stock.current_stock <= stock.min_stock AND stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
 		return nil, err
@@ -147,10 +166,13 @@ func (r *StockRepositoryBun) GetLowStockProducts(ctx context.Context) ([]model.S
 func (r *StockRepositoryBun) GetOutOfStockProducts(ctx context.Context) ([]model.Stock, error) {
 	stocks := []model.Stock{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&stocks).Where("stock.current_stock <= 0 AND stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
 		return nil, err

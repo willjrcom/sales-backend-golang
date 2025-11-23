@@ -20,10 +20,13 @@ func NewOrderRepositoryBun(db *bun.DB) model.OrderRepository {
 
 func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *model.Order) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewInsert().Model(order).Exec(ctx); err != nil {
 		return err
@@ -37,38 +40,36 @@ func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *model.Order
 
 func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *model.Order) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	if _, err = tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	for _, group := range p.GroupItems {
 		if _, err = tx.NewUpdate().Model(&group).WherePK().Exec(ctx); err != nil {
-			tx.Rollback()
 			return err
 		}
 
 		for _, item := range group.Items {
 			if _, err = tx.NewUpdate().Model(&item).WherePK().Exec(ctx); err != nil {
-				tx.Rollback()
 				return err
 			}
 
 			for _, additionalItem := range item.AdditionalItems {
 				if _, err = tx.NewUpdate().Model(&additionalItem).WherePK().Exec(ctx); err != nil {
-					tx.Rollback()
 					return err
 				}
 			}
 
 			if group.ComplementItemID != nil && group.ComplementItem != nil {
 				if _, err = tx.NewUpdate().Model(group.ComplementItem).WherePK().Exec(ctx); err != nil {
-					tx.Rollback()
 					return err
 				}
 			}
@@ -77,25 +78,21 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *model.Order) e
 
 	if p.Delivery != nil {
 		if _, err = tx.NewUpdate().Model(p.Delivery).WherePK().Exec(ctx); err != nil {
-			tx.Rollback()
 			return err
 		}
 
 	} else if p.Pickup != nil {
 		if _, err = tx.NewUpdate().Model(p.Pickup).WherePK().Exec(ctx); err != nil {
-			tx.Rollback()
 			return err
 		}
 
 	} else if p.Table != nil {
 		if _, err = tx.NewUpdate().Model(p.Table).WherePK().Exec(ctx); err != nil {
-			tx.Rollback()
 			return err
 		}
 	}
 
 	if err := tx.Commit(); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -104,10 +101,13 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *model.Order) e
 
 func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *model.Order) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewUpdate().Model(order).Where("id = ?", order.ID).Exec(ctx); err != nil {
 		return err
@@ -121,69 +121,61 @@ func (r *OrderRepositoryBun) UpdateOrder(ctx context.Context, order *model.Order
 
 func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	if _, err := tx.NewDelete().Model(&model.Order{}).Where("id = ?", id).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&model.OrderDelivery{}).Where("order_id = ?", id).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&model.OrderPickup{}).Where("order_id = ?", id).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&model.OrderTable{}).Where("order_id = ?", id).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&model.PaymentOrder{}).Where("order_id = ?", id).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	groupItems := []model.GroupItem{}
 	if err := tx.NewSelect().Model(&groupItems).Where("order_id = ?", id).Relation("ComplementItem").Relation("Items.AdditionalItems").Scan(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewDelete().Model(&model.GroupItem{}).Where("order_id = ?", id).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	for _, groupItem := range groupItems {
 		if groupItem.ComplementItem != nil {
 			if _, err := tx.NewDelete().Model(groupItem.ComplementItem).WherePK().Exec(ctx); err != nil {
-				tx.Rollback()
 				return err
 			}
 		}
 
 		for _, item := range groupItem.Items {
 			if _, err := tx.NewDelete().Model(&item).WherePK().Exec(ctx); err != nil {
-				tx.Rollback()
 				return err
 			}
 
 			if _, err := tx.NewDelete().Model(&model.ItemToAdditional{}).Where("item_id = ?", item.ID).Exec(ctx); err != nil {
-				tx.Rollback()
 				return err
 			}
 
 			for _, additionalItem := range item.AdditionalItems {
 				if _, err := tx.NewDelete().Model(&additionalItem).WherePK().Exec(ctx); err != nil {
-					tx.Rollback()
 					return err
 				}
 			}
@@ -201,10 +193,13 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	order = &model.Order{}
 	order.ID = uuid.MustParse(id)
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(order).WherePK().
 		Relation("GroupItems.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
@@ -268,10 +263,13 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder, withCategory bool, queryCondition string) ([]model.Order, error) {
 	orders := []model.Order{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if queryCondition == "" {
 		queryCondition = "OR"
@@ -397,10 +395,13 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
 	orders := []model.Order{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	validStatuses := []orderentity.StatusOrder{
 		orderentity.OrderStatusReady,
@@ -459,10 +460,13 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
 	orders := []model.Order{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	validStatuses := []string{
 		string(orderentity.OrderStatusReady),
@@ -487,10 +491,13 @@ func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID
 
 func (r *OrderRepositoryBun) AddPaymentOrder(ctx context.Context, payment *model.PaymentOrder) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewInsert().Model(payment).Exec(ctx); err != nil {
 		return err

@@ -17,10 +17,13 @@ func NewShiftRepositoryBun(db *bun.DB) model.ShiftRepository {
 
 func (r *ShiftRepositoryBun) CreateShift(ctx context.Context, c *model.Shift) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
 		return err
@@ -34,10 +37,13 @@ func (r *ShiftRepositoryBun) CreateShift(ctx context.Context, c *model.Shift) er
 
 func (r *ShiftRepositoryBun) UpdateShift(ctx context.Context, c *model.Shift) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
 		return err
@@ -51,10 +57,13 @@ func (r *ShiftRepositoryBun) UpdateShift(ctx context.Context, c *model.Shift) er
 
 func (r *ShiftRepositoryBun) DeleteShift(ctx context.Context, id string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewUpdate().Model(&model.Shift{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
@@ -69,10 +78,13 @@ func (r *ShiftRepositoryBun) DeleteShift(ctx context.Context, id string) error {
 func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*model.Shift, error) {
 	shift := &model.Shift{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(shift).Where("shift.id = ?", id).Relation("Attendant").Relation("Orders").Scan(ctx); err != nil {
 		return nil, err
@@ -87,10 +99,13 @@ func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*mode
 func (r *ShiftRepositoryBun) GetCurrentShift(ctx context.Context) (*model.Shift, error) {
 	shift := &model.Shift{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(shift).Where("shift.closed_at is NULL AND shift.end_change is NULL").Scan(ctx); err != nil {
 		return nil, err
@@ -105,10 +120,13 @@ func (r *ShiftRepositoryBun) GetCurrentShift(ctx context.Context) (*model.Shift,
 func (r *ShiftRepositoryBun) GetFullCurrentShift(ctx context.Context) (*model.Shift, error) {
 	shift := &model.Shift{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(shift).Where("shift.closed_at is NULL AND shift.end_change is NULL").Relation("Attendant").Scan(ctx); err != nil {
 		return nil, err
@@ -123,10 +141,13 @@ func (r *ShiftRepositoryBun) GetFullCurrentShift(ctx context.Context) (*model.Sh
 func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context, page int, perPage int) ([]model.Shift, error) {
 	Shifts := []model.Shift{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&Shifts).
 		Relation("Orders").
@@ -143,11 +164,12 @@ func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context, page int, perPage
 }
 
 func (s *ShiftRepositoryBun) IncrementCurrentOrder(ctx context.Context, id string) (int, error) {
-	tx, err := database.GetTenantTransaction(ctx, s.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
 	if err != nil {
 		return 0, err
 	}
 
+	defer cancel()
 	defer tx.Rollback()
 
 	// Busca o turno com "FOR UPDATE" para bloquear a linha

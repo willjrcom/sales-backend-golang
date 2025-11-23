@@ -18,10 +18,13 @@ func NewAddressRepositoryBun(db *bun.DB) model.AddressRepository {
 
 func (r *AddressRepositoryBun) CreateAddress(ctx context.Context, c *model.Address) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewInsert().Model(c).Exec(ctx); err != nil {
 		return err
@@ -35,10 +38,13 @@ func (r *AddressRepositoryBun) CreateAddress(ctx context.Context, c *model.Addre
 
 func (r *AddressRepositoryBun) UpdateAddress(ctx context.Context, c *model.Address) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewUpdate().Model(c).Where("id = ?", c.ID).Exec(ctx); err != nil {
 		return err
@@ -52,10 +58,13 @@ func (r *AddressRepositoryBun) UpdateAddress(ctx context.Context, c *model.Addre
 
 func (r *AddressRepositoryBun) DeleteAddress(ctx context.Context, id string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewDelete().Model(&model.Address{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
@@ -70,10 +79,13 @@ func (r *AddressRepositoryBun) DeleteAddress(ctx context.Context, id string) err
 func (r *AddressRepositoryBun) GetAddressById(ctx context.Context, id string) (*model.Address, error) {
 	aAddress := &model.Address{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(aAddress).Where("address.id = ?", id).Scan(ctx); err != nil {
 		return nil, err
@@ -88,10 +100,13 @@ func (r *AddressRepositoryBun) GetAddressById(ctx context.Context, id string) (*
 func (r *AddressRepositoryBun) GetAllAddress(ctx context.Context) ([]model.Address, error) {
 	addresss := []model.Address{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&addresss).Scan(ctx); err != nil {
 		return nil, err

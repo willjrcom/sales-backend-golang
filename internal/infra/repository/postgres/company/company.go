@@ -19,19 +19,20 @@ func NewCompanyRepositoryBun(db *bun.DB) model.CompanyRepository {
 
 func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *model.Company) (err error) {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	// Insert to private schema
 	if _, err = tx.NewInsert().Model(company).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if _, err = tx.NewInsert().Model(company.Address).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -39,10 +40,13 @@ func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *model.Co
 		return err
 	}
 
-	txPublic, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, txPublic, cancelPublic, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancelPublic()
+	defer txPublic.Rollback()
 
 	// Insert on public schema
 	if _, err = txPublic.NewInsert().Model(company).Exec(ctx); err != nil {
@@ -50,7 +54,6 @@ func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *model.Co
 	}
 
 	if _, err = txPublic.NewInsert().Model(company.Address).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -62,20 +65,20 @@ func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *model.Co
 }
 
 func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model.Company) (err error) {
-
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	// Update to private schema
 	if _, err = tx.NewUpdate().Model(company).WherePK().Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	if _, err := tx.NewUpdate().Model(company.Address).WherePK().Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -83,10 +86,13 @@ func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model
 		return err
 	}
 
-	txPublic, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, txPublic, cancelPublic, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancelPublic()
+	defer txPublic.Rollback()
 
 	// Insert on public schema
 	if _, err = txPublic.NewUpdate().Model(company).WherePK().Exec(ctx); err != nil {
@@ -94,7 +100,6 @@ func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model
 	}
 
 	if _, err := txPublic.NewUpdate().Model(company.Address).WherePK().Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -108,10 +113,13 @@ func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model
 func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*model.Company, error) {
 	company := &model.Company{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(company).Relation("Address").Relation("Users").Scan(ctx); err != nil {
 		return nil, err
@@ -127,10 +135,13 @@ func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*model.Company, 
 func (r *CompanyRepositoryBun) ValidateUserToPublicCompany(ctx context.Context, userID uuid.UUID) (bool, error) {
 	schema := ctx.Value(model.Schema("schema")).(string)
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return false, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	company := &model.Company{}
 	if err := tx.NewSelect().Model(company).Where("schema_name = ?", schema).Scan(ctx); err != nil {
@@ -151,10 +162,13 @@ func (r *CompanyRepositoryBun) ValidateUserToPublicCompany(ctx context.Context, 
 func (r *CompanyRepositoryBun) AddUserToPublicCompany(ctx context.Context, userID uuid.UUID) error {
 	schema := ctx.Value(model.Schema("schema")).(string)
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	company := &model.Company{}
 	if err := tx.NewSelect().Model(company).Where("schema_name = ?", schema).Scan(ctx); err != nil {
@@ -176,10 +190,13 @@ func (r *CompanyRepositoryBun) AddUserToPublicCompany(ctx context.Context, userI
 func (r *CompanyRepositoryBun) RemoveUserFromPublicCompany(ctx context.Context, userID uuid.UUID) error {
 	schema := ctx.Value(model.Schema("schema")).(string)
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	company := &model.Company{}
 	if err := tx.NewSelect().Model(company).Where("schema_name = ?", schema).Scan(ctx); err != nil {
@@ -201,10 +218,13 @@ func (r *CompanyRepositoryBun) GetCompanyUsers(ctx context.Context, page, perPag
 
 	// switch to public schema
 
-	tx, err := database.GetPublicTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, 0, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	// find company by schema name
 	schema := ctx.Value(model.Schema("schema")).(string)

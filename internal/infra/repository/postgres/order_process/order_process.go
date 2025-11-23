@@ -20,13 +20,15 @@ func NewOrderProcessRepositoryBun(db *bun.DB) model.OrderProcessRepository {
 
 func (r *ProcessRepositoryBun) CreateProcess(ctx context.Context, s *model.OrderProcess) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
 
+	defer cancel()
+	defer tx.Rollback()
+
 	if _, err := tx.NewInsert().Model(s).Exec(ctx); err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -43,7 +45,6 @@ func (r *ProcessRepositoryBun) CreateProcess(ctx context.Context, s *model.Order
 					continue
 				}
 
-				tx.Rollback()
 				return err
 			}
 		}
@@ -58,10 +59,13 @@ func (r *ProcessRepositoryBun) CreateProcess(ctx context.Context, s *model.Order
 
 func (r *ProcessRepositoryBun) UpdateProcess(ctx context.Context, s *model.OrderProcess) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
 		return err
@@ -75,10 +79,13 @@ func (r *ProcessRepositoryBun) UpdateProcess(ctx context.Context, s *model.Order
 
 func (r *ProcessRepositoryBun) DeleteProcess(ctx context.Context, id string) error {
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if _, err := tx.NewDelete().Model(&model.OrderProcess{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
@@ -93,10 +100,13 @@ func (r *ProcessRepositoryBun) DeleteProcess(ctx context.Context, id string) err
 func (r *ProcessRepositoryBun) GetProcessById(ctx context.Context, id string) (*model.OrderProcess, error) {
 	process := &model.OrderProcess{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(process).Where("process.id = ?", id).
 		Relation("GroupItem.Items.AdditionalItems").
@@ -117,10 +127,13 @@ func (r *ProcessRepositoryBun) GetProcessById(ctx context.Context, id string) (*
 func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]model.OrderProcess, error) {
 	processes := []model.OrderProcess{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&processes).Scan(ctx); err != nil {
 		return nil, err
@@ -135,10 +148,13 @@ func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]model.Ord
 func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, id string) ([]model.OrderProcess, error) {
 	processes := []model.OrderProcess{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	validStatus := []orderprocessentity.StatusProcess{
 		orderprocessentity.ProcessStatusFinished,
@@ -171,10 +187,13 @@ func (r *ProcessRepositoryBun) GetProcessesByProductID(ctx context.Context, id s
 	processes := []model.OrderProcess{}
 	processesToProduct := []model.OrderProcessToProductToGroupItem{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&processesToProduct).Where("product_id = ?", id).Scan(ctx); err != nil {
 		return nil, err
@@ -199,10 +218,13 @@ func (r *ProcessRepositoryBun) GetProcessesByGroupItemID(ctx context.Context, id
 	processes := []model.OrderProcess{}
 	processesToGroupItem := []model.OrderProcessToProductToGroupItem{}
 
-	tx, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&processesToGroupItem).Where("group_item_id = ?", id).Scan(ctx); err != nil {
 		return nil, err
