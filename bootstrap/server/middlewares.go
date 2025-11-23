@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -112,14 +111,6 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 				return
 			}
 		}
-
-		body, err := json.Marshal(r.Body)
-		if err != nil {
-			jsonpkg.ResponseErrorJson(w, r, http.StatusProcessing, err)
-			return
-		}
-
-		fmt.Printf("body: %v\n", string(body))
 
 		// Chamando o próximo handler
 		next.ServeHTTP(w, r.WithContext(ctx))
