@@ -7,9 +7,7 @@ import (
 	"net/http"
 	"runtime/debug"
 	"strings"
-	"time"
 
-	jwtpkg "github.com/dgrijalva/jwt-go"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
@@ -75,41 +73,27 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 			// Executar a lógica desejada apenas para os endpoints selecionados
 			fmt.Println("Antes de chamar o endpoint:", r.URL.Path)
 
-			// Criar contexto com timeout de 5 segundos para validação do token
-			ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
-			defer cancel()
+			validToken, err := headerservice.GetAnyValidToken(ctx, r)
 
-			// Canal para receber resultado da validação
-			type tokenResult struct {
-				token *jwtpkg.Token
-				err   error
-			}
-			resultChan := make(chan tokenResult, 1)
-
-			// Executar validação em goroutine
-			go func() {
-				fmt.Println("Validando token para:", r.URL.Path)
-				token, err := headerservice.GetAnyValidToken(ctxWithTimeout, r)
-				resultChan <- tokenResult{token: token, err: err}
-			}()
-
-			// Aguardar resultado ou timeout
-			select {
-			case result := <-resultChan:
-				if result.err != nil {
-					fmt.Println("Erro ao validar token:", result.err.Error())
-					jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, result.err)
-					return
-				}
-				fmt.Println("Token validado com sucesso para:", r.URL.Path)
-				ctx = context.WithValue(ctx, model.Schema("schema"), jwtservice.GetSchemaFromAccessToken(result.token))
-				ctx = context.WithValue(ctx, companyentity.UserValue("user_id"), jwtservice.GetUserIDFromToken(result.token))
-
-			case <-ctxWithTimeout.Done():
-				fmt.Println("TIMEOUT ao validar token para:", r.URL.Path)
-				jsonpkg.ResponseErrorJson(w, r, http.StatusRequestTimeout, errors.New("timeout ao validar token"))
+			if err != nil {
+				jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 				return
 			}
+
+			schema := jwtservice.GetSchemaFromAccessToken(validToken)
+			if schema == "" {
+				jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("schema not found in token"))
+				return
+			}
+
+			userID := jwtservice.GetUserIDFromToken(validToken)
+			if userID == "" {
+				jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("user id not found in token"))
+				return
+			}
+
+			ctx = context.WithValue(ctx, model.Schema("schema"), schema)
+			ctx = context.WithValue(ctx, companyentity.UserValue("user_id"), userID)
 		}
 
 		// Chamando o próximo handler
