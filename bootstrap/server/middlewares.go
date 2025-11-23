@@ -81,7 +81,7 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 			}
 
 			schema := jwtservice.GetSchemaFromAccessToken(validToken)
-			if schema == "" {
+			if schema == "" && r.URL.Path != "/user/companies" {
 				jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("schema not found in token"))
 				return
 			}
