@@ -81,17 +81,7 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 			}
 
 			schema := jwtservice.GetSchemaFromAccessToken(validToken)
-			if schema == "" && r.URL.Path != "/user/companies" {
-				jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("schema not found in token"))
-				return
-			}
-
 			userID := jwtservice.GetUserIDFromToken(validToken)
-			if userID == "" {
-				jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("user id not found in token"))
-				return
-			}
-
 			ctx = context.WithValue(ctx, model.Schema("schema"), schema)
 			ctx = context.WithValue(ctx, companyentity.UserValue("user_id"), userID)
 		}
