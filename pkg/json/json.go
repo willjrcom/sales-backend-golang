@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -79,6 +80,8 @@ func ResponseJson(w http.ResponseWriter, r *http.Request, statusCode int, data i
 }
 
 func ResponseErrorJson(w http.ResponseWriter, r *http.Request, statusCode int, err error) {
+	fmt.Printf("ResponseErrorJson %v\n", err.Error())
+
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(statusCode)
 

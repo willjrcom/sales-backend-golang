@@ -4,6 +4,20 @@
 
 Este é um sistema completo de gestão de vendas desenvolvido em Go, seguindo arquitetura limpa (Clean Architecture) com separação clara entre domínio, casos de uso, infraestrutura e apresentação.
 
+### 🔒 Sistema de Autenticação com Refresh Token
+
+O sistema implementa um fluxo de autenticação JWT de dois estágios:
+
+1. **Login** → Retorna `id_token` (validade: 30 minutos)
+2. **Seleção de Empresa** → Retorna `access_token` (validade: 2 horas) vinculado ao schema
+3. **Refresh Token** → Endpoint `/user/refresh-access-token` (desprotegido) renova o `access_token`
+
+**Middleware com Proteção:**
+- Timeout de 5 segundos na validação de tokens
+- Logs detalhados para debug em produção
+- Validação assíncrona para evitar bloqueio da thread
+- Retorno HTTP 408 em caso de timeout
+
 ## 🏗️ Arquitetura
 
 ### Estrutura de Pastas
