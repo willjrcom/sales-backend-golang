@@ -2,14 +2,16 @@ package companydto
 
 import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
 )
 
 type CompanyUpdateDTO struct {
-	TradeName   *string                   `json:"trade_name"`
-	Cnpj        *string                   `json:"cnpj"`
-	Email       *string                   `json:"email"`
-	Contacts    []string                  `json:"contacts"`
-	Preferences companyentity.Preferences `json:"preferences"`
+	TradeName   *string                      `json:"trade_name"`
+	Cnpj        *string                      `json:"cnpj"`
+	Email       *string                      `json:"email"`
+	Contacts    []string                     `json:"contacts"`
+	Address     *addressdto.AddressUpdateDTO `json:"address"`
+	Preferences companyentity.Preferences    `json:"preferences"`
 }
 
 func (c *CompanyUpdateDTO) validate() error {
@@ -35,6 +37,12 @@ func (c *CompanyUpdateDTO) UpdateDomain(company *companyentity.Company) (err err
 	}
 	if c.Preferences != nil {
 		company.Preferences = c.Preferences
+	}
+
+	if c.Address != nil {
+		if err := c.Address.UpdateDomain(company.Address); err != nil {
+			return err
+		}
 	}
 
 	return nil
