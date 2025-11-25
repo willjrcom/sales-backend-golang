@@ -87,6 +87,14 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, dto *entitydto.I
 		return err
 	}
 
+	if err := s.UpdateGroupItemTotal(ctx, groupItemModel.ID.String()); err != nil {
+		return err
+	}
+
+	if err := s.so.UpdateOrderTotal(ctx, groupItemModel.OrderID.String()); err != nil {
+		return err
+	}
+
 	reason := "group item canceled"
 	processes, err := s.sop.GetProcessesByGroupItemID(ctx, dto)
 	if err != nil {
