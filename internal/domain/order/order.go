@@ -61,6 +61,7 @@ type OrderType struct {
 
 type OrderTimeLogs struct {
 	PendingAt  *time.Time
+	ReadyAt    *time.Time
 	FinishedAt *time.Time
 	CanceledAt *time.Time
 	ArchivedAt *time.Time
@@ -140,6 +141,8 @@ func (o *Order) ReadyOrder() (err error) {
 		return ErrOrderMustBePending
 	}
 
+	o.ReadyAt = &time.Time{}
+	*o.ReadyAt = time.Now().UTC()
 	o.Status = OrderStatusReady
 
 	if o.Delivery != nil {

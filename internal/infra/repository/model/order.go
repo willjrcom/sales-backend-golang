@@ -46,6 +46,7 @@ type OrderType struct {
 type OrderTimeLogs struct {
 	PendingAt  *time.Time `bun:"pending_at"`
 	FinishedAt *time.Time `bun:"finished_at"`
+	ReadyAt    *time.Time `bun:"ready_at"`
 	CanceledAt *time.Time `bun:"canceled_at"`
 	ArchivedAt *time.Time `bun:"archived_at"`
 }
@@ -80,6 +81,7 @@ func (o *Order) FromDomain(order *orderentity.Order) {
 		OrderTimeLogs: OrderTimeLogs{
 			PendingAt:  order.PendingAt,
 			FinishedAt: order.FinishedAt,
+			ReadyAt:    order.ReadyAt,
 			CanceledAt: order.CanceledAt,
 			ArchivedAt: order.ArchivedAt,
 		},
@@ -142,6 +144,7 @@ func (o *Order) ToDomain() *orderentity.Order {
 		},
 		OrderTimeLogs: orderentity.OrderTimeLogs{
 			PendingAt:  o.PendingAt,
+			ReadyAt:    o.ReadyAt,
 			FinishedAt: o.FinishedAt,
 			CanceledAt: o.CanceledAt,
 			ArchivedAt: o.ArchivedAt,

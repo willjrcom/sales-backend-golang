@@ -15,6 +15,7 @@ import (
 
 type OrderDTO struct {
 	OrderType
+	OrderTimeLogs
 	OrderDetail
 	ID          uuid.UUID                   `json:"id"`
 	OrderNumber int                         `json:"order_number"`
@@ -43,6 +44,7 @@ type OrderType struct {
 type OrderTimeLogs struct {
 	PendingAt  *time.Time `json:"pending_at"`
 	FinishedAt *time.Time `json:"finished_at"`
+	ReadyAt    *time.Time `json:"ready_at"`
 	CanceledAt *time.Time `json:"canceled_at"`
 	ArchivedAt *time.Time `json:"archived_at"`
 }
@@ -56,6 +58,13 @@ func (o *OrderDTO) FromDomain(order *orderentity.Order) {
 			Delivery: &orderdeliverydto.OrderDeliveryDTO{},
 			Table:    &ordertabledto.OrderTableDTO{},
 			Pickup:   &orderpickupdto.OrderPickupDTO{},
+		},
+		OrderTimeLogs: OrderTimeLogs{
+			PendingAt:  order.PendingAt,
+			ReadyAt:    order.ReadyAt,
+			FinishedAt: order.FinishedAt,
+			CanceledAt: order.CanceledAt,
+			ArchivedAt: order.ArchivedAt,
 		},
 		OrderDetail: OrderDetail{
 			TotalPayable:  order.TotalPayable,
