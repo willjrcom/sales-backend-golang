@@ -489,5 +489,10 @@ func createTables(ctx context.Context, tx *bun.Tx) error {
 		return err
 	}
 
+	// Ensure ready_at timestamp columns exist where models expect them.
+	if err := setupPrivateMigrations(ctx, tx); err != nil {
+		return err
+	}
+
 	return nil
 }
