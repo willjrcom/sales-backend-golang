@@ -34,7 +34,6 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 		return err
 	}
 
-	groupItemIDs := []uuid.UUID{}
 	for i, groupItem := range order.GroupItems {
 		if groupItem.Status != orderentity.StatusGroupStaging {
 			continue
@@ -52,9 +51,6 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 			fmt.Println("process rule not found for category ID: " + groupItem.CategoryID.String())
 			continue
 		}
-
-		// Append only Staging group items
-		groupItemIDs = append(groupItemIDs, groupItem.ID)
 
 		createProcessInput := &orderprocessdto.OrderProcessCreateDTO{
 			OrderNumber:   order.OrderNumber,
@@ -74,9 +70,13 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 	}
 
 	// Create queue for each group item
-	for _, groupItemID := range groupItemIDs {
+	for _, groupItem := range order.GroupItems {
+		if groupItem.Status != orderentity.StatusGroupStaging && !groupItem.UseProcessRule {
+			continue
+		}
+
 		startQueueInput := &orderqueuedto.QueueCreateDTO{
-			GroupItemID: groupItemID,
+			GroupItemID: groupItem.ID,
 			JoinedAt:    *order.PendingAt,
 		}
 
