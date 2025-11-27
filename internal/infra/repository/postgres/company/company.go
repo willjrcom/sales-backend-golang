@@ -258,3 +258,29 @@ func (r *CompanyRepositoryBun) GetCompanyUsers(ctx context.Context, page, perPag
 	}
 	return users, int(totalCount), nil
 }
+
+// ListPublicCompanies returns all companies stored in the public schema with basic fields only.
+func (r *CompanyRepositoryBun) ListPublicCompanies(ctx context.Context) ([]model.Company, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	companies := []model.Company{}
+	if err := tx.NewSelect().
+		Model(&companies).
+		Column("id", "business_name", "trade_name", "email", "cnpj", "schema_name").
+		Order("business_name ASC").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return companies, nil
+}

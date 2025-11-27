@@ -81,6 +81,16 @@ func (r *UserRepositoryLocal) LoginAndDeleteUser(ctx context.Context, user *mode
 	return nil
 }
 
+func (r *UserRepositoryLocal) ListPublicUsers(ctx context.Context) ([]model.User, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	result := make([]model.User, 0, len(r.users))
+	for _, user := range r.users {
+		result = append(result, *user)
+	}
+	return result, nil
+}
+
 func (r *UserRepositoryLocal) LoginUser(ctx context.Context, user *model.User) (*model.User, error) {
 	if user == nil {
 		return nil, errors.New("invalid user")

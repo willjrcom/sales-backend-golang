@@ -240,3 +240,25 @@ func (s *Service) Test(ctx context.Context) error {
 	//go kafka.ReadMessages("order_process")
 	return nil
 }
+
+// ListPublicCompanies returns basic information for every company stored in the public schema.
+func (s *Service) ListPublicCompanies(ctx context.Context) ([]companydto.CompanyBasicDTO, error) {
+	companyModels, err := s.r.ListPublicCompanies(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(companyModels) == 0 {
+		return []companydto.CompanyBasicDTO{}, nil
+	}
+
+	basic := make([]companydto.CompanyBasicDTO, len(companyModels))
+	for i := range companyModels {
+		company := companyModels[i].ToDomain()
+		dto := companydto.CompanyBasicDTO{}
+		dto.FromDomain(company)
+		basic[i] = dto
+	}
+
+	return basic, nil
+}
