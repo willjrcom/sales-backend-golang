@@ -245,6 +245,28 @@ func (s *Service) GetCompanyUsers(ctx context.Context, page, perPage int) ([]com
 	}
 	return dtos, total, nil
 }
+
+// ListCompanyPayments returns subscription payments for the authenticated company.
+func (s *Service) ListCompanyPayments(ctx context.Context, page, perPage int) ([]companydto.CompanyPaymentDTO, int, error) {
+	companyModel, err := s.r.GetCompany(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	payments, total, err := s.r.ListCompanyPayments(ctx, companyModel.ID, page, perPage)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	dtos := make([]companydto.CompanyPaymentDTO, len(payments))
+	for i := range payments {
+		dto := companydto.CompanyPaymentDTO{}
+		dto.FromDomain(payments[i].ToDomain())
+		dtos[i] = dto
+	}
+
+	return dtos, total, nil
+}
 func (s *Service) AddUserToCompany(ctx context.Context, dto *companydto.UserToCompanyDTO) error {
 	email, err := dto.ToDomain()
 
@@ -305,6 +327,20 @@ func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.Use
 	}
 
 	return nil
+}
+
+func (s *Service) GetSubscriptionSettings(ctx context.Context) (*companydto.SubscriptionSettingsDTO, error) {
+	if s.mp == nil || !s.mp.Enabled() {
+		return nil, ErrMercadoPagoDisabled
+	}
+
+	return &companydto.SubscriptionSettingsDTO{
+		MonthlyPrice:  s.mp.MonthlyPrice(),
+		Currency:      "BRL",
+		MinMonths:     1,
+		MaxMonths:     12,
+		DefaultMonths: 1,
+	}, nil
 }
 
 func (s *Service) CreateSubscriptionCheckout(ctx context.Context, dto *companydto.SubscriptionCheckoutDTO) (*companydto.SubscriptionCheckoutResponseDTO, error) {

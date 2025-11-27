@@ -436,3 +436,56 @@ func (r *CompanyRepositoryBun) GetCompanyPaymentByProviderID(ctx context.Context
 
 	return payment, nil
 }
+
+func (r *CompanyRepositoryBun) ListCompanyPayments(ctx context.Context, companyID uuid.UUID, page, perPage int) ([]model.CompanyPayment, int, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	total, err := tx.NewSelect().
+		Model((*model.CompanyPayment)(nil)).
+		Where("company_id = ?", companyID).
+		Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if total == 0 {
+		if err := tx.Commit(); err != nil {
+			return nil, 0, err
+		}
+		return []model.CompanyPayment{}, 0, nil
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+
+	if perPage <= 0 {
+		perPage = 10
+	}
+
+	offset := (page - 1) * perPage
+	payments := make([]model.CompanyPayment, 0, perPage)
+
+	if err := tx.NewSelect().
+		Model(&payments).
+		Where("company_id = ?", companyID).
+		Order("paid_at DESC").
+		Order("created_at DESC").
+		Limit(perPage).
+		Offset(offset).
+		Scan(ctx); err != nil {
+		return nil, 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, 0, err
+	}
+
+	return payments, total, nil
+}

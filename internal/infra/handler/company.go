@@ -29,8 +29,10 @@ func NewHandlerCompany(companyService *companyusecases.Service) *handler.Handler
 		c.Put("/update", h.handlerUpdateCompany)
 		c.Get("/", h.handlerGetCompany)
 		c.Get("/users", h.handlerGetCompanyUsers)
+		c.Get("/payments", h.handlerListCompanyPayments)
 		c.Post("/add/user", h.handlerAddUserToCompany)
 		c.Post("/remove/user", h.handlerRemoveUserFromCompany)
+		c.Get("/payments/mercadopago/settings", h.handlerGetSubscriptionSettings)
 		c.Post("/payments/mercadopago/checkout", h.handlerCreateSubscriptionCheckout)
 		c.Post("/payments/mercadopago/webhook", h.handlerMercadoPagoWebhook)
 		c.Post("/test", h.handlerTest)
@@ -101,6 +103,20 @@ func (h *handlerCompanyImpl) handlerGetCompanyUsers(w http.ResponseWriter, r *ht
 	jsonpkg.ResponseJson(w, r, http.StatusOK, users)
 }
 
+func (h *handlerCompanyImpl) handlerListCompanyPayments(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	page, perPage := headerservice.GetPageAndPerPage(r, 1, 10)
+	payments, total, err := h.s.ListCompanyPayments(ctx, page, perPage)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	w.Header().Set("X-Total-Count", strconv.Itoa(total))
+	jsonpkg.ResponseJson(w, r, http.StatusOK, payments)
+}
+
 func (h *handlerCompanyImpl) handlerAddUserToCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -133,6 +149,22 @@ func (h *handlerCompanyImpl) handlerRemoveUserFromCompany(w http.ResponseWriter,
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerCompanyImpl) handlerGetSubscriptionSettings(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	settings, err := h.s.GetSubscriptionSettings(ctx)
+	if err != nil {
+		status := http.StatusInternalServerError
+		if errors.Is(err, companyusecases.ErrMercadoPagoDisabled) {
+			status = http.StatusServiceUnavailable
+		}
+		jsonpkg.ResponseErrorJson(w, r, status, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, settings)
 }
 
 func (h *handlerCompanyImpl) handlerCreateSubscriptionCheckout(w http.ResponseWriter, r *http.Request) {

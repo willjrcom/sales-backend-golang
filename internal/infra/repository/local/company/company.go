@@ -182,3 +182,48 @@ func (r *CompanyRepositoryLocal) GetCompanyPaymentByProviderID(ctx context.Conte
 	}
 	return nil, errors.New("payment not found")
 }
+
+func (r *CompanyRepositoryLocal) ListCompanyPayments(ctx context.Context, companyID uuid.UUID, page, perPage int) ([]model.CompanyPayment, int, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	matching := make([]*model.CompanyPayment, 0)
+	for _, payment := range r.payments {
+		if payment.CompanyID == companyID {
+			matching = append(matching, payment)
+		}
+	}
+	sort.Slice(matching, func(i, j int) bool {
+		return matching[i].PaidAt.After(matching[j].PaidAt)
+	})
+
+	total := len(matching)
+	if total == 0 {
+		return []model.CompanyPayment{}, 0, nil
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+
+	if perPage <= 0 {
+		perPage = total
+	}
+
+	offset := (page - 1) * perPage
+	if offset >= total {
+		return []model.CompanyPayment{}, total, nil
+	}
+
+	end := offset + perPage
+	if end > total {
+		end = total
+	}
+
+	result := make([]model.CompanyPayment, 0, end-offset)
+	for _, payment := range matching[offset:end] {
+		result = append(result, *payment)
+	}
+
+	return result, total, nil
+}

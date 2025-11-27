@@ -21,4 +21,5 @@ type CompanyRepository interface {
 	GetCompanyUsers(ctx context.Context, page, perPage int) ([]User, int, error)
 	CreateCompanyPayment(ctx context.Context, payment *CompanyPayment) error
 	GetCompanyPaymentByProviderID(ctx context.Context, provider string, paymentID string) (*CompanyPayment, error)
+	ListCompanyPayments(ctx context.Context, companyID uuid.UUID, page, perPage int) ([]CompanyPayment, int, error)
 }
