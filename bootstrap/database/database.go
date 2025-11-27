@@ -54,64 +54,9 @@ func ConnectDB(ctx context.Context) string {
 }
 
 var (
-	dbInstance     *bun.DB
-	once           sync.Once
-	schemaInitOnce sync.Map
-	schemaInitLock sync.Mutex
+	dbInstance *bun.DB
+	once       sync.Once
 )
-
-type schemaEnsureSkipKey struct{}
-
-func markSchemaReady(schema string) {
-	if schema == "" {
-		return
-	}
-	schemaInitOnce.Store(schema, struct{}{})
-}
-
-func isSchemaReady(schema string) bool {
-	if schema == "" {
-		return false
-	}
-	_, ok := schemaInitOnce.Load(schema)
-	return ok
-}
-
-func withSchemaEnsureSkip(ctx context.Context) context.Context {
-	return context.WithValue(ctx, schemaEnsureSkipKey{}, true)
-}
-
-func shouldSkipSchemaEnsure(ctx context.Context) bool {
-	skip, _ := ctx.Value(schemaEnsureSkipKey{}).(bool)
-	return skip
-}
-
-func ensureSchemaPrepared(ctx context.Context, db *bun.DB, schemaName string) error {
-	if schemaName == "" {
-		return errors.New("schema not found")
-	}
-
-	schemaInitLock.Lock()
-	defer schemaInitLock.Unlock()
-
-	if isSchemaReady(schemaName) {
-		return nil
-	}
-
-	ensureCtx := withSchemaEnsureSkip(ctx)
-	var err error
-	if schemaName == model.PUBLIC_SCHEMA {
-		err = createPublicTables(ensureCtx, db)
-	} else {
-		err = CreateNewCompanySchema(ensureCtx, db)
-	}
-	if err != nil {
-		return err
-	}
-
-	markSchemaReady(schemaName)
-	return nil
-}
 
 func NewPostgreSQLConnection() *bun.DB {
 	once.Do(func() {
@@ -187,12 +132,6 @@ func GetTenantTransaction(ctx context.Context, db *bun.DB) (context.Context, *bu
 		return nil, nil, nil, err
 	}
 
-	// if !shouldSkipSchemaEnsure(ctx) && !isSchemaReady(schemaName) {
-	// 	if err := ensureSchemaPrepared(ctx, db, schemaName); err != nil {
-	// 		return nil, nil, nil, err
-	// 	}
-	// }
-
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
@@ -241,7 +180,6 @@ func createPublicTables(ctx context.Context, db *bun.DB) error {
 		panic(err)
 	}
 
-	// ctx = withSchemaEnsureSkip(ctx)
 	ctx, tx, cancel, err := GetTenantTransaction(ctx, db)
 	if err != nil {
 		return err
@@ -270,15 +208,7 @@ func createPublicTables(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	if err := createTableIfNotExists(ctx, tx, (*model.CompanyPayment)(nil)); err != nil {
-		return err
-	}
-
 	if err := createTableIfNotExists(ctx, tx, (*model.Contact)(nil)); err != nil {
-		return err
-	}
-
-	if err := setupPublicMigrations(ctx, tx); err != nil {
 		return err
 	}
 
@@ -286,7 +216,6 @@ func createPublicTables(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	// markSchemaReady(model.PUBLIC_SCHEMA)
 	return nil
 }
 
@@ -307,35 +236,13 @@ func createAllSchemaTables(ctx context.Context, db *bun.DB) error {
 			continue
 		}
 
-		if err := applyTenantMigrations(ctx, db, schemaName); err != nil {
+		ctx = context.WithValue(ctx, model.Schema("schema"), schemaName)
+
+		if err := CreateNewCompanySchema(ctx, db); err != nil {
 			return err
 		}
 	}
 
-	return nil
-}
-
-func applyTenantMigrations(ctx context.Context, db *bun.DB, schemaName string) error {
-	ctx = context.WithValue(ctx, model.Schema("schema"), schemaName)
-	ctx = withSchemaEnsureSkip(ctx)
-
-	ctx, tx, cancel, err := GetTenantTransaction(ctx, db)
-	if err != nil {
-		return err
-	}
-
-	defer cancel()
-	defer tx.Rollback()
-
-	if err := setupPrivateMigrations(ctx, tx); err != nil {
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	markSchemaReady(schemaName)
 	return nil
 }
 
@@ -344,12 +251,6 @@ func CreateNewCompanySchema(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	// schemaName, err := GetCurrentSchema(ctx)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// ctx = withSchemaEnsureSkip(ctx)
 	ctx, tx, cancel, err := GetTenantTransaction(ctx, db)
 	if err != nil {
 		return err
@@ -366,7 +267,6 @@ func CreateNewCompanySchema(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	// markSchemaReady(schemaName)
 	return nil
 }
 
@@ -419,7 +319,6 @@ func registerModels(db *bun.DB) error {
 	db.RegisterModel((*model.Shift)(nil))
 	db.RegisterModel((*model.CompanyToUsers)(nil))
 	db.RegisterModel((*model.Company)(nil))
-	db.RegisterModel((*model.CompanyPayment)(nil))
 	db.RegisterModel((*model.User)(nil))
 	var _ bun.BeforeSelectHook = (*model.User)(nil)
 
@@ -587,10 +486,6 @@ func createTables(ctx context.Context, tx *bun.Tx) error {
 	}
 
 	if err := createTableIfNotExists(ctx, tx, (*model.Company)(nil)); err != nil {
-		return err
-	}
-
-	if err := createTableIfNotExists(ctx, tx, (*model.CompanyPayment)(nil)); err != nil {
 		return err
 	}
 
