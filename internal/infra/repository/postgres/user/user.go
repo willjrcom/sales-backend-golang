@@ -170,6 +170,32 @@ func (r *UserRepositoryBun) LoginAndDeleteUser(ctx context.Context, user *model.
 	return nil
 }
 
+// ListPublicUsers returns every user stored in the public schema with limited fields.
+func (r *UserRepositoryBun) ListPublicUsers(ctx context.Context) ([]model.User, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	users := []model.User{}
+	if err := tx.NewSelect().
+		Model(&users).
+		Column("id", "name", "email", "cpf").
+		Order("name ASC").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
 func (r *UserRepositoryBun) LoginUser(ctx context.Context, user *model.User) (*model.User, error) {
 
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)

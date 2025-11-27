@@ -50,6 +50,8 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 
 	// Add S3 handler
 	chi.AddHandler(handlerimpl.NewHandlerS3())
+	// Public analytics handler for company/user listing
+	chi.AddHandler(handlerimpl.NewHandlerPublicData(companyService, userService))
 
 	clientService.AddDependencies(contactRepository)
 	employeeService.AddDependencies(contactRepository, userRepository)

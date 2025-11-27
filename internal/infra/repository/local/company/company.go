@@ -56,6 +56,16 @@ func (r *CompanyRepositoryLocal) GetCompany(ctx context.Context) (*model.Company
 	return nil, errors.New("no company found")
 }
 
+func (r *CompanyRepositoryLocal) ListPublicCompanies(ctx context.Context) ([]model.Company, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	result := make([]model.Company, 0, len(r.companies))
+	for _, company := range r.companies {
+		result = append(result, *company)
+	}
+	return result, nil
+}
+
 func (r *CompanyRepositoryLocal) ValidateUserToPublicCompany(ctx context.Context, userID uuid.UUID) (bool, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()

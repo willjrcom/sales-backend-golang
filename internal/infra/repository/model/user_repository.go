@@ -11,6 +11,7 @@ type UserRepository interface {
 	UpdateUser(ctx context.Context, user *User) error
 	UpdateUserPassword(ctx context.Context, user *User) error
 	LoginAndDeleteUser(ctx context.Context, user *User) error
+	ListPublicUsers(ctx context.Context) ([]User, error)
 	GetUser(ctx context.Context, email string) (*User, error)
 	LoginUser(ctx context.Context, user *User) (*User, error)
 	GetIDByEmail(ctx context.Context, email string) (*uuid.UUID, error)

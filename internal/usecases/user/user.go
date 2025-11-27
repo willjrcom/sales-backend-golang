@@ -306,3 +306,25 @@ func (s *Service) GetCompanies(ctx context.Context) ([]companydto.CompanyDTO, er
 
 	return companyDTOs, nil
 }
+
+// ListPublicUsers returns basic data for all registered users.
+func (s *Service) ListPublicUsers(ctx context.Context) ([]companydto.UserBasicDTO, error) {
+	userModels, err := s.r.ListPublicUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(userModels) == 0 {
+		return []companydto.UserBasicDTO{}, nil
+	}
+
+	basic := make([]companydto.UserBasicDTO, len(userModels))
+	for i := range userModels {
+		user := userModels[i].ToDomain()
+		dto := companydto.UserBasicDTO{}
+		dto.FromDomain(user)
+		basic[i] = dto
+	}
+
+	return basic, nil
+}
