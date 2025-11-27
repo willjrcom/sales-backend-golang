@@ -2,6 +2,7 @@ package companyrepositorybun
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -130,6 +131,30 @@ func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*model.Company, 
 	}
 
 	return company, err
+}
+
+func (r *CompanyRepositoryBun) GetCompanyByIDPublic(ctx context.Context, id uuid.UUID) (*model.Company, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	company := &model.Company{}
+	if err := tx.NewSelect().
+		Model(company).
+		Where("id = ?", id).
+		Limit(1).
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return company, nil
 }
 
 func (r *CompanyRepositoryBun) ValidateUserToPublicCompany(ctx context.Context, userID uuid.UUID) (bool, error) {
@@ -283,4 +308,131 @@ func (r *CompanyRepositoryBun) ListPublicCompanies(ctx context.Context) ([]model
 	}
 
 	return companies, nil
+}
+
+func (r *CompanyRepositoryBun) ListCompaniesForBilling(ctx context.Context) ([]model.Company, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	companies := []model.Company{}
+	if err := tx.NewSelect().
+		Model(&companies).
+		Column("id", "schema_name", "business_name", "trade_name", "subscription_expires_at", "is_blocked").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return companies, nil
+}
+
+func (r *CompanyRepositoryBun) UpdateCompanySubscription(ctx context.Context, companyID uuid.UUID, schema string, expiresAt *time.Time, isBlocked bool) error {
+	if err := r.updateSubscriptionForSchema(ctx, model.PUBLIC_SCHEMA, companyID, expiresAt, isBlocked); err != nil {
+		return err
+	}
+
+	if schema != "" {
+		if err := r.updateSubscriptionForSchema(ctx, schema, companyID, expiresAt, isBlocked); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (r *CompanyRepositoryBun) updateSubscriptionForSchema(ctx context.Context, schema string, companyID uuid.UUID, expiresAt *time.Time, isBlocked bool) error {
+	var (
+		tx     *bun.Tx
+		cancel context.CancelFunc
+		err    error
+		txCtx  context.Context
+	)
+
+	if schema == model.PUBLIC_SCHEMA {
+		txCtx, tx, cancel, err = database.GetPublicTenantTransaction(ctx, r.db)
+	} else {
+		txCtx = context.WithValue(ctx, model.Schema("schema"), schema)
+		txCtx, tx, cancel, err = database.GetTenantTransaction(txCtx, r.db)
+	}
+	if err != nil {
+		return err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	update := tx.NewUpdate().
+		Model((*model.Company)(nil)).
+		Set("is_blocked = ?", isBlocked).
+		Where("id = ?", companyID)
+
+	if expiresAt == nil {
+		update = update.Set("subscription_expires_at = NULL")
+	} else {
+		update = update.Set("subscription_expires_at = ?", expiresAt)
+	}
+
+	if _, err := update.Exec(txCtx); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *CompanyRepositoryBun) CreateCompanyPayment(ctx context.Context, payment *model.CompanyPayment) error {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	if _, err := tx.NewInsert().Model(payment).Exec(ctx); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *CompanyRepositoryBun) GetCompanyPaymentByProviderID(ctx context.Context, provider string, paymentID string) (*model.CompanyPayment, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	payment := &model.CompanyPayment{}
+	if err := tx.NewSelect().
+		Model(payment).
+		Where("provider = ?", provider).
+		Where("provider_payment_id = ?", paymentID).
+		Limit(1).
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return payment, nil
 }

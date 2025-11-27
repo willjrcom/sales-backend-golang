@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -30,10 +31,12 @@ func NewHandlerCompany(companyService *companyusecases.Service) *handler.Handler
 		c.Get("/users", h.handlerGetCompanyUsers)
 		c.Post("/add/user", h.handlerAddUserToCompany)
 		c.Post("/remove/user", h.handlerRemoveUserFromCompany)
+		c.Post("/payments/mercadopago/checkout", h.handlerCreateSubscriptionCheckout)
+		c.Post("/payments/mercadopago/webhook", h.handlerMercadoPagoWebhook)
 		c.Post("/test", h.handlerTest)
 	})
 
-	return handler.NewHandler("/company", c)
+	return handler.NewHandler("/company", c, "/company/payments/mercadopago/webhook")
 }
 
 func (h *handlerCompanyImpl) handlerNewCompany(w http.ResponseWriter, r *http.Request) {
@@ -130,6 +133,57 @@ func (h *handlerCompanyImpl) handlerRemoveUserFromCompany(w http.ResponseWriter,
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerCompanyImpl) handlerCreateSubscriptionCheckout(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	dto := &companydto.SubscriptionCheckoutDTO{}
+	if err := jsonpkg.ParseBody(r, dto); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	resp, err := h.s.CreateSubscriptionCheckout(ctx, dto)
+	if err != nil {
+		status := http.StatusInternalServerError
+		if errors.Is(err, companyusecases.ErrMercadoPagoDisabled) {
+			status = http.StatusServiceUnavailable
+		}
+		jsonpkg.ResponseErrorJson(w, r, status, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	dto := &companydto.MercadoPagoWebhookDTO{}
+	if err := jsonpkg.ParseBody(r, dto); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	secret := r.URL.Query().Get("secret")
+	if secret == "" {
+		secret = r.Header.Get("X-Webhook-Secret")
+	}
+
+	if err := h.s.HandleMercadoPagoWebhook(ctx, secret, dto); err != nil {
+		status := http.StatusInternalServerError
+		switch {
+		case errors.Is(err, companyusecases.ErrInvalidWebhookSecret):
+			status = http.StatusUnauthorized
+		case errors.Is(err, companyusecases.ErrMercadoPagoDisabled):
+			status = http.StatusServiceUnavailable
+		}
+		jsonpkg.ResponseErrorJson(w, r, status, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, map[string]string{"status": "ok"})
 }
 
 func (h *handlerCompanyImpl) handlerTest(w http.ResponseWriter, r *http.Request) {

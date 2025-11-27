@@ -270,6 +270,10 @@ func createPublicTables(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
+	if err := createTableIfNotExists(ctx, tx, (*model.CompanyPayment)(nil)); err != nil {
+		return err
+	}
+
 	if err := createTableIfNotExists(ctx, tx, (*model.Contact)(nil)); err != nil {
 		return err
 	}
@@ -389,6 +393,7 @@ func registerModels(db *bun.DB) error {
 	db.RegisterModel((*model.Shift)(nil))
 	db.RegisterModel((*model.CompanyToUsers)(nil))
 	db.RegisterModel((*model.Company)(nil))
+	db.RegisterModel((*model.CompanyPayment)(nil))
 	db.RegisterModel((*model.User)(nil))
 	var _ bun.BeforeSelectHook = (*model.User)(nil)
 
@@ -556,6 +561,10 @@ func createTables(ctx context.Context, tx *bun.Tx) error {
 	}
 
 	if err := createTableIfNotExists(ctx, tx, (*model.Company)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, tx, (*model.CompanyPayment)(nil)); err != nil {
 		return err
 	}
 

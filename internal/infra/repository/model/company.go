@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"github.com/uptrace/bun"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
@@ -13,16 +15,17 @@ type Company struct {
 }
 
 type CompanyCommonAttributes struct {
-	SchemaName   string                    `bun:"schema_name,notnull"`
-	BusinessName string                    `bun:"business_name,notnull"`
-	TradeName    string                    `bun:"trade_name,notnull"`
-	Cnpj         string                    `bun:"cnpj,notnull"`
-	Email        string                    `bun:"email"`
-	Contacts     []string                  `bun:"contacts,type:jsonb"`
-	Address      *Address                  `bun:"rel:has-one,join:id=object_id,notnull"`
-	Users        []User                    `bun:"m2m:public.company_to_users,join:Company=User"`
-	Preferences  companyentity.Preferences `bun:"preferences,type:jsonb"`
-	IsBlocked    bool                      `bun:"is_blocked"`
+	SchemaName            string                    `bun:"schema_name,notnull"`
+	BusinessName          string                    `bun:"business_name,notnull"`
+	TradeName             string                    `bun:"trade_name,notnull"`
+	Cnpj                  string                    `bun:"cnpj,notnull"`
+	Email                 string                    `bun:"email"`
+	Contacts              []string                  `bun:"contacts,type:jsonb"`
+	Address               *Address                  `bun:"rel:has-one,join:id=object_id,notnull"`
+	Users                 []User                    `bun:"m2m:public.company_to_users,join:Company=User"`
+	Preferences           companyentity.Preferences `bun:"preferences,type:jsonb"`
+	IsBlocked             bool                      `bun:"is_blocked"`
+	SubscriptionExpiresAt *time.Time                `bun:"subscription_expires_at"`
 }
 
 func (c *Company) FromDomain(company *companyentity.Company) {
@@ -32,16 +35,17 @@ func (c *Company) FromDomain(company *companyentity.Company) {
 	*c = Company{
 		Entity: entitymodel.FromDomain(company.Entity),
 		CompanyCommonAttributes: CompanyCommonAttributes{
-			SchemaName:   company.SchemaName,
-			BusinessName: company.BusinessName,
-			TradeName:    company.TradeName,
-			Cnpj:         company.Cnpj,
-			Email:        company.Email,
-			Contacts:     company.Contacts,
-			Address:      &Address{},
-			Users:        []User{},
-			Preferences:  company.Preferences,
-			IsBlocked:    company.IsBlocked,
+			SchemaName:            company.SchemaName,
+			BusinessName:          company.BusinessName,
+			TradeName:             company.TradeName,
+			Cnpj:                  company.Cnpj,
+			Email:                 company.Email,
+			Contacts:              company.Contacts,
+			Address:               &Address{},
+			Users:                 []User{},
+			Preferences:           company.Preferences,
+			IsBlocked:             company.IsBlocked,
+			SubscriptionExpiresAt: company.SubscriptionExpiresAt,
 		},
 	}
 
@@ -67,16 +71,17 @@ func (c *Company) ToDomain() *companyentity.Company {
 	return &companyentity.Company{
 		Entity: c.Entity.ToDomain(),
 		CompanyCommonAttributes: companyentity.CompanyCommonAttributes{
-			SchemaName:   c.SchemaName,
-			BusinessName: c.BusinessName,
-			TradeName:    c.TradeName,
-			Cnpj:         c.Cnpj,
-			Email:        c.Email,
-			Contacts:     c.Contacts,
-			Address:      c.Address.ToDomain(),
-			Users:        users,
-			Preferences:  c.Preferences,
-			IsBlocked:    c.IsBlocked,
+			SchemaName:            c.SchemaName,
+			BusinessName:          c.BusinessName,
+			TradeName:             c.TradeName,
+			Cnpj:                  c.Cnpj,
+			Email:                 c.Email,
+			Contacts:              c.Contacts,
+			Address:               c.Address.ToDomain(),
+			Users:                 users,
+			Preferences:           c.Preferences,
+			IsBlocked:             c.IsBlocked,
+			SubscriptionExpiresAt: c.SubscriptionExpiresAt,
 		},
 	}
 }

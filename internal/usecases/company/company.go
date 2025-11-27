@@ -2,10 +2,16 @@ package companyusecases
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"errors"
+	"log"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	employeedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/employee"
@@ -13,6 +19,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
+	mercadopagoservice "github.com/willjrcom/sales-backend-go/internal/infra/service/mercadopago"
 	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 )
@@ -24,10 +31,18 @@ type Service struct {
 	u  model.UserRepository
 	es employeeusecases.Service
 	us userusecases.Service
+	mp *mercadopagoservice.Client
 }
 
-func NewService(r model.CompanyRepository) *Service {
-	return &Service{r: r}
+const mercadoPagoProvider = "mercado_pago"
+
+var (
+	ErrMercadoPagoDisabled  = errors.New("mercado pago integration disabled")
+	ErrInvalidWebhookSecret = errors.New("invalid mercado pago webhook secret")
+)
+
+func NewService(r model.CompanyRepository, mp *mercadopagoservice.Client) *Service {
+	return &Service{r: r, mp: mp}
 }
 
 func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Service, u model.UserRepository, us userusecases.Service, es employeeusecases.Service) {
@@ -36,6 +51,62 @@ func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Se
 	s.u = u
 	s.us = us
 	s.es = es
+}
+
+func (s *Service) StartSubscriptionWatcher(ctx context.Context, interval time.Duration) {
+	if interval <= 0 {
+		interval = 24 * time.Hour
+	}
+
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		run := func() {
+			if err := s.ProcessSubscriptionExpirations(context.Background()); err != nil {
+				log.Printf("subscription watcher error: %v", err)
+			}
+		}
+
+		run()
+
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				run()
+			}
+		}
+	}()
+}
+
+func (s *Service) ProcessSubscriptionExpirations(ctx context.Context) error {
+	companies, err := s.r.ListCompaniesForBilling(ctx)
+	if err != nil {
+		return err
+	}
+
+	now := time.Now().UTC()
+	for _, company := range companies {
+		if company.SubscriptionExpiresAt == nil {
+			continue
+		}
+
+		expired := company.SubscriptionExpiresAt.Before(now)
+		switch {
+		case expired && !company.IsBlocked:
+			if err := s.r.UpdateCompanySubscription(ctx, company.ID, company.SchemaName, company.SubscriptionExpiresAt, true); err != nil {
+				return err
+			}
+		case !expired && company.IsBlocked:
+			if err := s.r.UpdateCompanySubscription(ctx, company.ID, company.SchemaName, company.SubscriptionExpiresAt, false); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (response *companydto.CompanySchemaDTO, err error) {
@@ -234,6 +305,127 @@ func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.Use
 	}
 
 	return nil
+}
+
+func (s *Service) CreateSubscriptionCheckout(ctx context.Context, dto *companydto.SubscriptionCheckoutDTO) (*companydto.SubscriptionCheckoutResponseDTO, error) {
+	if s.mp == nil {
+		return nil, ErrMercadoPagoDisabled
+	}
+
+	months := dto.Normalize()
+	companyModel, err := s.r.GetCompany(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	company := companyModel.ToDomain()
+	req := &mercadopagoservice.PreferenceRequest{
+		Title:   "Mensalidade",
+		Company: company.TradeName,
+		Months:  months,
+		Price:   s.mp.MonthlyPrice(),
+		Schema:  company.SchemaName,
+		ID:      company.ID.String(),
+	}
+
+	pref, err := s.mp.CreateSubscriptionPreference(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &companydto.SubscriptionCheckoutResponseDTO{
+		PreferenceID:     pref.ID,
+		InitPoint:        pref.InitPoint,
+		SandboxInitPoint: pref.SandboxInitPoint,
+	}, nil
+}
+
+func (s *Service) HandleMercadoPagoWebhook(ctx context.Context, secret string, dto *companydto.MercadoPagoWebhookDTO) error {
+	if s.mp == nil {
+		return ErrMercadoPagoDisabled
+	}
+
+	expected := s.mp.WebhookSecret()
+	if expected != "" && secret != expected {
+		return ErrInvalidWebhookSecret
+	}
+
+	if dto == nil || dto.Type != "payment" || dto.Data.ID == "" {
+		return nil
+	}
+
+	paymentID := dto.Data.ID
+	if existing, err := s.r.GetCompanyPaymentByProviderID(ctx, mercadoPagoProvider, paymentID); err == nil && existing != nil {
+		return nil
+	} else if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return err
+	}
+
+	details, err := s.mp.GetPayment(ctx, paymentID)
+	if err != nil {
+		return err
+	}
+
+	if details.Status != "approved" {
+		return nil
+	}
+
+	companyIDRef := details.Metadata.CompanyID
+	if companyIDRef == "" {
+		companyIDRef = details.ExternalReference
+	}
+
+	companyID, err := uuid.Parse(companyIDRef)
+	if err != nil {
+		return err
+	}
+
+	companyModel, err := s.r.GetCompanyByIDPublic(ctx, companyID)
+	if err != nil {
+		return err
+	}
+
+	months := details.Metadata.Months
+	if months <= 0 {
+		months = 1
+	}
+
+	paidAt := time.Now().UTC()
+	if details.DateApproved != nil {
+		paidAt = details.DateApproved.UTC()
+	}
+
+	base := paidAt
+	if companyModel.SubscriptionExpiresAt != nil && companyModel.SubscriptionExpiresAt.After(paidAt) {
+		base = *companyModel.SubscriptionExpiresAt
+	}
+
+	newExpiration := base.AddDate(0, months, 0)
+
+	if err := s.r.UpdateCompanySubscription(ctx, companyModel.ID, companyModel.SchemaName, &newExpiration, false); err != nil {
+		return err
+	}
+
+	rawPayload, _ := json.Marshal(dto)
+
+	payment := &companyentity.SubscriptionPayment{
+		Entity:            entity.NewEntity(),
+		CompanyID:         companyModel.ID,
+		Provider:          mercadoPagoProvider,
+		ProviderPaymentID: paymentID,
+		Status:            details.Status,
+		Currency:          details.CurrencyID,
+		Amount:            decimal.NewFromFloat(details.TransactionAmount),
+		Months:            months,
+		PaidAt:            paidAt,
+		ExternalReference: details.ExternalReference,
+		RawPayload:        rawPayload,
+	}
+
+	paymentModel := &model.CompanyPayment{}
+	paymentModel.FromDomain(payment)
+
+	return s.r.CreateCompanyPayment(ctx, paymentModel)
 }
 
 func (s *Service) Test(ctx context.Context) error {

@@ -3,8 +3,10 @@ package companyrepositorylocal
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -13,6 +15,7 @@ import (
 type CompanyRepositoryLocal struct {
 	companies          map[uuid.UUID]*model.Company
 	publicCompanyUsers map[uuid.UUID]struct{}
+	payments           map[string]*model.CompanyPayment
 	mu                 sync.RWMutex
 }
 
@@ -20,6 +23,7 @@ func NewCompanyRepositoryLocal() model.CompanyRepository {
 	return &CompanyRepositoryLocal{
 		companies:          make(map[uuid.UUID]*model.Company),
 		publicCompanyUsers: make(map[uuid.UUID]struct{}),
+		payments:           make(map[string]*model.CompanyPayment),
 	}
 }
 
@@ -56,6 +60,15 @@ func (r *CompanyRepositoryLocal) GetCompany(ctx context.Context) (*model.Company
 	return nil, errors.New("no company found")
 }
 
+func (r *CompanyRepositoryLocal) GetCompanyByIDPublic(ctx context.Context, id uuid.UUID) (*model.Company, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if company, ok := r.companies[id]; ok {
+		return company, nil
+	}
+	return nil, fmt.Errorf("company %s not found", id)
+}
+
 func (r *CompanyRepositoryLocal) ListPublicCompanies(ctx context.Context) ([]model.Company, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -64,6 +77,22 @@ func (r *CompanyRepositoryLocal) ListPublicCompanies(ctx context.Context) ([]mod
 		result = append(result, *company)
 	}
 	return result, nil
+}
+
+func (r *CompanyRepositoryLocal) ListCompaniesForBilling(ctx context.Context) ([]model.Company, error) {
+	return r.ListPublicCompanies(ctx)
+}
+
+func (r *CompanyRepositoryLocal) UpdateCompanySubscription(ctx context.Context, companyID uuid.UUID, schema string, expiresAt *time.Time, isBlocked bool) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	company, ok := r.companies[companyID]
+	if !ok {
+		return fmt.Errorf("company %s not found", companyID)
+	}
+	company.SubscriptionExpiresAt = expiresAt
+	company.IsBlocked = isBlocked
+	return nil
 }
 
 func (r *CompanyRepositoryLocal) ValidateUserToPublicCompany(ctx context.Context, userID uuid.UUID) (bool, error) {
@@ -128,4 +157,28 @@ func (r *CompanyRepositoryLocal) GetCompanyUsers(ctx context.Context, page, perP
 		result = append(result, u)
 	}
 	return result, total, nil
+}
+
+func (r *CompanyRepositoryLocal) CreateCompanyPayment(ctx context.Context, payment *model.CompanyPayment) error {
+	if payment == nil {
+		return errors.New("payment is nil")
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	key := payment.Provider + ":" + payment.ProviderPaymentID
+	if _, exists := r.payments[key]; exists {
+		return fmt.Errorf("payment %s already exists", payment.ProviderPaymentID)
+	}
+	r.payments[key] = payment
+	return nil
+}
+
+func (r *CompanyRepositoryLocal) GetCompanyPaymentByProviderID(ctx context.Context, provider string, paymentID string) (*model.CompanyPayment, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	key := provider + ":" + paymentID
+	if payment, ok := r.payments[key]; ok {
+		return payment, nil
+	}
+	return nil, errors.New("payment not found")
 }
