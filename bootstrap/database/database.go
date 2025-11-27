@@ -278,6 +278,10 @@ func createPublicTables(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
+	if err := setupPublicMigrations(ctx, tx); err != nil {
+		return err
+	}
+
 	if err := tx.Commit(); err != nil {
 		return err
 	}
