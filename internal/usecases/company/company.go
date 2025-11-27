@@ -376,13 +376,13 @@ func (s *Service) CreateSubscriptionCheckout(ctx context.Context, dto *companydt
 	}, nil
 }
 
-func (s *Service) HandleMercadoPagoWebhook(ctx context.Context, secret string, dto *companydto.MercadoPagoWebhookDTO) error {
+func (s *Service) HandleMercadoPagoWebhook(ctx context.Context, dto *companydto.MercadoPagoWebhookDTO) error {
 	if s.mp == nil || !s.mp.Enabled() {
 		return ErrMercadoPagoDisabled
 	}
 
 	expected := s.mp.WebhookSecret()
-	if expected != "" && secret != expected {
+	if expected == "" {
 		return ErrInvalidWebhookSecret
 	}
 

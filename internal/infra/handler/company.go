@@ -198,12 +198,7 @@ func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r 
 		return
 	}
 
-	secret := r.URL.Query().Get("secret")
-	if secret == "" {
-		secret = r.Header.Get("X-Webhook-Secret")
-	}
-
-	if err := h.s.HandleMercadoPagoWebhook(ctx, secret, dto); err != nil {
+	if err := h.s.HandleMercadoPagoWebhook(ctx, dto); err != nil {
 		status := http.StatusInternalServerError
 		switch {
 		case errors.Is(err, companyusecases.ErrInvalidWebhookSecret):
