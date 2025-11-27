@@ -183,7 +183,7 @@ func (r *UserRepositoryBun) ListPublicUsers(ctx context.Context) ([]model.User, 
 	users := []model.User{}
 	if err := tx.NewSelect().
 		Model(&users).
-		Column("id", "name", "email", "cpf").
+		Column("id", "name", "email", "cpf").Relation("Companies").
 		Order("name ASC").
 		Scan(ctx); err != nil {
 		return nil, err
