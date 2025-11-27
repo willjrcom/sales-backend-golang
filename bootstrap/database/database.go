@@ -307,13 +307,35 @@ func createAllSchemaTables(ctx context.Context, db *bun.DB) error {
 			continue
 		}
 
-		ctx = context.WithValue(ctx, model.Schema("schema"), schemaName)
-
-		if err := CreateNewCompanySchema(ctx, db); err != nil {
+		if err := applyTenantMigrations(ctx, db, schemaName); err != nil {
 			return err
 		}
 	}
 
+	return nil
+}
+
+func applyTenantMigrations(ctx context.Context, db *bun.DB, schemaName string) error {
+	ctx = context.WithValue(ctx, model.Schema("schema"), schemaName)
+	ctx = withSchemaEnsureSkip(ctx)
+
+	ctx, tx, cancel, err := GetTenantTransaction(ctx, db)
+	if err != nil {
+		return err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	if err := setupPrivateMigrations(ctx, tx); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	markSchemaReady(schemaName)
 	return nil
 }
 
