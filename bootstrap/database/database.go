@@ -187,11 +187,11 @@ func GetTenantTransaction(ctx context.Context, db *bun.DB) (context.Context, *bu
 		return nil, nil, nil, err
 	}
 
-	if !shouldSkipSchemaEnsure(ctx) && !isSchemaReady(schemaName) {
-		if err := ensureSchemaPrepared(ctx, db, schemaName); err != nil {
-			return nil, nil, nil, err
-		}
-	}
+	// if !shouldSkipSchemaEnsure(ctx) && !isSchemaReady(schemaName) {
+	// 	if err := ensureSchemaPrepared(ctx, db, schemaName); err != nil {
+	// 		return nil, nil, nil, err
+	// 	}
+	// }
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	tx, err := db.BeginTx(ctx, nil)
@@ -241,7 +241,7 @@ func createPublicTables(ctx context.Context, db *bun.DB) error {
 		panic(err)
 	}
 
-	ctx = withSchemaEnsureSkip(ctx)
+	// ctx = withSchemaEnsureSkip(ctx)
 	ctx, tx, cancel, err := GetTenantTransaction(ctx, db)
 	if err != nil {
 		return err
@@ -286,7 +286,7 @@ func createPublicTables(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	markSchemaReady(model.PUBLIC_SCHEMA)
+	// markSchemaReady(model.PUBLIC_SCHEMA)
 	return nil
 }
 
@@ -322,12 +322,12 @@ func CreateNewCompanySchema(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	schemaName, err := GetCurrentSchema(ctx)
-	if err != nil {
-		return err
-	}
+	// schemaName, err := GetCurrentSchema(ctx)
+	// if err != nil {
+	// 	return err
+	// }
 
-	ctx = withSchemaEnsureSkip(ctx)
+	// ctx = withSchemaEnsureSkip(ctx)
 	ctx, tx, cancel, err := GetTenantTransaction(ctx, db)
 	if err != nil {
 		return err
@@ -344,7 +344,7 @@ func CreateNewCompanySchema(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
-	markSchemaReady(schemaName)
+	// markSchemaReady(schemaName)
 	return nil
 }
 
