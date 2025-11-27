@@ -308,7 +308,7 @@ func (s *Service) RemoveUserFromCompany(ctx context.Context, dto *companydto.Use
 }
 
 func (s *Service) CreateSubscriptionCheckout(ctx context.Context, dto *companydto.SubscriptionCheckoutDTO) (*companydto.SubscriptionCheckoutResponseDTO, error) {
-	if s.mp == nil {
+	if s.mp == nil || !s.mp.Enabled() {
 		return nil, ErrMercadoPagoDisabled
 	}
 
@@ -341,7 +341,7 @@ func (s *Service) CreateSubscriptionCheckout(ctx context.Context, dto *companydt
 }
 
 func (s *Service) HandleMercadoPagoWebhook(ctx context.Context, secret string, dto *companydto.MercadoPagoWebhookDTO) error {
-	if s.mp == nil {
+	if s.mp == nil || !s.mp.Enabled() {
 		return ErrMercadoPagoDisabled
 	}
 
