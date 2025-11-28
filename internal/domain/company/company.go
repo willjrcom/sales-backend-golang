@@ -89,7 +89,7 @@ func generateSchema(cnpjData *cnpj.Cnpj) string {
 	replacedName := strings.ReplaceAll(strings.ToLower(cnpjData.TradeName), " ", "_")
 	replacedName = strings.ReplaceAll(replacedName, "-", "_")
 	id = strings.ReplaceAll(id, "-", "_")
-	schema := "loja_" + replacedName + "_" + strings.ToLower(id)
+	schema := "company_" + replacedName + "_" + strings.ToLower(id)
 	return schema
 }
 

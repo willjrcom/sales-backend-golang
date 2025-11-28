@@ -20,6 +20,12 @@ func main() {
 	cmd.HttpserverCmd.PersistentFlags().StringP("environment", "e", "dev", "the environment to run the server in")
 	rootCmd.AddCommand(cmd.HttpserverCmd)
 
+	cmd.MigrateCmd.Flags().StringP("file", "f", "", "SQL file to execute for every tenant schema")
+	if err := cmd.MigrateCmd.MarkFlagRequired("file"); err != nil {
+		panic(err)
+	}
+	rootCmd.AddCommand(cmd.MigrateCmd)
+
 	ctx := context.Background()
 	if err := rootCmd.ExecuteContext(ctx); err != nil {
 		panic(err)

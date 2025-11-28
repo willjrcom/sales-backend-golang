@@ -20,8 +20,6 @@ import (
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
-type Environment string
-
 func ConnectDB(ctx context.Context) string {
 	host := os.Getenv("DB_HOST")
 	if host == "" {
@@ -239,7 +237,7 @@ func createAllSchemaTables(ctx context.Context, db *bun.DB) error {
 			return err
 		}
 
-		if !strings.Contains(schemaName, "loja_") {
+		if !strings.Contains(schemaName, "company_") {
 			continue
 		}
 
