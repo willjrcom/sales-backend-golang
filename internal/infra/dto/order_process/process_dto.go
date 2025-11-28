@@ -1,6 +1,7 @@
 package processdto
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,6 +37,9 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 	if orderProcess == nil {
 		return
 	}
+
+	elapsedDuration := calculateElapsedDuration(orderProcess, time.Now().UTC())
+
 	*s = OrderProcessDTO{
 		ID:                orderProcess.ID,
 		OrderNumber:       orderProcess.OrderNumber,
@@ -51,8 +55,8 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 		FinishedAt:        orderProcess.FinishedAt,
 		CanceledAt:        orderProcess.CanceledAt,
 		CanceledReason:    orderProcess.CanceledReason,
-		Duration:          orderProcess.Duration,
-		DurationFormatted: orderProcess.Duration.String(),
+		Duration:          elapsedDuration,
+		DurationFormatted: formatDurationToClock(elapsedDuration),
 		TotalPaused:       orderProcess.TotalPaused,
 		Products:          []productcategorydto.ProductDTO{},
 		Queue:             &orderqueuedto.QueueDTO{},
@@ -77,4 +81,57 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 	if len(orderProcess.Products) == 0 {
 		s.Products = nil
 	}
+}
+
+func calculateElapsedDuration(orderProcess *orderprocessentity.OrderProcess, now time.Time) time.Duration {
+	if orderProcess == nil {
+		return 0
+	}
+
+	elapsed := orderProcess.Duration
+
+	if !isProcessRunning(orderProcess.Status) {
+		return elapsed
+	}
+
+	reference := runningReferenceTime(orderProcess)
+	if reference == nil || now.Before(*reference) {
+		return elapsed
+	}
+
+	return elapsed + now.Sub(*reference)
+}
+
+func isProcessRunning(status orderprocessentity.StatusProcess) bool {
+	return status == orderprocessentity.ProcessStatusStarted ||
+		status == orderprocessentity.ProcessStatusContinued
+}
+
+func runningReferenceTime(orderProcess *orderprocessentity.OrderProcess) *time.Time {
+	if orderProcess == nil {
+		return nil
+	}
+
+	if orderProcess.Status == orderprocessentity.ProcessStatusContinued && orderProcess.ContinuedAt != nil {
+		return orderProcess.ContinuedAt
+	}
+
+	if orderProcess.StartedAt != nil {
+		return orderProcess.StartedAt
+	}
+
+	return orderProcess.ContinuedAt
+}
+
+func formatDurationToClock(duration time.Duration) string {
+	if duration < 0 {
+		duration = 0
+	}
+
+	totalSeconds := int(duration / time.Second)
+
+	minutes := totalSeconds / 60
+	seconds := totalSeconds % 60
+
+	return fmt.Sprintf("%02d:%02d", minutes, seconds)
 }
