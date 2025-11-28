@@ -54,8 +54,8 @@ func ConnectDB(ctx context.Context) string {
 }
 
 var (
-	dbInstance *bun.DB
-	once       sync.Once
+	db   *bun.DB
+	once sync.Once
 )
 
 func NewPostgreSQLConnection() *bun.DB {
@@ -64,36 +64,36 @@ func NewPostgreSQLConnection() *bun.DB {
 		connectionParams := ConnectDB(ctx)
 
 		// Connect to database doing a PING
-		db := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(connectionParams), pgdriver.WithTimeout(time.Second*30)))
+		sqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(connectionParams), pgdriver.WithTimeout(time.Second*30)))
 
 		// Verifique se o banco de dados já existe.
-		if err := db.PingContext(ctx); err != nil {
+		if err := sqlDB.PingContext(ctx); err != nil {
 			log.Printf("erro ao conectar ao banco de dados: %v", err)
 			panic(err)
 		}
 
 		// set connection settings
-		db.SetMaxOpenConns(5)
-		db.SetMaxIdleConns(5)
-		db.SetConnMaxLifetime(time.Duration(60) * time.Minute)
+		sqlDB.SetMaxOpenConns(5)
+		sqlDB.SetMaxIdleConns(5)
+		sqlDB.SetConnMaxLifetime(time.Duration(60) * time.Minute)
 
-		dbInstance = bun.NewDB(db, pgdialect.New())
+		db = bun.NewDB(sqlDB, pgdialect.New())
 
-		if err := registerModels(dbInstance); err != nil {
+		if err := registerModels(db); err != nil {
 			panic(err)
 		}
 
-		if err := createAllSchemaTables(ctx, dbInstance); err != nil {
-			panic(err)
-		}
+		// if err := createAllSchemaTables(ctx, dbInstance); err != nil {
+		// 	panic(err)
+		// }
 
-		if err := createPublicTables(ctx, dbInstance); err != nil {
+		if err := createPublicTables(db); err != nil {
 			panic(err)
 		}
 
 		fmt.Println("Db connected")
 	})
-	return dbInstance
+	return db
 }
 
 func NewSQLiteConnection() *bun.DB {
@@ -117,10 +117,10 @@ func NewSQLiteConnection() *bun.DB {
 	}
 
 	// Crie as tabelas no esquema, se necessário
-	ctx := context.Background()
-	if err := createAllSchemaTables(ctx, dbInstance); err != nil {
-		panic(err)
-	}
+	// ctx := context.Background()
+	// if err := createAllSchemaTables(ctx, dbInstance); err != nil {
+	// 	panic(err)
+	// }
 
 	fmt.Println("SQLite connected")
 	return dbInstance
@@ -139,7 +139,7 @@ func GetTenantTransaction(ctx context.Context, db *bun.DB) (context.Context, *bu
 		return nil, nil, nil, err
 	}
 
-	query := fmt.Sprintf("SET search_path=%s", schemaName)
+	query := fmt.Sprintf("SET search_path='%s'", schemaName)
 	if _, err = tx.ExecContext(ctx, query); err != nil {
 		cancel()
 		return nil, nil, nil, err
@@ -174,8 +174,8 @@ func createSchema(ctx context.Context, db *bun.DB) error {
 	return nil
 }
 
-func createPublicTables(ctx context.Context, db *bun.DB) error {
-	ctx = context.WithValue(ctx, model.Schema("schema"), model.PUBLIC_SCHEMA)
+func createPublicTables(db *bun.DB) error {
+	ctx := context.WithValue(context.Background(), model.Schema("schema"), model.PUBLIC_SCHEMA)
 	if err := createSchema(ctx, db); err != nil {
 		panic(err)
 	}
@@ -208,9 +208,17 @@ func createPublicTables(ctx context.Context, db *bun.DB) error {
 		return err
 	}
 
+	if err := createTableIfNotExists(ctx, tx, (*model.CompanyPayment)(nil)); err != nil {
+		return err
+	}
+
 	if err := createTableIfNotExists(ctx, tx, (*model.Contact)(nil)); err != nil {
 		return err
 	}
+
+	// if err := setupPublicMigrations(ctx, tx); err != nil {
+	// 	return err
+	// }
 
 	if err := tx.Commit(); err != nil {
 		return err
@@ -221,7 +229,6 @@ func createPublicTables(ctx context.Context, db *bun.DB) error {
 
 func createAllSchemaTables(ctx context.Context, db *bun.DB) error {
 	schemasFound, err := db.QueryContext(ctx, "SELECT schema_name FROM information_schema.schemata;")
-
 	if err != nil {
 		return err
 	}
@@ -319,6 +326,7 @@ func registerModels(db *bun.DB) error {
 	db.RegisterModel((*model.Shift)(nil))
 	db.RegisterModel((*model.CompanyToUsers)(nil))
 	db.RegisterModel((*model.Company)(nil))
+	db.RegisterModel((*model.CompanyPayment)(nil))
 	db.RegisterModel((*model.User)(nil))
 	var _ bun.BeforeSelectHook = (*model.User)(nil)
 
@@ -489,10 +497,14 @@ func createTables(ctx context.Context, tx *bun.Tx) error {
 		return err
 	}
 
-	// Ensure ready_at timestamp columns exist where models expect them.
-	if err := setupPrivateMigrations(ctx, tx); err != nil {
+	if err := createTableIfNotExists(ctx, tx, (*model.CompanyPayment)(nil)); err != nil {
 		return err
 	}
+
+	// Ensure ready_at timestamp columns exist where models expect them.
+	// if err := setupPrivateMigrations(ctx, tx); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
