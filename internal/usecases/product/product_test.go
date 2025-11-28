@@ -88,6 +88,8 @@ func TestCreateProduct(t *testing.T) {
 	assert.NotContains(t, productId, uuid.Nil)
 	assert.Equal(t, product.Name, "Test Product")
 	assert.Equal(t, product.ID, productId)
+	assert.NotNil(t, product.Flavors)
+	assert.Len(t, product.Flavors, 0)
 }
 
 func TestCreateProductError(t *testing.T) {
@@ -168,6 +170,17 @@ func TestUpdateProduct(t *testing.T) {
 	err = productService.UpdateProduct(ctx, dtoId, dto)
 	assert.EqualError(t, err, productcategorydto.ErrCostGreaterThanPrice.Error())
 	*dto.Cost = decimal.NewFromInt(90)
+
+	// Test 3 - Update flavors
+	dto = &productcategorydto.ProductUpdateDTO{
+		Flavors: []string{"mussarela", "calabresa"},
+	}
+	err = productService.UpdateProduct(ctx, dtoId, dto)
+	assert.Nil(t, err)
+
+	product, err := productService.GetProductById(ctx, dtoId)
+	assert.Nil(t, err)
+	assert.Equal(t, []string{"mussarela", "calabresa"}, product.Flavors)
 }
 
 func TestGetAll(t *testing.T) {

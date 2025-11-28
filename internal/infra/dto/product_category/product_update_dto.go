@@ -41,7 +41,11 @@ func (p *ProductUpdateDTO) UpdateDomain(product *productentity.Product) (err err
 		product.Name = *p.Name
 	}
 	if p.Flavors != nil {
-		product.Flavors = p.Flavors
+		if len(p.Flavors) == 0 {
+			product.Flavors = []string{}
+		} else {
+			product.Flavors = append([]string{}, p.Flavors...)
+		}
 	}
 	if p.ImagePath != nil {
 		product.ImagePath = p.ImagePath
