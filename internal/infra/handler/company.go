@@ -1,7 +1,6 @@
 package handlerimpl
 
 import (
-	"bytes"
 	"errors"
 	"io"
 	"net/http"
@@ -194,16 +193,14 @@ func (h *handlerCompanyImpl) handlerCreateSubscriptionCheckout(w http.ResponseWr
 func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
+	dto := &companydto.MercadoPagoWebhookDTO{}
+	if err := jsonpkg.ParseBody(r, dto); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
-	r.Body.Close()
-	r.Body = io.NopCloser(bytes.NewBuffer(body))
 
-	dto := &companydto.MercadoPagoWebhookDTO{}
-	if err := jsonpkg.ParseBody(r, dto); err != nil {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
