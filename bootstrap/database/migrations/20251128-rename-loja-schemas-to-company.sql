@@ -21,6 +21,10 @@ BEGIN
         END IF;
 
         EXECUTE format('ALTER SCHEMA %I RENAME TO %I', rec.schema_name, new_schema);
+
+        UPDATE public.companies
+        SET schema_name = new_schema
+        WHERE schema_name = rec.schema_name;
     END LOOP;
 END;
 $$;
