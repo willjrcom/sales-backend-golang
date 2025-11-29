@@ -2,11 +2,16 @@ package mercadopagoservice
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mercadopago/sdk-go/pkg/config"
@@ -15,7 +20,19 @@ import (
 )
 
 const (
-	defaultMonthlyPriceBRL = 99.90
+	defaultMonthlyPriceBRL  = 99.90
+	signatureMaxSkewMinutes = 5 * time.Minute
+)
+
+var (
+	// ErrSignatureHeaderMissing indicates the webhook request did not include the signature header.
+	ErrSignatureHeaderMissing = errors.New("mercado pago signature header is missing")
+	// ErrSignatureTimestampInvalid indicates the timestamp supplied on the signature is invalid or expired.
+	ErrSignatureTimestampInvalid = errors.New("mercado pago signature timestamp is invalid or expired")
+	// ErrSignatureMismatch indicates the computed signature did not match the one supplied on the webhook.
+	ErrSignatureMismatch = errors.New("mercado pago signature mismatch")
+	// ErrWebhookSecretNotConfigured indicates the client is missing the webhook secret/notification URL configuration.
+	ErrWebhookSecretNotConfigured = errors.New("mercado pago webhook secret is not configured")
 )
 
 // Client wraps Mercado Pago SDK clients with project specific helpers.
@@ -107,7 +124,16 @@ func NewClient() *Client {
 
 // Enabled indicates whether the SDK clients are ready for use.
 func (c *Client) Enabled() bool {
-	return c != nil && c.preferenceClient != nil && c.paymentClient != nil
+	if c == nil {
+		return false
+	}
+	if c.preferenceClient == nil || c.paymentClient == nil {
+		return false
+	}
+	if c.notificationURL == "" || c.successURL == "" || c.webhookSecret == "" {
+		return false
+	}
+	return true
 }
 
 // MonthlyPrice returns the configured default monthly price.
@@ -283,4 +309,99 @@ func intFromAny(value any) int {
 		}
 	}
 	return 0
+}
+
+// ValidateWebhookSignature verifies whether the webhook payload matches the Mercado Pago signature scheme.
+func (c *Client) ValidateWebhookSignature(signatureHeader string, payload []byte) error {
+	if c == nil || c.webhookSecret == "" || c.notificationURL == "" {
+		return ErrWebhookSecretNotConfigured
+	}
+
+	ts, providedSignature, err := parseSignatureHeader(signatureHeader)
+	if err != nil {
+		return err
+	}
+
+	if err := validateSignatureTimestamp(ts); err != nil {
+		return err
+	}
+
+	expected := computeSignature(c.webhookSecret, c.notificationURL, ts, payload)
+	received, err := hex.DecodeString(providedSignature)
+	if err != nil {
+		return ErrSignatureMismatch
+	}
+
+	if !hmac.Equal(expected, received) {
+		return ErrSignatureMismatch
+	}
+
+	return nil
+}
+
+func parseSignatureHeader(header string) (string, string, error) {
+	header = strings.TrimSpace(header)
+	if header == "" {
+		return "", "", ErrSignatureHeaderMissing
+	}
+
+	var timestamp string
+	var signature string
+
+	segments := strings.FieldsFunc(header, func(r rune) bool {
+		return r == ',' || r == ';'
+	})
+
+	for _, segment := range segments {
+		segment = strings.TrimSpace(segment)
+		if segment == "" {
+			continue
+		}
+		kv := strings.SplitN(segment, "=", 2)
+		if len(kv) != 2 {
+			continue
+		}
+		key := strings.ToLower(strings.TrimSpace(kv[0]))
+		value := strings.TrimSpace(kv[1])
+		switch key {
+		case "ts", "t", "timestamp":
+			timestamp = value
+		case "v1", "signature", "sha256":
+			value = strings.TrimPrefix(value, "sha256=")
+			value = strings.TrimPrefix(value, "sha256:")
+			signature = strings.ToLower(strings.TrimSpace(value))
+		}
+	}
+
+	if timestamp == "" || signature == "" {
+		return "", "", ErrSignatureHeaderMissing
+	}
+
+	return timestamp, signature, nil
+}
+
+func validateSignatureTimestamp(raw string) error {
+	parsed, err := strconv.ParseInt(raw, 10, 64)
+	if err != nil {
+		return ErrSignatureTimestampInvalid
+	}
+
+	ts := time.Unix(parsed, 0)
+	now := time.Now()
+
+	if ts.After(now.Add(signatureMaxSkewMinutes)) || ts.Before(now.Add(-signatureMaxSkewMinutes)) {
+		return ErrSignatureTimestampInvalid
+	}
+
+	return nil
+}
+
+func computeSignature(secret, notificationURL, timestamp string, payload []byte) []byte {
+	if payload == nil {
+		payload = []byte{}
+	}
+	data := strings.Join([]string{timestamp, notificationURL, string(payload)}, ":")
+	mac := hmac.New(sha256.New, []byte(secret))
+	mac.Write([]byte(data))
+	return mac.Sum(nil)
 }
