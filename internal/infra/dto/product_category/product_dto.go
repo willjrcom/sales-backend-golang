@@ -32,7 +32,7 @@ func (p *ProductDTO) FromDomain(product *productentity.Product) {
 		ID:          product.ID,
 		Code:        product.Code,
 		Name:        product.Name,
-		Flavors:     product.Flavors,
+		Flavors:     append([]string{}, product.Flavors...),
 		ImagePath:   product.ImagePath,
 		Description: product.Description,
 		Price:       product.Price,
@@ -46,6 +46,10 @@ func (p *ProductDTO) FromDomain(product *productentity.Product) {
 
 	p.Category.FromDomain(product.Category)
 	p.Size.FromDomain(product.Size)
+
+	if len(p.Flavors) == 0 {
+		p.Flavors = []string{}
+	}
 
 	if product.Category == nil {
 		p.Category = nil

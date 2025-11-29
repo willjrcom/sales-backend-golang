@@ -54,10 +54,15 @@ func (p *ProductCreateDTO) ToDomain() (*productentity.Product, error) {
 		return nil, err
 	}
 
+	flavors := p.Flavors
+	if len(flavors) == 0 {
+		flavors = []string{}
+	}
+
 	productCommonAttributes := productentity.ProductCommonAttributes{
 		Code:        p.Code,
 		Name:        p.Name,
-		Flavors:     p.Flavors,
+		Flavors:     flavors,
 		Description: p.Description,
 		Price:       p.Price,
 		Cost:        p.Cost,

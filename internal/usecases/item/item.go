@@ -204,7 +204,7 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest)
 }
 
 func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDRequest, dtoAdditional *itemdto.OrderAdditionalItemCreateDTO) (id uuid.UUID, err error) {
-	productID, quantityID, err := dtoAdditional.ToDomain()
+	productID, quantityID, flavor, err := dtoAdditional.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -216,11 +216,12 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 		return uuid.Nil, errors.New("item not found: " + err.Error())
 	}
 
-	productAdditional, err := s.rp.GetProductById(ctx, productID.String())
+	productAdditionalModel, err := s.rp.GetProductById(ctx, productID.String())
 
 	if err != nil {
 		return uuid.Nil, errors.New("product not found: " + err.Error())
 	}
+	productAdditional := productAdditionalModel.ToDomain()
 
 	groupItemModel, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
 	if err != nil {
@@ -245,17 +246,23 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 		return uuid.Nil, errors.New("additional category does not belong to this category")
 	}
 
-	quantity, err := s.rq.GetQuantityById(ctx, quantityID.String())
+	quantityModel, err := s.rq.GetQuantityById(ctx, quantityID.String())
 
 	if err != nil {
 		return uuid.Nil, errors.New("quantity not found: " + err.Error())
 	}
+	quantity := quantityModel.ToDomain()
 
 	if productAdditional.CategoryID != quantity.CategoryID {
 		return uuid.Nil, errors.New("product category and quantity not match")
 	}
 
-	additionalItem := orderentity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, productAdditional.ID, productAdditional.CategoryID)
+	normalizedFlavor, err := itemdto.NormalizeFlavor(flavor, productAdditional.Flavors)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	additionalItem := orderentity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, productAdditional.ID, productAdditional.CategoryID, normalizedFlavor)
 	additionalItem.IsAdditional = true
 	additionalItem.GroupItemID = groupItem.ID
 

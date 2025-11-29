@@ -19,6 +19,7 @@ type ItemDTO struct {
 	AdditionalItems []ItemDTO       `json:"additional_items"`
 	RemovedItems    []string        `json:"removed_items"`
 	ProductID       uuid.UUID       `json:"product_id"`
+	Flavor          *string         `json:"flavor,omitempty"`
 }
 
 func (i *ItemDTO) FromDomain(item *orderentity.Item) {
@@ -37,6 +38,7 @@ func (i *ItemDTO) FromDomain(item *orderentity.Item) {
 		CategoryID:      item.CategoryID,
 		RemovedItems:    item.RemovedItems,
 		ProductID:       item.ProductID,
+		Flavor:          item.Flavor,
 		AdditionalItems: []ItemDTO{},
 	}
 

@@ -17,7 +17,7 @@ type Product struct {
 type ProductCommonAttributes struct {
 	Code        string           `bun:"code,notnull"`
 	Name        string           `bun:"name,notnull"`
-	Flavors     []string         `bun:"flavors,type:jsonb"`
+	Flavors     []string         `bun:"flavors,type:jsonb,notnull"`
 	ImagePath   *string          `bun:"image_path"`
 	Description string           `bun:"description"`
 	Price       decimal.Decimal  `bun:"price,type:decimal(10,2),notnull"`
@@ -38,7 +38,7 @@ func (p *Product) FromDomain(product *productentity.Product) {
 		ProductCommonAttributes: ProductCommonAttributes{
 			Code:        product.Code,
 			Name:        product.Name,
-			Flavors:     product.Flavors,
+			Flavors:     cloneFlavors(product.Flavors),
 			ImagePath:   product.ImagePath,
 			Description: product.Description,
 			Price:       product.Price,
@@ -64,7 +64,7 @@ func (p *Product) ToDomain() *productentity.Product {
 		ProductCommonAttributes: productentity.ProductCommonAttributes{
 			Code:        p.Code,
 			Name:        p.Name,
-			Flavors:     p.Flavors,
+			Flavors:     cloneFlavors(p.Flavors),
 			ImagePath:   p.ImagePath,
 			Description: p.Description,
 			Price:       p.Price,
@@ -76,4 +76,14 @@ func (p *Product) ToDomain() *productentity.Product {
 			Size:        p.Size.ToDomain(),
 		},
 	}
+}
+
+func cloneFlavors(values []string) []string {
+	if len(values) == 0 {
+		return []string{}
+	}
+
+	cloned := make([]string, len(values))
+	copy(cloned, values)
+	return cloned
 }

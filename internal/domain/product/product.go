@@ -34,6 +34,10 @@ type ProductCommonAttributes struct {
 }
 
 func NewProduct(productCommonAttributes ProductCommonAttributes) *Product {
+	if len(productCommonAttributes.Flavors) == 0 {
+		productCommonAttributes.Flavors = []string{}
+	}
+
 	return &Product{
 		Entity:                  entity.NewEntity(),
 		ProductCommonAttributes: productCommonAttributes,

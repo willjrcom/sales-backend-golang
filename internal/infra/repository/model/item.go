@@ -27,6 +27,7 @@ type ItemCommonAttributes struct {
 	AdditionalItems []Item          `bun:"m2m:item_to_additional,join:Item=AdditionalItem"`
 	RemovedItems    []string        `bun:"removed_items,type:jsonb"`
 	ProductID       uuid.UUID       `bun:"product_id,type:uuid"`
+	Flavor          *string         `bun:"flavor"`
 }
 
 func (i *Item) FromDomain(item *orderentity.Item) {
@@ -48,6 +49,7 @@ func (i *Item) FromDomain(item *orderentity.Item) {
 			AdditionalItems: []Item{},
 			RemovedItems:    item.RemovedItems,
 			ProductID:       item.ProductID,
+			Flavor:          item.Flavor,
 		},
 	}
 
@@ -77,6 +79,7 @@ func (i *Item) ToDomain() *orderentity.Item {
 			AdditionalItems: []orderentity.Item{},
 			RemovedItems:    i.RemovedItems,
 			ProductID:       i.ProductID,
+			Flavor:          i.Flavor,
 		},
 	}
 

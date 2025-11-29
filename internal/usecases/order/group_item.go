@@ -90,7 +90,7 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 		return errors.New("complement category does not belong to this category")
 	}
 
-	itemComplement := orderentity.NewItem(productComplement.Name, productComplement.Price, groupItem.Quantity, groupItem.Size, productComplement.ID, productComplement.CategoryID)
+	itemComplement := orderentity.NewItem(productComplement.Name, productComplement.Price, groupItem.Quantity, groupItem.Size, productComplement.ID, productComplement.CategoryID, nil)
 
 	itemComplementModel := &model.Item{}
 	itemComplementModel.FromDomain(itemComplement)
