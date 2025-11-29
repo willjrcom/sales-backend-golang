@@ -22,6 +22,13 @@ BEGIN
 
         EXECUTE format('ALTER SCHEMA %I RENAME TO %I', rec.schema_name, new_schema);
 
+        EXECUTE format(
+            'UPDATE %I.companies SET schema_name = %L WHERE schema_name = %L',
+            new_schema,
+            new_schema,
+            rec.schema_name
+        );
+
         UPDATE public.companies
         SET schema_name = new_schema
         WHERE schema_name = rec.schema_name;
