@@ -34,10 +34,11 @@ type ItemCommonAttributes struct {
 	AdditionalItems []Item
 	RemovedItems    []string
 	ProductID       uuid.UUID
+	Flavor          *string
 }
 
 // NewItem creates a new order item with initial price and total
-func NewItem(name string, price decimal.Decimal, quantity float64, size string, productID uuid.UUID, categoryID uuid.UUID) *Item {
+func NewItem(name string, price decimal.Decimal, quantity float64, size string, productID uuid.UUID, categoryID uuid.UUID, flavor *string) *Item {
 	itemAdditionalCommonAttributes := ItemCommonAttributes{
 		Name:       name,
 		Price:      price,
@@ -46,6 +47,7 @@ func NewItem(name string, price decimal.Decimal, quantity float64, size string, 
 		Quantity:   quantity,
 		ProductID:  productID,
 		CategoryID: categoryID,
+		Flavor:     flavor,
 	}
 
 	return &Item{

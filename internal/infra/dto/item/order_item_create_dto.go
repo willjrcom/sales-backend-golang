@@ -20,6 +20,7 @@ type OrderItemCreateDTO struct {
 	QuantityID  uuid.UUID  `json:"quantity_id"`
 	GroupItemID *uuid.UUID `json:"group_item_id"`
 	Observation string     `json:"observation"`
+	Flavor      *string    `json:"flavor,omitempty"`
 }
 
 func (a *OrderItemCreateDTO) Validate() error {
@@ -54,6 +55,13 @@ func (a *OrderItemCreateDTO) validateInternal(product *productentity.Product, gr
 	if groupItem.Size != product.Size.Name {
 		return ErrGroupItemSizeInvalid
 	}
+
+	flavor, err := NormalizeFlavor(a.Flavor, product.Flavors)
+	if err != nil {
+		return err
+	}
+	a.Flavor = flavor
+
 	return nil
 }
 
@@ -62,7 +70,7 @@ func (a *OrderItemCreateDTO) ToDomain(product *productentity.Product, groupItem 
 		return
 	}
 
-	item = orderentity.NewItem(product.Name, product.Price, quantity.Quantity, product.Size.Name, product.ID, product.CategoryID)
+	item = orderentity.NewItem(product.Name, product.Price, quantity.Quantity, product.Size.Name, product.ID, product.CategoryID, a.Flavor)
 	item.AddSizeToName()
 	item.GroupItemID = *a.GroupItemID
 	item.Observation = a.Observation
