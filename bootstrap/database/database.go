@@ -56,6 +56,14 @@ var (
 	once sync.Once
 )
 
+type tenantTxTimeoutKey struct{}
+
+// WithTenantTransactionTimeout allows callers to customize or disable the default
+// transaction timeout. Pass a duration <= 0 to disable the timeout entirely.
+func WithTenantTransactionTimeout(ctx context.Context, timeout time.Duration) context.Context {
+	return context.WithValue(ctx, tenantTxTimeoutKey{}, timeout)
+}
+
 func NewPostgreSQLConnection() *bun.DB {
 	once.Do(func() {
 		ctx := context.Background()
@@ -130,7 +138,19 @@ func GetTenantTransaction(ctx context.Context, db *bun.DB) (context.Context, *bu
 		return nil, nil, nil, err
 	}
 
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	timeout := 5 * time.Second
+	if v := ctx.Value(tenantTxTimeoutKey{}); v != nil {
+		if custom, ok := v.(time.Duration); ok {
+			timeout = custom
+		}
+	}
+
+	var cancel context.CancelFunc
+	if timeout > 0 {
+		ctx, cancel = context.WithTimeout(ctx, timeout)
+	} else {
+		ctx, cancel = context.WithCancel(ctx)
+	}
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		cancel()

@@ -94,6 +94,7 @@ func listTenantSchemas(ctx context.Context, db *bun.DB) ([]string, error) {
 
 func applyMigration(ctx context.Context, db *bun.DB, schemaName, sql string) error {
 	schemaCtx := context.WithValue(ctx, model.Schema("schema"), schemaName)
+	schemaCtx = database.WithTenantTransactionTimeout(schemaCtx, 0)
 	schemaCtx, tx, cancel, err := database.GetTenantTransaction(schemaCtx, db)
 	if err != nil {
 		return err
