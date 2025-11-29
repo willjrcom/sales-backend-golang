@@ -2,6 +2,7 @@ package handlerimpl
 
 import (
 	"errors"
+	"io"
 	"net/http"
 	"strconv"
 
@@ -198,10 +199,20 @@ func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r 
 		return
 	}
 
-	if err := h.s.HandleMercadoPagoWebhook(ctx, dto); err != nil {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	signature := r.Header.Get("x-signature")
+
+	if err := h.s.HandleMercadoPagoWebhook(ctx, dto, signature, body); err != nil {
 		status := http.StatusInternalServerError
 		switch {
 		case errors.Is(err, companyusecases.ErrInvalidWebhookSecret):
+			status = http.StatusUnauthorized
+		case errors.Is(err, companyusecases.ErrInvalidWebhookSignature):
 			status = http.StatusUnauthorized
 		case errors.Is(err, companyusecases.ErrMercadoPagoDisabled):
 			status = http.StatusServiceUnavailable
