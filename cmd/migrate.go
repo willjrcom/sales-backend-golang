@@ -166,7 +166,7 @@ func ensureMigrationsTable(ctx context.Context, db *bun.DB) error {
 
 func getAppliedMigrations(ctx context.Context, db *bun.DB, schemaName string) (map[string]bool, error) {
 	rows, err := db.QueryContext(ctx, `
-		SELECT migration_name FROM public.schema_migrations WHERE schema_name = $1
+		SELECT migration_name FROM public.schema_migrations WHERE schema_name = ?
 	`, schemaName)
 	if err != nil {
 		return nil, err
@@ -188,7 +188,7 @@ func getAppliedMigrations(ctx context.Context, db *bun.DB, schemaName string) (m
 func recordMigration(ctx context.Context, db *bun.DB, schemaName, migrationName string) error {
 	_, err := db.ExecContext(ctx, `
 		INSERT INTO public.schema_migrations (schema_name, migration_name, applied_at)
-		VALUES ($1, $2, $3)
+		VALUES (?, ?, ?)
 		ON CONFLICT (schema_name, migration_name) DO NOTHING
 	`, schemaName, migrationName, time.Now())
 	return err
