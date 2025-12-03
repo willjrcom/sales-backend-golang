@@ -11,7 +11,7 @@ COPY . .
 
 # Execute o servidor diretamente
 # "-e", "prod"
-CMD go run main.go httpserver
+CMD go run main.go
 
 # Video full cycle kafka
 # CMD ["tail", "-f", "/dev/null"]
