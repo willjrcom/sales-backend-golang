@@ -247,7 +247,7 @@ func listTenantSchemas(ctx context.Context, db *bun.DB) ([]string, error) {
 	rows, err := db.QueryContext(ctx, `
 		SELECT schema_name
 		FROM information_schema.schemata
-		WHERE schema_name LIKE 'company_%'
+		WHERE schema_name LIKE 'company_%' OR schema_name LIKE 'loja_%'
 		ORDER BY schema_name
 	`)
 	if err != nil {
