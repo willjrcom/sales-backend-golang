@@ -7,12 +7,17 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
+
+const migrationsDir = "bootstrap/database/migrations"
 
 // MigrateCmd applies a raw SQL file to every tenant schema.
 var MigrateCmd = &cobra.Command{
@@ -30,7 +35,7 @@ var MigrateCmd = &cobra.Command{
 
 		fullPath := fileName
 		if !filepath.IsAbs(fileName) {
-			fullPath = filepath.Join("bootstrap", "database", "migrations", fileName)
+			fullPath = filepath.Join(migrationsDir, fileName)
 		}
 
 		payload, err := os.ReadFile(fullPath)
@@ -66,6 +71,176 @@ var MigrateCmd = &cobra.Command{
 		cmd.Println("migration applied to all schemas")
 		return nil
 	},
+}
+
+// MigrateAllCmd applies all pending SQL migrations to every tenant schema.
+var MigrateAllCmd = &cobra.Command{
+	Use:   "migrate-all",
+	Short: "Execute all pending SQL migrations for every tenant schema",
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		cmd.Printf("connecting to database...\n")
+		db := database.NewPostgreSQLConnection()
+		ctx := context.Background()
+
+		// Cria tabela de controle de migrações no schema public
+		if err := ensureMigrationsTable(ctx, db); err != nil {
+			return fmt.Errorf("failed to create migrations table: %w", err)
+		}
+
+		// Lista todos os schemas de tenant
+		schemas, err := listTenantSchemas(ctx, db)
+		if err != nil {
+			return err
+		}
+
+		if len(schemas) == 0 {
+			cmd.Println("no tenant schemas found, skipping migrations")
+			return nil
+		}
+
+		cmd.Printf("found %d tenant schemas\n", len(schemas))
+
+		// Lista todas as migrações disponíveis
+		migrations, err := listMigrationFiles()
+		if err != nil {
+			return fmt.Errorf("failed to list migration files: %w", err)
+		}
+
+		if len(migrations) == 0 {
+			cmd.Println("no migration files found")
+			return nil
+		}
+
+		cmd.Printf("found %d migration files\n", len(migrations))
+
+		// Para cada schema, aplica migrações pendentes
+		for _, schema := range schemas {
+			applied, err := getAppliedMigrations(ctx, db, schema)
+			if err != nil {
+				return fmt.Errorf("schema %s: failed to get applied migrations: %w", schema, err)
+			}
+
+			pending := filterPendingMigrations(migrations, applied)
+			if len(pending) == 0 {
+				cmd.Printf("schema %s: all migrations already applied\n", schema)
+				continue
+			}
+
+			cmd.Printf("schema %s: applying %d pending migrations...\n", schema, len(pending))
+
+			for _, migration := range pending {
+				cmd.Printf("  -> %s\n", migration)
+
+				sql, err := readMigrationFile(migration)
+				if err != nil {
+					return fmt.Errorf("schema %s: %w", schema, err)
+				}
+
+				if err := applyMigration(ctx, db, schema, sql); err != nil {
+					return fmt.Errorf("schema %s: migration %s failed: %w", schema, migration, err)
+				}
+
+				if err := recordMigration(ctx, db, schema, migration); err != nil {
+					return fmt.Errorf("schema %s: failed to record migration %s: %w", schema, migration, err)
+				}
+			}
+		}
+
+		cmd.Println("all migrations applied successfully")
+		return nil
+	},
+}
+
+func ensureMigrationsTable(ctx context.Context, db *bun.DB) error {
+	_, err := db.ExecContext(ctx, `
+		CREATE TABLE IF NOT EXISTS public.schema_migrations (
+			id SERIAL PRIMARY KEY,
+			schema_name VARCHAR(255) NOT NULL,
+			migration_name VARCHAR(255) NOT NULL,
+			applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			UNIQUE(schema_name, migration_name)
+		)
+	`)
+	return err
+}
+
+func getAppliedMigrations(ctx context.Context, db *bun.DB, schemaName string) (map[string]bool, error) {
+	rows, err := db.QueryContext(ctx, `
+		SELECT migration_name FROM public.schema_migrations WHERE schema_name = $1
+	`, schemaName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	applied := make(map[string]bool)
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			return nil, err
+		}
+		applied[name] = true
+	}
+
+	return applied, rows.Err()
+}
+
+func recordMigration(ctx context.Context, db *bun.DB, schemaName, migrationName string) error {
+	_, err := db.ExecContext(ctx, `
+		INSERT INTO public.schema_migrations (schema_name, migration_name, applied_at)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (schema_name, migration_name) DO NOTHING
+	`, schemaName, migrationName, time.Now())
+	return err
+}
+
+func listMigrationFiles() ([]string, error) {
+	entries, err := os.ReadDir(migrationsDir)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	var migrations []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		if strings.HasSuffix(entry.Name(), ".sql") {
+			migrations = append(migrations, entry.Name())
+		}
+	}
+
+	// Ordena por nome (que deve incluir timestamp no prefixo)
+	sort.Strings(migrations)
+	return migrations, nil
+}
+
+func filterPendingMigrations(all []string, applied map[string]bool) []string {
+	var pending []string
+	for _, m := range all {
+		if !applied[m] {
+			pending = append(pending, m)
+		}
+	}
+	return pending
+}
+
+func readMigrationFile(name string) (string, error) {
+	fullPath := filepath.Join(migrationsDir, name)
+	payload, err := os.ReadFile(fullPath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read migration file %s: %w", name, err)
+	}
+
+	sql := string(payload)
+	if sql == "" {
+		return "", fmt.Errorf("migration file %s is empty", name)
+	}
+
+	return sql, nil
 }
 
 func listTenantSchemas(ctx context.Context, db *bun.DB) ([]string, error) {
