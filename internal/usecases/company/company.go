@@ -37,8 +37,9 @@ type Service struct {
 const mercadoPagoProvider = "mercado_pago"
 
 var (
-	ErrMercadoPagoDisabled  = errors.New("mercado pago integration disabled")
-	ErrInvalidWebhookSecret = errors.New("invalid mercado pago webhook secret")
+	ErrMercadoPagoDisabled     = errors.New("mercado pago integration disabled")
+	ErrInvalidWebhookSecret    = errors.New("invalid mercado pago webhook secret")
+	ErrInvalidWebhookSignature = errors.New("invalid mercado pago webhook signature")
 )
 
 func NewService(r model.CompanyRepository, mp *mercadopagoservice.Client) *Service {
@@ -376,14 +377,16 @@ func (s *Service) CreateSubscriptionCheckout(ctx context.Context, dto *companydt
 	}, nil
 }
 
-func (s *Service) HandleMercadoPagoWebhook(ctx context.Context, dto *companydto.MercadoPagoWebhookDTO) error {
+func (s *Service) HandleMercadoPagoWebhook(ctx context.Context, dto *companydto.MercadoPagoWebhookDTO, signatureHeader string, payload []byte) error {
 	if s.mp == nil || !s.mp.Enabled() {
 		return ErrMercadoPagoDisabled
 	}
 
-	expected := s.mp.WebhookSecret()
-	if expected == "" {
-		return ErrInvalidWebhookSecret
+	if err := s.mp.ValidateWebhookSignature(signatureHeader, payload); err != nil {
+		if errors.Is(err, mercadopagoservice.ErrWebhookSecretNotConfigured) {
+			return ErrInvalidWebhookSecret
+		}
+		return ErrInvalidWebhookSignature
 	}
 
 	if dto == nil || dto.Type != "payment" || dto.Data.ID == "" {
@@ -442,7 +445,13 @@ func (s *Service) HandleMercadoPagoWebhook(ctx context.Context, dto *companydto.
 		return err
 	}
 
-	rawPayload, _ := json.Marshal(dto)
+	var rawPayload []byte
+	switch {
+	case len(payload) > 0:
+		rawPayload = append([]byte(nil), payload...)
+	default:
+		rawPayload, _ = json.Marshal(dto)
+	}
 
 	payment := &companyentity.SubscriptionPayment{
 		Entity:            entity.NewEntity(),
