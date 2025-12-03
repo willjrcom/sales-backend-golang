@@ -1,17 +1,43 @@
-# Use uma imagem base do Go
-FROM golang:1.23
+# Build stage
+FROM golang:1.23-alpine AS builder
 
-# Defina o diretório de trabalho dentro do contêiner
-WORKDIR /go/app
+WORKDIR /app
 
-# Copie o código-fonte para dentro do contêiner
+# Copie os arquivos de dependência primeiro (cache layer)
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copie o código-fonte
 COPY . .
 
-# RUN apt-get update && apt-get install -y librdkafka-dev
+# Compile o binário
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/sales-backend main.go
 
-# Execute o servidor diretamente
-# "-e", "prod"
-CMD go run main.go httpserver
+# Runtime stage
+FROM alpine:3.19
 
-# Video full cycle kafka
-# CMD ["tail", "-f", "/dev/null"]
+WORKDIR /app
+
+# Instale certificados SSL (necessário para HTTPS)
+RUN apk --no-cache add ca-certificates tzdata
+
+# Copie o binário compilado
+COPY --from=builder /app/sales-backend .
+
+# Copie os arquivos de migração (caso precise rodar migrate)
+COPY --from=builder /app/bootstrap/database/migrations ./bootstrap/database/migrations
+
+# Copie o script de entrypoint
+COPY docker-entrypoint.sh .
+RUN chmod +x docker-entrypoint.sh
+
+# Expose a porta padrão
+EXPOSE 8080
+
+# Use o entrypoint script para migrações automáticas
+# O container executa migrate-all automaticamente antes do servidor
+# Para desabilitar: defina AUTO_MIGRATE=false
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+
+# Comando padrão: httpserver em produção
+CMD ["httpserver", "-e", "prod"]
