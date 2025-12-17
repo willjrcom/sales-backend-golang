@@ -328,3 +328,17 @@ func (s *Service) ListPublicUsers(ctx context.Context) ([]companydto.UserBasicDT
 
 	return basic, nil
 }
+
+// GetUserByID returns the user data by ID.
+func (s *Service) GetUserByID(ctx context.Context, dtoID *entitydto.IDRequest) (*companydto.UserDTO, error) {
+	userModel, err := s.r.GetUserByID(ctx, dtoID.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	user := userModel.ToDomain()
+	dto := &companydto.UserDTO{}
+	dto.FromDomain(user)
+
+	return dto, nil
+}

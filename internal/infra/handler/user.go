@@ -41,6 +41,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 		c.Delete("/", h.handlerDeleteUser)
 		c.Get("/refresh-access-token", h.handlerRefreshAccessToken)
 		c.Get("/companies", h.handlerGetCompanies)
+		c.Get("/me", h.handlerGetAuthenticatedUser)
 		c.Post("/validate-password-reset-token", h.handlerValidatePasswordResetToken)
 	})
 
@@ -314,4 +315,36 @@ func (h *handlerUserImpl) handlerValidatePasswordResetToken(w http.ResponseWrite
 		Valid: true,
 		Email: email,
 	})
+}
+
+func (h *handlerUserImpl) handlerGetAuthenticatedUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	idToken, err := headerservice.GetIDTokenFromHeader(r)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
+		return
+	}
+
+	validIdToken, err := jwtservice.ValidateToken(ctx, idToken)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
+		return
+	}
+
+	userID := jwtservice.GetUserIDFromToken(validIdToken)
+	if userID == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("user_id not found in token"))
+		return
+	}
+
+	dtoID := &entitydto.IDRequest{ID: uuid.MustParse(userID)}
+
+	user, err := h.s.GetUserByID(ctx, dtoID)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, user)
 }
