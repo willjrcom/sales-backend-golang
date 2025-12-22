@@ -73,7 +73,7 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 			// Executar a lógica desejada apenas para os endpoints selecionados
 			fmt.Println("Antes de chamar o endpoint:", r.URL.Path)
 
-			validToken, err := headerservice.GetAnyValidToken(ctx, r)
+			validToken, err := headerservice.GetAccessTokenFromHeader(ctx, r)
 
 			if err != nil {
 				jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)

@@ -201,7 +201,7 @@ func (s *Service) LoginUser(ctx context.Context, dto *companydto.UserLoginDTO) (
 	userLoggedIn := userLoggedInModel.ToDomain()
 	userLoggedIn.Companies = []companyentity.Company{}
 
-	idToken, err := jwtservice.CreateIDToken(userLoggedIn)
+	idToken, err := jwtservice.CreateBasicAccessToken(userLoggedIn)
 
 	if err != nil {
 		return nil, err
@@ -249,7 +249,7 @@ func (s *Service) Access(ctx context.Context, dto *companydto.UserSchemaDTO, acc
 		return "", fmt.Errorf("company %s is blocked", company.BusinessName)
 	}
 
-	return jwtservice.CreateAccessToken(accessToken, *schema)
+	return jwtservice.CreateFullAccessToken(accessToken, *schema)
 }
 
 func (s *Service) SearchUser(ctx context.Context, dto *companydto.UserSearchDTO) (*companydto.UserDTO, error) {

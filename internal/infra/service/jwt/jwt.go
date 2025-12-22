@@ -9,11 +9,11 @@ import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 )
 
-func CreateIDToken(user *companyentity.User) (string, error) {
+func CreateBasicAccessToken(user *companyentity.User) (string, error) {
 	userID := user.ID.String()
 	claims := jwt.MapClaims{
 		"user_id": userID,
-		"sub":     "id-token",
+		"sub":     "access-token",
 		"exp":     time.Now().UTC().Add(30 * time.Minute).Unix(),
 	}
 
@@ -24,7 +24,7 @@ func CreateIDToken(user *companyentity.User) (string, error) {
 	return token.SignedString([]byte(secretKey))
 }
 
-func CreateAccessToken(accessToken *jwt.Token, schema string) (string, error) {
+func CreateFullAccessToken(accessToken *jwt.Token, schema string) (string, error) {
 	oldClaims := accessToken.Claims.(jwt.MapClaims)
 
 	claims := jwt.MapClaims{

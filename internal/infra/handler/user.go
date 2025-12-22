@@ -190,14 +190,7 @@ func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Reques
 func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	idToken, err := headerservice.GetIDTokenFromHeader(r)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
-		return
-	}
-
-	validIdToken, err := jwtservice.ValidateToken(ctx, idToken)
-
+	validToken, err := headerservice.GetAccessTokenFromHeader(ctx, r)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 		return
@@ -209,7 +202,7 @@ func (h *handlerUserImpl) handlerAccess(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	accessToken, err := h.s.Access(ctx, dtoSchema, validIdToken)
+	accessToken, err := h.s.Access(ctx, dtoSchema, validToken)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -257,13 +250,7 @@ func (h *handlerUserImpl) handlerRefreshAccessToken(w http.ResponseWriter, r *ht
 	ctx := r.Context()
 
 	// require an existing ID token to refresh
-	accessToken, err := headerservice.GetAccessTokenFromHeader(r)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
-		return
-	}
-
-	validAccessToken, err := jwtservice.ValidateToken(ctx, accessToken)
+	validAccessToken, err := headerservice.GetAccessTokenFromHeader(ctx, r)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 		return
@@ -275,7 +262,7 @@ func (h *handlerUserImpl) handlerRefreshAccessToken(w http.ResponseWriter, r *ht
 		return
 	}
 
-	newAccessToken, err := jwtservice.CreateAccessToken(validAccessToken, schema)
+	newAccessToken, err := jwtservice.CreateFullAccessToken(validAccessToken, schema)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -320,7 +307,7 @@ func (h *handlerUserImpl) handlerValidatePasswordResetToken(w http.ResponseWrite
 func (h *handlerUserImpl) handlerGetAuthenticatedUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	validToken, err := headerservice.GetAnyValidToken(ctx, r)
+	validToken, err := headerservice.GetAccessTokenFromHeader(ctx, r)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 		return
