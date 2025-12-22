@@ -320,19 +320,13 @@ func (h *handlerUserImpl) handlerValidatePasswordResetToken(w http.ResponseWrite
 func (h *handlerUserImpl) handlerGetAuthenticatedUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	idToken, err := headerservice.GetIDTokenFromHeader(r)
+	validToken, err := headerservice.GetAnyValidToken(ctx, r)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 		return
 	}
 
-	validIdToken, err := jwtservice.ValidateToken(ctx, idToken)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
-		return
-	}
-
-	userID := jwtservice.GetUserIDFromToken(validIdToken)
+	userID := jwtservice.GetUserIDFromToken(validToken)
 	if userID == "" {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("user_id not found in token"))
 		return
