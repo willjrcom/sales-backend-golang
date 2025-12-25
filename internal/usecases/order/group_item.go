@@ -17,6 +17,25 @@ var (
 	ErrComplementItemNotFound     = errors.New("complement item not found")
 )
 
+type GroupItemService struct {
+	r   model.GroupItemRepository
+	ri  model.ItemRepository
+	rp  model.ProductRepository
+	sop *OrderProcessService
+	so  *OrderService
+}
+
+func NewGroupItemService(rgi model.GroupItemRepository) *GroupItemService {
+	return &GroupItemService{r: rgi}
+}
+
+func (s *GroupItemService) AddDependencies(ri model.ItemRepository, rp model.ProductRepository, so *OrderService, sop *OrderProcessService) {
+	s.ri = ri
+	s.rp = rp
+	s.so = so
+	s.sop = sop
+}
+
 func (s *GroupItemService) GetGroupByID(ctx context.Context, dto *entitydto.IDRequest) (groupItemDTO *groupitemdto.GroupItemDTO, err error) {
 	groupItemModel, err := s.r.GetGroupByID(ctx, dto.ID.String(), true)
 

@@ -32,7 +32,7 @@ func (r *ClientCreateDTO) validate() error {
 	if r.Name == "" {
 		return ErrNameRequired
 	}
-	if r.Email != nil && !strings.Contains(*r.Email, "@") {
+	if r.Email != nil && *r.Email != "" && !strings.Contains(*r.Email, "@") {
 		return ErrInvalidEmail
 	}
 	if r.Contact == nil {

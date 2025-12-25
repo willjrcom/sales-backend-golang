@@ -13,7 +13,34 @@ import (
 	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
 	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
+	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 )
+
+type OrderProcessService struct {
+	r   model.OrderProcessRepository
+	rpr model.ProcessRuleRepository
+	sq  *orderqueueusecases.Service
+	sgi *GroupItemService
+	rgi model.GroupItemRepository
+	ro  model.OrderRepository
+	se  *employeeusecases.Service
+	so  *OrderService
+}
+
+func NewOrderProcessService(c model.OrderProcessRepository) *OrderProcessService {
+	return &OrderProcessService{r: c}
+}
+
+func (s *OrderProcessService) AddDependencies(sq *orderqueueusecases.Service, rpr model.ProcessRuleRepository, sgi *GroupItemService, ro model.OrderRepository, se *employeeusecases.Service, rgi model.GroupItemRepository, so *OrderService) {
+	s.rgi = rgi
+	s.rpr = rpr
+	s.sq = sq
+	s.sgi = sgi
+	s.ro = ro
+	s.se = se
+	s.so = so
+}
 
 func (s *OrderProcessService) CreateProcess(ctx context.Context, dto *orderprocessdto.OrderProcessCreateDTO) (uuid.UUID, error) {
 	process, err := dto.ToDomain()
@@ -198,7 +225,7 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 		if orderIsReady {
 			// Update order status only if it's not already Ready or Finished
 			if order.Status == orderentity.OrderStatusPending {
-				if err := order.ReadyOrder(); err != nil {
+				if err := s.so.ReadyOrder(ctx, &entitydto.IDRequest{ID: order.ID}); err != nil {
 					return uuid.Nil, err
 				}
 
