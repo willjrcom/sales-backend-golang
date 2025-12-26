@@ -228,11 +228,6 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 				if err := s.so.ReadyOrder(ctx, &entitydto.IDRequest{ID: order.ID}); err != nil {
 					return uuid.Nil, err
 				}
-
-				orderModel.FromDomain(order)
-				if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
-					return uuid.Nil, err
-				}
 			}
 			return uuid.Nil, nil
 		}
