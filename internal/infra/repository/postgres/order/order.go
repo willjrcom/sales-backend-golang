@@ -457,7 +457,7 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 	return orders, nil
 }
 
-func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
+func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID string, status orderentity.StatusOrderPickup, page, perPage int) ([]model.Order, error) {
 	orders := []model.Order{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -468,14 +468,10 @@ func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID
 	defer cancel()
 	defer tx.Rollback()
 
-	validStatuses := []string{
-		string(orderentity.OrderStatusReady),
-	}
-
 	query := tx.NewSelect().Model(&orders).
 		Relation("Pickup").
 		Where("pickup.id IS NOT NULL").
-		Where(`"order"."status" IN (?) AND "order"."shift_id" = ?`, bun.In(validStatuses), shiftID).
+		Where(`"pickup"."status" = ? AND "order"."shift_id" = ?`, string(status), shiftID).
 		Limit(perPage).
 		Offset(page * perPage)
 

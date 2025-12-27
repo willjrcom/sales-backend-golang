@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
@@ -29,7 +30,8 @@ func NewHandlerOrder(orderService *orderusecases.OrderService) *handler.Handler 
 		c.Get("/{id}", h.handlerGetOrderById)
 		c.Get("/all", h.handlerGetAllOrders)
 		c.Get("/all/delivery", h.GetAllOrdersWithDelivery)
-		c.Get("/all/pickup", h.GetAllOrdersWithPickup)
+		c.Get("/all/pickup/ready", h.GetAllOrdersWithPickupReady)
+		c.Get("/all/pickup/delivered", h.GetAllOrdersWithPickupDelivered)
 		c.Put("/update/{id}/observation", h.handlerUpdateObservation)
 		c.Put("/update/{id}/payment", h.handlerUpdatePaymentMethod)
 		c.Post("/pending/{id}", h.handlerPendingOrder)
@@ -91,12 +93,26 @@ func (h *handlerOrderImpl) GetAllOrdersWithDelivery(w http.ResponseWriter, r *ht
 	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
 }
 
-func (h *handlerOrderImpl) GetAllOrdersWithPickup(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderImpl) GetAllOrdersWithPickupReady(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	page, perPage := headerservice.GetPageAndPerPage(r, 0, 20)
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 100)
 
-	orders, err := h.s.GetAllOrdersWithPickup(ctx, page, perPage)
+	orders, err := h.s.GetAllOrdersWithPickup(ctx, orderentity.OrderPickupStatusReady, page, perPage)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
+}
+
+func (h *handlerOrderImpl) GetAllOrdersWithPickupDelivered(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
+
+	orders, err := h.s.GetAllOrdersWithPickup(ctx, orderentity.OrderPickupStatusDelivered, page, perPage)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

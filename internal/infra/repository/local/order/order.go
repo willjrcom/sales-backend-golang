@@ -106,12 +106,12 @@ func (r *OrderRepositoryLocal) GetAllOrdersWithDelivery(ctx context.Context, shi
 }
 
 // GetAllOrdersWithDelivery returns orders with delivery information, paginated by page and perPage
-func (r *OrderRepositoryLocal) GetAllOrdersWithPickup(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
+func (r *OrderRepositoryLocal) GetAllOrdersWithPickup(ctx context.Context, shiftID string, status orderentity.StatusOrderPickup, page, perPage int) ([]model.Order, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	all := []model.Order{}
 	for _, o := range r.orders {
-		if o.Delivery != nil {
+		if o.Pickup != nil {
 			all = append(all, *o)
 		}
 	}
