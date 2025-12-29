@@ -28,7 +28,7 @@ type ClientUpdateDTO struct {
 }
 
 func (r *ClientUpdateDTO) validate() error {
-	if r.Email != nil && !strings.Contains(*r.Email, "@") {
+	if r.Email != nil && *r.Email != "" && !strings.Contains(*r.Email, "@") {
 		return ErrInvalidEmail
 	}
 
@@ -50,7 +50,7 @@ func (r *ClientUpdateDTO) UpdateDomain(client *cliententity.Client) error {
 	if r.ImagePath != "" {
 		client.ImagePath = r.ImagePath
 	}
-	if r.Email != nil {
+	if r.Email != nil && *r.Email != "" {
 		client.Email = *r.Email
 	}
 	if r.Cpf != nil {
