@@ -128,8 +128,8 @@ func (s *Service) GetCategoryById(ctx context.Context, dto *entitydto.IDRequest)
 	}
 }
 
-func (s *Service) GetAllCategories(ctx context.Context) ([]productcategorydto.CategoryDTO, error) {
-	if categoryModels, err := s.r.GetAllCategories(ctx); err != nil {
+func (s *Service) GetAllCategories(ctx context.Context, dto *entitydto.IDRequest) ([]productcategorydto.CategoryDTO, error) {
+	if categoryModels, err := s.r.GetAllCategories(ctx, dto.IDs); err != nil {
 		return nil, err
 	} else {
 		dtos := modelsToDTOs(categoryModels)

@@ -65,7 +65,7 @@ func (r *CategoryRepositoryLocal) GetCategoryByName(_ context.Context, name stri
 
 	return nil, errCategoryNotFound
 }
-func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context) ([]model.ProductCategory, error) {
+func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context, IDs []uuid.UUID) ([]model.ProductCategory, error) {
 	mapCategories := make([]model.ProductCategory, 0)
 
 	for _, p := range r.categories {

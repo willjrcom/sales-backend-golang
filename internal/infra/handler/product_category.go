@@ -124,7 +124,14 @@ func (h *handlerProductCategoryImpl) handlerGetProductCategory(w http.ResponseWr
 
 func (h *handlerProductCategoryImpl) handlerGetAllCategories(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	categories, err := h.s.GetAllCategories(ctx)
+
+	dtoIDs := &entitydto.IDRequest{}
+	if err := jsonpkg.ParseBody(r, dtoIDs); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	categories, err := h.s.GetAllCategories(ctx, dtoIDs)
 
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)

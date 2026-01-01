@@ -228,7 +228,7 @@ func (r *ProductCategoryRepositoryBun) GetCategoryByName(ctx context.Context, na
 	return category, nil
 }
 
-func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context) ([]model.ProductCategory, error) {
+func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs []uuid.UUID) ([]model.ProductCategory, error) {
 	categories := []model.ProductCategory{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -240,16 +240,22 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context) ([]
 	defer tx.Rollback()
 
 	// load categories with their simple relations
-	if err := tx.NewSelect().
+	query := tx.NewSelect().
 		Model(&categories).
 		Relation("Sizes").
 		Relation("Quantities").
 		Relation("ProcessRules").
 		Relation("AdditionalCategories").
-		Relation("ComplementCategories").
-		Scan(ctx); err != nil {
+		Relation("ComplementCategories")
+
+	if len(IDs) > 0 {
+		query.Where("product_category.id IN (?)", bun.In(IDs))
+	}
+
+	if err := query.Scan(ctx); err != nil {
 		return nil, err
 	}
+
 	// fetch products for all categories and their sizes
 	// collect category IDs
 	categoryIDs := make([]uuid.UUID, len(categories))
