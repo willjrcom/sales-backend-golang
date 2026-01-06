@@ -381,13 +381,19 @@ func (s *Service) HandleMercadoPagoWebhook(ctx context.Context, dto *companydto.
 		return ErrMercadoPagoDisabled
 	}
 
-	expected := s.mp.WebhookSecret()
-	if expected == "" {
-		return ErrInvalidWebhookSecret
-	}
-
 	if dto == nil || dto.Type != "payment" || dto.Data.ID == "" {
 		return nil
+	}
+
+	// Get data.id for signature validation (prefer query param, fallback to body)
+	dataIDForSignature := dto.DataIDFromQuery
+	if dataIDForSignature == "" {
+		dataIDForSignature = dto.Data.ID
+	}
+
+	// Validate signature from Mercado Pago
+	if !s.mp.ValidateSignature(dto.XSignature, dto.XRequestID, dataIDForSignature) {
+		return ErrInvalidWebhookSecret
 	}
 
 	paymentID := dto.Data.ID

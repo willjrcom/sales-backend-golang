@@ -7,6 +7,11 @@ type MercadoPagoWebhookDTO struct {
 	Action  string                    `json:"action"`
 	Data    MercadoPagoWebhookDataDTO `json:"data"`
 	DateUTC string                    `json:"date_created"`
+
+	// Headers and query params for signature validation (populated by handler)
+	XSignature      string `json:"-"`
+	XRequestID      string `json:"-"`
+	DataIDFromQuery string `json:"-"` // data.id from query params for signature validation
 }
 
 type MercadoPagoWebhookDataDTO struct {

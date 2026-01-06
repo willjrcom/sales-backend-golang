@@ -198,6 +198,12 @@ func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r 
 		return
 	}
 
+	// Extract signature headers and query params for validation
+	// Per MP docs: data.id comes from query params, and must be used for signature validation
+	dto.XSignature = r.Header.Get("x-signature")
+	dto.XRequestID = r.Header.Get("x-request-id")
+	dto.DataIDFromQuery = r.URL.Query().Get("data.id")
+
 	if err := h.s.HandleMercadoPagoWebhook(ctx, dto); err != nil {
 		status := http.StatusInternalServerError
 		switch {

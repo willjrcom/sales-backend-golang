@@ -2,11 +2,15 @@ package mercadopagoservice
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/mercadopago/sdk-go/pkg/config"
@@ -132,6 +136,59 @@ func (c *Client) NotificationURL() string {
 		return ""
 	}
 	return c.notificationURL
+}
+
+// ValidateSignature validates the x-signature header from Mercado Pago webhooks.
+// The x-signature header format is: ts={timestamp},v1={hmac}
+// The manifest for HMAC calculation is: id:{data.id};request-id:{x-request-id};ts:{ts};
+// Note: data.id must be lowercased per MP documentation.
+// If any value is missing, it should be omitted from the manifest.
+func (c *Client) ValidateSignature(xSignature, xRequestID, dataID string) bool {
+	if c == nil || c.webhookSecret == "" {
+		return false
+	}
+
+	// Parse x-signature header to extract ts and v1
+	ts, v1 := parseXSignature(xSignature)
+	if ts == "" || v1 == "" {
+		return false
+	}
+
+	// Build the manifest string conditionally (omit empty values per MP docs)
+	var manifestParts []string
+	if dataID != "" {
+		manifestParts = append(manifestParts, fmt.Sprintf("id:%s", strings.ToLower(dataID)))
+	}
+	if xRequestID != "" {
+		manifestParts = append(manifestParts, fmt.Sprintf("request-id:%s", xRequestID))
+	}
+	if ts != "" {
+		manifestParts = append(manifestParts, fmt.Sprintf("ts:%s", ts))
+	}
+	manifest := strings.Join(manifestParts, ";") + ";"
+
+	// Calculate HMAC-SHA256
+	mac := hmac.New(sha256.New, []byte(c.webhookSecret))
+	mac.Write([]byte(manifest))
+	computed := hex.EncodeToString(mac.Sum(nil))
+
+	// Compare with received signature
+	return hmac.Equal([]byte(computed), []byte(v1))
+}
+
+// parseXSignature extracts ts and v1 values from x-signature header.
+// Format: "ts=1234567890,v1=abc123..."
+func parseXSignature(header string) (ts, v1 string) {
+	parts := strings.Split(header, ",")
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if strings.HasPrefix(part, "ts=") {
+			ts = strings.TrimPrefix(part, "ts=")
+		} else if strings.HasPrefix(part, "v1=") {
+			v1 = strings.TrimPrefix(part, "v1=")
+		}
+	}
+	return ts, v1
 }
 
 // CreateSubscriptionPreference creates a checkout preference using the official SDK.
