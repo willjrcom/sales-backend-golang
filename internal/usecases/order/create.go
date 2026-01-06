@@ -10,6 +10,12 @@ import (
 )
 
 func (s *OrderService) CreateDefaultOrder(ctx context.Context) (uuid.UUID, error) {
+	if s.sc != nil {
+		if err := s.sc.ValidateSubscription(ctx); err != nil {
+			return uuid.Nil, err
+		}
+	}
+
 	shiftModel, err := s.rs.GetCurrentShift(ctx)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("must open a new shift")

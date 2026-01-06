@@ -37,8 +37,11 @@ type Service struct {
 const mercadoPagoProvider = "mercado_pago"
 
 var (
-	ErrMercadoPagoDisabled  = errors.New("mercado pago integration disabled")
-	ErrInvalidWebhookSecret = errors.New("invalid mercado pago webhook secret")
+	ErrMercadoPagoDisabled         = errors.New("mercado pago integration disabled")
+	ErrInvalidWebhookSecret        = errors.New("invalid mercado pago webhook secret")
+	ErrSubscriptionExpired         = errors.New("assinatura expirada: realize o pagamento para continuar")
+	ErrCompanyBlocked              = errors.New("conta bloqueada: entre em contato com o suporte")
+	ErrCompanySubscriptionNotFound = errors.New("assinatura não encontrada")
 )
 
 func NewService(r model.CompanyRepository, mp *mercadopagoservice.Client) *Service {
@@ -140,6 +143,10 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	company := companyentity.NewCompany(cnpjData)
 	company.Email = userModel.Email
 	company.Contacts = contacts
+
+	// Define 7 days free trial
+	expiration := time.Now().UTC().AddDate(0, 0, 7)
+	company.SubscriptionExpiresAt = &expiration
 
 	coordinates, _ := geocodeservice.GetCoordinates(&company.Address.AddressCommonAttributes)
 
@@ -341,6 +348,27 @@ func (s *Service) GetSubscriptionSettings(ctx context.Context) (*companydto.Subs
 		MaxMonths:     12,
 		DefaultMonths: 1,
 	}, nil
+}
+
+func (s *Service) ValidateSubscription(ctx context.Context) error {
+	companyModel, err := s.r.GetCompany(ctx)
+	if err != nil {
+		return err
+	}
+
+	if companyModel.IsBlocked {
+		return ErrCompanyBlocked
+	}
+
+	if companyModel.SubscriptionExpiresAt == nil {
+		return ErrCompanySubscriptionNotFound
+	}
+
+	if companyModel.SubscriptionExpiresAt.Before(time.Now().UTC()) {
+		return ErrSubscriptionExpired
+	}
+
+	return nil
 }
 
 func (s *Service) CreateSubscriptionCheckout(ctx context.Context, dto *companydto.SubscriptionCheckoutDTO) (*companydto.SubscriptionCheckoutResponseDTO, error) {
