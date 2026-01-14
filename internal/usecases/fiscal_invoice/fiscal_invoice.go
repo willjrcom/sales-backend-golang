@@ -79,7 +79,7 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 
 	// Get next invoice number
 	serie := 1 // Default series
-	numero, err := s.invoiceRepo.GetNextNumero(ctx, company.ID, serie)
+	numero, err := s.invoiceRepo.GetNextNumber(ctx, company.ID, serie)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get next invoice number: %w", err)
 	}

@@ -85,7 +85,7 @@ type FiscalInvoiceRepository interface {
 	Update(ctx context.Context, invoice *FiscalInvoice) error
 	GetByID(ctx context.Context, id uuid.UUID) (*FiscalInvoice, error)
 	GetByOrderID(ctx context.Context, orderID uuid.UUID) (*FiscalInvoice, error)
-	GetByChaveAcesso(ctx context.Context, chaveAcesso string) (*FiscalInvoice, error)
+	GetByAccessKey(ctx context.Context, accessKey string) (*FiscalInvoice, error)
 	List(ctx context.Context, companyID uuid.UUID, page, perPage int) ([]*FiscalInvoice, int, error)
-	GetNextNumero(ctx context.Context, companyID uuid.UUID, serie int) (int, error)
+	GetNextNumber(ctx context.Context, companyID uuid.UUID, serie int) (int, error)
 }

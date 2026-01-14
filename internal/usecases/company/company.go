@@ -450,7 +450,7 @@ func (s *Service) HandleMercadoPagoWebhook(ctx context.Context, dto *companydto.
 		return err
 	}
 
-	companyModel, err := s.r.GetCompanyByIDPublic(ctx, companyID)
+	companyModel, err := s.r.GetCompanyOnlyByID(ctx, companyID)
 	if err != nil {
 		return err
 	}
