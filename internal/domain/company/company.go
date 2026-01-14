@@ -1,6 +1,7 @@
 package companyentity
 
 import (
+	"errors"
 	"strings"
 	"time"
 
@@ -9,6 +10,11 @@ import (
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
+)
+
+var (
+	ErrInvalidMonth = errors.New("invalid month: must be between 1 and 12")
+	ErrInvalidYear  = errors.New("invalid year: must be 2020 or later")
 )
 
 type Company struct {
@@ -28,6 +34,12 @@ type CompanyCommonAttributes struct {
 	Preferences           Preferences
 	IsBlocked             bool
 	SubscriptionExpiresAt *time.Time
+	// Fiscal fields for invoice emission
+	FiscalEnabled     bool   // Feature toggle for fiscal invoice functionality
+	InscricaoEstadual string // State registration (IE)
+	RegimeTributario  int    // Tax regime: 1=Simples Nacional, 2=Simples Nacional Excesso, 3=Normal
+	CNAE              string // Economic activity code
+	CRT               int    // Tax regime code for NFC-e (1, 2 or 3)
 }
 
 type CompanyToUsers struct {

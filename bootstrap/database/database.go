@@ -348,6 +348,10 @@ func registerModels(db *bun.DB) error {
 	db.RegisterModel((*model.User)(nil))
 	var _ bun.BeforeSelectHook = (*model.User)(nil)
 
+	// Fiscal invoice models
+	db.RegisterModel((*model.FiscalInvoice)(nil))
+	db.RegisterModel((*model.CompanyUsageCost)(nil))
+
 	return nil
 }
 
@@ -519,10 +523,13 @@ func createTables(ctx context.Context, tx *bun.Tx) error {
 		return err
 	}
 
-	// Ensure ready_at timestamp columns exist where models expect them.
-	// if err := setupPrivateMigrations(ctx, tx); err != nil {
-	// 	return err
-	// }
+	if err := createTableIfNotExists(ctx, tx, (*model.FiscalInvoice)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, tx, (*model.CompanyUsageCost)(nil)); err != nil {
+		return err
+	}
 
 	return nil
 }

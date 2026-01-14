@@ -40,9 +40,12 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 
 	_, orderPickupService, _ := NewOrderPickupModule(db, chi)
 
-	_, companyService, _ := NewCompanyModule(db, chi)
+	companyRepository, companyService, _ := NewCompanyModule(db, chi)
 	_, schemaService := NewSchemaModule(db, chi)
 	userRepository, userService, _ := NewUserModule(db, chi)
+
+	// Fiscal invoice and usage cost modules
+	_, _, _ = NewFiscalInvoiceModule(db, chi, companyRepository, orderRepository, companyService)
 
 	orderPrintService, _ := NewOrderPrintModule(db, chi)
 
