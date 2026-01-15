@@ -73,6 +73,54 @@ var MigrateCmd = &cobra.Command{
 	},
 }
 
+// MigrateCmd applies a raw SQL file to every tenant schema.
+var PublicMigrateCmd = &cobra.Command{
+	Use:   "public-migrate",
+	Short: "Execute a SQL migration for public schema",
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		fileName, err := cmd.Flags().GetString("file")
+		if err != nil {
+			return err
+		}
+
+		if fileName == "" {
+			return fmt.Errorf("flag --file is required")
+		}
+
+		fullPath := fileName
+		if !filepath.IsAbs(fileName) {
+			fullPath = filepath.Join(migrationsDir, fileName)
+		}
+
+		payload, err := os.ReadFile(fullPath)
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				return fmt.Errorf("migration file %s not found (looked in %s)", fileName, fullPath)
+			}
+			return fmt.Errorf("failed to read migration file: %w", err)
+		}
+
+		sql := string(payload)
+		if sql == "" {
+			return fmt.Errorf("migration file %s is empty", fullPath)
+		}
+
+		cmd.Printf("connecting to database...\n")
+		db := database.NewPostgreSQLConnection()
+
+		ctx := context.Background()
+
+		schema := "public"
+		cmd.Printf("applying migration to schema %s...\n", schema)
+		if err := applyMigration(ctx, db, schema, sql); err != nil {
+			return fmt.Errorf("schema %s: %w", schema, err)
+		}
+
+		cmd.Println("migration applied to schema public")
+		return nil
+	},
+}
+
 // MigrateAllCmd applies all pending SQL migrations to every tenant schema.
 var MigrateAllCmd = &cobra.Command{
 	Use:   "migrate-all",

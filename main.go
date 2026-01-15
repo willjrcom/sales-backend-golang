@@ -24,7 +24,14 @@ func main() {
 	if err := cmd.MigrateCmd.MarkFlagRequired("file"); err != nil {
 		panic(err)
 	}
+
+	cmd.PublicMigrateCmd.Flags().StringP("file", "f", "", "SQL file to execute for public schema")
+	if err := cmd.PublicMigrateCmd.MarkFlagRequired("file"); err != nil {
+		panic(err)
+	}
+
 	rootCmd.AddCommand(cmd.MigrateCmd)
+	rootCmd.AddCommand(cmd.PublicMigrateCmd)
 
 	// Comando para executar todas as migrações pendentes automaticamente
 	rootCmd.AddCommand(cmd.MigrateAllCmd)
