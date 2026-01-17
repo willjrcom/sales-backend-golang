@@ -18,6 +18,7 @@ type CategoryDTO struct {
 	UseProcessRule       bool                            `json:"use_process_rule"`
 	IsAdditional         bool                            `json:"is_additional"`
 	IsComplement         bool                            `json:"is_complement"`
+	IsActive             bool                            `json:"is_active"`
 	RemovableIngredients []string                        `json:"removable_ingredients,omitempty"`
 	Sizes                []sizedto.SizeDTO               `json:"sizes,omitempty"`
 	Quantities           []quantitydto.QuantityDTO       `json:"quantities,omitempty"`
@@ -40,6 +41,7 @@ func (c *CategoryDTO) FromDomain(category *productentity.ProductCategory) {
 		UseProcessRule:       category.UseProcessRule,
 		IsAdditional:         category.IsAdditional,
 		IsComplement:         category.IsComplement,
+		IsActive:             category.IsActive,
 		RemovableIngredients: category.RemovableIngredients,
 		Sizes:                []sizedto.SizeDTO{},
 		Quantities:           []quantitydto.QuantityDTO{},

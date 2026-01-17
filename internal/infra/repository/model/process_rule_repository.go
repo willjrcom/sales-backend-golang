@@ -12,7 +12,7 @@ type ProcessRuleRepository interface {
 	DeleteProcessRule(ctx context.Context, id string) error
 	GetProcessRuleById(ctx context.Context, id string) (*ProcessRule, error)
 	GetProcessRulesByCategoryId(ctx context.Context, id string) ([]ProcessRule, error)
-	GetAllProcessRules(ctx context.Context) ([]ProcessRule, error)
+	GetAllProcessRules(ctx context.Context, page, perPage int, isActive bool) ([]ProcessRule, int, error)
 	GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]ProcessRule, error)
 	GetProcessRuleByCategoryIdAndOrder(ctx context.Context, id string, order int8) (*ProcessRule, error)
 	GetFirstProcessRuleByCategoryId(ctx context.Context, id string) (*ProcessRule, error)

@@ -3,12 +3,14 @@ package handlerimpl
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	processruledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process_rule"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	processruleusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_rule"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -146,12 +148,27 @@ func (h *handlerProcessRuleCategoryImpl) handlerGetProcessRulesByCategoryID(w ht
 func (h *handlerProcessRuleCategoryImpl) handlerGetAllProcessRules(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	processRules, err := h.s.GetAllProcessRules(ctx)
+	// Parse pagination
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 100)
+
+	// Parse is_active query parameter (default: true)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		var err error
+		isActive, err = strconv.ParseBool(isActiveParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid is_active parameter"))
+			return
+		}
+	}
+
+	processRules, total, err := h.s.GetAllProcessRules(ctx, page, perPage, isActive)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
+	w.Header().Set("X-Total-Count", strconv.Itoa(total))
 	jsonpkg.ResponseJson(w, r, http.StatusOK, processRules)
 }
 

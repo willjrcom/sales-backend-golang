@@ -16,6 +16,7 @@ type PersonCommonAttributes struct {
 	Email     string
 	Cpf       string
 	Birthday  *time.Time
+	IsActive  bool
 	Contact   *Contact
 	Address   *addressentity.Address
 }

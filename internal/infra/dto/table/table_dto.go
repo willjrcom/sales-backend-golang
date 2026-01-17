@@ -9,6 +9,7 @@ type TableDTO struct {
 	ID          uuid.UUID `json:"id"`
 	Name        *string   `json:"name"`
 	IsAvailable *bool     `json:"is_available"`
+	IsActive    bool      `json:"is_active"`
 }
 
 func (c *TableDTO) FromDomain(table *tableentity.Table) (err error) {
@@ -19,6 +20,7 @@ func (c *TableDTO) FromDomain(table *tableentity.Table) (err error) {
 		ID:          table.ID,
 		Name:        &table.Name,
 		IsAvailable: &table.IsAvailable,
+		IsActive:    table.IsActive,
 	}
 
 	return nil

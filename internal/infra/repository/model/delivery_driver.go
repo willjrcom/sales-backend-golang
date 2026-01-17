@@ -15,6 +15,7 @@ type DeliveryDriver struct {
 
 type DeliveryDriverCommonAttributes struct {
 	EmployeeID      uuid.UUID       `bun:"column:employee_id,type:uuid,notnull"`
+	IsActive        bool            `bun:"column:is_active,type:boolean"`
 	Employee        *Employee       `bun:"rel:belongs-to"`
 	OrderDeliveries []OrderDelivery `bun:"rel:has-many,join:employee_id=driver_id"`
 }
@@ -27,6 +28,7 @@ func (d *DeliveryDriver) FromDomain(driver *orderentity.DeliveryDriver) {
 		Entity: entitymodel.FromDomain(driver.Entity),
 		DeliveryDriverCommonAttributes: DeliveryDriverCommonAttributes{
 			EmployeeID: driver.EmployeeID,
+			IsActive:   driver.IsActive,
 		},
 	}
 
@@ -47,6 +49,7 @@ func (d *DeliveryDriver) ToDomain() *orderentity.DeliveryDriver {
 		Entity: d.Entity.ToDomain(),
 		DeliveryDriverCommonAttributes: orderentity.DeliveryDriverCommonAttributes{
 			EmployeeID:      d.EmployeeID,
+			IsActive:        d.IsActive,
 			Employee:        d.Employee.ToDomain(),
 			OrderDeliveries: []orderentity.OrderDelivery{},
 		},

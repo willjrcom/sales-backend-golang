@@ -3,12 +3,14 @@ package handlerimpl
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	productusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -145,11 +147,29 @@ func (h *HandlerProductImpl) handlerGetProductByCode(w http.ResponseWriter, r *h
 func (h *HandlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	categories, err := h.s.GetAllProducts(ctx)
+	// Parse pagination
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 100)
+
+	// Parse is_active query parameter (default: true)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		var err error
+		isActive, err = strconv.ParseBool(isActiveParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid is_active parameter"))
+			return
+		}
+	}
+
+	// Parse is_additional query parameter (default: true)
+	categoryID := r.URL.Query().Get("category_id")
+
+	categories, total, err := h.s.GetAllProducts(ctx, page, perPage, isActive, categoryID)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
+	w.Header().Set("X-Total-Count", strconv.Itoa(total))
 	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
 }

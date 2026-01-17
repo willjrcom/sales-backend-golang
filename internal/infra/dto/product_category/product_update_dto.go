@@ -15,6 +15,7 @@ type ProductUpdateDTO struct {
 	Price       *decimal.Decimal `json:"price"`
 	Cost        *decimal.Decimal `json:"cost"`
 	IsAvailable *bool            `json:"is_available"`
+	IsActive    *bool            `json:"is_active"`
 	CategoryID  *uuid.UUID       `json:"category_id"`
 	SizeID      *uuid.UUID       `json:"size_id"`
 }
@@ -61,6 +62,9 @@ func (p *ProductUpdateDTO) UpdateDomain(product *productentity.Product) (err err
 	}
 	if p.IsAvailable != nil {
 		product.IsAvailable = *p.IsAvailable
+	}
+	if p.IsActive != nil {
+		product.IsActive = *p.IsActive
 	}
 	if p.CategoryID != nil {
 		product.Category.ID = *p.CategoryID

@@ -91,18 +91,13 @@ func (r *ClientRepositoryBun) DeleteClient(ctx context.Context, id string) error
 	defer cancel()
 	defer tx.Rollback()
 
-	// Delete client
-	if _, err = tx.NewDelete().Model(&model.Client{}).Where("id = ?", id).Exec(ctx); err != nil {
-		return err
-	}
-
-	// Delete contact
-	if _, err = tx.NewDelete().Model(&model.Contact{}).Where("object_id = ?", id).Exec(ctx); err != nil {
-		return err
-	}
-
-	// Delete addresse
-	if _, err = tx.NewDelete().Model(&model.Address{}).Where("object_id = ?", id).Exec(ctx); err != nil {
+	// Soft delete: set is_active to false on client
+	isActive := false
+	if _, err = tx.NewUpdate().
+		Model(&model.Client{}).
+		Set("is_active = ?", isActive).
+		Where("id = ?", id).
+		Exec(ctx); err != nil {
 		return err
 	}
 
@@ -135,7 +130,7 @@ func (r *ClientRepositoryBun) GetClientById(ctx context.Context, id string) (*mo
 }
 
 // GetAllClients retrieves a paginated list of clients and the total count.
-func (r *ClientRepositoryBun) GetAllClients(ctx context.Context, page, perPage int) ([]model.Client, int, error) {
+func (r *ClientRepositoryBun) GetAllClients(ctx context.Context, page, perPage int, isActive ...bool) ([]model.Client, int, error) {
 	var clients []model.Client
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -146,14 +141,21 @@ func (r *ClientRepositoryBun) GetAllClients(ctx context.Context, page, perPage i
 	defer cancel()
 	defer tx.Rollback()
 
+	// Default to active records (true)
+	activeFilter := true
+	if len(isActive) > 0 {
+		activeFilter = isActive[0]
+	}
+
 	// count total records
-	totalCount, err := tx.NewSelect().Model((*model.Client)(nil)).Count(ctx)
+	totalCount, err := tx.NewSelect().Model((*model.Client)(nil)).Where("is_active = ?", activeFilter).Count(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 	// fetch paginated records
 	if err := tx.NewSelect().
 		Model(&clients).
+		Where("client.is_active = ?", activeFilter).
 		Relation("Address").
 		Relation("Contact").
 		Limit(perPage).

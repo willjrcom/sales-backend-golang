@@ -17,6 +17,7 @@ type ProductDTO struct {
 	Price       decimal.Decimal  `json:"price"`
 	Cost        decimal.Decimal  `json:"cost"`
 	IsAvailable bool             `json:"is_available"`
+	IsActive    bool             `json:"is_active"`
 	CategoryID  uuid.UUID        `json:"category_id"`
 	Category    *CategoryDTO     `json:"category"`
 	SizeID      uuid.UUID        `json:"size_id"`
@@ -38,6 +39,7 @@ func (p *ProductDTO) FromDomain(product *productentity.Product) {
 		Price:       product.Price,
 		Cost:        product.Cost,
 		IsAvailable: product.IsAvailable,
+		IsActive:    product.IsActive,
 		CategoryID:  product.CategoryID,
 		Category:    &CategoryDTO{},
 		SizeID:      product.SizeID,

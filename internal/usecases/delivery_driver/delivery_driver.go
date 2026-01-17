@@ -93,8 +93,8 @@ func (s *Service) GetDeliveryDriverByID(ctx context.Context, dto *entitydto.IDRe
 	return deliveryDriverDTO, nil
 }
 
-func (s *Service) GetAllDeliveryDrivers(ctx context.Context) ([]deliverydriverdto.DeliveryDriverDTO, error) {
-	driverModels, err := s.r.GetAllDeliveryDrivers(ctx)
+func (s *Service) GetAllDeliveryDrivers(ctx context.Context, isActive bool) ([]deliverydriverdto.DeliveryDriverDTO, error) {
+	driverModels, err := s.r.GetAllDeliveryDrivers(ctx, isActive)
 	if err != nil {
 		return nil, err
 	}

@@ -19,6 +19,7 @@ type ProductCategoryCommonAttributes struct {
 	PrinterName          string            `bun:"printer_name"`
 	UseProcessRule       bool              `bun:"use_process_rule,notnull"`
 	RemovableIngredients []string          `bun:"removable_ingredients,type:jsonb"`
+	IsActive             bool              `bun:"column:is_active,type:boolean"`
 	Sizes                []Size            `bun:"rel:has-many,join:id=category_id"`
 	Quantities           []Quantity        `bun:"rel:has-many,join:id=category_id"`
 	Products             []Product         `bun:"rel:has-many,join:id=category_id"`
@@ -42,6 +43,7 @@ func (c *ProductCategory) FromDomain(category *productentity.ProductCategory) {
 			PrinterName:          category.PrinterName,
 			UseProcessRule:       category.UseProcessRule,
 			RemovableIngredients: category.RemovableIngredients,
+			IsActive:             category.IsActive,
 			Sizes:                []Size{},
 			Quantities:           []Quantity{},
 			Products:             []Product{},
@@ -103,6 +105,7 @@ func (c *ProductCategory) ToDomain() *productentity.ProductCategory {
 			PrinterName:          c.PrinterName,
 			UseProcessRule:       c.UseProcessRule,
 			RemovableIngredients: c.RemovableIngredients,
+			IsActive:             c.IsActive,
 			Sizes:                []productentity.Size{},
 			Quantities:           []productentity.Quantity{},
 			Products:             []productentity.Product{},

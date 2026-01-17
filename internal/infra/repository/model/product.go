@@ -23,6 +23,7 @@ type ProductCommonAttributes struct {
 	Price       decimal.Decimal  `bun:"price,type:decimal(10,2),notnull"`
 	Cost        decimal.Decimal  `bun:"cost,type:decimal(10,2)"`
 	IsAvailable bool             `bun:"is_available"`
+	IsActive    bool             `bun:"column:is_active,type:boolean"`
 	CategoryID  uuid.UUID        `bun:"column:category_id,type:uuid,notnull"`
 	Category    *ProductCategory `bun:"rel:belongs-to"`
 	SizeID      uuid.UUID        `bun:"size_id,type:uuid,notnull"`
@@ -44,6 +45,7 @@ func (p *Product) FromDomain(product *productentity.Product) {
 			Price:       product.Price,
 			Cost:        product.Cost,
 			IsAvailable: product.IsAvailable,
+			IsActive:    product.IsActive,
 			CategoryID:  product.CategoryID,
 			Category:    &ProductCategory{},
 			SizeID:      product.SizeID,
@@ -70,6 +72,7 @@ func (p *Product) ToDomain() *productentity.Product {
 			Price:       p.Price,
 			Cost:        p.Cost,
 			IsAvailable: p.IsAvailable,
+			IsActive:    p.IsActive,
 			CategoryID:  p.CategoryID,
 			Category:    p.Category.ToDomain(),
 			SizeID:      p.SizeID,

@@ -16,6 +16,7 @@ type ProcessRuleDTO struct {
 	ImagePath   *string   `json:"image_path"`
 	IdealTime   string    `json:"ideal_time"`
 	CategoryID  uuid.UUID `json:"category_id"`
+	IsActive    bool      `json:"is_active"`
 }
 
 func (s *ProcessRuleDTO) FromDomain(processRule *productentity.ProcessRule) {
@@ -30,6 +31,7 @@ func (s *ProcessRuleDTO) FromDomain(processRule *productentity.ProcessRule) {
 		ImagePath:   processRule.ImagePath,
 		IdealTime:   getTimeFormatted(processRule.IdealTime),
 		CategoryID:  processRule.CategoryID,
+		IsActive:    processRule.IsActive,
 	}
 }
 

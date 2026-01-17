@@ -128,8 +128,8 @@ func (s *Service) GetCategoryById(ctx context.Context, dto *entitydto.IDRequest)
 	}
 }
 
-func (s *Service) GetAllCategories(ctx context.Context, dto *entitydto.IDRequest) ([]productcategorydto.CategoryDTO, error) {
-	if categoryModels, err := s.r.GetAllCategories(ctx, dto.IDs); err != nil {
+func (s *Service) GetAllCategories(ctx context.Context, dto *entitydto.IDRequest, isActive bool) ([]productcategorydto.CategoryDTO, error) {
+	if categoryModels, err := s.r.GetAllCategories(ctx, dto.IDs, isActive); err != nil {
 		return nil, err
 	} else {
 		dtos := modelsToDTOs(categoryModels)
@@ -170,4 +170,33 @@ func modelsWithOrderProcessToDTOs(categoryModels []model.ProductCategoryWithOrde
 	}
 
 	return DTOs
+}
+
+func (s *Service) GetComplementProducts(ctx context.Context, categoryID string) ([]productcategorydto.ProductDTO, error) {
+	products, err := s.r.GetComplementProducts(ctx, categoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	return productsToDTOs(products), nil
+}
+
+func (s *Service) GetAdditionalProducts(ctx context.Context, categoryID string) ([]productcategorydto.ProductDTO, error) {
+	products, err := s.r.GetAdditionalProducts(ctx, categoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	return productsToDTOs(products), nil
+}
+
+func productsToDTOs(products []model.Product) []productcategorydto.ProductDTO {
+	dtos := []productcategorydto.ProductDTO{}
+	for _, p := range products {
+		domain := p.ToDomain()
+		dto := &productcategorydto.ProductDTO{}
+		dto.FromDomain(domain)
+		dtos = append(dtos, *dto)
+	}
+	return dtos
 }

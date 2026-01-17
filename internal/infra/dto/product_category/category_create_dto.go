@@ -19,6 +19,7 @@ type CategoryCreateDTO struct {
 	RemovableIngredients []string `json:"removable_ingredients"`
 	IsAdditional         bool     `json:"is_additional"`
 	IsComplement         bool     `json:"is_complement"`
+	IsActive             *bool    `json:"is_active"`
 }
 
 func (c *CategoryCreateDTO) validate() error {
@@ -34,6 +35,10 @@ func (c *CategoryCreateDTO) ToDomain() (*productentity.ProductCategory, error) {
 		return nil, err
 	}
 
+	isActive := true
+	if c.IsActive != nil {
+		isActive = *c.IsActive
+	}
 	categoryCommonAttributes := productentity.ProductCategoryCommonAttributes{
 		Name:                 c.Name,
 		ImagePath:            c.ImagePath,
@@ -43,6 +48,7 @@ func (c *CategoryCreateDTO) ToDomain() (*productentity.ProductCategory, error) {
 		RemovableIngredients: c.RemovableIngredients,
 		IsAdditional:         c.IsAdditional,
 		IsComplement:         c.IsComplement,
+		IsActive:             isActive,
 	}
 
 	return productentity.NewProductCategory(categoryCommonAttributes), nil

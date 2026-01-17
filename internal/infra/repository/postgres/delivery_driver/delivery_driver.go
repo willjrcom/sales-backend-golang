@@ -66,7 +66,13 @@ func (r *DeliveryDriverRepositoryBun) DeleteDeliveryDriver(ctx context.Context, 
 	defer cancel()
 	defer tx.Rollback()
 
-	if _, err := tx.NewDelete().Model(&model.DeliveryDriver{}).Where("id = ?", id).Exec(ctx); err != nil {
+	// Soft delete: set is_active to false
+	isActive := false
+	if _, err := tx.NewUpdate().
+		Model(&model.DeliveryDriver{}).
+		Set("is_active = ?", isActive).
+		Where("id = ?", id).
+		Exec(ctx); err != nil {
 		return err
 	}
 
@@ -118,7 +124,7 @@ func (r *DeliveryDriverRepositoryBun) GetDeliveryDriverByEmployeeId(ctx context.
 	return deliveryDriver, nil
 }
 
-func (r *DeliveryDriverRepositoryBun) GetAllDeliveryDrivers(ctx context.Context) ([]model.DeliveryDriver, error) {
+func (r *DeliveryDriverRepositoryBun) GetAllDeliveryDrivers(ctx context.Context, isActive ...bool) ([]model.DeliveryDriver, error) {
 	deliveryDrivers := []model.DeliveryDriver{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -129,7 +135,13 @@ func (r *DeliveryDriverRepositoryBun) GetAllDeliveryDrivers(ctx context.Context)
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&deliveryDrivers).Relation("Employee.User").Scan(ctx); err != nil {
+	// Default to active records (true)
+	activeFilter := true
+	if len(isActive) > 0 {
+		activeFilter = isActive[0]
+	}
+
+	if err := tx.NewSelect().Model(&deliveryDrivers).Where("driver.is_active = ?", activeFilter).Relation("Employee.User").Scan(ctx); err != nil {
 		return nil, err
 	}
 

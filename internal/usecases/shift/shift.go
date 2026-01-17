@@ -259,7 +259,7 @@ func (s *Service) LoadShiftWithProductionAnalytics(ctx context.Context, shift *s
 	}
 
 	// Busca todas as regras de processo para obter os nomes
-	allProcessRules, err := s.processRuleRepo.GetAllProcessRules(ctx)
+	allProcessRules, _, err := s.processRuleRepo.GetAllProcessRules(ctx, 0, 1000, true)
 	if err != nil {
 		return err
 	}

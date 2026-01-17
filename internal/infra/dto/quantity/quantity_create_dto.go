@@ -14,6 +14,7 @@ var (
 
 type QuantityCreateDTO struct {
 	Quantity   float64   `json:"quantity"`
+	IsActive   *bool     `json:"is_active"`
 	CategoryID uuid.UUID `json:"category_id"`
 }
 
@@ -33,8 +34,14 @@ func (s *QuantityCreateDTO) ToDomain() (*productentity.Quantity, error) {
 		return nil, err
 	}
 
+	isActive := true
+	if s.IsActive != nil {
+		isActive = *s.IsActive
+	}
+
 	quantityCommonAttributes := productentity.QuantityCommonAttributes{
 		Quantity:   s.Quantity,
+		IsActive:   isActive,
 		CategoryID: s.CategoryID,
 	}
 

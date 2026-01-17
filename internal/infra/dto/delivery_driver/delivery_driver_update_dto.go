@@ -11,6 +11,7 @@ var (
 )
 
 type DeliveryDriverUpdateDTO struct {
+	IsActive *bool `json:"is_active"`
 }
 
 func (s *DeliveryDriverUpdateDTO) validate() error {
@@ -20,6 +21,10 @@ func (s *DeliveryDriverUpdateDTO) validate() error {
 func (s *DeliveryDriverUpdateDTO) UpdateDomain(driver *orderentity.DeliveryDriver) (err error) {
 	if err = s.validate(); err != nil {
 		return err
+	}
+
+	if s.IsActive != nil {
+		driver.IsActive = *s.IsActive
 	}
 
 	return nil

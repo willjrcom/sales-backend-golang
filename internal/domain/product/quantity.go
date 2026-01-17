@@ -18,6 +18,7 @@ type Quantity struct {
 
 type QuantityCommonAttributes struct {
 	Quantity   float64
+	IsActive   bool
 	CategoryID uuid.UUID
 }
 

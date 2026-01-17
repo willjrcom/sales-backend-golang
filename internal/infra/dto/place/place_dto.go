@@ -14,6 +14,7 @@ type PlaceCommonAttributes struct {
 	Name        string             `json:"name"`
 	ImagePath   *string            `json:"image_path"`
 	IsAvailable bool               `json:"is_available"`
+	IsActive    bool               `json:"is_active"`
 	Tables      []PlaceToTablesDTO `json:"tables"`
 }
 
@@ -27,6 +28,7 @@ func (p *PlaceDTO) FromDomain(place *tableentity.Place) {
 			Name:        place.Name,
 			ImagePath:   place.ImagePath,
 			IsAvailable: place.IsAvailable,
+			IsActive:    place.IsActive,
 			Tables:      []PlaceToTablesDTO{},
 		},
 	}

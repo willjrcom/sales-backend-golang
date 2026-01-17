@@ -23,6 +23,7 @@ type ClientUpdateDTO struct {
 	Email     *string                      `json:"email"`
 	Cpf       *string                      `json:"cpf"`
 	Birthday  *time.Time                   `json:"birthday"`
+	IsActive  *bool                        `json:"is_active"`
 	Contact   *contactdto.ContactUpdateDTO `json:"contact"`
 	Address   *addressdto.AddressUpdateDTO `json:"address"`
 }
@@ -58,6 +59,9 @@ func (r *ClientUpdateDTO) UpdateDomain(client *cliententity.Client) error {
 	}
 	if r.Birthday != nil {
 		client.Birthday = r.Birthday
+	}
+	if r.IsActive != nil {
+		client.IsActive = *r.IsActive
 	}
 	if r.Contact != nil {
 		if client.Contact == nil {

@@ -6,6 +6,7 @@ import (
 
 type QuantityUpdateDTO struct {
 	Quantity *float64 `json:"quantity"`
+	IsActive *bool    `json:"is_active"`
 }
 
 func (s *QuantityUpdateDTO) validate() error {
@@ -23,6 +24,10 @@ func (s *QuantityUpdateDTO) UpdateDomain(quantity *productentity.Quantity) (err 
 
 	if s.Quantity != nil {
 		quantity.Quantity = *s.Quantity
+	}
+
+	if s.IsActive != nil {
+		quantity.IsActive = *s.IsActive
 	}
 
 	return nil

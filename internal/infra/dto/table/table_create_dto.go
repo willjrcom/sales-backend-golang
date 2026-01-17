@@ -14,6 +14,7 @@ var (
 type TableCreateDTO struct {
 	Name        string `json:"name"`
 	IsAvailable bool   `json:"is_available"`
+	IsActive    *bool  `json:"is_active"`
 }
 
 func (o *TableCreateDTO) validate() error {
@@ -29,9 +30,15 @@ func (o *TableCreateDTO) ToDomain() (*tableentity.Table, error) {
 		return nil, err
 	}
 
+	isActive := true
+	if o.IsActive != nil {
+		isActive = *o.IsActive
+	}
+
 	tableCommonAttributes := tableentity.TableCommonAttributes{
 		Name:        o.Name,
 		IsAvailable: true,
+		IsActive:    isActive,
 	}
 
 	table := &tableentity.Table{

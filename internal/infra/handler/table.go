@@ -3,6 +3,7 @@ package handlerimpl
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -124,7 +125,17 @@ func (h *handlerTableImpl) handlerUpdateTableById(w http.ResponseWriter, r *http
 func (h *handlerTableImpl) handlerGetAllTables(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	tables, err := h.s.GetAllTables(ctx)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		var err error
+		isActive, err = strconv.ParseBool(isActiveParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid is_active parameter"))
+			return
+		}
+	}
+
+	tables, err := h.s.GetAllTables(ctx, isActive)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -136,7 +147,17 @@ func (h *handlerTableImpl) handlerGetAllTables(w http.ResponseWriter, r *http.Re
 func (h *handlerTableImpl) handlerGetUnusedTables(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	tables, err := h.s.GetUnusedTables(ctx)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		var err error
+		isActive, err = strconv.ParseBool(isActiveParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid is_active parameter"))
+			return
+		}
+	}
+
+	tables, err := h.s.GetUnusedTables(ctx, isActive)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

@@ -13,6 +13,7 @@ type DeliveryDriver struct {
 
 type DeliveryDriverCommonAttributes struct {
 	EmployeeID      uuid.UUID
+	IsActive        bool
 	Employee        *employeeentity.Employee
 	OrderDeliveries []OrderDelivery
 }

@@ -24,6 +24,7 @@ type ClientCreateDTO struct {
 	Email     *string                      `json:"email"`
 	Cpf       *string                      `json:"cpf"`
 	Birthday  *time.Time                   `json:"birthday"`
+	IsActive  *bool                        `json:"is_active"`
 	Contact   *contactdto.ContactCreateDTO `json:"contact"`
 	Address   *addressdto.AddressCreateDTO `json:"address"`
 }
@@ -50,9 +51,15 @@ func (r *ClientCreateDTO) ToDomain() (*cliententity.Client, error) {
 		return nil, err
 	}
 
+	isActive := true
+	if r.IsActive != nil {
+		isActive = *r.IsActive
+	}
+
 	personCommonAttributes := &personentity.PersonCommonAttributes{
 		Name:      r.Name,
 		ImagePath: r.ImagePath,
+		IsActive:  isActive,
 	}
 
 	// Create person

@@ -14,6 +14,7 @@ type PublicPerson struct {
 	Birthday  *time.Time     `bun:"birthday"`
 	Contact   *PublicContact `bun:"rel:has-one,join:id=object_id,notnull"`
 	Address   *PublicAddress `bun:"rel:has-one,join:id=object_id,notnull"`
+	IsActive  bool           `bun:"column:is_active,type:boolean"`
 }
 
 func (p *PublicPerson) FromDomain(person *personentity.Person) {
@@ -28,6 +29,7 @@ func (p *PublicPerson) FromDomain(person *personentity.Person) {
 		Birthday:  person.Birthday,
 		Contact:   &PublicContact{},
 		Address:   &PublicAddress{},
+		IsActive:  p.IsActive,
 	}
 
 	p.Contact.FromDomain(person.Contact)
@@ -47,6 +49,7 @@ func (p *PublicPerson) ToDomain() *personentity.Person {
 			Birthday:  p.Birthday,
 			Contact:   p.Contact.ToDomain(),
 			Address:   p.Address.ToDomain(),
+			IsActive:  p.IsActive,
 		},
 	}
 }

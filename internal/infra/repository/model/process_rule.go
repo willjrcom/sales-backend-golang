@@ -22,6 +22,7 @@ type ProcessRuleCommonAttributes struct {
 	ImagePath   *string       `bun:"image_path"`
 	IdealTime   time.Duration `bun:"ideal_time,notnull"`
 	CategoryID  uuid.UUID     `bun:"column:category_id,type:uuid,notnull"`
+	IsActive    bool          `bun:"is_active,notnull"`
 }
 
 func (p *ProcessRule) FromDomain(processRule *productentity.ProcessRule) {
@@ -37,6 +38,7 @@ func (p *ProcessRule) FromDomain(processRule *productentity.ProcessRule) {
 			ImagePath:   processRule.ImagePath,
 			IdealTime:   processRule.IdealTime,
 			CategoryID:  processRule.CategoryID,
+			IsActive:    processRule.IsActive,
 		},
 	}
 }
@@ -54,6 +56,7 @@ func (p *ProcessRule) ToDomain() *productentity.ProcessRule {
 			ImagePath:   p.ImagePath,
 			IdealTime:   p.IdealTime,
 			CategoryID:  p.CategoryID,
+			IsActive:    p.IsActive,
 		},
 	}
 }

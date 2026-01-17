@@ -8,6 +8,7 @@ type PlaceUpdateDTO struct {
 	Name        *string `json:"name"`
 	ImagePath   *string `json:"image_path"`
 	IsAvailable *bool   `json:"is_available"`
+	IsActive    *bool   `json:"is_active"`
 }
 
 func (c *PlaceUpdateDTO) UpdateDomain(place *tableentity.Place) (err error) {
@@ -21,6 +22,10 @@ func (c *PlaceUpdateDTO) UpdateDomain(place *tableentity.Place) (err error) {
 
 	if c.IsAvailable != nil {
 		place.IsAvailable = *c.IsAvailable
+	}
+
+	if c.IsActive != nil {
+		place.IsActive = *c.IsActive
 	}
 
 	return nil

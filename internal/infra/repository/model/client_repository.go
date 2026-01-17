@@ -9,5 +9,5 @@ type ClientRepository interface {
 	UpdateClient(ctx context.Context, p *Client) error
 	DeleteClient(ctx context.Context, id string) error
 	GetClientById(ctx context.Context, id string) (*Client, error)
-	GetAllClients(ctx context.Context, page, perPage int) ([]Client, int, error)
+	GetAllClients(ctx context.Context, page, perPage int, isActive ...bool) ([]Client, int, error)
 }

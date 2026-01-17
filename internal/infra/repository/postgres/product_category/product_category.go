@@ -17,6 +17,86 @@ func NewProductCategoryRepositoryBun(db *bun.DB) model.CategoryRepository {
 	return &ProductCategoryRepositoryBun{db: db}
 }
 
+func (r *ProductCategoryRepositoryBun) GetComplementProducts(ctx context.Context, categoryID string) ([]model.Product, error) {
+	products := []model.Product{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	category := model.ProductCategory{}
+	if err := tx.NewSelect().
+		Model(&category).
+		Where("category.id = ?", categoryID).
+		Relation("ComplementCategories").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	complementCategoryIDs := []uuid.UUID{}
+	for _, ac := range category.ComplementCategories {
+		complementCategoryIDs = append(complementCategoryIDs, ac.ID)
+	}
+
+	if err := tx.NewSelect().
+		Model(&products).
+		Where("product.category_id IN (?)", bun.In(complementCategoryIDs)).
+		Where("product.is_active = ?", true).
+		Relation("Size").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
+func (r *ProductCategoryRepositoryBun) GetAdditionalProducts(ctx context.Context, categoryID string) ([]model.Product, error) {
+	products := []model.Product{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	category := model.ProductCategory{}
+	if err := tx.NewSelect().
+		Model(&category).
+		Where("category.id = ?", categoryID).
+		Relation("AdditionalCategories").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	additionalCategoryIDs := []uuid.UUID{}
+	for _, ac := range category.AdditionalCategories {
+		additionalCategoryIDs = append(additionalCategoryIDs, ac.ID)
+	}
+
+	if err := tx.NewSelect().
+		Model(&products).
+		Where("product.category_id IN (?)", bun.In(additionalCategoryIDs)).
+		Where("product.is_active = ?", true).
+		Relation("Size").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
 func (r *ProductCategoryRepositoryBun) CreateCategory(ctx context.Context, cp *model.ProductCategory) error {
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -145,31 +225,13 @@ func (r *ProductCategoryRepositoryBun) DeleteCategory(ctx context.Context, id st
 	defer cancel()
 	defer tx.Rollback()
 
-	if _, err := tx.NewDelete().Model(&model.ProductCategory{}).Where("id = ?", id).Exec(ctx); err != nil {
-		return err
-	}
-
-	if _, err := tx.NewDelete().Model(&model.ProductCategoryToAdditional{}).Where("category_id = ?", id).Exec(ctx); err != nil {
-		return err
-	}
-
-	if _, err := tx.NewDelete().Model(&model.ProductCategoryToAdditional{}).Where("additional_category_id = ?", id).Exec(ctx); err != nil {
-		return err
-	}
-
-	if _, err := tx.NewDelete().Model(&model.ProductCategoryToComplement{}).Where("complement_category_id = ?", id).Exec(ctx); err != nil {
-		return err
-	}
-
-	if _, err := tx.NewDelete().Model(&model.Size{}).Where("category_id = ?", id).Exec(ctx); err != nil {
-		return err
-	}
-
-	if _, err := tx.NewDelete().Model(&model.Quantity{}).Where("category_id = ?", id).Exec(ctx); err != nil {
-		return err
-	}
-
-	if _, err := tx.NewDelete().Model(&model.ProcessRule{}).Where("category_id = ?", id).Exec(ctx); err != nil {
+	// Soft delete: set is_active to false on category only
+	isActive := false
+	if _, err := tx.NewUpdate().
+		Model(&model.ProductCategory{}).
+		Set("is_active = ?", isActive).
+		Where("id = ?", id).
+		Exec(ctx); err != nil {
 		return err
 	}
 
@@ -191,7 +253,14 @@ func (r *ProductCategoryRepositoryBun) GetCategoryById(ctx context.Context, id s
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(category).Where("id = ?", id).Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Relation("ComplementCategories").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(category).Where("category.id = ?", id).
+		Relation("Sizes").
+		Relation("Quantities").
+		Relation("Products").
+		Relation("ProcessRules").
+		Relation("AdditionalCategories").
+		Relation("ComplementCategories").
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -228,7 +297,7 @@ func (r *ProductCategoryRepositoryBun) GetCategoryByName(ctx context.Context, na
 	return category, nil
 }
 
-func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs []uuid.UUID) ([]model.ProductCategory, error) {
+func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs []uuid.UUID, isActive ...bool) ([]model.ProductCategory, error) {
 	categories := []model.ProductCategory{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -238,6 +307,12 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs
 
 	defer cancel()
 	defer tx.Rollback()
+
+	// Default to active records (true)
+	activeFilter := true
+	if len(isActive) > 0 {
+		activeFilter = isActive[0]
+	}
 
 	// load categories with their simple relations
 	query := tx.NewSelect().
@@ -249,7 +324,9 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs
 		Relation("ComplementCategories")
 
 	if len(IDs) > 0 {
-		query.Where("product_category.id IN (?)", bun.In(IDs))
+		query.Where("category.id IN (?) AND category.is_active = ?", bun.In(IDs), activeFilter)
+	} else {
+		query.Where("category.is_active = ?", activeFilter)
 	}
 
 	if err := query.Scan(ctx); err != nil {
@@ -269,6 +346,7 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs
 			Model(&products).
 			Relation("Size").
 			Where("product.category_id IN (?)", bun.In(categoryIDs)).
+			Where("product.is_active = ?", activeFilter).
 			Scan(ctx); err != nil {
 			return nil, err
 		}

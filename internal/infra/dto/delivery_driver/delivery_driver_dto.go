@@ -9,6 +9,7 @@ import (
 type DeliveryDriverDTO struct {
 	ID              uuid.UUID                   `json:"id"`
 	EmployeeID      uuid.UUID                   `json:"employee_id"`
+	IsActive        bool                        `json:"is_active"`
 	Employee        *employeedto.EmployeeDTO    `json:"employee"`
 	OrderDeliveries []orderentity.OrderDelivery `json:"order_deliveries"`
 }
@@ -20,6 +21,7 @@ func (s *DeliveryDriverDTO) FromDomain(driver *orderentity.DeliveryDriver) {
 	*s = DeliveryDriverDTO{
 		ID:              driver.ID,
 		EmployeeID:      driver.EmployeeID,
+		IsActive:        driver.IsActive,
 		Employee:        &employeedto.EmployeeDTO{},
 		OrderDeliveries: driver.OrderDeliveries,
 	}

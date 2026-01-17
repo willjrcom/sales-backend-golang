@@ -7,6 +7,7 @@ import (
 type TableUpdateDTO struct {
 	Name        *string `json:"name"`
 	IsAvailable *bool   `json:"is_available"`
+	IsActive    *bool   `json:"is_active"`
 }
 
 func (c *TableUpdateDTO) UpdateDomain(table *tableentity.Table) (err error) {
@@ -15,6 +16,9 @@ func (c *TableUpdateDTO) UpdateDomain(table *tableentity.Table) (err error) {
 	}
 	if c.IsAvailable != nil {
 		table.IsAvailable = *c.IsAvailable
+	}
+	if c.IsActive != nil {
+		table.IsActive = *c.IsActive
 	}
 
 	return nil

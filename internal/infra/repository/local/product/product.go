@@ -71,12 +71,27 @@ func (r *ProductRepositoryLocal) GetProductByCode(_ context.Context, code string
 	return nil, errProductNotFound
 }
 
-func (r *ProductRepositoryLocal) GetAllProducts(_ context.Context) ([]model.Product, error) {
+func (r *ProductRepositoryLocal) GetAllProducts(_ context.Context, page, perPage int, isActive bool, categoryID string) ([]model.Product, int, error) {
 	products := make([]model.Product, 0)
 
+	// Filter by isActive
 	for _, p := range r.products {
-		products = append(products, *p)
+		if p.IsActive == isActive {
+			products = append(products, *p)
+		}
 	}
 
-	return products, nil
+	total := len(products)
+
+	// Apply pagination
+	start := page * perPage
+	end := start + perPage
+	if start > total {
+		return []model.Product{}, total, nil
+	}
+	if end > total {
+		end = total
+	}
+
+	return products[start:end], total, nil
 }

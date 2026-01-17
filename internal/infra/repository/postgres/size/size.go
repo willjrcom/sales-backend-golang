@@ -66,7 +66,13 @@ func (r *SizeRepositoryBun) DeleteSize(ctx context.Context, id string) error {
 	defer cancel()
 	defer tx.Rollback()
 
-	if _, err := tx.NewDelete().Model(&model.Size{}).Where("id = ?", id).Exec(ctx); err != nil {
+	// Soft delete: set is_active to false
+	isActive := false
+	if _, err := tx.NewUpdate().
+		Model(&model.Size{}).
+		Set("is_active = ?", isActive).
+		Where("id = ?", id).
+		Exec(ctx); err != nil {
 		return err
 	}
 

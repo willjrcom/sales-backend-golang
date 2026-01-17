@@ -120,23 +120,48 @@ func (r *ProductRepositoryBun) GetProductByCode(ctx context.Context, code string
 	return product, nil
 }
 
-func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context) ([]model.Product, error) {
+func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context, page, perPage int, isActive bool, categoryID string) ([]model.Product, int, error) {
 	products := []model.Product{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&products).Relation("Category").Relation("Size").Scan(ctx); err != nil {
-		return nil, err
+	// Calculate offset
+	offset := page * perPage
+
+	// Get paginated products with filter
+	query := tx.NewSelect().
+		Model(&products).
+		Relation("Category").
+		Relation("Size").
+		Where("product.is_active = ?", isActive).
+		Order("product.name ASC").
+		Limit(perPage).
+		Offset(offset)
+
+	if categoryID != "" {
+		query = query.Where("product.category_id = ?", categoryID)
+	}
+	if err := query.Scan(ctx); err != nil {
+		return nil, 0, err
+	}
+
+	// Get total count
+	total, err := tx.NewSelect().
+		Model(&model.Product{}).
+		Where("is_active = ?", isActive).
+		Count(ctx)
+	if err != nil {
+		return nil, 0, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return products, nil
+	return products, total, nil
 }

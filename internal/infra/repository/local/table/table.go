@@ -52,7 +52,7 @@ func (r *TableRepositoryLocal) GetTableById(ctx context.Context, id string) (*mo
 	return nil, nil
 }
 
-func (r *TableRepositoryLocal) GetAllTables(ctx context.Context) ([]model.Table, error) {
+func (r *TableRepositoryLocal) GetAllTables(ctx context.Context, isActive ...bool) ([]model.Table, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	list := make([]model.Table, 0, len(r.tables))
@@ -62,7 +62,7 @@ func (r *TableRepositoryLocal) GetAllTables(ctx context.Context) ([]model.Table,
 	return list, nil
 }
 
-func (r *TableRepositoryLocal) GetUnusedTables(ctx context.Context) ([]model.Table, error) {
+func (r *TableRepositoryLocal) GetUnusedTables(ctx context.Context, isActive ...bool) ([]model.Table, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	list := make([]model.Table, 0)

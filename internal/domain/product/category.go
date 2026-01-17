@@ -16,6 +16,7 @@ type ProductCategoryCommonAttributes struct {
 	PrinterName          string
 	UseProcessRule       bool
 	RemovableIngredients []string
+	IsActive             bool
 	Sizes                []Size
 	Quantities           []Quantity
 	Products             []Product

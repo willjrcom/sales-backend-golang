@@ -27,6 +27,7 @@ type ProductCommonAttributes struct {
 	Price       decimal.Decimal
 	Cost        decimal.Decimal
 	IsAvailable bool
+	IsActive    bool
 	CategoryID  uuid.UUID
 	Category    *ProductCategory
 	SizeID      uuid.UUID

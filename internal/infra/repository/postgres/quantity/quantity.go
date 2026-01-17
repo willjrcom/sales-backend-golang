@@ -66,7 +66,13 @@ func (r *QuantityRepositoryBun) DeleteQuantity(ctx context.Context, id string) e
 	defer cancel()
 	defer tx.Rollback()
 
-	if _, err := tx.NewDelete().Model(&model.Quantity{}).Where("id = ?", id).Exec(ctx); err != nil {
+	// Soft delete: set is_active to false
+	isActive := false
+	if _, err := tx.NewUpdate().
+		Model(&model.Quantity{}).
+		Set("is_active = ?", isActive).
+		Where("id = ?", id).
+		Exec(ctx); err != nil {
 		return err
 	}
 

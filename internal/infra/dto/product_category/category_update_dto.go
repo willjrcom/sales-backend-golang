@@ -15,6 +15,7 @@ type CategoryUpdateDTO struct {
 	PrinterName          string                `json:"printer_name"`
 	UseProcessRule       *bool                 `json:"use_process_rule"`
 	RemovableIngredients []string              `json:"removable_ingredients"`
+	IsActive             *bool                 `json:"is_active"`
 	AdditionalCategories []entitydto.IDRequest `json:"additional_categories"`
 	ComplementCategories []entitydto.IDRequest `json:"complement_categories"`
 }
@@ -35,6 +36,10 @@ func (c *CategoryUpdateDTO) UpdateDomain(category *productentity.ProductCategory
 
 	if c.UseProcessRule != nil {
 		category.UseProcessRule = *c.UseProcessRule
+	}
+
+	if c.IsActive != nil {
+		category.IsActive = *c.IsActive
 	}
 
 	if len(c.RemovableIngredients) != 0 {

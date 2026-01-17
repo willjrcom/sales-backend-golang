@@ -3,6 +3,7 @@ package handlerimpl
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -123,7 +124,17 @@ func (h *handlerDeliveryDriverImpl) handlerGetDeliveryDriver(w http.ResponseWrit
 func (h *handlerDeliveryDriverImpl) handlerGetAllDeliveryDrivers(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	deliveryDrivers, err := h.s.GetAllDeliveryDrivers(ctx)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		var err error
+		isActive, err = strconv.ParseBool(isActiveParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid is_active parameter"))
+			return
+		}
+	}
+
+	deliveryDrivers, err := h.s.GetAllDeliveryDrivers(ctx, isActive)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

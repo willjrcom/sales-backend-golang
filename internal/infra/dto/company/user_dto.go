@@ -19,6 +19,7 @@ type UserDTO struct {
 	Contact   *contactdto.ContactDTO `json:"contact,omitempty"`
 	Address   *addressdto.AddressDTO `json:"address,omitempty"`
 	Companies []CompanyDTO           `json:"companies,omitempty"`
+	IsActive  bool                   `json:"is_active"`
 }
 
 func (u *UserDTO) FromDomain(user *companyentity.User) {
@@ -35,6 +36,7 @@ func (u *UserDTO) FromDomain(user *companyentity.User) {
 		Contact:   &contactdto.ContactDTO{},
 		Address:   &addressdto.AddressDTO{},
 		Companies: []CompanyDTO{},
+		IsActive:  user.IsActive,
 	}
 
 	u.Contact.FromDomain(user.Contact)

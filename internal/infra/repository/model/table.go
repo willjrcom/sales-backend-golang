@@ -16,6 +16,7 @@ type Table struct {
 type TableCommonAttributes struct {
 	Name        string       `bun:"name,notnull"`
 	IsAvailable bool         `bun:"is_available"`
+	IsActive    bool         `bun:"column:is_active,type:boolean"`
 	Orders      []OrderTable `bun:"rel:has-many,join:id=table_id"`
 }
 
@@ -28,6 +29,7 @@ func (t *Table) FromDomain(table *tableentity.Table) {
 		TableCommonAttributes: TableCommonAttributes{
 			Name:        table.Name,
 			IsAvailable: table.IsAvailable,
+			IsActive:    table.IsActive,
 			Orders:      []OrderTable{},
 		},
 	}
@@ -48,6 +50,7 @@ func (t *Table) ToDomain() *tableentity.Table {
 		TableCommonAttributes: tableentity.TableCommonAttributes{
 			Name:        t.Name,
 			IsAvailable: t.IsAvailable,
+			IsActive:    t.IsActive,
 			Orders:      []orderentity.OrderTable{},
 		},
 	}

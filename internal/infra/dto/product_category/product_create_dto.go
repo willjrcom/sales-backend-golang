@@ -24,6 +24,7 @@ type ProductCreateDTO struct {
 	Price       decimal.Decimal `json:"price"`
 	Cost        decimal.Decimal `json:"cost"`
 	IsAvailable bool            `json:"is_available"`
+	IsActive    *bool           `json:"is_active"`
 	CategoryID  *uuid.UUID      `json:"category_id"`
 	SizeID      *uuid.UUID      `json:"size_id"`
 	ImagePath   string          `json:"image_path"`
@@ -59,6 +60,11 @@ func (p *ProductCreateDTO) ToDomain() (*productentity.Product, error) {
 		flavors = []string{}
 	}
 
+	isActive := true
+	if p.IsActive != nil {
+		isActive = *p.IsActive
+	}
+
 	productCommonAttributes := productentity.ProductCommonAttributes{
 		Code:        p.Code,
 		Name:        p.Name,
@@ -67,6 +73,7 @@ func (p *ProductCreateDTO) ToDomain() (*productentity.Product, error) {
 		Price:       p.Price,
 		Cost:        p.Cost,
 		IsAvailable: p.IsAvailable,
+		IsActive:    isActive,
 		CategoryID:  *p.CategoryID,
 		SizeID:      *p.SizeID,
 		ImagePath:   &p.ImagePath,

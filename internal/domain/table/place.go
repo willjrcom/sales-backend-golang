@@ -14,6 +14,7 @@ type PlaceCommonAttributes struct {
 	Name        string
 	ImagePath   *string
 	IsAvailable bool
+	IsActive    bool
 	Tables      []PlaceToTables
 }
 

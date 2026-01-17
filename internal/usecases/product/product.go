@@ -11,7 +11,6 @@ import (
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
-
 type Service struct {
 	rp        model.ProductRepository
 	rc        model.CategoryRepository
@@ -124,15 +123,15 @@ func (s *Service) GetProductById(ctx context.Context, dto *entitydto.IDRequest) 
 	}
 }
 
-func (s *Service) GetAllProducts(ctx context.Context) ([]productcategorydto.ProductDTO, error) {
-	productModels, err := s.rp.GetAllProducts(ctx)
+func (s *Service) GetAllProducts(ctx context.Context, page, perPage int, isActive bool, categoryID string) ([]productcategorydto.ProductDTO, int, error) {
+	productModels, total, err := s.rp.GetAllProducts(ctx, page, perPage, isActive, categoryID)
 
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	dtos := modelsToDtos(productModels)
-	return dtos, nil
+	return dtos, total, nil
 }
 
 func modelsToDtos(productModels []model.Product) []productcategorydto.ProductDTO {

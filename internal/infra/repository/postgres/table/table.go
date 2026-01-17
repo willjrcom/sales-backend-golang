@@ -66,7 +66,13 @@ func (r *TableRepositoryBun) DeleteTable(ctx context.Context, id string) error {
 	defer cancel()
 	defer tx.Rollback()
 
-	if _, err := tx.NewDelete().Model(&model.Table{}).Where("id = ?", id).Exec(ctx); err != nil {
+	// Soft delete: set is_active to false
+	isActive := false
+	if _, err := tx.NewUpdate().
+		Model(&model.Table{}).
+		Set("is_active = ?", isActive).
+		Where("id = ?", id).
+		Exec(ctx); err != nil {
 		return err
 	}
 
@@ -97,7 +103,7 @@ func (r *TableRepositoryBun) GetTableById(ctx context.Context, id string) (*mode
 	return table, nil
 }
 
-func (r *TableRepositoryBun) GetAllTables(ctx context.Context) ([]model.Table, error) {
+func (r *TableRepositoryBun) GetAllTables(ctx context.Context, isActive ...bool) ([]model.Table, error) {
 	tables := make([]model.Table, 0)
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -108,7 +114,13 @@ func (r *TableRepositoryBun) GetAllTables(ctx context.Context) ([]model.Table, e
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&tables).Scan(ctx); err != nil {
+	// Default to active records (true)
+	activeFilter := true
+	if len(isActive) > 0 {
+		activeFilter = isActive[0]
+	}
+
+	if err := tx.NewSelect().Model(&tables).Where("is_active = ?", activeFilter).Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -118,7 +130,7 @@ func (r *TableRepositoryBun) GetAllTables(ctx context.Context) ([]model.Table, e
 	return tables, nil
 }
 
-func (r *TableRepositoryBun) GetUnusedTables(ctx context.Context) ([]model.Table, error) {
+func (r *TableRepositoryBun) GetUnusedTables(ctx context.Context, isActive ...bool) ([]model.Table, error) {
 	tables := make([]model.Table, 0)
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -129,8 +141,14 @@ func (r *TableRepositoryBun) GetUnusedTables(ctx context.Context) ([]model.Table
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&tables).Where("id NOT IN (?)", tx.NewSelect().Model((*model.PlaceToTables)(nil)).
-		Column("table_id")).Scan(ctx); err != nil {
+	// Default to active records (true)
+	activeFilter := true
+	if len(isActive) > 0 {
+		activeFilter = isActive[0]
+	}
+
+	if err := tx.NewSelect().Model(&tables).Where("id NOT IN (?) AND is_active = ?", tx.NewSelect().Model((*model.PlaceToTables)(nil)).
+		Column("table_id"), activeFilter).Scan(ctx); err != nil {
 		return nil, err
 	}
 

@@ -72,7 +72,7 @@ func (r *ClientRepositoryLocal) GetClientById(ctx context.Context, id string) (*
 }
 
 // GetAllClients retrieves a paginated list of clients and the total count.
-func (r *ClientRepositoryLocal) GetAllClients(ctx context.Context, page, perPage int) ([]model.Client, int, error) {
+func (r *ClientRepositoryLocal) GetAllClients(ctx context.Context, page, perPage int, isActive ...bool) ([]model.Client, int, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	total := len(r.clients)

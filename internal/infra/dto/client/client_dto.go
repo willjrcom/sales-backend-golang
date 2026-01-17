@@ -16,6 +16,7 @@ type ClientDTO struct {
 	Email     string                 `json:"email"`
 	Cpf       string                 `json:"cpf"`
 	Birthday  *time.Time             `json:"birthday"`
+	IsActive  bool                   `json:"is_active"`
 	Contact   *contactdto.ContactDTO `json:"contact"`
 	Address   *addressdto.AddressDTO `json:"address"`
 }
@@ -31,6 +32,7 @@ func (c *ClientDTO) FromDomain(client *cliententity.Client) {
 		Email:     client.Email,
 		Cpf:       client.Cpf,
 		Birthday:  client.Birthday,
+		IsActive:  client.IsActive,
 		Contact:   &contactdto.ContactDTO{},
 		Address:   &addressdto.AddressDTO{},
 	}

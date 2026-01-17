@@ -19,6 +19,7 @@ type ProcessRuleCommonAttributes struct {
 	ImagePath   *string
 	IdealTime   time.Duration
 	CategoryID  uuid.UUID
+	IsActive    bool
 }
 
 func NewProcessRule(processCommonAttributes ProcessRuleCommonAttributes) *ProcessRule {

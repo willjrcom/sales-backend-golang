@@ -15,6 +15,7 @@ type ProcessRuleUpdateDTO struct {
 	Description *string `json:"description"`
 	ImagePath   *string `json:"image_path"`
 	IdealTime   *string `json:"ideal_time"`
+	IsActive    *bool   `json:"is_active"`
 }
 
 func (s *ProcessRuleUpdateDTO) validate() error {
@@ -57,6 +58,9 @@ func (s *ProcessRuleUpdateDTO) UpdateDomain(processRule *productentity.ProcessRu
 		}
 	}
 
+	if s.IsActive != nil {
+		processRule.IsActive = *s.IsActive
+	}
 	return nil
 }
 

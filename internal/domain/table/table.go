@@ -13,6 +13,7 @@ type Table struct {
 type TableCommonAttributes struct {
 	Name        string
 	IsAvailable bool
+	IsActive    bool
 	Orders      []orderentity.OrderTable
 }
 

@@ -3,6 +3,7 @@ package handlerimpl
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -33,6 +34,8 @@ func NewHandlerProductCategory(categoryService *productcategoryusecases.Service)
 		c.Get("/{id}", h.handlerGetProductCategory)
 		c.Get("/all", h.handlerGetAllCategories)
 		c.Get("/all-with-order-process", h.handlerGetAllCategoriesWithProcessRulesAndOrderProcess)
+		c.Get("/{id}/complements", h.handlerGetComplementProducts)
+		c.Get("/{id}/additionals", h.handlerGetAdditionalProducts)
 	})
 
 	return handler.NewHandler(route, c)
@@ -131,7 +134,18 @@ func (h *handlerProductCategoryImpl) handlerGetAllCategories(w http.ResponseWrit
 		return
 	}
 
-	categories, err := h.s.GetAllCategories(ctx, dtoIDs)
+	// Parse is_active query parameter (default: true)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		var err error
+		isActive, err = strconv.ParseBool(isActiveParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid is_active parameter"))
+			return
+		}
+	}
+
+	categories, err := h.s.GetAllCategories(ctx, dtoIDs, isActive)
 
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
@@ -151,4 +165,42 @@ func (h *handlerProductCategoryImpl) handlerGetAllCategoriesWithProcessRulesAndO
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, processRules)
+}
+
+func (h *handlerProductCategoryImpl) handlerGetComplementProducts(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	products, err := h.s.GetComplementProducts(ctx, id)
+
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, products)
+}
+
+func (h *handlerProductCategoryImpl) handlerGetAdditionalProducts(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	products, err := h.s.GetAdditionalProducts(ctx, id)
+
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, products)
 }

@@ -124,8 +124,8 @@ func (s *Service) GetClientByContact(ctx context.Context, dto *contactdto.Contac
 }
 
 // GetAllClients retrieves a paginated list of clients and the total count.
-func (s *Service) GetAllClients(ctx context.Context, page, perPage int) ([]clientdto.ClientDTO, int, error) {
-	clientModels, total, err := s.rclient.GetAllClients(ctx, page, perPage)
+func (s *Service) GetAllClients(ctx context.Context, page, perPage int, isActive bool) ([]clientdto.ClientDTO, int, error) {
+	clientModels, total, err := s.rclient.GetAllClients(ctx, page, perPage, isActive)
 	if err != nil {
 		return nil, 0, err
 	}

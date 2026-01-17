@@ -67,7 +67,13 @@ func (r *PlaceRepositoryBun) DeletePlace(ctx context.Context, id string) error {
 	defer cancel()
 	defer tx.Rollback()
 
-	if _, err := tx.NewDelete().Model(&model.Place{}).Where("id = ?", id).Exec(ctx); err != nil {
+	// Soft delete: set is_active to false
+	isActive := false
+	if _, err := tx.NewUpdate().
+		Model(&model.Place{}).
+		Set("is_active = ?", isActive).
+		Where("id = ?", id).
+		Exec(ctx); err != nil {
 		return err
 	}
 
@@ -98,7 +104,7 @@ func (r *PlaceRepositoryBun) GetPlaceById(ctx context.Context, id string) (*mode
 	return place, nil
 }
 
-func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context) ([]model.Place, error) {
+func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context, isActive ...bool) ([]model.Place, error) {
 	places := make([]model.Place, 0)
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -109,7 +115,13 @@ func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context) ([]model.Place, e
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&places).Relation("Tables.Table").Scan(ctx); err != nil {
+	// Default to active records (true)
+	activeFilter := true
+	if len(isActive) > 0 {
+		activeFilter = isActive[0]
+	}
+
+	if err := tx.NewSelect().Model(&places).Where("is_active = ?", activeFilter).Relation("Tables.Table").Scan(ctx); err != nil {
 		return nil, err
 	}
 

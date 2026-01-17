@@ -16,6 +16,7 @@ type PlaceCommonAttributes struct {
 	Name        string          `bun:"name,notnull"`
 	ImagePath   *string         `bun:"image_path"`
 	IsAvailable bool            `bun:"is_available"`
+	IsActive    bool            `bun:"column:is_active,type:boolean"`
 	Tables      []PlaceToTables `bun:"rel:has-many,join:id=place_id"`
 }
 
@@ -29,6 +30,7 @@ func (p *Place) FromDomain(place *tableentity.Place) {
 			Name:        place.Name,
 			ImagePath:   place.ImagePath,
 			IsAvailable: place.IsAvailable,
+			IsActive:    place.IsActive,
 			Tables:      []PlaceToTables{},
 		},
 	}
@@ -50,6 +52,7 @@ func (p *Place) ToDomain() *tableentity.Place {
 			Name:        p.Name,
 			ImagePath:   p.ImagePath,
 			IsAvailable: p.IsAvailable,
+			IsActive:    p.IsActive,
 			Tables:      []tableentity.PlaceToTables{},
 		},
 	}

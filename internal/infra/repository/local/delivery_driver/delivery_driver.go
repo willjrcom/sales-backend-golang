@@ -55,7 +55,7 @@ func (r *DeliveryDriverRepositoryLocal) GetDeliveryDriverByEmployeeId(ctx contex
 	return nil, nil
 }
 
-func (r *DeliveryDriverRepositoryLocal) GetAllDeliveryDrivers(ctx context.Context) ([]model.DeliveryDriver, error) {
+func (r *DeliveryDriverRepositoryLocal) GetAllDeliveryDrivers(ctx context.Context, isActive ...bool) ([]model.DeliveryDriver, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	out := make([]model.DeliveryDriver, 0, len(r.drivers))

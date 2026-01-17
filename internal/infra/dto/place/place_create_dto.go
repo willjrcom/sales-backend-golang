@@ -14,6 +14,7 @@ type CreatePlaceInput struct {
 	Name        string  `json:"name"`
 	ImagePath   *string `json:"image_path"`
 	IsAvailable bool    `json:"is_available"`
+	IsActive    *bool   `json:"is_active"`
 }
 
 func (o *CreatePlaceInput) validate() error {
@@ -29,10 +30,15 @@ func (o *CreatePlaceInput) ToDomain() (*tableentity.Place, error) {
 		return nil, err
 	}
 
+	isActive := true
+	if o.IsActive != nil {
+		isActive = *o.IsActive
+	}
 	placeCommonAttributes := tableentity.PlaceCommonAttributes{
 		Name:        o.Name,
 		ImagePath:   o.ImagePath,
 		IsAvailable: o.IsAvailable,
+		IsActive:    isActive,
 	}
 
 	return tableentity.NewPlace(placeCommonAttributes), nil

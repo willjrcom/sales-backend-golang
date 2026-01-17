@@ -152,8 +152,19 @@ func (h *handlerClientImpl) handlerGetAllClients(w http.ResponseWriter, r *http.
 	// parse pagination query params
 	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
 
+	// parse is_active query parameter (default: true)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		var err error
+		isActive, err = strconv.ParseBool(isActiveParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid is_active parameter"))
+			return
+		}
+	}
+
 	// fetch paginated clients from service
-	clients, total, err := h.s.GetAllClients(ctx, page, perPage)
+	clients, total, err := h.s.GetAllClients(ctx, page, perPage, isActive)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

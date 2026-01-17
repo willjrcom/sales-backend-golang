@@ -20,9 +20,10 @@ type Employee struct {
 
 func NewEmployee(userID uuid.UUID) *Employee {
 	return &Employee{
-		Entity:   entity.NewEntity(),
-		UserID:   userID,
-		Payments: make([]PaymentEmployee, 0),
+		Entity:      entity.NewEntity(),
+		UserID:      userID,
+		Payments:    make([]PaymentEmployee, 0),
+		Permissions: make(Permissions),
 	}
 }
 

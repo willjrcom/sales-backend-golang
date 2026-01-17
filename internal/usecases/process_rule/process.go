@@ -100,12 +100,12 @@ func (s *Service) GetProcessRulesByCategoryId(ctx context.Context, dto *entitydt
 	}
 }
 
-func (s *Service) GetAllProcessRules(ctx context.Context) ([]processruledto.ProcessRuleDTO, error) {
-	if processRuleModels, err := s.r.GetAllProcessRules(ctx); err != nil {
-		return nil, err
-	} else {
-		return s.processRulesToDto(processRuleModels), nil
+func (s *Service) GetAllProcessRules(ctx context.Context, page, perPage int, isActive bool) ([]processruledto.ProcessRuleDTO, int, error) {
+	processRuleModels, total, err := s.r.GetAllProcessRules(ctx, page, perPage, isActive)
+	if err != nil {
+		return nil, 0, err
 	}
+	return s.processRulesToDto(processRuleModels), total, nil
 }
 func (s *Service) GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]processruledto.ProcessRuleDTO, error) {
 	if processRuleModels, err := s.r.GetAllProcessRulesWithOrderProcess(ctx); err != nil {

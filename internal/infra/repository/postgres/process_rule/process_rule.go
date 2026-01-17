@@ -69,7 +69,8 @@ func (r *ProcessRuleRepositoryBun) DeleteProcessRule(ctx context.Context, id str
 	defer cancel()
 	defer tx.Rollback()
 
-	if _, err := tx.NewDelete().Model(&model.ProcessRule{}).Where("id = ?", id).Exec(ctx); err != nil {
+	isActive := false
+	if _, err := tx.NewUpdate().Model(&model.ProcessRule{}).Set("is_active = ?", isActive).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -252,25 +253,48 @@ func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Conte
 	return processRules, nil
 }
 
-func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context) ([]model.ProcessRule, error) {
+func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context, page, perPage int, isActive bool) ([]model.ProcessRule, int, error) {
 	processRules := []model.ProcessRule{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&processRules).Scan(ctx); err != nil {
-		return nil, err
+	// Calculate offset
+	offset := page * perPage
+
+	// Get paginated process rules with filter, only from active categories
+	if err := tx.NewSelect().
+		Model(&processRules).
+		Join("INNER JOIN product_categories AS pc ON pc.id = pr.category_id").
+		Where("pr.is_active = ?", isActive).
+		Where("pc.is_active = true").
+		Order("pr.name ASC").
+		Limit(perPage).
+		Offset(offset).
+		Scan(ctx); err != nil {
+		return nil, 0, err
+	}
+
+	// Get total count with same filters
+	total, err := tx.NewSelect().
+		Model(&model.ProcessRule{}).
+		Join("INNER JOIN product_categories AS pc ON pc.id = pr.category_id").
+		Where("pr.is_active = ?", isActive).
+		Where("pc.is_active = true").
+		Count(ctx)
+	if err != nil {
+		return nil, 0, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return processRules, nil
+	return processRules, total, nil
 }
 
 func (r *ProcessRuleRepositoryBun) GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]model.ProcessRule, error) {

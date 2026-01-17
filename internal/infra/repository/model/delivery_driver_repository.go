@@ -8,5 +8,5 @@ type DeliveryDriverRepository interface {
 	DeleteDeliveryDriver(ctx context.Context, id string) error
 	GetDeliveryDriverById(ctx context.Context, id string) (*DeliveryDriver, error)
 	GetDeliveryDriverByEmployeeId(ctx context.Context, id string) (*DeliveryDriver, error)
-	GetAllDeliveryDrivers(ctx context.Context) ([]DeliveryDriver, error)
+	GetAllDeliveryDrivers(ctx context.Context, isActive ...bool) ([]DeliveryDriver, error)
 }

@@ -143,7 +143,7 @@ func TestCreateProductError(t *testing.T) {
 }
 
 func TestUpdateProduct(t *testing.T) {
-	products, err := productService.GetAllProducts(ctx)
+	products, _, err := productService.GetAllProducts(ctx, 0, 100, true, "")
 
 	assert.Nil(t, err)
 	assert.NotNil(t, products)
@@ -184,14 +184,14 @@ func TestUpdateProduct(t *testing.T) {
 }
 
 func TestGetAll(t *testing.T) {
-	products, err := productService.GetAllProducts(ctx)
+	products, _, err := productService.GetAllProducts(ctx, 0, 100, true, "")
 
 	assert.Nil(t, err)
 	assert.Equal(t, 1, len(products))
 }
 
 func TestGetProductById(t *testing.T) {
-	products, _ := productService.GetAllProducts(ctx)
+	products, _, _ := productService.GetAllProducts(ctx, 0, 100, true, "")
 	assert.Equal(t, len(products), 1)
 	idProduct := products[0].ID
 
