@@ -87,7 +87,7 @@ func (r *EmployeeRepositoryLocal) GetEmployeeDeletedByUserID(_ context.Context, 
 }
 
 // GetAllEmployees retrieves a paginated list of employees and the total count.
-func (r *EmployeeRepositoryLocal) GetAllEmployees(_ context.Context, page, perPage int) ([]model.Employee, int, error) {
+func (r *EmployeeRepositoryLocal) GetAllEmployees(_ context.Context, page, perPage int, isActive ...bool) ([]model.Employee, int, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	total := len(r.employees)

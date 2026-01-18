@@ -118,8 +118,8 @@ func (s *Service) GetEmployeeByUserID(ctx context.Context, dto *entitydto.IDRequ
 }
 
 // GetAllEmployees retrieves a paginated list of employees and the total count.
-func (s *Service) GetAllEmployees(ctx context.Context, page, perPage int) ([]employeedto.EmployeeDTO, int, error) {
-	employeeModels, total, err := s.re.GetAllEmployees(ctx, page, perPage)
+func (s *Service) GetAllEmployees(ctx context.Context, page, perPage int, isActive bool) ([]employeedto.EmployeeDTO, int, error) {
+	employeeModels, total, err := s.re.GetAllEmployees(ctx, page, perPage, isActive)
 	if err != nil {
 		return nil, 0, err
 	}

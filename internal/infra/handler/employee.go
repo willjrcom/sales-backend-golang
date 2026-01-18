@@ -132,8 +132,19 @@ func (h *handlerEmployeeImpl) handlerGetAllEmployees(w http.ResponseWriter, r *h
 
 	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
 
+	// parse is_active query parameter (default: true)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		var err error
+		isActive, err = strconv.ParseBool(isActiveParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid is_active parameter"))
+			return
+		}
+	}
+
 	// fetch paginated employees
-	employees, total, err := h.s.GetAllEmployees(ctx, page, perPage)
+	employees, total, err := h.s.GetAllEmployees(ctx, page, perPage, isActive)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

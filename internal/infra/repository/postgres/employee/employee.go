@@ -143,7 +143,7 @@ func (r *EmployeeRepositoryBun) GetEmployeeDeletedByUserID(ctx context.Context, 
 }
 
 // GetAllEmployees retrieves a paginated list of employees and the total count.
-func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context, page, perPage int) ([]model.Employee, int, error) {
+func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context, page, perPage int, isActive ...bool) ([]model.Employee, int, error) {
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -152,8 +152,14 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context, page, perPa
 
 	defer cancel()
 	defer tx.Rollback()
+
+	activeFilter := true
+	if len(isActive) > 0 {
+		activeFilter = isActive[0]
+	}
+
 	// count total records
-	totalCount, err := tx.NewSelect().Model((*model.Employee)(nil)).Count(ctx)
+	totalCount, err := tx.NewSelect().Model((*model.Employee)(nil)).Where("employee.is_active = ?", activeFilter).Count(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -164,6 +170,7 @@ func (r *EmployeeRepositoryBun) GetAllEmployees(ctx context.Context, page, perPa
 		Relation("User").
 		Relation("User.Address").
 		Relation("User.Contact").
+		Where("employee.is_active = ?", activeFilter).
 		Limit(perPage).
 		Offset(page * perPage).
 		Scan(ctx)
