@@ -129,7 +129,6 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	}
 
 	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
-
 	if !ok {
 		return nil, errors.New("context user not found")
 	}

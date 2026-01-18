@@ -2,10 +2,12 @@ package orderprocessrepositorybun
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
@@ -148,6 +150,11 @@ func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]model.Ord
 func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, id string) ([]model.OrderProcess, error) {
 	processes := []model.OrderProcess{}
 
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	if !ok {
+		return nil, errors.New("context user not found")
+	}
+
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -157,13 +164,17 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 	defer tx.Rollback()
 
 	validStatus := []orderprocessentity.StatusProcess{
-		orderprocessentity.ProcessStatusFinished,
-		orderprocessentity.ProcessStatusCanceled,
+		orderprocessentity.ProcessStatusPending,
+		orderprocessentity.ProcessStatusStarted,
+		orderprocessentity.ProcessStatusPaused,
+		orderprocessentity.ProcessStatusContinued,
 	}
 
 	if err := tx.NewSelect().Model(&processes).
-		Where("\"process\".process_rule_id = ? and \"process\".status NOT IN (?)",
-			id, bun.In(validStatus)).
+		Join("INNER JOIN employees as emp ON process.employee_id = emp.id").
+		Where("process.process_rule_id = ?", id).
+		Where("process.status IN (?)", bun.In(validStatus)).
+		Where("emp.user_id = ? or process.employee_id is null", userID).
 		Relation("GroupItem").
 		Relation("GroupItem.Items", func(sq *bun.SelectQuery) *bun.SelectQuery {
 			return sq.Where("is_additional = ?", false)
@@ -180,6 +191,7 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
+
 	return processes, nil
 }
 

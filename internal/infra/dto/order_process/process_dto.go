@@ -13,6 +13,7 @@ import (
 
 type OrderProcessDTO struct {
 	ID                uuid.UUID                           `json:"id,omitempty"`
+	CreatedAt         time.Time                           `json:"created_at,omitempty"`
 	OrderNumber       int                                 `json:"order_number"`
 	OrderType         orderprocessentity.OrderProcessType `json:"order_type"`
 	EmployeeID        *uuid.UUID                          `json:"employee_id,omitempty"`
@@ -42,6 +43,7 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 
 	*s = OrderProcessDTO{
 		ID:                orderProcess.ID,
+		CreatedAt:         orderProcess.CreatedAt,
 		OrderNumber:       orderProcess.OrderNumber,
 		OrderType:         orderProcess.OrderType,
 		EmployeeID:        orderProcess.EmployeeID,
