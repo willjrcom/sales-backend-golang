@@ -29,6 +29,7 @@ func NewHandlerProduct(productService *productusecases.Service) *handler.Handler
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerCreateProduct)
 		c.Get("/all", h.handlerGetAllProducts)
+		c.Get("/all/default", h.handlerGetDefaultProducts)
 		c.Get("/all-map", h.handlerGetAllProductsMap)
 		c.Get("/code/{code}", h.handlerGetProductByCode)
 		c.Patch("/update/{id}", h.handlerUpdateProduct)
@@ -173,6 +174,33 @@ func (h *HandlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *htt
 
 	w.Header().Set("X-Total-Count", strconv.Itoa(total))
 	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
+}
+
+func (h *HandlerProductImpl) handlerGetDefaultProducts(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// Parse pagination
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 100)
+
+	// Parse is_active query parameter (default: true)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		var err error
+		isActive, err = strconv.ParseBool(isActiveParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid is_active parameter"))
+			return
+		}
+	}
+
+	products, total, err := h.s.GetDefaultProducts(ctx, page, perPage, isActive)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	w.Header().Set("X-Total-Count", strconv.Itoa(total))
+	jsonpkg.ResponseJson(w, r, http.StatusOK, products)
 }
 
 func (h *HandlerProductImpl) handlerGetAllProductsMap(w http.ResponseWriter, r *http.Request) {

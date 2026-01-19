@@ -544,3 +544,32 @@ func (r *ProductCategoryRepositoryBun) GetAdditionalCategories(ctx context.Conte
 	}
 	return categories, nil
 }
+
+func (r *ProductCategoryRepositoryBun) GetDefaultCategories(ctx context.Context) ([]model.ProductCategory, error) {
+	categories := []model.ProductCategory{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	err = tx.NewSelect().
+		Model(&categories).
+		Column("id", "name").
+		Where("is_additional = ?", false).
+		Where("is_complement = ?", false).
+		Where("is_active = ?", true).
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return categories, nil
+}

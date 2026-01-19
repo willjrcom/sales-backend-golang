@@ -19,4 +19,5 @@ type CategoryRepository interface {
 	GetAdditionalProducts(ctx context.Context, categoryID string) ([]Product, error)
 	GetComplementCategories(ctx context.Context) ([]ProductCategory, error)
 	GetAdditionalCategories(ctx context.Context) ([]ProductCategory, error)
+	GetDefaultCategories(ctx context.Context) ([]ProductCategory, error)
 }

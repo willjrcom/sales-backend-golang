@@ -134,6 +134,17 @@ func (s *Service) GetAllProducts(ctx context.Context, page, perPage int, isActiv
 	return dtos, total, nil
 }
 
+func (s *Service) GetDefaultProducts(ctx context.Context, page, perPage int, isActive bool) ([]productcategorydto.ProductDTO, int, error) {
+	productModels, total, err := s.rp.GetDefaultProducts(ctx, page, perPage, isActive)
+
+	if err != nil {
+		return nil, 0, err
+	}
+
+	dtos := modelsToDtos(productModels)
+	return dtos, total, nil
+}
+
 func modelsToDtos(productModels []model.Product) []productcategorydto.ProductDTO {
 	dtos := make([]productcategorydto.ProductDTO, 0)
 

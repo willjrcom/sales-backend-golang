@@ -40,6 +40,7 @@ func NewHandlerProductCategory(categoryService *productcategoryusecases.Service)
 		c.Get("/{id}/additionals", h.handlerGetAdditionalProducts)
 		c.Get("/all/additionals", h.handlerGetAdditionalCategories)
 		c.Get("/all/complements", h.handlerGetComplementCategories)
+		c.Get("/all/default", h.handlerGetDefaultCategories)
 	})
 
 	return handler.NewHandler(route, c)
@@ -249,6 +250,19 @@ func (h *handlerProductCategoryImpl) handlerGetAdditionalCategories(w http.Respo
 	ctx := r.Context()
 
 	categories, err := h.s.GetAdditionalCategories(ctx)
+
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
+}
+
+func (h *handlerProductCategoryImpl) handlerGetDefaultCategories(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	categories, err := h.s.GetDefaultCategories(ctx)
 
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)

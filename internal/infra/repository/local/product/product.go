@@ -96,6 +96,31 @@ func (r *ProductRepositoryLocal) GetAllProducts(_ context.Context, page, perPage
 	return products[start:end], total, nil
 }
 
+func (r *ProductRepositoryLocal) GetDefaultProducts(_ context.Context, page, perPage int, isActive bool) ([]model.Product, int, error) {
+	products := make([]model.Product, 0)
+
+	// Filter by isActive
+	for _, p := range r.products {
+		if p.IsActive == isActive {
+			products = append(products, *p)
+		}
+	}
+
+	total := len(products)
+
+	// Apply pagination
+	start := page * perPage
+	end := start + perPage
+	if start > total {
+		return []model.Product{}, total, nil
+	}
+	if end > total {
+		end = total
+	}
+
+	return products[start:end], total, nil
+}
+
 func (r *ProductRepositoryLocal) GetAllProductsMap(_ context.Context, isActive bool) ([]model.Product, error) {
 	products := make([]model.Product, 0)
 

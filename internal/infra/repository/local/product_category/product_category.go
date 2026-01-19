@@ -126,3 +126,8 @@ func (r *CategoryRepositoryLocal) GetAdditionalCategories(_ context.Context) ([]
 	// Dummy implementation
 	return []model.ProductCategory{}, nil
 }
+
+func (r *CategoryRepositoryLocal) GetDefaultCategories(_ context.Context) ([]model.ProductCategory, error) {
+	// Dummy implementation
+	return []model.ProductCategory{}, nil
+}

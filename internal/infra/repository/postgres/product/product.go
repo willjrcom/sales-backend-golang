@@ -166,6 +166,54 @@ func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context, page, perPage
 	return products, total, nil
 }
 
+func (r *ProductRepositoryBun) GetDefaultProducts(ctx context.Context, page, perPage int, isActive bool) ([]model.Product, int, error) {
+	products := []model.Product{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	// Calculate offset
+	offset := page * perPage
+
+	// Get paginated products with filter
+	if err := tx.NewSelect().
+		Model(&products).
+		Relation("Category").
+		Relation("Size").
+		Join("JOIN product_categories AS cat ON cat.id = product.category_id").
+		Where("product.is_active = ?", isActive).
+		Where("cat.is_additional = ?", false).
+		Where("cat.is_complement = ?", false).
+		Order("product.name ASC").
+		Limit(perPage).
+		Offset(offset).
+		Scan(ctx); err != nil {
+		return nil, 0, err
+	}
+
+	// Get total count
+	total, err := tx.NewSelect().
+		Model(&model.Product{}).
+		Join("JOIN product_categories AS cat ON cat.id = product.category_id").
+		Where("product.is_active = ?", isActive).
+		Where("cat.is_additional = ?", false).
+		Where("cat.is_complement = ?", false).
+		Count(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, 0, err
+	}
+	return products, total, nil
+}
+
 func (r *ProductRepositoryBun) GetAllProductsMap(ctx context.Context, isActive bool) ([]model.Product, error) {
 	products := []model.Product{}
 

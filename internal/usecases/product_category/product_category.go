@@ -245,3 +245,18 @@ func (s *Service) GetAdditionalCategories(ctx context.Context) ([]productcategor
 		return dtos, nil
 	}
 }
+
+func (s *Service) GetDefaultCategories(ctx context.Context) ([]productcategorydto.CategoryMapDTO, error) {
+	if categoryModels, err := s.r.GetDefaultCategories(ctx); err != nil {
+		return nil, err
+	} else {
+		dtos := make([]productcategorydto.CategoryMapDTO, 0)
+		for _, model := range categoryModels {
+			dtos = append(dtos, productcategorydto.CategoryMapDTO{
+				ID:   model.ID,
+				Name: model.Name,
+			})
+		}
+		return dtos, nil
+	}
+}
