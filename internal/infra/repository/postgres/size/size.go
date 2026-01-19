@@ -123,3 +123,24 @@ func (r *SizeRepositoryBun) GetSizeByIdWithProducts(ctx context.Context, id stri
 	}
 	return size, nil
 }
+
+func (r *SizeRepositoryBun) GetSizesByCategoryId(ctx context.Context, categoryId string) ([]*model.Size, error) {
+	sizes := []*model.Size{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	if err := tx.NewSelect().Model(&sizes).Where("category_id = ?", categoryId).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return sizes, nil
+}

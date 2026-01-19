@@ -28,9 +28,29 @@ func NewHandlerQuantity(quantityService *quantityusecases.Service) *handler.Hand
 		c.Post("/new", h.handlerCreateQuantity)
 		c.Patch("/update/{id}", h.handlerUpdateQuantity)
 		c.Delete("/{id}", h.handlerDeleteQuantity)
+		c.Get("/by-category-id/{categoryId}", h.handlerGetQuantitiesByCategoryId)
 	})
 
 	return handler.NewHandler("/product-category/quantity", c)
+}
+
+func (h *handlerQuantityImpl) handlerGetQuantitiesByCategoryId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	categoryId := chi.URLParam(r, "categoryId")
+
+	if categoryId == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("categoryId is required"))
+		return
+	}
+
+	quantities, err := h.s.GetQuantitiesByCategoryId(ctx, categoryId)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, quantities)
 }
 
 func (h *handlerQuantityImpl) handlerCreateQuantity(w http.ResponseWriter, r *http.Request) {

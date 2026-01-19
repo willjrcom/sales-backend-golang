@@ -146,3 +146,25 @@ func modelsToDtos(productModels []model.Product) []productcategorydto.ProductDTO
 
 	return dtos
 }
+
+func (s *Service) GetAllProductsMap(ctx context.Context, isActive bool) ([]productcategorydto.ProductMapDTO, error) {
+	products, err := s.rp.GetAllProductsMap(ctx, isActive)
+	if err != nil {
+		return nil, err
+	}
+
+	dtos := make([]productcategorydto.ProductMapDTO, 0)
+	for _, p := range products {
+		name := p.Name
+		if p.Size != nil && p.Size.Name != "" {
+			name = name + " - " + p.Size.Name
+		}
+
+		dtos = append(dtos, productcategorydto.ProductMapDTO{
+			ID:   p.ID,
+			Name: name,
+		})
+	}
+
+	return dtos, nil
+}

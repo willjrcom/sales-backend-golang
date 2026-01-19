@@ -95,3 +95,15 @@ func (r *ProductRepositoryLocal) GetAllProducts(_ context.Context, page, perPage
 
 	return products[start:end], total, nil
 }
+
+func (r *ProductRepositoryLocal) GetAllProductsMap(_ context.Context, isActive bool) ([]model.Product, error) {
+	products := make([]model.Product, 0)
+
+	for _, p := range r.products {
+		if p.IsActive == isActive {
+			products = append(products, *p)
+		}
+	}
+
+	return products, nil
+}

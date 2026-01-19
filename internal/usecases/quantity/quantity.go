@@ -123,3 +123,17 @@ func (s *Service) AddQuantitiesByValues(ctx context.Context, dto *quantitydto.Qu
 
 	return nil
 }
+
+func (s *Service) GetQuantitiesByCategoryId(ctx context.Context, categoryId string) ([]*quantitydto.QuantityDTO, error) {
+	if quantities, err := s.rq.GetQuantitiesByCategoryId(ctx, categoryId); err != nil {
+		return nil, err
+	} else {
+		quantityDtos := []*quantitydto.QuantityDTO{}
+		for _, quantity := range quantities {
+			qDto := &quantitydto.QuantityDTO{}
+			qDto.FromDomain(quantity.ToDomain())
+			quantityDtos = append(quantityDtos, qDto)
+		}
+		return quantityDtos, nil
+	}
+}

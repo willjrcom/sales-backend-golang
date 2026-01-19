@@ -28,9 +28,29 @@ func NewHandlerSize(sizeService *sizeusecases.Service) *handler.Handler {
 		c.Post("/new", h.handlerCreateSize)
 		c.Patch("/update/{id}", h.handlerUpdateSize)
 		c.Delete("/{id}", h.handlerDeleteSize)
+		c.Get("/by-category-id/{category_id}", h.handlerGetSizesByCategoryId)
 	})
 
 	return handler.NewHandler("/product-category/size", c)
+}
+
+func (h *handlerSizeImpl) handlerGetSizesByCategoryId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	categoryId := chi.URLParam(r, "category_id")
+
+	if categoryId == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("category_id is required"))
+		return
+	}
+
+	sizes, err := h.s.GetSizesByCategoryId(ctx, categoryId)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, sizes)
 }
 
 func (h *handlerSizeImpl) handlerCreateSize(w http.ResponseWriter, r *http.Request) {

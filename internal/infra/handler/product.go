@@ -29,6 +29,7 @@ func NewHandlerProduct(productService *productusecases.Service) *handler.Handler
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerCreateProduct)
 		c.Get("/all", h.handlerGetAllProducts)
+		c.Get("/all-map", h.handlerGetAllProductsMap)
 		c.Get("/code/{code}", h.handlerGetProductByCode)
 		c.Patch("/update/{id}", h.handlerUpdateProduct)
 		c.Delete("/{id}", h.handlerDeleteProduct)
@@ -172,4 +173,24 @@ func (h *HandlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *htt
 
 	w.Header().Set("X-Total-Count", strconv.Itoa(total))
 	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
+}
+
+func (h *HandlerProductImpl) handlerGetAllProductsMap(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// Parse is_active query parameter (default: true)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		if val, err := strconv.ParseBool(isActiveParam); err == nil {
+			isActive = val
+		}
+	}
+
+	products, err := h.s.GetAllProductsMap(ctx, isActive)
+
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, products)
 }

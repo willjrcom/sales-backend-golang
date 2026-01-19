@@ -138,3 +138,17 @@ func (s *Service) AddSizesByValues(ctx context.Context, dto *sizedto.SizeCreateB
 
 	return nil
 }
+
+func (s *Service) GetSizesByCategoryId(ctx context.Context, categoryId string) ([]*sizedto.SizeDTO, error) {
+	if sizes, err := s.rs.GetSizesByCategoryId(ctx, categoryId); err != nil {
+		return nil, err
+	} else {
+		sizeDtos := []*sizedto.SizeDTO{}
+		for _, size := range sizes {
+			sDto := &sizedto.SizeDTO{}
+			sDto.FromDomain(size.ToDomain())
+			sizeDtos = append(sizeDtos, sDto)
+		}
+		return sizeDtos, nil
+	}
+}

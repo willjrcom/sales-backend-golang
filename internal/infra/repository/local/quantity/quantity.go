@@ -54,3 +54,13 @@ func (r *QuantityRepositoryLocal) GetQuantityById(_ context.Context, id string) 
 
 	return nil, errQuantityNotFound
 }
+
+func (r *QuantityRepositoryLocal) GetQuantitiesByCategoryId(_ context.Context, categoryId string) ([]*model.Quantity, error) {
+	quantities := []*model.Quantity{}
+	for _, quantity := range r.quantitys {
+		if quantity.CategoryID == uuid.MustParse(categoryId) {
+			quantities = append(quantities, quantity)
+		}
+	}
+	return quantities, nil
+}

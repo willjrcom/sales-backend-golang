@@ -165,3 +165,31 @@ func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context, page, perPage
 	}
 	return products, total, nil
 }
+
+func (r *ProductRepositoryBun) GetAllProductsMap(ctx context.Context, isActive bool) ([]model.Product, error) {
+	products := []model.Product{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	err = tx.NewSelect().
+		Model(&products).
+		Relation("Size").
+		Column("product.id", "product.name", "product.size_id").
+		Where("product.is_active = ?", isActive).
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return products, nil
+}

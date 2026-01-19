@@ -7,4 +7,5 @@ type QuantityRepository interface {
 	UpdateQuantity(ctx context.Context, Quantity *Quantity) error
 	DeleteQuantity(ctx context.Context, id string) error
 	GetQuantityById(ctx context.Context, id string) (*Quantity, error)
+	GetQuantitiesByCategoryId(ctx context.Context, categoryId string) ([]*Quantity, error)
 }

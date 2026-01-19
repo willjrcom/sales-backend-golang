@@ -8,4 +8,5 @@ type SizeRepository interface {
 	DeleteSize(ctx context.Context, id string) error
 	GetSizeById(ctx context.Context, id string) (*Size, error)
 	GetSizeByIdWithProducts(ctx context.Context, id string) (*Size, error)
+	GetSizesByCategoryId(ctx context.Context, categoryId string) ([]*Size, error)
 }

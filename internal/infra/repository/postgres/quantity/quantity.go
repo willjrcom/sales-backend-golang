@@ -102,3 +102,24 @@ func (r *QuantityRepositoryBun) GetQuantityById(ctx context.Context, id string) 
 	}
 	return quantity, nil
 }
+
+func (r *QuantityRepositoryBun) GetQuantitiesByCategoryId(ctx context.Context, categoryId string) ([]*model.Quantity, error) {
+	quantities := []*model.Quantity{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	if err := tx.NewSelect().Model(&quantities).Where("category_id = ?", categoryId).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return quantities, nil
+}

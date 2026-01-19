@@ -63,3 +63,13 @@ func (r *SizeRepositoryLocal) GetSizeByIdWithProducts(_ context.Context, id stri
 
 	return nil, errSizeNotFound
 }
+
+func (r *SizeRepositoryLocal) GetSizesByCategoryId(_ context.Context, categoryId string) ([]*model.Size, error) {
+	sizes := []*model.Size{}
+	for _, size := range r.sizes {
+		if size.CategoryID == uuid.MustParse(categoryId) {
+			sizes = append(sizes, size)
+		}
+	}
+	return sizes, nil
+}
