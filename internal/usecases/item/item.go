@@ -3,6 +3,7 @@ package itemusecases
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
@@ -204,7 +205,7 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest)
 }
 
 func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDRequest, dtoAdditional *itemdto.OrderAdditionalItemCreateDTO) (id uuid.UUID, err error) {
-	productID, quantityID, flavor, err := dtoAdditional.ToDomain()
+	productID, quantityValue, flavor, err := dtoAdditional.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -246,12 +247,22 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 		return uuid.Nil, errors.New("additional category does not belong to this category")
 	}
 
-	quantityModel, err := s.rq.GetQuantityById(ctx, quantityID.String())
-
+	quantities, err := s.rq.GetQuantitiesByCategoryId(ctx, productAdditional.CategoryID.String())
 	if err != nil {
-		return uuid.Nil, errors.New("quantity not found: " + err.Error())
+		return uuid.Nil, errors.New("quantities not found by category id: " + err.Error())
 	}
-	quantity := quantityModel.ToDomain()
+
+	quantity := &model.Quantity{}
+	for _, q := range quantities {
+		if q.Quantity == quantityValue {
+			quantity = q
+			break
+		}
+	}
+
+	if quantity == nil {
+		return uuid.Nil, fmt.Errorf("quantity %f not found", quantityValue)
+	}
 
 	if productAdditional.CategoryID != quantity.CategoryID {
 		return uuid.Nil, errors.New("product category and quantity not match")

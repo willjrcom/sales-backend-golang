@@ -9,7 +9,7 @@ import (
 
 type OrderAdditionalItemCreateDTO struct {
 	ProductID uuid.UUID `json:"product_id"`
-	Quantity  uuid.UUID `json:"quantity_id"`
+	Quantity  float64   `json:"quantity"`
 	Flavor    *string   `json:"flavor,omitempty"`
 }
 
@@ -18,14 +18,14 @@ func (a *OrderAdditionalItemCreateDTO) validate() error {
 		return errors.New("product id is required")
 	}
 
-	if a.Quantity == uuid.Nil {
-		return errors.New("quantity id is required")
+	if a.Quantity == 0 {
+		return errors.New("quantity is required")
 	}
 
 	return nil
 }
 
-func (a *OrderAdditionalItemCreateDTO) ToDomain() (productID uuid.UUID, quantity uuid.UUID, flavor *string, err error) {
+func (a *OrderAdditionalItemCreateDTO) ToDomain() (productID uuid.UUID, quantity float64, flavor *string, err error) {
 	if err = a.validate(); err != nil {
 		return
 	}
