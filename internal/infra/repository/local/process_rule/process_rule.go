@@ -60,6 +60,10 @@ func (r *ProcessRuleRepositoryLocal) GetProcessRulesByCategoryId(ctx context.Con
 	return out, nil
 }
 
+func (r *ProcessRuleRepositoryLocal) GetProcessRulesWithOrderProcessByCategoryId(ctx context.Context, id string) ([]model.ProcessRuleWithOrderProcess, error) {
+	return []model.ProcessRuleWithOrderProcess{}, nil
+}
+
 func (r *ProcessRuleRepositoryLocal) GetAllProcessRules(ctx context.Context, page, perPage int, isActive bool) ([]model.ProcessRule, int, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()

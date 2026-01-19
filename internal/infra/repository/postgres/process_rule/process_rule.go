@@ -253,6 +253,83 @@ func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Conte
 	return processRules, nil
 }
 
+func (r *ProcessRuleRepositoryBun) GetProcessRulesWithOrderProcessByCategoryId(ctx context.Context, id string) ([]model.ProcessRuleWithOrderProcess, error) {
+	processRules := []model.ProcessRuleWithOrderProcess{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	// 1. Fetch ProcessRules for the category
+	if err := tx.NewSelect().Model(&processRules).Where("category_id = ?", id).Order("order ASC").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if len(processRules) == 0 {
+		return processRules, nil
+	}
+
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	processRuleIDs := make([]uuid.UUID, len(processRules))
+	for i, pr := range processRules {
+		processRuleIDs[i] = pr.ID
+	}
+
+	// 2. Count orders (total and late)
+	rows, err := r.db.QueryContext(ctx, `
+		SELECT process_rule_id, 
+			COUNT(CASE WHEN status NOT IN ('Finished', 'Canceled') THEN 1 END) AS total_orders, 
+			COUNT(CASE WHEN status NOT IN ('Finished', 'Canceled') AND (EXTRACT(EPOCH FROM (NOW() - started_at::timestamptz)) * 1000000000) > pr.ideal_time THEN 1 END) AS late_orders
+		FROM `+schemaName+`.order_processes AS process
+		JOIN `+schemaName+`.process_rules AS pr ON process.process_rule_id = pr.id
+		WHERE process_rule_id IN (?) 
+		GROUP BY process_rule_id
+	`, bun.In(processRuleIDs))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	processCount := map[uuid.UUID]int{}
+	lateCount := map[uuid.UUID]int{}
+
+	for rows.Next() {
+		var processRuleID uuid.UUID
+		var totalOrders int
+		var lateOrders int
+
+		if err := rows.Scan(&processRuleID, &totalOrders, &lateOrders); err != nil {
+			return nil, err
+		}
+
+		processCount[processRuleID] = totalOrders
+		lateCount[processRuleID] = lateOrders
+	}
+
+	// 3. Populate struct
+	for i := range processRules {
+		if count, ok := processCount[processRules[i].ID]; ok {
+			processRules[i].TotalOrderQueue = count
+		}
+		if late, ok := lateCount[processRules[i].ID]; ok {
+			processRules[i].TotalOrderProcessLate = late
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return processRules, nil
+}
+
 func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context, page, perPage int, isActive bool) ([]model.ProcessRule, int, error) {
 	processRules := []model.ProcessRule{}
 

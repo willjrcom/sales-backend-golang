@@ -136,13 +136,31 @@ func (h *handlerProcessRuleCategoryImpl) handlerGetProcessRulesByCategoryID(w ht
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	processRules, err := h.s.GetProcessRulesByCategoryId(ctx, dtoId)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-		return
+	withProcesses := false
+	if withProcessesParam := r.URL.Query().Get("with_processes"); withProcessesParam != "" {
+		var err error
+		withProcesses, err = strconv.ParseBool(withProcessesParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid with_processes parameter"))
+			return
+		}
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, processRules)
+	if withProcesses {
+		processRules, err := h.s.GetProcessRulesWithOrderProcessByCategoryId(ctx, dtoId)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		jsonpkg.ResponseJson(w, r, http.StatusOK, processRules)
+	} else {
+		processRules, err := h.s.GetProcessRulesByCategoryId(ctx, dtoId)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		jsonpkg.ResponseJson(w, r, http.StatusOK, processRules)
+	}
 }
 
 func (h *handlerProcessRuleCategoryImpl) handlerGetAllProcessRules(w http.ResponseWriter, r *http.Request) {
