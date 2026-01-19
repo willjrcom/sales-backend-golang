@@ -215,3 +215,33 @@ func (s *Service) GetAllCategoriesMap(ctx context.Context, isActive bool) ([]pro
 		return dtos, nil
 	}
 }
+
+func (s *Service) GetComplementCategories(ctx context.Context) ([]productcategorydto.CategoryMapDTO, error) {
+	if categoryModels, err := s.r.GetComplementCategories(ctx); err != nil {
+		return nil, err
+	} else {
+		dtos := make([]productcategorydto.CategoryMapDTO, 0)
+		for _, model := range categoryModels {
+			dtos = append(dtos, productcategorydto.CategoryMapDTO{
+				ID:   model.ID,
+				Name: model.Name,
+			})
+		}
+		return dtos, nil
+	}
+}
+
+func (s *Service) GetAdditionalCategories(ctx context.Context) ([]productcategorydto.CategoryMapDTO, error) {
+	if categoryModels, err := s.r.GetAdditionalCategories(ctx); err != nil {
+		return nil, err
+	} else {
+		dtos := make([]productcategorydto.CategoryMapDTO, 0)
+		for _, model := range categoryModels {
+			dtos = append(dtos, productcategorydto.CategoryMapDTO{
+				ID:   model.ID,
+				Name: model.Name,
+			})
+		}
+		return dtos, nil
+	}
+}

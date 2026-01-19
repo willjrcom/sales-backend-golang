@@ -116,3 +116,13 @@ func (r *CategoryRepositoryLocal) GetAdditionalProducts(_ context.Context, categ
 	// Dummy implementation
 	return []model.Product{}, nil
 }
+
+func (r *CategoryRepositoryLocal) GetComplementCategories(_ context.Context) ([]model.ProductCategory, error) {
+	// Dummy implementation
+	return []model.ProductCategory{}, nil
+}
+
+func (r *CategoryRepositoryLocal) GetAdditionalCategories(_ context.Context) ([]model.ProductCategory, error) {
+	// Dummy implementation
+	return []model.ProductCategory{}, nil
+}

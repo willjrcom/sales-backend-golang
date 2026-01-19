@@ -488,3 +488,59 @@ func (r *ProductCategoryRepositoryBun) GetAllCategoriesMap(ctx context.Context, 
 	}
 	return categories, nil
 }
+
+func (r *ProductCategoryRepositoryBun) GetComplementCategories(ctx context.Context) ([]model.ProductCategory, error) {
+	categories := []model.ProductCategory{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	err = tx.NewSelect().
+		Model(&categories).
+		Column("id", "name").
+		Where("is_complement = ?", true).
+		Where("is_active = ?", true).
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return categories, nil
+}
+
+func (r *ProductCategoryRepositoryBun) GetAdditionalCategories(ctx context.Context) ([]model.ProductCategory, error) {
+	categories := []model.ProductCategory{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	err = tx.NewSelect().
+		Model(&categories).
+		Column("id", "name").
+		Where("is_additional = ?", true).
+		Where("is_active = ?", true).
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return categories, nil
+}
