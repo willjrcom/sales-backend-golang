@@ -6,7 +6,7 @@ package quantityusecases
 import (
 	"github.com/google/wire"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category"
+	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product_category"
 	quantityrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/quantity"
 	categoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
 	quantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity"

@@ -10,6 +10,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	productcategoryusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -134,6 +135,9 @@ func (h *handlerProductCategoryImpl) handlerGetAllCategories(w http.ResponseWrit
 		return
 	}
 
+	// Parse pagination
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 100)
+
 	// Parse is_active query parameter (default: true)
 	isActive := true
 	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
@@ -145,7 +149,7 @@ func (h *handlerProductCategoryImpl) handlerGetAllCategories(w http.ResponseWrit
 		}
 	}
 
-	categories, err := h.s.GetAllCategories(ctx, dtoIDs, isActive)
+	categories, err := h.s.GetAllCategories(ctx, dtoIDs, page, perPage, isActive)
 
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)

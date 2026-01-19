@@ -297,7 +297,7 @@ func (r *ProductCategoryRepositoryBun) GetCategoryByName(ctx context.Context, na
 	return category, nil
 }
 
-func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs []uuid.UUID, isActive ...bool) ([]model.ProductCategory, error) {
+func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs []uuid.UUID, page int, perPage int, isActive ...bool) ([]model.ProductCategory, error) {
 	categories := []model.ProductCategory{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -307,6 +307,9 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs
 
 	defer cancel()
 	defer tx.Rollback()
+
+	// Calculate offset
+	offset := page * perPage
 
 	// Default to active records (true)
 	activeFilter := true
@@ -321,7 +324,9 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs
 		Relation("Quantities").
 		Relation("ProcessRules").
 		Relation("AdditionalCategories").
-		Relation("ComplementCategories")
+		Relation("ComplementCategories").
+		Limit(perPage).
+		Offset(offset)
 
 	if len(IDs) > 0 {
 		query.Where("category.id IN (?) AND category.is_active = ?", bun.In(IDs), activeFilter)

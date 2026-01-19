@@ -12,7 +12,7 @@ import (
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
 
-	categoryrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category"
+	categoryrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product_category"
 	quantityrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/quantity"
 	sizerepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/size"
 

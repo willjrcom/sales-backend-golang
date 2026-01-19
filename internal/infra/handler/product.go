@@ -161,7 +161,7 @@ func (h *HandlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *htt
 		}
 	}
 
-	// Parse is_additional query parameter (default: true)
+	// Parse category_id query parameter (default: true)
 	categoryID := r.URL.Query().Get("category_id")
 
 	categories, total, err := h.s.GetAllProducts(ctx, page, perPage, isActive, categoryID)

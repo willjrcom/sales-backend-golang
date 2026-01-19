@@ -6,7 +6,7 @@ package productcategoryusecases
 import (
 	"github.com/google/wire"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category"
+	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product_category"
 	productcategoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
 	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size"
