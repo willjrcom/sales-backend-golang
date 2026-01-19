@@ -34,6 +34,7 @@ func NewHandlerProductCategory(categoryService *productcategoryusecases.Service)
 		c.Delete("/{id}", h.handlerDeleteProductCategory)
 		c.Get("/{id}", h.handlerGetProductCategory)
 		c.Get("/all", h.handlerGetAllCategories)
+		c.Get("/all-map", h.handlerGetAllCategoriesMap)
 		c.Get("/all-with-order-process", h.handlerGetAllCategoriesWithProcessRulesAndOrderProcess)
 		c.Get("/{id}/complements", h.handlerGetComplementProducts)
 		c.Get("/{id}/additionals", h.handlerGetAdditionalProducts)
@@ -156,6 +157,26 @@ func (h *handlerProductCategoryImpl) handlerGetAllCategories(w http.ResponseWrit
 		return
 	}
 
+	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
+}
+
+func (h *handlerProductCategoryImpl) handlerGetAllCategoriesMap(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// Parse is_active query parameter (default: true)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		if val, err := strconv.ParseBool(isActiveParam); err == nil {
+			isActive = val
+		}
+	}
+
+	categories, err := h.s.GetAllCategoriesMap(ctx, isActive)
+
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
 	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
 }
 

@@ -8,10 +8,10 @@ package quantityusecases
 
 import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/local/quantity"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity"
+	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product_category"
+	quantityrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/quantity"
+	productcategoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
+	quantityrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/quantity"
 )
 
 // Injectors from wire.go:

@@ -8,10 +8,10 @@ package sizeusecases
 
 import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/local/size"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size"
+	categoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product_category"
+	sizerepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/size"
+	productcategoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
+	sizerepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/size"
 )
 
 // Injectors from wire.go:

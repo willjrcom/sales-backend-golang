@@ -8,10 +8,10 @@ package productcategoryusecases
 
 import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/local/category"
-	"github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
-	"github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
-	"github.com/willjrcom/sales-backend-go/internal/usecases/size"
+	productcategoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product_category"
+	productcategoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
+	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
+	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size"
 )
 
 // Injectors from wire.go:
@@ -32,7 +32,7 @@ func InitializeService() (*Service, error) {
 }
 
 func InitializeServiceForTest() (*Service, error) {
-	categoryRepository := categoryrepositorylocal.NewCategoryRepositoryLocal()
+	categoryRepository := productcategoryrepositorylocal.NewCategoryRepositoryLocal()
 	service, err := quantityusecases.InitializeServiceForTest()
 	if err != nil {
 		return nil, err

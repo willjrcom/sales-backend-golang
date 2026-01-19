@@ -461,3 +461,30 @@ func (r *ProductCategoryRepositoryBun) GetAllCategoriesWithProcessRulesAndOrderP
 	}
 	return categories, nil
 }
+
+func (r *ProductCategoryRepositoryBun) GetAllCategoriesMap(ctx context.Context, isActive bool) ([]model.ProductCategory, error) {
+	categories := []model.ProductCategory{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	err = tx.NewSelect().
+		Model(&categories).
+		Column("id", "name").
+		Where("is_active = ?", isActive).
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return categories, nil
+}

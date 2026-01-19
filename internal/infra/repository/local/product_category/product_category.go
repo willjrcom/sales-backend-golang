@@ -78,6 +78,21 @@ func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context, IDs []uuid
 	return productCategories, nil
 }
 
+func (r *CategoryRepositoryLocal) GetAllCategoriesMap(_ context.Context, isActive bool) ([]model.ProductCategory, error) {
+	productCategories := make([]model.ProductCategory, 0)
+
+	for _, p := range r.productCategories {
+		if p.IsActive == isActive {
+			cat := model.ProductCategory{}
+			cat.ID = p.ID
+			cat.Name = p.Name
+			productCategories = append(productCategories, cat)
+		}
+	}
+
+	return productCategories, nil
+}
+
 func (r *CategoryRepositoryLocal) GetAllCategoriesWithProcessRulesAndOrderProcess(_ context.Context) ([]model.ProductCategoryWithOrderProcess, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
