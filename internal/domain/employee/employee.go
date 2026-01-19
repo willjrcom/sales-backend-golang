@@ -16,6 +16,7 @@ type Employee struct {
 	User        *companyentity.User
 	Payments    []PaymentEmployee
 	Permissions Permissions
+	IsActive    bool
 }
 
 func NewEmployee(userID uuid.UUID) *Employee {
@@ -24,6 +25,7 @@ func NewEmployee(userID uuid.UUID) *Employee {
 		UserID:      userID,
 		Payments:    make([]PaymentEmployee, 0),
 		Permissions: make(Permissions),
+		IsActive:    true,
 	}
 }
 

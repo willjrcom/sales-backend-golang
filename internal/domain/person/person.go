@@ -16,9 +16,9 @@ type PersonCommonAttributes struct {
 	Email     string
 	Cpf       string
 	Birthday  *time.Time
-	IsActive  bool
 	Contact   *Contact
 	Address   *addressentity.Address
+	IsActive  bool
 }
 
 func NewPerson(personCommonAttributes *PersonCommonAttributes) *Person {

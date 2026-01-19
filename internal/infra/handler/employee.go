@@ -33,6 +33,7 @@ func NewHandlerEmployee(employeeService *employeeusecases.Service) *handler.Hand
 		c.Delete("/{id}", h.handlerDeleteEmployee)
 		c.Get("/{id}", h.handlerGetEmployee)
 		c.Get("/all", h.handlerGetAllEmployees)
+		c.Get("/all/without-delivery-drivers", h.handlerGetAllEmployeesWithoutDeliveryDrivers)
 		c.Get("/deleted", h.handlerGetAllEmployeeDeleted)
 		c.Get("/{id}/salary-history", h.handlerGetSalaryHistory)
 		c.Get("/{id}/payments", h.handlerGetPayments)
@@ -284,4 +285,15 @@ func (h *handlerEmployeeImpl) handlerCreatePayment(w http.ResponseWriter, r *htt
 		return
 	}
 	jsonpkg.ResponseJson(w, r, http.StatusCreated, payment)
+}
+
+func (h *handlerEmployeeImpl) handlerGetAllEmployeesWithoutDeliveryDrivers(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	employees, err := h.s.GetAllEmployeesWithoutDeliveryDrivers(ctx)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, employees)
 }

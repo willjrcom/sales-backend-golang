@@ -29,6 +29,7 @@ func (d *DeliveryDriver) FromDomain(driver *orderentity.DeliveryDriver) {
 		DeliveryDriverCommonAttributes: DeliveryDriverCommonAttributes{
 			EmployeeID: driver.EmployeeID,
 			IsActive:   driver.IsActive,
+			Employee:   &Employee{},
 		},
 	}
 

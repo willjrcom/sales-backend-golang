@@ -11,6 +11,7 @@ type EmployeeDTO struct {
 	ID          uuid.UUID       `json:"id"`
 	UserID      uuid.UUID       `json:"user_id"`
 	Permissions map[string]bool `json:"permissions"`
+	IsActive    bool            `json:"is_active"`
 }
 
 func (c *EmployeeDTO) FromDomain(employee *employeeentity.Employee) {
@@ -23,6 +24,7 @@ func (c *EmployeeDTO) FromDomain(employee *employeeentity.Employee) {
 		UserID:      employee.UserID,
 		UserDTO:     companydto.UserDTO{},
 		Permissions: make(map[string]bool),
+		IsActive:    employee.IsActive,
 	}
 
 	c.UserDTO.FromDomain(employee.User)

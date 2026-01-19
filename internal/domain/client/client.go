@@ -9,12 +9,20 @@ import (
 type Client struct {
 	entity.Entity
 	personentity.Person
+	ClienteCommonAttributes
+}
+
+type ClienteCommonAttributes struct {
+	IsActive bool
 }
 
 func NewClient(person *personentity.Person) *Client {
 	return &Client{
 		Entity: entity.NewEntity(),
 		Person: *person,
+		ClienteCommonAttributes: ClienteCommonAttributes{
+			IsActive: true,
+		},
 	}
 }
 

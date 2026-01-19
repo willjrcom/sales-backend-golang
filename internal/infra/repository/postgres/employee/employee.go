@@ -69,7 +69,7 @@ func (r *EmployeeRepositoryBun) DeleteEmployee(ctx context.Context, id string) e
 	defer tx.Rollback()
 
 	// Delete employee
-	if _, err := tx.NewDelete().Model(&model.Employee{}).Where("employee.id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(&model.Employee{}).Set("is_active = false").Where("employee.id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -300,4 +300,33 @@ func (r *EmployeeRepositoryBun) CreateSalaryHistory(ctx context.Context, h *mode
 		return err
 	}
 	return nil
+}
+
+// GetAllEmployeesWithoutDeliveryDrivers retrieves all employees who are not delivery drivers.
+func (r *EmployeeRepositoryBun) GetAllEmployeesWithoutDeliveryDrivers(ctx context.Context) ([]model.Employee, error) {
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	employees := []model.Employee{}
+	err = tx.NewSelect().
+		Model(&employees).
+		Relation("User").
+		Relation("User.Address").
+		Relation("User.Contact").
+		Where("NOT EXISTS (SELECT 1 FROM delivery_drivers AS dd WHERE dd.employee_id = employee.id)").
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return employees, nil
 }

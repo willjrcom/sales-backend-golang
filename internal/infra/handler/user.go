@@ -165,7 +165,6 @@ func (h *handlerUserImpl) handlerUpdateUser(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("handlerLoginUser init")
 	ctx := r.Context()
 
 	dtoUser := &companydto.UserLoginDTO{}
@@ -174,15 +173,11 @@ func (h *handlerUserImpl) handlerLoginUser(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	fmt.Println("handlerLoginUser dtoUser", dtoUser)
-
 	user, err := h.s.LoginUser(ctx, dtoUser)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
-
-	fmt.Println("handlerLoginUser user", user)
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, user)
 }

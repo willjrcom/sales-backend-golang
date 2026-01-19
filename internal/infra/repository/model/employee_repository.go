@@ -14,6 +14,7 @@ type EmployeeRepository interface {
 	GetEmployeeByUserID(ctx context.Context, userID string) (*Employee, error)
 	GetEmployeeDeletedByUserID(ctx context.Context, userID string) (*Employee, error)
 	GetAllEmployees(ctx context.Context, page, perPage int, isActive ...bool) ([]Employee, int, error)
+	GetAllEmployeesWithoutDeliveryDrivers(ctx context.Context) ([]Employee, error)
 	AddPaymentEmployee(ctx context.Context, p *PaymentEmployee) error
 	GetAllEmployeeDeleted(ctx context.Context, page, perPage int) ([]Employee, int, error)
 	GetSalaryHistory(ctx context.Context, employeeID uuid.UUID) ([]EmployeeSalaryHistory, error)

@@ -188,3 +188,15 @@ func (r *EmployeeRepositoryLocal) CreateSalaryHistory(_ context.Context, h *mode
 	// Mock: não faz nada, apenas retorna nil
 	return nil
 }
+
+func (r *EmployeeRepositoryLocal) GetAllEmployeesWithoutDeliveryDrivers(_ context.Context) ([]model.Employee, error) {
+	// Mock implementation: return all employees for now
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	employees := make([]model.Employee, 0, len(r.employees))
+	for _, e := range r.employees {
+		employees = append(employees, *e)
+	}
+	return employees, nil
+}

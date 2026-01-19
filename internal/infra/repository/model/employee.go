@@ -16,8 +16,9 @@ type Employee struct {
 }
 
 type EmployeeCommonAttributes struct {
-	UserID uuid.UUID `bun:"column:user_id,type:uuid,notnull"`
-	User   *User     `bun:"rel:belongs-to,join:user_id=id"`
+	UserID   uuid.UUID `bun:"column:user_id,type:uuid,notnull"`
+	User     *User     `bun:"rel:belongs-to,join:user_id=id"`
+	IsActive bool      `bun:"column:is_active"`
 }
 
 func (e *Employee) FromDomain(employee *employeeentity.Employee) {
@@ -27,8 +28,9 @@ func (e *Employee) FromDomain(employee *employeeentity.Employee) {
 	*e = Employee{
 		Entity: entitymodel.FromDomain(employee.Entity),
 		EmployeeCommonAttributes: EmployeeCommonAttributes{
-			UserID: employee.UserID,
-			User:   &User{},
+			UserID:   employee.UserID,
+			User:     &User{},
+			IsActive: employee.IsActive,
 		},
 		Payments:    []PaymentEmployee{},
 		Permissions: make(map[string]bool),
@@ -57,6 +59,7 @@ func (e *Employee) ToDomain() *employeeentity.Employee {
 		User:        e.User.ToDomain(),
 		Payments:    make([]employeeentity.PaymentEmployee, 0, len(e.Payments)),
 		Permissions: make(employeeentity.Permissions),
+		IsActive:    e.IsActive,
 	}
 	// map payments to domain
 	for _, p := range e.Payments {

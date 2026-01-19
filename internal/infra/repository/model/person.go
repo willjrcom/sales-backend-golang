@@ -12,7 +12,6 @@ type Person struct {
 	Email     string     `bun:"email"`
 	Cpf       string     `bun:"cpf"`
 	Birthday  *time.Time `bun:"birthday"`
-	IsActive  bool       `bun:"column:is_active,type:boolean"`
 	Contact   *Contact   `bun:"rel:has-one,join:id=object_id,notnull"`
 	Address   *Address   `bun:"rel:has-one,join:id=object_id,notnull"`
 }
@@ -27,7 +26,6 @@ func (p *Person) FromDomain(person *personentity.Person) {
 		Email:     person.Email,
 		Cpf:       person.Cpf,
 		Birthday:  person.Birthday,
-		IsActive:  person.IsActive,
 		Contact:   &Contact{},
 		Address:   &Address{},
 	}
@@ -47,7 +45,6 @@ func (p *Person) ToDomain() *personentity.Person {
 			Email:     p.Email,
 			Cpf:       p.Cpf,
 			Birthday:  p.Birthday,
-			IsActive:  p.IsActive,
 			Contact:   p.Contact.ToDomain(),
 			Address:   p.Address.ToDomain(),
 		},

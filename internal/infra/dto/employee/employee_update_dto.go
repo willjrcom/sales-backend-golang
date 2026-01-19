@@ -6,6 +6,7 @@ import (
 
 type EmployeeUpdateDTO struct {
 	Permissions map[string]bool `json:"permissions"`
+	IsActive    *bool           `json:"is_active"`
 }
 
 func (r *EmployeeUpdateDTO) validate() error {
@@ -25,5 +26,8 @@ func (r *EmployeeUpdateDTO) UpdateDomain(employee *employeeentity.Employee) erro
 		}
 	}
 
+	if r.IsActive != nil {
+		employee.IsActive = *r.IsActive
+	}
 	return nil
 }

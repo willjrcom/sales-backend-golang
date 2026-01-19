@@ -170,6 +170,15 @@ func (s *Service) GetAllEmployeeDeleted(ctx context.Context, page, perPage int) 
 	return dtos, total, nil
 }
 
+func (s *Service) GetAllEmployeesWithoutDeliveryDrivers(ctx context.Context) ([]employeedto.EmployeeDTO, error) {
+	employeeModels, err := s.re.GetAllEmployeesWithoutDeliveryDrivers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	dtos := modelsToDTOs(employeeModels)
+	return dtos, nil
+}
+
 func modelsToDTOs(employeeModels []model.Employee) []employeedto.EmployeeDTO {
 	dtos := make([]employeedto.EmployeeDTO, len(employeeModels))
 	for i, employeeModel := range employeeModels {
