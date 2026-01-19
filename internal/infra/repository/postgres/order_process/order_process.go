@@ -171,7 +171,7 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 	}
 
 	if err := tx.NewSelect().Model(&processes).
-		Join("INNER JOIN employees as emp ON process.employee_id = emp.id").
+		Join("LEFT JOIN employees as emp ON process.employee_id = emp.id").
 		Where("process.process_rule_id = ?", id).
 		Where("process.status IN (?)", bun.In(validStatus)).
 		Where("emp.user_id = ? or process.employee_id is null", userID).
