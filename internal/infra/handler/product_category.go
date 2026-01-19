@@ -174,7 +174,21 @@ func (h *handlerProductCategoryImpl) handlerGetAllCategoriesMap(w http.ResponseW
 		}
 	}
 
-	categories, err := h.s.GetAllCategoriesMap(ctx, isActive)
+	var isAdditional *bool
+	if isAdditionalParam := r.URL.Query().Get("is_additional"); isAdditionalParam != "" {
+		if val, err := strconv.ParseBool(isAdditionalParam); err == nil {
+			isAdditional = &val
+		}
+	}
+
+	var isComplement *bool
+	if isComplementParam := r.URL.Query().Get("is_complement"); isComplementParam != "" {
+		if val, err := strconv.ParseBool(isComplementParam); err == nil {
+			isComplement = &val
+		}
+	}
+
+	categories, err := h.s.GetAllCategoriesMap(ctx, isActive, isAdditional, isComplement)
 
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)

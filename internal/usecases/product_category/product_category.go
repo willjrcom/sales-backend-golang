@@ -201,8 +201,8 @@ func productsToDTOs(products []model.Product) []productcategorydto.ProductDTO {
 	return dtos
 }
 
-func (s *Service) GetAllCategoriesMap(ctx context.Context, isActive bool) ([]productcategorydto.CategoryMapDTO, error) {
-	if categoryModels, err := s.r.GetAllCategoriesMap(ctx, isActive); err != nil {
+func (s *Service) GetAllCategoriesMap(ctx context.Context, isActive bool, isAdditional, isComplement *bool) ([]productcategorydto.CategoryMapDTO, error) {
+	if categoryModels, err := s.r.GetAllCategoriesMap(ctx, isActive, isAdditional, isComplement); err != nil {
 		return nil, err
 	} else {
 		dtos := make([]productcategorydto.CategoryMapDTO, 0)

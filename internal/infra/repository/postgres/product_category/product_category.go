@@ -462,7 +462,7 @@ func (r *ProductCategoryRepositoryBun) GetAllCategoriesWithProcessRulesAndOrderP
 	return categories, nil
 }
 
-func (r *ProductCategoryRepositoryBun) GetAllCategoriesMap(ctx context.Context, isActive bool) ([]model.ProductCategory, error) {
+func (r *ProductCategoryRepositoryBun) GetAllCategoriesMap(ctx context.Context, isActive bool, isAdditional, isComplement *bool) ([]model.ProductCategory, error) {
 	categories := []model.ProductCategory{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -473,11 +473,20 @@ func (r *ProductCategoryRepositoryBun) GetAllCategoriesMap(ctx context.Context, 
 	defer cancel()
 	defer tx.Rollback()
 
-	err = tx.NewSelect().
+	query := tx.NewSelect().
 		Model(&categories).
 		Column("id", "name").
-		Where("is_active = ?", isActive).
-		Scan(ctx)
+		Where("is_active = ?", isActive)
+
+	if isAdditional != nil {
+		query.Where("is_additional = ?", *isAdditional)
+	}
+
+	if isComplement != nil {
+		query.Where("is_complement = ?", *isComplement)
+	}
+
+	err = query.Scan(ctx)
 
 	if err != nil {
 		return nil, err

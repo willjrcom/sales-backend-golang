@@ -78,16 +78,26 @@ func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context, IDs []uuid
 	return productCategories, nil
 }
 
-func (r *CategoryRepositoryLocal) GetAllCategoriesMap(_ context.Context, isActive bool) ([]model.ProductCategory, error) {
+func (r *CategoryRepositoryLocal) GetAllCategoriesMap(_ context.Context, isActive bool, isAdditional, isComplement *bool) ([]model.ProductCategory, error) {
 	productCategories := make([]model.ProductCategory, 0)
 
 	for _, p := range r.productCategories {
-		if p.IsActive == isActive {
-			cat := model.ProductCategory{}
-			cat.ID = p.ID
-			cat.Name = p.Name
-			productCategories = append(productCategories, cat)
+		if p.IsActive != isActive {
+			continue
 		}
+
+		if isAdditional != nil && p.IsAdditional != *isAdditional {
+			continue
+		}
+
+		if isComplement != nil && p.IsComplement != *isComplement {
+			continue
+		}
+
+		cat := model.ProductCategory{}
+		cat.ID = p.ID
+		cat.Name = p.Name
+		productCategories = append(productCategories, cat)
 	}
 
 	return productCategories, nil
