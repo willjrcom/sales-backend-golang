@@ -190,6 +190,24 @@ func (s *Service) GetAdditionalProducts(ctx context.Context, categoryID string) 
 	return productsToDTOs(products), nil
 }
 
+func (s *Service) GetDefaultProducts(ctx context.Context, categoryID string) ([]productcategorydto.ProductDTO, error) {
+	products, err := s.r.GetDefaultProducts(ctx, categoryID, false)
+	if err != nil {
+		return nil, err
+	}
+
+	return productsToDTOs(products), nil
+}
+
+func (s *Service) GetDefaultProductsMap(ctx context.Context, categoryID string) ([]productcategorydto.ProductMapDTO, error) {
+	products, err := s.r.GetDefaultProducts(ctx, categoryID, true)
+	if err != nil {
+		return nil, err
+	}
+
+	return productsToMapDTOs(products), nil
+}
+
 func productsToDTOs(products []model.Product) []productcategorydto.ProductDTO {
 	dtos := []productcategorydto.ProductDTO{}
 	for _, p := range products {
@@ -197,6 +215,21 @@ func productsToDTOs(products []model.Product) []productcategorydto.ProductDTO {
 		dto := &productcategorydto.ProductDTO{}
 		dto.FromDomain(domain)
 		dtos = append(dtos, *dto)
+	}
+	return dtos
+}
+
+func productsToMapDTOs(products []model.Product) []productcategorydto.ProductMapDTO {
+	dtos := []productcategorydto.ProductMapDTO{}
+	for _, p := range products {
+		name := p.Name
+		if p.Size != nil && p.Size.Name != "" {
+			name = name + " - " + p.Size.Name
+		}
+		dtos = append(dtos, productcategorydto.ProductMapDTO{
+			ID:   p.ID,
+			Name: name,
+		})
 	}
 	return dtos
 }

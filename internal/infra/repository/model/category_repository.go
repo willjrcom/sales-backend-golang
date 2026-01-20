@@ -17,6 +17,7 @@ type CategoryRepository interface {
 	GetAllCategoriesWithProcessRulesAndOrderProcess(ctx context.Context) ([]ProductCategoryWithOrderProcess, error)
 	GetComplementProducts(ctx context.Context, categoryID string) ([]Product, error)
 	GetAdditionalProducts(ctx context.Context, categoryID string) ([]Product, error)
+	GetDefaultProducts(ctx context.Context, categoryID string, isMap bool) ([]Product, error)
 	GetComplementCategories(ctx context.Context) ([]ProductCategory, error)
 	GetAdditionalCategories(ctx context.Context) ([]ProductCategory, error)
 	GetDefaultCategories(ctx context.Context) ([]ProductCategory, error)

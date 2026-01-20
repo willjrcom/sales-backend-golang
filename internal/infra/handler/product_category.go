@@ -36,8 +36,9 @@ func NewHandlerProductCategory(categoryService *productcategoryusecases.Service)
 		c.Get("/all", h.handlerGetAllCategories)
 		c.Get("/all-map", h.handlerGetAllCategoriesMap)
 		c.Get("/all-with-order-process", h.handlerGetAllCategoriesWithProcessRulesAndOrderProcess)
-		c.Get("/{id}/complements", h.handlerGetComplementProducts)
-		c.Get("/{id}/additionals", h.handlerGetAdditionalProducts)
+		c.Get("/{id}/complement-products", h.handlerGetComplementProducts)
+		c.Get("/{id}/additional-products", h.handlerGetAdditionalProducts)
+		c.Get("/{id}/default-products", h.handlerGetDefaultProducts)
 		c.Get("/all/additionals", h.handlerGetAdditionalCategories)
 		c.Get("/all/complements", h.handlerGetComplementCategories)
 		c.Get("/all/default", h.handlerGetDefaultCategories)
@@ -245,6 +246,43 @@ func (h *handlerProductCategoryImpl) handlerGetAdditionalProducts(w http.Respons
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, products)
+}
+
+func (h *handlerProductCategoryImpl) handlerGetDefaultProducts(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	// Parse is_map query parameter (default: false)
+	isMap := false
+	if isMapParam := r.URL.Query().Get("is_map"); isMapParam != "" {
+		var err error
+		isMap, err = strconv.ParseBool(isMapParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid is_map parameter"))
+			return
+		}
+	}
+
+	if isMap {
+		products, err := h.s.GetDefaultProductsMap(ctx, id)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		jsonpkg.ResponseJson(w, r, http.StatusOK, products)
+	} else {
+		products, err := h.s.GetDefaultProducts(ctx, id)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		jsonpkg.ResponseJson(w, r, http.StatusOK, products)
+	}
 }
 
 func (h *handlerProductCategoryImpl) handlerGetComplementCategories(w http.ResponseWriter, r *http.Request) {

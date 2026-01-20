@@ -127,6 +127,11 @@ func (r *CategoryRepositoryLocal) GetAdditionalProducts(_ context.Context, categ
 	return []model.Product{}, nil
 }
 
+func (r *CategoryRepositoryLocal) GetDefaultProducts(_ context.Context, categoryID string, isMap bool) ([]model.Product, error) {
+	// Dummy implementation
+	return []model.Product{}, nil
+}
+
 func (r *CategoryRepositoryLocal) GetComplementCategories(_ context.Context) ([]model.ProductCategory, error) {
 	// Dummy implementation
 	return []model.ProductCategory{}, nil

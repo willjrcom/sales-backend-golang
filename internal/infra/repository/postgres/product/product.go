@@ -214,7 +214,7 @@ func (r *ProductRepositoryBun) GetDefaultProducts(ctx context.Context, page, per
 	return products, total, nil
 }
 
-func (r *ProductRepositoryBun) GetAllProductsMap(ctx context.Context, isActive bool) ([]model.Product, error) {
+func (r *ProductRepositoryBun) GetAllProductsMap(ctx context.Context, isActive bool, categoryID string) ([]model.Product, error) {
 	products := []model.Product{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -225,12 +225,17 @@ func (r *ProductRepositoryBun) GetAllProductsMap(ctx context.Context, isActive b
 	defer cancel()
 	defer tx.Rollback()
 
-	err = tx.NewSelect().
+	query := tx.NewSelect().
 		Model(&products).
 		Relation("Size").
 		Column("product.id", "product.name", "product.size_id").
-		Where("product.is_active = ?", isActive).
-		Scan(ctx)
+		Where("product.is_active = ?", isActive)
+
+	if categoryID != "" {
+		query = query.Where("product.category_id = ?", categoryID)
+	}
+
+	err = query.Scan(ctx)
 
 	if err != nil {
 		return nil, err

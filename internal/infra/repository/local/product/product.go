@@ -121,7 +121,7 @@ func (r *ProductRepositoryLocal) GetDefaultProducts(_ context.Context, page, per
 	return products[start:end], total, nil
 }
 
-func (r *ProductRepositoryLocal) GetAllProductsMap(_ context.Context, isActive bool) ([]model.Product, error) {
+func (r *ProductRepositoryLocal) GetAllProductsMap(_ context.Context, isActive bool, categoryID string) ([]model.Product, error) {
 	products := make([]model.Product, 0)
 
 	for _, p := range r.products {

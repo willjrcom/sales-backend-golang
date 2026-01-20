@@ -97,6 +97,45 @@ func (r *ProductCategoryRepositoryBun) GetAdditionalProducts(ctx context.Context
 	return products, nil
 }
 
+func (r *ProductCategoryRepositoryBun) GetDefaultProducts(ctx context.Context, categoryID string, isMap bool) ([]model.Product, error) {
+	products := []model.Product{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	query := tx.NewSelect().
+		Model(&products).
+		Join("JOIN product_categories AS cat ON cat.id = product.category_id").
+		Where("product.category_id = ?", categoryID).
+		Where("cat.is_additional = ?", false).
+		Where("cat.is_complement = ?", false).
+		Where("product.is_active = ?", true)
+
+	if isMap {
+		// Only select necessary columns for map format
+		query.Column("product.id", "product.name", "product.size_id").
+			Relation("Size")
+	} else {
+		// Select all columns and relations for complete format
+		query.Relation("Category").
+			Relation("Size")
+	}
+
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
 func (r *ProductCategoryRepositoryBun) CreateCategory(ctx context.Context, cp *model.ProductCategory) error {
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)

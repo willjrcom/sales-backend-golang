@@ -30,6 +30,7 @@ func NewHandlerProduct(productService *productusecases.Service) *handler.Handler
 		c.Post("/new", h.handlerCreateProduct)
 		c.Get("/all", h.handlerGetAllProducts)
 		c.Get("/all/default", h.handlerGetDefaultProducts)
+		c.Get("/all/by-category-id/{category_id}", h.handlerGetProductsByCategoryId)
 		c.Get("/all-map", h.handlerGetAllProductsMap)
 		c.Get("/code/{code}", h.handlerGetProductByCode)
 		c.Patch("/update/{id}", h.handlerUpdateProduct)
@@ -203,6 +204,37 @@ func (h *HandlerProductImpl) handlerGetDefaultProducts(w http.ResponseWriter, r 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, products)
 }
 
+func (h *HandlerProductImpl) handlerGetProductsByCategoryId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	// Get category_id from URL path parameter
+	categoryID := chi.URLParam(r, "category_id")
+
+	if categoryID == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("category_id is required"))
+		return
+	}
+
+	// Parse is_active query parameter (default: true)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		var err error
+		isActive, err = strconv.ParseBool(isActiveParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid is_active parameter"))
+			return
+		}
+	}
+
+	products, err := h.s.GetAllProductsMap(ctx, isActive, categoryID)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, products)
+}
+
 func (h *HandlerProductImpl) handlerGetAllProductsMap(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -214,7 +246,10 @@ func (h *HandlerProductImpl) handlerGetAllProductsMap(w http.ResponseWriter, r *
 		}
 	}
 
-	products, err := h.s.GetAllProductsMap(ctx, isActive)
+	// Parse category_id query parameter (optional)
+	categoryID := r.URL.Query().Get("category_id")
+
+	products, err := h.s.GetAllProductsMap(ctx, isActive, categoryID)
 
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)

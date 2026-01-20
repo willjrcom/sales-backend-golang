@@ -158,8 +158,8 @@ func modelsToDtos(productModels []model.Product) []productcategorydto.ProductDTO
 	return dtos
 }
 
-func (s *Service) GetAllProductsMap(ctx context.Context, isActive bool) ([]productcategorydto.ProductMapDTO, error) {
-	products, err := s.rp.GetAllProductsMap(ctx, isActive)
+func (s *Service) GetAllProductsMap(ctx context.Context, isActive bool, categoryID string) ([]productcategorydto.ProductMapDTO, error) {
+	products, err := s.rp.GetAllProductsMap(ctx, isActive, categoryID)
 	if err != nil {
 		return nil, err
 	}
