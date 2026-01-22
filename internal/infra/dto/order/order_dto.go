@@ -18,6 +18,7 @@ type OrderDTO struct {
 	OrderTimeLogs
 	OrderDetail
 	ID          uuid.UUID                   `json:"id"`
+	CreatedAt   time.Time                   `json:"created_at"`
 	OrderNumber int                         `json:"order_number"`
 	Status      orderentity.StatusOrder     `json:"status"`
 	GroupsItems []groupitemdto.GroupItemDTO `json:"group_items"`
@@ -77,6 +78,7 @@ func (o *OrderDTO) FromDomain(order *orderentity.Order) {
 			ShiftID:       order.ShiftID,
 		},
 		ID:          order.ID,
+		CreatedAt:   order.CreatedAt,
 		OrderNumber: order.OrderNumber,
 		Status:      order.Status,
 		GroupsItems: []groupitemdto.GroupItemDTO{},
