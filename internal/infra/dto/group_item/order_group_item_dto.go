@@ -27,6 +27,7 @@ type GroupItemDTO struct {
 	ComplementItem   *itemdto.ItemDTO                `json:"complement_item"`
 	Items            []itemdto.ItemDTO               `json:"items"`
 	OrderID          uuid.UUID                       `json:"order_id"`
+	CreatedAt        time.Time                       `json:"created_at"`
 }
 
 type GroupItemTimeLogsDTO struct {
@@ -57,6 +58,7 @@ func (i *GroupItemDTO) FromDomain(groupItem *orderentity.GroupItem) {
 		ComplementItem:   &itemdto.ItemDTO{},
 		Items:            []itemdto.ItemDTO{},
 		OrderID:          groupItem.OrderID,
+		CreatedAt:        groupItem.CreatedAt,
 		GroupItemTimeLogsDTO: GroupItemTimeLogsDTO{
 			StartAt:    groupItem.StartAt,
 			PendingAt:  groupItem.PendingAt,
