@@ -11,7 +11,7 @@ type TableRepository interface {
 	UpdateTable(ctx context.Context, table *Table) error
 	DeleteTable(ctx context.Context, id string) error
 	GetTableById(ctx context.Context, id string) (*Table, error)
-	GetAllTables(ctx context.Context, isActive ...bool) ([]Table, error)
+	GetAllTables(ctx context.Context, page, perPage int, isActive bool) ([]Table, int, error)
 	GetUnusedTables(ctx context.Context, isActive ...bool) ([]Table, error)
 }
 
@@ -20,7 +20,7 @@ type PlaceRepository interface {
 	UpdatePlace(ctx context.Context, place *Place) error
 	DeletePlace(ctx context.Context, id string) error
 	GetPlaceById(ctx context.Context, id string) (*Place, error)
-	GetAllPlaces(ctx context.Context, isActive ...bool) ([]Place, error)
+	GetAllPlaces(ctx context.Context, page, perPage int, isActive bool) ([]Place, int, error)
 	AddTableToPlace(ctx context.Context, placeToTables *PlaceToTables) error
 	GetTableToPlaceByPlaceIDAndPosition(ctx context.Context, placeID uuid.UUID, column, row int) (*PlaceToTables, error)
 	GetTableToPlaceByTableID(ctx context.Context, table uuid.UUID) (*PlaceToTables, error)

@@ -91,7 +91,7 @@ func (h *handlerUserImpl) handlerUpdateUserForgetPassword(w http.ResponseWriter,
 	}
 
 	if email != dtoUser.Email {
-		err := fmt.Errorf("email do token invalido!")
+		err := fmt.Errorf("email token invalid")
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}

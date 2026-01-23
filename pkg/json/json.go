@@ -23,7 +23,7 @@ type Error struct {
 
 type Metadata struct {
 	Page         int `json:"page"`
-	PageSize     int `json:"page_size"`
+	PageSize     int `json:"per_page"`
 	TotalPages   int `json:"total_pages"`
 	TotalResults int `json:"total_results"`
 }

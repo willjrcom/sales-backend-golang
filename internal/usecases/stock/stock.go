@@ -119,10 +119,10 @@ func (s *Service) GetStockByProductID(ctx context.Context, productID string) (*s
 }
 
 // GetAllStocks busca todos os estoques
-func (s *Service) GetAllStocks(ctx context.Context) ([]stockdto.StockDTO, error) {
-	stocksModel, err := s.stockRepo.GetAllStocks(ctx)
+func (s *Service) GetAllStocks(ctx context.Context, page, perPage int) ([]stockdto.StockDTO, int, error) {
+	stocksModel, count, err := s.stockRepo.GetAllStocks(ctx, page, perPage)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	var stocksDTO []stockdto.StockDTO
@@ -133,7 +133,7 @@ func (s *Service) GetAllStocks(ctx context.Context) ([]stockdto.StockDTO, error)
 		stocksDTO = append(stocksDTO, stockDTO)
 	}
 
-	return stocksDTO, nil
+	return stocksDTO, count, nil
 }
 
 // AddMovementStock adiciona estoque manualmente
@@ -199,7 +199,7 @@ func (s *Service) GetStockWithProduct(ctx context.Context, dtoID *entitydto.IDRe
 
 // GetAllStocksWithProduct busca todos os estoques com informações dos produtos
 func (s *Service) GetAllStocksWithProduct(ctx context.Context) ([]stockdto.StockWithProductDTO, error) {
-	stocksModel, err := s.stockRepo.GetAllStocks(ctx)
+	stocksModel, _, err := s.stockRepo.GetAllStocks(ctx, 1, 1000) // Fetch all (or a large page) for now as this seems to be used for reports
 	if err != nil {
 		return nil, err
 	}
@@ -297,33 +297,33 @@ func (s *Service) DeleteAlert(ctx context.Context, alertID string) error {
 	return s.stockAlertRepo.DeleteAlert(ctx, alertID)
 }
 
-func (s *Service) GetStockReport(ctx context.Context) (*stockdto.StockReportCompleteDTO, error) {
+func (s *Service) GetStockReport(ctx context.Context, page, perPage int) (*stockdto.StockReportCompleteDTO, int, error) {
 	// Buscar todos os estoques
-	stockModels, err := s.stockRepo.GetAllStocks(ctx)
+	stockModels, count, err := s.stockRepo.GetAllStocks(ctx, page, perPage)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// Buscar produtos com estoque baixo
 	lowStockProducts, err := s.stockRepo.GetLowStockProducts(ctx)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// Buscar produtos sem estoque
 	outOfStockProducts, err := s.stockRepo.GetOutOfStockProducts(ctx)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// Buscar alertas ativos
 	activeAlerts, err := s.stockAlertRepo.GetActiveAlerts(ctx)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	// Calcular estatísticas
-	totalProducts := len(stockModels)
+	totalProducts := count
 	totalLowStock := len(lowStockProducts)
 	totalOutOfStock := len(outOfStockProducts)
 	totalActiveAlerts := len(activeAlerts)
@@ -385,5 +385,5 @@ func (s *Service) GetStockReport(ctx context.Context) (*stockdto.StockReportComp
 		GeneratedAt:        time.Now(),
 	}
 
-	return report, nil
+	return report, count, nil
 }

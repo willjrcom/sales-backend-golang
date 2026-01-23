@@ -85,10 +85,10 @@ func (s *Service) GetPlaceById(ctx context.Context, dto *entitydto.IDRequest) (*
 	}
 }
 
-func (s *Service) GetAllPlaces(ctx context.Context) ([]placedto.PlaceDTO, error) {
-	placeModels, err := s.r.GetAllPlaces(ctx)
+func (s *Service) GetAllPlaces(ctx context.Context, page, perPage int, isActive bool) ([]placedto.PlaceDTO, int, error) {
+	placeModels, count, err := s.r.GetAllPlaces(ctx, page, perPage, isActive)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	placeDTOs := []placedto.PlaceDTO{}
@@ -100,7 +100,7 @@ func (s *Service) GetAllPlaces(ctx context.Context) ([]placedto.PlaceDTO, error)
 		placeDTOs = append(placeDTOs, *placeDTO)
 	}
 
-	return placeDTOs, nil
+	return placeDTOs, count, nil
 }
 
 func (s *Service) AddTableToPlace(ctx context.Context, dto *placedto.PlaceUpdateTableDTO) error {

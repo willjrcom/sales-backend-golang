@@ -3,12 +3,14 @@ package handlerimpl
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	placedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/place"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	placeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/place"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -125,12 +127,25 @@ func (h *handlerPlaceImpl) handlerUpdatePlaceById(w http.ResponseWriter, r *http
 func (h *handlerPlaceImpl) handlerGetAllPlaces(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	places, err := h.s.GetAllPlaces(ctx)
+	isActive := true
+	if isActiveParam := r.URL.Query().Get("is_active"); isActiveParam != "" {
+		var err error
+		isActive, err = strconv.ParseBool(isActiveParam)
+		if err != nil {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("invalid is_active parameter"))
+			return
+		}
+	}
+
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 100)
+
+	places, count, err := h.s.GetAllPlaces(ctx, page, perPage, isActive)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
+	w.Header().Set("X-Total-Count", strconv.Itoa(count))
 	jsonpkg.ResponseJson(w, r, http.StatusOK, places)
 }
 

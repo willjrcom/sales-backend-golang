@@ -167,14 +167,14 @@ func (h *HandlerProductImpl) handlerGetAllProducts(w http.ResponseWriter, r *htt
 	// Parse category_id query parameter (default: true)
 	categoryID := r.URL.Query().Get("category_id")
 
-	categories, total, err := h.s.GetAllProducts(ctx, page, perPage, isActive, categoryID)
+	products, total, err := h.s.GetAllProducts(ctx, page, perPage, isActive, categoryID)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	w.Header().Set("X-Total-Count", strconv.Itoa(total))
-	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
+	jsonpkg.ResponseJson(w, r, http.StatusOK, products)
 }
 
 func (h *HandlerProductImpl) handlerGetDefaultProducts(w http.ResponseWriter, r *http.Request) {

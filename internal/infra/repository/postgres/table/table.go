@@ -103,31 +103,28 @@ func (r *TableRepositoryBun) GetTableById(ctx context.Context, id string) (*mode
 	return table, nil
 }
 
-func (r *TableRepositoryBun) GetAllTables(ctx context.Context, isActive ...bool) ([]model.Table, error) {
+func (r *TableRepositoryBun) GetAllTables(ctx context.Context, page, perPage int, isActive bool) ([]model.Table, int, error) {
 	tables := make([]model.Table, 0)
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer cancel()
 	defer tx.Rollback()
 
-	// Default to active records (true)
-	activeFilter := true
-	if len(isActive) > 0 {
-		activeFilter = isActive[0]
-	}
+	query := tx.NewSelect().Model(&tables).Where("is_active = ?", isActive).Limit(perPage).Offset((page - 1) * perPage)
 
-	if err := tx.NewSelect().Model(&tables).Where("is_active = ?", activeFilter).Scan(ctx); err != nil {
-		return nil, err
+	count, err := query.ScanAndCount(ctx)
+	if err != nil {
+		return nil, 0, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return tables, nil
+	return tables, count, nil
 }
 
 func (r *TableRepositoryBun) GetUnusedTables(ctx context.Context, isActive ...bool) ([]model.Table, error) {

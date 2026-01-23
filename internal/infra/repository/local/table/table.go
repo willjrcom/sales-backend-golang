@@ -52,14 +52,31 @@ func (r *TableRepositoryLocal) GetTableById(ctx context.Context, id string) (*mo
 	return nil, nil
 }
 
-func (r *TableRepositoryLocal) GetAllTables(ctx context.Context, isActive ...bool) ([]model.Table, error) {
+func (r *TableRepositoryLocal) GetAllTables(ctx context.Context, page, perPage int, isActive bool) ([]model.Table, int, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	list := make([]model.Table, 0, len(r.tables))
 	for _, tbl := range r.tables {
-		list = append(list, *tbl)
+		if !isActive || tbl.IsActive {
+			list = append(list, *tbl)
+		}
 	}
-	return list, nil
+
+	total := len(list)
+
+	if page > 0 && perPage > 0 {
+		start := (page - 1) * perPage
+		end := start + perPage
+		if start > total {
+			start = total
+		}
+		if end > total {
+			end = total
+		}
+		list = list[start:end]
+	}
+
+	return list, total, nil
 }
 
 func (r *TableRepositoryLocal) GetUnusedTables(ctx context.Context, isActive ...bool) ([]model.Table, error) {

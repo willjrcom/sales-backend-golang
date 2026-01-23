@@ -100,25 +100,28 @@ func (r *StockRepositoryBun) GetStockByProductID(ctx context.Context, productID 
 	return stock, nil
 }
 
-func (r *StockRepositoryBun) GetAllStocks(ctx context.Context) ([]model.Stock, error) {
+func (r *StockRepositoryBun) GetAllStocks(ctx context.Context, page, perPage int) ([]model.Stock, int, error) {
 	stocks := []model.Stock{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&stocks).Relation("Product").Scan(ctx); err != nil {
-		return nil, err
+	query := tx.NewSelect().Model(&stocks).Relation("Product").Limit(perPage).Offset((page - 1) * perPage)
+
+	count, err := query.ScanAndCount(ctx)
+	if err != nil {
+		return nil, 0, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return stocks, nil
+	return stocks, count, nil
 }
 
 func (r *StockRepositoryBun) GetActiveStocks(ctx context.Context) ([]model.Stock, error) {

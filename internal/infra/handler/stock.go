@@ -3,12 +3,14 @@ package handlerimpl
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	stockdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/stock"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	stockusecases "github.com/willjrcom/sales-backend-go/internal/usecases/stock"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -157,11 +159,15 @@ func (h *handlerStockImpl) handlerGetStockByProductID(w http.ResponseWriter, r *
 func (h *handlerStockImpl) handlerGetAllStocks(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	stocks, err := h.s.GetAllStocks(ctx)
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 100)
+
+	stocks, count, err := h.s.GetAllStocks(ctx, page, perPage)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
+
+	w.Header().Set("X-Total-Count", strconv.Itoa(count))
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, stocks)
 }
@@ -360,11 +366,14 @@ func (h *handlerStockImpl) handlerDeleteAlert(w http.ResponseWriter, r *http.Req
 }
 
 func (h *handlerStockImpl) handlerGetStockReport(w http.ResponseWriter, r *http.Request) {
-	report, err := h.s.GetStockReport(r.Context())
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 100)
+	report, count, err := h.s.GetStockReport(r.Context(), page, perPage)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
+
+	w.Header().Set("X-Total-Count", strconv.Itoa(count))
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, report)
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	tabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/table"
+	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	tableusecases "github.com/willjrcom/sales-backend-go/internal/usecases/table"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -135,12 +136,15 @@ func (h *handlerTableImpl) handlerGetAllTables(w http.ResponseWriter, r *http.Re
 		}
 	}
 
-	tables, err := h.s.GetAllTables(ctx, isActive)
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 100)
+
+	tables, count, err := h.s.GetAllTables(ctx, page, perPage, isActive)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
+	w.Header().Set("X-Total-Count", strconv.Itoa(count))
 	jsonpkg.ResponseJson(w, r, http.StatusOK, tables)
 }
 

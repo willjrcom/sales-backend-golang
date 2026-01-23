@@ -81,10 +81,10 @@ func (s *Service) GetTableById(ctx context.Context, dto *entitydto.IDRequest) (*
 	}
 }
 
-func (s *Service) GetAllTables(ctx context.Context, isActive bool) ([]tabledto.TableDTO, error) {
-	tableModels, err := s.r.GetAllTables(ctx, isActive)
+func (s *Service) GetAllTables(ctx context.Context, page, perPage int, isActive bool) ([]tabledto.TableDTO, int, error) {
+	tableModels, count, err := s.r.GetAllTables(ctx, page, perPage, isActive)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	tables := []tabledto.TableDTO{}
@@ -96,7 +96,7 @@ func (s *Service) GetAllTables(ctx context.Context, isActive bool) ([]tabledto.T
 		tables = append(tables, *tableDTO)
 	}
 
-	return tables, nil
+	return tables, count, nil
 }
 
 func (s *Service) GetUnusedTables(ctx context.Context, isActive bool) ([]tabledto.TableDTO, error) {

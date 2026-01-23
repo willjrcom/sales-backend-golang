@@ -104,31 +104,28 @@ func (r *PlaceRepositoryBun) GetPlaceById(ctx context.Context, id string) (*mode
 	return place, nil
 }
 
-func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context, isActive ...bool) ([]model.Place, error) {
+func (r *PlaceRepositoryBun) GetAllPlaces(ctx context.Context, page, perPage int, isActive bool) ([]model.Place, int, error) {
 	places := make([]model.Place, 0)
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer cancel()
 	defer tx.Rollback()
 
-	// Default to active records (true)
-	activeFilter := true
-	if len(isActive) > 0 {
-		activeFilter = isActive[0]
-	}
+	query := tx.NewSelect().Model(&places).Where("is_active = ?", isActive).Relation("Tables.Table").Limit(perPage).Offset((page - 1) * perPage)
 
-	if err := tx.NewSelect().Model(&places).Where("is_active = ?", activeFilter).Relation("Tables.Table").Scan(ctx); err != nil {
-		return nil, err
+	count, err := query.ScanAndCount(ctx)
+	if err != nil {
+		return nil, 0, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return places, nil
+	return places, count, nil
 }
 
 func (r *PlaceRepositoryBun) AddTableToPlace(ctx context.Context, placeToTables *model.PlaceToTables) error {
