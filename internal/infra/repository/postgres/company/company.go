@@ -407,15 +407,6 @@ func (r *CompanyRepositoryBun) ListCompanyPayments(ctx context.Context, companyI
 		return []model.CompanyPayment{}, 0, nil
 	}
 
-	if page <= 0 {
-		page = 1
-	}
-
-	if perPage <= 0 {
-		perPage = 10
-	}
-
-	offset := (page - 1) * perPage
 	payments := make([]model.CompanyPayment, 0, perPage)
 
 	if err := tx.NewSelect().
@@ -424,7 +415,7 @@ func (r *CompanyRepositoryBun) ListCompanyPayments(ctx context.Context, companyI
 		Order("paid_at DESC").
 		Order("created_at DESC").
 		Limit(perPage).
-		Offset(offset).
+		Offset(page * perPage).
 		Scan(ctx); err != nil {
 		return nil, 0, err
 	}

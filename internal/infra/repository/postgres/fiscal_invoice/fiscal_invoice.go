@@ -126,15 +126,6 @@ func (r *FiscalInvoiceRepository) GetByAccessKey(ctx context.Context, accessKey 
 }
 
 func (r *FiscalInvoiceRepository) List(ctx context.Context, companyID uuid.UUID, page, perPage int) ([]*model.FiscalInvoice, int, error) {
-	if page <= 0 {
-		page = 1
-	}
-	if perPage <= 0 {
-		perPage = 10
-	}
-
-	offset := (page - 1) * perPage
-
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, 0, err
@@ -150,7 +141,7 @@ func (r *FiscalInvoiceRepository) List(ctx context.Context, companyID uuid.UUID,
 		Where("deleted_at IS NULL").
 		Order("created_at DESC").
 		Limit(perPage).
-		Offset(offset).
+		Offset(page * perPage).
 		ScanAndCount(ctx)
 
 	if err != nil {

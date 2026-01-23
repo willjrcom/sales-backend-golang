@@ -341,9 +341,6 @@ func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context, page,
 	defer cancel()
 	defer tx.Rollback()
 
-	// Calculate offset
-	offset := page * perPage
-
 	// Get paginated process rules with filter, only from active categories
 	if err := tx.NewSelect().
 		Model(&processRules).
@@ -352,7 +349,7 @@ func (r *ProcessRuleRepositoryBun) GetAllProcessRules(ctx context.Context, page,
 		Where("pc.is_active = true").
 		Order("pr.name ASC").
 		Limit(perPage).
-		Offset(offset).
+		Offset(page * perPage).
 		Scan(ctx); err != nil {
 		return nil, 0, err
 	}

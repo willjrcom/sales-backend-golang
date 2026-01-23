@@ -111,7 +111,7 @@ func (r *StockRepositoryBun) GetAllStocks(ctx context.Context, page, perPage int
 	defer cancel()
 	defer tx.Rollback()
 
-	query := tx.NewSelect().Model(&stocks).Relation("Product").Limit(perPage).Offset((page - 1) * perPage)
+	query := tx.NewSelect().Model(&stocks).Relation("Product").Limit(perPage).Offset(page * perPage)
 
 	count, err := query.ScanAndCount(ctx)
 	if err != nil {

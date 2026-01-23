@@ -347,9 +347,6 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs
 	defer cancel()
 	defer tx.Rollback()
 
-	// Calculate offset
-	offset := page * perPage
-
 	// Default to active records (true)
 	activeFilter := true
 	if len(isActive) > 0 {
@@ -357,7 +354,7 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs
 	}
 
 	// load categories with their simple relations
-	query := tx.NewSelect().Model(&categories).Limit(perPage).Offset(offset)
+	query := tx.NewSelect().Model(&categories).Limit(perPage).Offset(page * perPage)
 
 	if len(IDs) > 0 {
 		query.Where("category.id IN (?) AND category.is_active = ?", bun.In(IDs), activeFilter)

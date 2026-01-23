@@ -131,9 +131,6 @@ func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context, page, perPage
 	defer cancel()
 	defer tx.Rollback()
 
-	// Calculate offset
-	offset := page * perPage
-
 	// Get paginated products with filter
 	query := tx.NewSelect().
 		Model(&products).
@@ -142,7 +139,7 @@ func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context, page, perPage
 		Where("product.is_active = ?", isActive).
 		Order("product.name ASC").
 		Limit(perPage).
-		Offset(offset)
+		Offset(page * perPage)
 
 	if categoryID != "" {
 		query = query.Where("product.category_id = ?", categoryID)
@@ -177,9 +174,6 @@ func (r *ProductRepositoryBun) GetDefaultProducts(ctx context.Context, page, per
 	defer cancel()
 	defer tx.Rollback()
 
-	// Calculate offset
-	offset := page * perPage
-
 	// Get paginated products with filter
 	if err := tx.NewSelect().
 		Model(&products).
@@ -191,7 +185,7 @@ func (r *ProductRepositoryBun) GetDefaultProducts(ctx context.Context, page, per
 		Where("cat.is_complement = ?", false).
 		Order("product.name ASC").
 		Limit(perPage).
-		Offset(offset).
+		Offset(page * perPage).
 		Scan(ctx); err != nil {
 		return nil, 0, err
 	}
