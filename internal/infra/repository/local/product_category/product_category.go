@@ -67,7 +67,7 @@ func (r *CategoryRepositoryLocal) GetCategoryByName(_ context.Context, name stri
 	return nil, errProductCategoryNotFound
 }
 
-func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context, IDs []uuid.UUID, page int, perPage int, isActive ...bool) ([]model.ProductCategory, error) {
+func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context, IDs []uuid.UUID, page int, perPage int, isActive ...bool) ([]model.ProductCategory, int, error) {
 	productCategories := make([]model.ProductCategory, 0)
 
 	for _, p := range r.productCategories {
@@ -75,7 +75,7 @@ func (r *CategoryRepositoryLocal) GetAllCategories(_ context.Context, IDs []uuid
 		productCategories = append(productCategories, *p)
 	}
 
-	return productCategories, nil
+	return productCategories, len(productCategories), nil
 }
 
 func (r *CategoryRepositoryLocal) GetAllCategoriesMap(_ context.Context, isActive bool, isAdditional, isComplement *bool) ([]model.ProductCategory, error) {

@@ -336,12 +336,12 @@ func (r *ProductCategoryRepositoryBun) GetCategoryByName(ctx context.Context, na
 	return category, nil
 }
 
-func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs []uuid.UUID, page int, perPage int, isActive ...bool) ([]model.ProductCategory, error) {
+func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs []uuid.UUID, page int, perPage int, isActive ...bool) ([]model.ProductCategory, int, error) {
 	categories := []model.ProductCategory{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
 	defer cancel()
@@ -357,15 +357,7 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs
 	}
 
 	// load categories with their simple relations
-	query := tx.NewSelect().
-		Model(&categories).
-		Relation("Sizes").
-		Relation("Quantities").
-		Relation("ProcessRules").
-		Relation("AdditionalCategories").
-		Relation("ComplementCategories").
-		Limit(perPage).
-		Offset(offset)
+	query := tx.NewSelect().Model(&categories).Limit(perPage).Offset(offset)
 
 	if len(IDs) > 0 {
 		query.Where("category.id IN (?) AND category.is_active = ?", bun.In(IDs), activeFilter)
@@ -374,45 +366,22 @@ func (r *ProductCategoryRepositoryBun) GetAllCategories(ctx context.Context, IDs
 	}
 
 	if err := query.Scan(ctx); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	// fetch products for all categories and their sizes
-	// collect category IDs
-	categoryIDs := make([]uuid.UUID, len(categories))
-	for i, cat := range categories {
-		categoryIDs[i] = cat.ID
-	}
-	// load products with Size relation
-	var products []model.Product
-	if len(categoryIDs) > 0 {
-		if err := tx.NewSelect().
-			Model(&products).
-			Relation("Size").
-			Where("product.category_id IN (?)", bun.In(categoryIDs)).
-			Where("product.is_active = ?", activeFilter).
-			Scan(ctx); err != nil {
-			return nil, err
-		}
-	}
-	// group products by their category
-	prodByCat := make(map[uuid.UUID][]model.Product, len(categories))
-	for _, p := range products {
-		prodByCat[p.CategoryID] = append(prodByCat[p.CategoryID], p)
-	}
-	// assign grouped products to categories
-	for i := range categories {
-		if ps, ok := prodByCat[categories[i].ID]; ok {
-			categories[i].Products = ps
-		} else {
-			categories[i].Products = nil
-		}
+	// Get total count
+	total, err := tx.NewSelect().
+		Model(&model.ProductCategory{}).
+		Where("is_active = ?", activeFilter).
+		Count(ctx)
+	if err != nil {
+		return nil, 0, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return categories, nil
+	return categories, total, nil
 }
 
 func (r *ProductCategoryRepositoryBun) GetAllCategoriesWithProcessRulesAndOrderProcess(ctx context.Context) ([]model.ProductCategoryWithOrderProcess, error) {

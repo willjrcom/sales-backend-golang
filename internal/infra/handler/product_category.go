@@ -154,13 +154,14 @@ func (h *handlerProductCategoryImpl) handlerGetAllCategories(w http.ResponseWrit
 		}
 	}
 
-	categories, err := h.s.GetAllCategories(ctx, dtoIDs, page, perPage, isActive)
+	categories, total, err := h.s.GetAllCategories(ctx, dtoIDs, page, perPage, isActive)
 
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
+	w.Header().Set("X-Total-Count", strconv.Itoa(total))
 	jsonpkg.ResponseJson(w, r, http.StatusOK, categories)
 }
 
