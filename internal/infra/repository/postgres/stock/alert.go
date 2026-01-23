@@ -17,7 +17,6 @@ func NewStockAlertRepositoryBun(db *bun.DB) model.StockAlertRepository {
 }
 
 func (r *StockAlertRepositoryBun) CreateAlert(ctx context.Context, a *model.StockAlert) error {
-
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err

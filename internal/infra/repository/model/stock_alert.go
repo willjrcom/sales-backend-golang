@@ -17,12 +17,14 @@ type StockAlert struct {
 }
 
 type StockAlertCommonAttributes struct {
-	StockID    uuid.UUID  `bun:"stock_id,type:uuid,notnull"`
-	Type       string     `bun:"type,notnull"`
-	Message    string     `bun:"message,notnull"`
-	IsResolved bool       `bun:"is_resolved,notnull"`
-	ResolvedAt *time.Time `bun:"resolved_at"`
-	ResolvedBy *uuid.UUID `bun:"resolved_by,type:uuid"`
+	StockID     uuid.UUID  `bun:"stock_id,type:uuid,notnull"`
+	Type        string     `bun:"type,notnull"`
+	Message     string     `bun:"message,notnull"`
+	IsResolved  bool       `bun:"is_resolved,notnull"`
+	ResolvedAt  *time.Time `bun:"resolved_at"`
+	ResolvedBy  *uuid.UUID `bun:"resolved_by,type:uuid"`
+	ProductName string     `bun:"product_name,notnull"`
+	ProductCode string     `bun:"product_code,notnull"`
 }
 
 // FromDomain converte domain para model
@@ -33,12 +35,14 @@ func (sa *StockAlert) FromDomain(alert *stockentity.StockAlert) {
 	*sa = StockAlert{
 		Entity: entitymodel.FromDomain(alert.Entity),
 		StockAlertCommonAttributes: StockAlertCommonAttributes{
-			StockID:    alert.StockID,
-			Type:       string(alert.Type),
-			Message:    alert.Message,
-			IsResolved: alert.IsResolved,
-			ResolvedAt: alert.ResolvedAt,
-			ResolvedBy: alert.ResolvedBy,
+			StockID:     alert.StockID,
+			Type:        string(alert.Type),
+			Message:     alert.Message,
+			IsResolved:  alert.IsResolved,
+			ResolvedAt:  alert.ResolvedAt,
+			ResolvedBy:  alert.ResolvedBy,
+			ProductName: alert.ProductName,
+			ProductCode: alert.ProductCode,
 		},
 	}
 }
@@ -51,12 +55,14 @@ func (sa *StockAlert) ToDomain() *stockentity.StockAlert {
 	return &stockentity.StockAlert{
 		Entity: sa.Entity.ToDomain(),
 		StockAlertCommonAttributes: stockentity.StockAlertCommonAttributes{
-			StockID:    sa.StockID,
-			Type:       stockentity.AlertType(sa.Type),
-			Message:    sa.Message,
-			IsResolved: sa.IsResolved,
-			ResolvedAt: sa.ResolvedAt,
-			ResolvedBy: sa.ResolvedBy,
+			StockID:     sa.StockID,
+			Type:        stockentity.AlertType(sa.Type),
+			Message:     sa.Message,
+			IsResolved:  sa.IsResolved,
+			ResolvedAt:  sa.ResolvedAt,
+			ResolvedBy:  sa.ResolvedBy,
+			ProductName: sa.ProductName,
+			ProductCode: sa.ProductCode,
 		},
 	}
 }

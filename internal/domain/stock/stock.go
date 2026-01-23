@@ -220,10 +220,12 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 		alerts = append(alerts, &StockAlert{
 			Entity: entity.NewEntity(),
 			StockAlertCommonAttributes: StockAlertCommonAttributes{
-				StockID:    s.ID,
-				Type:       AlertTypeLowStock,
-				Message:    "Estoque abaixo do mínimo",
-				IsResolved: false,
+				StockID:     s.ID,
+				Type:        AlertTypeLowStock,
+				Message:     "Estoque abaixo do mínimo",
+				IsResolved:  false,
+				ProductName: s.Product.Name,
+				ProductCode: s.Product.Code,
 			},
 		})
 	}
@@ -233,10 +235,12 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 		alerts = append(alerts, &StockAlert{
 			Entity: entity.NewEntity(),
 			StockAlertCommonAttributes: StockAlertCommonAttributes{
-				StockID:    s.ID,
-				Type:       AlertTypeOutOfStock,
-				Message:    "Produto sem estoque",
-				IsResolved: false,
+				StockID:     s.ID,
+				Type:        AlertTypeOutOfStock,
+				Message:     "Produto sem estoque",
+				IsResolved:  false,
+				ProductName: s.Product.Name,
+				ProductCode: s.Product.Code,
 			},
 		})
 	}
@@ -246,10 +250,12 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 		alerts = append(alerts, &StockAlert{
 			Entity: entity.NewEntity(),
 			StockAlertCommonAttributes: StockAlertCommonAttributes{
-				StockID:    s.ID,
-				Type:       AlertTypeOverStock,
-				Message:    "Estoque acima do máximo",
-				IsResolved: false,
+				StockID:     s.ID,
+				Type:        AlertTypeOverStock,
+				Message:     "Estoque acima do máximo",
+				IsResolved:  false,
+				ProductName: s.Product.Name,
+				ProductCode: s.Product.Code,
 			},
 		})
 	}

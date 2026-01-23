@@ -14,12 +14,14 @@ type StockAlert struct {
 }
 
 type StockAlertCommonAttributes struct {
-	StockID    uuid.UUID
-	Type       AlertType
-	Message    string
-	IsResolved bool
-	ResolvedAt *time.Time
-	ResolvedBy *uuid.UUID
+	StockID     uuid.UUID
+	Type        AlertType
+	Message     string
+	IsResolved  bool
+	ResolvedAt  *time.Time
+	ResolvedBy  *uuid.UUID
+	ProductName string
+	ProductCode string
 }
 
 // AlertType define o tipo de alerta
