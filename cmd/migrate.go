@@ -18,6 +18,7 @@ import (
 )
 
 const migrationsDir = "bootstrap/database/migrations"
+const publicMigrationsDir = "bootstrap/database/migrations/public"
 
 // MigrateCmd applies a raw SQL file to every tenant schema.
 var MigrateCmd = &cobra.Command{
@@ -266,6 +267,30 @@ func listMigrationFiles() ([]string, error) {
 	return migrations, nil
 }
 
+func listPublicMigrationFiles() ([]string, error) {
+	entries, err := os.ReadDir(publicMigrationsDir)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	var migrations []string
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		if strings.HasSuffix(entry.Name(), ".sql") {
+			migrations = append(migrations, entry.Name())
+		}
+	}
+
+	// Ordena por nome (que deve incluir timestamp no prefixo)
+	sort.Strings(migrations)
+	return migrations, nil
+}
+
 func filterPendingMigrations(all []string, applied map[string]bool) []string {
 	var pending []string
 	for _, m := range all {
@@ -331,4 +356,67 @@ func applyMigration(ctx context.Context, db *bun.DB, schemaName, sql string) err
 	}
 
 	return tx.Commit()
+}
+
+// MigrateAllCmd applies all pending SQL migrations to every tenant schema.
+var PublicMigrateAllCmd = &cobra.Command{
+	Use:   "public-migrate-all",
+	Short: "Execute all pending SQL migrations for public schema",
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		cmd.Printf("connecting to database...\n")
+		db := database.NewPostgreSQLConnection()
+		ctx := context.Background()
+
+		// Cria tabela de controle de migrações no schema public
+		if err := ensureMigrationsTable(ctx, db); err != nil {
+			return fmt.Errorf("failed to create migrations table: %w", err)
+		}
+
+		// Lista todas as migrações disponíveis
+		migrations, err := listMigrationFiles()
+		if err != nil {
+			return fmt.Errorf("failed to list migration files: %w", err)
+		}
+
+		if len(migrations) == 0 {
+			cmd.Println("no migration files found")
+			return nil
+		}
+
+		cmd.Printf("found %d migration files\n", len(migrations))
+
+		// Para cada schema, aplica migrações pendentes
+		applied, err := getAppliedMigrations(ctx, db, "public")
+		if err != nil {
+			return fmt.Errorf("schema public: failed to get applied migrations: %w", err)
+		}
+
+		pending := filterPendingMigrations(migrations, applied)
+		if len(pending) == 0 {
+			cmd.Printf("schema public: all migrations already applied")
+			return nil
+		}
+
+		cmd.Printf("schema public: applying %d pending migrations...\n", len(pending))
+
+		for _, migration := range pending {
+			cmd.Printf("  -> %s\n", migration)
+
+			sql, err := readMigrationFile(migration)
+			if err != nil {
+				return fmt.Errorf("schema public: %w", err)
+			}
+
+			if err := applyMigration(ctx, db, "public", sql); err != nil {
+				return fmt.Errorf("schema public: migration %s failed: %w", migration, err)
+			}
+
+			if err := recordMigration(ctx, db, "public", migration); err != nil {
+				return fmt.Errorf("schema public: failed to record migration %s: %w", migration, err)
+			}
+		}
+
+		cmd.Println("all migrations applied successfully")
+		return nil
+	},
 }

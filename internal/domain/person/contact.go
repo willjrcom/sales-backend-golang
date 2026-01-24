@@ -18,7 +18,6 @@ type Contact struct {
 }
 
 type ContactCommonAttributes struct {
-	Ddd    string
 	Number string
 	Type   ContactType
 }

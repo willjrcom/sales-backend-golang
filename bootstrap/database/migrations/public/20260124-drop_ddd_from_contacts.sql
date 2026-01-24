@@ -1,0 +1,1 @@
+ALTER TABLE contacts DROP COLUMN IF EXISTS ddd;

@@ -70,14 +70,14 @@ func (r *ContactRepositoryLocal) GetContactById(ctx context.Context, id string) 
 	return c, nil
 }
 
-func (r *ContactRepositoryLocal) GetContactByDddAndNumber(ctx context.Context, ddd string, number string, contactType string) (*model.Contact, error) {
-	if ddd == "" || number == "" {
-		return nil, errors.New("ddd and number are required")
+func (r *ContactRepositoryLocal) GetContactByNumber(ctx context.Context, number string, contactType string) (*model.Contact, error) {
+	if number == "" {
+		return nil, errors.New("number is required")
 	}
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	for _, c := range r.contacts {
-		if c.Ddd == ddd && c.Number == number && (contactType == "" || strings.EqualFold(c.Type, contactType)) {
+		if c.Number == number && (contactType == "" || strings.EqualFold(c.Type, contactType)) {
 			return c, nil
 		}
 	}
@@ -93,7 +93,7 @@ func (r *ContactRepositoryLocal) FtSearchContacts(ctx context.Context, key strin
 		if contactType != "" && !strings.EqualFold(c.Type, contactType) {
 			continue
 		}
-		if strings.Contains(strings.ToLower(c.Number), keyLower) || strings.Contains(strings.ToLower(c.Ddd), keyLower) {
+		if strings.Contains(strings.ToLower(c.Number), keyLower) {
 			results = append(results, *c)
 		}
 	}

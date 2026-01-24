@@ -417,7 +417,7 @@ func createTables(ctx context.Context, tx *bun.Tx) error {
 		return err
 	}
 
-	index := "CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_contact ON contacts (ddd, number, type);"
+	index := "CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_contact ON contacts (number, type);"
 
 	if _, err := tx.ExecContext(ctx, index); err != nil {
 		return err

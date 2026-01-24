@@ -22,7 +22,6 @@ func (c *PublicContact) FromDomain(contact *personentity.Contact) {
 		Entity:   entitymodel.FromDomain(contact.Entity),
 		ObjectID: contact.ObjectID,
 		ContactCommonAttributes: ContactCommonAttributes{
-			Ddd:    contact.Ddd,
 			Number: contact.Number,
 			Type:   string(contact.Type),
 		},
@@ -37,7 +36,6 @@ func (c *PublicContact) ToDomain() *personentity.Contact {
 		Entity:   c.Entity.ToDomain(),
 		ObjectID: c.ObjectID,
 		ContactCommonAttributes: personentity.ContactCommonAttributes{
-			Ddd:    c.Ddd,
 			Number: c.Number,
 			Type:   personentity.ContactType(c.Type),
 		},

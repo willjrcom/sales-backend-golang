@@ -100,7 +100,7 @@ func (r *ContactRepositoryBun) GetContactById(ctx context.Context, id string) (*
 	return contact, nil
 }
 
-func (r *ContactRepositoryBun) GetContactByDddAndNumber(ctx context.Context, ddd string, number string, contactType string) (*model.Contact, error) {
+func (r *ContactRepositoryBun) GetContactByNumber(ctx context.Context, number string, contactType string) (*model.Contact, error) {
 	contact := &model.Contact{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -111,7 +111,7 @@ func (r *ContactRepositoryBun) GetContactByDddAndNumber(ctx context.Context, ddd
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(contact).Where("ddd = ? AND number = ? AND type = ?", ddd, number, contactType).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(contact).Where("number = ? AND type = ?", number, contactType).Scan(ctx); err != nil {
 		return nil, err
 	}
 

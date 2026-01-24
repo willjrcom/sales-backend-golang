@@ -11,9 +11,7 @@ const (
 	addColumnSQL = `
 		ALTER TABLE contacts ADD COLUMN IF NOT EXISTS ts tsvector
 		GENERATED ALWAYS AS (
-			setweight(to_tsvector('simple', coalesce(ddd::text, '') || coalesce(number::text, '')), 'A') ||
-			setweight(to_tsvector('simple', coalesce(ddd::text, '')), 'B') ||
-			setweight(to_tsvector('simple', coalesce(number::text, '')), 'B')
+			setweight(to_tsvector('simple', coalesce(number::text, '')), 'A')
 		) STORED;
 	`
 	createIndexSQL = "CREATE INDEX IF NOT EXISTS contacts_ts_idx ON contacts USING GIN(ts);"

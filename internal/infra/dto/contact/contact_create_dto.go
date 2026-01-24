@@ -7,21 +7,15 @@ import (
 )
 
 var (
-	ErrDddIsEmpty    = errors.New("ddd is required")
 	ErrNumberIsEmpty = errors.New("number is required")
 )
 
 type ContactCreateDTO struct {
-	Ddd    string                   `json:"ddd"`
 	Number string                   `json:"number"`
 	Type   personentity.ContactType `json:"type"`
 }
 
 func (c *ContactCreateDTO) validate() error {
-	if c.Ddd == "" {
-		return ErrDddIsEmpty
-	}
-
 	if c.Number == "" {
 		return ErrNumberIsEmpty
 	}
@@ -35,7 +29,6 @@ func (c *ContactCreateDTO) ToDomain() (*personentity.Contact, error) {
 	}
 
 	contactCommonAttributes := &personentity.ContactCommonAttributes{
-		Ddd:    c.Ddd,
 		Number: c.Number,
 		Type:   c.Type,
 	}

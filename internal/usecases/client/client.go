@@ -103,7 +103,7 @@ func (s *Service) GetClientById(ctx context.Context, dto *entitydto.IDRequest) (
 }
 
 func (s *Service) GetClientByContact(ctx context.Context, dto *contactdto.ContactDTO) (*clientdto.ClientDTO, error) {
-	contactModel, err := s.rcontact.GetContactByDddAndNumber(ctx, dto.Ddd, dto.Number, string(personentity.ContactTypeClient))
+	contactModel, err := s.rcontact.GetContactByNumber(ctx, dto.Number, string(personentity.ContactTypeClient))
 
 	if err != nil {
 		return nil, err
