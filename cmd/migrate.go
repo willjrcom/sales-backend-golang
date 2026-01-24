@@ -373,7 +373,7 @@ var PublicMigrateAllCmd = &cobra.Command{
 		}
 
 		// Lista todas as migrações disponíveis
-		migrations, err := listMigrationFiles()
+		migrations, err := listPublicMigrationFiles()
 		if err != nil {
 			return fmt.Errorf("failed to list migration files: %w", err)
 		}

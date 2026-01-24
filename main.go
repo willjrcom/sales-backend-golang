@@ -35,6 +35,7 @@ func main() {
 
 	// Comando para executar todas as migrações pendentes automaticamente
 	rootCmd.AddCommand(cmd.MigrateAllCmd)
+	rootCmd.AddCommand(cmd.PublicMigrateAllCmd)
 
 	ctx := context.Background()
 	if err := rootCmd.ExecuteContext(ctx); err != nil {
