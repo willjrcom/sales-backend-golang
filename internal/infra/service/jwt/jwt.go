@@ -52,6 +52,17 @@ func ValidateToken(ctx context.Context, tokenString string) (*jwt.Token, error) 
 	})
 }
 
+func ValidateTokenWithoutExpiry(ctx context.Context, tokenString string) (*jwt.Token, error) {
+	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrSignatureInvalid
+		}
+
+		secretKey := os.Getenv("JWT_SECRET_KEY")
+		return []byte(secretKey), nil
+	})
+}
+
 func GetSchemaFromAccessToken(token *jwt.Token) string {
 	claims := token.Claims.(jwt.MapClaims)
 	currentSchema, ok := claims["current_schema"]

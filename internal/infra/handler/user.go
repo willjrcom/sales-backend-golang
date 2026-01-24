@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -244,20 +245,32 @@ func (h *handlerUserImpl) handlerDeleteUser(w http.ResponseWriter, r *http.Reque
 func (h *handlerUserImpl) handlerRefreshAccessToken(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	// require an existing ID token to refresh
-	validAccessToken, err := headerservice.GetAccessTokenFromHeader(ctx, r)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
+	// Extract token manually from header because headerservice.GetAccessTokenFromHeader enforces validity (including expiry)
+	accessTokenString := r.Header.Get("access-token")
+	if accessTokenString == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("access-token is required"))
 		return
 	}
 
-	schema := jwtservice.GetSchemaFromAccessToken(validAccessToken)
-	if schema == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("schema not found in token"))
+	// Validate signature only, ignoring expiry
+	// We allow expired tokens to be refreshed as long as the signature is valid
+	token, err := jwtservice.ValidateTokenWithoutExpiry(ctx, accessTokenString)
+	if token == nil || (err != nil && !strings.Contains(err.Error(), "token is expired")) {
+		// If verification failed for reasons other than expiry (e.g. invalid signature), return 401
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, fmt.Errorf("access-token invalid: %v", err))
 		return
 	}
 
-	newAccessToken, err := jwtservice.CreateFullAccessToken(validAccessToken, schema)
+	// Double check if token is valid object (even if expired, jwt-go returns it)
+	if token == nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("access-token is nil"))
+		return
+	}
+
+	schema := jwtservice.GetSchemaFromAccessToken(token)
+	// Removed strict check for schema presence to allow refreshing Basic Access Tokens (pre-company selection)
+
+	newAccessToken, err := jwtservice.CreateFullAccessToken(token, schema)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
