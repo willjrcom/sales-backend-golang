@@ -34,7 +34,7 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 		c.Patch("/update/{id}", h.handlerUpdateClient)
 		c.Delete("/{id}", h.handlerDeleteClient)
 		c.Get("/{id}", h.handlerGetClientById)
-		c.Post("/by-contact", h.handlerGetClientByContact)
+		c.Get("/by-contact/{number}", h.handlerGetClientByContact)
 		c.Get("/all", h.handlerGetAllClients)
 	})
 
@@ -132,7 +132,13 @@ func (h *handlerClientImpl) handlerGetClientById(w http.ResponseWriter, r *http.
 func (h *handlerClientImpl) handlerGetClientByContact(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoContact := &contactdto.ContactDTO{}
+	number := chi.URLParam(r, "number")
+	if number == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("number is required"))
+		return
+	}
+
+	dtoContact := &contactdto.ContactDTO{Number: number}
 	if err := jsonpkg.ParseBody(r, dtoContact); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
