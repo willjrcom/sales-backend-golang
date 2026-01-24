@@ -32,14 +32,28 @@ func (r *UserRepositoryBun) CreateUser(ctx context.Context, user *model.User) er
 	}
 
 	if user.PublicPerson.Contact != nil {
-		if _, err := tx.NewUpdate().Model(user.PublicPerson.Contact).Where("id = ?", user.PublicPerson.Contact.ID).Exec(ctx); err != nil {
+		res, err := tx.NewUpdate().Model(user.PublicPerson.Contact).Where("id = ?", user.PublicPerson.Contact.ID).Exec(ctx)
+		if err != nil {
 			return err
+		}
+
+		if rows, _ := res.RowsAffected(); rows == 0 {
+			if _, err := tx.NewInsert().Model(user.PublicPerson.Contact).Exec(ctx); err != nil {
+				return err
+			}
 		}
 	}
 
 	if user.PublicPerson.Address != nil {
-		if _, err := tx.NewUpdate().Model(user.PublicPerson.Address).Where("id = ?", user.PublicPerson.Address.ID).Exec(ctx); err != nil {
+		res, err := tx.NewUpdate().Model(user.PublicPerson.Address).Where("id = ?", user.PublicPerson.Address.ID).Exec(ctx)
+		if err != nil {
 			return err
+		}
+
+		if rows, _ := res.RowsAffected(); rows == 0 {
+			if _, err := tx.NewInsert().Model(user.PublicPerson.Address).Exec(ctx); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -111,14 +125,28 @@ func (r *UserRepositoryBun) UpdateUser(ctx context.Context, user *model.User) er
 	}
 
 	if user.Contact != nil {
-		if _, err := tx.NewUpdate().Model(user.Contact).WherePK().Exec(ctx); err != nil {
+		res, err := tx.NewUpdate().Model(user.Contact).WherePK().Exec(ctx)
+		if err != nil {
 			return err
+		}
+
+		if rows, _ := res.RowsAffected(); rows == 0 {
+			if _, err := tx.NewInsert().Model(user.Contact).Exec(ctx); err != nil {
+				return err
+			}
 		}
 	}
 
 	if user.Address != nil {
-		if _, err := tx.NewUpdate().Model(user.Address).WherePK().Exec(ctx); err != nil {
+		res, err := tx.NewUpdate().Model(user.Address).WherePK().Exec(ctx)
+		if err != nil {
 			return err
+		}
+
+		if rows, _ := res.RowsAffected(); rows == 0 {
+			if _, err := tx.NewInsert().Model(user.Address).Exec(ctx); err != nil {
+				return err
+			}
 		}
 	}
 

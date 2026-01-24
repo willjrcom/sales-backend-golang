@@ -58,8 +58,15 @@ func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model
 		return err
 	}
 
-	if _, err := tx.NewUpdate().Model(company.Address).WherePK().Exec(ctx); err != nil {
+	res, err := tx.NewUpdate().Model(company.Address).WherePK().Exec(ctx)
+	if err != nil {
 		return err
+	}
+
+	if rows, _ := res.RowsAffected(); rows == 0 {
+		if _, err := tx.NewInsert().Model(company.Address).Exec(ctx); err != nil {
+			return err
+		}
 	}
 
 	if err = tx.Commit(); err != nil {

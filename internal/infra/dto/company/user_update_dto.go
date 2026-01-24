@@ -71,9 +71,6 @@ func (r *UserUpdateDTO) UpdateDomain(user *companyentity.User) error {
 				AddressCommonAttributes: addressentity.AddressCommonAttributes{},
 				ObjectID:                user.ID,
 			}
-
-			r.Address.UpdateDomain(user.Address)
-
 		}
 		r.Address.UpdateDomain(user.Address)
 	} else {

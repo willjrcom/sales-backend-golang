@@ -63,14 +63,28 @@ func (r *ClientRepositoryBun) UpdateClient(ctx context.Context, c *model.Client)
 	}
 
 	if c.Contact != nil {
-		if _, err := tx.NewUpdate().Model(c.Contact).Where("id = ?", c.Contact.ID).Exec(ctx); err != nil {
+		res, err := tx.NewUpdate().Model(c.Contact).Where("id = ?", c.Contact.ID).Exec(ctx)
+		if err != nil {
 			return err
+		}
+
+		if rows, _ := res.RowsAffected(); rows == 0 {
+			if _, err := tx.NewInsert().Model(c.Contact).Exec(ctx); err != nil {
+				return err
+			}
 		}
 	}
 
 	if c.Address != nil {
-		if _, err := tx.NewUpdate().Model(c.Address).Where("id = ?", c.Address.ID).Exec(ctx); err != nil {
+		res, err := tx.NewUpdate().Model(c.Address).Where("id = ?", c.Address.ID).Exec(ctx)
+		if err != nil {
 			return err
+		}
+
+		if rows, _ := res.RowsAffected(); rows == 0 {
+			if _, err := tx.NewInsert().Model(c.Address).Exec(ctx); err != nil {
+				return err
+			}
 		}
 	}
 
