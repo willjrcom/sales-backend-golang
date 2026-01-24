@@ -3,7 +3,7 @@ package contactdto
 import personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 
 type ContactUpdateDTO struct {
-	Number *string `json:"number"`
+	Number string `json:"number"`
 }
 
 func (c *ContactUpdateDTO) validate() error {
@@ -15,8 +15,8 @@ func (c *ContactUpdateDTO) UpdateDomain(contact *personentity.Contact, Type pers
 		return err
 	}
 
-	if c.Number != nil {
-		contact.Number = *c.Number
+	if c.Number != "" {
+		contact.Number = c.Number
 	}
 
 	contact.Type = Type

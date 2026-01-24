@@ -52,7 +52,10 @@ func (r *UserUpdateDTO) UpdateDomain(user *companyentity.User) error {
 	if r.Contact != nil {
 		if user.Contact == nil {
 			user.Contact = &personentity.Contact{
-				Entity:   entity.NewEntity(),
+				Entity: entity.NewEntity(),
+				ContactCommonAttributes: personentity.ContactCommonAttributes{
+					Number: r.Contact.Number,
+				},
 				ObjectID: user.ID,
 			}
 		}
@@ -64,9 +67,13 @@ func (r *UserUpdateDTO) UpdateDomain(user *companyentity.User) error {
 	if r.Address != nil {
 		if user.Address == nil {
 			user.Address = &addressentity.Address{
-				Entity:   entity.NewEntity(),
-				ObjectID: user.ID,
+				Entity:                  entity.NewEntity(),
+				AddressCommonAttributes: addressentity.AddressCommonAttributes{},
+				ObjectID:                user.ID,
 			}
+
+			r.Address.UpdateDomain(user.Address)
+
 		}
 		r.Address.UpdateDomain(user.Address)
 	} else {
