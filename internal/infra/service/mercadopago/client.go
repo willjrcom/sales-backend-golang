@@ -114,14 +114,6 @@ func (c *Client) Enabled() bool {
 	return c != nil && c.preferenceClient != nil && c.paymentClient != nil
 }
 
-// MonthlyPrice returns the configured default monthly price.
-func (c *Client) MonthlyPrice() float64 {
-	if c == nil {
-		return defaultMonthlyPriceBRL
-	}
-	return c.monthlyPrice
-}
-
 // WebhookSecret returns the configured webhook secret.
 func (c *Client) WebhookSecret() string {
 	if c == nil {
@@ -189,69 +181,6 @@ func parseXSignature(header string) (ts, v1 string) {
 		}
 	}
 	return ts, v1
-}
-
-// CreateSubscriptionPreference creates a checkout preference using the official SDK.
-func (c *Client) CreateSubscriptionPreference(ctx context.Context, req *PreferenceRequest) (*PreferenceResponse, error) {
-	if c == nil || !c.Enabled() {
-		return nil, fmt.Errorf("mercado pago client is not configured")
-	}
-
-	if c.notificationURL == "" {
-		return nil, fmt.Errorf("mercado pago notification url is not configured")
-	}
-
-	if c.successURL == "" {
-		return nil, fmt.Errorf("mercado pago success url is not configured (set MP_SUCCESS_URL)")
-	}
-
-	months := req.Months
-	if months <= 0 {
-		months = 1
-	}
-
-	price := req.Price
-	if price <= 0 {
-		price = c.monthlyPrice
-	}
-
-	item := preference.ItemRequest{
-		Title:       fmt.Sprintf("Mensalidade %s", req.Company),
-		Description: fmt.Sprintf("Plano de assinatura (%d mês(es))", months),
-		Quantity:    1,
-		UnitPrice:   price * float64(months),
-		CurrencyID:  "BRL",
-	}
-
-	metadata := map[string]any{
-		"company_id":  req.ID,
-		"schema_name": req.Schema,
-		"months":      months,
-	}
-
-	prefRequest := preference.Request{
-		Items:             []preference.ItemRequest{item},
-		ExternalReference: req.ID,
-		NotificationURL:   c.notificationURL,
-		AutoReturn:        "approved",
-		Metadata:          metadata,
-		BackURLs: &preference.BackURLsRequest{
-			Success: c.successURL,
-			Pending: c.pendingURL,
-			Failure: c.failureURL,
-		},
-	}
-
-	resource, err := c.preferenceClient.Create(ctx, prefRequest)
-	if err != nil {
-		return nil, err
-	}
-
-	return &PreferenceResponse{
-		ID:               resource.ID,
-		InitPoint:        resource.InitPoint,
-		SandboxInitPoint: resource.SandboxInitPoint,
-	}, nil
 }
 
 // CheckoutItem represents a single line item in the checkout preference.
