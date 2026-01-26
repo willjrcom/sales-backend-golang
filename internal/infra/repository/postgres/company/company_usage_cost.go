@@ -148,6 +148,38 @@ func (r *CompanyUsageCostRepository) GetMonthlyCosts(ctx context.Context, compan
 	return costs, nil
 }
 
+func (r *CompanyUsageCostRepository) GetMonthlyCostsPaginated(ctx context.Context, companyID uuid.UUID, month, year, page, perPage int) ([]*model.CompanyUsageCost, int, error) {
+	var costs []*model.CompanyUsageCost
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	query := tx.NewSelect().
+		Model(&costs).
+		Where("company_id = ?", companyID).
+		Where("EXTRACT(MONTH FROM created_at) = ?", month).
+		Where("EXTRACT(YEAR FROM created_at) = ?", year).
+		Where("deleted_at IS NULL").
+		Order("created_at DESC") // DESC for latest first in paginated view usually
+
+	if page > 0 && perPage > 0 {
+		query.Limit(perPage).Offset((page - 1) * perPage)
+	}
+
+	count, err := query.ScanAndCount(ctx)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, 0, err
+	}
+	return costs, count, nil
+}
+
 func (r *CompanyUsageCostRepository) Update(ctx context.Context, cost *model.CompanyUsageCost) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {

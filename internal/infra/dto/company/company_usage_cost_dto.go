@@ -12,6 +12,8 @@ type CompanyUsageCostDTO struct {
 	Description string          `json:"description"`
 	Amount      decimal.Decimal `json:"amount"`
 	ReferenceID *string         `json:"reference_id,omitempty"`
+	PaymentID   *string         `json:"payment_id,omitempty"`
+	Status      string          `json:"status"`
 	CreatedAt   string          `json:"created_at"`
 }
 
@@ -30,4 +32,9 @@ func (dto *CompanyUsageCostDTO) FromDomain(cost *companyentity.CompanyUsageCost)
 		refID := cost.ReferenceID.String()
 		dto.ReferenceID = &refID
 	}
+	if cost.PaymentID != nil {
+		payID := cost.PaymentID.String()
+		dto.PaymentID = &payID
+	}
+	dto.Status = string(cost.Status)
 }

@@ -218,8 +218,9 @@ func (h *handlerCompanyImpl) handlerGetMonthlyCosts(w http.ResponseWriter, r *ht
 
 	month, _ := strconv.Atoi(r.URL.Query().Get("month"))
 	year, _ := strconv.Atoi(r.URL.Query().Get("year"))
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
 
-	summary, err := h.costService.GetMonthlySummary(ctx, month, year)
+	summary, err := h.costService.GetMonthlySummary(ctx, month, year, page, perPage)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

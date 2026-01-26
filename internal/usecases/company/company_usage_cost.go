@@ -37,7 +37,7 @@ func (s *UsageCostService) RegisterUsageCost(ctx context.Context, cost *companye
 }
 
 // GetMonthlySummary returns a summary of costs for a given month
-func (s *UsageCostService) GetMonthlySummary(ctx context.Context, month, year int) (*companydto.MonthlyCostSummaryDTO, error) {
+func (s *UsageCostService) GetMonthlySummary(ctx context.Context, month, year, page, perPage int) (*companydto.MonthlyCostSummaryDTO, error) {
 	if s.costRepo == nil {
 		return nil, ErrCostRepositoryNotSet
 	}
@@ -48,20 +48,28 @@ func (s *UsageCostService) GetMonthlySummary(ctx context.Context, month, year in
 		return nil, err
 	}
 
-	// Get all costs for the month
-	costs, err := s.costRepo.GetMonthlyCosts(ctx, companyModel.ID, month, year)
+	// Get all costs for the month (for totals) - TODO: Optimize with aggregate query
+	allCosts, err := s.costRepo.GetMonthlyCosts(ctx, companyModel.ID, month, year)
 	if err != nil {
 		return nil, err
 	}
 
-	// Calculate totals by type
+	// Get paginated costs for the items list
+	paginatedCosts, totalItems, err := s.costRepo.GetMonthlyCostsPaginated(ctx, companyModel.ID, month, year, page, perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	// Calculate totals by type (using allCosts)
 	costsByType := make(map[string]decimal.Decimal)
 	totalAmount := decimal.Zero
+	totalPaid := decimal.Zero
 	nfceCount := 0
 	nfceCosts := decimal.Zero
 	otherFee := decimal.Zero
+	items := make([]companydto.CompanyUsageCostDTO, 0, len(paginatedCosts))
 
-	for _, cost := range costs {
+	for _, cost := range allCosts {
 		amount := cost.Amount
 		totalAmount = totalAmount.Add(amount)
 
@@ -74,10 +82,20 @@ func (s *UsageCostService) GetMonthlySummary(ctx context.Context, month, year in
 		// Track specific metrics
 		if cost.CostType == string(companyentity.CostTypeNFCe) {
 			nfceCount++
-			nfceCosts = nfceCosts.Add(amount)
 		} else {
 			otherFee = otherFee.Add(amount)
 		}
+
+		if cost.Status == "PAID" || cost.Status == "paid" {
+			totalPaid = totalPaid.Add(amount)
+		}
+	}
+
+	items = make([]companydto.CompanyUsageCostDTO, 0, len(paginatedCosts))
+	for _, cost := range paginatedCosts {
+		item := companydto.CompanyUsageCostDTO{}
+		item.FromDomain(cost.ToDomain())
+		items = append(items, item)
 	}
 
 	return &companydto.MonthlyCostSummaryDTO{
@@ -85,10 +103,15 @@ func (s *UsageCostService) GetMonthlySummary(ctx context.Context, month, year in
 		Month:       month,
 		Year:        year,
 		TotalAmount: totalAmount,
+		TotalPaid:   totalPaid,
 		CostsByType: costsByType,
-		CostsCount:  len(costs),
+		CostsCount:  len(allCosts),
 		OtherFee:    otherFee,
 		NFCeCosts:   nfceCosts,
 		NFCeCount:   nfceCount,
+		CurrentPage: page,
+		PerPage:     perPage,
+		TotalItems:  totalItems,
+		Items:       items,
 	}, nil
 }
