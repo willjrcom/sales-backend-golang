@@ -21,8 +21,9 @@ type CompanyPayment struct {
 	Currency          string          `bun:"currency,notnull"`
 	Amount            decimal.Decimal `bun:"amount,type:decimal(12,2),notnull"`
 	Months            int             `bun:"months,notnull"`
-	PaidAt            time.Time       `bun:"paid_at,notnull"`
+	PaidAt            *time.Time      `bun:"paid_at"`
 	ExternalReference string          `bun:"external_reference"`
+	PaymentURL        string          `bun:"payment_url"`
 	Description       string          `bun:"description"`
 	RawPayload        []byte          `bun:"raw_payload,type:jsonb"`
 }
@@ -42,6 +43,7 @@ func (c *CompanyPayment) FromDomain(payment *companyentity.SubscriptionPayment) 
 		Months:            payment.Months,
 		PaidAt:            payment.PaidAt,
 		ExternalReference: payment.ExternalReference,
+		PaymentURL:        payment.PaymentURL,
 		RawPayload:        payment.RawPayload,
 	}
 }
@@ -61,6 +63,7 @@ func (c *CompanyPayment) ToDomain() *companyentity.SubscriptionPayment {
 		Months:            c.Months,
 		PaidAt:            c.PaidAt,
 		ExternalReference: c.ExternalReference,
+		PaymentURL:        c.PaymentURL,
 		RawPayload:        c.RawPayload,
 	}
 }

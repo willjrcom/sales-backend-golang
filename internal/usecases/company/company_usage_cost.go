@@ -6,6 +6,7 @@ import (
 
 	"github.com/shopspring/decimal"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
@@ -28,6 +29,7 @@ func NewUsageCostService(costRepo model.CompanyUsageCostRepository, companyRepo 
 
 // RegisterUsageCost registers a new usage cost for a company
 func (s *UsageCostService) RegisterUsageCost(ctx context.Context, cost *companyentity.CompanyUsageCost) error {
+	cost.Entity = entity.NewEntity()
 	costModel := &model.CompanyUsageCost{}
 	costModel.FromDomain(cost)
 

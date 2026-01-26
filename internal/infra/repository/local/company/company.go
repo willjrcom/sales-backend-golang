@@ -213,7 +213,7 @@ func (r *CompanyRepositoryLocal) ListCompanyPayments(ctx context.Context, compan
 		}
 	}
 	sort.Slice(matching, func(i, j int) bool {
-		return matching[i].PaidAt.After(matching[j].PaidAt)
+		return matching[i].PaidAt.After(*matching[j].PaidAt)
 	})
 
 	total := len(matching)

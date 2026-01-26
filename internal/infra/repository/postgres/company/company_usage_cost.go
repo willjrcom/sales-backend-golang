@@ -134,8 +134,8 @@ func (r *CompanyUsageCostRepository) GetMonthlyCosts(ctx context.Context, compan
 	if err := tx.NewSelect().
 		Model(&costs).
 		Where("company_id = ?", companyID).
-		Where("month = ?", month).
-		Where("year = ?", year).
+		Where("EXTRACT(MONTH FROM created_at) = ?", month).
+		Where("EXTRACT(YEAR FROM created_at) = ?", year).
 		Where("deleted_at IS NULL").
 		Order("created_at ASC").
 		Scan(ctx); err != nil {

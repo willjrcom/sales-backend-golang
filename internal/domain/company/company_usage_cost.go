@@ -60,7 +60,6 @@ func NewPlanUsageCost(companyID uuid.UUID, costType CostType, amount decimal.Dec
 
 func NewUsageCost(companyID uuid.UUID, costType CostType, amount decimal.Decimal, description string, referenceID *uuid.UUID) *CompanyUsageCost {
 	return &CompanyUsageCost{
-		Entity:      entity.NewEntity(),
 		CompanyID:   companyID,
 		CostType:    costType,
 		Amount:      amount,

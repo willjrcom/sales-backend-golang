@@ -94,8 +94,22 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		return nil, fmt.Errorf("failed to get company: %w", err)
 	}
 
-	// 3. Create Pending Payment
 	paymentEntity := entity.NewEntity()
+
+	// 3. Create MP Preference linked to PaymentID (ahead of time)
+	mpReq := &mercadopagoservice.CheckoutRequest{
+		CompanyID:         company.ID.String(),
+		Schema:            company.SchemaName,
+		Item:              checkoutItem,
+		ExternalReference: paymentEntity.ID.String(), // Link to Payment
+	}
+
+	pref, err := uc.mpService.CreateCheckoutPreference(ctx, mpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create preference: %w", err)
+	}
+
+	// 4. Create Pending Payment
 	payment := &companyentity.SubscriptionPayment{
 		Entity:            paymentEntity,
 		CompanyID:         company.ID,
@@ -105,6 +119,7 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		Amount:            finalAmount,
 		Months:            months,
 		ProviderPaymentID: paymentEntity.ID.String(),
+		PaymentURL:        pref.InitPoint,
 		// PaidAt is nil
 		ExternalReference: paymentEntity.ID.String(), // Self-reference or empty? Using ID as ref.
 	}
@@ -114,19 +129,6 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 
 	if err := uc.companyPaymentRepo.CreateCompanyPayment(ctx, paymentModel); err != nil {
 		return nil, fmt.Errorf("failed to create pending payment: %w", err)
-	}
-
-	// 4. Create MP Preference linked to PaymentID
-	mpReq := &mercadopagoservice.CheckoutRequest{
-		CompanyID:         company.ID.String(),
-		Schema:            company.SchemaName,
-		Item:              checkoutItem,
-		ExternalReference: payment.ID.String(), // Link to Payment
-	}
-
-	pref, err := uc.mpService.CreateCheckoutPreference(ctx, mpReq)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create preference: %w", err)
 	}
 
 	return &billingdto.CheckoutResponseDTO{
@@ -210,7 +212,7 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 	rawPayload, _ := json.Marshal(dto)
 	paymentModel.Status = details.Status
 	paymentModel.ProviderPaymentID = details.ID
-	paymentModel.PaidAt = paidAt
+	paymentModel.PaidAt = &paidAt
 	paymentModel.RawPayload = rawPayload
 
 	// Assuming UpdateCompanyPayment exists (we'll implement it next)
@@ -262,13 +264,34 @@ func (uc *CheckoutUseCase) CreateCostCheckout(ctx context.Context, companyID uui
 		costIDs[i] = cost.ID
 	}
 
-	// 3. Create Pending Payment
+	// 3. Create Checkout Item and Preference first to get URL
+	checkoutItem := mercadopagoservice.NewCheckoutItem(
+		"Fatura de Custos Extras",
+		fmt.Sprintf("Pagamento de %d custos pendentes (NFC-e, etc)", len(pendingCosts)),
+		1,
+		totalAmount.InexactFloat64(),
+	)
+
 	company, err := uc.companyRepo.GetCompanyOnlyByID(ctx, companyID)
 	if err != nil {
 		return nil, err
 	}
 
 	paymentEntity := entity.NewEntity()
+
+	mpReq := &mercadopagoservice.CheckoutRequest{
+		CompanyID:         company.ID.String(),
+		Schema:            company.SchemaName,
+		Item:              checkoutItem,
+		ExternalReference: paymentEntity.ID.String(),
+	}
+
+	pref, err := uc.mpService.CreateCheckoutPreference(ctx, mpReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create preference: %w", err)
+	}
+
+	// 4. Create Pending Payment
 	payment := &companyentity.SubscriptionPayment{
 		Entity:            paymentEntity,
 		CompanyID:         company.ID,
@@ -278,6 +301,7 @@ func (uc *CheckoutUseCase) CreateCostCheckout(ctx context.Context, companyID uui
 		Amount:            totalAmount,
 		Months:            0, // Not a subscription renewal
 		ProviderPaymentID: paymentEntity.ID.String(),
+		PaymentURL:        pref.InitPoint,
 		ExternalReference: paymentEntity.ID.String(),
 	}
 
@@ -288,29 +312,9 @@ func (uc *CheckoutUseCase) CreateCostCheckout(ctx context.Context, companyID uui
 		return nil, fmt.Errorf("failed to create payment: %w", err)
 	}
 
-	// 4. Link costs to Payment
+	// 5. Link costs to Payment
 	if err := uc.costRepo.UpdateCostsPaymentID(ctx, costIDs, payment.ID); err != nil {
 		return nil, fmt.Errorf("failed to link costs to payment: %w", err)
-	}
-
-	// 5. Create MP Preference
-	checkoutItem := mercadopagoservice.NewCheckoutItem(
-		"Fatura de Custos Extras",
-		fmt.Sprintf("Pagamento de %d custos pendentes (NFC-e, etc)", len(pendingCosts)),
-		1,
-		totalAmount.InexactFloat64(),
-	)
-
-	mpReq := &mercadopagoservice.CheckoutRequest{
-		CompanyID:         company.ID.String(),
-		Schema:            company.SchemaName,
-		Item:              checkoutItem,
-		ExternalReference: payment.ID.String(),
-	}
-
-	pref, err := uc.mpService.CreateCheckoutPreference(ctx, mpReq)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create preference: %w", err)
 	}
 
 	return &billingdto.CheckoutResponseDTO{

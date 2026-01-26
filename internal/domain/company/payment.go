@@ -18,7 +18,8 @@ type SubscriptionPayment struct {
 	Currency          string
 	Amount            decimal.Decimal
 	Months            int
-	PaidAt            time.Time
+	PaidAt            *time.Time
 	ExternalReference string
+	PaymentURL        string
 	RawPayload        json.RawMessage
 }

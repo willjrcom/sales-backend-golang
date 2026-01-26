@@ -17,8 +17,9 @@ type CompanyPaymentDTO struct {
 	Currency          string          `json:"currency"`
 	Amount            decimal.Decimal `json:"amount"`
 	Months            int             `json:"months"`
-	PaidAt            time.Time       `json:"paid_at"`
+	PaidAt            *time.Time      `json:"paid_at,omitempty"`
 	ExternalReference string          `json:"external_reference,omitempty"`
+	PaymentURL        string          `json:"payment_url,omitempty"`
 }
 
 // FromDomain maps a domain subscription payment to a DTO representation.
@@ -37,5 +38,6 @@ func (c *CompanyPaymentDTO) FromDomain(payment *companyentity.SubscriptionPaymen
 		Months:            payment.Months,
 		PaidAt:            payment.PaidAt,
 		ExternalReference: payment.ExternalReference,
+		PaymentURL:        payment.PaymentURL,
 	}
 }

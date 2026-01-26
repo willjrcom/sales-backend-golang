@@ -115,7 +115,7 @@ func (h *handlerCompanyImpl) handlerGetCompanyUsers(w http.ResponseWriter, r *ht
 func (h *handlerCompanyImpl) handlerListCompanyPayments(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	page, perPage := headerservice.GetPageAndPerPage(r, 1, 10)
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
 	payments, total, err := h.s.ListCompanyPayments(ctx, page, perPage)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
