@@ -11,15 +11,21 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	companyrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/company"
 	mercadopagoservice "github.com/willjrcom/sales-backend-go/internal/infra/service/mercadopago"
+	billingusecases "github.com/willjrcom/sales-backend-go/internal/usecases/checkout"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 )
 
-func NewCompanyModule(db *bun.DB, chi *server.ServerChi) (model.CompanyRepository, *companyusecases.Service, *handler.Handler) {
+func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyUsageCostRepository) (model.CompanyRepository, *companyusecases.Service, *handler.Handler) {
 	repository := companyrepositorybun.NewCompanyRepositoryBun(db)
+	companyPaymentRepo := companyrepositorybun.NewCompanyPaymentRepositoryBun(db)
 	mpClient := mercadopagoservice.NewClient()
-	service := companyusecases.NewService(repository, mpClient)
+	service := companyusecases.NewService(repository, companyPaymentRepo)
 	service.StartSubscriptionWatcher(context.Background(), 24*time.Hour)
-	handler := handlerimpl.NewHandlerCompany(service)
+
+	checkoutUC := billingusecases.NewCheckoutUseCase(costRepo, repository, companyPaymentRepo, mpClient)
+	costService := companyusecases.NewUsageCostService(costRepo, repository)
+
+	handler := handlerimpl.NewHandlerCompany(service, checkoutUC, costService)
 	chi.AddHandler(handler)
 	return repository, service, handler
 }

@@ -90,7 +90,7 @@ var PublicMigrateCmd = &cobra.Command{
 
 		fullPath := fileName
 		if !filepath.IsAbs(fileName) {
-			fullPath = filepath.Join(migrationsDir, fileName)
+			fullPath = filepath.Join(publicMigrationsDir, fileName)
 		}
 
 		payload, err := os.ReadFile(fullPath)
@@ -180,7 +180,8 @@ var MigrateAllCmd = &cobra.Command{
 			for _, migration := range pending {
 				cmd.Printf("  -> %s\n", migration)
 
-				sql, err := readMigrationFile(migration)
+				fullPath := filepath.Join(migrationsDir, migration)
+				sql, err := readMigrationFile(fullPath)
 				if err != nil {
 					return fmt.Errorf("schema %s: %w", schema, err)
 				}
@@ -301,16 +302,15 @@ func filterPendingMigrations(all []string, applied map[string]bool) []string {
 	return pending
 }
 
-func readMigrationFile(name string) (string, error) {
-	fullPath := filepath.Join(migrationsDir, name)
+func readMigrationFile(fullPath string) (string, error) {
 	payload, err := os.ReadFile(fullPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to read migration file %s: %w", name, err)
+		return "", fmt.Errorf("failed to read migration file %s: %w", fullPath, err)
 	}
 
 	sql := string(payload)
 	if sql == "" {
-		return "", fmt.Errorf("migration file %s is empty", name)
+		return "", fmt.Errorf("migration file %s is empty", fullPath)
 	}
 
 	return sql, nil
@@ -402,7 +402,8 @@ var PublicMigrateAllCmd = &cobra.Command{
 		for _, migration := range pending {
 			cmd.Printf("  -> %s\n", migration)
 
-			sql, err := readMigrationFile(migration)
+			fullPath := filepath.Join(publicMigrationsDir, migration)
+			sql, err := readMigrationFile(fullPath)
 			if err != nil {
 				return fmt.Errorf("schema public: %w", err)
 			}

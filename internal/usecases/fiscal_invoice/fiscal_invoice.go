@@ -4,9 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	fiscalinvoice "github.com/willjrcom/sales-backend-go/internal/domain/fiscal_invoice"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/transmitenota"
@@ -194,7 +197,10 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 	// Register cost (R$ 0.10 per NFC-e)
 	if s.usageCostService != nil {
 		description := fmt.Sprintf("Emissão NFC-e #%d - Série %d", numero, serie)
-		if err := s.usageCostService.RegisterNFCeCost(ctx, company.ID, invoice.ID, description); err != nil {
+		pricePerInvoice, _ := decimal.NewFromString(os.Getenv("PRICE_PER_NFCE"))
+
+		cost := companyentity.NewUsageCost(company.ID, companyentity.CostTypeNFCe, pricePerInvoice, description, &invoice.ID)
+		if err := s.usageCostService.RegisterUsageCost(ctx, cost); err != nil {
 			// Log error but don't fail the emission
 			fmt.Printf("Warning: failed to register NFC-e cost: %v\n", err)
 		}

@@ -1,44 +1,53 @@
 package handlerimpl
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
+	billingdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/checkout"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
+	billingusecases "github.com/willjrcom/sales-backend-go/internal/usecases/checkout"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
 type handlerCompanyImpl struct {
-	s *companyusecases.Service
+	s           *companyusecases.Service
+	checkoutUC  *billingusecases.CheckoutUseCase
+	costService *companyusecases.UsageCostService
 }
 
-func NewHandlerCompany(companyService *companyusecases.Service) *handler.Handler {
+func NewHandlerCompany(companyService *companyusecases.Service, checkoutUC *billingusecases.CheckoutUseCase, costService *companyusecases.UsageCostService) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerCompanyImpl{
-		s: companyService,
+		s:           companyService,
+		checkoutUC:  checkoutUC,
+		costService: costService,
 	}
 
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerNewCompany)
 		c.Put("/update", h.handlerUpdateCompany)
 		c.Get("/", h.handlerGetCompany)
-		c.Get("/users", h.handlerGetCompanyUsers)
-		c.Get("/payments", h.handlerListCompanyPayments)
+
+		// Users
 		c.Post("/add/user", h.handlerAddUserToCompany)
 		c.Post("/remove/user", h.handlerRemoveUserFromCompany)
-		c.Get("/payments/mercadopago/settings", h.handlerGetSubscriptionSettings)
-		c.Post("/payments/mercadopago/checkout", h.handlerCreateSubscriptionCheckout)
-		c.Post("/payments/mercadopago/webhook", h.handlerMercadoPagoWebhook)
-		c.Post("/test", h.handlerTest)
+		c.Get("/users", h.handlerGetCompanyUsers)
+
+		// Checkout
+		c.Post("/checkout/subscription", h.handlerCheckoutCreateSubscription)
+		c.Post("/checkout/costs", h.handlerCheckoutCosts)
+		c.Get("/payments", h.handlerListCompanyPayments)
+		c.Get("/costs/monthly", h.handlerGetMonthlyCosts)
+		c.Post("/costs/register", h.handlerCreateCost)
 	})
 
-	return handler.NewHandler("/company", c, "/company/payments/mercadopago/webhook")
+	return handler.NewHandler("/company", c)
 }
 
 func (h *handlerCompanyImpl) handlerNewCompany(w http.ResponseWriter, r *http.Request) {
@@ -151,81 +160,70 @@ func (h *handlerCompanyImpl) handlerRemoveUserFromCompany(w http.ResponseWriter,
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerCompanyImpl) handlerGetSubscriptionSettings(w http.ResponseWriter, r *http.Request) {
+func (h *handlerCompanyImpl) handlerCheckoutCreateSubscription(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	settings, err := h.s.GetSubscriptionSettings(ctx)
-	if err != nil {
-		status := http.StatusInternalServerError
-		if errors.Is(err, companyusecases.ErrMercadoPagoDisabled) {
-			status = http.StatusServiceUnavailable
-		}
-		jsonpkg.ResponseErrorJson(w, r, status, err)
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, settings)
-}
-
-func (h *handlerCompanyImpl) handlerCreateSubscriptionCheckout(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	dto := &companydto.SubscriptionCheckoutDTO{}
+	dto := &billingdto.CreateCheckoutDTO{}
 	if err := jsonpkg.ParseBody(r, dto); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	resp, err := h.s.CreateSubscriptionCheckout(ctx, dto)
+	resp, err := h.checkoutUC.CreateSubscriptionCheckout(ctx, dto)
 	if err != nil {
-		status := http.StatusInternalServerError
-		if errors.Is(err, companyusecases.ErrMercadoPagoDisabled) {
-			status = http.StatusServiceUnavailable
-		}
-		jsonpkg.ResponseErrorJson(w, r, status, err)
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
 }
 
-func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r *http.Request) {
+func (h *handlerCompanyImpl) handlerCheckoutCosts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dto := &companydto.MercadoPagoWebhookDTO{}
+	companyID, err := h.s.GetCompany(ctx)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	resp, err := h.checkoutUC.CreateCostCheckout(ctx, companyID.ID)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
+}
+
+func (h *handlerCompanyImpl) handlerCreateCost(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	dto := &companydto.CompanyUsageCostCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dto); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	// Extract signature headers and query params for validation
-	// Per MP docs: data.id comes from query params, and must be used for signature validation
-	dto.XSignature = r.Header.Get("x-signature")
-	dto.XRequestID = r.Header.Get("x-request-id")
-	dto.DataIDFromQuery = r.URL.Query().Get("data.id")
-
-	if err := h.s.HandleMercadoPagoWebhook(ctx, dto); err != nil {
-		status := http.StatusInternalServerError
-		switch {
-		case errors.Is(err, companyusecases.ErrInvalidWebhookSecret):
-			status = http.StatusUnauthorized
-		case errors.Is(err, companyusecases.ErrMercadoPagoDisabled):
-			status = http.StatusServiceUnavailable
-		}
-		jsonpkg.ResponseErrorJson(w, r, status, err)
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, map[string]string{"status": "ok"})
-}
-
-func (h *handlerCompanyImpl) handlerTest(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	if err := h.s.Test(ctx); err != nil {
+	if err := h.costService.RegisterUsageCost(ctx, dto.ToDomain()); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerCompanyImpl) handlerGetMonthlyCosts(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	month, _ := strconv.Atoi(r.URL.Query().Get("month"))
+	year, _ := strconv.Atoi(r.URL.Query().Get("year"))
+
+	summary, err := h.costService.GetMonthlySummary(ctx, month, year)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, summary)
 }

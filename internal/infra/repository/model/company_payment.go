@@ -23,6 +23,7 @@ type CompanyPayment struct {
 	Months            int             `bun:"months,notnull"`
 	PaidAt            time.Time       `bun:"paid_at,notnull"`
 	ExternalReference string          `bun:"external_reference"`
+	Description       string          `bun:"description"`
 	RawPayload        []byte          `bun:"raw_payload,type:jsonb"`
 }
 

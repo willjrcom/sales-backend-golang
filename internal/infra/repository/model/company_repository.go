@@ -16,10 +16,9 @@ type CompanyRepository interface {
 	ListCompaniesForBilling(ctx context.Context) ([]Company, error)
 	UpdateCompanySubscription(ctx context.Context, companyID uuid.UUID, schema string, expiresAt *time.Time, isBlocked bool) error
 	ValidateUserToPublicCompany(ctx context.Context, userID uuid.UUID) (bool, error)
+
+	// Users
 	AddUserToPublicCompany(ctx context.Context, userID uuid.UUID) error
 	RemoveUserFromPublicCompany(ctx context.Context, userID uuid.UUID) error
 	GetCompanyUsers(ctx context.Context, page, perPage int) ([]User, int, error)
-	CreateCompanyPayment(ctx context.Context, payment *CompanyPayment) error
-	GetCompanyPaymentByProviderID(ctx context.Context, provider string, paymentID string) (*CompanyPayment, error)
-	ListCompanyPayments(ctx context.Context, companyID uuid.UUID, page, perPage int) ([]CompanyPayment, int, error)
 }

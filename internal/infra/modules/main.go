@@ -4,6 +4,7 @@ import (
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
+	companyrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/company"
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
@@ -40,12 +41,15 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 
 	_, orderPickupService, _ := NewOrderPickupModule(db, chi)
 
-	companyRepository, companyService, _ := NewCompanyModule(db, chi)
+	// Usage Cost Repository (Creating here to pass to both Company and Fiscal modules)
+	usageCostRepo := companyrepositorybun.NewCompanyUsageCostRepository(db)
+
+	companyRepository, companyService, _ := NewCompanyModule(db, chi, usageCostRepo)
 	_, schemaService := NewSchemaModule(db, chi)
 	userRepository, userService, _ := NewUserModule(db, chi)
 
 	// Fiscal invoice and usage cost modules
-	_, _, _ = NewFiscalInvoiceModule(db, chi, companyRepository, orderRepository, companyService)
+	_, _, _ = NewFiscalInvoiceModule(db, chi, companyRepository, orderRepository, companyService, usageCostRepo)
 
 	orderPrintService, _ := NewOrderPrintModule(db, chi)
 

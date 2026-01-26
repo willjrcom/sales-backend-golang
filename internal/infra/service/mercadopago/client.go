@@ -254,6 +254,77 @@ func (c *Client) CreateSubscriptionPreference(ctx context.Context, req *Preferen
 	}, nil
 }
 
+// CheckoutItem represents a single line item in the checkout preference.
+type CheckoutItem struct {
+	Title       string
+	Description string
+	Quantity    int
+	UnitPrice   float64
+}
+
+func NewCheckoutItem(title, description string, quantity int, unitPrice float64) *CheckoutItem {
+	return &CheckoutItem{
+		Title:       title,
+		Description: description,
+		Quantity:    quantity,
+		UnitPrice:   unitPrice,
+	}
+}
+
+// CheckoutRequest wraps the information required to create a multi-item checkout preference.
+type CheckoutRequest struct {
+	CompanyID         string
+	Schema            string
+	Item              *CheckoutItem
+	ExternalReference string // Usually the PaymentID
+}
+
+// CreateCheckoutPreference creates a multi-item preference for the new billing architecture.
+func (c *Client) CreateCheckoutPreference(ctx context.Context, req *CheckoutRequest) (*PreferenceResponse, error) {
+	if c == nil || !c.Enabled() {
+		return nil, fmt.Errorf("mercado pago client is not configured")
+	}
+
+	items := []preference.ItemRequest{
+		{
+			Title:       req.Item.Title,
+			Description: req.Item.Description,
+			Quantity:    req.Item.Quantity,
+			UnitPrice:   req.Item.UnitPrice,
+			CurrencyID:  "BRL",
+		},
+	}
+
+	metadata := map[string]any{
+		"company_id":  req.CompanyID,
+		"schema_name": req.Schema,
+	}
+
+	prefRequest := preference.Request{
+		Items:             items,
+		ExternalReference: req.ExternalReference,
+		NotificationURL:   c.notificationURL,
+		AutoReturn:        "approved",
+		Metadata:          metadata,
+		BackURLs: &preference.BackURLsRequest{
+			Success: c.successURL,
+			Pending: c.pendingURL,
+			Failure: c.failureURL,
+		},
+	}
+
+	resource, err := c.preferenceClient.Create(ctx, prefRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	return &PreferenceResponse{
+		ID:               resource.ID,
+		InitPoint:        resource.InitPoint,
+		SandboxInitPoint: resource.SandboxInitPoint,
+	}, nil
+}
+
 // GetPayment fetches a payment and maps essential fields for the domain layer.
 func (c *Client) GetPayment(ctx context.Context, id string) (*PaymentDetails, error) {
 	if c == nil || !c.Enabled() {

@@ -2,16 +2,45 @@ package orderusecases
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
+var (
+	ErrSubscriptionExpired         = errors.New("assinatura expirada: realize o pagamento da mensalidade para continuar")
+	ErrCompanyBlocked              = errors.New("conta bloqueada: entre em contato com o suporte")
+	ErrCompanySubscriptionNotFound = errors.New("assinatura não encontrada")
+)
+
+func (s *OrderService) ValidateSubscription(ctx context.Context) error {
+	companyModel, err := s.sc.GetCompany(ctx)
+	if err != nil {
+		return err
+	}
+
+	if companyModel.IsBlocked {
+		return ErrCompanyBlocked
+	}
+
+	if companyModel.SubscriptionExpiresAt == nil {
+		return ErrCompanySubscriptionNotFound
+	}
+
+	if companyModel.SubscriptionExpiresAt.Before(time.Now().UTC()) {
+		return ErrSubscriptionExpired
+	}
+
+	return nil
+}
+
 func (s *OrderService) CreateDefaultOrder(ctx context.Context) (uuid.UUID, error) {
 	if s.sc != nil {
-		if err := s.sc.ValidateSubscription(ctx); err != nil {
+		if err := s.ValidateSubscription(ctx); err != nil {
 			return uuid.Nil, err
 		}
 	}
