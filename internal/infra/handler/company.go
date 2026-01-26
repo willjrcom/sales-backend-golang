@@ -45,9 +45,10 @@ func NewHandlerCompany(companyService *companyusecases.Service, checkoutUC *bill
 		c.Get("/payments", h.handlerListCompanyPayments)
 		c.Get("/costs/monthly", h.handlerGetMonthlyCosts)
 		c.Post("/costs/register", h.handlerCreateCost)
+		c.Post("/payments/mercadopago/webhook", h.handlerMercadoPagoWebhook)
 	})
 
-	return handler.NewHandler("/company", c)
+	return handler.NewHandler("/company", c, "/company/payments/mercadopago/webhook")
 }
 
 func (h *handlerCompanyImpl) handlerNewCompany(w http.ResponseWriter, r *http.Request) {
@@ -227,4 +228,34 @@ func (h *handlerCompanyImpl) handlerGetMonthlyCosts(w http.ResponseWriter, r *ht
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, summary)
+}
+
+func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	dto := &companydto.MercadoPagoWebhookDTO{}
+	// Parse body manually or use helper. The payload from MP matches the DTO
+	if err := jsonpkg.ParseBody(r, dto); err != nil {
+		// Log error but MP might retry
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	// Extract headers for signature validation details
+	// x-signature: ...
+	// x-request-id: ...
+	dto.XSignature = r.Header.Get("x-signature")
+	dto.XRequestID = r.Header.Get("x-request-id")
+	dto.DataIDFromQuery = r.URL.Query().Get("data.id")
+
+	if err := h.checkoutUC.HandleMercadoPagoWebhook(ctx, dto); err != nil {
+		if err == billingusecases.ErrInvalidWebhookSecret {
+			jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
+			return
+		}
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, map[string]string{"status": "ok"})
 }
