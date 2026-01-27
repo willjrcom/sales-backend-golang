@@ -1,10 +1,12 @@
 package handlerimpl
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	billingdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/checkout"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
@@ -42,6 +44,7 @@ func NewHandlerCompany(companyService *companyusecases.Service, checkoutUC *bill
 		// Checkout
 		c.Post("/checkout/subscription", h.handlerCheckoutCreateSubscription)
 		c.Post("/checkout/costs", h.handlerCheckoutCosts)
+		c.Post("/checkout/cancel/{paymentID}", h.handlerCancelPayment)
 		c.Get("/payments", h.handlerListCompanyPayments)
 		c.Get("/costs/monthly", h.handlerGetMonthlyCosts)
 		c.Post("/costs/register", h.handlerCreateCost)
@@ -258,4 +261,21 @@ func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r 
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+func (h *handlerCompanyImpl) handlerCancelPayment(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	paymentIDStr := chi.URLParam(r, "paymentID")
+	paymentID, err := uuid.Parse(paymentIDStr)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, fmt.Errorf("invalid payment id: %w", err))
+		return
+	}
+
+	if err := h.checkoutUC.CancelPayment(ctx, paymentID); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }

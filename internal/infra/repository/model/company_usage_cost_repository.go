@@ -16,4 +16,5 @@ type CompanyUsageCostRepository interface {
 	GetByPaymentID(ctx context.Context, paymentID uuid.UUID) ([]*CompanyUsageCost, error)
 	GetPendingCosts(ctx context.Context, companyID uuid.UUID) ([]*CompanyUsageCost, error)
 	UpdateCostsPaymentID(ctx context.Context, costIDs []uuid.UUID, paymentID uuid.UUID) error
+	UnlinkCostsFromPayment(ctx context.Context, paymentID uuid.UUID) error
 }

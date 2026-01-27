@@ -220,3 +220,22 @@ func (r *CompanyUsageCostRepository) GetByPaymentID(ctx context.Context, payment
 	}
 	return costs, nil
 }
+
+func (r *CompanyUsageCostRepository) UnlinkCostsFromPayment(ctx context.Context, paymentID uuid.UUID) error {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	if _, err := tx.NewUpdate().
+		Model((*model.CompanyUsageCost)(nil)).
+		Set("payment_id = NULL").
+		Where("payment_id = ?", paymentID).
+		Exec(ctx); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}

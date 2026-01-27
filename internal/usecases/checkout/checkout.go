@@ -357,3 +357,27 @@ func translatePlanType(p domainbilling.PlanType) string {
 		return string(p)
 	}
 }
+
+func (uc *CheckoutUseCase) CancelPayment(ctx context.Context, paymentID uuid.UUID) error {
+	payment, err := uc.companyPaymentRepo.GetCompanyPaymentByID(ctx, paymentID)
+	if err != nil {
+		return fmt.Errorf("failed to get payment: %w", err)
+	}
+
+	if payment.Status != "pending" {
+		return fmt.Errorf("payment cannot be cancelled (status: %s)", payment.Status)
+	}
+
+	// Unlink costs if any
+	if err := uc.costRepo.UnlinkCostsFromPayment(ctx, paymentID); err != nil {
+		return fmt.Errorf("failed to unlink costs: %w", err)
+	}
+
+	payment.Status = "cancelled"
+	// Ensure UpdateCompanyPayment is available and works as expected
+	if err := uc.companyPaymentRepo.UpdateCompanyPayment(ctx, payment); err != nil {
+		return fmt.Errorf("failed to update payment status: %w", err)
+	}
+
+	return nil
+}
