@@ -32,7 +32,7 @@ func (s *SizeUpdateDTO) UpdateDomain(size *productentity.Size) (err error) {
 		size.Name = *s.Name
 	}
 	if s.IsActive != nil {
-		size.IsActive = s.IsActive
+		size.IsActive = *s.IsActive
 	}
 
 	return nil

@@ -112,6 +112,7 @@ func (s *Service) AddQuantitiesByValues(ctx context.Context, dto *quantitydto.Qu
 		newQuantity := productentity.NewQuantity(productentity.QuantityCommonAttributes{
 			Quantity:   quantity,
 			CategoryID: *categoryID,
+			IsActive:   true,
 		})
 
 		quantityModel := &model.Quantity{}

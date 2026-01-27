@@ -120,12 +120,10 @@ func (s *Service) AddSizesByValues(ctx context.Context, dto *sizedto.SizeCreateB
 		return err
 	}
 
-	isTrue := true
-
 	for _, size := range sizes {
 		newSize := productentity.NewSize(productentity.SizeCommonAttributes{
 			Name:       size,
-			IsActive:   &isTrue,
+			IsActive:   true,
 			CategoryID: *categoryID,
 		})
 

@@ -8,7 +8,7 @@ import (
 type SizeDTO struct {
 	ID         uuid.UUID `json:"id"`
 	Name       string    `json:"name"`
-	IsActive   *bool     `json:"is_active"`
+	IsActive   bool      `json:"is_active"`
 	CategoryID uuid.UUID `json:"category_id"`
 }
 

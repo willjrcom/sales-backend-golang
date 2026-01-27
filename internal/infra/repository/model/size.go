@@ -15,7 +15,7 @@ type Size struct {
 
 type SizeCommonAttributes struct {
 	Name       string    `bun:"name"`
-	IsActive   *bool     `bun:"is_active"`
+	IsActive   bool      `bun:"is_active"`
 	CategoryID uuid.UUID `bun:"column:category_id,type:uuid,notnull"`
 	Products   []Product `bun:"rel:has-many,join:id=size_id"`
 }

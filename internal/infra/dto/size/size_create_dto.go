@@ -39,9 +39,14 @@ func (s *SizeCreateDTO) ToDomain() (*productentity.Size, error) {
 		return nil, err
 	}
 
+	isActive := true
+	if s.IsActive != nil {
+		isActive = *s.IsActive
+	}
+
 	sizeCommonAttributes := productentity.SizeCommonAttributes{
 		Name:       s.Name,
-		IsActive:   s.IsActive,
+		IsActive:   isActive,
 		CategoryID: s.CategoryID,
 	}
 

@@ -18,7 +18,7 @@ type Size struct {
 
 type SizeCommonAttributes struct {
 	Name       string
-	IsActive   *bool
+	IsActive   bool
 	CategoryID uuid.UUID
 	Products   []Product
 }
