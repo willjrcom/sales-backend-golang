@@ -9,12 +9,22 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
-type SubscriptionPayment struct {
+type PaymentStatus string
+
+const (
+	PaymentStatusPending   PaymentStatus = "pending"
+	PaymentStatusApproved  PaymentStatus = "approved"
+	PaymentStatusPaid      PaymentStatus = "paid"
+	PaymentStatusRefused   PaymentStatus = "refused"
+	PaymentStatusCancelled PaymentStatus = "cancelled"
+)
+
+type CompanyPayment struct {
 	entity.Entity
 	CompanyID         uuid.UUID
 	Provider          string
 	ProviderPaymentID string
-	Status            string
+	Status            PaymentStatus
 	Currency          string
 	Amount            decimal.Decimal
 	Months            int

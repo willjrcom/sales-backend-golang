@@ -28,7 +28,7 @@ type CompanyPayment struct {
 	RawPayload        []byte          `bun:"raw_payload,type:jsonb"`
 }
 
-func (c *CompanyPayment) FromDomain(payment *companyentity.SubscriptionPayment) {
+func (c *CompanyPayment) FromDomain(payment *companyentity.CompanyPayment) {
 	if payment == nil {
 		return
 	}
@@ -37,7 +37,7 @@ func (c *CompanyPayment) FromDomain(payment *companyentity.SubscriptionPayment) 
 		CompanyID:         payment.CompanyID,
 		Provider:          payment.Provider,
 		ProviderPaymentID: payment.ProviderPaymentID,
-		Status:            payment.Status,
+		Status:            string(payment.Status),
 		Currency:          payment.Currency,
 		Amount:            payment.Amount,
 		Months:            payment.Months,
@@ -48,16 +48,16 @@ func (c *CompanyPayment) FromDomain(payment *companyentity.SubscriptionPayment) 
 	}
 }
 
-func (c *CompanyPayment) ToDomain() *companyentity.SubscriptionPayment {
+func (c *CompanyPayment) ToDomain() *companyentity.CompanyPayment {
 	if c == nil {
 		return nil
 	}
-	return &companyentity.SubscriptionPayment{
+	return &companyentity.CompanyPayment{
 		Entity:            c.Entity.ToDomain(),
 		CompanyID:         c.CompanyID,
 		Provider:          c.Provider,
 		ProviderPaymentID: c.ProviderPaymentID,
-		Status:            c.Status,
+		Status:            companyentity.PaymentStatus(c.Status),
 		Currency:          c.Currency,
 		Amount:            c.Amount,
 		Months:            c.Months,

@@ -110,11 +110,11 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 	}
 
 	// 4. Create Pending Payment
-	payment := &companyentity.SubscriptionPayment{
+	payment := &companyentity.CompanyPayment{
 		Entity:            paymentEntity,
 		CompanyID:         company.ID,
 		Provider:          mercadoPagoProvider,
-		Status:            "pending",
+		Status:            companyentity.PaymentStatusPending,
 		Currency:          "BRL",
 		Amount:            finalAmount,
 		Months:            months,
@@ -180,7 +180,7 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 	}
 
 	// Idempotency: if already paid, ignore
-	if paymentModel.Status == "approved" || paymentModel.Status == "paid" {
+	if paymentModel.Status == string(companyentity.PaymentStatusApproved) || paymentModel.Status == string(companyentity.PaymentStatusPaid) {
 		return nil
 	}
 
@@ -292,11 +292,11 @@ func (uc *CheckoutUseCase) CreateCostCheckout(ctx context.Context, companyID uui
 	}
 
 	// 4. Create Pending Payment
-	payment := &companyentity.SubscriptionPayment{
+	payment := &companyentity.CompanyPayment{
 		Entity:            paymentEntity,
 		CompanyID:         company.ID,
 		Provider:          mercadoPagoProvider,
-		Status:            "pending",
+		Status:            companyentity.PaymentStatusPending,
 		Currency:          "BRL",
 		Amount:            totalAmount,
 		Months:            0, // Not a subscription renewal
@@ -364,7 +364,7 @@ func (uc *CheckoutUseCase) CancelPayment(ctx context.Context, paymentID uuid.UUI
 		return fmt.Errorf("failed to get payment: %w", err)
 	}
 
-	if payment.Status != "pending" {
+	if payment.Status != string(companyentity.PaymentStatusPending) {
 		return fmt.Errorf("payment cannot be cancelled (status: %s)", payment.Status)
 	}
 
@@ -373,7 +373,7 @@ func (uc *CheckoutUseCase) CancelPayment(ctx context.Context, paymentID uuid.UUI
 		return fmt.Errorf("failed to unlink costs: %w", err)
 	}
 
-	payment.Status = "cancelled"
+	payment.Status = string(companyentity.PaymentStatusCancelled)
 	// Ensure UpdateCompanyPayment is available and works as expected
 	if err := uc.companyPaymentRepo.UpdateCompanyPayment(ctx, payment); err != nil {
 		return fmt.Errorf("failed to update payment status: %w", err)

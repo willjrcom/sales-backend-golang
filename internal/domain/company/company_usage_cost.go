@@ -27,10 +27,11 @@ var (
 type CostStatus string
 
 const (
-	CostStatusPending CostStatus = "PENDING"
-	CostStatusPaid    CostStatus = "PAID"
-	CostStatusOverdue CostStatus = "OVERDUE"
-	CostStatusWaived  CostStatus = "WAIVED"
+	CostStatusPending          CostStatus = "PENDING"
+	CostStatusPaid             CostStatus = "PAID"
+	CostStatusOverdue          CostStatus = "OVERDUE"
+	CostStatusWaived           CostStatus = "WAIVED"
+	CostStatusPaymentGenerated CostStatus = "PAYMENT_GENERATED"
 )
 
 // CompanyUsageCost represents a cost incurred by a company for using platform features

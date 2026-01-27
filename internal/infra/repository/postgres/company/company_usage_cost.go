@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
@@ -84,6 +85,7 @@ func (r *CompanyUsageCostRepository) UpdateCostsPaymentID(ctx context.Context, c
 	_, err = tx.NewUpdate().
 		Model((*model.CompanyUsageCost)(nil)).
 		Set("payment_id = ?", paymentID).
+		Set("status = ?", companyentity.CostStatusPaymentGenerated).
 		Where("id IN (?)", bun.In(costIDs)).
 		Exec(ctx)
 
@@ -232,6 +234,7 @@ func (r *CompanyUsageCostRepository) UnlinkCostsFromPayment(ctx context.Context,
 	if _, err := tx.NewUpdate().
 		Model((*model.CompanyUsageCost)(nil)).
 		Set("payment_id = NULL").
+		Set("status = ?", companyentity.CostStatusPending).
 		Where("payment_id = ?", paymentID).
 		Exec(ctx); err != nil {
 		return err

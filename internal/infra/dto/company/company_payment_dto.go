@@ -23,7 +23,7 @@ type CompanyPaymentDTO struct {
 }
 
 // FromDomain maps a domain subscription payment to a DTO representation.
-func (c *CompanyPaymentDTO) FromDomain(payment *companyentity.SubscriptionPayment) {
+func (c *CompanyPaymentDTO) FromDomain(payment *companyentity.CompanyPayment) {
 	if payment == nil {
 		return
 	}
@@ -32,7 +32,7 @@ func (c *CompanyPaymentDTO) FromDomain(payment *companyentity.SubscriptionPaymen
 		ID:                payment.ID,
 		Provider:          payment.Provider,
 		ProviderPaymentID: payment.ProviderPaymentID,
-		Status:            payment.Status,
+		Status:            string(payment.Status),
 		Currency:          payment.Currency,
 		Amount:            payment.Amount,
 		Months:            payment.Months,
