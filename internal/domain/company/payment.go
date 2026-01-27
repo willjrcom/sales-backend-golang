@@ -31,5 +31,7 @@ type CompanyPayment struct {
 	PaidAt            *time.Time
 	ExternalReference string
 	PaymentURL        string
+	ExpiresAt         *time.Time
+	IsMandatory       bool
 	RawPayload        json.RawMessage
 }

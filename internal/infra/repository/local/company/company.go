@@ -83,6 +83,13 @@ func (r *CompanyRepositoryLocal) ListCompaniesForBilling(ctx context.Context) ([
 	return r.ListPublicCompanies(ctx)
 }
 
+func (r *CompanyRepositoryLocal) ListCompaniesByPaymentDueDay(ctx context.Context, day int) ([]model.Company, error) {
+	// Stub implementation
+	// In a real local scenario, we would filter r.companies
+	// For now, returning empty to satisfy interface
+	return []model.Company{}, nil
+}
+
 func (r *CompanyRepositoryLocal) UpdateCompanySubscription(ctx context.Context, companyID uuid.UUID, schema string, expiresAt *time.Time, isBlocked bool) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()

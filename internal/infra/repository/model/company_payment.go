@@ -24,6 +24,8 @@ type CompanyPayment struct {
 	PaidAt            *time.Time      `bun:"paid_at"`
 	ExternalReference string          `bun:"external_reference"`
 	PaymentURL        string          `bun:"payment_url"`
+	ExpiresAt         *time.Time      `bun:"expires_at"`
+	IsMandatory       bool            `bun:"is_mandatory,notnull,default:false"`
 	Description       string          `bun:"description"`
 	RawPayload        []byte          `bun:"raw_payload,type:jsonb"`
 }
@@ -44,6 +46,8 @@ func (c *CompanyPayment) FromDomain(payment *companyentity.CompanyPayment) {
 		PaidAt:            payment.PaidAt,
 		ExternalReference: payment.ExternalReference,
 		PaymentURL:        payment.PaymentURL,
+		ExpiresAt:         payment.ExpiresAt,
+		IsMandatory:       payment.IsMandatory,
 		RawPayload:        payment.RawPayload,
 	}
 }
@@ -64,6 +68,8 @@ func (c *CompanyPayment) ToDomain() *companyentity.CompanyPayment {
 		PaidAt:            c.PaidAt,
 		ExternalReference: c.ExternalReference,
 		PaymentURL:        c.PaymentURL,
+		ExpiresAt:         c.ExpiresAt,
+		IsMandatory:       c.IsMandatory,
 		RawPayload:        c.RawPayload,
 	}
 }

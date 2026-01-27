@@ -10,6 +10,7 @@ import (
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	companyrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/company"
+	"github.com/willjrcom/sales-backend-go/internal/infra/scheduler"
 	mercadopagoservice "github.com/willjrcom/sales-backend-go/internal/infra/service/mercadopago"
 	billingusecases "github.com/willjrcom/sales-backend-go/internal/usecases/checkout"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
@@ -25,7 +26,11 @@ func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyU
 	checkoutUC := billingusecases.NewCheckoutUseCase(costRepo, repository, companyPaymentRepo, mpClient)
 	costService := companyusecases.NewUsageCostService(costRepo, repository)
 
-	handler := handlerimpl.NewHandlerCompany(service, checkoutUC, costService)
+	// Start Monthly Billing Scheduler
+	billingScheduler := scheduler.NewMonthlyBillingScheduler(checkoutUC, repository)
+	billingScheduler.Start(context.Background())
+
+	handler := handlerimpl.NewHandlerCompany(service, checkoutUC, costService, billingScheduler)
 	chi.AddHandler(handler)
 	return repository, service, handler
 }

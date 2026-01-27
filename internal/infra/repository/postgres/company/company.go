@@ -314,6 +314,31 @@ func (r *CompanyRepositoryBun) ListCompaniesForBilling(ctx context.Context) ([]m
 	return companies, nil
 }
 
+func (r *CompanyRepositoryBun) ListCompaniesByPaymentDueDay(ctx context.Context, day int) ([]model.Company, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	companies := []model.Company{}
+	if err := tx.NewSelect().
+		Model(&companies).
+		Column("id", "schema_name", "business_name", "trade_name", "subscription_expires_at", "is_blocked", "monthly_payment_due_day").
+		Where("monthly_payment_due_day = ?", day).
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return companies, nil
+}
+
 func (r *CompanyRepositoryBun) UpdateCompanySubscription(ctx context.Context, companyID uuid.UUID, schema string, expiresAt *time.Time, isBlocked bool) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {

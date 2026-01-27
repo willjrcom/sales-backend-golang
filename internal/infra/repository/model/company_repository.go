@@ -14,6 +14,7 @@ type CompanyRepository interface {
 	GetCompanyOnlyByID(ctx context.Context, id uuid.UUID) (*Company, error)
 	ListPublicCompanies(ctx context.Context) ([]Company, error)
 	ListCompaniesForBilling(ctx context.Context) ([]Company, error)
+	ListCompaniesByPaymentDueDay(ctx context.Context, day int) ([]Company, error)
 	UpdateCompanySubscription(ctx context.Context, companyID uuid.UUID, schema string, expiresAt *time.Time, isBlocked bool) error
 	ValidateUserToPublicCompany(ctx context.Context, userID uuid.UUID) (bool, error)
 

@@ -20,6 +20,9 @@ type CompanyPaymentDTO struct {
 	PaidAt            *time.Time      `json:"paid_at,omitempty"`
 	ExternalReference string          `json:"external_reference,omitempty"`
 	PaymentURL        string          `json:"payment_url,omitempty"`
+	ExpiresAt         *time.Time      `json:"expires_at,omitempty"`
+	IsMandatory       bool            `json:"is_mandatory"`
+	CreatedAt         time.Time       `json:"created_at"`
 }
 
 // FromDomain maps a domain subscription payment to a DTO representation.
@@ -39,5 +42,11 @@ func (c *CompanyPaymentDTO) FromDomain(payment *companyentity.CompanyPayment) {
 		PaidAt:            payment.PaidAt,
 		ExternalReference: payment.ExternalReference,
 		PaymentURL:        payment.PaymentURL,
+		ExpiresAt:         payment.ExpiresAt,
+		IsMandatory:       payment.IsMandatory,
+		CreatedAt:         payment.CreatedAt,
 	}
 }
+
+// Extended DTO to include new fields if needed, or just add to the main one.
+// Adding to main one is better.

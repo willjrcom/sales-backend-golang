@@ -32,6 +32,9 @@ type CompanyCommonAttributes struct {
 	RegimeTributario  int    `bun:"regime_tributario,default:1"`
 	CNAE              string `bun:"cnae"`
 	CRT               int    `bun:"crt,default:1"`
+	// Billing
+	MonthlyPaymentDueDay          int        `bun:"monthly_payment_due_day,default:10"`
+	MonthlyPaymentDueDayUpdatedAt *time.Time `bun:"monthly_payment_due_day_updated_at"`
 }
 
 func (c *Company) FromDomain(company *companyentity.Company) {
@@ -41,22 +44,24 @@ func (c *Company) FromDomain(company *companyentity.Company) {
 	*c = Company{
 		Entity: entitymodel.FromDomain(company.Entity),
 		CompanyCommonAttributes: CompanyCommonAttributes{
-			SchemaName:            company.SchemaName,
-			BusinessName:          company.BusinessName,
-			TradeName:             company.TradeName,
-			Cnpj:                  company.Cnpj,
-			Email:                 company.Email,
-			Contacts:              company.Contacts,
-			Address:               &Address{},
-			Users:                 []User{},
-			Preferences:           company.Preferences,
-			IsBlocked:             company.IsBlocked,
-			SubscriptionExpiresAt: company.SubscriptionExpiresAt,
-			FiscalEnabled:         company.FiscalEnabled,
-			InscricaoEstadual:     company.InscricaoEstadual,
-			RegimeTributario:      company.RegimeTributario,
-			CNAE:                  company.CNAE,
-			CRT:                   company.CRT,
+			SchemaName:                    company.SchemaName,
+			BusinessName:                  company.BusinessName,
+			TradeName:                     company.TradeName,
+			Cnpj:                          company.Cnpj,
+			Email:                         company.Email,
+			Contacts:                      company.Contacts,
+			Address:                       &Address{},
+			Users:                         []User{},
+			Preferences:                   company.Preferences,
+			IsBlocked:                     company.IsBlocked,
+			SubscriptionExpiresAt:         company.SubscriptionExpiresAt,
+			FiscalEnabled:                 company.FiscalEnabled,
+			InscricaoEstadual:             company.InscricaoEstadual,
+			RegimeTributario:              company.RegimeTributario,
+			CNAE:                          company.CNAE,
+			CRT:                           company.CRT,
+			MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
+			MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
 		},
 	}
 
@@ -82,22 +87,24 @@ func (c *Company) ToDomain() *companyentity.Company {
 	return &companyentity.Company{
 		Entity: c.Entity.ToDomain(),
 		CompanyCommonAttributes: companyentity.CompanyCommonAttributes{
-			SchemaName:            c.SchemaName,
-			BusinessName:          c.BusinessName,
-			TradeName:             c.TradeName,
-			Cnpj:                  c.Cnpj,
-			Email:                 c.Email,
-			Contacts:              c.Contacts,
-			Address:               c.Address.ToDomain(),
-			Users:                 users,
-			Preferences:           c.Preferences,
-			IsBlocked:             c.IsBlocked,
-			SubscriptionExpiresAt: c.SubscriptionExpiresAt,
-			FiscalEnabled:         c.FiscalEnabled,
-			InscricaoEstadual:     c.InscricaoEstadual,
-			RegimeTributario:      c.RegimeTributario,
-			CNAE:                  c.CNAE,
-			CRT:                   c.CRT,
+			SchemaName:                    c.SchemaName,
+			BusinessName:                  c.BusinessName,
+			TradeName:                     c.TradeName,
+			Cnpj:                          c.Cnpj,
+			Email:                         c.Email,
+			Contacts:                      c.Contacts,
+			Address:                       c.Address.ToDomain(),
+			Users:                         users,
+			Preferences:                   c.Preferences,
+			IsBlocked:                     c.IsBlocked,
+			SubscriptionExpiresAt:         c.SubscriptionExpiresAt,
+			FiscalEnabled:                 c.FiscalEnabled,
+			InscricaoEstadual:             c.InscricaoEstadual,
+			RegimeTributario:              c.RegimeTributario,
+			CNAE:                          c.CNAE,
+			CRT:                           c.CRT,
+			MonthlyPaymentDueDay:          c.MonthlyPaymentDueDay,
+			MonthlyPaymentDueDayUpdatedAt: c.MonthlyPaymentDueDayUpdatedAt,
 		},
 	}
 }

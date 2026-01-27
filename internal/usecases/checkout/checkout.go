@@ -323,10 +323,130 @@ func (uc *CheckoutUseCase) CreateCostCheckout(ctx context.Context, companyID uui
 	}, nil
 }
 
+func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, companyID uuid.UUID) error {
+	// 1. Fetch pending costs
+	pendingCosts, err := uc.costRepo.GetPendingCosts(ctx, companyID)
+	if err != nil {
+		return fmt.Errorf("failed to fetch pending costs: %w", err)
+	}
+
+	if len(pendingCosts) == 0 {
+		return nil // Nothing to pay
+	}
+
+	// 2. Calculate total amount
+	totalAmount := decimal.Zero
+	costIDs := make([]uuid.UUID, len(pendingCosts))
+	for i, cost := range pendingCosts {
+		totalAmount = totalAmount.Add(cost.Amount)
+		costIDs[i] = cost.ID
+	}
+
+	company, err := uc.companyRepo.GetCompanyOnlyByID(ctx, companyID)
+	if err != nil {
+		return err
+	}
+
+	// Determine expiration date
+	now := time.Now()
+	dueDay := company.MonthlyPaymentDueDay
+	if dueDay == 0 {
+		dueDay = getEnvInt("MONTHLY_PAYMENT_DUE_DAY", 10)
+	}
+	expiresAt := time.Date(now.Year(), now.Month(), dueDay, 23, 59, 59, 0, now.Location())
+
+	// If generated after the due day (e.g. rerun), set for next month or few days later?
+	// Assuming running on day 1, due day 10 is fine.
+	if now.Day() > dueDay {
+		// Fallback if running late?
+		expiresAt = now.AddDate(0, 0, 5) // 5 days from now
+	}
+
+	description := fmt.Sprintf("Fatura Mensal - %s/%d", translateMonth(now.Month()), now.Year())
+
+	// 3. Create Checkout Item
+	checkoutItem := mercadopagoservice.NewCheckoutItem(
+		description,
+		"Pagamento de custos mensais acumulados",
+		1,
+		totalAmount.InexactFloat64(),
+	)
+
+	paymentEntity := entity.NewEntity()
+
+	mpReq := &mercadopagoservice.CheckoutRequest{
+		CompanyID:         company.ID.String(),
+		Schema:            company.SchemaName,
+		Item:              checkoutItem,
+		ExternalReference: paymentEntity.ID.String(),
+	}
+
+	pref, err := uc.mpService.CreateCheckoutPreference(ctx, mpReq)
+	if err != nil {
+		return fmt.Errorf("failed to create preference: %w", err)
+	}
+
+	// 4. Create Mandatory Payment
+	payment := &companyentity.CompanyPayment{
+		Entity:            paymentEntity,
+		CompanyID:         company.ID,
+		Provider:          mercadoPagoProvider,
+		Status:            companyentity.PaymentStatusPending,
+		Currency:          "BRL",
+		Amount:            totalAmount,
+		Months:            0,
+		ProviderPaymentID: paymentEntity.ID.String(),
+		PaymentURL:        pref.InitPoint,
+		ExternalReference: paymentEntity.ID.String(),
+		ExpiresAt:         &expiresAt,
+		IsMandatory:       true,
+	}
+
+	paymentModel := &model.CompanyPayment{}
+	paymentModel.FromDomain(payment)
+	// Add Description manually as it's not in Domain yet?
+	// Wait, I updated Domain to have ExpiresAt and IsMandatory.
+	// I didn't add Description to Domain/Model?
+	// Let's check repository model again.
+	// Repository model has Description. Domain CompanyPayment DOES NOT have Description in my previous read?
+	// Let's check 'internal/domain/company/payment.go'.
+	// It doesn't have Description.
+	// I should probably add Description to Domain too or just rely on MP Title.
+	// For now, I'll skip Description mapping if it's missing in Domain.
+
+	if err := uc.companyPaymentRepo.CreateCompanyPayment(ctx, paymentModel); err != nil {
+		return fmt.Errorf("failed to create payment: %w", err)
+	}
+
+	// 5. Link costs to Payment & Set Status
+	if err := uc.costRepo.UpdateCostsPaymentID(ctx, costIDs, payment.ID); err != nil {
+		return fmt.Errorf("failed to link costs to payment: %w", err)
+	}
+
+	return nil
+}
+
+func translateMonth(m time.Month) string {
+	months := []string{"", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"}
+	if m >= 1 && m <= 12 {
+		return months[m]
+	}
+	return m.String()
+}
+
 func getEnvFloat(key string, fallback float64) float64 {
 	if value, exists := os.LookupEnv(key); exists {
 		if floatVal, err := strconv.ParseFloat(value, 64); err == nil {
 			return floatVal
+		}
+	}
+	return fallback
+}
+
+func getEnvInt(key string, fallback int) int {
+	if value, exists := os.LookupEnv(key); exists {
+		if intVal, err := strconv.Atoi(value); err == nil {
+			return intVal
 		}
 	}
 	return fallback

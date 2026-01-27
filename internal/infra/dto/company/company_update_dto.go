@@ -18,6 +18,8 @@ type CompanyUpdateDTO struct {
 	RegimeTributario  *int    `json:"regime_tributario,omitempty"`
 	CNAE              *string `json:"cnae,omitempty"`
 	CRT               *int    `json:"crt,omitempty"`
+
+	MonthlyPaymentDueDay *int `json:"monthly_payment_due_day,omitempty"`
 }
 
 func (c *CompanyUpdateDTO) validate() error {
@@ -66,6 +68,10 @@ func (c *CompanyUpdateDTO) UpdateDomain(company *companyentity.Company) (err err
 	}
 	if c.CRT != nil {
 		company.CRT = *c.CRT
+	}
+
+	if c.MonthlyPaymentDueDay != nil {
+		company.MonthlyPaymentDueDay = *c.MonthlyPaymentDueDay
 	}
 
 	return nil

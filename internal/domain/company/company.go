@@ -40,6 +40,10 @@ type CompanyCommonAttributes struct {
 	RegimeTributario  int    // Tax regime: 1=Simples Nacional, 2=Simples Nacional Excesso, 3=Normal
 	CNAE              string // Economic activity code
 	CRT               int    // Tax regime code for NFC-e (1, 2 or 3)
+
+	// Billing
+	MonthlyPaymentDueDay          int
+	MonthlyPaymentDueDayUpdatedAt *time.Time
 }
 
 type CompanyToUsers struct {

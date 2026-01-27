@@ -124,6 +124,23 @@ func (s *Service) UpdateCompany(ctx context.Context, dto *companydto.CompanyUpda
 
 	company := companyModel.ToDomain()
 
+	if dto.MonthlyPaymentDueDay != nil && *dto.MonthlyPaymentDueDay != company.MonthlyPaymentDueDay {
+		// Validate range
+		if *dto.MonthlyPaymentDueDay < 1 || *dto.MonthlyPaymentDueDay > 28 {
+			return errors.New("payment due day must be between 1 and 28")
+		}
+
+		// Check 3-month restriction
+		if company.MonthlyPaymentDueDayUpdatedAt != nil {
+			nextAllowedUpdate := company.MonthlyPaymentDueDayUpdatedAt.AddDate(0, 3, 0)
+			if time.Now().Before(nextAllowedUpdate) {
+				return errors.New("payment due day can only be changed every 3 months")
+			}
+		}
+		now := time.Now()
+		company.MonthlyPaymentDueDayUpdatedAt = &now
+	}
+
 	dto.UpdateDomain(company)
 
 	if company.Cnpj != companyModel.Cnpj {

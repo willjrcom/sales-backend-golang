@@ -27,6 +27,9 @@ type CompanyDTO struct {
 	RegimeTributario  int    `json:"regime_tributario,omitempty"`
 	CNAE              string `json:"cnae,omitempty"`
 	CRT               int    `json:"crt,omitempty"`
+
+	MonthlyPaymentDueDay          int        `json:"monthly_payment_due_day,omitempty"`
+	MonthlyPaymentDueDayUpdatedAt *time.Time `json:"monthly_payment_due_day_updated_at,omitempty"`
 }
 
 func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
@@ -34,23 +37,25 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 		return
 	}
 	*c = CompanyDTO{
-		ID:                    company.ID,
-		SchemaName:            company.SchemaName,
-		BusinessName:          company.BusinessName,
-		TradeName:             company.TradeName,
-		Cnpj:                  company.Cnpj,
-		Email:                 company.Email,
-		Contacts:              company.Contacts,
-		Address:               &addressdto.AddressDTO{},
-		Users:                 []UserDTO{},
-		Preferences:           company.Preferences,
-		IsBlocked:             company.IsBlocked,
-		SubscriptionExpiresAt: company.SubscriptionExpiresAt,
-		FiscalEnabled:         company.FiscalEnabled,
-		InscricaoEstadual:     company.InscricaoEstadual,
-		RegimeTributario:      company.RegimeTributario,
-		CNAE:                  company.CNAE,
-		CRT:                   company.CRT,
+		ID:                            company.ID,
+		SchemaName:                    company.SchemaName,
+		BusinessName:                  company.BusinessName,
+		TradeName:                     company.TradeName,
+		Cnpj:                          company.Cnpj,
+		Email:                         company.Email,
+		Contacts:                      company.Contacts,
+		Address:                       &addressdto.AddressDTO{},
+		Users:                         []UserDTO{},
+		Preferences:                   company.Preferences,
+		IsBlocked:                     company.IsBlocked,
+		SubscriptionExpiresAt:         company.SubscriptionExpiresAt,
+		FiscalEnabled:                 company.FiscalEnabled,
+		InscricaoEstadual:             company.InscricaoEstadual,
+		RegimeTributario:              company.RegimeTributario,
+		CNAE:                          company.CNAE,
+		CRT:                           company.CRT,
+		MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
+		MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
 	}
 
 	c.Address.FromDomain(company.Address)

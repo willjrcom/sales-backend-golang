@@ -8,8 +8,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
+
 	billingdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/checkout"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
+	"github.com/willjrcom/sales-backend-go/internal/infra/scheduler"
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	billingusecases "github.com/willjrcom/sales-backend-go/internal/usecases/checkout"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
@@ -20,15 +22,17 @@ type handlerCompanyImpl struct {
 	s           *companyusecases.Service
 	checkoutUC  *billingusecases.CheckoutUseCase
 	costService *companyusecases.UsageCostService
+	scheduler   *scheduler.MonthlyBillingScheduler
 }
 
-func NewHandlerCompany(companyService *companyusecases.Service, checkoutUC *billingusecases.CheckoutUseCase, costService *companyusecases.UsageCostService) *handler.Handler {
+func NewHandlerCompany(companyService *companyusecases.Service, checkoutUC *billingusecases.CheckoutUseCase, costService *companyusecases.UsageCostService, scheduler *scheduler.MonthlyBillingScheduler) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerCompanyImpl{
 		s:           companyService,
 		checkoutUC:  checkoutUC,
 		costService: costService,
+		scheduler:   scheduler,
 	}
 
 	c.With().Group(func(c chi.Router) {
@@ -49,6 +53,7 @@ func NewHandlerCompany(companyService *companyusecases.Service, checkoutUC *bill
 		c.Get("/costs/monthly", h.handlerGetMonthlyCosts)
 		c.Post("/costs/register", h.handlerCreateCost)
 		c.Post("/payments/mercadopago/webhook", h.handlerMercadoPagoWebhook)
+		c.Post("/billing/scheduler/trigger", h.handlerTriggerMonthlyBilling)
 	})
 
 	return handler.NewHandler("/company", c, "/company/payments/mercadopago/webhook")
@@ -222,7 +227,7 @@ func (h *handlerCompanyImpl) handlerGetMonthlyCosts(w http.ResponseWriter, r *ht
 
 	month, _ := strconv.Atoi(r.URL.Query().Get("month"))
 	year, _ := strconv.Atoi(r.URL.Query().Get("year"))
-	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 1000)
 
 	summary, err := h.costService.GetMonthlySummary(ctx, month, year, page, perPage)
 	if err != nil {
@@ -278,4 +283,10 @@ func (h *handlerCompanyImpl) handlerCancelPayment(w http.ResponseWriter, r *http
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerCompanyImpl) handlerTriggerMonthlyBilling(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	h.scheduler.ProcessDailyBatch(ctx)
+	jsonpkg.ResponseJson(w, r, http.StatusOK, map[string]string{"status": "triggered, daily batch started"})
 }
