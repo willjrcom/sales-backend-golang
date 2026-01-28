@@ -3,6 +3,7 @@ package emailservice
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"gopkg.in/gomail.v2"
 )
@@ -15,10 +16,15 @@ type BodyEmail struct {
 
 func SendEmail(bodyEmail *BodyEmail) error {
 	// Configurações do e-mail
-	smtpHost := "smtp.gmail.com" // Por exemplo, para Gmail
-	smtpPort := 587              // Porta do servidor SMTP
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPort := os.Getenv("SMTP_PORT")
 	senderEmail := os.Getenv("EMAIL_SERVICE")
 	senderPass := os.Getenv("PASSWORD_EMAIL_SERVICE")
+
+	port, err := strconv.Atoi(smtpPort)
+	if err != nil {
+		return fmt.Errorf("Erro ao converter a porta do email: %v", err)
+	}
 
 	// Criar mensagem
 	m := gomail.NewMessage()
@@ -28,7 +34,7 @@ func SendEmail(bodyEmail *BodyEmail) error {
 	m.SetBody("text/html", bodyEmail.Body)
 
 	// Configurar servidor SMTP
-	d := gomail.NewDialer(smtpHost, smtpPort, senderEmail, senderPass)
+	d := gomail.NewDialer(smtpHost, port, senderEmail, senderPass)
 
 	// Enviar o e-mail
 	if err := d.DialAndSend(m); err != nil {
