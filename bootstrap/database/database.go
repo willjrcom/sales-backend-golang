@@ -234,6 +234,10 @@ func createPublicTables(db *bun.DB) error {
 		return err
 	}
 
+	if err := createTableIfNotExists(ctx, tx, (*model.FiscalSettings)(nil)); err != nil {
+		return err
+	}
+
 	if err := createTableIfNotExists(ctx, tx, (*model.Contact)(nil)); err != nil {
 		return err
 	}
@@ -355,6 +359,7 @@ func registerModels(db *bun.DB) error {
 	// Fiscal invoice models
 	db.RegisterModel((*model.FiscalInvoice)(nil))
 	db.RegisterModel((*model.CompanyUsageCost)(nil))
+	db.RegisterModel((*model.FiscalSettings)(nil))
 
 	return nil
 }
