@@ -21,12 +21,6 @@ type CompanyDTO struct {
 	Preferences           companyentity.Preferences `json:"preferences,omitempty"`
 	IsBlocked             bool                      `json:"is_blocked,omitempty"`
 	SubscriptionExpiresAt *time.Time                `json:"subscription_expires_at,omitempty"`
-	// Fiscal fields
-	FiscalEnabled     bool   `json:"fiscal_enabled,omitempty"`
-	InscricaoEstadual string `json:"inscricao_estadual,omitempty"`
-	RegimeTributario  int    `json:"regime_tributario,omitempty"`
-	CNAE              string `json:"cnae,omitempty"`
-	CRT               int    `json:"crt,omitempty"`
 
 	MonthlyPaymentDueDay          int        `json:"monthly_payment_due_day,omitempty"`
 	MonthlyPaymentDueDayUpdatedAt *time.Time `json:"monthly_payment_due_day_updated_at,omitempty"`
@@ -49,11 +43,6 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 		Preferences:                   company.Preferences,
 		IsBlocked:                     company.IsBlocked,
 		SubscriptionExpiresAt:         company.SubscriptionExpiresAt,
-		FiscalEnabled:                 company.FiscalEnabled,
-		InscricaoEstadual:             company.InscricaoEstadual,
-		RegimeTributario:              company.RegimeTributario,
-		CNAE:                          company.CNAE,
-		CRT:                           company.CRT,
 		MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
 		MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
 	}

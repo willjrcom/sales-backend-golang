@@ -50,6 +50,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 
 	// Fiscal invoice and usage cost modules
 	_, _, _ = NewFiscalInvoiceModule(db, chi, companyRepository, orderRepository, companyService, usageCostRepo)
+	NewFiscalSettingsModule(db, chi, companyRepository, companyService)
 
 	orderPrintService, _ := NewOrderPrintModule(db, chi)
 

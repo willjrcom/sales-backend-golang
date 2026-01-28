@@ -6,18 +6,13 @@ import (
 )
 
 type CompanyUpdateDTO struct {
-	TradeName   *string                      `json:"trade_name"`
-	Cnpj        *string                      `json:"cnpj"`
-	Email       *string                      `json:"email"`
-	Contacts    []string                     `json:"contacts"`
-	Address     *addressdto.AddressUpdateDTO `json:"address"`
-	Preferences companyentity.Preferences    `json:"preferences"`
-	// Fiscal fields
-	FiscalEnabled     *bool   `json:"fiscal_enabled,omitempty"`
-	InscricaoEstadual *string `json:"inscricao_estadual,omitempty"`
-	RegimeTributario  *int    `json:"regime_tributario,omitempty"`
-	CNAE              *string `json:"cnae,omitempty"`
-	CRT               *int    `json:"crt,omitempty"`
+	BusinessName *string                      `json:"business_name"`
+	TradeName    *string                      `json:"trade_name"`
+	Cnpj         *string                      `json:"cnpj"`
+	Email        *string                      `json:"email"`
+	Contacts     []string                     `json:"contacts"`
+	Address      *addressdto.AddressUpdateDTO `json:"address"`
+	Preferences  companyentity.Preferences    `json:"preferences"`
 
 	MonthlyPaymentDueDay *int `json:"monthly_payment_due_day,omitempty"`
 }
@@ -31,6 +26,9 @@ func (c *CompanyUpdateDTO) UpdateDomain(company *companyentity.Company) (err err
 		return err
 	}
 
+	if c.BusinessName != nil {
+		company.BusinessName = *c.BusinessName
+	}
 	if c.TradeName != nil {
 		company.TradeName = *c.TradeName
 	}
@@ -51,23 +49,6 @@ func (c *CompanyUpdateDTO) UpdateDomain(company *companyentity.Company) (err err
 		if err := c.Address.UpdateDomain(company.Address); err != nil {
 			return err
 		}
-	}
-
-	// Update fiscal fields if provided
-	if c.FiscalEnabled != nil {
-		company.FiscalEnabled = *c.FiscalEnabled
-	}
-	if c.InscricaoEstadual != nil {
-		company.InscricaoEstadual = *c.InscricaoEstadual
-	}
-	if c.RegimeTributario != nil {
-		company.RegimeTributario = *c.RegimeTributario
-	}
-	if c.CNAE != nil {
-		company.CNAE = *c.CNAE
-	}
-	if c.CRT != nil {
-		company.CRT = *c.CRT
 	}
 
 	if c.MonthlyPaymentDueDay != nil {

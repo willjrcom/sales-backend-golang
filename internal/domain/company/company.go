@@ -34,12 +34,7 @@ type CompanyCommonAttributes struct {
 	Preferences           Preferences
 	IsBlocked             bool
 	SubscriptionExpiresAt *time.Time
-	// Fiscal fields for invoice emission
-	FiscalEnabled     bool   // Feature toggle for fiscal invoice functionality
-	InscricaoEstadual string // State registration (IE)
-	RegimeTributario  int    // Tax regime: 1=Simples Nacional, 2=Simples Nacional Excesso, 3=Normal
-	CNAE              string // Economic activity code
-	CRT               int    // Tax regime code for NFC-e (1, 2 or 3)
+	// Fiscal fields removed (moved to fiscalsettingsentity)
 
 	// Billing
 	MonthlyPaymentDueDay          int

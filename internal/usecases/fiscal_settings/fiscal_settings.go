@@ -1,0 +1,246 @@
+package fiscalsettingsusecases
+
+import (
+	"context"
+
+	"fmt"
+
+	"github.com/google/uuid"
+	fiscalsettingsentity "github.com/willjrcom/sales-backend-go/internal/domain/fiscal_settings"
+	fiscalsettingsdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/fiscal_settings"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/focusnfe"
+)
+
+type Service struct {
+	fiscalSettingsRepo model.FiscalSettingsRepository
+	companyRepo        model.CompanyRepository
+	focusClient        *focusnfe.Client
+}
+
+func NewService(fiscalSettingsRepo model.FiscalSettingsRepository, companyRepo model.CompanyRepository, focusClient *focusnfe.Client) *Service {
+	return &Service{
+		fiscalSettingsRepo: fiscalSettingsRepo,
+		companyRepo:        companyRepo,
+		focusClient:        focusClient,
+	}
+}
+
+// GetFiscalSettings retrieves the fiscal settings for the company
+func (s *Service) GetFiscalSettings(ctx context.Context) (*fiscalsettingsdto.FiscalSettingsDTO, error) {
+	// Need company ID from context. Assuming companyRepo can get it or we extract from ctx.
+	// Existing code used s.companyRepo.GetCompany(ctx) which likely uses user info in context.
+	companyModel, err := s.companyRepo.GetCompany(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	settings, err := s.fiscalSettingsRepo.GetByCompanyID(ctx, companyModel.ID)
+	if err != nil {
+		// If not found, return empty or default?
+		// Or creating default settings?
+		// For now, return empty DTO.
+		return &fiscalsettingsdto.FiscalSettingsDTO{}, nil
+	}
+
+	if settings == nil {
+		return &fiscalsettingsdto.FiscalSettingsDTO{}, nil
+	}
+
+	dto := &fiscalsettingsdto.FiscalSettingsDTO{}
+	mapEntityToDTO(settings, dto)
+
+	return dto, nil
+}
+
+// UpdateFiscalSettings updates or creates the fiscal settings for the company
+func (s *Service) UpdateFiscalSettings(ctx context.Context, input *fiscalsettingsdto.FiscalSettingsUpdateDTO) error {
+	companyModel, err := s.companyRepo.GetCompany(ctx)
+	if err != nil {
+		return err
+	}
+
+	settings, err := s.fiscalSettingsRepo.GetByCompanyID(ctx, companyModel.ID)
+	if err != nil {
+		// Log error?
+	}
+
+	if settings == nil {
+		settings = fiscalsettingsentity.NewFiscalSettings(companyModel.ID)
+	}
+
+	// Update fields
+	updateEntityFromDTO(settings, input)
+
+	if settings.ID == uuid.Nil {
+		// Should have ID from NewFiscalSettings.
+		// Just in case it wasn't saved yet?
+		// NewFiscalSettings generates ID? No, entity.NewEntity generates ID.
+		if err := s.fiscalSettingsRepo.Create(ctx, settings); err != nil {
+			return err
+		}
+	} else {
+		// Check if it exists in DB. If GetByCompanyID returned nil, we are creating.
+		// Actually, GetByCompanyID returns nil if not found.
+		// So checking if it was fetched or created.
+		// If ID is set, we try update. But if it's new, we insert.
+		// We can check if it was retrieved.
+
+		// If create vs update:
+		// fiscalsettingsentity.NewFiscalSettings sets ID.
+		// We'd need to know if it's an insert or update.
+		// We can check if settings were fetched above.
+
+		// Let's rely on checking existence via Get.
+		// Refetch to be sure or use boolean flag.
+		existing, _ := s.fiscalSettingsRepo.GetByCompanyID(ctx, companyModel.ID)
+		if existing == nil {
+			if err := s.fiscalSettingsRepo.Create(ctx, settings); err != nil {
+				return err
+			}
+		} else {
+			// Make sure ID matches existing
+			settings.ID = existing.ID
+			if err := s.fiscalSettingsRepo.Update(ctx, settings); err != nil {
+				return err
+			}
+		}
+	}
+
+	if settings.IsActive {
+		if err := s.registerCompanyInFocus(ctx, settings); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *Service) registerCompanyInFocus(ctx context.Context, settings *fiscalsettingsentity.FiscalSettings) error {
+	if s.focusClient == nil || !s.focusClient.Enabled() {
+		return fmt.Errorf("focus nfe client is not enabled")
+	}
+
+	regime := "1" // Simples Nacional
+	if settings.RegimeTributario == 3 {
+		regime = "3" // Regime Normal
+	}
+
+	req := &focusnfe.CompanyRegistryRequest{
+		Nome:                    settings.BusinessName,
+		NomeFantasia:            settings.TradeName,
+		InscricaoEstadual:       settings.InscricaoEstadual,
+		InscricaoMunicipal:      settings.InscricaoMunicipal,
+		CNPJ:                    settings.Cnpj,
+		RegimeTributario:        regime,
+		Email:                   settings.Email,
+		Telefone:                settings.Phone,
+		Logradouro:              settings.Address.Street,
+		Numero:                  settings.Address.Number,
+		Complemento:             settings.Address.Complement,
+		Bairro:                  settings.Address.Neighborhood,
+		CEP:                     settings.Address.Cep,
+		Municipio:               settings.Address.City,
+		UF:                      settings.Address.UF,
+		DiscriminaImpostos:      settings.DiscriminaImpostos,
+		EnviarEmailDestinatario: settings.EnviarEmailDestinatario,
+	}
+
+	_, err := s.focusClient.CadastrarEmpresa(ctx, req)
+	if err != nil {
+		return fmt.Errorf("failed to register company in Focus NFe: %w", err)
+	}
+
+	return nil
+}
+
+func mapEntityToDTO(entity *fiscalsettingsentity.FiscalSettings, dto *fiscalsettingsdto.FiscalSettingsDTO) {
+	dto.FiscalEnabled = entity.IsActive
+	dto.InscricaoEstadual = entity.InscricaoEstadual
+	dto.RegimeTributario = entity.RegimeTributario
+	dto.CNAE = entity.CNAE
+	dto.CRT = entity.CRT
+	dto.SimplesNacional = entity.SimplesNacional
+	dto.InscricaoMunicipal = entity.InscricaoMunicipal
+	dto.DiscriminaImpostos = entity.DiscriminaImpostos
+	dto.EnviarEmailDestinatario = entity.EnviarEmailDestinatario
+	dto.InscricaoMunicipal = entity.InscricaoMunicipal
+	dto.DiscriminaImpostos = entity.DiscriminaImpostos
+	dto.EnviarEmailDestinatario = entity.EnviarEmailDestinatario
+	dto.BusinessName = entity.BusinessName
+	dto.TradeName = entity.TradeName
+	dto.Cnpj = entity.Cnpj
+	dto.Email = entity.Email
+	dto.Phone = entity.Phone
+	dto.Street = entity.Address.Street
+	dto.Number = entity.Address.Number
+	dto.Complement = entity.Address.Complement
+	dto.Neighborhood = entity.Address.Neighborhood
+	dto.City = entity.Address.City
+	dto.UF = entity.Address.UF
+	dto.Cep = entity.Address.Cep
+}
+
+func updateEntityFromDTO(entity *fiscalsettingsentity.FiscalSettings, dto *fiscalsettingsdto.FiscalSettingsUpdateDTO) {
+	if dto.FiscalEnabled != nil {
+		entity.IsActive = *dto.FiscalEnabled
+	}
+	if dto.InscricaoEstadual != nil {
+		entity.InscricaoEstadual = *dto.InscricaoEstadual
+	}
+	if dto.RegimeTributario != nil {
+		entity.RegimeTributario = *dto.RegimeTributario
+		entity.SimplesNacional = entity.RegimeTributario == 1 || entity.RegimeTributario == 2
+	}
+	if dto.CNAE != nil {
+		entity.CNAE = *dto.CNAE
+	}
+	if dto.CRT != nil {
+		entity.CRT = *dto.CRT
+	}
+	if dto.InscricaoMunicipal != nil {
+		entity.InscricaoMunicipal = *dto.InscricaoMunicipal
+	}
+	if dto.DiscriminaImpostos != nil {
+		entity.DiscriminaImpostos = *dto.DiscriminaImpostos
+	}
+	if dto.EnviarEmailDestinatario != nil {
+		entity.EnviarEmailDestinatario = *dto.EnviarEmailDestinatario
+	}
+	if dto.BusinessName != nil {
+		entity.BusinessName = *dto.BusinessName
+	}
+	if dto.TradeName != nil {
+		entity.TradeName = *dto.TradeName
+	}
+	if dto.Cnpj != nil {
+		entity.Cnpj = *dto.Cnpj
+	}
+	if dto.Email != nil {
+		entity.Email = *dto.Email
+	}
+	if dto.Phone != nil {
+		entity.Phone = *dto.Phone
+	}
+	if dto.Street != nil {
+		entity.Address.Street = *dto.Street
+	}
+	if dto.Number != nil {
+		entity.Address.Number = *dto.Number
+	}
+	if dto.Complement != nil {
+		entity.Address.Complement = *dto.Complement
+	}
+	if dto.Neighborhood != nil {
+		entity.Address.Neighborhood = *dto.Neighborhood
+	}
+	if dto.City != nil {
+		entity.Address.City = *dto.City
+	}
+	if dto.UF != nil {
+		entity.Address.UF = *dto.UF
+	}
+	if dto.Cep != nil {
+		entity.Address.Cep = *dto.Cep
+	}
+}

@@ -6,6 +6,7 @@ import (
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	fiscalinvoicerepository "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/fiscal_invoice"
+	fiscalsettingsrepository "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/fiscal_settings"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/focusnfe"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 	fiscalinvoiceusecases "github.com/willjrcom/sales-backend-go/internal/usecases/fiscal_invoice"
@@ -22,6 +23,7 @@ func NewFiscalInvoiceModule(
 ) (model.FiscalInvoiceRepository, *fiscalinvoiceusecases.Service, *companyusecases.UsageCostService) {
 	// Repositories
 	fiscalInvoiceRepo := fiscalinvoicerepository.NewFiscalInvoiceRepository(db)
+	fiscalSettingsRepo := fiscalsettingsrepository.NewFiscalSettingsRepositoryBun(db)
 
 	// Services
 	focusClient := focusnfe.NewClient()
@@ -29,6 +31,7 @@ func NewFiscalInvoiceModule(
 	fiscalInvoiceService := fiscalinvoiceusecases.NewService(
 		fiscalInvoiceRepo,
 		companyRepo,
+		fiscalSettingsRepo,
 		orderRepo,
 		usageCostService,
 		focusClient,

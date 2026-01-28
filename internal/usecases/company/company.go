@@ -3,7 +3,6 @@ package companyusecases
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -168,12 +167,6 @@ func (s *Service) UpdateCompany(ctx context.Context, dto *companydto.CompanyUpda
 	companyModel.FromDomain(company)
 	if err = s.r.UpdateCompany(ctx, companyModel); err != nil {
 		return err
-	}
-
-	if company.FiscalEnabled {
-		if err := s.RegisterFiscalCompany(ctx); err != nil {
-			return fmt.Errorf("company updated but failed to register in Focus NFe: %w", err)
-		}
 	}
 
 	return nil

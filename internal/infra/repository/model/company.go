@@ -26,12 +26,6 @@ type CompanyCommonAttributes struct {
 	Preferences           companyentity.Preferences `bun:"preferences,type:jsonb"`
 	IsBlocked             bool                      `bun:"is_blocked"`
 	SubscriptionExpiresAt *time.Time                `bun:"subscription_expires_at"`
-	// Fiscal fields
-	FiscalEnabled     bool   `bun:"fiscal_enabled,default:false"`
-	InscricaoEstadual string `bun:"inscricao_estadual"`
-	RegimeTributario  int    `bun:"regime_tributario,default:1"`
-	CNAE              string `bun:"cnae"`
-	CRT               int    `bun:"crt,default:1"`
 	// Billing
 	MonthlyPaymentDueDay          int        `bun:"monthly_payment_due_day,default:10"`
 	MonthlyPaymentDueDayUpdatedAt *time.Time `bun:"monthly_payment_due_day_updated_at"`
@@ -55,11 +49,6 @@ func (c *Company) FromDomain(company *companyentity.Company) {
 			Preferences:                   company.Preferences,
 			IsBlocked:                     company.IsBlocked,
 			SubscriptionExpiresAt:         company.SubscriptionExpiresAt,
-			FiscalEnabled:                 company.FiscalEnabled,
-			InscricaoEstadual:             company.InscricaoEstadual,
-			RegimeTributario:              company.RegimeTributario,
-			CNAE:                          company.CNAE,
-			CRT:                           company.CRT,
 			MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
 			MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
 		},
@@ -98,11 +87,6 @@ func (c *Company) ToDomain() *companyentity.Company {
 			Preferences:                   c.Preferences,
 			IsBlocked:                     c.IsBlocked,
 			SubscriptionExpiresAt:         c.SubscriptionExpiresAt,
-			FiscalEnabled:                 c.FiscalEnabled,
-			InscricaoEstadual:             c.InscricaoEstadual,
-			RegimeTributario:              c.RegimeTributario,
-			CNAE:                          c.CNAE,
-			CRT:                           c.CRT,
 			MonthlyPaymentDueDay:          c.MonthlyPaymentDueDay,
 			MonthlyPaymentDueDayUpdatedAt: c.MonthlyPaymentDueDayUpdatedAt,
 		},

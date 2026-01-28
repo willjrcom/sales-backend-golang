@@ -27,26 +27,29 @@ var (
 )
 
 type Service struct {
-	invoiceRepo      model.FiscalInvoiceRepository
-	companyRepo      model.CompanyRepository
-	orderRepo        model.OrderRepository
-	usageCostService *companyusecases.UsageCostService
-	focusClient      *focusnfe.Client
+	invoiceRepo        model.FiscalInvoiceRepository
+	companyRepo        model.CompanyRepository
+	fiscalSettingsRepo model.FiscalSettingsRepository
+	orderRepo          model.OrderRepository
+	usageCostService   *companyusecases.UsageCostService
+	focusClient        *focusnfe.Client
 }
 
 func NewService(
 	invoiceRepo model.FiscalInvoiceRepository,
 	companyRepo model.CompanyRepository,
+	fiscalSettingsRepo model.FiscalSettingsRepository,
 	orderRepo model.OrderRepository,
 	usageCostService *companyusecases.UsageCostService,
 	focusClient *focusnfe.Client,
 ) *Service {
 	return &Service{
-		invoiceRepo:      invoiceRepo,
-		companyRepo:      companyRepo,
-		orderRepo:        orderRepo,
-		usageCostService: usageCostService,
-		focusClient:      focusClient,
+		invoiceRepo:        invoiceRepo,
+		companyRepo:        companyRepo,
+		fiscalSettingsRepo: fiscalSettingsRepo,
+		orderRepo:          orderRepo,
+		usageCostService:   usageCostService,
+		focusClient:        focusClient,
 	}
 }
 
@@ -60,13 +63,19 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 
 	company := companyModel.ToDomain()
 
+	// Fetch Fiscal Settings
+	settings, err := s.fiscalSettingsRepo.GetByCompanyID(ctx, company.ID)
+	if err != nil || settings == nil {
+		return nil, ErrFiscalNotEnabled
+	}
+
 	// Validate fiscal is enabled
-	if !company.FiscalEnabled {
+	if !settings.IsActive {
 		return nil, ErrFiscalNotEnabled
 	}
 
 	// Validate required fiscal data
-	if company.InscricaoEstadual == "" || company.RegimeTributario == 0 {
+	if settings.InscricaoEstadual == "" || settings.RegimeTributario == 0 {
 		return nil, ErrMissingFiscalData
 	}
 
@@ -115,7 +124,7 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 				ValorUnitarioComercial: valorUnitario,
 				ValorBruto:             valorTotal,
 				ICMSOrigem:             fmt.Sprintf("%d", fiscalinvoice.DefaultOrigem),
-				ICMSSituacaoTributaria: fiscalinvoice.GetCSOSNForRegime(company.RegimeTributario),
+				ICMSSituacaoTributaria: fiscalinvoice.GetCSOSNForRegime(settings.RegimeTributario),
 			}
 			nfceItems = append(nfceItems, nfceItem)
 			itemNumber++
@@ -149,7 +158,7 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 		FormasPagamento:   formasPagamento,
 		Numero:            fmt.Sprintf("%d", numero),
 		Serie:             fmt.Sprintf("%d", serie),
-		CNPJ:              company.Cnpj,
+		CNPJ:              settings.Cnpj,
 		PresencaComprador: "1", // Operação presencial
 	}
 
