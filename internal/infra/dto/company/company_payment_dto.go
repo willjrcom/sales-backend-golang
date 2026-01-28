@@ -23,6 +23,7 @@ type CompanyPaymentDTO struct {
 	ExpiresAt         *time.Time      `json:"expires_at,omitempty"`
 	IsMandatory       bool            `json:"is_mandatory"`
 	CreatedAt         time.Time       `json:"created_at"`
+	Description       string          `json:"description,omitempty"`
 }
 
 // FromDomain maps a domain subscription payment to a DTO representation.
@@ -45,6 +46,7 @@ func (c *CompanyPaymentDTO) FromDomain(payment *companyentity.CompanyPayment) {
 		ExpiresAt:         payment.ExpiresAt,
 		IsMandatory:       payment.IsMandatory,
 		CreatedAt:         payment.CreatedAt,
+		Description:       payment.Description,
 	}
 }
 

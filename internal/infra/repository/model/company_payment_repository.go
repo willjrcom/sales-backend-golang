@@ -14,4 +14,6 @@ type CompanyPaymentRepository interface {
 	ListCompanyPayments(ctx context.Context, companyID uuid.UUID, page, perPage int) ([]CompanyPayment, int, error)
 	ListOverduePayments(ctx context.Context, cutoffDate time.Time) ([]CompanyPayment, error)
 	ListPendingMandatoryPayments(ctx context.Context, companyID uuid.UUID) ([]CompanyPayment, error)
+	ListOverduePaymentsByCompany(ctx context.Context, companyID uuid.UUID, cutoffDate time.Time) ([]CompanyPayment, error)
+	ListExpiredOptionalPayments(ctx context.Context) ([]CompanyPayment, error)
 }

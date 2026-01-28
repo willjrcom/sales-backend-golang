@@ -288,5 +288,7 @@ func (h *handlerCompanyImpl) handlerCancelPayment(w http.ResponseWriter, r *http
 func (h *handlerCompanyImpl) handlerTriggerMonthlyBilling(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	h.scheduler.ProcessDailyBatch(ctx)
+	h.scheduler.CheckOverdueAccounts(ctx)
+	h.scheduler.CheckExpiredOptionalPayments(ctx)
 	jsonpkg.ResponseJson(w, r, http.StatusOK, map[string]string{"status": "triggered, daily batch started"})
 }

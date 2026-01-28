@@ -122,6 +122,8 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		PaymentURL:        pref.InitPoint,
 		// PaidAt is nil
 		ExternalReference: paymentEntity.ID.String(), // Self-reference or empty? Using ID as ref.
+		ExpiresAt:         func() *time.Time { t := time.Now().AddDate(0, 0, 5); return &t }(),
+		IsMandatory:       false,
 	}
 
 	paymentModel := &model.CompanyPayment{}
@@ -242,6 +244,16 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 		}
 	}
 
+	// 3. Attempt to unblock company if there are no more OVERDUE (> 5 days) mandatory payments
+	if companyModel.IsBlocked {
+		// Use same cutoff logic as Scheduler: payments overdue by more than 5 days
+		cutoffDate := time.Now().AddDate(0, 0, -5)
+		overdue, err := s.companyPaymentRepo.ListOverduePaymentsByCompany(ctx, companyModel.ID, cutoffDate)
+		if err == nil && len(overdue) == 0 {
+			_ = s.companyRepo.UpdateBlockStatus(ctx, companyModel.ID, false)
+		}
+	}
+
 	return nil
 }
 
@@ -303,6 +315,8 @@ func (uc *CheckoutUseCase) CreateCostCheckout(ctx context.Context, companyID uui
 		ProviderPaymentID: paymentEntity.ID.String(),
 		PaymentURL:        pref.InitPoint,
 		ExternalReference: paymentEntity.ID.String(),
+		ExpiresAt:         func() *time.Time { t := time.Now().AddDate(0, 0, 5); return &t }(),
+		IsMandatory:       false,
 	}
 
 	paymentModel := &model.CompanyPayment{}

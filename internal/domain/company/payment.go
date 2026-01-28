@@ -34,4 +34,5 @@ type CompanyPayment struct {
 	ExpiresAt         *time.Time
 	IsMandatory       bool
 	RawPayload        json.RawMessage
+	Description       string
 }

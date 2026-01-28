@@ -49,6 +49,7 @@ func (c *CompanyPayment) FromDomain(payment *companyentity.CompanyPayment) {
 		ExpiresAt:         payment.ExpiresAt,
 		IsMandatory:       payment.IsMandatory,
 		RawPayload:        payment.RawPayload,
+		Description:       payment.Description,
 	}
 }
 
@@ -71,5 +72,6 @@ func (c *CompanyPayment) ToDomain() *companyentity.CompanyPayment {
 		ExpiresAt:         c.ExpiresAt,
 		IsMandatory:       c.IsMandatory,
 		RawPayload:        c.RawPayload,
+		Description:       c.Description,
 	}
 }

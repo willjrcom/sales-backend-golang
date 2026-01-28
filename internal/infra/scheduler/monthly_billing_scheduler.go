@@ -35,6 +35,7 @@ func (s *MonthlyBillingScheduler) Start(ctx context.Context) {
 				if t.Hour() == 8 {
 					s.ProcessDailyBatch(ctx)
 					s.CheckOverdueAccounts(ctx)
+					s.CheckExpiredOptionalPayments(ctx)
 				}
 			}
 		}
@@ -90,5 +91,19 @@ func (s *MonthlyBillingScheduler) ProcessDailyBatch(ctx context.Context) {
 		for _, company := range companies {
 			_ = s.checkoutUseCase.GenerateMonthlyCostPayment(ctx, company.ID)
 		}
+	}
+}
+
+func (s *MonthlyBillingScheduler) CheckExpiredOptionalPayments(ctx context.Context) {
+	payments, err := s.companyPaymentRepo.ListExpiredOptionalPayments(ctx)
+	if err != nil {
+		// log error
+		return
+	}
+
+	for _, payment := range payments {
+		// Reuse CheckoutUseCase.CancelPayment logic (unlinks costs, updates status)
+		// Assuming CancelPayment handles idempotency or allowed status checks
+		_ = s.checkoutUseCase.CancelPayment(ctx, payment.ID)
 	}
 }
