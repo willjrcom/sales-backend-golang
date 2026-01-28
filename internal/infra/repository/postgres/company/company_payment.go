@@ -2,6 +2,7 @@ package companyrepositorybun
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -124,4 +125,52 @@ func (r *CompanyPaymentRepositoryBun) ListCompanyPayments(ctx context.Context, c
 	}
 
 	return payments, total, nil
+}
+
+func (r *CompanyPaymentRepositoryBun) ListOverduePayments(ctx context.Context, cutoffDate time.Time) ([]model.CompanyPayment, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	var payments []model.CompanyPayment
+	if err := tx.NewSelect().
+		Model(&payments).
+		Where("status = ?", "pending").
+		Where("is_mandatory = ?", true).
+		Where("expires_at < ?", cutoffDate).
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return payments, nil
+}
+
+func (r *CompanyPaymentRepositoryBun) ListPendingMandatoryPayments(ctx context.Context, companyID uuid.UUID) ([]model.CompanyPayment, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	var payments []model.CompanyPayment
+	if err := tx.NewSelect().
+		Model(&payments).
+		Where("company_id = ?", companyID).
+		Where("status = ?", "pending").
+		Where("is_mandatory = ?", true).
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return payments, nil
 }

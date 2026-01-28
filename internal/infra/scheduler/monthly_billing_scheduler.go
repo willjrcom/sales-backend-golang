@@ -9,14 +9,16 @@ import (
 )
 
 type MonthlyBillingScheduler struct {
-	checkoutUseCase *billing.CheckoutUseCase
-	companyRepo     model.CompanyRepository
+	checkoutUseCase    *billing.CheckoutUseCase
+	companyRepo        model.CompanyRepository
+	companyPaymentRepo model.CompanyPaymentRepository
 }
 
-func NewMonthlyBillingScheduler(checkoutUseCase *billing.CheckoutUseCase, companyRepo model.CompanyRepository) *MonthlyBillingScheduler {
+func NewMonthlyBillingScheduler(checkoutUseCase *billing.CheckoutUseCase, companyRepo model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository) *MonthlyBillingScheduler {
 	return &MonthlyBillingScheduler{
-		checkoutUseCase: checkoutUseCase,
-		companyRepo:     companyRepo,
+		checkoutUseCase:    checkoutUseCase,
+		companyRepo:        companyRepo,
+		companyPaymentRepo: companyPaymentRepo,
 	}
 }
 
@@ -32,10 +34,35 @@ func (s *MonthlyBillingScheduler) Start(ctx context.Context) {
 				// Run daily at 8 AM
 				if t.Hour() == 8 {
 					s.ProcessDailyBatch(ctx)
+					s.CheckOverdueAccounts(ctx)
 				}
 			}
 		}
 	}()
+}
+
+func (s *MonthlyBillingScheduler) CheckOverdueAccounts(ctx context.Context) {
+	// 1. Block companies with overdue payments (> 5 days)
+	cutoffDate := time.Now().AddDate(0, 0, -5)
+	overduePayments, err := s.companyPaymentRepo.ListOverduePayments(ctx, cutoffDate)
+	if err == nil {
+		for _, payment := range overduePayments {
+			_ = s.companyRepo.UpdateBlockStatus(ctx, payment.CompanyID, true)
+		}
+	}
+
+	// 2. Unblock companies that have settled their mandatory payments
+	companies, err := s.companyRepo.ListCompaniesForBilling(ctx)
+	if err == nil {
+		for _, company := range companies {
+			if company.IsBlocked {
+				pending, err := s.companyPaymentRepo.ListPendingMandatoryPayments(ctx, company.ID)
+				if err == nil && len(pending) == 0 {
+					_ = s.companyRepo.UpdateBlockStatus(ctx, company.ID, false)
+				}
+			}
+		}
+	}
 }
 
 func (s *MonthlyBillingScheduler) ProcessDailyBatch(ctx context.Context) {

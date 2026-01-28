@@ -22,4 +22,5 @@ type CompanyRepository interface {
 	AddUserToPublicCompany(ctx context.Context, userID uuid.UUID) error
 	RemoveUserFromPublicCompany(ctx context.Context, userID uuid.UUID) error
 	GetCompanyUsers(ctx context.Context, page, perPage int) ([]User, int, error)
+	UpdateBlockStatus(ctx context.Context, companyID uuid.UUID, isBlocked bool) error
 }

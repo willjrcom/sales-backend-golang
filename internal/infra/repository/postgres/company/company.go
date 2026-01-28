@@ -368,3 +368,25 @@ func (r *CompanyRepositoryBun) UpdateCompanySubscription(ctx context.Context, co
 	}
 	return nil
 }
+
+func (r *CompanyRepositoryBun) UpdateBlockStatus(ctx context.Context, companyID uuid.UUID, isBlocked bool) error {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	if _, err := tx.NewUpdate().
+		Model((*model.Company)(nil)).
+		Set("is_blocked = ?", isBlocked).
+		Where("id = ?", companyID).
+		Exec(ctx); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return nil
+}

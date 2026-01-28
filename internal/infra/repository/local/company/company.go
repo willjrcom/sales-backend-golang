@@ -253,3 +253,38 @@ func (r *CompanyRepositoryLocal) ListCompanyPayments(ctx context.Context, compan
 
 	return result, total, nil
 }
+
+func (r *CompanyRepositoryLocal) UpdateBlockStatus(ctx context.Context, companyID uuid.UUID, isBlocked bool) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	company, ok := r.companies[companyID]
+	if !ok {
+		return fmt.Errorf("company %s not found", companyID)
+	}
+	company.IsBlocked = isBlocked
+	return nil
+}
+
+func (r *CompanyRepositoryLocal) ListOverduePayments(ctx context.Context, cutoffDate time.Time) ([]model.CompanyPayment, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	var overdue []model.CompanyPayment
+	for _, p := range r.payments {
+		if p.Status == "pending" && p.IsMandatory && p.ExpiresAt != nil && p.ExpiresAt.Before(cutoffDate) {
+			overdue = append(overdue, *p)
+		}
+	}
+	return overdue, nil
+}
+
+func (r *CompanyRepositoryLocal) ListPendingMandatoryPayments(ctx context.Context, companyID uuid.UUID) ([]model.CompanyPayment, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	var pending []model.CompanyPayment
+	for _, p := range r.payments {
+		if p.CompanyID == companyID && p.Status == "pending" && p.IsMandatory {
+			pending = append(pending, *p)
+		}
+	}
+	return pending, nil
+}

@@ -3,7 +3,6 @@ package userusecases
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
@@ -243,10 +242,6 @@ func (s *Service) Access(ctx context.Context, dto *companydto.UserSchemaDTO, acc
 
 	if company == nil {
 		return "", errors.New("schema not found in schemas in token")
-	}
-
-	if company.IsBlocked {
-		return "", fmt.Errorf("company %s is blocked", company.BusinessName)
 	}
 
 	return jwtservice.CreateFullAccessToken(accessToken, *schema)

@@ -27,7 +27,7 @@ func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyU
 	costService := companyusecases.NewUsageCostService(costRepo, repository)
 
 	// Start Monthly Billing Scheduler
-	billingScheduler := scheduler.NewMonthlyBillingScheduler(checkoutUC, repository)
+	billingScheduler := scheduler.NewMonthlyBillingScheduler(checkoutUC, repository, companyPaymentRepo)
 	billingScheduler.Start(context.Background())
 
 	handler := handlerimpl.NewHandlerCompany(service, checkoutUC, costService, billingScheduler)
