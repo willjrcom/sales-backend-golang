@@ -35,10 +35,24 @@ func FormatOrder(o *orderentity.Order) ([]byte, error) {
 	case o.Table != nil:
 		formatTableSection(&raw, o)
 	}
-	formatOrderDetailSection(&raw, o)
+
+	// Observation (Top)
+	if o.Observation != "" {
+		raw.WriteString(escBoldOn)
+		raw.WriteString("Observação do pedido" + newline)
+		raw.WriteString(o.Observation + newline)
+		raw.WriteString(escBoldOff)
+		raw.WriteString(newline)
+	}
+
 	printGroupItemsSection(&raw, o.GroupItems)
-	formatPaymentsSection(&raw, o)
+
 	formatTotalFooter(&raw, o)
+
+	formatPaymentsSection(&raw, o)
+
+	// Change/Paid Details aka Footer
+	formatOrderValuesFooter(&raw, o)
 	raw.WriteString(strings.Repeat(newline, 3))
 
 	// Align columns using tabwriter into main buffer, checking for errors
@@ -134,7 +148,7 @@ func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 
 	// Subtotal for this group
 	buf.WriteString(escBoldOn)
-	buf.WriteString(fmt.Sprintf("Subtotal:\t\t%.2f%s", d2f(group.TotalPrice), newline))
+	buf.WriteString(fmt.Sprintf("Subtotal:\t\tR$ %.2f%s", d2f(group.TotalPrice), newline))
 	buf.WriteString(escBoldOff)
 }
 
@@ -142,7 +156,7 @@ func printComplementItem(buf *bytes.Buffer, comp *orderentity.Item, group *order
 	buf.WriteString(escBoldOn)
 	// truncate complement name to 20 runes to avoid breaking UTF-8
 	name := truncate(comp.Name, 20)
-	buf.WriteString(fmt.Sprintf("%4.1f\t%-20s\t%7.2f%s", group.Quantity, name, d2f(comp.TotalPrice), newline))
+	buf.WriteString(fmt.Sprintf("%4.1f\t%-20s\tR$ %7.2f%s", group.Quantity, name, d2f(comp.TotalPrice), newline))
 	buf.WriteString(escBoldOff)
 }
 
@@ -151,7 +165,7 @@ func printComplementItem(buf *bytes.Buffer, comp *orderentity.Item, group *order
 func printItem(buf *bytes.Buffer, item *orderentity.Item) {
 	// truncate item name to 20 runes to avoid breaking UTF-8
 	name := truncate(item.Name, 20)
-	buf.WriteString(fmt.Sprintf("%.1f\t%-20s\t%.2f%s", item.Quantity, name, d2f(item.TotalPrice), newline))
+	buf.WriteString(fmt.Sprintf("%.1f\t%-20s\tR$ %.2f%s", item.Quantity, name, d2f(item.TotalPrice), newline))
 
 	for _, add := range item.AdditionalItems {
 		printAdditionalItem(buf, &add)
@@ -178,12 +192,12 @@ func printItem(buf *bytes.Buffer, item *orderentity.Item) {
 func printAdditionalItem(buf *bytes.Buffer, add *orderentity.Item) {
 	// truncate additional item name to 17 runes to avoid breaking UTF-8
 	name := truncate(add.Name, 17)
-	buf.WriteString(fmt.Sprintf("+\t%-17s\t%.2f%s", name, d2f(add.TotalPrice), newline))
+	buf.WriteString(fmt.Sprintf("+\t%-17s\tR$ %.2f%s", name, d2f(add.TotalPrice), newline))
 }
 
 // formatTotalFooter writes the total payable amount to the buffer.
 func formatTotalFooter(buf *bytes.Buffer, o *orderentity.Order) {
-	buf.WriteString(fmt.Sprintf("TOTAL:\t\t%.2f%s", d2f(o.TotalPayable), newline))
+	buf.WriteString(fmt.Sprintf("TOTAL:\t\tR$ %.2f%s", d2f(o.TotalPayable), newline))
 }
 
 // formatDeliverySection prints delivery-related details if present.
@@ -248,11 +262,11 @@ func formatDeliverySection(buf *bytes.Buffer, o *orderentity.Order) {
 
 	// Delivery tax
 	if t := o.Delivery.DeliveryTax; t != nil {
-		buf.WriteString(fmt.Sprintf("Taxa entrega:\t\t%.2f%s", d2f(*t), newline))
+		buf.WriteString(fmt.Sprintf("Taxa entrega:\t\tR$ %.2f%s", d2f(*t), newline))
 	}
 
 	// Change for delivery
-	buf.WriteString(fmt.Sprintf("Troco:\t\t%.2f%s", d2f(o.Delivery.Change), newline))
+	buf.WriteString(fmt.Sprintf("Troco:\t\tR$ %.2f%s", d2f(o.Delivery.Change), newline))
 
 	// Payment method for delivery
 	buf.WriteString(fmt.Sprintf("Forma de pagamento:\t%s%s", o.Delivery.PaymentMethod, newline))
@@ -314,27 +328,18 @@ func formatTableSection(buf *bytes.Buffer, o *orderentity.Order) {
 	buf.WriteString(strings.Repeat("-", 40) + newline)
 }
 
-// formatOrderDetailSection prints order detail fields: observation, items count, paid and change totals.
-func formatOrderDetailSection(buf *bytes.Buffer, o *orderentity.Order) {
+// formatOrderValuesFooter prints order detail fields: items count, paid and change totals.
+func formatOrderValuesFooter(buf *bytes.Buffer, o *orderentity.Order) {
 	buf.WriteString(escAlignLeft)
-	// Observation
-	if obs := o.Observation; obs != "" {
-		buf.WriteString(escBoldOn)
-		buf.WriteString("Observação do pedido")
-		buf.WriteString(newline)
-		buf.WriteString(obs)
-		buf.WriteString(escBoldOff)
-		buf.WriteString(newline)
-	}
 
 	// Total items
 	buf.WriteString(fmt.Sprintf("Total de itens:\t\t%.0f%s", o.QuantityItems, newline))
 
 	// Total paid
-	buf.WriteString(fmt.Sprintf("Pago:\t\t%.2f%s", d2f(o.TotalPaid), newline))
+	buf.WriteString(fmt.Sprintf("Pago:\t\tR$ %.2f%s", d2f(o.TotalPaid), newline))
 
 	// Total change
-	buf.WriteString(fmt.Sprintf("Troco:\t\t%.2f%s", d2f(o.TotalChange), newline))
+	buf.WriteString(fmt.Sprintf("Troco:\t\tR$ %.2f%s", d2f(o.TotalChange), newline))
 	buf.WriteString(strings.Repeat("-", 40) + newline)
 }
 
@@ -345,7 +350,7 @@ func formatPaymentsSection(buf *bytes.Buffer, o *orderentity.Order) {
 	}
 	buf.WriteString(escAlignLeft)
 	for _, p := range o.Payments {
-		buf.WriteString(fmt.Sprintf("%s:%7.2f%s", p.Method, d2f(p.TotalPaid), newline))
+		buf.WriteString(fmt.Sprintf("%s:%7sR$ %.2f%s", p.Method, "", d2f(p.TotalPaid), newline))
 	}
 	buf.WriteString(strings.Repeat("-", 40) + newline)
 }

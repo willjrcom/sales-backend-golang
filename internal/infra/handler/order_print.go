@@ -42,14 +42,26 @@ func (h *handlerOrderPrintImpl) handlePrintOrder(w http.ResponseWriter, r *http.
 	}
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
-	order, err := h.s.PrintOrder(ctx, dtoId)
+	format := r.URL.Query().Get("format")
+
+	var data []byte
+	var err error
+
+	if format == "html" {
+		data, err = h.s.PrintOrderHTML(ctx, dtoId)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	} else {
+		data, err = h.s.PrintOrder(ctx, dtoId)
+		w.Header().Set("Content-Type", "application/octet-stream")
+	}
+
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
-	w.Header().Set("Content-Type", "application/octet-stream")
+
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write(order)
+	_, _ = w.Write(data)
 }
 
 // handlePrintByShift handles POST /order-print/daily to generate daily sales report.
@@ -80,12 +92,24 @@ func (h *handlerOrderPrintImpl) handlePrintGroupItemKitchen(w http.ResponseWrite
 		return
 	}
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
-	data, err := h.s.PrintGroupItemKitchen(ctx, dtoId)
+	format := r.URL.Query().Get("format")
+
+	var data []byte
+	var err error
+
+	if format == "html" {
+		data, err = h.s.PrintGroupItemKitchenHTML(ctx, dtoId)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	} else {
+		data, err = h.s.PrintGroupItemKitchen(ctx, dtoId)
+		w.Header().Set("Content-Type", "application/octet-stream")
+	}
+
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
-	w.Header().Set("Content-Type", "application/octet-stream")
+
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(data)
 }

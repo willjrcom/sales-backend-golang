@@ -243,6 +243,32 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		}
 	}
 
+	// load categories
+	var categories []model.ProductCategory
+	var categoryIDs []uuid.UUID
+	for _, g := range order.GroupItems {
+		categoryIDs = append(categoryIDs, g.CategoryID)
+	}
+
+	if len(categoryIDs) > 0 {
+		if err := tx.NewSelect().Model(&categories).
+			Where("id IN (?)", bun.In(categoryIDs)).
+			Scan(ctx); err != nil {
+			return nil, err
+		}
+		catMap := make(map[uuid.UUID]*model.ProductCategory, len(categories))
+		for k := range categories {
+			ci := categories[k]
+			catMap[ci.ID] = &ci
+		}
+		for i := range order.GroupItems {
+			g := &order.GroupItems[i]
+			if cat, ok := catMap[g.CategoryID]; ok {
+				g.Category = cat
+			}
+		}
+	}
+
 	if order.Delivery != nil {
 		if err := tx.NewSelect().Model(order.Delivery).WherePK().
 			Relation("Client.Contact").

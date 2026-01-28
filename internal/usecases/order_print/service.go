@@ -74,3 +74,36 @@ func (s *Service) PrintGroupItemKitchen(ctx context.Context, req *entitydto.IDRe
 	}
 	return data, nil
 }
+
+// PrintOrderHTML retrieves the order by ID and returns its HTML representation.
+func (s *Service) PrintOrderHTML(ctx context.Context, req *entitydto.IDRequest) ([]byte, error) {
+	model, err := s.orderRepository.GetOrderById(ctx, req.ID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	order := model.ToDomain()
+	data, err := pos.RenderOrderHTML(order)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+// PrintGroupItemKitchenHTML retrieves the order by ID and returns its kitchen-printable HTML bytes
+func (s *Service) PrintGroupItemKitchenHTML(ctx context.Context, req *entitydto.IDRequest) ([]byte, error) {
+	// fetch full order model
+	modelGroupItem, err := s.groupItemRepository.GetGroupByID(ctx, req.ID.String(), true)
+	if err != nil {
+		return nil, err
+	}
+
+	// convert to domain
+	groupItem := modelGroupItem.ToDomain()
+	data, err := pos.RenderGroupItemKitchenHTML(groupItem)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
