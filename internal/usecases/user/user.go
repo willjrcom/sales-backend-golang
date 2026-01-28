@@ -3,6 +3,8 @@ package userusecases
 import (
 	"context"
 	"errors"
+	"fmt"
+	"os"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
@@ -118,6 +120,12 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 		return err
 	}
 
+	frontendURL := os.Getenv("FRONTEND_URL")
+	if frontendURL == "" {
+		frontendURL = "http://localhost:3000"
+	}
+	magicLink := fmt.Sprintf("%s/login/forget-password?token=%s", frontendURL, token)
+
 	bodyEmail := &emailservice.BodyEmail{
 		Email:   *email,
 		Subject: "Redefinição de senha",
@@ -126,15 +134,18 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 		
 		<p style="color: #333; font-size: 16px; margin-bottom: 24px;">
 			Recebemos uma solicitação para redefinir a senha da sua conta.<br>
-			Use o código abaixo para redefinir sua senha no sistema:
+			Clique no botão abaixo ou use o código para redefinir sua senha:
 		</p>
+
+		<div style="text-align: center; margin-bottom: 24px;">
+			<a href="` + magicLink + `" style="display: inline-block; background-color: #eab308; color: #ffffff; font-size: 16px; font-weight: bold; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
+				Redefinir Senha
+			</a>
+		</div>
 		
 		<div style="background: #f3f4f6; border-radius: 6px; padding: 20px; text-align: center; margin-bottom: 16px;">
-			<span id="reset-code" style="font-size: 15px; color: #222; word-break: break-word;">` + token + `</span>
-			<br>
-			
-			Copie o código e cole no campo de redefinir senha!
-			</button>
+			<p style="margin: 0 0 8px; font-size: 14px; color: #666;">Ou copie este código:</p>
+			<span id="reset-code" style="font-size: 15px; color: #222; word-break: break-word; font-family: monospace; font-weight: bold;">` + token + `</span>
 		</div>
 		
 		<p style="color: #666; font-size: 14px;">
@@ -146,15 +157,6 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 			Atenciosamente,<br>
 			Equipe GazalTech
 		</p>
-
-		<script>
-			function copyText() {
-			const code = document.getElementById("reset-code").innerText;
-			navigator.clipboard.writeText(code)
-				.then(() => alert("Código copiado!"))
-				.catch(err => alert("Erro ao copiar: " + err));
-			}
-		</script>
 		</div>
 `,
 	}
