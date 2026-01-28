@@ -3,6 +3,7 @@ package companyusecases
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,6 +13,7 @@ import (
 	employeedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/employee"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/focusnfe"
 	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
@@ -26,10 +28,11 @@ type Service struct {
 	u                  model.UserRepository
 	es                 employeeusecases.Service
 	us                 userusecases.Service
+	focusClient        *focusnfe.Client
 }
 
-func NewService(r model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository) *Service {
-	return &Service{r: r, companyPaymentRepo: companyPaymentRepo}
+func NewService(r model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository, focusClient *focusnfe.Client) *Service {
+	return &Service{r: r, companyPaymentRepo: companyPaymentRepo, focusClient: focusClient}
 }
 
 func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Service, u model.UserRepository, us userusecases.Service, es employeeusecases.Service) {
@@ -165,6 +168,12 @@ func (s *Service) UpdateCompany(ctx context.Context, dto *companydto.CompanyUpda
 	companyModel.FromDomain(company)
 	if err = s.r.UpdateCompany(ctx, companyModel); err != nil {
 		return err
+	}
+
+	if company.FiscalEnabled {
+		if err := s.RegisterFiscalCompany(ctx); err != nil {
+			return fmt.Errorf("company updated but failed to register in Focus NFe: %w", err)
+		}
 	}
 
 	return nil

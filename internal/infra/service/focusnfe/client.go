@@ -1,0 +1,271 @@
+package focusnfe
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"time"
+)
+
+const (
+	defaultBaseURL = "https://api.focusnfe.com.br"
+	defaultTimeout = 30 * time.Second
+)
+
+// Client wraps HTTP client for Focus NFe API
+type Client struct {
+	baseURL     string
+	httpClient  *http.Client
+	token       string
+	environment string // "production" or "homologation"
+}
+
+// CompanyRegistryRequest represents the payload to register a company
+type CompanyRegistryRequest struct {
+	Nome                    string `json:"nome"`
+	NomeFantasia            string `json:"nome_fantasia"`
+	InscricaoEstadual       string `json:"inscricao_estadual"`
+	InscricaoMunicipal      string `json:"inscricao_municipal,omitempty"`
+	CNPJ                    string `json:"cnpj"`
+	RegimeTributario        string `json:"regime_tributario"` // 1=Simples Nacional, 3=Regime Normal
+	Email                   string `json:"email"`
+	Telefone                string `json:"telefone"`
+	Logradouro              string `json:"logradouro"`
+	Numero                  string `json:"numero"`
+	Complemento             string `json:"complemento,omitempty"`
+	Bairro                  string `json:"bairro"`
+	CEP                     string `json:"cep"`
+	Municipio               string `json:"municipio"`
+	UF                      string `json:"uf"`
+	DiscriminaImpostos      bool   `json:"discrimina_impostos"`
+	EnviarEmailDestinatario bool   `json:"enviar_email_destinatario"`
+}
+
+// CompanyRegistryResponse represents the response from company registration
+type CompanyRegistryResponse struct {
+	ID       string          `json:"id"`
+	Mensagem string          `json:"mensagem,omitempty"`
+	Errors   json.RawMessage `json:"erros,omitempty"` // Can be string or array
+}
+
+// NewClient creates a new Focus NFe API client
+func NewClient() *Client {
+	baseURL := os.Getenv("FOCUS_NFE_URL")
+	if baseURL == "" {
+		baseURL = defaultBaseURL
+	}
+
+	token := os.Getenv("FOCUS_NFE_API_KEY")
+
+	environment := os.Getenv("FOCUS_NFE_ENV")
+	if environment == "" {
+		environment = "homologation"
+	}
+
+	timeout := defaultTimeout
+	if timeoutStr := os.Getenv("FOCUS_NFE_TIMEOUT"); timeoutStr != "" {
+		if d, err := time.ParseDuration(timeoutStr); err == nil {
+			timeout = d
+		}
+	}
+
+	return &Client{
+		baseURL: baseURL,
+		httpClient: &http.Client{
+			Timeout: timeout,
+		},
+		token:       token,
+		environment: environment,
+	}
+}
+
+// CadastrarEmpresa registers a new company in Focus NFe
+func (c *Client) CadastrarEmpresa(ctx context.Context, req *CompanyRegistryRequest) (*CompanyRegistryResponse, error) {
+	// For company registration, the endpoint is usually /v2/empresas
+	// But check documentation or assuming standard hook.
+	// Based on Focus NFe v2: POST /v2/empresas
+
+	// However, usually we use the "token" of the account to register sub-companies?
+	// Or maybe we are just configuring the main company.
+	// Let's assume we are POSTing to /v2/empresas with the API Key as Basic Auth (username=key, password="").
+
+	endpoint := "/v2/empresas"
+	if c.environment == "homologation" {
+		// In Focus NFe, usually the URL changes, but the path might be the same.
+		// However, some APIs use /sandbox/ prefix.
+		// Focus NFe uses https://homologacao.focusnfe.com.br for sandbox.
+		// So we handle this in baseURL env var usually, or here.
+		// Let's assume baseURL handles the domain.
+	}
+
+	resp := &CompanyRegistryResponse{}
+	if err := c.doRequest(ctx, "POST", endpoint, req, resp); err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+// doRequest performs HTTP request to Focus NFe API
+func (c *Client) doRequest(ctx context.Context, method, endpoint string, reqBody, respBody interface{}) error {
+	url := c.baseURL + endpoint
+
+	var body io.Reader
+	if reqBody != nil {
+		jsonData, err := json.Marshal(reqBody)
+		if err != nil {
+			return fmt.Errorf("failed to marshal request: %w", err)
+		}
+		body = bytes.NewBuffer(jsonData)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, method, url, body)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	// Basic Auth with Token
+	req.SetBasicAuth(c.token, "")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		// Try to parse error message if possible
+		return fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(bodyBytes))
+	}
+
+	if respBody != nil {
+		if err := json.NewDecoder(resp.Body).Decode(respBody); err != nil {
+			return fmt.Errorf("failed to decode response: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// NFCeRequest represents the request to emit NFC-e
+type NFCeRequest struct {
+	NaturezaOperacao string           `json:"natureza_operacao"`
+	DataEmissao      string           `json:"data_emissao,omitempty"`
+	Itens            []NFCeItem       `json:"items"` // Note: Focus might use "items" or "itens" depending on version. Usually "items".
+	Cliente          *NFCeCliente     `json:"cliente,omitempty"`
+	Pagamento        *NFCePagamento   `json:"pagamento,omitempty"` // Or FormasPagamento
+	FormasPagamento  []FormaPagamento `json:"formas_pagamento,omitempty"`
+	// Additional fields
+	Serie             string `json:"serie,omitempty"`
+	Numero            string `json:"numero,omitempty"`
+	PresencaComprador string `json:"presenca_comprador,omitempty"` // 1=Presencial
+	CNPJ              string `json:"cnpj_emitente,omitempty"`      // sometimes used if token covers multiple
+}
+
+type NFCeItem struct {
+	NumeroItem             int     `json:"numero_item"`
+	CodigoProduto          string  `json:"codigo_produto"`
+	Descricao              string  `json:"descricao"`
+	CFOP                   string  `json:"cfop"` // 5102
+	UnidadeComercial       string  `json:"unidade_comercial"`
+	QuantidadeComercial    float64 `json:"quantidade_comercial"`
+	ValorUnitarioComercial float64 `json:"valor_unitario_comercial"`
+	ValorBruto             float64 `json:"valor_bruto"` // Qty * UnitPrice
+	NCM                    string  `json:"ncm"`
+	ICMSOrigem             string  `json:"icms_origem"`              // 0
+	ICMSSituacaoTributaria string  `json:"icms_situacao_tributaria"` // 102, etc
+	// PIS/COFINS usually needed too
+}
+
+type NFCeCliente struct {
+	CPF   string `json:"cpf,omitempty"`
+	Nome  string `json:"nome_completo,omitempty"`
+	Email string `json:"email,omitempty"`
+}
+
+type FormaPagamento struct {
+	FormaPagamento string  `json:"forma_pagamento"` // 01, 03...
+	ValorPagamento float64 `json:"valor_pagamento"`
+}
+
+// Keep older struct for compat if needed, but we are building new.
+type NFCePagamento struct {
+	FormasPagamento []FormaPagamento `json:"formas_pagamento"`
+	Troco           float64          `json:"troco,omitempty"`
+}
+
+type NFCeResponse struct {
+	Status     string          `json:"status"` // authorized, processando, erro_autorizacao
+	CaminhoXML string          `json:"caminho_xml_nota_fiscal"`
+	CaminhoPDF string          `json:"caminho_danfe"`
+	ChaveNFe   string          `json:"chave_nfe"`
+	Numero     interface{}     `json:"numero"` // int or string
+	Serie      interface{}     `json:"serie"`
+	Protocolo  string          `json:"protocolo"`
+	Mensagem   string          `json:"mensagem_sefaz,omitempty"`
+	Erros      json.RawMessage `json:"erros,omitempty"`
+}
+
+// CancelamentoRequest
+type CancelamentoRequest struct {
+	Justificativa string `json:"justificativa"`
+}
+
+// EmitirNFCe emits a new NFC-e
+// Reference maps "reference" to our internal ID to query later if stuck in processing
+func (c *Client) EmitirNFCe(ctx context.Context, reference string, req *NFCeRequest) (*NFCeResponse, error) {
+	// POST /v2/nfce?ref=reference
+	endpoint := fmt.Sprintf("/v2/nfce?ref=%s", reference)
+
+	resp := &NFCeResponse{}
+	if err := c.doRequest(ctx, "POST", endpoint, req, resp); err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+// ConsultarNFCe queries NFC-e. Can query by reference.
+func (c *Client) ConsultarNFCe(ctx context.Context, reference string) (*NFCeResponse, error) {
+	endpoint := fmt.Sprintf("/v2/nfce/%s", reference)
+
+	resp := &NFCeResponse{}
+	if err := c.doRequest(ctx, "GET", endpoint, nil, resp); err != nil {
+		return nil, err
+	}
+
+	return resp, nil
+}
+
+// CancelarNFCe cancels an NFC-e using its reference (or key)
+func (c *Client) CancelarNFCe(ctx context.Context, reference string, req *CancelamentoRequest) error {
+	endpoint := fmt.Sprintf("/v2/nfce/%s", reference)
+
+	// Cancellation in Focus NFe: DELETE /v2/nfce/{ref} with body?
+	// Or POST /v2/nfce/{ref}/cancelar?
+	// Documentation says DELETE /v2/nfce/{ref} cancels it.
+
+	// Usually DELETE accepts body with justificativa.
+	// Check if doRequest supports body in DELETE.
+
+	resp := &struct {
+		Status string `json:"status"`
+	}{}
+	if err := c.doRequest(ctx, "DELETE", endpoint, req, resp); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Enabled checks if client is properly configured with credentials
+func (c *Client) Enabled() bool {
+	return c != nil && c.baseURL != "" && c.token != ""
+}

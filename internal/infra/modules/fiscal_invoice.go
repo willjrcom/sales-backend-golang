@@ -6,7 +6,7 @@ import (
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	fiscalinvoicerepository "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/fiscal_invoice"
-	"github.com/willjrcom/sales-backend-go/internal/infra/service/transmitenota"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/focusnfe"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 	fiscalinvoiceusecases "github.com/willjrcom/sales-backend-go/internal/usecases/fiscal_invoice"
 )
@@ -24,14 +24,14 @@ func NewFiscalInvoiceModule(
 	fiscalInvoiceRepo := fiscalinvoicerepository.NewFiscalInvoiceRepository(db)
 
 	// Services
-	transmitenotaClient := transmitenota.NewClient()
+	focusClient := focusnfe.NewClient()
 	usageCostService := companyusecases.NewUsageCostService(usageCostRepo, companyRepo)
 	fiscalInvoiceService := fiscalinvoiceusecases.NewService(
 		fiscalInvoiceRepo,
 		companyRepo,
 		orderRepo,
 		usageCostService,
-		transmitenotaClient,
+		focusClient,
 	)
 
 	// Handlers
