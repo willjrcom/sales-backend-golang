@@ -9,18 +9,19 @@ import (
 
 type FiscalSettings struct {
 	entity.Entity
-	CompanyID          uuid.UUID
-	IsActive           bool
-	InscricaoEstadual  string
-	RegimeTributario   int
-	CNAE               string
-	CRT                int
-	SimplesNacional    bool
-	InscricaoMunicipal string
+	CompanyID             uuid.UUID
+	CompanyRegistryID     int64 // ID returned by Focus NFe
+	IsActive              bool
+	StateRegistration     string // InscricaoEstadual
+	TaxRegime             int    // RegimeTributario (1=Simples Nacional, 3=Regime Normal)
+	CNAE                  string // CNAE
+	CRT                   int    // CRT
+	IsSimpleNational      bool   // SimplesNacional
+	MunicipalRegistration string // InscricaoMunicipal
 
 	// Preferences
-	DiscriminaImpostos      bool
-	EnviarEmailDestinatario bool
+	ShowTaxBreakdown     bool // DiscriminaImpostos
+	SendEmailToRecipient bool // EnviarEmailDestinatario
 
 	// Company Identity (Specific for Fiscal Emission)
 	BusinessName string
@@ -60,16 +61,21 @@ func (f *FiscalSettings) Update(
 	address FiscalAddress,
 ) {
 	f.IsActive = isActive
-	f.InscricaoEstadual = ie
-	f.RegimeTributario = regime
+	f.StateRegistration = ie
+	f.TaxRegime = regime
 	f.CNAE = cnae
 	f.CRT = crt
-	f.SimplesNacional = regime == 1 || regime == 2
+	f.IsSimpleNational = regime == 1 || regime == 2
 	f.BusinessName = businessName
 	f.TradeName = tradeName
 	f.Cnpj = cnpj
 	f.Email = email
 	f.Phone = phone
 	f.Address = address
+	f.UpdatedAt = time.Now()
+}
+
+func (f *FiscalSettings) SetCompanyRegistryID(id int64) {
+	f.CompanyRegistryID = id
 	f.UpdatedAt = time.Now()
 }

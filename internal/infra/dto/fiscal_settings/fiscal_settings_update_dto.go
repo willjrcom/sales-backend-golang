@@ -1,16 +1,16 @@
 package fiscalsettingsdto
 
 type FiscalSettingsUpdateDTO struct {
-	FiscalEnabled      *bool   `json:"fiscal_enabled,omitempty"`
-	InscricaoEstadual  *string `json:"inscricao_estadual,omitempty"`
-	RegimeTributario   *int    `json:"regime_tributario,omitempty"`
-	CNAE               *string `json:"cnae,omitempty"`
-	CRT                *int    `json:"crt,omitempty"`
-	InscricaoMunicipal *string `json:"inscricao_municipal,omitempty"`
+	FiscalEnabled         *bool   `json:"fiscal_enabled,omitempty"`
+	StateRegistration     *string `json:"state_registration,omitempty"`
+	TaxRegime             *int    `json:"tax_regime,omitempty"`
+	CNAE                  *string `json:"cnae,omitempty"`
+	CRT                   *int    `json:"crt,omitempty"`
+	MunicipalRegistration *string `json:"municipal_registration,omitempty"`
 
 	// Preferences
-	DiscriminaImpostos      *bool `json:"discrimina_impostos,omitempty"`
-	EnviarEmailDestinatario *bool `json:"enviar_email_destinatario,omitempty"`
+	ShowTaxBreakdown     *bool `json:"show_tax_breakdown,omitempty"`
+	SendEmailToRecipient *bool `json:"send_email_to_recipient,omitempty"`
 
 	// Company Identity
 	BusinessName *string `json:"business_name,omitempty"`

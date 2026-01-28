@@ -113,7 +113,7 @@ func (r *FiscalInvoiceRepository) GetByAccessKey(ctx context.Context, accessKey 
 
 	if err := tx.NewSelect().
 		Model(invoice).
-		Where("chave_acesso = ?", accessKey).
+		Where("access_key = ?", accessKey).
 		Where("deleted_at IS NULL").
 		Scan(ctx); err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func (r *FiscalInvoiceRepository) List(ctx context.Context, companyID uuid.UUID,
 	return invoices, total, nil
 }
 
-func (r *FiscalInvoiceRepository) GetNextNumber(ctx context.Context, companyID uuid.UUID, serie int) (int, error) {
+func (r *FiscalInvoiceRepository) GetNextNumber(ctx context.Context, companyID uuid.UUID, series int) (int, error) {
 	var maxNumber int
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -165,9 +165,9 @@ func (r *FiscalInvoiceRepository) GetNextNumber(ctx context.Context, companyID u
 
 	if err := tx.NewSelect().
 		Model((*model.FiscalInvoice)(nil)).
-		ColumnExpr("COALESCE(MAX(numero), 0) as max_numero").
+		ColumnExpr("COALESCE(MAX(number), 0) as max_number").
 		Where("company_id = ?", companyID).
-		Where("serie = ?", serie).
+		Where("series = ?", series).
 		Where("deleted_at IS NULL").
 		Scan(ctx, &maxNumber); err != nil {
 		return 0, err

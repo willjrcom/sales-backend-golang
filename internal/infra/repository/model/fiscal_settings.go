@@ -1,7 +1,6 @@
 package model
 
 import (
-	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -10,28 +9,23 @@ import (
 	fiscalsettingsentity "github.com/willjrcom/sales-backend-go/internal/domain/fiscal_settings"
 )
 
-type FiscalSettingsRepository interface {
-	Create(ctx context.Context, fiscalSettings *FiscalSettings) error
-	Update(ctx context.Context, fiscalSettings *FiscalSettings) error
-	GetByCompanyID(ctx context.Context, companyID uuid.UUID) (*FiscalSettings, error)
-}
-
 type FiscalSettings struct {
 	bun.BaseModel `bun:"table:fiscal_settings,alias:fs"`
 
-	ID                 uuid.UUID `bun:"id,pk,type:uuid"`
-	CompanyID          uuid.UUID `bun:"company_id,type:uuid,notnull"`
-	IsActive           bool      `bun:"is_active"`
-	InscricaoEstadual  string    `bun:"inscricao_estadual"`
-	RegimeTributario   int       `bun:"regime_tributario"`
-	CNAE               string    `bun:"cnae"`
-	CRT                int       `bun:"crt"`
-	SimplesNacional    bool      `bun:"simples_nacional"`
-	InscricaoMunicipal string    `bun:"inscricao_municipal"`
+	ID                    uuid.UUID `bun:"id,pk,type:uuid"`
+	CompanyID             uuid.UUID `bun:"company_id,type:uuid,notnull"`
+	CompanyRegistryID     int64     `bun:"company_registry_id"`
+	IsActive              bool      `bun:"is_active"`
+	StateRegistration     string    `bun:"state_registration"`     // InscricaoEstadual
+	TaxRegime             int       `bun:"tax_regime"`             // RegimeTributario
+	CNAE                  string    `bun:"cnae"`                   // CNAE
+	CRT                   int       `bun:"crt"`                    // CRT
+	IsSimpleNational      bool      `bun:"is_simple_national"`     // SimplesNacional
+	MunicipalRegistration string    `bun:"municipal_registration"` // InscricaoMunicipal
 
 	// Preferences
-	DiscriminaImpostos      bool `bun:"discrimina_impostos"`
-	EnviarEmailDestinatario bool `bun:"enviar_email_destinatario"`
+	ShowTaxBreakdown     bool `bun:"show_tax_breakdown"`      // DiscriminaImpostos
+	SendEmailToRecipient bool `bun:"send_email_to_recipient"` // EnviarEmailDestinatario
 
 	// Company Identity
 	BusinessName string `bun:"business_name"`
@@ -65,21 +59,22 @@ func (m *FiscalSettings) ToDomain() *fiscalsettingsentity.FiscalSettings {
 			CreatedAt: m.CreatedAt,
 			UpdatedAt: updatedAt,
 		},
-		CompanyID:               m.CompanyID,
-		IsActive:                m.IsActive,
-		InscricaoEstadual:       m.InscricaoEstadual,
-		RegimeTributario:        m.RegimeTributario,
-		CNAE:                    m.CNAE,
-		CRT:                     m.CRT,
-		SimplesNacional:         m.SimplesNacional,
-		InscricaoMunicipal:      m.InscricaoMunicipal,
-		DiscriminaImpostos:      m.DiscriminaImpostos,
-		EnviarEmailDestinatario: m.EnviarEmailDestinatario,
-		BusinessName:            m.BusinessName,
-		TradeName:               m.TradeName,
-		Cnpj:                    m.Cnpj,
-		Email:                   m.Email,
-		Phone:                   m.Phone,
+		CompanyID:             m.CompanyID,
+		CompanyRegistryID:     m.CompanyRegistryID,
+		IsActive:              m.IsActive,
+		StateRegistration:     m.StateRegistration,
+		TaxRegime:             m.TaxRegime,
+		CNAE:                  m.CNAE,
+		CRT:                   m.CRT,
+		IsSimpleNational:      m.IsSimpleNational,
+		MunicipalRegistration: m.MunicipalRegistration,
+		ShowTaxBreakdown:      m.ShowTaxBreakdown,
+		SendEmailToRecipient:  m.SendEmailToRecipient,
+		BusinessName:          m.BusinessName,
+		TradeName:             m.TradeName,
+		Cnpj:                  m.Cnpj,
+		Email:                 m.Email,
+		Phone:                 m.Phone,
 		Address: fiscalsettingsentity.FiscalAddress{
 			Street:       m.Street,
 			Number:       m.Number,
@@ -95,15 +90,16 @@ func (m *FiscalSettings) ToDomain() *fiscalsettingsentity.FiscalSettings {
 func (m *FiscalSettings) FromDomain(d *fiscalsettingsentity.FiscalSettings) {
 	m.ID = d.ID
 	m.CompanyID = d.CompanyID
+	m.CompanyRegistryID = d.CompanyRegistryID
 	m.IsActive = d.IsActive
-	m.InscricaoEstadual = d.InscricaoEstadual
-	m.RegimeTributario = d.RegimeTributario
+	m.StateRegistration = d.StateRegistration
+	m.TaxRegime = d.TaxRegime
 	m.CNAE = d.CNAE
 	m.CRT = d.CRT
-	m.SimplesNacional = d.SimplesNacional
-	m.InscricaoMunicipal = d.InscricaoMunicipal
-	m.DiscriminaImpostos = d.DiscriminaImpostos
-	m.EnviarEmailDestinatario = d.EnviarEmailDestinatario
+	m.IsSimpleNational = d.IsSimpleNational
+	m.MunicipalRegistration = d.MunicipalRegistration
+	m.ShowTaxBreakdown = d.ShowTaxBreakdown
+	m.SendEmailToRecipient = d.SendEmailToRecipient
 	m.BusinessName = d.BusinessName
 	m.TradeName = d.TradeName
 	m.Cnpj = d.Cnpj

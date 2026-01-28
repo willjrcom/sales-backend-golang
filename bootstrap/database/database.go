@@ -234,6 +234,10 @@ func createPublicTables(db *bun.DB) error {
 		return err
 	}
 
+	if err := createTableIfNotExists(ctx, tx, (*model.FiscalInvoice)(nil)); err != nil {
+		return err
+	}
+
 	if err := createTableIfNotExists(ctx, tx, (*model.FiscalSettings)(nil)); err != nil {
 		return err
 	}
@@ -517,10 +521,6 @@ func createTables(ctx context.Context, tx *bun.Tx) error {
 	}
 
 	if err := createTableIfNotExists(ctx, tx, (*model.Shift)(nil)); err != nil {
-		return err
-	}
-
-	if err := createTableIfNotExists(ctx, tx, (*model.FiscalInvoice)(nil)); err != nil {
 		return err
 	}
 

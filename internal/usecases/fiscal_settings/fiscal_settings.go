@@ -108,15 +108,15 @@ func (s *Service) registerCompanyInFocus(ctx context.Context, settings *fiscalse
 	}
 
 	regime := "1" // Simples Nacional
-	if settings.RegimeTributario == 3 {
+	if settings.TaxRegime == 3 {
 		regime = "3" // Regime Normal
 	}
 
 	req := &focusnfe.CompanyRegistryRequest{
 		Nome:                    settings.BusinessName,
 		NomeFantasia:            settings.TradeName,
-		InscricaoEstadual:       settings.InscricaoEstadual,
-		InscricaoMunicipal:      settings.InscricaoMunicipal,
+		InscricaoEstadual:       settings.StateRegistration,
+		InscricaoMunicipal:      settings.MunicipalRegistration,
 		CNPJ:                    settings.Cnpj,
 		RegimeTributario:        regime,
 		Email:                   settings.Email,
@@ -128,13 +128,26 @@ func (s *Service) registerCompanyInFocus(ctx context.Context, settings *fiscalse
 		CEP:                     settings.Address.Cep,
 		Municipio:               settings.Address.City,
 		UF:                      settings.Address.UF,
-		DiscriminaImpostos:      settings.DiscriminaImpostos,
-		EnviarEmailDestinatario: settings.EnviarEmailDestinatario,
+		DiscriminaImpostos:      settings.ShowTaxBreakdown,
+		EnviarEmailDestinatario: settings.SendEmailToRecipient,
 	}
 
-	_, err := s.focusClient.CadastrarEmpresa(ctx, req)
+	resp, err := s.focusClient.CadastrarEmpresa(ctx, req)
 	if err != nil {
 		return fmt.Errorf("failed to register company in Focus NFe: %w", err)
+	}
+
+	// Update settings with the returned ID if successful
+	if resp != nil && resp.ID > 0 {
+		settings.SetCompanyRegistryID(resp.ID)
+
+		settingsModel := &model.FiscalSettings{}
+		settingsModel.FromDomain(settings)
+
+		// Update DB with the new ID
+		if err := s.fiscalSettingsRepo.Update(ctx, settingsModel); err != nil {
+			return fmt.Errorf("failed to update company registry id: %w", err)
+		}
 	}
 
 	return nil
@@ -142,17 +155,14 @@ func (s *Service) registerCompanyInFocus(ctx context.Context, settings *fiscalse
 
 func mapEntityToDTO(entity *fiscalsettingsentity.FiscalSettings, dto *fiscalsettingsdto.FiscalSettingsDTO) {
 	dto.FiscalEnabled = entity.IsActive
-	dto.InscricaoEstadual = entity.InscricaoEstadual
-	dto.RegimeTributario = entity.RegimeTributario
+	dto.StateRegistration = entity.StateRegistration
+	dto.TaxRegime = entity.TaxRegime
 	dto.CNAE = entity.CNAE
 	dto.CRT = entity.CRT
-	dto.SimplesNacional = entity.SimplesNacional
-	dto.InscricaoMunicipal = entity.InscricaoMunicipal
-	dto.DiscriminaImpostos = entity.DiscriminaImpostos
-	dto.EnviarEmailDestinatario = entity.EnviarEmailDestinatario
-	dto.InscricaoMunicipal = entity.InscricaoMunicipal
-	dto.DiscriminaImpostos = entity.DiscriminaImpostos
-	dto.EnviarEmailDestinatario = entity.EnviarEmailDestinatario
+	dto.IsSimpleNational = entity.IsSimpleNational
+	dto.MunicipalRegistration = entity.MunicipalRegistration
+	dto.ShowTaxBreakdown = entity.ShowTaxBreakdown
+	dto.SendEmailToRecipient = entity.SendEmailToRecipient
 	dto.BusinessName = entity.BusinessName
 	dto.TradeName = entity.TradeName
 	dto.Cnpj = entity.Cnpj
@@ -171,12 +181,12 @@ func updateEntityFromDTO(entity *fiscalsettingsentity.FiscalSettings, dto *fisca
 	if dto.FiscalEnabled != nil {
 		entity.IsActive = *dto.FiscalEnabled
 	}
-	if dto.InscricaoEstadual != nil {
-		entity.InscricaoEstadual = *dto.InscricaoEstadual
+	if dto.StateRegistration != nil {
+		entity.StateRegistration = *dto.StateRegistration
 	}
-	if dto.RegimeTributario != nil {
-		entity.RegimeTributario = *dto.RegimeTributario
-		entity.SimplesNacional = entity.RegimeTributario == 1 || entity.RegimeTributario == 2
+	if dto.TaxRegime != nil {
+		entity.TaxRegime = *dto.TaxRegime
+		entity.IsSimpleNational = entity.TaxRegime == 1 || entity.TaxRegime == 2
 	}
 	if dto.CNAE != nil {
 		entity.CNAE = *dto.CNAE
@@ -184,14 +194,14 @@ func updateEntityFromDTO(entity *fiscalsettingsentity.FiscalSettings, dto *fisca
 	if dto.CRT != nil {
 		entity.CRT = *dto.CRT
 	}
-	if dto.InscricaoMunicipal != nil {
-		entity.InscricaoMunicipal = *dto.InscricaoMunicipal
+	if dto.MunicipalRegistration != nil {
+		entity.MunicipalRegistration = *dto.MunicipalRegistration
 	}
-	if dto.DiscriminaImpostos != nil {
-		entity.DiscriminaImpostos = *dto.DiscriminaImpostos
+	if dto.ShowTaxBreakdown != nil {
+		entity.ShowTaxBreakdown = *dto.ShowTaxBreakdown
 	}
-	if dto.EnviarEmailDestinatario != nil {
-		entity.EnviarEmailDestinatario = *dto.EnviarEmailDestinatario
+	if dto.SendEmailToRecipient != nil {
+		entity.SendEmailToRecipient = *dto.SendEmailToRecipient
 	}
 	if dto.BusinessName != nil {
 		entity.BusinessName = *dto.BusinessName

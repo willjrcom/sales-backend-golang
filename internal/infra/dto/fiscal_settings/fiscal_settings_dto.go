@@ -5,17 +5,18 @@ import (
 )
 
 type FiscalSettingsDTO struct {
-	FiscalEnabled      bool   `json:"fiscal_enabled"`
-	InscricaoEstadual  string `json:"inscricao_estadual"`
-	RegimeTributario   int    `json:"regime_tributario"`
-	CNAE               string `json:"cnae"`
-	CRT                int    `json:"crt"`
-	SimplesNacional    bool   `json:"simples_nacional"`
-	InscricaoMunicipal string `json:"inscricao_municipal"`
+	CompanyRegistryID     int64  `json:"company_registry_id,omitempty"`
+	FiscalEnabled         bool   `json:"fiscal_enabled"`
+	StateRegistration     string `json:"state_registration"`
+	TaxRegime             int    `json:"tax_regime"`
+	CNAE                  string `json:"cnae"`
+	CRT                   int    `json:"crt"`
+	IsSimpleNational      bool   `json:"is_simple_national"`
+	MunicipalRegistration string `json:"municipal_registration"`
 
 	// Preferences
-	DiscriminaImpostos      bool `json:"discrimina_impostos"`
-	EnviarEmailDestinatario bool `json:"enviar_email_destinatario"`
+	ShowTaxBreakdown     bool `json:"show_tax_breakdown"`
+	SendEmailToRecipient bool `json:"send_email_to_recipient"`
 
 	// Company Identity
 	BusinessName string `json:"business_name"` // Razão Social
@@ -35,15 +36,16 @@ type FiscalSettingsDTO struct {
 }
 
 func (d *FiscalSettingsDTO) FromDomain(entity *fiscalsettingsentity.FiscalSettings) {
+	d.CompanyRegistryID = entity.CompanyRegistryID
 	d.FiscalEnabled = entity.IsActive
-	d.InscricaoEstadual = entity.InscricaoEstadual
-	d.RegimeTributario = entity.RegimeTributario
+	d.StateRegistration = entity.StateRegistration
+	d.TaxRegime = entity.TaxRegime
 	d.CNAE = entity.CNAE
 	d.CRT = entity.CRT
-	d.SimplesNacional = entity.SimplesNacional
-	d.InscricaoMunicipal = entity.InscricaoMunicipal
-	d.DiscriminaImpostos = entity.DiscriminaImpostos
-	d.EnviarEmailDestinatario = entity.EnviarEmailDestinatario
+	d.IsSimpleNational = entity.IsSimpleNational
+	d.MunicipalRegistration = entity.MunicipalRegistration
+	d.ShowTaxBreakdown = entity.ShowTaxBreakdown
+	d.SendEmailToRecipient = entity.SendEmailToRecipient
 
 	d.BusinessName = entity.BusinessName
 	d.TradeName = entity.TradeName

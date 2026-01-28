@@ -20,34 +20,34 @@ type FiscalInvoice struct {
 	entity.Entity
 	CompanyID          uuid.UUID
 	OrderID            uuid.UUID
-	ChaveAcesso        string // 44-character access key
-	Numero             int
-	Serie              int
+	AccessKey          string // ChaveAcesso (44-character access key)
+	Number             int    // Numero
+	Series             int    // Serie
 	Status             InvoiceStatus
 	XMLPath            string
 	PDFPath            string
-	Protocolo          string
+	Protocol           string // Protocolo
 	ErrorMessage       string
 	CancellationReason string
 }
 
 // NewFiscalInvoice creates a new fiscal invoice
-func NewFiscalInvoice(companyID, orderID uuid.UUID, numero, serie int) *FiscalInvoice {
+func NewFiscalInvoice(companyID, orderID uuid.UUID, number, series int) *FiscalInvoice {
 	return &FiscalInvoice{
 		Entity:    entity.NewEntity(),
 		CompanyID: companyID,
 		OrderID:   orderID,
-		Numero:    numero,
-		Serie:     serie,
+		Number:    number,
+		Series:    series,
 		Status:    StatusPending,
 	}
 }
 
 // Authorize marks the invoice as authorized
-func (f *FiscalInvoice) Authorize(chaveAcesso, protocolo, xmlPath, pdfPath string) {
+func (f *FiscalInvoice) Authorize(accessKey, protocol, xmlPath, pdfPath string) {
 	f.Status = StatusAuthorized
-	f.ChaveAcesso = chaveAcesso
-	f.Protocolo = protocolo
+	f.AccessKey = accessKey
+	f.Protocol = protocol
 	f.XMLPath = xmlPath
 	f.PDFPath = pdfPath
 	f.ErrorMessage = ""
@@ -77,5 +77,5 @@ func (f *FiscalInvoice) IsCancelled() bool {
 
 // CanBeCancelled checks if invoice can be cancelled
 func (f *FiscalInvoice) CanBeCancelled() bool {
-	return f.Status == StatusAuthorized && f.ChaveAcesso != ""
+	return f.Status == StatusAuthorized && f.AccessKey != ""
 }

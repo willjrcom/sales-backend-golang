@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	defaultBaseURL = "https://api.focusnfe.com.br"
-	defaultTimeout = 30 * time.Second
+	productionBaseURL   = "https://api.focusnfe.com.br"
+	homologationBaseURL = "https://homologacao.focusnfe.com.br"
+	defaultTimeout      = 30 * time.Second
 )
 
 // Client wraps HTTP client for Focus NFe API
@@ -47,23 +48,24 @@ type CompanyRegistryRequest struct {
 
 // CompanyRegistryResponse represents the response from company registration
 type CompanyRegistryResponse struct {
-	ID       string          `json:"id"`
+	ID       int64           `json:"id"`
 	Mensagem string          `json:"mensagem,omitempty"`
 	Errors   json.RawMessage `json:"erros,omitempty"` // Can be string or array
 }
 
 // NewClient creates a new Focus NFe API client
 func NewClient() *Client {
-	baseURL := os.Getenv("FOCUS_NFE_URL")
-	if baseURL == "" {
-		baseURL = defaultBaseURL
-	}
 
 	token := os.Getenv("FOCUS_NFE_API_KEY")
 
 	environment := os.Getenv("FOCUS_NFE_ENV")
 	if environment == "" {
 		environment = "homologation"
+	}
+
+	baseURL := homologationBaseURL
+	if environment == "production" {
+		baseURL = productionBaseURL
 	}
 
 	timeout := defaultTimeout
@@ -85,22 +87,20 @@ func NewClient() *Client {
 
 // CadastrarEmpresa registers a new company in Focus NFe
 func (c *Client) CadastrarEmpresa(ctx context.Context, req *CompanyRegistryRequest) (*CompanyRegistryResponse, error) {
-	// For company registration, the endpoint is usually /v2/empresas
-	// But check documentation or assuming standard hook.
-	// Based on Focus NFe v2: POST /v2/empresas
-
-	// However, usually we use the "token" of the account to register sub-companies?
-	// Or maybe we are just configuring the main company.
-	// Let's assume we are POSTing to /v2/empresas with the API Key as Basic Auth (username=key, password="").
-
+	// The Companies API operates EXCLUSIVELY in the production environment.
+	// https://focusnfe.com.br/doc/#empresas-ambientes
 	endpoint := "/v2/empresas"
-	if c.environment == "homologation" {
-		// In Focus NFe, usually the URL changes, but the path might be the same.
-		// However, some APIs use /sandbox/ prefix.
-		// Focus NFe uses https://homologacao.focusnfe.com.br for sandbox.
-		// So we handle this in baseURL env var usually, or here.
-		// Let's assume baseURL handles the domain.
+
+	// If we are in homologation, we should use dry_run to simulate
+	if c.environment != "production" {
+		endpoint += "?dry_run=1"
 	}
+
+	// For this specific call, we MUST use the production URL, regardless of the environment
+	// We'll temporarily override the base URL for this request
+	originalBaseURL := c.baseURL
+	c.baseURL = productionBaseURL
+	defer func() { c.baseURL = originalBaseURL }()
 
 	resp := &CompanyRegistryResponse{}
 	if err := c.doRequest(ctx, "POST", endpoint, req, resp); err != nil {

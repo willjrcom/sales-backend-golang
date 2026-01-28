@@ -75,7 +75,7 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 	}
 
 	// Validate required fiscal data
-	if settings.InscricaoEstadual == "" || settings.RegimeTributario == 0 {
+	if settings.TaxRegime == 0 {
 		return nil, ErrMissingFiscalData
 	}
 
@@ -90,14 +90,14 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 	}
 
 	// Get next invoice number
-	serie := 1 // Default series
-	numero, err := s.invoiceRepo.GetNextNumber(ctx, company.ID, serie)
+	series := 1 // Default series
+	number, err := s.invoiceRepo.GetNextNumber(ctx, company.ID, series)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get next invoice number: %w", err)
 	}
 
 	// Create invoice entity
-	invoice := fiscalinvoice.NewFiscalInvoice(company.ID, orderID, numero, serie)
+	invoice := fiscalinvoice.NewFiscalInvoice(company.ID, orderID, number, series)
 
 	// Fetch order to get items and payment info
 	orderModel, err := s.orderRepo.GetOrderById(ctx, orderID.String())
@@ -124,7 +124,7 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 				ValorUnitarioComercial: valorUnitario,
 				ValorBruto:             valorTotal,
 				ICMSOrigem:             fmt.Sprintf("%d", fiscalinvoice.DefaultOrigem),
-				ICMSSituacaoTributaria: fiscalinvoice.GetCSOSNForRegime(settings.RegimeTributario),
+				ICMSSituacaoTributaria: fiscalinvoice.GetCSOSNForRegime(settings.TaxRegime),
 			}
 			nfceItems = append(nfceItems, nfceItem)
 			itemNumber++
@@ -156,8 +156,8 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 		DataEmissao:       time.Now().Format("2006-01-02T15:04:05-07:00"),
 		Itens:             nfceItems,
 		FormasPagamento:   formasPagamento,
-		Numero:            fmt.Sprintf("%d", numero),
-		Serie:             fmt.Sprintf("%d", serie),
+		Numero:            fmt.Sprintf("%d", number),
+		Serie:             fmt.Sprintf("%d", series),
 		CNPJ:              settings.Cnpj,
 		PresencaComprador: "1", // Operação presencial
 	}
@@ -218,7 +218,7 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 
 	// Register cost (R$ 0.10 per NFC-e)
 	if s.usageCostService != nil && response.Status == "autorizado" {
-		description := fmt.Sprintf("Emissão NFC-e #%d - Série %d", numero, serie)
+		description := fmt.Sprintf("Emissão NFC-e #%d - Série %d", number, series)
 		pricePerInvoice, _ := decimal.NewFromString(os.Getenv("PRICE_PER_NFCE"))
 
 		cost := companyentity.NewUsageCost(company.ID, companyentity.CostTypeNFCe, pricePerInvoice, description, &invoice.ID)
