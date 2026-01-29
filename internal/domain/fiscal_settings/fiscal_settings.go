@@ -13,6 +13,10 @@ type FiscalSettings struct {
 	CompanyRegistryID     int64 // ID returned by Focus NFe
 	TokenProduction       string
 	TokenHomologation     string
+	CSCProductionID       string
+	CSCProductionCode     string
+	CSCHomologationID     string
+	CSCHomologationCode   string
 	IsActive              bool
 	StateRegistration     string // InscricaoEstadual
 	TaxRegime             int    // RegimeTributario (1=Simples Nacional, 3=Regime Normal)
@@ -61,6 +65,7 @@ func (f *FiscalSettings) Update(
 	crt int,
 	businessName, tradeName, cnpj, email, phone string,
 	address FiscalAddress,
+	cscProductionID, cscProductionCode, cscHomologationID, cscHomologationCode string,
 ) {
 	f.IsActive = isActive
 	f.StateRegistration = ie
@@ -74,6 +79,10 @@ func (f *FiscalSettings) Update(
 	f.Email = email
 	f.Phone = phone
 	f.Address = address
+	f.CSCProductionID = cscProductionID
+	f.CSCProductionCode = cscProductionCode
+	f.CSCHomologationID = cscHomologationID
+	f.CSCHomologationCode = cscHomologationCode
 	f.UpdatedAt = time.Now()
 }
 

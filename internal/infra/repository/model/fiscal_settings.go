@@ -17,6 +17,10 @@ type FiscalSettings struct {
 	CompanyRegistryID     int64     `bun:"company_registry_id"`
 	TokenProduction       string    `bun:"token_production"`
 	TokenHomologation     string    `bun:"token_homologation"`
+	CSCProductionID       string    `bun:"csc_production_id"`
+	CSCProductionCode     string    `bun:"csc_production_code"`
+	CSCHomologationID     string    `bun:"csc_homologation_id"`
+	CSCHomologationCode   string    `bun:"csc_homologation_code"`
 	IsActive              bool      `bun:"is_active"`
 	StateRegistration     string    `bun:"state_registration"`     // InscricaoEstadual
 	TaxRegime             int       `bun:"tax_regime"`             // RegimeTributario
@@ -65,6 +69,10 @@ func (m *FiscalSettings) ToDomain() *fiscalsettingsentity.FiscalSettings {
 		CompanyRegistryID:     m.CompanyRegistryID,
 		TokenProduction:       m.TokenProduction,
 		TokenHomologation:     m.TokenHomologation,
+		CSCProductionID:       m.CSCProductionID,
+		CSCProductionCode:     m.CSCProductionCode,
+		CSCHomologationID:     m.CSCHomologationID,
+		CSCHomologationCode:   m.CSCHomologationCode,
 		IsActive:              m.IsActive,
 		StateRegistration:     m.StateRegistration,
 		TaxRegime:             m.TaxRegime,
@@ -97,6 +105,10 @@ func (m *FiscalSettings) FromDomain(d *fiscalsettingsentity.FiscalSettings) {
 	m.CompanyRegistryID = d.CompanyRegistryID
 	m.TokenProduction = d.TokenProduction
 	m.TokenHomologation = d.TokenHomologation
+	m.CSCProductionID = d.CSCProductionID
+	m.CSCProductionCode = d.CSCProductionCode
+	m.CSCHomologationID = d.CSCHomologationID
+	m.CSCHomologationCode = d.CSCHomologationCode
 	m.IsActive = d.IsActive
 	m.StateRegistration = d.StateRegistration
 	m.TaxRegime = d.TaxRegime

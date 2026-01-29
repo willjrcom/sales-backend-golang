@@ -7,6 +7,10 @@ type FiscalSettingsUpdateDTO struct {
 	CNAE                  *string `json:"cnae,omitempty"`
 	CRT                   *int    `json:"crt,omitempty"`
 	MunicipalRegistration *string `json:"municipal_registration,omitempty"`
+	CSCProductionID       *string `json:"csc_production_id,omitempty"`
+	CSCProductionCode     *string `json:"csc_production_code,omitempty"`
+	CSCHomologationID     *string `json:"csc_homologation_id,omitempty"`
+	CSCHomologationCode   *string `json:"csc_homologation_code,omitempty"`
 
 	// Preferences
 	ShowTaxBreakdown     *bool `json:"show_tax_breakdown,omitempty"`

@@ -130,6 +130,10 @@ func (s *Service) registerCompanyInFocus(ctx context.Context, settings *fiscalse
 		UF:                      settings.Address.UF,
 		DiscriminaImpostos:      settings.ShowTaxBreakdown,
 		EnviarEmailDestinatario: settings.SendEmailToRecipient,
+		CscNfceProducao:         settings.CSCProductionCode,
+		IdTokenNfceProducao:     settings.CSCProductionID,
+		CscNfceHomologacao:      settings.CSCHomologationCode,
+		IdTokenNfceHomologacao:  settings.CSCHomologationID,
 	}
 
 	resp, err := s.focusClient.CadastrarEmpresa(ctx, req)
@@ -176,6 +180,10 @@ func mapEntityToDTO(entity *fiscalsettingsentity.FiscalSettings, dto *fiscalsett
 	dto.City = entity.Address.City
 	dto.UF = entity.Address.UF
 	dto.Cep = entity.Address.Cep
+	dto.CSCProductionID = entity.CSCProductionID
+	dto.CSCProductionCode = entity.CSCProductionCode
+	dto.CSCHomologationID = entity.CSCHomologationID
+	dto.CSCHomologationCode = entity.CSCHomologationCode
 }
 
 func updateEntityFromDTO(entity *fiscalsettingsentity.FiscalSettings, dto *fiscalsettingsdto.FiscalSettingsUpdateDTO) {
@@ -197,6 +205,18 @@ func updateEntityFromDTO(entity *fiscalsettingsentity.FiscalSettings, dto *fisca
 	}
 	if dto.MunicipalRegistration != nil {
 		entity.MunicipalRegistration = *dto.MunicipalRegistration
+	}
+	if dto.CSCProductionID != nil {
+		entity.CSCProductionID = *dto.CSCProductionID
+	}
+	if dto.CSCProductionCode != nil {
+		entity.CSCProductionCode = *dto.CSCProductionCode
+	}
+	if dto.CSCHomologationID != nil {
+		entity.CSCHomologationID = *dto.CSCHomologationID
+	}
+	if dto.CSCHomologationCode != nil {
+		entity.CSCHomologationCode = *dto.CSCHomologationCode
 	}
 	if dto.ShowTaxBreakdown != nil {
 		entity.ShowTaxBreakdown = *dto.ShowTaxBreakdown

@@ -45,6 +45,10 @@ type CompanyRegistryRequest struct {
 	UF                      string `json:"uf"`
 	DiscriminaImpostos      bool   `json:"discrimina_impostos"`
 	EnviarEmailDestinatario bool   `json:"enviar_email_destinatario"`
+	CscNfceProducao         string `json:"csc_nfce_producao,omitempty"`
+	IdTokenNfceProducao     string `json:"id_token_nfce_producao,omitempty"`
+	CscNfceHomologacao      string `json:"csc_nfce_homologacao,omitempty"`
+	IdTokenNfceHomologacao  string `json:"id_token_nfce_homologacao,omitempty"`
 }
 
 // CompanyRegistryResponse represents the response from company registration
@@ -226,6 +230,12 @@ type CancelamentoRequest struct {
 func (c *Client) EmitirNFCe(ctx context.Context, reference string, req *NFCeRequest, token string) (*NFCeResponse, error) {
 	// POST /v2/nfce?ref=reference
 	endpoint := fmt.Sprintf("/v2/nfce?ref=%s", reference)
+
+	// If dry_run is requested (e.g. implicitly by environment), append to query
+	// User requested "dry_run=1" on all permitted endpoints.
+	if c.environment != "production" {
+		endpoint += "&dry_run=1"
+	}
 
 	resp := &NFCeResponse{}
 	if err := c.doRequest(ctx, "POST", endpoint, req, resp, token); err != nil {

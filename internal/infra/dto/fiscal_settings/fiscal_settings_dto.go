@@ -11,6 +11,10 @@ type FiscalSettingsDTO struct {
 	TaxRegime             int    `json:"tax_regime"`
 	CNAE                  string `json:"cnae"`
 	CRT                   int    `json:"crt"`
+	CSCProductionID       string `json:"csc_production_id,omitempty"`
+	CSCProductionCode     string `json:"csc_production_code,omitempty"`
+	CSCHomologationID     string `json:"csc_homologation_id,omitempty"`
+	CSCHomologationCode   string `json:"csc_homologation_code,omitempty"`
 	IsSimpleNational      bool   `json:"is_simple_national"`
 	MunicipalRegistration string `json:"municipal_registration"`
 
@@ -46,6 +50,11 @@ func (d *FiscalSettingsDTO) FromDomain(entity *fiscalsettingsentity.FiscalSettin
 	d.MunicipalRegistration = entity.MunicipalRegistration
 	d.ShowTaxBreakdown = entity.ShowTaxBreakdown
 	d.SendEmailToRecipient = entity.SendEmailToRecipient
+
+	d.CSCProductionID = entity.CSCProductionID
+	d.CSCProductionCode = entity.CSCProductionCode
+	d.CSCHomologationID = entity.CSCHomologationID
+	d.CSCHomologationCode = entity.CSCHomologationCode
 
 	d.BusinessName = entity.BusinessName
 	d.TradeName = entity.TradeName

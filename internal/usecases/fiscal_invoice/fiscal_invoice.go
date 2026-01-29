@@ -256,14 +256,15 @@ func (s *Service) ConsultarNFCe(ctx context.Context, invoiceID uuid.UUID) (*fisc
 		return invoice, nil
 	}
 
-	settings, err := s.fiscalSettingsRepo.GetByCompanyID(ctx, invoice.CompanyID)
+	settingsModel, err := s.fiscalSettingsRepo.GetByCompanyID(ctx, invoice.CompanyID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get fiscal settings: %w", err)
 	}
 
-	token := settings.ToDomain().TokenHomologation
+	settings := settingsModel.ToDomain()
+	token := settings.TokenHomologation
 	if s.focusClient.GetEnvironment() == "production" {
-		token = settings.ToDomain().TokenProduction
+		token = settings.TokenProduction
 	}
 
 	response, err := s.focusClient.ConsultarNFCe(
