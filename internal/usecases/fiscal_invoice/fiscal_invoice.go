@@ -66,7 +66,7 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 	company := companyModel.ToDomain()
 
 	// Guard Clause: Check Subscription Plan
-	// NFC-e emission is only allowed for paid plans (Basic, Intermediate, Enterprise)
+	// NFC-e emission is only allowed for paid plans (Basic, Intermediate, Advanced)
 	if company.CurrentPlan == companyentity.PlanTypeFree { // Or use IsPaidPlan() helper if available?
 		return nil, ErrFunctionalityNotAvailableForPlan
 	}

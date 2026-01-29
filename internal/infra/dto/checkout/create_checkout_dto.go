@@ -7,7 +7,7 @@ import (
 
 type CreateCheckoutDTO struct {
 	CompanyID   uuid.UUID `json:"company_id" validate:"required"`
-	Plan        string    `json:"plan"`        // "BASIC", "INTERMEDIATE", "ENTERPRISE"
+	Plan        string    `json:"plan"`        // "BASIC", "INTERMEDIATE", "ADVANCED"
 	Periodicity string    `json:"periodicity"` // "MONTHLY", "SEMIANNUAL", "ANNUAL"
 }
 
@@ -20,8 +20,8 @@ func (c *CreateCheckoutDTO) ToPlanType() domainbilling.PlanType {
 	switch c.Plan {
 	case "INTERMEDIATE":
 		return domainbilling.PlanIntermediate
-	case "ENTERPRISE":
-		return domainbilling.PlanEnterprise
+	case "ADVANCED":
+		return domainbilling.PlanAdvanced
 	default:
 		return domainbilling.PlanBasic
 	}

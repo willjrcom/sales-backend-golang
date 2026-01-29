@@ -32,24 +32,21 @@ func (s *DailyScheduler) Start(ctx context.Context) {
 				ticker.Stop()
 				return
 			case t := <-ticker.C:
-				// Run daily at 5 AM
-				if t.Hour() == 5 {
-					log.Println("Running Daily Plan Update...")
-					if err := s.companyRepo.UpdateCompanyPlans(ctx); err != nil {
-						log.Printf("Error updating company plans: %v", err)
-					}
-				}
-
 				// Run billing checks at 8 AM
-				if t.Hour() == 8 {
+				if t.Hour() == 5 {
 					log.Println("Running Daily Billing Batch...")
 					s.ProcessCostsToPay(ctx)
 					s.CheckOverdueAccounts(ctx)
 					s.CheckExpiredOptionalPayments(ctx)
+					log.Println("Daily Billing Batch Completed.")
 				}
 			}
 		}
 	}()
+}
+
+func (s *DailyScheduler) UpdateCompanyPlans(ctx context.Context) error {
+	return s.companyRepo.UpdateCompanyPlans(ctx)
 }
 
 func (s *DailyScheduler) CheckOverdueAccounts(ctx context.Context) {

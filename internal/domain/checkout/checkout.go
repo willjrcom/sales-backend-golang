@@ -6,7 +6,7 @@ type Periodicity string
 const (
 	PlanBasic        PlanType = "BASIC"
 	PlanIntermediate PlanType = "INTERMEDIATE"
-	PlanEnterprise   PlanType = "ENTERPRISE"
+	PlanAdvanced     PlanType = "ADVANCED"
 
 	PeriodicityMonthly    Periodicity = "MONTHLY"
 	PeriodicitySemiannual Periodicity = "SEMIANNUAL"

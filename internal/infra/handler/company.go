@@ -290,6 +290,7 @@ func (h *handlerCompanyImpl) handlerCancelPayment(w http.ResponseWriter, r *http
 
 func (h *handlerCompanyImpl) handlerTriggerMonthlyBilling(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	h.scheduler.UpdateCompanyPlans(ctx)
 	h.scheduler.ProcessCostsToPay(ctx)
 	h.scheduler.CheckOverdueAccounts(ctx)
 	h.scheduler.CheckExpiredOptionalPayments(ctx)

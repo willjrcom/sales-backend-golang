@@ -127,5 +127,17 @@ func (r *CompanyRepositoryBun) UpdateCompanyPlans(ctx context.Context) error {
 		return err
 	}
 
+	// 4. Disable fiscal settings for companies on 'free' or 'basic' plans
+	if _, err := tx.NewRaw(`
+		UPDATE fiscal_settings 
+		SET is_active = false 
+		FROM companies c 
+		WHERE fiscal_settings.company_id = c.id 
+		AND c.current_plan IN ('free', 'basic') 
+		AND fiscal_settings.is_active = true
+	`).Exec(ctx); err != nil {
+		return err
+	}
+
 	return tx.Commit()
 }

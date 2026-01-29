@@ -54,8 +54,8 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 	case domainbilling.PlanIntermediate:
 		price := getEnvFloat("PRICE_INTERMEDIATE", 119.90)
 		basePrice = decimal.NewFromFloat(price)
-	case domainbilling.PlanEnterprise:
-		price := getEnvFloat("PRICE_ENTERPRISE", 129.90)
+	case domainbilling.PlanAdvanced:
+		price := getEnvFloat("PRICE_ADVANCED", 129.90)
 		basePrice = decimal.NewFromFloat(price)
 	default:
 		price := getEnvFloat("PRICE_BASIC", 99.90)
@@ -507,8 +507,8 @@ func translatePlanType(p domainbilling.PlanType) string {
 		return "Básico"
 	case domainbilling.PlanIntermediate:
 		return "Intermediário"
-	case domainbilling.PlanEnterprise:
-		return "Enterprise"
+	case domainbilling.PlanAdvanced:
+		return "Avançado"
 	default:
 		return string(p)
 	}
