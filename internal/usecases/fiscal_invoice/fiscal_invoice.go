@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/google/uuid"
@@ -151,6 +152,10 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 		})
 	}
 
+	// Sanitize CNPJ to ensure only digits
+	reg, _ := regexp.Compile("[^0-9]+")
+	sanitizedCNPJ := reg.ReplaceAllString(settings.Cnpj, "")
+
 	nfceRequest := &focusnfe.NFCeRequest{
 		NaturezaOperacao:  "Venda ao Consumidor",
 		DataEmissao:       time.Now().Format("2006-01-02T15:04:05-07:00"),
@@ -158,18 +163,25 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 		FormasPagamento:   formasPagamento,
 		Numero:            fmt.Sprintf("%d", number),
 		Serie:             fmt.Sprintf("%d", series),
-		CNPJ:              settings.Cnpj,
+		CNPJ:              sanitizedCNPJ,
 		PresencaComprador: "1", // Operação presencial
 	}
 
 	// Use invoice ID as reference
 	reference := invoice.ID.String()
 
+	// Select correct token based on environment
+	token := settings.TokenHomologation
+	if s.focusClient.GetEnvironment() == "production" {
+		token = settings.TokenProduction
+	}
+
 	// Emit NFC-e via Focus NFe API
 	response, err := s.focusClient.EmitirNFCe(
 		ctx,
 		reference,
 		nfceRequest,
+		token,
 	)
 
 	if err != nil {
@@ -240,44 +252,61 @@ func (s *Service) ConsultarNFCe(ctx context.Context, invoiceID uuid.UUID) (*fisc
 
 	invoice := invoiceModel.ToDomain()
 
-	// Use invoice ID as reference
-	if s.focusClient != nil {
-		response, err := s.focusClient.ConsultarNFCe(
-			ctx,
-			invoice.ID.String(),
-		)
+	if s.focusClient == nil || !s.focusClient.Enabled() {
+		return invoice, nil
+	}
 
-		if err == nil && response != nil {
-			// Update status if authorized
-			if response.Status == "autorizado" {
-				if invoice.Status != fiscalinvoice.StatusAuthorized {
-					invoice.Authorize(response.ChaveNFe, response.Protocolo, response.CaminhoXML, response.CaminhoPDF)
-				}
-				// Ensure paths are updated
-				if response.CaminhoXML != "" {
-					invoice.XMLPath = response.CaminhoXML
-				}
-				if response.CaminhoPDF != "" {
-					invoice.PDFPath = response.CaminhoPDF
-				}
-			} else if response.Status == "erro_autorizacao" || response.Status == "cancelado" {
-				// handle other statuses
-				if response.Status == "cancelado" {
-					invoice.Cancel("Cancelado na SEFAZ") // Or keep original logic
-				}
-			}
+	settings, err := s.fiscalSettingsRepo.GetByCompanyID(ctx, invoice.CompanyID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get fiscal settings: %w", err)
+	}
 
-			// Update model and save
-			invoiceModel.FromDomain(invoice)
-			_ = s.invoiceRepo.Update(ctx, invoiceModel)
+	token := settings.ToDomain().TokenHomologation
+	if s.focusClient.GetEnvironment() == "production" {
+		token = settings.ToDomain().TokenProduction
+	}
+
+	response, err := s.focusClient.ConsultarNFCe(
+		ctx,
+		invoice.ID.String(),
+		token,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to consult NFC-e: %w", err)
+	}
+
+	// Update status if authorized
+	switch response.Status {
+	case "autorizado":
+		if invoice.Status != fiscalinvoice.StatusAuthorized {
+			invoice.Authorize(response.ChaveNFe, response.Protocolo, response.CaminhoXML, response.CaminhoPDF)
 		}
+		// Ensure paths are updated
+		if response.CaminhoXML != "" {
+			invoice.XMLPath = response.CaminhoXML
+		}
+		if response.CaminhoPDF != "" {
+			invoice.PDFPath = response.CaminhoPDF
+		}
+	case "erro_autorizacao", "cancelado":
+		// handle other statuses
+		if response.Status == "cancelado" {
+			invoice.Cancel("Cancelado na SEFAZ") // Or keep original logic
+		}
+	}
+
+	// Update model and save
+	invoiceModel.FromDomain(invoice)
+	if err := s.invoiceRepo.Update(ctx, invoiceModel); err != nil {
+		return nil, fmt.Errorf("failed to update invoice: %w", err)
 	}
 
 	return invoice, nil
 }
 
 // CancelarNFCe cancels an NFC-e
-func (s *Service) CancelarNFCe(ctx context.Context, invoiceID uuid.UUID, justificativa string) error {
+func (s *Service) CancelarNFCe(ctx context.Context, invoiceID uuid.UUID, justify string) error {
 	invoiceModel, err := s.invoiceRepo.GetByID(ctx, invoiceID)
 	if err != nil {
 		return ErrInvoiceNotFound
@@ -290,29 +319,42 @@ func (s *Service) CancelarNFCe(ctx context.Context, invoiceID uuid.UUID, justifi
 	}
 
 	// Validate justification (minimum 15 characters as per SEFAZ rules)
-	if len(justificativa) < 15 {
-		return errors.New("justificativa deve ter no mínimo 15 caracteres")
+	if len(justify) < 15 {
+		return errors.New("justify must be at least 15 characters long")
 	}
 
 	// Cancel via Focus NFe API
-	if s.focusClient != nil && s.focusClient.Enabled() {
-		cancelRequest := &focusnfe.CancelamentoRequest{
-			Justificativa: justificativa,
-		}
+	if s.focusClient == nil || !s.focusClient.Enabled() {
+		return errors.New("focus client not enabled")
+	}
 
-		err := s.focusClient.CancelarNFCe(
-			ctx,
-			invoice.ID.String(), // Use reference
-			cancelRequest,
-		)
+	cancelRequest := &focusnfe.CancelamentoRequest{
+		Justify: justify,
+	}
 
-		if err != nil {
-			return fmt.Errorf("failed to cancel NFC-e: %w", err)
-		}
+	// Fetch settings to get token
+	settingsModel, err := s.fiscalSettingsRepo.GetByCompanyID(ctx, invoice.CompanyID)
+	if err != nil {
+		return fmt.Errorf("failed to get fiscal settings: %w", err)
+	}
+
+	settings := settingsModel.ToDomain()
+	token := settings.TokenHomologation
+	if s.focusClient.GetEnvironment() == "production" {
+		token = settings.TokenProduction
+	}
+
+	if err = s.focusClient.CancelarNFCe(
+		ctx,
+		invoice.ID.String(), // Use reference
+		cancelRequest,
+		token,
+	); err != nil {
+		return fmt.Errorf("failed to cancel NFC-e: %w", err)
 	}
 
 	// Mark as cancelled
-	invoice.Cancel(justificativa)
+	invoice.Cancel(justify)
 	invoiceModel.FromDomain(invoice)
 
 	if err := s.invoiceRepo.Update(ctx, invoiceModel); err != nil {

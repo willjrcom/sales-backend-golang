@@ -140,6 +140,7 @@ func (s *Service) registerCompanyInFocus(ctx context.Context, settings *fiscalse
 	// Update settings with the returned ID if successful
 	if resp != nil && resp.ID > 0 {
 		settings.SetCompanyRegistryID(resp.ID)
+		settings.SetTokens(resp.TokenProduction, resp.TokenHomologation)
 
 		settingsModel := &model.FiscalSettings{}
 		settingsModel.FromDomain(settings)

@@ -15,6 +15,8 @@ type FiscalSettings struct {
 	ID                    uuid.UUID `bun:"id,pk,type:uuid"`
 	CompanyID             uuid.UUID `bun:"company_id,type:uuid,notnull"`
 	CompanyRegistryID     int64     `bun:"company_registry_id"`
+	TokenProduction       string    `bun:"token_production"`
+	TokenHomologation     string    `bun:"token_homologation"`
 	IsActive              bool      `bun:"is_active"`
 	StateRegistration     string    `bun:"state_registration"`     // InscricaoEstadual
 	TaxRegime             int       `bun:"tax_regime"`             // RegimeTributario
@@ -61,6 +63,8 @@ func (m *FiscalSettings) ToDomain() *fiscalsettingsentity.FiscalSettings {
 		},
 		CompanyID:             m.CompanyID,
 		CompanyRegistryID:     m.CompanyRegistryID,
+		TokenProduction:       m.TokenProduction,
+		TokenHomologation:     m.TokenHomologation,
 		IsActive:              m.IsActive,
 		StateRegistration:     m.StateRegistration,
 		TaxRegime:             m.TaxRegime,
@@ -91,6 +95,8 @@ func (m *FiscalSettings) FromDomain(d *fiscalsettingsentity.FiscalSettings) {
 	m.ID = d.ID
 	m.CompanyID = d.CompanyID
 	m.CompanyRegistryID = d.CompanyRegistryID
+	m.TokenProduction = d.TokenProduction
+	m.TokenHomologation = d.TokenHomologation
 	m.IsActive = d.IsActive
 	m.StateRegistration = d.StateRegistration
 	m.TaxRegime = d.TaxRegime

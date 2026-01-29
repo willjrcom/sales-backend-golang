@@ -11,6 +11,8 @@ type FiscalSettings struct {
 	entity.Entity
 	CompanyID             uuid.UUID
 	CompanyRegistryID     int64 // ID returned by Focus NFe
+	TokenProduction       string
+	TokenHomologation     string
 	IsActive              bool
 	StateRegistration     string // InscricaoEstadual
 	TaxRegime             int    // RegimeTributario (1=Simples Nacional, 3=Regime Normal)
@@ -77,5 +79,11 @@ func (f *FiscalSettings) Update(
 
 func (f *FiscalSettings) SetCompanyRegistryID(id int64) {
 	f.CompanyRegistryID = id
+	f.UpdatedAt = time.Now()
+}
+
+func (f *FiscalSettings) SetTokens(production, homologation string) {
+	f.TokenProduction = production
+	f.TokenHomologation = homologation
 	f.UpdatedAt = time.Now()
 }

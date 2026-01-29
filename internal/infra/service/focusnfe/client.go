@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -19,10 +20,10 @@ const (
 
 // Client wraps HTTP client for Focus NFe API
 type Client struct {
-	baseURL     string
-	httpClient  *http.Client
-	token       string
-	environment string // "production" or "homologation"
+	baseURL             string
+	httpClient          *http.Client
+	mainProductionToken string
+	environment         string // "production" or "homologation"
 }
 
 // CompanyRegistryRequest represents the payload to register a company
@@ -48,15 +49,17 @@ type CompanyRegistryRequest struct {
 
 // CompanyRegistryResponse represents the response from company registration
 type CompanyRegistryResponse struct {
-	ID       int64           `json:"id"`
-	Mensagem string          `json:"mensagem,omitempty"`
-	Errors   json.RawMessage `json:"erros,omitempty"` // Can be string or array
+	ID                int64           `json:"id"`
+	Mensagem          string          `json:"mensagem,omitempty"`
+	TokenProduction   string          `json:"token_producao"`
+	TokenHomologation string          `json:"token_homologacao"`
+	Errors            json.RawMessage `json:"erros,omitempty"` // Can be string or array
 }
 
 // NewClient creates a new Focus NFe API client
 func NewClient() *Client {
 
-	token := os.Getenv("FOCUS_NFE_API_KEY")
+	token := strings.TrimSpace(os.Getenv("FOCUS_NFE_API_KEY"))
 
 	environment := os.Getenv("FOCUS_NFE_ENV")
 	if environment == "" {
@@ -80,8 +83,8 @@ func NewClient() *Client {
 		httpClient: &http.Client{
 			Timeout: timeout,
 		},
-		token:       token,
-		environment: environment,
+		mainProductionToken: token,
+		environment:         environment,
 	}
 }
 
@@ -103,7 +106,7 @@ func (c *Client) CadastrarEmpresa(ctx context.Context, req *CompanyRegistryReque
 	defer func() { c.baseURL = originalBaseURL }()
 
 	resp := &CompanyRegistryResponse{}
-	if err := c.doRequest(ctx, "POST", endpoint, req, resp); err != nil {
+	if err := c.doRequest(ctx, "POST", endpoint, req, resp, c.mainProductionToken); err != nil {
 		return nil, err
 	}
 
@@ -111,7 +114,7 @@ func (c *Client) CadastrarEmpresa(ctx context.Context, req *CompanyRegistryReque
 }
 
 // doRequest performs HTTP request to Focus NFe API
-func (c *Client) doRequest(ctx context.Context, method, endpoint string, reqBody, respBody interface{}) error {
+func (c *Client) doRequest(ctx context.Context, method, endpoint string, reqBody, respBody interface{}, token string) error {
 	url := c.baseURL + endpoint
 
 	var body io.Reader
@@ -131,7 +134,7 @@ func (c *Client) doRequest(ctx context.Context, method, endpoint string, reqBody
 	req.Header.Set("Content-Type", "application/json")
 
 	// Basic Auth with Token
-	req.SetBasicAuth(c.token, "")
+	req.SetBasicAuth(token, "")
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
@@ -215,17 +218,17 @@ type NFCeResponse struct {
 
 // CancelamentoRequest
 type CancelamentoRequest struct {
-	Justificativa string `json:"justificativa"`
+	Justify string `json:"justificativa"`
 }
 
 // EmitirNFCe emits a new NFC-e
 // Reference maps "reference" to our internal ID to query later if stuck in processing
-func (c *Client) EmitirNFCe(ctx context.Context, reference string, req *NFCeRequest) (*NFCeResponse, error) {
+func (c *Client) EmitirNFCe(ctx context.Context, reference string, req *NFCeRequest, token string) (*NFCeResponse, error) {
 	// POST /v2/nfce?ref=reference
 	endpoint := fmt.Sprintf("/v2/nfce?ref=%s", reference)
 
 	resp := &NFCeResponse{}
-	if err := c.doRequest(ctx, "POST", endpoint, req, resp); err != nil {
+	if err := c.doRequest(ctx, "POST", endpoint, req, resp, token); err != nil {
 		return nil, err
 	}
 
@@ -233,11 +236,11 @@ func (c *Client) EmitirNFCe(ctx context.Context, reference string, req *NFCeRequ
 }
 
 // ConsultarNFCe queries NFC-e. Can query by reference.
-func (c *Client) ConsultarNFCe(ctx context.Context, reference string) (*NFCeResponse, error) {
+func (c *Client) ConsultarNFCe(ctx context.Context, reference string, token string) (*NFCeResponse, error) {
 	endpoint := fmt.Sprintf("/v2/nfce/%s", reference)
 
 	resp := &NFCeResponse{}
-	if err := c.doRequest(ctx, "GET", endpoint, nil, resp); err != nil {
+	if err := c.doRequest(ctx, "GET", endpoint, nil, resp, token); err != nil {
 		return nil, err
 	}
 
@@ -245,7 +248,7 @@ func (c *Client) ConsultarNFCe(ctx context.Context, reference string) (*NFCeResp
 }
 
 // CancelarNFCe cancels an NFC-e using its reference (or key)
-func (c *Client) CancelarNFCe(ctx context.Context, reference string, req *CancelamentoRequest) error {
+func (c *Client) CancelarNFCe(ctx context.Context, reference string, req *CancelamentoRequest, token string) error {
 	endpoint := fmt.Sprintf("/v2/nfce/%s", reference)
 
 	// Cancellation in Focus NFe: DELETE /v2/nfce/{ref} with body?
@@ -258,7 +261,7 @@ func (c *Client) CancelarNFCe(ctx context.Context, reference string, req *Cancel
 	resp := &struct {
 		Status string `json:"status"`
 	}{}
-	if err := c.doRequest(ctx, "DELETE", endpoint, req, resp); err != nil {
+	if err := c.doRequest(ctx, "DELETE", endpoint, req, resp, token); err != nil {
 		return err
 	}
 
@@ -267,5 +270,10 @@ func (c *Client) CancelarNFCe(ctx context.Context, reference string, req *Cancel
 
 // Enabled checks if client is properly configured with credentials
 func (c *Client) Enabled() bool {
-	return c != nil && c.baseURL != "" && c.token != ""
+	return c != nil && c.baseURL != "" && c.mainProductionToken != ""
+}
+
+// GetEnvironment returns the current environment
+func (c *Client) GetEnvironment() string {
+	return c.environment
 }
