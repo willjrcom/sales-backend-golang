@@ -83,7 +83,7 @@ func (r *CompanyPaymentRepositoryBun) GetCompanyPaymentByID(ctx context.Context,
 	return payment, nil
 }
 
-func (r *CompanyPaymentRepositoryBun) ListCompanyPayments(ctx context.Context, companyID uuid.UUID, page, perPage int) ([]model.CompanyPayment, int, error) {
+func (r *CompanyPaymentRepositoryBun) ListCompanyPayments(ctx context.Context, companyID uuid.UUID, page, perPage, month, year int) ([]model.CompanyPayment, int, error) {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, 0, err
@@ -92,10 +92,17 @@ func (r *CompanyPaymentRepositoryBun) ListCompanyPayments(ctx context.Context, c
 	defer cancel()
 	defer tx.Rollback()
 
-	total, err := tx.NewSelect().
+	q := tx.NewSelect().
 		Model((*model.CompanyPayment)(nil)).
-		Where("company_id = ?", companyID).
-		Count(ctx)
+		Where("company_id = ?", companyID)
+
+	if month > 0 && year > 0 {
+		startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+		endDate := startDate.AddDate(0, 1, 0)
+		q.Where("created_at >= ?", startDate).Where("created_at < ?", endDate)
+	}
+
+	total, err := q.Count(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -109,9 +116,17 @@ func (r *CompanyPaymentRepositoryBun) ListCompanyPayments(ctx context.Context, c
 
 	payments := make([]model.CompanyPayment, 0, perPage)
 
-	if err := tx.NewSelect().
+	qList := tx.NewSelect().
 		Model(&payments).
-		Where("company_id = ?", companyID).
+		Where("company_id = ?", companyID)
+
+	if month > 0 && year > 0 {
+		startDate := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+		endDate := startDate.AddDate(0, 1, 0)
+		qList.Where("created_at >= ?", startDate).Where("created_at < ?", endDate)
+	}
+
+	if err := qList.
 		Order("paid_at DESC").
 		Order("created_at DESC").
 		Limit(perPage).

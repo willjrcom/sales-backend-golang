@@ -128,7 +128,10 @@ func (h *handlerCompanyImpl) handlerListCompanyPayments(w http.ResponseWriter, r
 	ctx := r.Context()
 
 	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
-	payments, total, err := h.s.ListCompanyPayments(ctx, page, perPage)
+	month, _ := strconv.Atoi(r.URL.Query().Get("month"))
+	year, _ := strconv.Atoi(r.URL.Query().Get("year"))
+
+	payments, total, err := h.s.ListCompanyPayments(ctx, page, perPage, month, year)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

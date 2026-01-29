@@ -7,13 +7,13 @@ import (
 )
 
 // ListCompanyPayments returns subscription payments for the authenticated company.
-func (s *Service) ListCompanyPayments(ctx context.Context, page, perPage int) ([]companydto.CompanyPaymentDTO, int, error) {
+func (s *Service) ListCompanyPayments(ctx context.Context, page, perPage, month, year int) ([]companydto.CompanyPaymentDTO, int, error) {
 	companyModel, err := s.r.GetCompany(ctx)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	payments, total, err := s.companyPaymentRepo.ListCompanyPayments(ctx, companyModel.ID, page, perPage)
+	payments, total, err := s.companyPaymentRepo.ListCompanyPayments(ctx, companyModel.ID, page, perPage, month, year)
 	if err != nil {
 		return nil, 0, err
 	}
