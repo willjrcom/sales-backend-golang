@@ -64,7 +64,7 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	}
 
 	userIDUUID := uuid.MustParse(userID)
-	userModel, err := s.u.GetUserByID(ctx, userIDUUID)
+	userModel, err := s.u.GetUserByID(ctx, userIDUUID, false)
 	if err != nil {
 		return nil, err
 	}

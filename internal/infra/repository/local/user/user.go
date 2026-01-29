@@ -134,7 +134,7 @@ func (r *UserRepositoryLocal) GetIDByEmailOrCPF(ctx context.Context, email strin
 	return nil, errors.New("user not found")
 }
 
-func (r *UserRepositoryLocal) GetUserByID(ctx context.Context, id uuid.UUID) (*model.User, error) {
+func (r *UserRepositoryLocal) GetUserByID(ctx context.Context, id uuid.UUID, withCompanies bool) (*model.User, error) {
 	if id == uuid.Nil {
 		return nil, errors.New("invalid id")
 	}

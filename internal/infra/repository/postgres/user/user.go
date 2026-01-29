@@ -294,8 +294,7 @@ func (r *UserRepositoryBun) GetIDByEmailOrCPF(ctx context.Context, email string,
 	return &user.ID, nil
 }
 
-func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID) (*model.User, error) {
-
+func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID, withCompanies bool) (*model.User, error) {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -305,7 +304,13 @@ func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID) (*mod
 	defer tx.Rollback()
 
 	user := &model.User{}
-	if err := tx.NewSelect().Model(user).Where("u.id = ?", id).Relation("Companies").Relation("Address").Relation("Contact").ExcludeColumn("hash").Scan(ctx); err != nil {
+	query := tx.NewSelect().Model(user).Where("u.id = ?", id).Relation("Address").Relation("Contact")
+
+	if withCompanies {
+		query = query.Relation("Companies")
+	}
+
+	if err := query.ExcludeColumn("hash").Scan(ctx); err != nil {
 		return nil, err
 	}
 

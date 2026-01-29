@@ -169,7 +169,7 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 }
 
 func (s *Service) UpdateUser(ctx context.Context, dtoID *entitydto.IDRequest, dto *companydto.UserUpdateDTO) error {
-	userModel, err := s.r.GetUserByID(ctx, dtoID.ID)
+	userModel, err := s.r.GetUserByID(ctx, dtoID.ID, false)
 	if err != nil {
 		return err
 	}
@@ -230,7 +230,7 @@ func (s *Service) Access(ctx context.Context, dto *companydto.UserSchemaDTO, acc
 	}
 
 	userIDUUID := uuid.MustParse(userID)
-	userModel, err := s.r.GetUserByID(ctx, userIDUUID)
+	userModel, err := s.r.GetUserByID(ctx, userIDUUID, true)
 	if err != nil {
 		return "", err
 	}
@@ -288,7 +288,7 @@ func (s *Service) GetCompanies(ctx context.Context) ([]companydto.CompanyDTO, er
 	}
 
 	userIDUUID := uuid.MustParse(userID)
-	userModel, err := s.r.GetUserByID(ctx, userIDUUID)
+	userModel, err := s.r.GetUserByID(ctx, userIDUUID, true)
 	if err != nil {
 		return nil, err
 	}
@@ -328,7 +328,7 @@ func (s *Service) ListPublicUsers(ctx context.Context) ([]companydto.UserBasicDT
 
 // GetUserByID returns the user data by ID.
 func (s *Service) GetUserByID(ctx context.Context, dtoID *entitydto.IDRequest) (*companydto.UserDTO, error) {
-	userModel, err := s.r.GetUserByID(ctx, dtoID.ID)
+	userModel, err := s.r.GetUserByID(ctx, dtoID.ID, false)
 	if err != nil {
 		return nil, err
 	}
