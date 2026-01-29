@@ -102,6 +102,10 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		Schema:            company.SchemaName,
 		Item:              checkoutItem,
 		ExternalReference: paymentEntity.ID.String(), // Link to Payment
+		Metadata: map[string]any{
+			"plan_type": string(req.ToPlanType()),
+			"months":    months,
+		},
 	}
 
 	pref, err := uc.mpService.CreateCheckoutPreference(ctx, mpReq)
@@ -118,6 +122,7 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		Currency:          "BRL",
 		Amount:            finalAmount,
 		Months:            months,
+		PlanType:          companyentity.PlanType(req.ToPlanType()),
 		ProviderPaymentID: paymentEntity.ID.String(),
 		PaymentURL:        pref.InitPoint,
 		// PaidAt is nil
@@ -197,15 +202,32 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 	}
 
 	// Update Subscription ONLY if it's a subscription payment
-	if paymentModel.Months > 0 {
+	// We check metadata first (new flow) or fallback to CompanyPayment.Months (legacy/redundant)
+	planType := details.Metadata.PlanType
+	months := details.Metadata.Months
+
+	if planType != "" && months > 0 {
 		base := paidAt
 		if companyModel.SubscriptionExpiresAt != nil && companyModel.SubscriptionExpiresAt.After(paidAt) {
 			base = *companyModel.SubscriptionExpiresAt
 		}
 
-		newExpiration := base.AddDate(0, paymentModel.Months, 0)
+		startDate := base
+		endDate := base.AddDate(0, months, 0)
 
-		if err := s.companyRepo.UpdateCompanySubscription(ctx, companyModel.ID, companyModel.SchemaName, &newExpiration, false); err != nil {
+		// Create Subscription Record
+		sub := companyentity.NewCompanySubscription(companyModel.ID, companyentity.PlanType(planType), startDate, endDate)
+		// Link Payment
+		sub.PaymentID = &paymentModel.ID
+
+		subModel := &model.CompanySubscription{}
+		subModel.FromDomain(sub)
+		if err := s.companyRepo.CreateSubscription(ctx, subModel); err != nil {
+			return err
+		}
+
+		// Update Company Current Plan Snapshot
+		if err := s.companyRepo.UpdateCompanySubscription(ctx, companyModel.ID, companyModel.SchemaName, &endDate, planType); err != nil {
 			return err
 		}
 	}

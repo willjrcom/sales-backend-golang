@@ -2,7 +2,6 @@ package modules
 
 import (
 	"context"
-	"time"
 
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
@@ -23,16 +22,16 @@ func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyU
 	mpClient := mercadopagoservice.NewClient()
 	focusClient := focusnfe.NewClient()
 	service := companyusecases.NewService(repository, companyPaymentRepo, focusClient)
-	service.StartSubscriptionWatcher(context.Background(), 24*time.Hour)
+	// service.StartSubscriptionWatcher removed in favor of DailyScheduler
 
 	checkoutUC := billingusecases.NewCheckoutUseCase(costRepo, repository, companyPaymentRepo, mpClient)
 	costService := companyusecases.NewUsageCostService(costRepo, repository)
 
-	// Start Monthly Billing Scheduler
-	billingScheduler := scheduler.NewMonthlyBillingScheduler(checkoutUC, repository, companyPaymentRepo)
-	billingScheduler.Start(context.Background())
+	// Start Daily Scheduler
+	dailyScheduler := scheduler.NewDailyScheduler(repository, companyPaymentRepo, checkoutUC)
+	dailyScheduler.Start(context.Background())
 
-	handler := handlerimpl.NewHandlerCompany(service, checkoutUC, costService, billingScheduler)
+	handler := handlerimpl.NewHandlerCompany(service, checkoutUC, costService, dailyScheduler)
 	chi.AddHandler(handler)
 	return repository, service, handler
 }

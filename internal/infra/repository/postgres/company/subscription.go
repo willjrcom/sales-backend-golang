@@ -1,0 +1,131 @@
+package companyrepositorybun
+
+import (
+	"context"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+)
+
+func (r *CompanyRepositoryBun) CreateSubscription(ctx context.Context, subscription *model.CompanySubscription) error {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	if _, err := tx.NewInsert().Model(subscription).Exec(ctx); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (r *CompanyRepositoryBun) GetActiveSubscription(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	subscription := &model.CompanySubscription{}
+	if err := tx.NewSelect().
+		Model(subscription).
+		Where("company_id = ?", companyID).
+		Where("is_active = ?", true).
+		Where("end_date > ?", time.Now()).
+		Order("end_date DESC").
+		Limit(1).
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return subscription, nil
+}
+
+func (r *CompanyRepositoryBun) GetUpcomingSubscription(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	subscription := &model.CompanySubscription{}
+	if err := tx.NewSelect().
+		Model(subscription).
+		Where("company_id = ?", companyID).
+		Where("is_active = ?", true).
+		Where("start_date > ?", time.Now()).
+		Order("start_date ASC").
+		Limit(1).
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return subscription, nil
+}
+
+func (r *CompanyRepositoryBun) UpdateCompanyPlans(ctx context.Context) error {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	// 1. Update companies with active subscriptions
+	// We select the latest/highest priority active subscription for each company
+	// Ideally we should have a constraints to avoid overlap, but here we pick one.
+	// We use a subquery or join.
+	// Simple approach: Set Plan to Subscription's Plan where Subscription is Active and Valid.
+	// "UPDATE companies SET current_plan = cs.plan_type FROM company_subscriptions cs WHERE cs.company_id = companies.id AND cs.is_active = true AND cs.start_date <= NOW() AND cs.end_date >= NOW()"
+	if _, err := tx.NewRaw(`
+		UPDATE companies 
+		SET current_plan = cs.plan_type 
+		FROM company_subscriptions cs 
+		WHERE cs.company_id = companies.id 
+		AND cs.is_active = true 
+		AND cs.start_date <= NOW() 
+		AND cs.end_date >= NOW()
+	`).Exec(ctx); err != nil {
+		return err
+	}
+
+	// 2. Mark expired subscriptions as inactive
+	// This ensures is_active accurately reflects the subscription state
+	if _, err := tx.NewRaw(`
+		UPDATE company_subscriptions 
+		SET is_active = false 
+		WHERE is_active = true 
+		AND end_date < NOW()
+	`).Exec(ctx); err != nil {
+		return err
+	}
+
+	// 3. Revert companies with NO active subscription to 'free'
+	// "UPDATE companies SET current_plan = 'free' WHERE NOT EXISTS (SELECT 1 FROM company_subscriptions cs WHERE cs.company_id = companies.id AND cs.is_active = true AND cs.start_date <= NOW() AND cs.end_date >= NOW()) AND current_plan != 'free'"
+	if _, err := tx.NewRaw(`
+		UPDATE companies 
+		SET current_plan = 'free' 
+		WHERE NOT EXISTS (
+			SELECT 1 FROM company_subscriptions cs 
+			WHERE cs.company_id = companies.id 
+			AND cs.is_active = true 
+			AND cs.start_date <= NOW() 
+			AND cs.end_date >= NOW()
+		) 
+		AND current_plan != 'free'
+	`).Exec(ctx); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}

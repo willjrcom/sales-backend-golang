@@ -33,6 +33,7 @@ type CompanyPayment struct {
 	PaymentURL        string
 	ExpiresAt         *time.Time
 	IsMandatory       bool
-	RawPayload        json.RawMessage
 	Description       string
+	PlanType          PlanType // "basic", "intermediate", "advanced", or empty for non-subscription payments
+	RawPayload        json.RawMessage
 }

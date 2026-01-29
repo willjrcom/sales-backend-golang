@@ -17,6 +17,7 @@ type CompanyPaymentDTO struct {
 	Currency          string          `json:"currency"`
 	Amount            decimal.Decimal `json:"amount"`
 	Months            int             `json:"months"`
+	PlanType          string          `json:"plan_type"`
 	PaidAt            *time.Time      `json:"paid_at,omitempty"`
 	ExternalReference string          `json:"external_reference,omitempty"`
 	PaymentURL        string          `json:"payment_url,omitempty"`
@@ -40,6 +41,7 @@ func (c *CompanyPaymentDTO) FromDomain(payment *companyentity.CompanyPayment) {
 		Currency:          payment.Currency,
 		Amount:            payment.Amount,
 		Months:            payment.Months,
+		PlanType:          string(payment.PlanType),
 		PaidAt:            payment.PaidAt,
 		ExternalReference: payment.ExternalReference,
 		PaymentURL:        payment.PaymentURL,

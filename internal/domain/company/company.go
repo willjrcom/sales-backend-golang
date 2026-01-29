@@ -34,6 +34,7 @@ type CompanyCommonAttributes struct {
 	Preferences           Preferences
 	IsBlocked             bool
 	SubscriptionExpiresAt *time.Time
+	CurrentPlan           PlanType
 	// Fiscal fields removed (moved to fiscalsettingsentity)
 
 	// Billing

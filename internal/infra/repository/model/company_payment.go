@@ -27,6 +27,7 @@ type CompanyPayment struct {
 	ExpiresAt         *time.Time      `bun:"expires_at"`
 	IsMandatory       bool            `bun:"is_mandatory,notnull,default:false"`
 	Description       string          `bun:"description"`
+	PlanType          string          `bun:"plan_type"`
 	RawPayload        []byte          `bun:"raw_payload,type:jsonb"`
 }
 
@@ -50,6 +51,7 @@ func (c *CompanyPayment) FromDomain(payment *companyentity.CompanyPayment) {
 		IsMandatory:       payment.IsMandatory,
 		RawPayload:        payment.RawPayload,
 		Description:       payment.Description,
+		PlanType:          string(payment.PlanType),
 	}
 }
 
@@ -73,5 +75,6 @@ func (c *CompanyPayment) ToDomain() *companyentity.CompanyPayment {
 		IsMandatory:       c.IsMandatory,
 		RawPayload:        c.RawPayload,
 		Description:       c.Description,
+		PlanType:          companyentity.PlanType(c.PlanType),
 	}
 }

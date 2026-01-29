@@ -18,13 +18,14 @@ import (
 )
 
 var (
-	ErrFiscalNotEnabled           = errors.New("fiscal invoice functionality is not enabled for this company")
-	ErrMissingFiscalData          = errors.New("company is missing required fiscal data (IE, regime tributário)")
-	ErrTransmitenotaNotConfigured = errors.New("focus nfe client is not configured")
-	ErrInvoiceAlreadyExists       = errors.New("invoice already exists for this order")
-	ErrInvoiceNotFound            = errors.New("fiscal invoice not found")
-	ErrCannotCancelInvoice        = errors.New("invoice cannot be cancelled (not authorized or already cancelled)")
-	ErrOrderNotFound              = errors.New("order not found")
+	ErrFiscalNotEnabled                 = errors.New("fiscal invoice functionality is not enabled for this company")
+	ErrMissingFiscalData                = errors.New("company is missing required fiscal data (IE, regime tributário)")
+	ErrTransmitenotaNotConfigured       = errors.New("focus nfe client is not configured")
+	ErrInvoiceAlreadyExists             = errors.New("invoice already exists for this order")
+	ErrInvoiceNotFound                  = errors.New("fiscal invoice not found")
+	ErrCannotCancelInvoice              = errors.New("invoice cannot be cancelled (not authorized or already cancelled)")
+	ErrOrderNotFound                    = errors.New("order not found")
+	ErrFunctionalityNotAvailableForPlan = errors.New("funcionalidade não disponível para o plano atual")
 )
 
 type Service struct {
@@ -63,6 +64,12 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 	}
 
 	company := companyModel.ToDomain()
+
+	// Guard Clause: Check Subscription Plan
+	// NFC-e emission is only allowed for paid plans (Basic, Intermediate, Enterprise)
+	if company.CurrentPlan == companyentity.PlanTypeFree { // Or use IsPaidPlan() helper if available?
+		return nil, ErrFunctionalityNotAvailableForPlan
+	}
 
 	// Fetch Fiscal Settings
 	settings, err := s.fiscalSettingsRepo.GetByCompanyID(ctx, company.ID)

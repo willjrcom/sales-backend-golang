@@ -26,6 +26,7 @@ type CompanyCommonAttributes struct {
 	Preferences           companyentity.Preferences `bun:"preferences,type:jsonb"`
 	IsBlocked             bool                      `bun:"is_blocked"`
 	SubscriptionExpiresAt *time.Time                `bun:"subscription_expires_at"`
+	CurrentPlan           companyentity.PlanType    `bun:"current_plan,default:'free'"`
 	// Billing
 	MonthlyPaymentDueDay          int        `bun:"monthly_payment_due_day,default:10"`
 	MonthlyPaymentDueDayUpdatedAt *time.Time `bun:"monthly_payment_due_day_updated_at"`
@@ -49,6 +50,7 @@ func (c *Company) FromDomain(company *companyentity.Company) {
 			Preferences:                   company.Preferences,
 			IsBlocked:                     company.IsBlocked,
 			SubscriptionExpiresAt:         company.SubscriptionExpiresAt,
+			CurrentPlan:                   company.CurrentPlan,
 			MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
 			MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
 		},
@@ -87,6 +89,7 @@ func (c *Company) ToDomain() *companyentity.Company {
 			Preferences:                   c.Preferences,
 			IsBlocked:                     c.IsBlocked,
 			SubscriptionExpiresAt:         c.SubscriptionExpiresAt,
+			CurrentPlan:                   c.CurrentPlan,
 			MonthlyPaymentDueDay:          c.MonthlyPaymentDueDay,
 			MonthlyPaymentDueDayUpdatedAt: c.MonthlyPaymentDueDayUpdatedAt,
 		},

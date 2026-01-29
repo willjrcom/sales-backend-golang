@@ -22,10 +22,10 @@ type handlerCompanyImpl struct {
 	s           *companyusecases.Service
 	checkoutUC  *billingusecases.CheckoutUseCase
 	costService *companyusecases.UsageCostService
-	scheduler   *scheduler.MonthlyBillingScheduler
+	scheduler   *scheduler.DailyScheduler
 }
 
-func NewHandlerCompany(companyService *companyusecases.Service, checkoutUC *billingusecases.CheckoutUseCase, costService *companyusecases.UsageCostService, scheduler *scheduler.MonthlyBillingScheduler) *handler.Handler {
+func NewHandlerCompany(companyService *companyusecases.Service, checkoutUC *billingusecases.CheckoutUseCase, costService *companyusecases.UsageCostService, scheduler *scheduler.DailyScheduler) *handler.Handler {
 	c := chi.NewRouter()
 
 	h := &handlerCompanyImpl{
@@ -54,6 +54,9 @@ func NewHandlerCompany(companyService *companyusecases.Service, checkoutUC *bill
 		c.Post("/costs/register", h.handlerCreateCost)
 		c.Post("/payments/mercadopago/webhook", h.handlerMercadoPagoWebhook)
 		c.Post("/billing/scheduler/trigger", h.handlerTriggerMonthlyBilling)
+
+		// Subscription
+		c.Get("/subscription/status", h.handlerGetSubscriptionStatus)
 	})
 
 	return handler.NewHandler("/company", c, "/company/payments/mercadopago/webhook")
@@ -287,8 +290,18 @@ func (h *handlerCompanyImpl) handlerCancelPayment(w http.ResponseWriter, r *http
 
 func (h *handlerCompanyImpl) handlerTriggerMonthlyBilling(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	h.scheduler.ProcessDailyBatch(ctx)
+	h.scheduler.ProcessCostsToPay(ctx)
 	h.scheduler.CheckOverdueAccounts(ctx)
 	h.scheduler.CheckExpiredOptionalPayments(ctx)
 	jsonpkg.ResponseJson(w, r, http.StatusOK, map[string]string{"status": "triggered, daily batch started"})
+}
+
+func (h *handlerCompanyImpl) handlerGetSubscriptionStatus(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	status, err := h.s.GetSubscriptionStatus(ctx)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	jsonpkg.ResponseJson(w, r, http.StatusOK, status)
 }

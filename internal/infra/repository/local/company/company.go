@@ -90,7 +90,7 @@ func (r *CompanyRepositoryLocal) ListCompaniesByPaymentDueDay(ctx context.Contex
 	return []model.Company{}, nil
 }
 
-func (r *CompanyRepositoryLocal) UpdateCompanySubscription(ctx context.Context, companyID uuid.UUID, schema string, expiresAt *time.Time, isBlocked bool) error {
+func (r *CompanyRepositoryLocal) UpdateCompanySubscription(ctx context.Context, companyID uuid.UUID, schema string, expiresAt *time.Time, planType string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	company, ok := r.companies[companyID]
@@ -98,7 +98,6 @@ func (r *CompanyRepositoryLocal) UpdateCompanySubscription(ctx context.Context, 
 		return fmt.Errorf("company %s not found", companyID)
 	}
 	company.SubscriptionExpiresAt = expiresAt
-	company.IsBlocked = isBlocked
 	return nil
 }
 
@@ -287,4 +286,20 @@ func (r *CompanyRepositoryLocal) ListPendingMandatoryPayments(ctx context.Contex
 		}
 	}
 	return pending, nil
+}
+
+func (r *CompanyRepositoryLocal) CreateSubscription(ctx context.Context, subscription *model.CompanySubscription) error {
+	return nil // Stub
+}
+
+func (r *CompanyRepositoryLocal) GetActiveSubscription(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
+	return nil, nil // Stub
+}
+
+func (r *CompanyRepositoryLocal) GetUpcomingSubscription(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
+	return nil, nil // Stub
+}
+
+func (r *CompanyRepositoryLocal) UpdateCompanyPlans(ctx context.Context) error {
+	return nil // Stub
 }

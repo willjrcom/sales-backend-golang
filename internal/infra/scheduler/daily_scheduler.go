@@ -2,27 +2,28 @@ package scheduler
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	billing "github.com/willjrcom/sales-backend-go/internal/usecases/checkout"
 )
 
-type MonthlyBillingScheduler struct {
-	checkoutUseCase    *billing.CheckoutUseCase
+type DailyScheduler struct {
 	companyRepo        model.CompanyRepository
 	companyPaymentRepo model.CompanyPaymentRepository
+	checkoutUseCase    *billing.CheckoutUseCase
 }
 
-func NewMonthlyBillingScheduler(checkoutUseCase *billing.CheckoutUseCase, companyRepo model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository) *MonthlyBillingScheduler {
-	return &MonthlyBillingScheduler{
-		checkoutUseCase:    checkoutUseCase,
+func NewDailyScheduler(companyRepo model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository, checkoutUseCase *billing.CheckoutUseCase) *DailyScheduler {
+	return &DailyScheduler{
 		companyRepo:        companyRepo,
 		companyPaymentRepo: companyPaymentRepo,
+		checkoutUseCase:    checkoutUseCase,
 	}
 }
 
-func (s *MonthlyBillingScheduler) Start(ctx context.Context) {
+func (s *DailyScheduler) Start(ctx context.Context) {
 	ticker := time.NewTicker(1 * time.Hour)
 	go func() {
 		for {
@@ -31,9 +32,18 @@ func (s *MonthlyBillingScheduler) Start(ctx context.Context) {
 				ticker.Stop()
 				return
 			case t := <-ticker.C:
-				// Run daily at 8 AM
+				// Run daily at 5 AM
+				if t.Hour() == 5 {
+					log.Println("Running Daily Plan Update...")
+					if err := s.companyRepo.UpdateCompanyPlans(ctx); err != nil {
+						log.Printf("Error updating company plans: %v", err)
+					}
+				}
+
+				// Run billing checks at 8 AM
 				if t.Hour() == 8 {
-					s.ProcessDailyBatch(ctx)
+					log.Println("Running Daily Billing Batch...")
+					s.ProcessCostsToPay(ctx)
 					s.CheckOverdueAccounts(ctx)
 					s.CheckExpiredOptionalPayments(ctx)
 				}
@@ -42,7 +52,7 @@ func (s *MonthlyBillingScheduler) Start(ctx context.Context) {
 	}()
 }
 
-func (s *MonthlyBillingScheduler) CheckOverdueAccounts(ctx context.Context) {
+func (s *DailyScheduler) CheckOverdueAccounts(ctx context.Context) {
 	// 1. Block companies with overdue payments (> 5 days)
 	cutoffDate := time.Now().AddDate(0, 0, -5)
 	overduePayments, err := s.companyPaymentRepo.ListOverduePayments(ctx, cutoffDate)
@@ -66,7 +76,7 @@ func (s *MonthlyBillingScheduler) CheckOverdueAccounts(ctx context.Context) {
 	}
 }
 
-func (s *MonthlyBillingScheduler) ProcessDailyBatch(ctx context.Context) {
+func (s *DailyScheduler) ProcessCostsToPay(ctx context.Context) {
 	// Calculate target date (10 days from now)
 	targetDate := time.Now().AddDate(0, 0, 10)
 	targetDay := targetDate.Day()
@@ -94,7 +104,7 @@ func (s *MonthlyBillingScheduler) ProcessDailyBatch(ctx context.Context) {
 	}
 }
 
-func (s *MonthlyBillingScheduler) CheckExpiredOptionalPayments(ctx context.Context) {
+func (s *DailyScheduler) CheckExpiredOptionalPayments(ctx context.Context) {
 	payments, err := s.companyPaymentRepo.ListExpiredOptionalPayments(ctx)
 	if err != nil {
 		// log error

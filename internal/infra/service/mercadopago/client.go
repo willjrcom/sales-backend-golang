@@ -56,6 +56,7 @@ type PaymentMetadata struct {
 	CompanyID  string `json:"company_id"`
 	SchemaName string `json:"schema_name"`
 	Months     int    `json:"months"`
+	PlanType   string `json:"plan_type"`
 }
 
 // PaymentDetails wraps the fields we use when reconciling payments.
@@ -206,6 +207,7 @@ type CheckoutRequest struct {
 	Schema            string
 	Item              *CheckoutItem
 	ExternalReference string // Usually the PaymentID
+	Metadata          map[string]any
 }
 
 // CreateCheckoutPreference creates a multi-item preference for the new billing architecture.
@@ -227,6 +229,11 @@ func (c *Client) CreateCheckoutPreference(ctx context.Context, req *CheckoutRequ
 	metadata := map[string]any{
 		"company_id":  req.CompanyID,
 		"schema_name": req.Schema,
+	}
+	if req.Metadata != nil {
+		for k, v := range req.Metadata {
+			metadata[k] = v
+		}
 	}
 
 	prefRequest := preference.Request{
@@ -275,6 +282,7 @@ func (c *Client) GetPayment(ctx context.Context, id string) (*PaymentDetails, er
 		meta.CompanyID = stringFromAny(resource.Metadata["company_id"])
 		meta.SchemaName = stringFromAny(resource.Metadata["schema_name"])
 		meta.Months = intFromAny(resource.Metadata["months"])
+		meta.PlanType = stringFromAny(resource.Metadata["plan_type"])
 	}
 
 	var approved *time.Time
