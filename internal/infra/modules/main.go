@@ -62,7 +62,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	chi.AddHandler(handlerimpl.NewHandlerPublicData(companyService, userService))
 
 	clientService.AddDependencies(contactRepository)
-	employeeService.AddDependencies(contactRepository, userRepository)
+	employeeService.AddDependencies(contactRepository, userRepository, companyRepository)
 
 	orderQueueService.AddDependencies(orderProcessRepository)
 	orderProcessService.AddDependencies(orderQueueService, processRuleRepository, groupItemService, orderRepository, employeeService, groupItemRepository, orderService)

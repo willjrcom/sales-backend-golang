@@ -176,6 +176,10 @@ func (r *CompanyRepositoryBun) AddUserToPublicCompany(ctx context.Context, userI
 	}
 
 	companyToUsers := &model.CompanyToUsers{CompanyID: company.ID, UserID: userID}
+	// Check if already exists
+	if exists, _ := tx.NewSelect().Model(companyToUsers).Where("company_id = ? AND user_id = ?", company.ID, userID).Exists(ctx); exists {
+		return nil
+	}
 	if _, err := tx.NewInsert().Model(companyToUsers).Exec(ctx); err != nil {
 		return err
 	}
@@ -204,6 +208,11 @@ func (r *CompanyRepositoryBun) RemoveUserFromPublicCompany(ctx context.Context, 
 	company := &model.Company{}
 	if err := tx.NewSelect().Model(company).Where("schema_name = ?", schema).Scan(ctx); err != nil {
 		return err
+	}
+
+	// Check if exists
+	if exists, _ := tx.NewSelect().Model(&model.CompanyToUsers{}).Where("company_id = ? AND user_id = ?", company.ID, userID).Exists(ctx); !exists {
+		return nil
 	}
 
 	if _, err := tx.NewDelete().Model(&model.CompanyToUsers{}).Where("company_id = ? AND user_id = ?", company.ID, userID).Exec(ctx); err != nil {

@@ -11,18 +11,20 @@ import (
 )
 
 type Service struct {
-	re model.EmployeeRepository
-	rc model.ContactRepository
-	ru model.UserRepository
+	re  model.EmployeeRepository
+	rc  model.ContactRepository
+	ru  model.UserRepository
+	rco model.CompanyRepository
 }
 
 func NewService(repository model.EmployeeRepository) *Service {
 	return &Service{re: repository}
 }
 
-func (s *Service) AddDependencies(rc model.ContactRepository, ru model.UserRepository) {
+func (s *Service) AddDependencies(rc model.ContactRepository, ru model.UserRepository, rco model.CompanyRepository) {
 	s.rc = rc
 	s.ru = ru
+	s.rco = rco
 }
 
 func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.EmployeeCreateDTO) (*uuid.UUID, error) {
@@ -80,15 +82,36 @@ func (s *Service) UpdateEmployee(ctx context.Context, dtoId *entitydto.IDRequest
 		return err
 	}
 
+	// Handle active status change
+	if dto.IsActive != nil {
+		if *dto.IsActive {
+			// Activate: Add user to company
+			if err := s.rco.AddUserToPublicCompany(ctx, employee.UserID); err != nil {
+				return err
+			}
+		} else {
+			// Deactivate: Remove user from company
+			if err := s.rco.RemoveUserFromPublicCompany(ctx, employee.UserID); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
 func (s *Service) DeleteEmployee(ctx context.Context, dto *entitydto.IDRequest) error {
-	if _, err := s.re.GetEmployeeById(ctx, dto.ID.String()); err != nil {
+	employeeModel, err := s.re.GetEmployeeById(ctx, dto.ID.String())
+	if err != nil {
 		return err
 	}
 
 	if err := s.re.DeleteEmployee(ctx, dto.ID.String()); err != nil {
+		return err
+	}
+
+	// Remove user from public company
+	if err := s.rco.RemoveUserFromPublicCompany(ctx, employeeModel.UserID); err != nil {
 		return err
 	}
 
