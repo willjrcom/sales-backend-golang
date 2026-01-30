@@ -24,6 +24,7 @@ type CompanyPayment struct {
 	CompanyID         uuid.UUID
 	Provider          string
 	ProviderPaymentID string
+	PreapprovalID     string // MP Subscription ID (preserved even after payment)
 	Status            PaymentStatus
 	Currency          string
 	Amount            decimal.Decimal

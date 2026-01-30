@@ -17,6 +17,7 @@ type CompanyPayment struct {
 	CompanyID         uuid.UUID       `bun:"company_id,type:uuid,notnull"`
 	Provider          string          `bun:"provider,notnull"`
 	ProviderPaymentID string          `bun:"provider_payment_id,notnull,unique"`
+	PreapprovalID     string          `bun:"preapproval_id"` // MP Subscription ID
 	Status            string          `bun:"status,notnull"`
 	Currency          string          `bun:"currency,notnull"`
 	Amount            decimal.Decimal `bun:"amount,type:decimal(12,2),notnull"`
@@ -40,6 +41,7 @@ func (c *CompanyPayment) FromDomain(payment *companyentity.CompanyPayment) {
 		CompanyID:         payment.CompanyID,
 		Provider:          payment.Provider,
 		ProviderPaymentID: payment.ProviderPaymentID,
+		PreapprovalID:     payment.PreapprovalID,
 		Status:            string(payment.Status),
 		Currency:          payment.Currency,
 		Amount:            payment.Amount,
@@ -64,6 +66,7 @@ func (c *CompanyPayment) ToDomain() *companyentity.CompanyPayment {
 		CompanyID:         c.CompanyID,
 		Provider:          c.Provider,
 		ProviderPaymentID: c.ProviderPaymentID,
+		PreapprovalID:     c.PreapprovalID,
 		Status:            companyentity.PaymentStatus(c.Status),
 		Currency:          c.Currency,
 		Amount:            c.Amount,

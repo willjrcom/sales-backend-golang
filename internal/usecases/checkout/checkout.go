@@ -118,14 +118,15 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		Entity:            paymentEntity,
 		CompanyID:         company.ID,
 		Provider:          mercadoPagoProvider,
+		ProviderPaymentID: subResp.ID,
+		PreapprovalID:     subResp.ID, // Store Preapproval ID separately
 		Status:            companyentity.PaymentStatusPending,
 		Currency:          "BRL",
 		Amount:            finalAmount,
 		Months:            months,
 		PlanType:          companyentity.PlanType(req.ToPlanType()),
-		ProviderPaymentID: subResp.ID, // Storing Preapproval ID here
 		PaymentURL:        subResp.InitPoint,
-		ExternalReference: externalRef, // Using the SUB ref
+		ExternalReference: externalRef,
 		ExpiresAt:         func() *time.Time { t := time.Now().AddDate(0, 0, 5); return &t }(),
 		IsMandatory:       false,
 	}
@@ -630,13 +631,13 @@ func (uc *CheckoutUseCase) CancelSubscription(ctx context.Context, companyID uui
 		return fmt.Errorf("no active subscription found")
 	}
 
-	// ProviderPaymentID might be Preapproval ID (if not yet paid) or Payment ID (if first payment completed)
-	// We need to store the Preapproval ID separately, or we can search for it
-	// For now, let's assume ProviderPaymentID on pending payment is the Preapproval ID
-	preapprovalID := payment.ProviderPaymentID
+	// Use the dedicated PreapprovalID field
+	if payment.PreapprovalID == "" {
+		return fmt.Errorf("subscription has no preapproval ID")
+	}
 
 	// Cancel the subscription at Mercado Pago
-	if err := uc.mpService.CancelSubscription(ctx, preapprovalID); err != nil {
+	if err := uc.mpService.CancelSubscription(ctx, payment.PreapprovalID); err != nil {
 		return fmt.Errorf("failed to cancel subscription at Mercado Pago: %w", err)
 	}
 
