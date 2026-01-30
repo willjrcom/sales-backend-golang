@@ -39,6 +39,7 @@ func (c *CategoryCreateDTO) ToDomain() (*productentity.ProductCategory, error) {
 	if c.IsActive != nil {
 		isActive = *c.IsActive
 	}
+
 	categoryCommonAttributes := productentity.ProductCategoryCommonAttributes{
 		Name:                 c.Name,
 		ImagePath:            c.ImagePath,

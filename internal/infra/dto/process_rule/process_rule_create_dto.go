@@ -21,6 +21,7 @@ type ProcessRuleCreateDTO struct {
 	ImagePath   *string   `json:"image_path"`
 	IdealTime   string    `json:"ideal_time"`
 	CategoryID  uuid.UUID `json:"category_id"`
+	IsActive    *bool     `json:"is_active"`
 }
 
 func (s *ProcessRuleCreateDTO) validate() error {
@@ -46,17 +47,26 @@ func (s *ProcessRuleCreateDTO) ToDomain() (*productentity.ProcessRule, error) {
 	if err := s.validate(); err != nil {
 		return nil, err
 	}
-	processRuleCommonAttributes := productentity.ProcessRuleCommonAttributes{
-		Name:       s.Name,
-		Order:      s.Order,
-		CategoryID: s.CategoryID,
-	}
 
 	idealTime, err := convertToDuration(s.IdealTime)
 	if err != nil {
 		return nil, err
 	}
 
-	processRuleCommonAttributes.IdealTime = idealTime
+	isActive := true
+	if s.IsActive != nil {
+		isActive = *s.IsActive
+	}
+
+	processRuleCommonAttributes := productentity.ProcessRuleCommonAttributes{
+		Name:        s.Name,
+		Order:       s.Order,
+		CategoryID:  s.CategoryID,
+		IdealTime:   idealTime,
+		IsActive:    isActive,
+		Description: s.Description,
+		ImagePath:   s.ImagePath,
+	}
+
 	return productentity.NewProcessRule(processRuleCommonAttributes), nil
 }

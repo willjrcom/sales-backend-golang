@@ -26,10 +26,6 @@ func (s *SizeCreateDTO) validate() error {
 	if s.CategoryID == uuid.Nil {
 		return ErrCategoryRequired
 	}
-	if s.IsActive == nil {
-		s.IsActive = new(bool)
-		*s.IsActive = true
-	}
 
 	return nil
 }

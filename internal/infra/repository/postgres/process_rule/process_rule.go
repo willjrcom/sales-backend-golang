@@ -243,7 +243,7 @@ func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Conte
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&processRules).Where("category_id = ?", id).Order("order ASC").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&processRules).Where("category_id = ? and is_active = true", id).Order("order ASC").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -265,7 +265,7 @@ func (r *ProcessRuleRepositoryBun) GetProcessRulesWithOrderProcessByCategoryId(c
 	defer tx.Rollback()
 
 	// 1. Fetch ProcessRules for the category
-	if err := tx.NewSelect().Model(&processRules).Where("category_id = ?", id).Order("order ASC").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&processRules).Where("category_id = ? and is_active = true", id).Order("order ASC").Scan(ctx); err != nil {
 		return nil, err
 	}
 
