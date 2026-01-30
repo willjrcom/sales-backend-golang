@@ -7,25 +7,29 @@ import (
 
 	"github.com/google/uuid"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
 	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
+	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 )
 
 type Service struct {
 	rclient  model.ClientRepository
 	rcontact model.ContactRepository
+	cs       *companyusecases.Service
 }
 
 func NewService(rcliente model.ClientRepository) *Service {
 	return &Service{rclient: rcliente}
 }
 
-func (s *Service) AddDependencies(rcontact model.ContactRepository) {
+func (s *Service) AddDependencies(rcontact model.ContactRepository, cs *companyusecases.Service) {
 	s.rcontact = rcontact
+	s.cs = cs
 }
 
 func (s *Service) CreateClient(ctx context.Context, dto *clientdto.ClientCreateDTO) (uuid.UUID, error) {
@@ -33,6 +37,17 @@ func (s *Service) CreateClient(ctx context.Context, dto *clientdto.ClientCreateD
 
 	if err != nil {
 		return uuid.Nil, err
+	}
+
+	company, err := s.cs.GetCompany(ctx)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if minDeliveryTax, err := company.Preferences.GetDecimal(companyentity.MinDeliveryTax); err == nil {
+		if client.Address.DeliveryTax.LessThan(minDeliveryTax) {
+			return uuid.Nil, errors.New("delivery tax is less than minimum delivery tax")
+		}
 	}
 
 	s.UpdateClientWithCoordinates(ctx, client)
@@ -67,6 +82,17 @@ func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IDRequest, 
 	client := clientModel.ToDomain()
 	if err := dto.UpdateDomain(client); err != nil {
 		return err
+	}
+
+	company, err := s.cs.GetCompany(ctx)
+	if err != nil {
+		return err
+	}
+
+	if minDeliveryTax, err := company.Preferences.GetDecimal(companyentity.MinDeliveryTax); err == nil {
+		if client.Address.DeliveryTax.LessThan(minDeliveryTax) {
+			return errors.New("delivery tax is less than minimum delivery tax")
+		}
 	}
 
 	s.UpdateClientWithCoordinates(ctx, client)

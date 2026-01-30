@@ -11,7 +11,7 @@ import (
 type Key string
 
 const (
-	// TableTaxRate is the percentage rate applied for table consumption (e.g., 0.10 for 10%).
+	// TableTaxRate is the percentage rate applied for table consumption (e.g., 10 for 10%).
 	TableTaxRate Key = "table_tax_rate"
 	// MinOrderValueForFreeDelivery is the minimum order value to qualify for free delivery.
 	MinOrderValueForFreeDelivery Key = "min_order_value_for_free_delivery"
@@ -59,7 +59,7 @@ func NewDefaultPreferences() Preferences {
 		EnableDelivery:                     "true",
 		EnableTable:                        "true",
 		EnableMinOrderValueForFreeDelivery: "true",
-		TableTaxRate:                       "0.10",
+		TableTaxRate:                       "10",
 		MinDeliveryTax:                     "0.00",
 		MinOrderValueForFreeDelivery:       "0.00",
 	}

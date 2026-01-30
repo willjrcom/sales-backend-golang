@@ -115,6 +115,12 @@ func (s *OrderDeliveryService) CreateOrderDelivery(ctx context.Context, dto *ord
 	delivery.AddressID = client.Address.ID
 	delivery.DeliveryTax = &client.Address.DeliveryTax
 
+	if minDeliveryTax, err := company.Preferences.GetDecimal(companyentity.MinDeliveryTax); err == nil {
+		if delivery.DeliveryTax.LessThan(minDeliveryTax) {
+			delivery.DeliveryTax = &minDeliveryTax
+		}
+	}
+
 	deliveryModel := &model.OrderDelivery{}
 	deliveryModel.FromDomain(delivery)
 	if err = s.rdo.CreateOrderDelivery(ctx, deliveryModel); err != nil {

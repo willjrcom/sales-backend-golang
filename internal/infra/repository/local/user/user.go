@@ -120,18 +120,18 @@ func (r *UserRepositoryLocal) GetIDByEmail(ctx context.Context, email string) (*
 	return nil, errors.New("user not found")
 }
 
-func (r *UserRepositoryLocal) GetIDByEmailOrCPF(ctx context.Context, email string, cpf string) (*uuid.UUID, error) {
+func (r *UserRepositoryLocal) GetIDByEmailOrCPF(ctx context.Context, email string, cpf string) (*uuid.UUID, string, error) {
 	if email == "" && cpf == "" {
-		return nil, errors.New("email and cpf cannot both be empty")
+		return nil, "", errors.New("email and cpf cannot both be empty")
 	}
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	for _, u := range r.users {
 		if (email != "" && u.Email == email) || (cpf != "" && u.Cpf == cpf) {
-			return &u.Entity.ID, nil
+			return &u.Entity.ID, "email", nil
 		}
 	}
-	return nil, errors.New("user not found")
+	return nil, "", errors.New("user not found")
 }
 
 func (r *UserRepositoryLocal) GetUserByID(ctx context.Context, id uuid.UUID, withCompanies bool) (*model.User, error) {

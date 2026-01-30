@@ -61,7 +61,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	// Public analytics handler for company/user listing
 	chi.AddHandler(handlerimpl.NewHandlerPublicData(companyService, userService))
 
-	clientService.AddDependencies(contactRepository)
+	clientService.AddDependencies(contactRepository, companyService)
 	employeeService.AddDependencies(contactRepository, userRepository, companyRepository)
 
 	orderQueueService.AddDependencies(orderProcessRepository)

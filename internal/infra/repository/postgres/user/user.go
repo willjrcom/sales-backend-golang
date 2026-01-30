@@ -273,11 +273,11 @@ func (r *UserRepositoryBun) GetIDByEmail(ctx context.Context, email string) (*uu
 	return &user.ID, nil
 }
 
-func (r *UserRepositoryBun) GetIDByEmailOrCPF(ctx context.Context, email string, cpf string) (*uuid.UUID, error) {
+func (r *UserRepositoryBun) GetIDByEmailOrCPF(ctx context.Context, email string, cpf string) (*uuid.UUID, string, error) {
 
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	defer cancel()
@@ -285,13 +285,23 @@ func (r *UserRepositoryBun) GetIDByEmailOrCPF(ctx context.Context, email string,
 
 	user := &model.User{}
 	if err := tx.NewSelect().Model(user).Where("u.email = ? or u.cpf = ?", email, cpf).Column("id").Scan(ctx); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 
 	if err := tx.Commit(); err != nil {
-		return nil, err
+		return nil, "", err
 	}
-	return &user.ID, nil
+
+	key := ""
+	if user.Email == email {
+		key = "email"
+	}
+
+	if user.Cpf == cpf {
+		key = "cpf"
+	}
+
+	return &user.ID, key, nil
 }
 
 func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID, withCompanies bool) (*model.User, error) {

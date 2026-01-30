@@ -18,9 +18,8 @@ import (
 )
 
 var (
-	ErrUserAlreadyExists = errors.New("user already exists")
-	ErrInvalidEmail      = errors.New("invalid email")
-	ErrInvalidPassword   = errors.New("invalid password")
+	ErrInvalidEmail    = errors.New("invalid email")
+	ErrInvalidPassword = errors.New("invalid password")
 )
 
 type Service struct {
@@ -38,8 +37,11 @@ func (s *Service) CreateUser(ctx context.Context, dto *companydto.UserCreateDTO)
 		return nil, err
 	}
 
-	if id, _ := s.r.GetIDByEmailOrCPF(ctx, user.Email, user.Cpf); id != nil {
-		return nil, ErrUserAlreadyExists
+	if id, key, _ := s.r.GetIDByEmailOrCPF(ctx, user.Email, user.Cpf); id != nil {
+		if key == "email" {
+			return nil, fmt.Errorf("user email already exists")
+		}
+		return nil, fmt.Errorf("user cpf already exists")
 	}
 
 	hash, err := bcryptservice.HashPassword(dto.Password)
