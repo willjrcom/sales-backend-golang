@@ -190,6 +190,36 @@ func (r *CompanyPaymentRepositoryBun) ListPendingMandatoryPayments(ctx context.C
 	return payments, nil
 }
 
+func (r *CompanyPaymentRepositoryBun) GetCompanyPaymentByProviderID(ctx context.Context, providerPaymentID string) (*model.CompanyPayment, error) {
+	payment := &model.CompanyPayment{}
+	err := r.db.NewSelect().
+		Model(payment).
+		Where("provider_payment_id = ?", providerPaymentID).
+		Limit(1).
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	return payment, nil
+}
+
+func (r *CompanyPaymentRepositoryBun) GetPendingPaymentByExternalReference(ctx context.Context, externalReference string) (*model.CompanyPayment, error) {
+	payment := &model.CompanyPayment{}
+	err := r.db.NewSelect().
+		Model(payment).
+		Where("external_reference = ?", externalReference).
+		Where("status = ?", "pending").
+		Order("created_at DESC").
+		Limit(1).
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	return payment, nil
+}
+
 func (r *CompanyPaymentRepositoryBun) ListOverduePaymentsByCompany(ctx context.Context, companyID uuid.UUID, cutoffDate time.Time) ([]model.CompanyPayment, error) {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {

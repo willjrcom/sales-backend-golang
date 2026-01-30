@@ -57,6 +57,7 @@ func NewHandlerCompany(companyService *companyusecases.Service, checkoutUC *bill
 
 		// Subscription
 		c.Get("/subscription/status", h.handlerGetSubscriptionStatus)
+		c.Post("/subscription/cancel", h.handlerCancelSubscription)
 	})
 
 	return handler.NewHandler("/company", c, "/company/payments/mercadopago/webhook")
@@ -308,4 +309,21 @@ func (h *handlerCompanyImpl) handlerGetSubscriptionStatus(w http.ResponseWriter,
 		return
 	}
 	jsonpkg.ResponseJson(w, r, http.StatusOK, status)
+}
+
+func (h *handlerCompanyImpl) handlerCancelSubscription(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	company, err := h.s.GetCompany(ctx)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := h.checkoutUC.CancelSubscription(ctx, company.ID); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, map[string]string{"status": "subscription cancelled"})
 }

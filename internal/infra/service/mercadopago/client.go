@@ -15,6 +15,7 @@ import (
 
 	"github.com/mercadopago/sdk-go/pkg/config"
 	"github.com/mercadopago/sdk-go/pkg/payment"
+	"github.com/mercadopago/sdk-go/pkg/preapproval"
 	"github.com/mercadopago/sdk-go/pkg/preference"
 )
 
@@ -24,14 +25,15 @@ const (
 
 // Client wraps Mercado Pago SDK clients with project specific helpers.
 type Client struct {
-	preferenceClient preference.Client
-	paymentClient    payment.Client
-	notificationURL  string
-	webhookSecret    string
-	monthlyPrice     float64
-	successURL       string
-	pendingURL       string
-	failureURL       string
+	preferenceClient  preference.Client
+	paymentClient     payment.Client
+	preapprovalClient preapproval.Client
+	notificationURL   string
+	webhookSecret     string
+	monthlyPrice      float64
+	successURL        string
+	pendingURL        string
+	failureURL        string
 }
 
 // PreferenceRequest wraps the information required to create subscription preferences.
@@ -106,6 +108,7 @@ func NewClient() *Client {
 
 	client.preferenceClient = preference.NewClient(cfg)
 	client.paymentClient = payment.NewClient(cfg)
+	client.preapprovalClient = preapproval.NewClient(cfg)
 
 	return client
 }
@@ -129,6 +132,15 @@ func (c *Client) NotificationURL() string {
 		return ""
 	}
 	return c.notificationURL
+}
+
+// SuccessURL returns the URL for successful payments.
+// Returns empty string if not configured.
+func (c *Client) SuccessURL() string {
+	if c == nil {
+		return ""
+	}
+	return c.successURL
 }
 
 // ValidateSignature validates the x-signature header from Mercado Pago webhooks.
@@ -259,6 +271,70 @@ func (c *Client) CreateCheckoutPreference(ctx context.Context, req *CheckoutRequ
 		InitPoint:        resource.InitPoint,
 		SandboxInitPoint: resource.SandboxInitPoint,
 	}, nil
+}
+
+// SubscriptionRequest wraps the information required to create a subscription (preapproval).
+type SubscriptionRequest struct {
+	Title         string
+	Description   string
+	Price         float64
+	Frequency     int
+	FrequencyType string // "months"
+	ExternalRef   string
+	PayerEmail    string
+	BackURL       string
+}
+
+// SubscriptionResponse mirrors the minimal data needed by the application when creating a subscription.
+type SubscriptionResponse struct {
+	ID        string `json:"id"`
+	InitPoint string `json:"init_point"`
+}
+
+// CreateSubscription creates a recurring payment (preapproval) preference.
+func (c *Client) CreateSubscription(ctx context.Context, req *SubscriptionRequest) (*SubscriptionResponse, error) {
+	if c == nil || !c.Enabled() {
+		return nil, fmt.Errorf("mercado pago client is not configured")
+	}
+
+	preapprovalReq := preapproval.Request{
+		Reason:            req.Title,
+		ExternalReference: req.ExternalRef,
+		PayerEmail:        req.PayerEmail,
+		AutoRecurring: &preapproval.AutoRecurringRequest{
+			Frequency:         req.Frequency,
+			FrequencyType:     req.FrequencyType,
+			TransactionAmount: req.Price,
+			CurrencyID:        "BRL",
+		},
+		BackURL: req.BackURL,
+		Status:  "pending",
+	}
+
+	resource, err := c.preapprovalClient.Create(ctx, preapprovalReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return &SubscriptionResponse{
+		ID:        resource.ID,
+		InitPoint: resource.InitPoint,
+	}, nil
+}
+
+// CancelSubscription cancels a recurring payment (preapproval) by ID.
+func (c *Client) CancelSubscription(ctx context.Context, preapprovalID string) error {
+	if c == nil || !c.Enabled() {
+		return fmt.Errorf("mercado pago client is not configured")
+	}
+
+	// Update the preapproval status to "cancelled"
+	updateReq := preapproval.UpdateRequest{
+		Status: "cancelled",
+	}
+
+	_, err := c.preapprovalClient.Update(ctx, preapprovalID, updateReq)
+	return err
 }
 
 // GetPayment fetches a payment and maps essential fields for the domain layer.

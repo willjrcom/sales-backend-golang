@@ -43,5 +43,16 @@ func (s *Service) GetSubscriptionStatus(ctx context.Context) (*companydto.Subscr
 		// upcoming subscription is optional information
 	}
 
+	// Check if company has an active subscription that can be cancelled
+	// This means finding a pending payment with SUB:<companyID>: reference
+	dto.CanCancelRenewal = false
+	if company.ID.String() != "" {
+		externalRef := "SUB:" + company.ID.String() + ":"
+		payment, err := s.companyPaymentRepo.GetPendingPaymentByExternalReference(ctx, externalRef)
+		if err == nil && payment != nil {
+			dto.CanCancelRenewal = true
+		}
+	}
+
 	return dto, nil
 }
