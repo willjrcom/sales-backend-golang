@@ -76,6 +76,7 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	// Define 7 days free trial
 	expiration := time.Now().UTC().AddDate(0, 0, 7)
 	company.SubscriptionExpiresAt = &expiration
+	company.CurrentPlan = companyentity.PlanTypeFree
 
 	coordinates, _ := geocodeservice.GetCoordinates(&company.Address.AddressCommonAttributes)
 
