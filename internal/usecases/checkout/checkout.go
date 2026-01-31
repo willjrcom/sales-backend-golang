@@ -843,10 +843,6 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, compan
 		return nil, err
 	}
 
-	if company.SubscriptionExpiresAt == nil || company.SubscriptionExpiresAt.Before(time.Now()) {
-		return nil, errors.New("no active subscription to upgrade")
-	}
-
 	currentPlan := domainbilling.PlanType(company.CurrentPlan)
 	if currentPlan == targetPlan {
 		return nil, errors.New("target plan is same as current plan")
@@ -861,7 +857,10 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, compan
 	}
 
 	// Calculate remaining days
-	daysRemaining := int(time.Until(*company.SubscriptionExpiresAt).Hours() / 24)
+	daysRemaining := 0
+	if company.SubscriptionExpiresAt != nil && company.SubscriptionExpiresAt.After(time.Now()) {
+		daysRemaining = int(time.Until(*company.SubscriptionExpiresAt).Hours() / 24)
+	}
 	isFullRenewal := false
 	var upgradeAmount float64
 
