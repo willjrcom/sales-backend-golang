@@ -220,6 +220,21 @@ func (r *CompanyPaymentRepositoryBun) GetPendingPaymentByExternalReference(ctx c
 	return payment, nil
 }
 
+func (r *CompanyPaymentRepositoryBun) GetLastPaymentByExternalReferencePrefix(ctx context.Context, externalReferencePrefix string) (*model.CompanyPayment, error) {
+	payment := &model.CompanyPayment{}
+	err := r.db.NewSelect().
+		Model(payment).
+		Where("external_reference LIKE ?", externalReferencePrefix+"%").
+		Order("created_at DESC").
+		Limit(1).
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	return payment, nil
+}
+
 func (r *CompanyPaymentRepositoryBun) ListOverduePaymentsByCompany(ctx context.Context, companyID uuid.UUID, cutoffDate time.Time) ([]model.CompanyPayment, error) {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
