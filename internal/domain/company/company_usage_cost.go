@@ -10,10 +10,13 @@ import (
 type CostType string
 
 const (
-	CostTypeNFCe       CostType = "nfce"
-	CostTypeNFe        CostType = "nfe"
-	CostTypeNFCeRefund CostType = "nfce_refund"
-	CostTypeNFeRefund  CostType = "nfe_refund"
+	CostTypeNFCe                CostType = "nfce"
+	CostTypeNFe                 CostType = "nfe"
+	CostTypeNFCeRefund          CostType = "nfce_refund"
+	CostTypeNFeRefund           CostType = "nfe_refund"
+	CostTypeUpgradeBasic        CostType = "upgrade_basic"
+	CostTypeUpgradeIntermediate CostType = "upgrade_intermediate"
+	CostTypeUpgradeAdvanced     CostType = "upgrade_advanced"
 )
 
 var (

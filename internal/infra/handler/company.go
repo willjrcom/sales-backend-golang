@@ -58,6 +58,8 @@ func NewHandlerCompany(companyService *companyusecases.Service, checkoutUC *bill
 		// Subscription
 		c.Get("/subscription/status", h.handlerGetSubscriptionStatus)
 		c.Post("/subscription/cancel", h.handlerCancelSubscription)
+		c.Get("/subscription/upgrade/simulate", h.handlerSimulateUpgrade)
+		c.Post("/subscription/upgrade/checkout", h.handlerCreateUpgradeCheckout)
 	})
 
 	return handler.NewHandler("/company", c, "/company/payments/mercadopago/webhook")
@@ -326,4 +328,55 @@ func (h *handlerCompanyImpl) handlerCancelSubscription(w http.ResponseWriter, r 
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, map[string]string{"status": "subscription cancelled"})
+}
+
+func (h *handlerCompanyImpl) handlerSimulateUpgrade(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	targetPlan := r.URL.Query().Get("target_plan")
+	if targetPlan == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, fmt.Errorf("target_plan required"))
+		return
+	}
+
+	company, err := h.s.GetCompany(ctx)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	dto := &billingdto.CreateCheckoutDTO{Plan: targetPlan}
+
+	simulation, err := h.checkoutUC.CalculateUpgradeProration(ctx, company.ID, dto.ToPlanType())
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, simulation)
+}
+
+func (h *handlerCompanyImpl) handlerCreateUpgradeCheckout(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	dto := &billingdto.UpgradeCheckoutDTO{}
+	if err := jsonpkg.ParseBody(r, dto); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	company, err := h.s.GetCompany(ctx)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	createDto := &billingdto.CreateCheckoutDTO{Plan: dto.TargetPlan}
+
+	resp, err := h.checkoutUC.CreateUpgradeCheckout(ctx, company.ID, createDto.ToPlanType())
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
 }
