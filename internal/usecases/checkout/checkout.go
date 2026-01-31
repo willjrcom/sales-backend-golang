@@ -865,8 +865,8 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, compan
 	isFullRenewal := false
 	var upgradeAmount float64
 
-	if daysRemaining < 1 {
-		// Early Renewal Logic: Less than 1 day remaining
+	if daysRemaining < 1 || currentPrice == 0 {
+		// Early Renewal Logic OR Upgrading from Free Plan
 		// User pays full price of new plan, and subscription is extended by 1 full period
 		daysRemaining = 0
 		upgradeAmount = targetPrice
