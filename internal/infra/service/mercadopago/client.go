@@ -63,6 +63,7 @@ type PaymentMetadata struct {
 	Months        int    `json:"months"`
 	PlanType      string `json:"plan_type"`
 	IsFullRenewal bool   `json:"is_full_renewal"`
+	IsUpcoming    bool   `json:"is_upcoming"` // Indicates if this is a scheduled/upcoming subscription
 }
 
 // PaymentDetails wraps the fields we use when reconciling payments.
@@ -379,6 +380,7 @@ func (c *Client) GetPayment(ctx context.Context, id string) (*PaymentDetails, er
 		meta.SchemaName = stringFromAny(resource.Metadata["schema_name"])
 		meta.Months = intFromAny(resource.Metadata["months"])
 		meta.PlanType = stringFromAny(resource.Metadata["plan_type"])
+		meta.IsUpcoming = boolFromAny(resource.Metadata["is_upcoming"])
 	}
 
 	var approved *time.Time
@@ -444,6 +446,18 @@ func intFromAny(value any) int {
 		}
 	}
 	return 0
+}
+
+func boolFromAny(value any) bool {
+	switch v := value.(type) {
+	case bool:
+		return v
+	case string:
+		return v == "true" || v == "1"
+	case int, int64, float64, float32:
+		return v != 0
+	}
+	return false
 }
 
 // UpdateSubscriptionDetails updates the logic of a subscription (Amount and Reason/Title)

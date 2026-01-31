@@ -2,7 +2,6 @@ package companyusecases
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
@@ -16,59 +15,45 @@ func (s *Service) GetSubscriptionStatus(ctx context.Context) (*companydto.Subscr
 	}
 
 	dto := &companydto.SubscriptionStatusDTO{
-		CurrentPlan: string(company.CurrentPlan),
+		CurrentPlan:      string(company.CurrentPlan),
+		CanCancelRenewal: false,
+		Periodicity:      "MONTHLY",
 	}
 
-	// If company has an expiration date, calculate days remaining
-	if company.SubscriptionExpiresAt != nil {
-		expiresAt := company.SubscriptionExpiresAt.Format(time.RFC3339)
+	// Get active subscription - single source of truth
+	activeSub, err := s.r.GetActiveSubscription(ctx, company.ID)
+	if err == nil && activeSub != nil {
+		// Expiration date and days remaining from active subscription
+		expiresAt := activeSub.EndDate.Format(time.RFC3339)
 		dto.ExpiresAt = &expiresAt
 
-		daysRemaining := int(time.Until(*company.SubscriptionExpiresAt).Hours() / 24)
-		if daysRemaining < 0 {
-			daysRemaining = 0
-		}
+		daysRemaining := max(int(time.Until(activeSub.EndDate).Hours()/24), 0)
 		dto.DaysRemaining = &daysRemaining
+
+		// Can cancel if subscription hasn't been cancelled yet
+		dto.CanCancelRenewal = !activeSub.IsCanceled
+
+		// Get periodicity from linked payment
+		if activeSub.PaymentID != nil {
+			payment, err := s.companyPaymentRepo.GetCompanyPaymentByID(ctx, *activeSub.PaymentID)
+			if err == nil && payment != nil {
+				switch payment.Months {
+				case 6:
+					dto.Periodicity = "SEMIANNUAL"
+				case 12:
+					dto.Periodicity = "ANNUAL"
+				}
+			}
+		}
 	}
 
-	// Check for upcoming (future) subscriptions
+	// Check for upcoming (future) subscription
 	upcoming, err := s.r.GetUpcomingSubscription(ctx, company.ID)
 	if err == nil && upcoming != nil {
 		planType := string(upcoming.PlanType)
 		startAt := upcoming.StartDate.Format(time.RFC3339)
 		dto.UpcomingPlan = &planType
 		dto.UpcomingStartAt = &startAt
-	} else if err != nil && err != sql.ErrNoRows {
-		// Log error but don't fail the entire request
-		// upcoming subscription is optional information
-	}
-
-	// Determine Periodicity from active subscription
-	// External reference format: SUB:<CompanyID>:<PlanType>:<Months>
-	externalRef := "SUB:" + company.ID.String() + ":"
-	activeSub, err := s.companyPaymentRepo.GetLastApprovedPaymentByExternalReferencePrefix(ctx, externalRef)
-	if err == nil && activeSub != nil {
-		switch activeSub.Months {
-		case 6:
-			dto.Periodicity = "SEMIANNUAL"
-		case 12:
-			dto.Periodicity = "ANNUAL"
-		default:
-			dto.Periodicity = "MONTHLY"
-		}
-	} else {
-		dto.Periodicity = "MONTHLY"
-	}
-
-	// Check if company has an active subscription that can be cancelled
-	// This means finding a pending payment with SUB:<companyID>: reference
-	dto.CanCancelRenewal = false
-	if company.ID.String() != "" {
-		externalRef := "SUB:" + company.ID.String() + ":"
-		payment, err := s.companyPaymentRepo.GetPendingPaymentByExternalReference(ctx, externalRef)
-		if err == nil && payment != nil {
-			dto.CanCancelRenewal = true
-		}
 	}
 
 	return dto, nil

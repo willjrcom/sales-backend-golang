@@ -59,22 +59,20 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		return nil, fmt.Errorf("company email is required for subscription")
 	}
 
-	// Auto-cancel previous subscription if exists
-	// We check if there is an active subscription or preapproval
-	// The cancel logic is in CancelSubscription, we can reuse it?
-	// But CancelSubscription takes companyID only.
-	// We should try to cancel cleanly.
-	if err := uc.CancelSubscription(ctx, req.CompanyID); err != nil {
-		// If error is "no active subscription", ignore.
-		// If other error, log but maybe proceed? Or fail?
-		// Better to fail to avoid double billing risk if cancellation failed.
-		// But CancelSubscription returns nil if no sub found? (Need to verify)
-		// Let's assume it might return error if not found or DB error.
-		// Ideally CancelSubscription checks and cancels.
-		// Let's log and proceed if it's just "not found", but currently generic error.
-		// Let's assume CancelSubscription handles "not found" gracefully or we check error string.
-		// For safety, let's call it and if it fails, we assume it might be DB error.
-		fmt.Printf("Warning: failed to cancel previous subscription during new checkout: %v\n", err)
+	// Check if user has active subscription
+	hasActiveSubscription := company.SubscriptionExpiresAt != nil && company.SubscriptionExpiresAt.After(time.Now())
+
+	if hasActiveSubscription {
+		// User has active subscription - will create UPCOMING/SCHEDULED subscription
+		// Do NOT cancel current subscription
+		fmt.Printf("Creating scheduled subscription for company %s, will start after %s\n",
+			company.ID.String(), company.SubscriptionExpiresAt.Format("2006-01-02"))
+	} else {
+		// No active subscription or expired - cancel any lingering preapproval and create new
+		if err := uc.CancelSubscription(ctx, req.CompanyID); err != nil {
+			// Log but continue - CancelSubscription handles "not found" cases
+			fmt.Printf("Warning: failed to cancel previous subscription during new checkout: %v\n", err)
+		}
 	}
 
 	var basePrice decimal.Decimal
@@ -115,36 +113,83 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 
 	externalRef := fmt.Sprintf("SUB:%s:%s:%d", company.ID.String(), req.ToPlanType(), months)
 
-	subReq := &mercadopagoservice.SubscriptionRequest{
-		Title:         title,
-		Description:   description,
-		Price:         finalAmount.InexactFloat64(),
-		Frequency:     frequency,
-		FrequencyType: frequencyType,
-		ExternalRef:   externalRef,
-		PayerEmail:    company.Email,
-		BackURL:       uc.mpService.SuccessURL(),
-	}
-
-	subResp, err := uc.mpService.CreateSubscription(ctx, subReq)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create subscription: %w", err)
-	}
-
 	paymentEntity := entity.NewEntity()
+	var checkoutURL string
+	var providerID string
+
+	if hasActiveSubscription {
+		// SCHEDULED SUBSCRIPTION: Create one-time payment (no Preapproval yet)
+		// The subscription will be created as "upcoming" when payment is approved
+		description = fmt.Sprintf("Assinatura Agendada - %s. Iniciará em %s",
+			title, company.SubscriptionExpiresAt.AddDate(0, 0, 1).Format("02/01/2006"))
+
+		checkoutItem := mercadopagoservice.NewCheckoutItem(
+			title,
+			description,
+			1,
+			finalAmount.InexactFloat64(),
+		)
+
+		mpReq := &mercadopagoservice.CheckoutRequest{
+			CompanyID:         company.ID.String(),
+			Schema:            company.SchemaName,
+			Item:              checkoutItem,
+			ExternalReference: paymentEntity.ID.String(),
+			Metadata: map[string]any{
+				"plan_type":   string(req.ToPlanType()),
+				"months":      months,
+				"is_upcoming": true, // Flag to indicate this is a scheduled subscription
+			},
+		}
+
+		pref, err := uc.mpService.CreateCheckoutPreference(ctx, mpReq)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create scheduled subscription checkout: %w", err)
+		}
+
+		checkoutURL = pref.InitPoint
+		providerID = paymentEntity.ID.String()
+	} else {
+		// IMMEDIATE SUBSCRIPTION: Create Mercado Pago Preapproval (recurring)
+		subReq := &mercadopagoservice.SubscriptionRequest{
+			Title:         title,
+			Description:   description,
+			Price:         finalAmount.InexactFloat64(),
+			Frequency:     frequency,
+			FrequencyType: frequencyType,
+			ExternalRef:   externalRef,
+			PayerEmail:    company.Email,
+			BackURL:       uc.mpService.SuccessURL(),
+		}
+
+		subResp, err := uc.mpService.CreateSubscription(ctx, subReq)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create subscription: %w", err)
+		}
+
+		checkoutURL = subResp.InitPoint
+		providerID = subResp.ID
+	}
+
 	payment := &companyentity.CompanyPayment{
 		Entity:            paymentEntity,
 		CompanyID:         company.ID,
 		Provider:          mercadoPagoProvider,
-		ProviderPaymentID: subResp.ID,
-		PreapprovalID:     subResp.ID, // Store Preapproval ID separately
+		ProviderPaymentID: providerID,
+		PreapprovalID: func() string {
+			if hasActiveSubscription {
+				return ""
+			} else {
+				return providerID
+			}
+		}(),
 		Status:            companyentity.PaymentStatusPending,
 		Currency:          "BRL",
 		Amount:            finalAmount,
 		Months:            months,
 		PlanType:          companyentity.PlanType(req.ToPlanType()),
-		PaymentURL:        subResp.InitPoint,
-		ExternalReference: externalRef,
+		PaymentURL:        checkoutURL,
+		ExternalReference: externalRef, // Always use SUB: format so frontend detects as "Assinatura"
 		ExpiresAt:         func() *time.Time { t := time.Now().AddDate(0, 0, 5); return &t }(),
 		IsMandatory:       false,
 	}
@@ -158,7 +203,7 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 
 	return &billingdto.CheckoutResponseDTO{
 		PaymentID:   payment.ID.String(),
-		CheckoutUrl: subResp.InitPoint,
+		CheckoutUrl: checkoutURL,
 	}, nil
 }
 
@@ -322,15 +367,27 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 	// We check metadata first (new flow) or fallback to CompanyPayment.Months (legacy/redundant)
 	planType := details.Metadata.PlanType
 	months := details.Metadata.Months
+	isUpcoming := details.Metadata.IsUpcoming
 
 	if planType != "" && months > 0 {
-		base := paidAt
-		if companyModel.SubscriptionExpiresAt != nil && companyModel.SubscriptionExpiresAt.After(paidAt) {
-			base = *companyModel.SubscriptionExpiresAt
-		}
+		var startDate, endDate time.Time
 
-		startDate := base
-		endDate := base.AddDate(0, months, 0)
+		if isUpcoming {
+			// SCHEDULED SUBSCRIPTION: Start after current subscription expires
+			if companyModel.SubscriptionExpiresAt == nil {
+				return fmt.Errorf("cannot create scheduled subscription without active subscription")
+			}
+			startDate = companyModel.SubscriptionExpiresAt.AddDate(0, 0, 1) // Start day after expiration
+			endDate = startDate.AddDate(0, months, 0)
+		} else {
+			// IMMEDIATE SUBSCRIPTION: Extend from current expiration or start now
+			base := paidAt
+			if companyModel.SubscriptionExpiresAt != nil && companyModel.SubscriptionExpiresAt.After(paidAt) {
+				base = *companyModel.SubscriptionExpiresAt
+			}
+			startDate = base
+			endDate = base.AddDate(0, months, 0)
+		}
 
 		// Create Subscription Record
 		sub := companyentity.NewCompanySubscription(companyModel.ID, companyentity.PlanType(planType), startDate, endDate)
@@ -343,10 +400,13 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 			return err
 		}
 
-		// Update Company Current Plan Snapshot
-		if err := s.companyRepo.UpdateCompanySubscription(ctx, companyModel.ID, companyModel.SchemaName, &endDate, planType); err != nil {
-			return err
+		// Update Company Current Plan Snapshot ONLY if not upcoming
+		if !isUpcoming {
+			if err := s.companyRepo.UpdateCompanySubscription(ctx, companyModel.ID, companyModel.SchemaName, &endDate, planType); err != nil {
+				return err
+			}
 		}
+		// If isUpcoming, we DON'T update company's current plan - it stays as-is until the scheduled time
 	}
 
 	// Update Payment
@@ -798,15 +858,14 @@ func (uc *CheckoutUseCase) CancelSubscription(ctx context.Context, companyID uui
 		return fmt.Errorf("subscription has no preapproval ID")
 	}
 
-	// Cancel the subscription at Mercado Pago
+	// Cancel the subscription (Preapproval) at Mercado Pago - stops future renewals
 	if err := uc.mpService.CancelSubscription(ctx, payment.PreapprovalID); err != nil {
 		return fmt.Errorf("failed to cancel subscription at Mercado Pago: %w", err)
 	}
 
-	// Cancel the pending payment in our system
-	payment.Status = string(companyentity.PaymentStatusCancelled)
-	if err := uc.companyPaymentRepo.UpdateCompanyPayment(ctx, payment); err != nil {
-		return fmt.Errorf("failed to update payment status: %w", err)
+	// Mark the active subscription as canceled directly (no fetch needed)
+	if err := uc.companyRepo.MarkActiveSubscriptionAsCanceled(ctx, companyID); err != nil {
+		return fmt.Errorf("failed to mark subscription as canceled: %w", err)
 	}
 
 	return nil

@@ -13,25 +13,27 @@ type CompanySubscription struct {
 	entitymodel.Entity
 	bun.BaseModel `bun:"table:company_subscriptions"`
 
-	CompanyID uuid.UUID              `bun:"company_id,type:uuid,notnull"`
-	Company   *Company               `bun:"rel:belongs-to,join:company_id=id"`
-	PaymentID *uuid.UUID             `bun:"payment_id,type:uuid"` // Nullable
-	Payment   *CompanyPayment        `bun:"rel:belongs-to,join:payment_id=id"`
-	PlanType  companyentity.PlanType `bun:"plan_type,notnull"`
-	StartDate time.Time              `bun:"start_date,notnull"`
-	EndDate   time.Time              `bun:"end_date,notnull"`
-	IsActive  bool                   `bun:"is_active,notnull"`
+	CompanyID  uuid.UUID              `bun:"company_id,type:uuid,notnull"`
+	Company    *Company               `bun:"rel:belongs-to,join:company_id=id"`
+	PaymentID  *uuid.UUID             `bun:"payment_id,type:uuid"` // Nullable
+	Payment    *CompanyPayment        `bun:"rel:belongs-to,join:payment_id=id"`
+	PlanType   companyentity.PlanType `bun:"plan_type,notnull"`
+	StartDate  time.Time              `bun:"start_date,notnull"`
+	EndDate    time.Time              `bun:"end_date,notnull"`
+	IsActive   bool                   `bun:"is_active,notnull"`
+	IsCanceled bool                   `bun:"is_canceled,notnull,default:false"` // Renewal cancelled in MP
 }
 
 func (c *CompanySubscription) ToDomain() *companyentity.CompanySubscription {
 	return &companyentity.CompanySubscription{
-		Entity:    c.Entity.ToDomain(),
-		CompanyID: c.CompanyID,
-		PaymentID: c.PaymentID,
-		PlanType:  c.PlanType,
-		StartDate: c.StartDate,
-		EndDate:   c.EndDate,
-		IsActive:  c.IsActive,
+		Entity:     c.Entity.ToDomain(),
+		CompanyID:  c.CompanyID,
+		PaymentID:  c.PaymentID,
+		PlanType:   c.PlanType,
+		StartDate:  c.StartDate,
+		EndDate:    c.EndDate,
+		IsActive:   c.IsActive,
+		IsCanceled: c.IsCanceled,
 	}
 }
 
@@ -43,4 +45,5 @@ func (c *CompanySubscription) FromDomain(entity *companyentity.CompanySubscripti
 	c.StartDate = entity.StartDate
 	c.EndDate = entity.EndDate
 	c.IsActive = entity.IsActive
+	c.IsCanceled = entity.IsCanceled
 }

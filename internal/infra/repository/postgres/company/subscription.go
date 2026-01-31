@@ -2,6 +2,7 @@ package companyrepositorybun
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,6 +21,55 @@ func (r *CompanyRepositoryBun) CreateSubscription(ctx context.Context, subscript
 
 	if _, err := tx.NewInsert().Model(subscription).Exec(ctx); err != nil {
 		return err
+	}
+
+	return tx.Commit()
+}
+
+func (r *CompanyRepositoryBun) UpdateSubscription(ctx context.Context, subscription *model.CompanySubscription) error {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	if _, err := tx.NewUpdate().
+		Model(subscription).
+		Where("id = ?", subscription.ID).
+		Exec(ctx); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (r *CompanyRepositoryBun) MarkActiveSubscriptionAsCanceled(ctx context.Context, companyID uuid.UUID) error {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	result, err := tx.NewUpdate().
+		Model((*model.CompanySubscription)(nil)).
+		Set("is_canceled = ?", true).
+		Where("company_id = ?", companyID).
+		Where("is_active = ?", true).
+		Where("start_date <= NOW()"). // Must have already started (not upcoming)
+		Where("end_date > NOW()").    // Must not have expired yet
+		Exec(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf("no active subscription found to cancel")
 	}
 
 	return tx.Commit()

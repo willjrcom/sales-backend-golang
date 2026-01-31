@@ -292,6 +292,14 @@ func (r *CompanyRepositoryLocal) CreateSubscription(ctx context.Context, subscri
 	return nil // Stub
 }
 
+func (r *CompanyRepositoryLocal) UpdateSubscription(ctx context.Context, subscription *model.CompanySubscription) error {
+	return nil // Stub
+}
+
+func (r *CompanyRepositoryLocal) MarkActiveSubscriptionAsCanceled(ctx context.Context, companyID uuid.UUID) error {
+	return nil // Stub
+}
+
 func (r *CompanyRepositoryLocal) GetActiveSubscription(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
 	return nil, nil // Stub
 }

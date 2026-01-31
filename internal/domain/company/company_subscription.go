@@ -18,22 +18,25 @@ const (
 
 type CompanySubscription struct {
 	entity.Entity
-	CompanyID uuid.UUID
-	PaymentID *uuid.UUID // Can be nil for manual grants
-	PlanType  PlanType
-	StartDate time.Time
-	EndDate   time.Time
-	IsActive  bool
+	CompanyID  uuid.UUID
+	PaymentID  *uuid.UUID // Link to the payment that created this subscription
+	PlanType   PlanType
+	StartDate  time.Time
+	EndDate    time.Time
+	IsActive   bool
+	IsCanceled bool // If true, renewal (Preapproval) was cancelled in MercadoPago
 }
 
 func NewCompanySubscription(companyID uuid.UUID, planType PlanType, startDate, endDate time.Time) *CompanySubscription {
+	ent := entity.NewEntity()
 	return &CompanySubscription{
-		Entity:    entity.NewEntity(),
-		CompanyID: companyID,
-		PlanType:  planType,
-		StartDate: startDate,
-		EndDate:   endDate,
-		IsActive:  true,
+		Entity:     ent,
+		CompanyID:  companyID,
+		PlanType:   planType,
+		StartDate:  startDate,
+		EndDate:    endDate,
+		IsActive:   true,
+		IsCanceled: false,
 	}
 }
 
