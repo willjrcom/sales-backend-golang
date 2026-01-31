@@ -1000,8 +1000,10 @@ func getPlanPrice(p domainbilling.PlanType) float64 {
 		return getEnvFloat("PRICE_INTERMEDIATE", 119.90)
 	case domainbilling.PlanAdvanced:
 		return getEnvFloat("PRICE_ADVANCED", 129.90)
-	default:
+	case domainbilling.PlanBasic:
 		return getEnvFloat("PRICE_BASIC", 99.90)
+	default:
+		return 0
 	}
 }
 
