@@ -220,6 +220,25 @@ func (r *CompanyPaymentRepositoryBun) GetPendingPaymentByExternalReference(ctx c
 	return payment, nil
 }
 
+func (r *CompanyPaymentRepositoryBun) GetLastApprovedPaymentByExternalReferencePrefix(ctx context.Context, externalReferencePrefix string) (*model.CompanyPayment, error) {
+	payment := &model.CompanyPayment{}
+	err := r.db.NewSelect().
+		Model(payment).
+		Where("external_reference LIKE ?", externalReferencePrefix+"%").
+		WhereGroup(" AND ", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Where("status = ?", "approved").
+				WhereOr("status = ?", "paid")
+		}).
+		Order("created_at DESC").
+		Limit(1).
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	return payment, nil
+}
+
 func (r *CompanyPaymentRepositoryBun) GetLastPaymentByExternalReferencePrefix(ctx context.Context, externalReferencePrefix string) (*model.CompanyPayment, error) {
 	payment := &model.CompanyPayment{}
 	err := r.db.NewSelect().

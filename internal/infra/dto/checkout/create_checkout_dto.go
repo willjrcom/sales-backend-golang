@@ -1,6 +1,8 @@
 package billingdto
 
 import (
+	"strings"
+
 	"github.com/google/uuid"
 	domainbilling "github.com/willjrcom/sales-backend-go/internal/domain/checkout"
 )
@@ -17,7 +19,7 @@ type CheckoutResponseDTO struct {
 }
 
 func (c *CreateCheckoutDTO) ToPlanType() domainbilling.PlanType {
-	switch c.Plan {
+	switch strings.ToUpper(c.Plan) {
 	case "INTERMEDIATE":
 		return domainbilling.PlanIntermediate
 	case "ADVANCED":
@@ -28,7 +30,7 @@ func (c *CreateCheckoutDTO) ToPlanType() domainbilling.PlanType {
 }
 
 func (c *CreateCheckoutDTO) ToPeriodicity() domainbilling.Periodicity {
-	switch c.Periodicity {
+	switch strings.ToUpper(c.Periodicity) {
 	case "SEMIANNUAL":
 		return domainbilling.PeriodicitySemiannual
 	case "ANNUAL":

@@ -43,6 +43,23 @@ func (s *Service) GetSubscriptionStatus(ctx context.Context) (*companydto.Subscr
 		// upcoming subscription is optional information
 	}
 
+	// Determine Periodicity from active subscription
+	// External reference format: SUB:<CompanyID>:<PlanType>:<Months>
+	externalRef := "SUB:" + company.ID.String() + ":"
+	activeSub, err := s.companyPaymentRepo.GetLastApprovedPaymentByExternalReferencePrefix(ctx, externalRef)
+	if err == nil && activeSub != nil {
+		switch activeSub.Months {
+		case 6:
+			dto.Periodicity = "SEMIANNUAL"
+		case 12:
+			dto.Periodicity = "ANNUAL"
+		default:
+			dto.Periodicity = "MONTHLY"
+		}
+	} else {
+		dto.Periodicity = "MONTHLY"
+	}
+
 	// Check if company has an active subscription that can be cancelled
 	// This means finding a pending payment with SUB:<companyID>: reference
 	dto.CanCancelRenewal = false

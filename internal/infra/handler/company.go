@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 
+	billingentity "github.com/willjrcom/sales-backend-go/internal/domain/checkout"
 	billingdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/checkout"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/scheduler"
@@ -310,6 +311,51 @@ func (h *handlerCompanyImpl) handlerGetSubscriptionStatus(w http.ResponseWriter,
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
+	companyID, err := h.s.GetCompany(ctx)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	// Populate Available Plans
+	plans := billingentity.GetAllPlans()
+	dtoPlans := make([]companydto.PlanDTO, len(plans))
+
+	// Map current plan order
+	currentPlanKey := status.CurrentPlan
+	var currentOrder int
+	for _, p := range plans {
+		if string(p.Key) == currentPlanKey {
+			currentOrder = p.Order
+			break
+		}
+	}
+
+	for i, p := range plans {
+		isUpgrade := p.Order > currentOrder
+		var upgradePrice *float64
+
+		// Calculate upgrade price if applicable (only if user has paid plan and it is an upgrade)
+		if isUpgrade && currentOrder > 0 {
+			// GetCompany above returns ID, we use it here
+			if sim, err := h.checkoutUC.CalculateUpgradeProration(ctx, companyID.ID, p.Key); err == nil {
+				upgradePrice = &sim.UpgradeAmount
+			}
+		}
+
+		dtoPlans[i] = companydto.PlanDTO{
+			Key:          string(p.Key),
+			Name:         p.Name,
+			Price:        p.Price,
+			Features:     p.Features,
+			Order:        p.Order,
+			IsCurrent:    string(p.Key) == currentPlanKey,
+			IsUpgrade:    isUpgrade,
+			UpgradePrice: upgradePrice,
+		}
+	}
+	status.AvailablePlans = dtoPlans
+
 	jsonpkg.ResponseJson(w, r, http.StatusOK, status)
 }
 
