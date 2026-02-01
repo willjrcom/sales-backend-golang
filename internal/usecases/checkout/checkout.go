@@ -907,9 +907,17 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, compan
 		return nil, errors.New("target plan is same as current plan")
 	}
 
-	// Prices
-	currentPrice := getPlanPrice(currentPlan)
-	targetPrice := getPlanPrice(targetPlan)
+	// Get current subscription to determine periodicity (months)
+	subRefPrefix := fmt.Sprintf("SUB:%s:", companyID.String())
+	currentSubscription, err := uc.companyPaymentRepo.GetLastPaymentByExternalReferencePrefix(ctx, subRefPrefix)
+	months := 1 // Default to monthly if no subscription found
+	if err == nil && currentSubscription != nil && currentSubscription.Months > 0 {
+		months = currentSubscription.Months
+	}
+
+	// Prices with discount applied based on periodicity
+	currentPrice := getPlanPriceWithDiscount(currentPlan, months)
+	targetPrice := getPlanPriceWithDiscount(targetPlan, months)
 
 	if targetPrice <= currentPrice {
 		return nil, errors.New("target plan must be higher value (downgrade not supported via this flow)")
@@ -1063,6 +1071,26 @@ func getPlanPrice(p domainbilling.PlanType) float64 {
 	default:
 		return 0
 	}
+}
+
+// getPlanPriceWithDiscount returns the plan price with discount applied based on periodicity
+func getPlanPriceWithDiscount(p domainbilling.PlanType, months int) float64 {
+	basePrice := getPlanPrice(p)
+	if basePrice == 0 {
+		return 0
+	}
+
+	// Apply discount based on periodicity
+	var discountPercent float64
+	if months >= 12 {
+		// Annual discount
+		discountPercent = getEnvFloat("DISCOUNT_ANNUAL_PERCENT", 10)
+	} else if months >= 6 {
+		// Semester discount
+		discountPercent = getEnvFloat("DISCOUNT_SEMESTER_PERCENT", 5)
+	}
+
+	return basePrice * (1 - discountPercent/100)
 }
 
 func checkoutPaymentEntity() entity.Entity {
