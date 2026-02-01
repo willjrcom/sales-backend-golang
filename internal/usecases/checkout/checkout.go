@@ -104,6 +104,12 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		frequency = 1
 	}
 
+	// DEBUG: Force daily frequency for testing if env set
+	if os.Getenv("DEBUG_FAST_SUBSCRIPTION") == "true" {
+		frequency = 1
+		frequencyType = "days"
+	}
+
 	totalAmount := basePrice.Mul(decimal.NewFromInt(int64(months)))
 	finalAmount := totalAmount.Mul(decimal.NewFromFloat(1.0 - discount))
 
