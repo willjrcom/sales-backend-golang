@@ -22,14 +22,14 @@ import (
 
 // Test FormatOrder starts and ends with correct control codes.
 func Test_FormatOrder(t *testing.T) {
-	now := time.Now()
+	now := time.Now().UTC()
 	decimalValue := decimal.NewFromFloat(10.00)
 
 	o := &orderentity.Order{
 		Entity: entity.Entity{
 			ID:        uuid.New(),
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
 		},
 		OrderCommonAttributes: orderentity.OrderCommonAttributes{
 			OrderNumber: 1,

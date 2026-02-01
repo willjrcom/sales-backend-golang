@@ -127,7 +127,6 @@ func (r *CompanyPaymentRepositoryBun) ListCompanyPayments(ctx context.Context, c
 	}
 
 	if err := qList.
-		Order("paid_at DESC").
 		Order("created_at DESC").
 		Limit(perPage).
 		Offset(page * perPage).
@@ -292,7 +291,7 @@ func (r *CompanyPaymentRepositoryBun) ListExpiredOptionalPayments(ctx context.Co
 		Model(&payments).
 		Where("status = ?", "pending").
 		Where("is_mandatory = ?", false).
-		Where("expires_at < ?", time.Now()).
+		Where("expires_at < ?", time.Now().UTC()).
 		Scan(ctx); err != nil {
 		return nil, err
 	}

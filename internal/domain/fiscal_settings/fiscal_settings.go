@@ -83,16 +83,16 @@ func (f *FiscalSettings) Update(
 	f.CSCProductionCode = cscProductionCode
 	f.CSCHomologationID = cscHomologationID
 	f.CSCHomologationCode = cscHomologationCode
-	f.UpdatedAt = time.Now()
+	f.UpdatedAt = time.Now().UTC()
 }
 
 func (f *FiscalSettings) SetCompanyRegistryID(id int64) {
 	f.CompanyRegistryID = id
-	f.UpdatedAt = time.Now()
+	f.UpdatedAt = time.Now().UTC()
 }
 
 func (f *FiscalSettings) SetTokens(production, homologation string) {
 	f.TokenProduction = production
 	f.TokenHomologation = homologation
-	f.UpdatedAt = time.Now()
+	f.UpdatedAt = time.Now().UTC()
 }

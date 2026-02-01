@@ -48,12 +48,12 @@ func (f *FiscalInvoice) FromDomain(invoice *fiscalinvoice.FiscalInvoice) {
 	}
 
 	if invoice.IsAuthorized() && f.EmittedAt == nil {
-		now := time.Now()
+		now := time.Now().UTC()
 		f.EmittedAt = &now
 	}
 
 	if invoice.IsCancelled() && f.CancelledAt == nil {
-		now := time.Now()
+		now := time.Now().UTC()
 		f.CancelledAt = &now
 	}
 }

@@ -51,7 +51,7 @@ func (s *DailyScheduler) UpdateCompanyPlans(ctx context.Context) error {
 
 func (s *DailyScheduler) CheckOverdueAccounts(ctx context.Context) {
 	// 1. Block companies with overdue payments (> 5 days)
-	cutoffDate := time.Now().AddDate(0, 0, -5)
+	cutoffDate := time.Now().UTC().AddDate(0, 0, -5)
 	overduePayments, err := s.companyPaymentRepo.ListOverduePayments(ctx, cutoffDate)
 	if err == nil {
 		for _, payment := range overduePayments {
@@ -75,7 +75,7 @@ func (s *DailyScheduler) CheckOverdueAccounts(ctx context.Context) {
 
 func (s *DailyScheduler) ProcessCostsToPay(ctx context.Context) {
 	// Calculate target date (10 days from now)
-	targetDate := time.Now().AddDate(0, 0, 10)
+	targetDate := time.Now().UTC().AddDate(0, 0, 10)
 	targetDay := targetDate.Day()
 
 	daysProcessing := []int{targetDay}

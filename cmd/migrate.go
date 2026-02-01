@@ -240,7 +240,7 @@ func recordMigration(ctx context.Context, db *bun.DB, schemaName, migrationName 
 		INSERT INTO public.schema_migrations (schema_name, migration_name, applied_at)
 		VALUES (?, ?, ?)
 		ON CONFLICT (schema_name, migration_name) DO NOTHING
-	`, schemaName, migrationName, time.Now())
+	`, schemaName, migrationName, time.Now().UTC())
 	return err
 }
 

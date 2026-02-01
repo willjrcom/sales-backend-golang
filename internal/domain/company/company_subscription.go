@@ -41,5 +41,5 @@ func NewCompanySubscription(companyID uuid.UUID, planType PlanType, startDate, e
 }
 
 func (c *CompanySubscription) IsExpired() bool {
-	return time.Now().After(c.EndDate)
+	return time.Now().UTC().After(c.EndDate)
 }

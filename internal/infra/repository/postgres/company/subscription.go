@@ -89,7 +89,7 @@ func (r *CompanyRepositoryBun) GetActiveSubscription(ctx context.Context, compan
 		Model(subscription).
 		Where("company_id = ?", companyID).
 		Where("is_active = ?", true).
-		Where("end_date > ?", time.Now()).
+		Where("end_date > ?", time.Now().UTC()).
 		Order("end_date DESC").
 		Limit(1).
 		Scan(ctx); err != nil {
@@ -113,7 +113,7 @@ func (r *CompanyRepositoryBun) GetUpcomingSubscription(ctx context.Context, comp
 		Model(subscription).
 		Where("company_id = ?", companyID).
 		Where("is_active = ?", true).
-		Where("start_date > ?", time.Now()).
+		Where("start_date > ?", time.Now().UTC()).
 		Order("start_date ASC").
 		Limit(1).
 		Scan(ctx); err != nil {

@@ -136,11 +136,11 @@ func (s *Service) UpdateCompany(ctx context.Context, dto *companydto.CompanyUpda
 		// Check 3-month restriction
 		if company.MonthlyPaymentDueDayUpdatedAt != nil {
 			nextAllowedUpdate := company.MonthlyPaymentDueDayUpdatedAt.AddDate(0, 3, 0)
-			if time.Now().Before(nextAllowedUpdate) {
+			if time.Now().UTC().Before(nextAllowedUpdate) {
 				return errors.New("payment due day can only be changed every 3 months")
 			}
 		}
-		now := time.Now()
+		now := time.Now().UTC()
 		company.MonthlyPaymentDueDayUpdatedAt = &now
 	}
 

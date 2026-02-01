@@ -65,9 +65,9 @@ func handlerGeneratePresignedURL(w http.ResponseWriter, r *http.Request) {
 	// Generate unique key with schema_name in the path
 	var key string
 	if req.SchemaName != "" {
-		key = fmt.Sprintf("images/%s/%d-%s", req.SchemaName, time.Now().Unix(), req.Filename)
+		key = fmt.Sprintf("images/%s/%d-%s", req.SchemaName, time.Now().UTC().Unix(), req.Filename)
 	} else {
-		key = fmt.Sprintf("images/public/%d-%s", time.Now().Unix(), req.Filename)
+		key = fmt.Sprintf("images/public/%d-%s", time.Now().UTC().Unix(), req.Filename)
 	}
 
 	// Create presigned URL
@@ -121,9 +121,9 @@ func handlerUploadImage(w http.ResponseWriter, r *http.Request) {
 	sanitizedName := filename
 	key := ""
 	if schemaName != "" {
-		key = fmt.Sprintf("images/%s/%d-%s", schemaName, time.Now().Unix(), sanitizedName)
+		key = fmt.Sprintf("images/%s/%d-%s", schemaName, time.Now().UTC().Unix(), sanitizedName)
 	} else {
-		key = fmt.Sprintf("images/public/%d-%s", time.Now().Unix(), sanitizedName)
+		key = fmt.Sprintf("images/public/%d-%s", time.Now().UTC().Unix(), sanitizedName)
 	}
 
 	// Carrega config AWS

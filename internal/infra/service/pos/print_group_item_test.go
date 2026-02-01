@@ -12,7 +12,7 @@ import (
 )
 
 func Test_FormatGroupItem(t *testing.T) {
-	now := time.Now()
+	now := time.Now().UTC()
 	groupItem := orderentity.GroupItem{
 		GroupCommonAttributes: orderentity.GroupCommonAttributes{
 			Items: []orderentity.Item{

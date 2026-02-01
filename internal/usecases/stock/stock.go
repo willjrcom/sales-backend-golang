@@ -287,7 +287,7 @@ func (s *Service) ResolveAlert(ctx context.Context, alertID string) error {
 	}
 
 	alert.IsResolved = true
-	now := time.Now()
+	now := time.Now().UTC()
 	alert.ResolvedAt = &now
 
 	return s.stockAlertRepo.UpdateAlert(ctx, alert)
@@ -382,7 +382,7 @@ func (s *Service) GetStockReport(ctx context.Context, page, perPage int) (*stock
 		LowStockProducts:   lowStockDTOs,
 		OutOfStockProducts: outOfStockDTOs,
 		ActiveAlerts:       alertDTOs,
-		GeneratedAt:        time.Now(),
+		GeneratedAt:        time.Now().UTC(),
 	}
 
 	return report, count, nil

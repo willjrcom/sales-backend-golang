@@ -60,7 +60,7 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 	}
 
 	// Check if user has active subscription
-	hasActiveSubscription := company.SubscriptionExpiresAt != nil && company.SubscriptionExpiresAt.After(time.Now())
+	hasActiveSubscription := company.SubscriptionExpiresAt != nil && company.SubscriptionExpiresAt.After(time.Now().UTC())
 
 	if hasActiveSubscription {
 		// User has active subscription - will create UPCOMING/SCHEDULED subscription
@@ -190,7 +190,7 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		PlanType:          companyentity.PlanType(req.ToPlanType()),
 		PaymentURL:        checkoutURL,
 		ExternalReference: externalRef, // Always use SUB: format so frontend detects as "Assinatura"
-		ExpiresAt:         func() *time.Time { t := time.Now().AddDate(0, 0, 5); return &t }(),
+		ExpiresAt:         func() *time.Time { t := time.Now().UTC().AddDate(0, 0, 5); return &t }(),
 		IsMandatory:       false,
 	}
 
@@ -571,7 +571,7 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 	// 4. Attempt to unblock company if there are no more OVERDUE (> 5 days) mandatory payments
 	if companyModel.IsBlocked {
 		// Use same cutoff logic as Scheduler: payments overdue by more than 5 days
-		cutoffDate := time.Now().AddDate(0, 0, -5)
+		cutoffDate := time.Now().UTC().AddDate(0, 0, -5)
 		overdue, err := s.companyPaymentRepo.ListOverduePaymentsByCompany(ctx, companyModel.ID, cutoffDate)
 		if err == nil && len(overdue) == 0 {
 			_ = s.companyRepo.UpdateBlockStatus(ctx, companyModel.ID, false)
@@ -658,7 +658,7 @@ func (uc *CheckoutUseCase) CreateCostCheckout(ctx context.Context, companyID uui
 		ProviderPaymentID: paymentEntity.ID.String(),
 		PaymentURL:        pref.InitPoint,
 		ExternalReference: paymentEntity.ID.String(),
-		ExpiresAt:         func() *time.Time { t := time.Now().AddDate(0, 0, 5); return &t }(),
+		ExpiresAt:         func() *time.Time { t := time.Now().UTC().AddDate(0, 0, 5); return &t }(),
 		IsMandatory:       false,
 	}
 
@@ -705,7 +705,7 @@ func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, compa
 	}
 
 	// Determine expiration date
-	now := time.Now()
+	now := time.Now().UTC()
 	dueDay := company.MonthlyPaymentDueDay
 	if dueDay == 0 {
 		dueDay = getEnvInt("MONTHLY_PAYMENT_DUE_DAY", 10)
@@ -925,7 +925,7 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, compan
 
 	// Calculate remaining days
 	daysRemaining := 0
-	if company.SubscriptionExpiresAt != nil && company.SubscriptionExpiresAt.After(time.Now()) {
+	if company.SubscriptionExpiresAt != nil && company.SubscriptionExpiresAt.After(time.Now().UTC()) {
 		daysRemaining = int(time.Until(*company.SubscriptionExpiresAt).Hours() / 24)
 	}
 	isFullRenewal := false
@@ -967,38 +967,12 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, companyID 
 		return nil, err
 	}
 
-	// Determine Cost Type based on Target Plan
-	var costType companyentity.CostType
-	switch targetPlan {
-	case domainbilling.PlanIntermediate:
-		costType = companyentity.CostTypeUpgradeIntermediate
-	case domainbilling.PlanAdvanced:
-		costType = companyentity.CostTypeUpgradeAdvanced
-	default:
-		return nil, errors.New("invalid target plan for upgrade")
-	}
-
-	// Create Usage Cost for the Upgrade
 	amount := decimal.NewFromFloat(sim.UpgradeAmount)
-	costEntity := entity.NewEntity()
-	cost := &companyentity.CompanyUsageCost{
-		Entity:      costEntity,
-		CompanyID:   companyID,
-		CostType:    companyentity.CostType(costType),
-		Amount:      amount,
-		Description: fmt.Sprintf("Upgrade para plano %s (%d dias restantes)", translatePlanType(targetPlan), sim.DaysRemaining),
-		Status:      "PENDING",
-	}
+	description := fmt.Sprintf("Upgrade para plano %s (%d dias restantes)", translatePlanType(targetPlan), sim.DaysRemaining)
 
-	costModel := &model.CompanyUsageCost{}
-	costModel.FromDomain(cost)
-	if err := uc.costRepo.Create(ctx, costModel); err != nil {
-		return nil, fmt.Errorf("failed to create upgrade cost: %w", err)
-	}
-
-	// Create Checkout for this single cost
+	// Create Checkout Item
 	checkoutItem := mercadopagoservice.NewCheckoutItem(
-		cost.Description,
+		description,
 		"Upgrade de Plano",
 		1,
 		amount.InexactFloat64(),
@@ -1011,10 +985,8 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, companyID 
 		Schema:            company.SchemaName,
 		Item:              checkoutItem,
 		ExternalReference: paymentEntity.ID.String(),
-		// We can add metadata to track plan update intent
 		Metadata: map[string]interface{}{
 			"upgrade_target_plan": string(targetPlan),
-			"cost_id":             cost.ID.String(),
 			"is_full_renewal":     sim.IsFullRenewal,
 		},
 	}
@@ -1036,23 +1008,23 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, companyID 
 		ProviderPaymentID: paymentEntity.ID.String(),
 		PaymentURL:        pref.InitPoint,
 		ExternalReference: paymentEntity.ID.String(), // Payment ID
-		ExpiresAt:         func() *time.Time { t := time.Now().AddDate(0, 0, 2); return &t }(),
+		ExpiresAt:         func() *time.Time { t := time.Now().UTC().AddDate(0, 0, 2); return &t }(),
 		IsMandatory:       false,
-		Description:       cost.Description,
-		PlanType:          companyentity.PlanType(targetPlan), // Track the target plan here too
+		Description:       description,
+		PlanType:          companyentity.PlanType(targetPlan), // Track the target plan
 	}
 
 	paymentModel := &model.CompanyPayment{}
 	paymentModel.FromDomain(payment)
 
+	fmt.Printf("DEBUG: Creating upgrade payment for company %s, amount: %v, plan: %s\n", company.ID, amount, targetPlan)
+
 	if err := uc.companyPaymentRepo.CreateCompanyPayment(ctx, paymentModel); err != nil {
+		fmt.Printf("ERROR: Failed to create payment: %v\n", err)
 		return nil, fmt.Errorf("failed to create payment: %w", err)
 	}
 
-	// Link cost to Payment
-	if err := uc.costRepo.UpdateCostsPaymentID(ctx, []uuid.UUID{cost.ID}, payment.ID); err != nil {
-		return nil, fmt.Errorf("failed to link cost to payment: %w", err)
-	}
+	fmt.Printf("DEBUG: Payment created successfully with ID: %s\n", payment.ID)
 
 	return &billingdto.CheckoutResponseDTO{
 		PaymentID:   payment.ID.String(),

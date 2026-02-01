@@ -165,7 +165,7 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 
 	nfceRequest := &focusnfe.NFCeRequest{
 		NaturezaOperacao:  "Venda ao Consumidor",
-		DataEmissao:       time.Now().Format("2006-01-02T15:04:05-07:00"),
+		DataEmissao:       time.Now().UTC().Format("2006-01-02T15:04:05-07:00"),
 		Itens:             nfceItems,
 		FormasPagamento:   formasPagamento,
 		Numero:            fmt.Sprintf("%d", number),
