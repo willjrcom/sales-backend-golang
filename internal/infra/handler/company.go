@@ -251,13 +251,31 @@ func (h *handlerCompanyImpl) handlerGetMonthlyCosts(w http.ResponseWriter, r *ht
 func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	fmt.Printf("========== MERCADO PAGO WEBHOOK RECEIVED ==========\n")
+	fmt.Printf("Method: %s\n", r.Method)
+	fmt.Printf("URL: %s\n", r.URL.String())
+	fmt.Printf("Headers:\n")
+	for name, values := range r.Header {
+		for _, value := range values {
+			fmt.Printf("  %s: %s\n", name, value)
+		}
+	}
+
 	dto := &companydto.MercadoPagoWebhookDTO{}
 	// Parse body manually or use helper. The payload from MP matches the DTO
 	if err := jsonpkg.ParseBody(r, dto); err != nil {
 		// Log error but MP might retry
+		fmt.Printf("ERROR: Failed to parse webhook body: %v\n", err)
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
+
+	fmt.Printf("Webhook Type: %s\n", dto.Type)
+	fmt.Printf("Action: %s\n", dto.Action)
+	if dto.Data.ID != "" {
+		fmt.Printf("Data.ID: %s\n", dto.Data.ID)
+	}
+	fmt.Printf("Query data.id: %s\n", r.URL.Query().Get("data.id"))
 
 	// Extract headers for signature validation details
 	// x-signature: ...
@@ -266,14 +284,22 @@ func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r 
 	dto.XRequestID = r.Header.Get("x-request-id")
 	dto.DataIDFromQuery = r.URL.Query().Get("data.id")
 
+	fmt.Printf("XSignature: %s\n", dto.XSignature)
+	fmt.Printf("XRequestID: %s\n", dto.XRequestID)
+
+	fmt.Printf("Processing webhook...\n")
 	if err := h.checkoutUC.HandleMercadoPagoWebhook(ctx, dto); err != nil {
 		if err == billingusecases.ErrInvalidWebhookSecret {
+			fmt.Printf("ERROR: Invalid webhook secret\n")
 			jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 			return
 		}
+		fmt.Printf("ERROR: Failed to handle webhook: %v\n", err)
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
+
+	fmt.Printf("========== WEBHOOK PROCESSED SUCCESSFULLY ==========\n")
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, map[string]string{"status": "ok"})
 }
