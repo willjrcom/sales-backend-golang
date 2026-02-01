@@ -51,22 +51,13 @@ func (r *CompanyRepositoryLocal) UpdateCompany(ctx context.Context, company *mod
 	return nil
 }
 
-func (r *CompanyRepositoryLocal) GetCompany(ctx context.Context) (*model.Company, error) {
+func (r *CompanyRepositoryLocal) GetCompany(ctx context.Context, withouRelations ...bool) (*model.Company, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	for _, c := range r.companies {
 		return c, nil // return first company found
 	}
 	return nil, errors.New("no company found")
-}
-
-func (r *CompanyRepositoryLocal) GetCompanyOnlyByID(ctx context.Context, id uuid.UUID) (*model.Company, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-	if company, ok := r.companies[id]; ok {
-		return company, nil
-	}
-	return nil, fmt.Errorf("company %s not found", id)
 }
 
 func (r *CompanyRepositoryLocal) ListPublicCompanies(ctx context.Context) ([]model.Company, error) {

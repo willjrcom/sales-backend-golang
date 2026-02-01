@@ -10,8 +10,7 @@ import (
 type CompanyRepository interface {
 	NewCompany(ctx context.Context, company *Company) error
 	UpdateCompany(ctx context.Context, company *Company) error
-	GetCompany(ctx context.Context) (*Company, error)
-	GetCompanyOnlyByID(ctx context.Context, id uuid.UUID) (*Company, error)
+	GetCompany(ctx context.Context, withoutRelations ...bool) (*Company, error)
 	ListPublicCompanies(ctx context.Context) ([]Company, error)
 	ListCompaniesForBilling(ctx context.Context) ([]Company, error)
 	ListCompaniesByPaymentDueDay(ctx context.Context, day int) ([]Company, error)

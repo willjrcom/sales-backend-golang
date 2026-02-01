@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 
-	billingentity "github.com/willjrcom/sales-backend-go/internal/domain/checkout"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	billingdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/checkout"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/scheduler"
@@ -44,23 +44,26 @@ func NewHandlerCompany(companyService *companyusecases.Service, checkoutUC *bill
 		// Users
 		c.Post("/add/user", h.handlerAddUserToCompany)
 		c.Post("/remove/user", h.handlerRemoveUserFromCompany)
-		c.Get("/users", h.handlerGetCompanyUsers)
+		c.Get("/user", h.handlerGetCompanyUsers)
 
 		// Checkout
-		c.Post("/checkout/subscription", h.handlerCheckoutCreateSubscription)
-		c.Post("/checkout/costs", h.handlerCheckoutCosts)
-		c.Post("/checkout/cancel/{paymentID}", h.handlerCancelPayment)
-		c.Get("/payments", h.handlerListCompanyPayments)
-		c.Get("/costs/monthly", h.handlerGetMonthlyCosts)
-		c.Post("/costs/register", h.handlerCreateCost)
-		c.Post("/payments/mercadopago/webhook", h.handlerMercadoPagoWebhook)
+		c.Post("/payment/cancel/{paymentID}", h.handlerCancelPayment)
+		c.Get("/payment", h.handlerListCompanyPayments)
+		c.Get("/cost/monthly", h.handlerGetMonthlyCosts)
+		c.Post("/cost/register", h.handlerCreateCost)
+
+		// Scheduler
 		c.Post("/billing/scheduler/trigger", h.handlerTriggerMonthlyBilling)
 
 		// Subscription
-		c.Get("/subscription/status", h.handlerGetSubscriptionStatus)
 		c.Post("/subscription/cancel", h.handlerCancelSubscription)
-		c.Get("/subscription/upgrade/simulate", h.handlerSimulateUpgrade)
-		c.Post("/subscription/upgrade/checkout", h.handlerCreateUpgradeCheckout)
+		c.Post("/subscription/checkout", h.handlerCheckoutCreateSubscription)
+		c.Post("/subscription/checkout/upgrade", h.handlerCreateUpgradeCheckout)
+		c.Get("/subscription/simulate/upgrade", h.handlerSimulateUpgrade)
+		c.Get("/subscription/status", h.handlerGetSubscriptionStatus)
+
+		// Webhook
+		c.Post("/payments/mercadopago/webhook", h.handlerMercadoPagoWebhook)
 	})
 
 	return handler.NewHandler("/company", c, "/company/payments/mercadopago/webhook")
@@ -182,31 +185,13 @@ func (h *handlerCompanyImpl) handlerRemoveUserFromCompany(w http.ResponseWriter,
 func (h *handlerCompanyImpl) handlerCheckoutCreateSubscription(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dto := &billingdto.CreateCheckoutDTO{}
+	dto := &billingdto.CreateSubscriptionCheckoutDTO{}
 	if err := jsonpkg.ParseBody(r, dto); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	resp, err := h.checkoutUC.CreateSubscriptionCheckout(ctx, dto)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, resp)
-}
-
-func (h *handlerCompanyImpl) handlerCheckoutCosts(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	companyID, err := h.s.GetCompany(ctx)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	resp, err := h.checkoutUC.CreateCostCheckout(ctx, companyID.ID)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -313,7 +298,7 @@ func (h *handlerCompanyImpl) handlerCancelPayment(w http.ResponseWriter, r *http
 		return
 	}
 
-	if err := h.checkoutUC.CancelPayment(ctx, paymentID); err != nil {
+	if err := h.s.CancelPayment(ctx, paymentID); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
@@ -337,14 +322,9 @@ func (h *handlerCompanyImpl) handlerGetSubscriptionStatus(w http.ResponseWriter,
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
-	companyID, err := h.s.GetCompany(ctx)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-		return
-	}
 
 	// Populate Available Plans
-	plans := billingentity.GetAllPlans()
+	plans := companyentity.GetAllPlans()
 	dtoPlans := make([]companydto.PlanDTO, len(plans))
 
 	// Map current plan order
@@ -364,7 +344,7 @@ func (h *handlerCompanyImpl) handlerGetSubscriptionStatus(w http.ResponseWriter,
 		// Calculate upgrade price if applicable (only if user has paid plan and it is an upgrade)
 		if isUpgrade && currentOrder > 0 {
 			// GetCompany above returns ID, we use it here
-			if sim, err := h.checkoutUC.CalculateUpgradeProration(ctx, companyID.ID, p.Key); err == nil {
+			if sim, err := h.checkoutUC.CalculateUpgradeProration(ctx, p.Key); err == nil {
 				upgradePrice = &sim.UpgradeAmount
 			}
 		}
@@ -410,15 +390,7 @@ func (h *handlerCompanyImpl) handlerSimulateUpgrade(w http.ResponseWriter, r *ht
 		return
 	}
 
-	company, err := h.s.GetCompany(ctx)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	dto := &billingdto.CreateCheckoutDTO{Plan: targetPlan}
-
-	simulation, err := h.checkoutUC.CalculateUpgradeProration(ctx, company.ID, dto.ToPlanType())
+	simulation, err := h.checkoutUC.CalculateUpgradeProration(ctx, companyentity.PlanType(targetPlan))
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
@@ -436,15 +408,7 @@ func (h *handlerCompanyImpl) handlerCreateUpgradeCheckout(w http.ResponseWriter,
 		return
 	}
 
-	company, err := h.s.GetCompany(ctx)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	createDto := &billingdto.CreateCheckoutDTO{Plan: dto.TargetPlan}
-
-	resp, err := h.checkoutUC.CreateUpgradeCheckout(ctx, company.ID, createDto.ToPlanType())
+	resp, err := h.checkoutUC.CreateUpgradeCheckout(ctx, companyentity.PlanType(dto.TargetPlan))
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return

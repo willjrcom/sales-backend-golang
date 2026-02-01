@@ -7,19 +7,22 @@ import (
 
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	billing "github.com/willjrcom/sales-backend-go/internal/usecases/checkout"
+	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 )
 
 type DailyScheduler struct {
 	companyRepo        model.CompanyRepository
 	companyPaymentRepo model.CompanyPaymentRepository
 	checkoutUseCase    *billing.CheckoutUseCase
+	companyUseCase     *companyusecases.Service
 }
 
-func NewDailyScheduler(companyRepo model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository, checkoutUseCase *billing.CheckoutUseCase) *DailyScheduler {
+func NewDailyScheduler(companyRepo model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository, checkoutUseCase *billing.CheckoutUseCase, companyUseCase *companyusecases.Service) *DailyScheduler {
 	return &DailyScheduler{
 		companyRepo:        companyRepo,
 		companyPaymentRepo: companyPaymentRepo,
 		checkoutUseCase:    checkoutUseCase,
+		companyUseCase:     companyUseCase,
 	}
 }
 
@@ -111,6 +114,6 @@ func (s *DailyScheduler) CheckExpiredOptionalPayments(ctx context.Context) {
 	for _, payment := range payments {
 		// Reuse CheckoutUseCase.CancelPayment logic (unlinks costs, updates status)
 		// Assuming CancelPayment handles idempotency or allowed status checks
-		_ = s.checkoutUseCase.CancelPayment(ctx, payment.ID)
+		_ = s.companyUseCase.CancelPayment(ctx, payment.ID)
 	}
 }

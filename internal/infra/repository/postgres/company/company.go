@@ -76,7 +76,7 @@ func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model
 	return nil
 }
 
-func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*model.Company, error) {
+func (r *CompanyRepositoryBun) GetCompany(ctx context.Context, withoutRelations ...bool) (*model.Company, error) {
 	company := &model.Company{}
 	schema, ok := ctx.Value(model.Schema("schema")).(string)
 	if !ok {
@@ -91,31 +91,12 @@ func (r *CompanyRepositoryBun) GetCompany(ctx context.Context) (*model.Company, 
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(company).Where("schema_name = ?", schema).Relation("Address").Relation("Users").Scan(ctx); err != nil {
-		return nil, err
+	query := tx.NewSelect().Model(company).Where("schema_name = ?", schema)
+	if len(withoutRelations) > 0 && withoutRelations[0] {
+		query = query.Relation("Address").Relation("Users")
 	}
 
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
-
-	return company, err
-}
-
-func (r *CompanyRepositoryBun) GetCompanyOnlyByID(ctx context.Context, id uuid.UUID) (*model.Company, error) {
-	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
-	if err != nil {
-		return nil, err
-	}
-	defer cancel()
-	defer tx.Rollback()
-
-	company := &model.Company{}
-	if err := tx.NewSelect().
-		Model(company).
-		Where("id = ?", id).
-		Limit(1).
-		Scan(ctx); err != nil {
+	if err := query.Scan(ctx); err != nil {
 		return nil, err
 	}
 

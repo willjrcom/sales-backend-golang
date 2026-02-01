@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"maps"
 	"net/http"
 	"os"
 	"strconv"
@@ -60,6 +61,7 @@ type PreferenceResponse struct {
 type PaymentMetadata struct {
 	CompanyID         string `json:"company_id"`
 	SchemaName        string `json:"schema_name"`
+	PaymentType       string `json:"payment_type"`
 	Months            int    `json:"months"`
 	PlanType          string `json:"plan_type"`
 	IsFullRenewal     bool   `json:"is_full_renewal"`
@@ -219,10 +221,20 @@ func NewCheckoutItem(title, description string, quantity int, unitPrice float64)
 	}
 }
 
+type PaymentCheckoutType string
+
+const (
+	PaymentCheckoutTypeSubscription         PaymentCheckoutType = "subscription"
+	PaymentCheckoutTypeSubscriptionUpgrade  PaymentCheckoutType = "subscription_upgrade"
+	PaymentCheckoutTypeSubscriptionSchedule PaymentCheckoutType = "subscription_schedule"
+	PaymentCheckoutTypeCost                 PaymentCheckoutType = "cost"
+)
+
 // CheckoutRequest wraps the information required to create a multi-item checkout preference.
 type CheckoutRequest struct {
 	CompanyID         string
 	Schema            string
+	PaymentType       PaymentCheckoutType
 	Item              *CheckoutItem
 	ExternalReference string // Usually the PaymentID
 	Metadata          map[string]any
@@ -245,13 +257,12 @@ func (c *Client) CreateCheckoutPreference(ctx context.Context, req *CheckoutRequ
 	}
 
 	metadata := map[string]any{
-		"company_id":  req.CompanyID,
-		"schema_name": req.Schema,
+		"company_id":   req.CompanyID,
+		"schema_name":  req.Schema,
+		"payment_type": string(req.PaymentType),
 	}
 	if req.Metadata != nil {
-		for k, v := range req.Metadata {
-			metadata[k] = v
-		}
+		maps.Copy(metadata, req.Metadata)
 	}
 
 	prefRequest := preference.Request{

@@ -1,4 +1,4 @@
-package billingentity
+package companyentity
 
 import (
 	"os"
@@ -9,6 +9,7 @@ type PlanType string
 type Periodicity string
 
 const (
+	PlanTypeFree     PlanType = "free"
 	PlanBasic        PlanType = "basic"
 	PlanIntermediate PlanType = "intermediate"
 	PlanAdvanced     PlanType = "advanced"

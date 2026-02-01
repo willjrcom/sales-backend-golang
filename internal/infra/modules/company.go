@@ -28,7 +28,7 @@ func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyU
 	costService := companyusecases.NewUsageCostService(costRepo, repository)
 
 	// Start Daily Scheduler
-	dailyScheduler := scheduler.NewDailyScheduler(repository, companyPaymentRepo, checkoutUC)
+	dailyScheduler := scheduler.NewDailyScheduler(repository, companyPaymentRepo, checkoutUC, service)
 	dailyScheduler.Start(context.Background())
 
 	handler := handlerimpl.NewHandlerCompany(service, checkoutUC, costService, dailyScheduler)

@@ -7,15 +7,6 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
-type PlanType string
-
-const (
-	PlanTypeFree         PlanType = "free"
-	PlanTypeBasic        PlanType = "basic"
-	PlanTypeIntermediate PlanType = "intermediate"
-	PlanTypeAdvanced     PlanType = "advanced"
-)
-
 type CompanySubscription struct {
 	entity.Entity
 	CompanyID  uuid.UUID

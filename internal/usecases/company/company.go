@@ -28,18 +28,20 @@ type Service struct {
 	es                 employeeusecases.Service
 	us                 userusecases.Service
 	focusClient        *focusnfe.Client
+	costRepo           model.CompanyUsageCostRepository
 }
 
 func NewService(r model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository, focusClient *focusnfe.Client) *Service {
 	return &Service{r: r, companyPaymentRepo: companyPaymentRepo, focusClient: focusClient}
 }
 
-func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Service, u model.UserRepository, us userusecases.Service, es employeeusecases.Service) {
+func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Service, u model.UserRepository, us userusecases.Service, es employeeusecases.Service, costRepo model.CompanyUsageCostRepository) {
 	s.a = a
 	s.s = ss
 	s.u = u
 	s.us = us
 	s.es = es
+	s.costRepo = costRepo
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (response *companydto.CompanySchemaDTO, err error) {

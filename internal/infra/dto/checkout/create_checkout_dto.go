@@ -3,14 +3,12 @@ package billingdto
 import (
 	"strings"
 
-	"github.com/google/uuid"
-	domainbilling "github.com/willjrcom/sales-backend-go/internal/domain/checkout"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 )
 
-type CreateCheckoutDTO struct {
-	CompanyID   uuid.UUID `json:"company_id" validate:"required"`
-	Plan        string    `json:"plan"`        // "BASIC", "INTERMEDIATE", "ADVANCED"
-	Periodicity string    `json:"periodicity"` // "MONTHLY", "SEMIANNUAL", "ANNUAL"
+type CreateSubscriptionCheckoutDTO struct {
+	Plan        string `json:"plan"`        // "BASIC", "INTERMEDIATE", "ADVANCED"
+	Periodicity string `json:"periodicity"` // "MONTHLY", "SEMIANNUAL", "ANNUAL"
 }
 
 type CheckoutResponseDTO struct {
@@ -18,25 +16,25 @@ type CheckoutResponseDTO struct {
 	CheckoutUrl string `json:"checkout_url"`
 }
 
-func (c *CreateCheckoutDTO) ToPlanType() domainbilling.PlanType {
+func (c *CreateSubscriptionCheckoutDTO) ToPlanType() companyentity.PlanType {
 	switch strings.ToUpper(c.Plan) {
 	case "INTERMEDIATE":
-		return domainbilling.PlanIntermediate
+		return companyentity.PlanIntermediate
 	case "ADVANCED":
-		return domainbilling.PlanAdvanced
+		return companyentity.PlanAdvanced
 	default:
-		return domainbilling.PlanBasic
+		return companyentity.PlanBasic
 	}
 }
 
-func (c *CreateCheckoutDTO) ToPeriodicity() domainbilling.Periodicity {
+func (c *CreateSubscriptionCheckoutDTO) ToPeriodicity() companyentity.Periodicity {
 	switch strings.ToUpper(c.Periodicity) {
 	case "SEMIANNUAL":
-		return domainbilling.PeriodicitySemiannual
+		return companyentity.PeriodicitySemiannual
 	case "ANNUAL":
-		return domainbilling.PeriodicityAnnual
+		return companyentity.PeriodicityAnnual
 	default:
-		return domainbilling.PeriodicityMonthly
+		return companyentity.PeriodicityMonthly
 	}
 }
 
