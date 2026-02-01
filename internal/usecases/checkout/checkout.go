@@ -272,6 +272,25 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 	planType := details.Metadata.PlanType
 	months := details.Metadata.Months
 
+	// Fallback: If metadata is missing (recurring payment), parse from ExternalReference
+	// Format: SUB:<CompanyID>:<PlanType>:<Months>
+	if planType == "" && strings.HasPrefix(details.ExternalReference, "SUB:") {
+		parts := strings.Split(details.ExternalReference, ":")
+		if len(parts) >= 4 {
+			// parts[0] = "SUB"
+			// parts[1] = CompanyID
+			// parts[2] = PlanType
+			// parts[3] = Months
+			if companyID == "" {
+				companyID = parts[1]
+			}
+			planType = parts[2]
+			if m, err := strconv.Atoi(parts[3]); err == nil {
+				months = m
+			}
+		}
+	}
+
 	existing, err := s.companyPaymentRepo.GetCompanyPaymentByProviderID(ctx, details.ID)
 	if err == nil && existing != nil {
 		return nil
@@ -462,25 +481,6 @@ func (s *CheckoutUseCase) runSubscriptionUpgradeWebhook(ctx context.Context, det
 
 	fmt.Printf("Company %s plan upgraded successfully to %s\n", company.ID, targetPlan)
 	return nil
-}
-
-func isUpgradeCost(costType string) bool {
-	return costType == "upgrade_basic" ||
-		costType == "upgrade_intermediate" ||
-		costType == "upgrade_advanced"
-}
-
-func getPlanFromCostType(costType string) companyentity.PlanType {
-	switch costType {
-	case "upgrade_intermediate":
-		return companyentity.PlanIntermediate
-	case "upgrade_advanced":
-		return companyentity.PlanAdvanced
-	case "upgrade_basic":
-		return companyentity.PlanBasic
-	default:
-		return ""
-	}
 }
 
 func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, companyID uuid.UUID) error {
