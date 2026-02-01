@@ -58,12 +58,13 @@ type PreferenceResponse struct {
 
 // PaymentMetadata stores metadata persisted on Mercado Pago payments.
 type PaymentMetadata struct {
-	CompanyID     string `json:"company_id"`
-	SchemaName    string `json:"schema_name"`
-	Months        int    `json:"months"`
-	PlanType      string `json:"plan_type"`
-	IsFullRenewal bool   `json:"is_full_renewal"`
-	IsUpcoming    bool   `json:"is_upcoming"` // Indicates if this is a scheduled/upcoming subscription
+	CompanyID         string `json:"company_id"`
+	SchemaName        string `json:"schema_name"`
+	Months            int    `json:"months"`
+	PlanType          string `json:"plan_type"`
+	IsFullRenewal     bool   `json:"is_full_renewal"`
+	IsUpcoming        bool   `json:"is_upcoming"`         // Indicates if this is a scheduled/upcoming subscription
+	UpgradeTargetPlan string `json:"upgrade_target_plan"` // For upgrade payments
 }
 
 // PaymentDetails wraps the fields we use when reconciling payments.

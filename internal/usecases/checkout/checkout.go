@@ -421,6 +421,21 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 		return err
 	}
 
+	// Handle Upgrade Payments (check metadata for upgrade_target_plan)
+	if details.Metadata.UpgradeTargetPlan != "" {
+		fmt.Printf("DEBUG: Processing upgrade to plan: %s\n", details.Metadata.UpgradeTargetPlan)
+
+		// Update company plan immediately
+		if err := s.companyRepo.UpdateCompanySubscription(ctx, companyModel.ID, companyModel.SchemaName, companyModel.SubscriptionExpiresAt, details.Metadata.UpgradeTargetPlan); err != nil {
+			fmt.Printf("ERROR: Failed to update company plan: %v\n", err)
+			return fmt.Errorf("failed to upgrade company plan: %w", err)
+		}
+
+		fmt.Printf("DEBUG: Company plan upgraded successfully to %s\n", details.Metadata.UpgradeTargetPlan)
+		// Upgrade processed, skip cost processing
+		return nil
+	}
+
 	// 3. Process Upgrade Costs
 	costs, err := s.costRepo.GetByPaymentID(ctx, paymentID)
 	if err != nil {
