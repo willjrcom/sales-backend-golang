@@ -28,7 +28,20 @@ func NewUsageCostService(costRepo model.CompanyUsageCostRepository, companyRepo 
 }
 
 // RegisterUsageCost registers a new usage cost for a company
-func (s *UsageCostService) RegisterUsageCost(ctx context.Context, cost *companyentity.CompanyUsageCost) error {
+func (s *UsageCostService) RegisterUsageCost(ctx context.Context, dto *companydto.CompanyUsageCostCreateDTO) error {
+	cost, err := dto.ToDomain()
+	if err != nil {
+		return err
+	}
+
+	if dto.CompanyID == nil {
+		companyModel, err := s.companyRepo.GetCompany(ctx)
+		if err != nil {
+			return err
+		}
+		cost.CompanyID = companyModel.ID
+	}
+
 	cost.Entity = entity.NewEntity()
 	costModel := &model.CompanyUsageCost{}
 	costModel.FromDomain(cost)

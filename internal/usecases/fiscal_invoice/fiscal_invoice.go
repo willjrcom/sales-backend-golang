@@ -12,6 +12,7 @@ import (
 	"github.com/shopspring/decimal"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	fiscalinvoice "github.com/willjrcom/sales-backend-go/internal/domain/fiscal_invoice"
+	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/focusnfe"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
@@ -246,8 +247,14 @@ func (s *Service) EmitNFCeOrder(ctx context.Context, orderID uuid.UUID) (*fiscal
 		description := fmt.Sprintf("Emissão NFC-e #%d - Série %d", number, series)
 		pricePerInvoice, _ := decimal.NewFromString(os.Getenv("PRICE_PER_NFCE"))
 
-		cost := companyentity.NewUsageCost(company.ID, companyentity.CostTypeNFCe, pricePerInvoice, description, &invoice.ID)
-		if err := s.usageCostService.RegisterUsageCost(ctx, cost); err != nil {
+		costDTO := &companydto.CompanyUsageCostCreateDTO{
+			CompanyID:   &company.ID,
+			CostType:    string(companyentity.CostTypeNFCe),
+			Description: description,
+			Amount:      pricePerInvoice,
+			ReferenceID: &invoice.ID,
+		}
+		if err := s.usageCostService.RegisterUsageCost(ctx, costDTO); err != nil {
 			// Log error but don't fail the emission
 			fmt.Printf("Warning: failed to register NFC-e cost: %v\n", err)
 		}

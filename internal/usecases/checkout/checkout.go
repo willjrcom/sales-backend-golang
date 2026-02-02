@@ -60,26 +60,8 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 
 	// Fetch active/upcoming subscriptions
 	activeSub, _ := uc.companySubscriptionRepo.GetActiveSubscription(ctx, companyModel.ID)
-	subscriptionExpiresAt := time.Now().UTC()
 	if activeSub != nil && activeSub.PlanType != companyentity.PlanFree {
 		return nil, fmt.Errorf("company already has an active subscription")
-	}
-
-	if activeSub != nil {
-		subscriptionExpiresAt = activeSub.EndDate
-	}
-
-	if activeSub != nil {
-		// User has active subscription - will create UPCOMING/SCHEDULED subscription
-		// Do NOT cancel current subscription
-		fmt.Printf("Creating scheduled subscription for company %s, will start after %s\n",
-			companyModel.ID.String(), subscriptionExpiresAt.Format("2006-01-02"))
-	} else {
-		// No active subscription or expired - cancel any lingering preapproval and create new
-		if err := uc.CancelSubscription(ctx, companyModel.ID); err != nil {
-			// Log but continue - CancelSubscription handles "not found" cases
-			fmt.Printf("Warning: failed to cancel previous subscription during new checkout: %v\n", err)
-		}
 	}
 
 	var basePrice decimal.Decimal
@@ -114,14 +96,15 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 	}
 
 	totalAmount := basePrice.Mul(decimal.NewFromInt(int64(frequency)))
-	finalAmount := totalAmount.Mul(decimal.NewFromFloat(1.0 - discount))
+	finalAmount := totalAmount.Mul(decimal.NewFromFloat(1.0 - discount)).Round(2)
 
 	title := fmt.Sprintf("Assinatura Gfood Plano %s - %s", translatePlanType(req.ToPlanType()), translatePeriodicity(req.ToPeriodicity()))
 	description := fmt.Sprintf("Cobrança recorrente a cada %d meses. Valor: %s", frequency, finalAmount.StringFixed(2))
 
-	externalRef := fmt.Sprintf("SUB:%s:%s:%d", companyModel.ID.String(), req.ToPlanType(), frequency)
-
 	paymentEntity := entity.NewEntity()
+
+	// Generate external reference
+	externalRef := mercadopagoservice.NewSubscriptionExternalRef(companyModel.ID.String(), string(req.ToPlanType()), frequency, paymentEntity.ID.String())
 
 	// Create Mercado Pago Preapproval (recurring)
 	subReq := &mercadopagoservice.SubscriptionRequest{
@@ -131,7 +114,7 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		Frequency:     frequency,
 		FrequencyType: frequencyType,
 		ExternalRef:   externalRef,
-		PayerEmail:    companyModel.Email,
+		PayerEmail:    "test_user_4780522383580900169@testuser.com",
 		BackURL:       uc.mpService.SuccessURL(),
 	}
 
@@ -141,18 +124,13 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		return nil, fmt.Errorf("failed to create subscription: %w", err)
 	}
 
-	preapprovalID := ""
-	if activeSub == nil {
-		preapprovalID = subResp.ID
-	}
-
 	paymentExpiresAt := time.Now().UTC().AddDate(0, 0, 5)
 	payment := &companyentity.CompanyPayment{
 		Entity:            paymentEntity,
 		CompanyID:         companyModel.ID,
 		Provider:          mercadoPagoProvider,
 		ProviderPaymentID: subResp.ID,
-		PreapprovalID:     preapprovalID,
+		PreapprovalID:     subResp.ID,
 		Status:            companyentity.PaymentStatusPending,
 		Currency:          "BRL",
 		Amount:            finalAmount,
@@ -231,13 +209,17 @@ func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, compa
 
 	paymentEntity := entity.NewEntity()
 
+	// Generate external reference
+	// Format: COST:company_id:day:month:year:company_payment_id
+	externalRef := mercadopagoservice.NewCostExternalRef(companyModel.ID.String(), paymentEntity.ID.String())
+
 	mpReq := &mercadopagoservice.CheckoutRequest{
 		CompanyID:         companyModel.ID.String(),
 		Schema:            companyModel.SchemaName,
 		PaymentType:       mercadopagoservice.PaymentCheckoutTypeCost,
 		Item:              checkoutItem,
 		Payer:             uc.getPayerFromCompany(companyModel), // Added Payer
-		ExternalReference: paymentEntity.ID.String(),
+		ExternalReference: externalRef,
 	}
 
 	pref, err := uc.mpService.CreateUniqueCheckout(ctx, mpReq)
@@ -256,7 +238,7 @@ func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, compa
 		Months:            0,
 		ProviderPaymentID: paymentEntity.ID.String(),
 		PaymentURL:        pref.InitPoint,
-		ExternalReference: paymentEntity.ID.String(),
+		ExternalReference: externalRef,
 		ExpiresAt:         &expiresAt,
 		IsMandatory:       true,
 	}
@@ -277,26 +259,37 @@ func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, compa
 }
 
 // CancelSubscription cancels the company's active subscription (Preapproval).
-func (uc *CheckoutUseCase) CancelSubscription(ctx context.Context, companyID uuid.UUID) error {
+func (uc *CheckoutUseCase) CancelSubscription(ctx context.Context) error {
 	// Get company to find the active subscription
 	companyModel, err := uc.companyRepo.GetCompany(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to get company: %w", err)
 	}
 
-	// Find the pending subscription payment with Preapproval ID
-	// External reference format: SUB:<CompanyID>:<PlanType>:<Months>
-	externalRef := fmt.Sprintf("SUB:%s:", companyModel.ID.String())
-
-	// Get the most recent payment (Active/Approved) with this company's subscription reference
-	payment, err := uc.companyPaymentRepo.GetLastPaymentByExternalReferencePrefix(ctx, externalRef)
-	if err != nil || payment == nil {
+	// Get active subscription
+	activeSub, err := uc.companySubscriptionRepo.GetActiveSubscription(ctx, companyModel.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get active subscription: %w", err)
+	}
+	if activeSub == nil {
 		return fmt.Errorf("no active subscription found")
 	}
 
-	// Use the dedicated PreapprovalID field
+	if activeSub.PaymentID == nil {
+		return fmt.Errorf("active subscription has no linked payment")
+	}
+
+	// Get linked payment to find PreapprovalID
+	payment, err := uc.companyPaymentRepo.GetCompanyPaymentByID(ctx, *activeSub.PaymentID)
+	if err != nil {
+		return fmt.Errorf("failed to get subscription payment: %w", err)
+	}
+	if payment == nil {
+		return fmt.Errorf("subscription payment not found")
+	}
+
 	if payment.PreapprovalID == "" {
-		return fmt.Errorf("subscription has no preapproval ID")
+		return fmt.Errorf("subscription payment has no preapproval ID")
 	}
 
 	// Cancel the subscription (Preapproval) at Mercado Pago - stops future renewals
@@ -304,8 +297,8 @@ func (uc *CheckoutUseCase) CancelSubscription(ctx context.Context, companyID uui
 		return fmt.Errorf("failed to cancel subscription at Mercado Pago: %w", err)
 	}
 
-	// Mark the active subscription as canceled directly (no fetch needed)
-	if err := uc.companySubscriptionRepo.MarkActiveSubscriptionAsCanceled(ctx, companyID); err != nil {
+	// Mark the active subscription as canceled directly
+	if err := uc.companySubscriptionRepo.MarkActiveSubscriptionAsCanceled(ctx, companyModel.ID); err != nil {
 		return fmt.Errorf("failed to mark subscription as canceled: %w", err)
 	}
 
@@ -352,7 +345,6 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 	if activeSub.EndDate.After(time.Now().UTC()) {
 		daysRemaining = int(time.Until(activeSub.EndDate).Hours() / 24)
 	}
-	isFullRenewal := false
 	var upgradeAmount float64
 
 	if daysRemaining < 1 || currentPrice == 0 {
@@ -360,14 +352,15 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 		// User pays full price of new plan, and subscription is extended by 1 full period
 		daysRemaining = 0
 		upgradeAmount = targetPrice
-		isFullRenewal = true
 	} else {
 		// Standard Proration Logic
 		diffPerMonth := targetPrice - currentPrice
 		dailyDiff := diffPerMonth / 30.0
 		upgradeAmount = dailyDiff * float64(daysRemaining)
-		upgradeAmount = decimal.NewFromFloat(upgradeAmount).Round(2).InexactFloat64()
 	}
+
+	// Always round to 2 decimals for API compatibility
+	upgradeAmount = decimal.NewFromFloat(upgradeAmount).Round(2).InexactFloat64()
 
 	return &billingdto.UpgradeSimulationDTO{
 		TargetPlan:     string(targetPlan),
@@ -375,7 +368,6 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 		DaysRemaining:  daysRemaining,
 		UpgradeAmount:  upgradeAmount,
 		NewMonthlyCost: targetPrice,
-		IsFullRenewal:  isFullRenewal,
 	}, nil
 }
 
@@ -407,16 +399,18 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, targetPlan
 
 	paymentEntity := checkoutPaymentEntity()
 
+	// Generate external reference
+	externalRef := mercadopagoservice.NewSubscriptionUpgradeExternalRef(companyModel.ID.String(), sim.TargetPlan, sim.UpgradeAmount, paymentEntity.ID.String())
+
 	mpReq := &mercadopagoservice.CheckoutRequest{
 		CompanyID:         companyModel.ID.String(),
 		Schema:            companyModel.SchemaName,
 		PaymentType:       mercadopagoservice.PaymentCheckoutTypeSubscriptionUpgrade,
 		Item:              checkoutItem,
 		Payer:             uc.getPayerFromCompany(companyModel), // Added Payer
-		ExternalReference: paymentEntity.ID.String(),
+		ExternalReference: externalRef,
 		Metadata: map[string]interface{}{
 			"upgrade_target_plan": string(targetPlan),
-			"is_full_renewal":     sim.IsFullRenewal,
 		},
 	}
 

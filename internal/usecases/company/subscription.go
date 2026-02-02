@@ -24,6 +24,8 @@ func (s *Service) GetSubscriptionStatus(ctx context.Context) (*companydto.Subscr
 	// Get active and upcoming subscriptions - single call
 	activeSub, err := s.companySubscriptionRepo.GetActiveSubscription(ctx, company.ID)
 	if err == nil && activeSub != nil {
+		dto.CurrentPlan = string(activeSub.PlanType)
+
 		// Expiration date and days remaining from active subscription
 		expiresAt := activeSub.EndDate.Format(time.RFC3339)
 		dto.ExpiresAt = &expiresAt

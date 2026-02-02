@@ -1,17 +1,14 @@
 package mercadopagoservice
 
 import (
-	"bytes"
 	"context"
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"maps"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -64,7 +61,6 @@ type PaymentMetadata struct {
 	PaymentType       string `json:"payment_type"`
 	Months            int    `json:"months"`
 	PlanType          string `json:"plan_type"`
-	IsFullRenewal     bool   `json:"is_full_renewal"`
 	IsUpcoming        bool   `json:"is_upcoming"`         // Indicates if this is a scheduled/upcoming subscription
 	UpgradeTargetPlan string `json:"upgrade_target_plan"` // For upgrade payments
 }
@@ -462,149 +458,4 @@ func (c *Client) GetPayment(ctx context.Context, id string) (*PaymentDetails, er
 		ExternalReference: resource.ExternalReference,
 		Metadata:          meta,
 	}, nil
-}
-
-func stringFromAny(value any) string {
-	switch v := value.(type) {
-	case string:
-		return v
-	case fmt.Stringer:
-		return v.String()
-	case float64:
-		return strconv.FormatInt(int64(v), 10)
-	case float32:
-		return strconv.FormatInt(int64(v), 10)
-	case int:
-		return strconv.Itoa(v)
-	case int64:
-		return strconv.FormatInt(v, 10)
-	case json.Number:
-		return v.String()
-	case nil:
-		return ""
-	default:
-		return fmt.Sprintf("%v", v)
-	}
-}
-
-func intFromAny(value any) int {
-	switch v := value.(type) {
-	case int:
-		return v
-	case int64:
-		return int(v)
-	case float64:
-		return int(v)
-	case float32:
-		return int(v)
-	case string:
-		if parsed, err := strconv.Atoi(v); err == nil {
-			return parsed
-		}
-	case json.Number:
-		if parsed, err := v.Int64(); err == nil {
-			return int(parsed)
-		}
-		if parsedFloat, err := v.Float64(); err == nil {
-			return int(parsedFloat)
-		}
-	}
-	return 0
-}
-
-func boolFromAny(value any) bool {
-	switch v := value.(type) {
-	case bool:
-		return v
-	case string:
-		return v == "true" || v == "1"
-	case int, int64, float64, float32:
-		return v != 0
-	}
-	return false
-}
-
-// UpdateSubscriptionDetails updates the logic of a subscription (Amount and Reason/Title)
-func (c *Client) UpdateSubscriptionDetails(ctx context.Context, preapprovalID string, newAmount float64, newTitle string) error {
-	if c == nil || !c.Enabled() {
-		return fmt.Errorf("mercado pago client is not configured")
-	}
-
-	url := fmt.Sprintf("https://api.mercadopago.com/preapproval/%s", preapprovalID)
-
-	payload := map[string]interface{}{
-		"auto_recurring": map[string]interface{}{
-			"transaction_amount": newAmount,
-		},
-		"reason": newTitle,
-	}
-
-	body, err := json.Marshal(payload)
-	if err != nil {
-		return fmt.Errorf("failed to marshal request body: %w", err)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bytes.NewBuffer(body))
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	accessToken := os.Getenv("MP_ACCESS_TOKEN")
-	req.Header.Set("Authorization", "Bearer "+accessToken)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to execute request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("mercado pago API error: %s - %s", resp.Status, string(respBody))
-	}
-
-	return nil
-}
-
-// UpdateSubscriptionDate updates the next_payment_date of a subscription
-func (c *Client) UpdateSubscriptionDate(ctx context.Context, preapprovalID string, nextPaymentDate time.Time) error {
-	if c == nil || !c.Enabled() {
-		return fmt.Errorf("mercado pago client is not configured")
-	}
-
-	url := fmt.Sprintf("https://api.mercadopago.com/preapproval/%s", preapprovalID)
-	dateStr := nextPaymentDate.Format("2006-01-02T15:04:05.000-07:00")
-
-	payload := map[string]interface{}{
-		"next_payment_date": dateStr,
-	}
-	body, err := json.Marshal(payload)
-	if err != nil {
-		return fmt.Errorf("failed to marshal request body: %w", err)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, "PUT", url, bytes.NewBuffer(body))
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
-	}
-
-	accessToken := os.Getenv("MP_ACCESS_TOKEN")
-	req.Header.Set("Authorization", "Bearer "+accessToken)
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return fmt.Errorf("failed to execute request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode >= 400 {
-		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("mercado pago API error: %s - %s", resp.Status, string(respBody))
-	}
-
-	return nil
 }

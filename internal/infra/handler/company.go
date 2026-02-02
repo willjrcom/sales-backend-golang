@@ -1,6 +1,7 @@
 package handlerimpl
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -209,7 +210,7 @@ func (h *handlerCompanyImpl) handlerCreateCost(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if err := h.costService.RegisterUsageCost(ctx, dto.ToDomain()); err != nil {
+	if err := h.costService.RegisterUsageCost(ctx, dto); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
@@ -234,7 +235,6 @@ func (h *handlerCompanyImpl) handlerGetMonthlyCosts(w http.ResponseWriter, r *ht
 }
 
 func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
 
 	fmt.Printf("========== MERCADO PAGO WEBHOOK RECEIVED ==========\n")
 	fmt.Printf("Method: %s\n", r.Method)
@@ -273,9 +273,9 @@ func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r 
 	fmt.Printf("XRequestID: %s\n", dto.XRequestID)
 
 	fmt.Printf("Processing webhook...\n")
-	if err := h.checkoutUC.HandleMercadoPagoWebhook(ctx, dto); err != nil {
+	if err := h.checkoutUC.HandleMercadoPagoWebhook(context.Background(), dto); err != nil {
 		if err == billingusecases.ErrInvalidWebhookSecret {
-			fmt.Printf("ERROR: Invalid webhook secret\n", err)
+			fmt.Printf("ERROR: Invalid webhook secret %v", err)
 			jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 			return
 		}
@@ -368,13 +368,7 @@ func (h *handlerCompanyImpl) handlerGetSubscriptionStatus(w http.ResponseWriter,
 func (h *handlerCompanyImpl) handlerCancelSubscription(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	company, err := h.s.GetCompany(ctx)
-	if err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	if err := h.checkoutUC.CancelSubscription(ctx, company.ID); err != nil {
+	if err := h.checkoutUC.CancelSubscription(ctx); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}

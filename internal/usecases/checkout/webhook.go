@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -47,15 +46,6 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 		return nil
 	}
 
-	// add schema_name to context from metadata
-	ctx = context.WithValue(ctx, model.Schema("schema"), details.Metadata.SchemaName)
-	companyModel, err := s.companyRepo.GetCompany(ctx)
-	if err != nil {
-		return err
-	}
-
-	company := companyModel.ToDomain()
-
 	// Route based on payment type
 	paymentType := details.Metadata.PaymentType
 
@@ -66,10 +56,10 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 
 	switch mercadopagoservice.PaymentCheckoutType(paymentType) {
 	case mercadopagoservice.PaymentCheckoutTypeSubscription:
-		return s.runSubscriptionWebhook(ctx, details, company, dto)
+		return s.runSubscriptionWebhook(ctx, details, dto)
 
 	case mercadopagoservice.PaymentCheckoutTypeSubscriptionUpgrade:
-		return s.runSubscriptionUpgradeWebhook(ctx, details, company, dto)
+		return s.runSubscriptionUpgradeWebhook(ctx, details, dto)
 
 	case mercadopagoservice.PaymentCheckoutTypeCost:
 		return s.runCostWebhook(ctx, details, dto)
@@ -81,28 +71,22 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 
 // runSubscriptionWebhook handles payments from Mercado Pago Preapprovals (recurrent subscriptions)
 
-func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *mercadopagoservice.PaymentDetails, company *companyentity.Company, dto *companydto.MercadoPagoWebhookDTO) error {
-	companyID := details.Metadata.CompanyID
-	planType := details.Metadata.PlanType
-	months := details.Metadata.Months
+func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *mercadopagoservice.PaymentDetails, dto *companydto.MercadoPagoWebhookDTO) error {
+	subscriptionExternalRef, err := mercadopagoservice.ExtractSubscriptionExternalRef(details.ExternalReference)
+	if err != nil {
+		return err
+	}
 
-	// Fallback: If metadata is missing (recurring payment), parse from ExternalReference
-	// Format: SUB:<CompanyID>:<PlanType>:<Months>
-	if planType == "" && strings.HasPrefix(details.ExternalReference, "SUB:") {
-		parts := strings.Split(details.ExternalReference, ":")
-		if len(parts) >= 4 {
-			// parts[0] = "SUB"
-			// parts[1] = CompanyID
-			// parts[2] = PlanType
-			// parts[3] = Months
-			if companyID == "" {
-				companyID = parts[1]
-			}
-			planType = parts[2]
-			if m, err := strconv.Atoi(parts[3]); err == nil {
-				months = m
-			}
-		}
+	if subscriptionExternalRef.CompanyID == "" {
+		return fmt.Errorf("company id not found")
+	}
+
+	if subscriptionExternalRef.PlanType == "" {
+		return fmt.Errorf("plan type not found")
+	}
+
+	if subscriptionExternalRef.Frequency == 0 {
+		return fmt.Errorf("frequency not found")
 	}
 
 	existing, err := s.companyPaymentRepo.GetCompanyPaymentByProviderID(ctx, details.ID)
@@ -118,25 +102,24 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 
 	amount := decimal.NewFromFloat(details.TransactionAmount)
 	startDate := paidAt
-	endDate := startDate.AddDate(0, months, 0)
 
-	activeSub, _ := s.companySubscriptionRepo.GetActiveSubscription(ctx, company.ID)
-	subscriptionExpiresAt := paidAt
-	if activeSub != nil {
-		subscriptionExpiresAt = activeSub.EndDate
+	// Check for active subscription to determine start date (renewal vs new)
+	activeSub, _ := s.companySubscriptionRepo.GetActiveSubscription(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID))
+	if activeSub != nil && activeSub.PlanType != companyentity.PlanFree {
+		if activeSub.EndDate.After(paidAt) {
+			startDate = activeSub.EndDate
+		}
 	}
 
-	if subscriptionExpiresAt.After(paidAt) {
-		newExpire := subscriptionExpiresAt.AddDate(0, months, 0)
-		endDate = newExpire
-	}
+	// Calculate end date based on start date
+	endDate := startDate.AddDate(0, subscriptionExternalRef.Frequency, 0)
 
 	// Removed UpdateCompanySubscription call as fields are moved to Subscription entity
 
 	pending, _ := s.companyPaymentRepo.GetPendingPaymentByExternalReference(ctx, details.ExternalReference)
 	// First payment will exists
 	if pending != nil {
-		fmt.Printf("Creating first subscription by company id %s", companyID)
+		fmt.Printf("Creating first subscription by company id %s", subscriptionExternalRef.CompanyID)
 		paymentToSave := pending
 
 		rawPayload, _ := json.Marshal(dto)
@@ -149,7 +132,7 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 			return err
 		}
 
-		sub := companyentity.NewCompanySubscription(company.ID, companyentity.PlanType(planType), startDate, endDate)
+		sub := companyentity.NewCompanySubscription(uuid.MustParse(subscriptionExternalRef.CompanyID), companyentity.PlanType(subscriptionExternalRef.PlanType), startDate, endDate)
 		sub.PaymentID = &paymentToSave.ID
 
 		subModel := &model.CompanySubscription{}
@@ -158,9 +141,9 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 			return err
 		}
 
-		// Update active free subscription plan type
-		if activeSub.PlanType != companyentity.PlanFree {
-			activeSub.PlanType = companyentity.PlanType(planType)
+		// Update active free subscription plan type to finish the free trial
+		if activeSub != nil && activeSub.PlanType == companyentity.PlanFree {
+			activeSub.EndDate = startDate
 			if err := s.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
 				return fmt.Errorf("failed to update current free subscription to new plan: %w", err)
 			}
@@ -169,19 +152,19 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 		return nil
 	}
 
-	fmt.Printf("Creating recurrency subscription by company id %s", companyID)
+	fmt.Printf("Creating recurrency subscription by company id %s", subscriptionExternalRef.CompanyID)
 
 	// Recurrency payments must create
 	paymentEntity := entity.NewEntity()
 	domPay := &companyentity.CompanyPayment{
 		Entity:            paymentEntity,
-		CompanyID:         uuid.MustParse(companyID),
+		CompanyID:         uuid.MustParse(subscriptionExternalRef.CompanyID),
 		Provider:          mercadoPagoProvider,
 		Status:            companyentity.PaymentStatusPending,
 		Currency:          "BRL",
 		Amount:            amount,
-		Months:            months,
-		PlanType:          companyentity.PlanType(planType),
+		Months:            subscriptionExternalRef.Frequency,
+		PlanType:          companyentity.PlanType(subscriptionExternalRef.PlanType),
 		ProviderPaymentID: details.ID,
 		ExternalReference: details.ExternalReference,
 		IsMandatory:       false,
@@ -199,7 +182,7 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 		return err
 	}
 
-	sub := companyentity.NewCompanySubscription(company.ID, companyentity.PlanType(planType), startDate, endDate)
+	sub := companyentity.NewCompanySubscription(uuid.MustParse(subscriptionExternalRef.CompanyID), companyentity.PlanType(subscriptionExternalRef.PlanType), startDate, endDate)
 	sub.PaymentID = &paymentToSave.ID
 
 	subModel := &model.CompanySubscription{}
@@ -208,9 +191,9 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 		return err
 	}
 
-	// Update active free subscription plan type
-	if activeSub.PlanType != companyentity.PlanFree {
-		activeSub.PlanType = companyentity.PlanType(planType)
+	// Update active free subscription plan type to finish the free trial
+	if activeSub != nil && activeSub.PlanType == companyentity.PlanFree {
+		activeSub.EndDate = startDate
 		if err := s.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
 			return fmt.Errorf("failed to update current free subscription to new plan: %w", err)
 		}
@@ -220,10 +203,14 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 
 // runCostWebhook handles payments for extra costs (NFC-e, etc)
 func (s *CheckoutUseCase) runCostWebhook(ctx context.Context, details *mercadopagoservice.PaymentDetails, dto *companydto.MercadoPagoWebhookDTO) error {
-	// Parse payment ID from external reference
-	paymentID, err := uuid.Parse(details.ExternalReference)
+	costExternalRef, err := mercadopagoservice.ExtractCostExternalRef(details.ExternalReference)
 	if err != nil {
-		return fmt.Errorf("invalid external reference (payment_id): %w", err)
+		return fmt.Errorf("invalid external reference (cost): %w", err)
+	}
+
+	paymentID, err := uuid.Parse(costExternalRef.PaymentID)
+	if err != nil {
+		return fmt.Errorf("invalid payment ID: %w", err)
 	}
 
 	// Get payment
@@ -270,11 +257,16 @@ func (s *CheckoutUseCase) runCostWebhook(ctx context.Context, details *mercadopa
 }
 
 // runSubscriptionUpgradeWebhook handles subscription upgrade payments
-func (s *CheckoutUseCase) runSubscriptionUpgradeWebhook(ctx context.Context, details *mercadopagoservice.PaymentDetails, company *companyentity.Company, dto *companydto.MercadoPagoWebhookDTO) error {
+func (s *CheckoutUseCase) runSubscriptionUpgradeWebhook(ctx context.Context, details *mercadopagoservice.PaymentDetails, dto *companydto.MercadoPagoWebhookDTO) error {
 	// Parse payment ID from external reference
-	paymentID, err := uuid.Parse(details.ExternalReference)
+	subscriptionUpgradeExternalRef, err := mercadopagoservice.ExtractSubscriptionUpgradeExternalRef(details.ExternalReference)
 	if err != nil {
-		return fmt.Errorf("invalid external reference (payment_id): %w", err)
+		return fmt.Errorf("invalid external reference (subscription_upgrade): %w", err)
+	}
+
+	paymentID, err := uuid.Parse(subscriptionUpgradeExternalRef.PaymentID)
+	if err != nil {
+		return fmt.Errorf("invalid payment ID: %w", err)
 	}
 
 	// Get payment
@@ -312,16 +304,35 @@ func (s *CheckoutUseCase) runSubscriptionUpgradeWebhook(ctx context.Context, det
 
 	// Update company plan (keeps same expiration date - proration)
 	// Update active subscription plan
-	activeSub, err := s.companySubscriptionRepo.GetActiveSubscription(ctx, company.ID)
-	if err == nil && activeSub != nil {
-		activeSub.PlanType = companyentity.PlanType(targetPlan)
-		if err := s.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
-			return fmt.Errorf("failed to update subscription plan: %w", err)
-		}
-	} else {
-		return fmt.Errorf("no active subscription to upgrade")
+	activeSub, err := s.companySubscriptionRepo.GetActiveSubscription(ctx, paymentModel.CompanyID)
+	if err != nil || activeSub == nil {
+		return fmt.Errorf("active subscription not found for upgrade")
 	}
 
-	fmt.Printf("Company %s plan upgraded successfully to %s\n", company.ID, targetPlan)
+	// Get the payment linked to the active subscription to find the PreapprovalID
+	if activeSub.PaymentID == nil {
+		return fmt.Errorf("active subscription has no linked payment")
+	}
+
+	subPayment, err := s.companyPaymentRepo.GetCompanyPaymentByID(ctx, *activeSub.PaymentID)
+	if err != nil {
+		return fmt.Errorf("failed to get subscription payment: %w", err)
+	}
+
+	if subPayment.PreapprovalID == "" {
+		return fmt.Errorf("subscription payment has no preapproval ID")
+	}
+
+	// Update Mercado Pago Subscription Amount
+	if err := s.mpService.UpdateSubscriptionAmount(ctx, subPayment.PreapprovalID, subscriptionUpgradeExternalRef.NewAmount); err != nil {
+		return fmt.Errorf("failed to update subscription amount: %w", err)
+	}
+
+	activeSub.PlanType = companyentity.PlanType(targetPlan)
+	if err := s.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
+		return fmt.Errorf("failed to update subscription plan: %w", err)
+	}
+
+	fmt.Printf("Company %s plan upgraded successfully to %s\n", paymentModel.CompanyID, targetPlan)
 	return nil
 }

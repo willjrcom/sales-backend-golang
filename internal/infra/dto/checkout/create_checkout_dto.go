@@ -44,7 +44,6 @@ type UpgradeSimulationDTO struct {
 	DaysRemaining  int     `json:"days_remaining"`
 	UpgradeAmount  float64 `json:"upgrade_amount"`
 	NewMonthlyCost float64 `json:"new_monthly_cost"`
-	IsFullRenewal  bool    `json:"is_full_renewal"`
 }
 
 type UpgradeCheckoutDTO struct {

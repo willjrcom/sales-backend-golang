@@ -2,6 +2,7 @@ package companyentity
 
 import (
 	"errors"
+	"regexp"
 	"strings"
 	"time"
 
@@ -94,11 +95,11 @@ func (c *Company) UpdateCompany(cnpjData *cnpj.Cnpj) {
 }
 
 func generateSchema(cnpjData *cnpj.Cnpj) string {
+	reg := regexp.MustCompile("[^a-zA-Z0-9]+")
 	id, _ := shortid.Generate()
-	replacedName := strings.ReplaceAll(strings.ToLower(cnpjData.TradeName), " ", "_")
-	replacedName = strings.ReplaceAll(replacedName, "-", "_")
-	id = strings.ReplaceAll(id, "-", "_")
-	schema := "company_" + replacedName + "_" + strings.ToLower(id)
+	replacedName := reg.ReplaceAllString(strings.ToLower(cnpjData.TradeName), "_")
+	safeID := reg.ReplaceAllString(id, "_")
+	schema := "company_" + replacedName + "_" + strings.ToLower(safeID)
 	return schema
 }
 

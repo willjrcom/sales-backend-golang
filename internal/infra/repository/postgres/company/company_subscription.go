@@ -122,60 +122,11 @@ func (r *CompanySubscriptionRepositoryBun) UpdateCompanyPlans(ctx context.Contex
 	defer cancel()
 	defer tx.Rollback()
 
-	// 1. Update companies with active subscriptions
-	// We select the latest/highest priority active subscription for each company
-	// Ideally we should have a constraints to avoid overlap, but here we pick one.
-	// We use a subquery or join.
-	// Simple approach: Set Plan to Subscription's Plan where Subscription is Active and Valid.
-	// "UPDATE companies SET current_plan = cs.plan_type FROM company_subscriptions cs WHERE cs.company_id = companies.id AND cs.is_active = true AND cs.start_date <= NOW() AND cs.end_date >= NOW()"
-	if _, err := tx.NewRaw(`
-		UPDATE companies 
-		SET current_plan = cs.plan_type 
-		FROM company_subscriptions cs 
-		WHERE cs.company_id = companies.id 
-		AND cs.is_active = true 
-		AND cs.start_date <= NOW() 
-		AND cs.end_date >= NOW()
-	`).Exec(ctx); err != nil {
-		return err
-	}
-
-	// 2. Mark expired subscriptions as inactive
-	// This ensures is_active accurately reflects the subscription state
 	if _, err := tx.NewRaw(`
 		UPDATE company_subscriptions 
 		SET is_active = false 
 		WHERE is_active = true 
 		AND end_date < NOW()
-	`).Exec(ctx); err != nil {
-		return err
-	}
-
-	// 3. Revert companies with NO active subscription to 'free'
-	// "UPDATE companies SET current_plan = 'free' WHERE NOT EXISTS (SELECT 1 FROM company_subscriptions cs WHERE cs.company_id = companies.id AND cs.is_active = true AND cs.start_date <= NOW() AND cs.end_date >= NOW()) AND current_plan != 'free'"
-	if _, err := tx.NewRaw(`
-		UPDATE companies 
-		SET current_plan = 'free' 
-		WHERE NOT EXISTS (
-			SELECT 1 FROM company_subscriptions cs 
-			WHERE cs.company_id = companies.id 
-			AND cs.is_active = true 
-			AND cs.start_date <= NOW() 
-			AND cs.end_date >= NOW()
-		) 
-		AND current_plan != 'free'
-	`).Exec(ctx); err != nil {
-		return err
-	}
-
-	// 4. Disable fiscal settings for companies on 'free' or 'basic' plans
-	if _, err := tx.NewRaw(`
-		UPDATE fiscal_settings 
-		SET is_active = false 
-		FROM companies c 
-		WHERE fiscal_settings.company_id = c.id 
-		AND c.current_plan IN ('free', 'basic') 
-		AND fiscal_settings.is_active = true
 	`).Exec(ctx); err != nil {
 		return err
 	}
