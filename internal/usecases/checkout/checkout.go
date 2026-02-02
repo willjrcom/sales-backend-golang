@@ -95,16 +95,21 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		frequencyType = "days"
 	}
 
+	// Calculate total amount per period (e.g. Total for 12 months)
+	// BasePrice is monthly price.
 	totalAmount := basePrice.Mul(decimal.NewFromInt(int64(frequency)))
 	finalAmount := totalAmount.Mul(decimal.NewFromFloat(1.0 - discount)).Round(2)
 
 	title := fmt.Sprintf("Assinatura Gfood Plano %s - %s", translatePlanType(req.ToPlanType()), translatePeriodicity(req.ToPeriodicity()))
-	description := fmt.Sprintf("Cobrança recorrente a cada %d meses. Valor: %s", frequency, finalAmount.StringFixed(2))
+	description := fmt.Sprintf("Cobrança recorrente a cada %d meses. Valor Total: %s", frequency, finalAmount.StringFixed(2))
 
 	paymentEntity := entity.NewEntity()
 
 	// Generate external reference
 	externalRef := mercadopagoservice.NewSubscriptionExternalRef(companyModel.ID.String(), string(req.ToPlanType()), frequency, paymentEntity.ID.String())
+
+	// DEBUG: Verify amount being sent
+	fmt.Printf("DEBUG: Creating subscription. Frequency: %d, Total Amount: %s\n", frequency, finalAmount.String())
 
 	// Create Mercado Pago Preapproval (recurring)
 	subReq := &mercadopagoservice.SubscriptionRequest{
@@ -129,8 +134,6 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		Entity:            paymentEntity,
 		CompanyID:         companyModel.ID,
 		Provider:          mercadoPagoProvider,
-		ProviderPaymentID: subResp.ID,
-		PreapprovalID:     subResp.ID,
 		Status:            companyentity.PaymentStatusPending,
 		Currency:          "BRL",
 		Amount:            finalAmount,
@@ -236,7 +239,6 @@ func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, compa
 		Currency:          "BRL",
 		Amount:            totalAmount,
 		Months:            0,
-		ProviderPaymentID: paymentEntity.ID.String(),
 		PaymentURL:        pref.InitPoint,
 		ExternalReference: externalRef,
 		ExpiresAt:         &expiresAt,
@@ -288,12 +290,12 @@ func (uc *CheckoutUseCase) CancelSubscription(ctx context.Context) error {
 		return fmt.Errorf("subscription payment not found")
 	}
 
-	if payment.PreapprovalID == "" {
+	if payment.PreapprovalID == nil || *payment.PreapprovalID == "" {
 		return fmt.Errorf("subscription payment has no preapproval ID")
 	}
 
 	// Cancel the subscription (Preapproval) at Mercado Pago - stops future renewals
-	if err := uc.mpService.CancelSubscription(ctx, payment.PreapprovalID); err != nil {
+	if err := uc.mpService.CancelSubscription(ctx, *payment.PreapprovalID); err != nil {
 		return fmt.Errorf("failed to cancel subscription at Mercado Pago: %w", err)
 	}
 
@@ -429,7 +431,6 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, targetPlan
 		Currency:          "BRL",
 		Amount:            amount,
 		Months:            0,
-		ProviderPaymentID: paymentEntity.ID.String(),
 		PaymentURL:        pref.InitPoint,
 		ExternalReference: paymentEntity.ID.String(), // Payment ID
 		ExpiresAt:         &expiresAt,

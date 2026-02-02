@@ -146,31 +146,11 @@ func (r *CompanyRepositoryLocal) GetCompanyUsers(ctx context.Context, page, perP
 }
 
 func (r *CompanyRepositoryLocal) CreateCompanyPayment(ctx context.Context, payment *model.CompanyPayment) error {
-	if payment == nil {
-		return errors.New("payment is nil")
-	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	key := payment.Provider + ":" + payment.ProviderPaymentID
-	if _, exists := r.payments[key]; exists {
-		return fmt.Errorf("payment %s already exists", payment.ProviderPaymentID)
-	}
-	r.payments[key] = payment
 	return nil
 }
 
 func (r *CompanyRepositoryLocal) UpdateCompanyPayment(ctx context.Context, payment *model.CompanyPayment) error {
-	if payment == nil || payment.ID == uuid.Nil {
-		return errors.New("invalid payment")
-	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
 
-	// Update index by provider if changed?
-	// For simplicity, we just store it. But if provider ID changed, we should re-index.
-	// Since we use key provider:providerID, we should handle that.
-	key := payment.Provider + ":" + payment.ProviderPaymentID
-	r.payments[key] = payment
 	return nil
 }
 
@@ -188,49 +168,36 @@ func (r *CompanyRepositoryLocal) GetCompanyPaymentByID(ctx context.Context, id u
 	return nil, errors.New("payment not found")
 }
 
-func (r *CompanyRepositoryLocal) ListCompanyPayments(ctx context.Context, companyID uuid.UUID, page, perPage int) ([]model.CompanyPayment, int, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+func (r *CompanyRepositoryLocal) GetCompanyPaymentByProviderID(ctx context.Context, providerPaymentID string) (*model.CompanyPayment, error) {
+	return nil, nil // Stub
+}
 
-	matching := make([]*model.CompanyPayment, 0)
-	for _, payment := range r.payments {
-		if payment.CompanyID == companyID {
-			matching = append(matching, payment)
-		}
-	}
-	sort.Slice(matching, func(i, j int) bool {
-		return matching[i].PaidAt.After(*matching[j].PaidAt)
-	})
+func (r *CompanyRepositoryLocal) ListCompanyPayments(ctx context.Context, companyID uuid.UUID, page, perPage, month, year int) ([]model.CompanyPayment, int, error) {
+	return []model.CompanyPayment{}, 0, nil // Stub
+}
 
-	total := len(matching)
-	if total == 0 {
-		return []model.CompanyPayment{}, 0, nil
-	}
+func (r *CompanyRepositoryLocal) GetPendingPaymentByExternalReference(ctx context.Context, externalReference string) (*model.CompanyPayment, error) {
+	return nil, nil // Stub
+}
 
-	if page <= 0 {
-		page = 1
-	}
+func (r *CompanyRepositoryLocal) GetCompanyPaymentByExternalReference(ctx context.Context, externalReference string) (*model.CompanyPayment, error) {
+	return nil, nil // Stub
+}
 
-	if perPage <= 0 {
-		perPage = total
-	}
+func (r *CompanyRepositoryLocal) GetLastPaymentByExternalReferencePrefix(ctx context.Context, externalReferencePrefix string) (*model.CompanyPayment, error) {
+	return nil, nil // Stub
+}
 
-	offset := (page - 1) * perPage
-	if offset >= total {
-		return []model.CompanyPayment{}, total, nil
-	}
+func (r *CompanyRepositoryLocal) GetLastApprovedPaymentByExternalReferencePrefix(ctx context.Context, externalReferencePrefix string) (*model.CompanyPayment, error) {
+	return nil, nil // Stub
+}
 
-	end := offset + perPage
-	if end > total {
-		end = total
-	}
+func (r *CompanyRepositoryLocal) ListOverduePaymentsByCompany(ctx context.Context, companyID uuid.UUID, cutoffDate time.Time) ([]model.CompanyPayment, error) {
+	return nil, nil // Stub
+}
 
-	result := make([]model.CompanyPayment, 0, end-offset)
-	for _, payment := range matching[offset:end] {
-		result = append(result, *payment)
-	}
-
-	return result, total, nil
+func (r *CompanyRepositoryLocal) ListExpiredOptionalPayments(ctx context.Context) ([]model.CompanyPayment, error) {
+	return nil, nil // Stub
 }
 
 func (r *CompanyRepositoryLocal) UpdateBlockStatus(ctx context.Context, companyID uuid.UUID, isBlocked bool) error {

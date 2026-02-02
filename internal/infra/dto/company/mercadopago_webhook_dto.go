@@ -5,10 +5,17 @@ import (
 	"fmt"
 )
 
+type MercadoPagoWebhookType string
+
+const (
+	MercadoPagoWebhookTypePayment                 = "payment"
+	MercadoPagoWebhookTypeSubscriptionPreapproval = "subscription_preapproval"
+)
+
 type MercadoPagoWebhookDTO struct {
 	ID      FlexibleID                `json:"id"`
 	Live    bool                      `json:"live_mode"`
-	Type    string                    `json:"type"`
+	Type    MercadoPagoWebhookType    `json:"type"`
 	Action  string                    `json:"action"`
 	Data    MercadoPagoWebhookDataDTO `json:"data"`
 	DateUTC string                    `json:"date_created"`

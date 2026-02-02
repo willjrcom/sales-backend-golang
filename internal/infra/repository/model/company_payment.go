@@ -16,8 +16,8 @@ type CompanyPayment struct {
 
 	CompanyID         uuid.UUID       `bun:"company_id,type:uuid,notnull"`
 	Provider          string          `bun:"provider,notnull"`
-	ProviderPaymentID string          `bun:"provider_payment_id,notnull,unique"`
-	PreapprovalID     string          `bun:"preapproval_id"` // MP Subscription ID
+	ProviderPaymentID *string         `bun:"provider_payment_id,unique"`
+	PreapprovalID     *string         `bun:"preapproval_id"` // MP Subscription ID
 	Status            string          `bun:"status,notnull"`
 	Currency          string          `bun:"currency,notnull"`
 	Amount            decimal.Decimal `bun:"amount,type:decimal(12,2),notnull"`

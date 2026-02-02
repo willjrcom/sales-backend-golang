@@ -459,3 +459,12 @@ func (c *Client) GetPayment(ctx context.Context, id string) (*PaymentDetails, er
 		Metadata:          meta,
 	}, nil
 }
+
+// GetPreapproval fetches a subscription (preapproval) by ID.
+func (c *Client) GetPreapproval(ctx context.Context, id string) (*preapproval.Response, error) {
+	if c == nil || !c.Enabled() {
+		return nil, fmt.Errorf("mercado pago client is not configured")
+	}
+
+	return c.preapprovalClient.Get(ctx, id)
+}

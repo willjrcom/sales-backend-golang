@@ -16,6 +16,7 @@ type CompanyPaymentRepository interface {
 	ListOverduePayments(ctx context.Context, cutoffDate time.Time) ([]CompanyPayment, error)
 	ListPendingMandatoryPayments(ctx context.Context, companyID uuid.UUID) ([]CompanyPayment, error)
 	GetPendingPaymentByExternalReference(ctx context.Context, externalReference string) (*CompanyPayment, error)
+	GetCompanyPaymentByExternalReference(ctx context.Context, externalReference string) (*CompanyPayment, error)
 	GetLastPaymentByExternalReferencePrefix(ctx context.Context, externalReferencePrefix string) (*CompanyPayment, error)
 	GetLastApprovedPaymentByExternalReferencePrefix(ctx context.Context, externalReferencePrefix string) (*CompanyPayment, error)
 	ListOverduePaymentsByCompany(ctx context.Context, companyID uuid.UUID, cutoffDate time.Time) ([]CompanyPayment, error)

@@ -21,10 +21,6 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 		return ErrMercadoPagoDisabled
 	}
 
-	if dto == nil || (dto.Type != "payment" && dto.Type != "subscription_preapproval") || dto.Data.ID == "" {
-		return nil
-	}
-
 	// Get data.id for signature validation (prefer query param, fallback to body)
 	dataIDForSignature := dto.DataIDFromQuery
 	if dataIDForSignature == "" {
@@ -36,6 +32,16 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 	// 	return ErrInvalidWebhookSecret
 	// }
 
+	if dto.Type == companydto.MercadoPagoWebhookTypeSubscriptionPreapproval {
+		return s.runSubscriptionPreapprovalWebhook(ctx, dto)
+	}
+
+	if dto.Type != companydto.MercadoPagoWebhookTypePayment {
+		return fmt.Errorf("unknown webhook type: %s", dto.Type)
+	}
+
+	fmt.Printf("Payment webhook received: %s, type: %s\n", dto.Data.ID, dto.Type)
+
 	mpPaymentID := dto.Data.ID
 	details, err := s.mpService.GetPayment(ctx, mpPaymentID)
 	if err != nil {
@@ -46,32 +52,41 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 		return nil
 	}
 
-	// Route based on payment type
-	paymentType := details.Metadata.PaymentType
-
-	// Fallback: If payment type is missing, check ExternalReference for legacy/recurring format
-	if paymentType == "" && strings.HasPrefix(details.ExternalReference, "SUB:") {
-		paymentType = string(mercadopagoservice.PaymentCheckoutTypeSubscription)
+	parts := strings.Split(details.ExternalReference, ":")
+	if len(parts) == 0 {
+		return fmt.Errorf("external reference not found")
 	}
 
-	switch mercadopagoservice.PaymentCheckoutType(paymentType) {
-	case mercadopagoservice.PaymentCheckoutTypeSubscription:
-		return s.runSubscriptionWebhook(ctx, details, dto)
+	prefix := parts[0]
 
-	case mercadopagoservice.PaymentCheckoutTypeSubscriptionUpgrade:
+	switch prefix {
+	case "SUB_UP":
 		return s.runSubscriptionUpgradeWebhook(ctx, details, dto)
-
-	case mercadopagoservice.PaymentCheckoutTypeCost:
+	case "COST":
 		return s.runCostWebhook(ctx, details, dto)
-
+	case "SUB":
+		return s.runSubscriptionPaymentWebhook(ctx, details, dto)
 	default:
-		return fmt.Errorf("unknown payment type: %s", details.Metadata.PaymentType)
+		return fmt.Errorf("unknown payment type: %s", prefix)
 	}
+
+	return fmt.Errorf("unknown payment type: %s", details.Metadata.PaymentType)
 }
 
-// runSubscriptionWebhook handles payments from Mercado Pago Preapprovals (recurrent subscriptions)
+func (s *CheckoutUseCase) runSubscriptionPreapprovalWebhook(ctx context.Context, dto *companydto.MercadoPagoWebhookDTO) error {
+	preapprovalID := dto.Data.ID
+	details, err := s.mpService.GetPreapproval(ctx, preapprovalID)
+	if err != nil {
+		return fmt.Errorf("failed to get preapproval %s: %w", preapprovalID, err)
+	}
 
-func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *mercadopagoservice.PaymentDetails, dto *companydto.MercadoPagoWebhookDTO) error {
+	fmt.Printf("Subscription preapproval webhook received: %s status: %s\n", preapprovalID, details.Status)
+
+	if details.Status != "authorized" {
+		fmt.Println("Preapproval not authorized")
+		return nil
+	}
+
 	subscriptionExternalRef, err := mercadopagoservice.ExtractSubscriptionExternalRef(details.ExternalReference)
 	if err != nil {
 		return err
@@ -89,18 +104,13 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 		return fmt.Errorf("frequency not found")
 	}
 
-	existing, err := s.companyPaymentRepo.GetCompanyPaymentByProviderID(ctx, details.ID)
-	if err == nil && existing != nil {
-		fmt.Println("Payment already exists")
-		return nil
-	}
+	// Check removed: We allow multiple payments for the same preapproval (recurrence)
+	// and we don't store PreapprovalID in ProviderPaymentID anymore.
 
-	paidAt := time.Now().UTC()
-	if details.DateApproved != nil {
-		paidAt = details.DateApproved.UTC()
-	}
+	// Use DateCreated for subscriptions as approval date isn't always present in the same format
+	paidAt := details.DateCreated.UTC()
 
-	amount := decimal.NewFromFloat(details.TransactionAmount)
+	amount := decimal.NewFromFloat(details.AutoRecurring.TransactionAmount)
 	startDate := paidAt
 
 	// Check for active subscription to determine start date (renewal vs new)
@@ -116,24 +126,20 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 
 	// Removed UpdateCompanySubscription call as fields are moved to Subscription entity
 
-	pending, _ := s.companyPaymentRepo.GetPendingPaymentByExternalReference(ctx, details.ExternalReference)
-	// First payment will exists
-	if pending != nil {
-		fmt.Printf("Creating first subscription by company id %s", subscriptionExternalRef.CompanyID)
-		paymentToSave := pending
-
-		rawPayload, _ := json.Marshal(dto)
-		paymentToSave.Status = details.Status
-		paymentToSave.ProviderPaymentID = details.ID
-		paymentToSave.PaidAt = &paidAt
-		paymentToSave.RawPayload = rawPayload
-
-		if err := s.companyPaymentRepo.UpdateCompanyPayment(ctx, paymentToSave); err != nil {
-			return err
+	// Check if a payment with this ExternalReference already exists (Pending or Paid)
+	// This prevents duplicates if Payment webhook arrived first and approved it, or if this is a retry.
+	existingPayment, _ := s.companyPaymentRepo.GetCompanyPaymentByExternalReference(ctx, details.ExternalReference)
+	if existingPayment != nil {
+		fmt.Printf("Updating existing subscription payment (First Payment) %s\n", existingPayment.ID)
+		// We only update the PreapprovalID linkage if missing, but we DON'T touch payment status/dates here.
+		// The Payment Webhook logic (runSubscriptionPaymentWebhook) is the owner of Status, PaidAt and ProviderPaymentID.
+		if existingPayment.PreapprovalID == nil || *existingPayment.PreapprovalID == "" {
+			existingPayment.PreapprovalID = &details.ID
+			_ = s.companyPaymentRepo.UpdateCompanyPayment(ctx, existingPayment)
 		}
 
 		sub := companyentity.NewCompanySubscription(uuid.MustParse(subscriptionExternalRef.CompanyID), companyentity.PlanType(subscriptionExternalRef.PlanType), startDate, endDate)
-		sub.PaymentID = &paymentToSave.ID
+		sub.PaymentID = &existingPayment.ID
 
 		subModel := &model.CompanySubscription{}
 		subModel.FromDomain(sub)
@@ -160,22 +166,21 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 		Entity:            paymentEntity,
 		CompanyID:         uuid.MustParse(subscriptionExternalRef.CompanyID),
 		Provider:          mercadoPagoProvider,
-		Status:            companyentity.PaymentStatusPending,
+		Status:            companyentity.PaymentStatus(details.Status),
 		Currency:          "BRL",
 		Amount:            amount,
 		Months:            subscriptionExternalRef.Frequency,
 		PlanType:          companyentity.PlanType(subscriptionExternalRef.PlanType),
-		ProviderPaymentID: details.ID,
+		ProviderPaymentID: nil,         // No payment ID yet. Will be updated by payment webhook
+		PreapprovalID:     &details.ID, // Link to the same preapproval
 		ExternalReference: details.ExternalReference,
 		IsMandatory:       false,
+		PaidAt:            &paidAt,
 	}
 	paymentToSave := &model.CompanyPayment{}
 	paymentToSave.FromDomain(domPay)
 
 	rawPayload, _ := json.Marshal(dto)
-	paymentToSave.Status = details.Status
-	paymentToSave.ProviderPaymentID = details.ID
-	paymentToSave.PaidAt = &paidAt
 	paymentToSave.RawPayload = rawPayload
 
 	if err := s.companyPaymentRepo.CreateCompanyPayment(ctx, paymentToSave); err != nil {
@@ -198,6 +203,53 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 			return fmt.Errorf("failed to update current free subscription to new plan: %w", err)
 		}
 	}
+	return nil
+}
+
+// runSubscriptionPaymentWebhook handles the actual payment transaction for a subscription
+func (s *CheckoutUseCase) runSubscriptionPaymentWebhook(ctx context.Context, details *mercadopagoservice.PaymentDetails, dto *companydto.MercadoPagoWebhookDTO) error {
+	// Extract details from external reference
+	subscriptionExternalRef, err := mercadopagoservice.ExtractSubscriptionExternalRef(details.ExternalReference)
+	if err != nil {
+		return fmt.Errorf("invalid external reference (subscription): %w", err)
+	}
+
+	// 1. Find the payment (using ExternalReference)
+	// We search for ANY state to correctly handle retries or race conditions
+	paymentModel, err := s.companyPaymentRepo.GetCompanyPaymentByExternalReference(ctx, details.ExternalReference)
+	if err != nil {
+		// If not found, it might be a retry or logic gap. However, for "SUB:" we expect a record to exist
+		// created either by Checkout (first payment) or Preapproval Webhook (recurrence).
+		return fmt.Errorf("pending subscription payment not found for ref %s: %w", details.ExternalReference, err)
+	}
+
+	if paymentModel == nil {
+		return fmt.Errorf("pending subscription payment not found for ref %s", details.ExternalReference)
+	}
+
+	// Idempotency check
+	if paymentModel.Status == string(companyentity.PaymentStatusApproved) || paymentModel.Status == string(companyentity.PaymentStatusPaid) {
+		return nil
+	}
+
+	// 2. Update with Payment Transaction details
+	paidAt := time.Now().UTC()
+	if details.DateApproved != nil {
+		paidAt = details.DateApproved.UTC()
+	}
+
+	rawPayload, _ := json.Marshal(dto)
+	paymentModel.Status = details.Status
+	paymentModel.ProviderPaymentID = &details.ID // HERE IS THE FIX: Valid Numeric Payment ID
+	paymentModel.PaidAt = &paidAt
+	paymentModel.RawPayload = rawPayload
+
+	// 3. Save updates
+	if err := s.companyPaymentRepo.UpdateCompanyPayment(ctx, paymentModel); err != nil {
+		return fmt.Errorf("failed to update subscription payment: %w", err)
+	}
+
+	fmt.Printf("Subscription payment processed: %s (Transaction ID: %s)\n", subscriptionExternalRef.CompanyID, details.ID)
 	return nil
 }
 
@@ -232,7 +284,7 @@ func (s *CheckoutUseCase) runCostWebhook(ctx context.Context, details *mercadopa
 
 	rawPayload, _ := json.Marshal(dto)
 	paymentModel.Status = details.Status
-	paymentModel.ProviderPaymentID = details.ID
+	paymentModel.ProviderPaymentID = &details.ID
 	paymentModel.PaidAt = &paidAt
 	paymentModel.RawPayload = rawPayload
 
@@ -288,7 +340,7 @@ func (s *CheckoutUseCase) runSubscriptionUpgradeWebhook(ctx context.Context, det
 
 	rawPayload, _ := json.Marshal(dto)
 	paymentModel.Status = details.Status
-	paymentModel.ProviderPaymentID = details.ID
+	paymentModel.ProviderPaymentID = &details.ID
 	paymentModel.PaidAt = &paidAt
 	paymentModel.RawPayload = rawPayload
 
@@ -319,12 +371,12 @@ func (s *CheckoutUseCase) runSubscriptionUpgradeWebhook(ctx context.Context, det
 		return fmt.Errorf("failed to get subscription payment: %w", err)
 	}
 
-	if subPayment.PreapprovalID == "" {
+	if subPayment.PreapprovalID == nil {
 		return fmt.Errorf("subscription payment has no preapproval ID")
 	}
 
 	// Update Mercado Pago Subscription Amount
-	if err := s.mpService.UpdateSubscriptionAmount(ctx, subPayment.PreapprovalID, subscriptionUpgradeExternalRef.NewAmount); err != nil {
+	if err := s.mpService.UpdateSubscriptionAmount(ctx, *subPayment.PreapprovalID, subscriptionUpgradeExternalRef.NewAmount); err != nil {
 		return fmt.Errorf("failed to update subscription amount: %w", err)
 	}
 
