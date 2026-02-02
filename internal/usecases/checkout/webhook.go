@@ -21,7 +21,7 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 		return ErrMercadoPagoDisabled
 	}
 
-	if dto == nil || dto.Type != "payment" || dto.Data.ID == "" {
+	if dto == nil || (dto.Type != "payment" && dto.Type != "subscription_preapproval") || dto.Data.ID == "" {
 		return nil
 	}
 
