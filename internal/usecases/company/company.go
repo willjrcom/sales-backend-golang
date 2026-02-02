@@ -36,13 +36,14 @@ func NewService(r model.CompanyRepository, companyPaymentRepo model.CompanyPayme
 	return &Service{r: r, companyPaymentRepo: companyPaymentRepo, focusClient: focusClient}
 }
 
-func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Service, u model.UserRepository, us userusecases.Service, es employeeusecases.Service, costRepo model.CompanyUsageCostRepository) {
+func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Service, u model.UserRepository, us userusecases.Service, es employeeusecases.Service, costRepo model.CompanyUsageCostRepository, companySubscriptionRepo model.CompanySubscriptionRepository) {
 	s.a = a
 	s.s = ss
 	s.u = u
 	s.us = us
 	s.es = es
 	s.costRepo = costRepo
+	s.companySubscriptionRepo = companySubscriptionRepo
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (response *companydto.CompanySchemaDTO, err error) {

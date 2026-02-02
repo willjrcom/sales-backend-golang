@@ -64,13 +64,16 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 		paymentType = string(mercadopagoservice.PaymentCheckoutTypeSubscription)
 	}
 
-	switch paymentType {
-	case string(mercadopagoservice.PaymentCheckoutTypeSubscription):
+	switch mercadopagoservice.PaymentCheckoutType(paymentType) {
+	case mercadopagoservice.PaymentCheckoutTypeSubscription:
 		return s.runSubscriptionWebhook(ctx, details, company, dto)
-	case string(mercadopagoservice.PaymentCheckoutTypeCost):
-		return s.runCostWebhook(ctx, details, dto)
-	case string(mercadopagoservice.PaymentCheckoutTypeSubscriptionUpgrade):
+
+	case mercadopagoservice.PaymentCheckoutTypeSubscriptionUpgrade:
 		return s.runSubscriptionUpgradeWebhook(ctx, details, company, dto)
+
+	case mercadopagoservice.PaymentCheckoutTypeCost:
+		return s.runCostWebhook(ctx, details, dto)
+
 	default:
 		return fmt.Errorf("unknown payment type: %s", details.Metadata.PaymentType)
 	}
@@ -104,6 +107,7 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 
 	existing, err := s.companyPaymentRepo.GetCompanyPaymentByProviderID(ctx, details.ID)
 	if err == nil && existing != nil {
+		fmt.Println("Payment already exists")
 		return nil
 	}
 
@@ -116,24 +120,24 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 	startDate := paidAt
 	endDate := startDate.AddDate(0, months, 0)
 
-	activeSub, _, _ := s.companySubscriptionRepo.GetActiveAndUpcomingSubscriptions(ctx, company.ID)
-	var subscriptionExpiresAt *time.Time
+	activeSub, _ := s.companySubscriptionRepo.GetActiveSubscription(ctx, company.ID)
+	subscriptionExpiresAt := paidAt
 	if activeSub != nil {
-		subscriptionExpiresAt = &activeSub.EndDate
+		subscriptionExpiresAt = activeSub.EndDate
 	}
 
-	if subscriptionExpiresAt != nil && subscriptionExpiresAt.After(paidAt) {
+	if subscriptionExpiresAt.After(paidAt) {
 		newExpire := subscriptionExpiresAt.AddDate(0, months, 0)
 		endDate = newExpire
 	}
 
 	// Removed UpdateCompanySubscription call as fields are moved to Subscription entity
 
-	var paymentToSave *model.CompanyPayment
 	pending, _ := s.companyPaymentRepo.GetPendingPaymentByExternalReference(ctx, details.ExternalReference)
 	// First payment will exists
 	if pending != nil {
-		paymentToSave = pending
+		fmt.Printf("Creating first subscription by company id %s", companyID)
+		paymentToSave := pending
 
 		rawPayload, _ := json.Marshal(dto)
 		paymentToSave.Status = details.Status
@@ -154,8 +158,18 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 			return err
 		}
 
+		// Update active free subscription plan type
+		if activeSub.PlanType != companyentity.PlanFree {
+			activeSub.PlanType = companyentity.PlanType(planType)
+			if err := s.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
+				return fmt.Errorf("failed to update current free subscription to new plan: %w", err)
+			}
+		}
+
 		return nil
 	}
+
+	fmt.Printf("Creating recurrency subscription by company id %s", companyID)
 
 	// Recurrency payments must create
 	paymentEntity := entity.NewEntity()
@@ -172,7 +186,7 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 		ExternalReference: details.ExternalReference,
 		IsMandatory:       false,
 	}
-	paymentToSave = &model.CompanyPayment{}
+	paymentToSave := &model.CompanyPayment{}
 	paymentToSave.FromDomain(domPay)
 
 	rawPayload, _ := json.Marshal(dto)
@@ -194,6 +208,13 @@ func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *m
 		return err
 	}
 
+	// Update active free subscription plan type
+	if activeSub.PlanType != companyentity.PlanFree {
+		activeSub.PlanType = companyentity.PlanType(planType)
+		if err := s.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
+			return fmt.Errorf("failed to update current free subscription to new plan: %w", err)
+		}
+	}
 	return nil
 }
 
@@ -291,7 +312,7 @@ func (s *CheckoutUseCase) runSubscriptionUpgradeWebhook(ctx context.Context, det
 
 	// Update company plan (keeps same expiration date - proration)
 	// Update active subscription plan
-	activeSub, _, err := s.companySubscriptionRepo.GetActiveAndUpcomingSubscriptions(ctx, company.ID)
+	activeSub, err := s.companySubscriptionRepo.GetActiveSubscription(ctx, company.ID)
 	if err == nil && activeSub != nil {
 		activeSub.PlanType = companyentity.PlanType(targetPlan)
 		if err := s.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {

@@ -53,7 +53,7 @@ func (h *handlerFiscalInvoiceImpl) handlerEmitirNFCe(w http.ResponseWriter, r *h
 		return
 	}
 
-	invoice, err := h.service.EmitirNFCeParaPedido(ctx, dto.OrderID)
+	invoice, err := h.service.EmitNFCeOrder(ctx, dto.OrderID)
 	if err != nil {
 		status := http.StatusInternalServerError
 		switch err {

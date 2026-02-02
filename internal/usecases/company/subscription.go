@@ -22,7 +22,7 @@ func (s *Service) GetSubscriptionStatus(ctx context.Context) (*companydto.Subscr
 	}
 
 	// Get active and upcoming subscriptions - single call
-	activeSub, upcoming, err := s.companySubscriptionRepo.GetActiveAndUpcomingSubscriptions(ctx, company.ID)
+	activeSub, err := s.companySubscriptionRepo.GetActiveSubscription(ctx, company.ID)
 	if err == nil && activeSub != nil {
 		// Expiration date and days remaining from active subscription
 		expiresAt := activeSub.EndDate.Format(time.RFC3339)
@@ -44,14 +44,6 @@ func (s *Service) GetSubscriptionStatus(ctx context.Context) (*companydto.Subscr
 		default:
 			dto.Periodicity = "MONTHLY"
 		}
-	}
-
-	// Check for upcoming (future) subscription
-	if upcoming != nil {
-		planType := string(upcoming.PlanType)
-		startAt := upcoming.StartDate.Format(time.RFC3339)
-		dto.UpcomingPlan = &planType
-		dto.UpcomingStartAt = &startAt
 	}
 
 	return dto, nil

@@ -59,7 +59,7 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 	}
 
 	// Fetch active/upcoming subscriptions
-	activeSub, _, _ := uc.companySubscriptionRepo.GetActiveAndUpcomingSubscriptions(ctx, companyModel.ID)
+	activeSub, _ := uc.companySubscriptionRepo.GetActiveSubscription(ctx, companyModel.ID)
 	subscriptionExpiresAt := time.Now().UTC()
 	if activeSub != nil && activeSub.PlanType != companyentity.PlanFree {
 		return nil, fmt.Errorf("company already has an active subscription")
@@ -169,13 +169,6 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 
 	if err := uc.companyPaymentRepo.CreateCompanyPayment(ctx, paymentModel); err != nil {
 		return nil, fmt.Errorf("failed to create pending subscription payment: %w", err)
-	}
-
-	if activeSub.PlanType != companyentity.PlanFree {
-		activeSub.PlanType = companyentity.PlanType(req.ToPlanType())
-		if err := uc.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
-			return nil, fmt.Errorf("failed to update current free subscription to new plan: %w", err)
-		}
 	}
 
 	return &billingdto.CheckoutResponseDTO{
@@ -326,7 +319,7 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 		return nil, err
 	}
 
-	activeSub, _, _ := uc.companySubscriptionRepo.GetActiveAndUpcomingSubscriptions(ctx, companyModel.ID)
+	activeSub, _ := uc.companySubscriptionRepo.GetActiveSubscription(ctx, companyModel.ID)
 	if activeSub == nil {
 		return nil, errors.New("no active subscription found")
 	}
@@ -340,10 +333,10 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 
 	// Get current subscription to determine periodicity (months)
 	subRefPrefix := fmt.Sprintf("SUB:%s:", companyModel.ID.String())
-	currentSubscription, err := uc.companyPaymentRepo.GetLastPaymentByExternalReferencePrefix(ctx, subRefPrefix)
+	currentPayment, err := uc.companyPaymentRepo.GetLastApprovedPaymentByExternalReferencePrefix(ctx, subRefPrefix)
 	months := 1 // Default to monthly if no subscription found
-	if err == nil && currentSubscription != nil && currentSubscription.Months > 0 {
-		months = currentSubscription.Months
+	if err == nil && currentPayment != nil && currentPayment.Months > 0 {
+		months = currentPayment.Months
 	}
 
 	// Prices with discount applied based on periodicity
@@ -424,7 +417,6 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, targetPlan
 		Metadata: map[string]interface{}{
 			"upgrade_target_plan": string(targetPlan),
 			"is_full_renewal":     sim.IsFullRenewal,
-			"company_id":          companyModel.ID.String(),
 		},
 	}
 
@@ -433,6 +425,7 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, targetPlan
 		return nil, fmt.Errorf("failed to create preference: %w", err)
 	}
 
+	expiresAt := time.Now().UTC().AddDate(0, 0, 2)
 	// Create Pending Payment
 	payment := &companyentity.CompanyPayment{
 		Entity:            paymentEntity,
@@ -445,7 +438,7 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, targetPlan
 		ProviderPaymentID: paymentEntity.ID.String(),
 		PaymentURL:        pref.InitPoint,
 		ExternalReference: paymentEntity.ID.String(), // Payment ID
-		ExpiresAt:         func() *time.Time { t := time.Now().UTC().AddDate(0, 0, 2); return &t }(),
+		ExpiresAt:         &expiresAt,
 		IsMandatory:       false,
 		Description:       description,
 		PlanType:          companyentity.PlanType(targetPlan), // Track the target plan

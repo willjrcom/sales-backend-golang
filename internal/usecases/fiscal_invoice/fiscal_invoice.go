@@ -58,8 +58,8 @@ func NewService(
 	}
 }
 
-// EmitirNFCeParaPedido emits NFC-e for an order and registers the cost
-func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (*fiscalinvoice.FiscalInvoice, error) {
+// EmitNFCeOrder emits NFC-e for an order and registers the cost
+func (s *Service) EmitNFCeOrder(ctx context.Context, orderID uuid.UUID) (*fiscalinvoice.FiscalInvoice, error) {
 	// Get company from context
 	companyModel, err := s.companyRepo.GetCompany(ctx)
 	if err != nil {
@@ -68,7 +68,7 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 
 	company := companyModel.ToDomain()
 
-	sub, _, err := s.companySubscriptionRepo.GetActiveAndUpcomingSubscriptions(ctx, company.ID)
+	sub, err := s.companySubscriptionRepo.GetActiveSubscription(ctx, company.ID)
 	if err != nil || sub == nil {
 		return nil, ErrFunctionalityNotAvailableForPlan
 	}

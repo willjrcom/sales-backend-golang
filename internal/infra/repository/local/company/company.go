@@ -280,8 +280,8 @@ func (r *CompanyRepositoryLocal) MarkActiveSubscriptionAsCanceled(ctx context.Co
 	return nil // Stub
 }
 
-func (r *CompanyRepositoryLocal) GetActiveAndUpcomingSubscriptions(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, *model.CompanySubscription, error) {
-	return nil, nil, nil // Stub
+func (r *CompanyRepositoryLocal) GetActiveSubscription(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
+	return nil, nil // Stub
 }
 
 func (r *CompanyRepositoryLocal) UpdateCompanyPlans(ctx context.Context) error {

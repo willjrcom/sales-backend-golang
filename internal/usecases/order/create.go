@@ -27,7 +27,7 @@ func (s *OrderService) ValidateSubscription(ctx context.Context) error {
 		return ErrCompanyBlocked
 	}
 
-	activeSub, _, _ := s.companySubscriptionRepo.GetActiveAndUpcomingSubscriptions(ctx, companyModel.ID)
+	activeSub, _ := s.companySubscriptionRepo.GetActiveSubscription(ctx, companyModel.ID)
 	if activeSub == nil {
 		return ErrCompanySubscriptionNotFound
 	}

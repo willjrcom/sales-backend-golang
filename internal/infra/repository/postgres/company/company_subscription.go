@@ -85,10 +85,10 @@ func (r *CompanySubscriptionRepositoryBun) MarkActiveSubscriptionAsCanceled(ctx 
 	return tx.Commit()
 }
 
-func (r *CompanySubscriptionRepositoryBun) GetActiveAndUpcomingSubscriptions(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, *model.CompanySubscription, error) {
+func (r *CompanySubscriptionRepositoryBun) GetActiveSubscription(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	defer cancel()
@@ -107,28 +107,11 @@ func (r *CompanySubscriptionRepositoryBun) GetActiveAndUpcomingSubscriptions(ctx
 		if err == sql.ErrNoRows {
 			active = nil
 		} else {
-			return nil, nil, err
+			return nil, err
 		}
 	}
 
-	// Get Upcoming
-	upcoming := &model.CompanySubscription{}
-	if err := tx.NewSelect().
-		Model(upcoming).
-		Where("company_id = ?", companyID).
-		Where("is_active = ?", true).
-		Where("start_date > ?", time.Now().UTC()).
-		Order("start_date ASC").
-		Limit(1).
-		Scan(ctx); err != nil {
-		if err == sql.ErrNoRows {
-			upcoming = nil
-		} else {
-			return nil, nil, err
-		}
-	}
-
-	return active, upcoming, nil
+	return active, nil
 }
 
 func (r *CompanySubscriptionRepositoryBun) UpdateCompanyPlans(ctx context.Context) error {
