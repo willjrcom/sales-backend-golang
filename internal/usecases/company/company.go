@@ -20,15 +20,16 @@ import (
 )
 
 type Service struct {
-	r                  model.CompanyRepository
-	companyPaymentRepo model.CompanyPaymentRepository
-	a                  model.AddressRepository
-	s                  schemaservice.Service
-	u                  model.UserRepository
-	es                 employeeusecases.Service
-	us                 userusecases.Service
-	focusClient        *focusnfe.Client
-	costRepo           model.CompanyUsageCostRepository
+	r                       model.CompanyRepository
+	companyPaymentRepo      model.CompanyPaymentRepository
+	a                       model.AddressRepository
+	s                       schemaservice.Service
+	u                       model.UserRepository
+	es                      employeeusecases.Service
+	us                      userusecases.Service
+	focusClient             *focusnfe.Client
+	costRepo                model.CompanyUsageCostRepository
+	companySubscriptionRepo model.CompanySubscriptionRepository
 }
 
 func NewService(r model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository, focusClient *focusnfe.Client) *Service {
@@ -75,11 +76,6 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	company.Email = userModel.Email
 	company.Contacts = contacts
 
-	// Define 7 days free trial
-	expiration := time.Now().UTC().AddDate(0, 0, 7)
-	company.SubscriptionExpiresAt = &expiration
-	company.CurrentPlan = companyentity.PlanTypeFree
-
 	coordinates, _ := geocodeservice.GetCoordinates(&company.Address.AddressCommonAttributes)
 
 	if coordinates != nil {
@@ -113,6 +109,16 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	}
 
 	if _, err = s.es.CreateEmployee(ctx, employeeInput); err != nil {
+		return nil, err
+	}
+
+	// Define 7 days free trial
+	startDate := time.Now().UTC()
+	endDate := startDate.AddDate(0, 0, 7)
+	companySubscription := companyentity.NewCompanySubscription(company.ID, companyentity.PlanFree, startDate, endDate)
+	modelCompanySubscription := &model.CompanySubscription{}
+	modelCompanySubscription.FromDomain(companySubscription)
+	if err := s.companySubscriptionRepo.CreateSubscription(ctx, modelCompanySubscription); err != nil {
 		return nil, err
 	}
 

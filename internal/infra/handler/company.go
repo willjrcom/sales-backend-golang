@@ -275,7 +275,7 @@ func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r 
 	fmt.Printf("Processing webhook...\n")
 	if err := h.checkoutUC.HandleMercadoPagoWebhook(ctx, dto); err != nil {
 		if err == billingusecases.ErrInvalidWebhookSecret {
-			fmt.Printf("ERROR: Invalid webhook secret\n")
+			fmt.Printf("ERROR: Invalid webhook secret\n", err)
 			jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 			return
 		}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 )
 
@@ -15,13 +16,13 @@ func (s *Service) GetSubscriptionStatus(ctx context.Context) (*companydto.Subscr
 	}
 
 	dto := &companydto.SubscriptionStatusDTO{
-		CurrentPlan:      string(company.CurrentPlan),
+		CurrentPlan:      string(companyentity.PlanFree),
 		CanCancelRenewal: false,
 		Periodicity:      "MONTHLY",
 	}
 
-	// Get active subscription - single source of truth
-	activeSub, err := s.r.GetActiveSubscription(ctx, company.ID)
+	// Get active and upcoming subscriptions - single call
+	activeSub, upcoming, err := s.companySubscriptionRepo.GetActiveAndUpcomingSubscriptions(ctx, company.ID)
 	if err == nil && activeSub != nil {
 		// Expiration date and days remaining from active subscription
 		expiresAt := activeSub.EndDate.Format(time.RFC3339)
@@ -33,23 +34,20 @@ func (s *Service) GetSubscriptionStatus(ctx context.Context) (*companydto.Subscr
 		// Can cancel if subscription hasn't been cancelled yet
 		dto.CanCancelRenewal = !activeSub.IsCanceled
 
+		monthsBetween := MonthsBetween(activeSub.StartDate, activeSub.EndDate)
 		// Get periodicity from linked payment
-		if activeSub.PaymentID != nil {
-			payment, err := s.companyPaymentRepo.GetCompanyPaymentByID(ctx, *activeSub.PaymentID)
-			if err == nil && payment != nil {
-				switch payment.Months {
-				case 6:
-					dto.Periodicity = "SEMIANNUAL"
-				case 12:
-					dto.Periodicity = "ANNUAL"
-				}
-			}
+		switch monthsBetween {
+		case 6:
+			dto.Periodicity = "SEMIANNUAL"
+		case 12:
+			dto.Periodicity = "ANNUAL"
+		default:
+			dto.Periodicity = "MONTHLY"
 		}
 	}
 
 	// Check for upcoming (future) subscription
-	upcoming, err := s.r.GetUpcomingSubscription(ctx, company.ID)
-	if err == nil && upcoming != nil {
+	if upcoming != nil {
 		planType := string(upcoming.PlanType)
 		startAt := upcoming.StartDate.Format(time.RFC3339)
 		dto.UpcomingPlan = &planType
@@ -57,4 +55,23 @@ func (s *Service) GetSubscriptionStatus(ctx context.Context) (*companydto.Subscr
 	}
 
 	return dto, nil
+}
+
+func MonthsBetween(a, b time.Time) int {
+	// Garantir ordem (a <= b)
+	if a.After(b) {
+		a, b = b, a
+	}
+
+	years := b.Year() - a.Year()
+	months := int(b.Month()) - int(a.Month())
+
+	total := years*12 + months
+
+	// Ajuste se ainda não completou o mês
+	if b.Day() < a.Day() {
+		total--
+	}
+
+	return total
 }

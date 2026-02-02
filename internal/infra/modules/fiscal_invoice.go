@@ -17,6 +17,7 @@ func NewFiscalInvoiceModule(
 	db *bun.DB,
 	chi *server.ServerChi,
 	companyRepo model.CompanyRepository,
+	companySubscriptionRepo model.CompanySubscriptionRepository,
 	orderRepo model.OrderRepository,
 	companyService *companyusecases.Service,
 	usageCostRepo model.CompanyUsageCostRepository,
@@ -31,6 +32,7 @@ func NewFiscalInvoiceModule(
 	fiscalInvoiceService := fiscalinvoiceusecases.NewService(
 		fiscalInvoiceRepo,
 		companyRepo,
+		companySubscriptionRepo,
 		fiscalSettingsRepo,
 		orderRepo,
 		usageCostService,

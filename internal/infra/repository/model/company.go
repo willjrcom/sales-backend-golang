@@ -15,18 +15,17 @@ type Company struct {
 }
 
 type CompanyCommonAttributes struct {
-	SchemaName            string                    `bun:"schema_name,notnull"`
-	BusinessName          string                    `bun:"business_name,notnull"`
-	TradeName             string                    `bun:"trade_name,notnull"`
-	Cnpj                  string                    `bun:"cnpj,notnull"`
-	Email                 string                    `bun:"email"`
-	Contacts              []string                  `bun:"contacts,type:jsonb"`
-	Address               *Address                  `bun:"rel:has-one,join:id=object_id,notnull"`
-	Users                 []User                    `bun:"m2m:public.company_to_users,join:Company=User"`
-	Preferences           companyentity.Preferences `bun:"preferences,type:jsonb"`
-	IsBlocked             bool                      `bun:"is_blocked"`
-	SubscriptionExpiresAt *time.Time                `bun:"subscription_expires_at"`
-	CurrentPlan           companyentity.PlanType    `bun:"current_plan,default:'free'"`
+	SchemaName   string                    `bun:"schema_name,notnull"`
+	BusinessName string                    `bun:"business_name,notnull"`
+	TradeName    string                    `bun:"trade_name,notnull"`
+	Cnpj         string                    `bun:"cnpj,notnull"`
+	Email        string                    `bun:"email"`
+	Contacts     []string                  `bun:"contacts,type:jsonb"`
+	Address      *Address                  `bun:"rel:has-one,join:id=object_id,notnull"`
+	Users        []User                    `bun:"m2m:public.company_to_users,join:Company=User"`
+	Preferences  companyentity.Preferences `bun:"preferences,type:jsonb"`
+	IsBlocked    bool                      `bun:"is_blocked"`
+
 	// Billing
 	MonthlyPaymentDueDay          int        `bun:"monthly_payment_due_day,default:10"`
 	MonthlyPaymentDueDayUpdatedAt *time.Time `bun:"monthly_payment_due_day_updated_at"`
@@ -49,8 +48,6 @@ func (c *Company) FromDomain(company *companyentity.Company) {
 			Users:                         []User{},
 			Preferences:                   company.Preferences,
 			IsBlocked:                     company.IsBlocked,
-			SubscriptionExpiresAt:         company.SubscriptionExpiresAt,
-			CurrentPlan:                   company.CurrentPlan,
 			MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
 			MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
 		},
@@ -88,8 +85,6 @@ func (c *Company) ToDomain() *companyentity.Company {
 			Users:                         users,
 			Preferences:                   c.Preferences,
 			IsBlocked:                     c.IsBlocked,
-			SubscriptionExpiresAt:         c.SubscriptionExpiresAt,
-			CurrentPlan:                   c.CurrentPlan,
 			MonthlyPaymentDueDay:          c.MonthlyPaymentDueDay,
 			MonthlyPaymentDueDayUpdatedAt: c.MonthlyPaymentDueDayUpdatedAt,
 		},

@@ -17,21 +17,22 @@ import (
 )
 
 func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyUsageCostRepository) (model.CompanyRepository, *companyusecases.Service, *handler.Handler) {
-	repository := companyrepositorybun.NewCompanyRepositoryBun(db)
+	companyRepository := companyrepositorybun.NewCompanyRepositoryBun(db)
+	companySubscriptionRepo := companyrepositorybun.NewCompanySubscriptionRepositoryBun(db)
 	companyPaymentRepo := companyrepositorybun.NewCompanyPaymentRepositoryBun(db)
 	mpClient := mercadopagoservice.NewClient()
 	focusClient := focusnfe.NewClient()
-	service := companyusecases.NewService(repository, companyPaymentRepo, focusClient)
+	service := companyusecases.NewService(companyRepository, companyPaymentRepo, focusClient)
 	// service.StartSubscriptionWatcher removed in favor of DailyScheduler
 
-	checkoutUC := billingusecases.NewCheckoutUseCase(costRepo, repository, companyPaymentRepo, mpClient)
-	costService := companyusecases.NewUsageCostService(costRepo, repository)
+	checkoutUC := billingusecases.NewCheckoutUseCase(costRepo, companyRepository, companyPaymentRepo, companySubscriptionRepo, mpClient)
+	costService := companyusecases.NewUsageCostService(costRepo, companyRepository)
 
 	// Start Daily Scheduler
-	dailyScheduler := scheduler.NewDailyScheduler(repository, companyPaymentRepo, checkoutUC, service)
+	dailyScheduler := scheduler.NewDailyScheduler(companyRepository, companyPaymentRepo, companySubscriptionRepo, checkoutUC, service)
 	dailyScheduler.Start(context.Background())
 
 	handler := handlerimpl.NewHandlerCompany(service, checkoutUC, costService, dailyScheduler)
 	chi.AddHandler(handler)
-	return repository, service, handler
+	return companyRepository, service, handler
 }

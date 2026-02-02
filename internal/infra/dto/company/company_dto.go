@@ -9,18 +9,17 @@ import (
 )
 
 type CompanyDTO struct {
-	ID                    uuid.UUID                 `json:"id"`
-	SchemaName            string                    `json:"schema_name"`
-	BusinessName          string                    `json:"business_name"`
-	TradeName             string                    `json:"trade_name"`
-	Cnpj                  string                    `json:"cnpj"`
-	Email                 string                    `json:"email"`
-	Contacts              []string                  `json:"contacts"`
-	Address               *addressdto.AddressDTO    `json:"address,omitempty"`
-	Users                 []UserDTO                 `json:"users,omitempty"`
-	Preferences           companyentity.Preferences `json:"preferences,omitempty"`
-	IsBlocked             bool                      `json:"is_blocked,omitempty"`
-	SubscriptionExpiresAt *time.Time                `json:"subscription_expires_at,omitempty"`
+	ID           uuid.UUID                 `json:"id"`
+	SchemaName   string                    `json:"schema_name"`
+	BusinessName string                    `json:"business_name"`
+	TradeName    string                    `json:"trade_name"`
+	Cnpj         string                    `json:"cnpj"`
+	Email        string                    `json:"email"`
+	Contacts     []string                  `json:"contacts"`
+	Address      *addressdto.AddressDTO    `json:"address,omitempty"`
+	Users        []UserDTO                 `json:"users,omitempty"`
+	Preferences  companyentity.Preferences `json:"preferences,omitempty"`
+	IsBlocked    bool                      `json:"is_blocked,omitempty"`
 
 	MonthlyPaymentDueDay          int        `json:"monthly_payment_due_day,omitempty"`
 	MonthlyPaymentDueDayUpdatedAt *time.Time `json:"monthly_payment_due_day_updated_at,omitempty"`
@@ -42,7 +41,6 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 		Users:                         []UserDTO{},
 		Preferences:                   company.Preferences,
 		IsBlocked:                     company.IsBlocked,
-		SubscriptionExpiresAt:         company.SubscriptionExpiresAt,
 		MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
 		MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
 	}

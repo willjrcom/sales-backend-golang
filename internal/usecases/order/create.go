@@ -27,11 +27,12 @@ func (s *OrderService) ValidateSubscription(ctx context.Context) error {
 		return ErrCompanyBlocked
 	}
 
-	if companyModel.SubscriptionExpiresAt == nil {
+	activeSub, _, _ := s.companySubscriptionRepo.GetActiveAndUpcomingSubscriptions(ctx, companyModel.ID)
+	if activeSub == nil {
 		return ErrCompanySubscriptionNotFound
 	}
 
-	if companyModel.SubscriptionExpiresAt.Before(time.Now().UTC()) {
+	if activeSub.EndDate.Before(time.Now().UTC()) {
 		return ErrSubscriptionExpired
 	}
 

@@ -81,17 +81,6 @@ func (r *CompanyRepositoryLocal) ListCompaniesByPaymentDueDay(ctx context.Contex
 	return []model.Company{}, nil
 }
 
-func (r *CompanyRepositoryLocal) UpdateCompanySubscription(ctx context.Context, companyID uuid.UUID, schema string, expiresAt *time.Time, planType string) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	company, ok := r.companies[companyID]
-	if !ok {
-		return fmt.Errorf("company %s not found", companyID)
-	}
-	company.SubscriptionExpiresAt = expiresAt
-	return nil
-}
-
 func (r *CompanyRepositoryLocal) ValidateUserToPublicCompany(ctx context.Context, userID uuid.UUID) (bool, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -291,12 +280,8 @@ func (r *CompanyRepositoryLocal) MarkActiveSubscriptionAsCanceled(ctx context.Co
 	return nil // Stub
 }
 
-func (r *CompanyRepositoryLocal) GetActiveSubscription(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
-	return nil, nil // Stub
-}
-
-func (r *CompanyRepositoryLocal) GetUpcomingSubscription(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
-	return nil, nil // Stub
+func (r *CompanyRepositoryLocal) GetActiveAndUpcomingSubscriptions(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, *model.CompanySubscription, error) {
+	return nil, nil, nil // Stub
 }
 
 func (r *CompanyRepositoryLocal) UpdateCompanyPlans(ctx context.Context) error {

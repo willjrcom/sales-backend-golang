@@ -2,15 +2,25 @@ package companyrepositorybun
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
-func (r *CompanyRepositoryBun) CreateSubscription(ctx context.Context, subscription *model.CompanySubscription) error {
+type CompanySubscriptionRepositoryBun struct {
+	db *bun.DB
+}
+
+func NewCompanySubscriptionRepositoryBun(db *bun.DB) model.CompanySubscriptionRepository {
+	return &CompanySubscriptionRepositoryBun{db: db}
+}
+
+func (r *CompanySubscriptionRepositoryBun) CreateSubscription(ctx context.Context, subscription *model.CompanySubscription) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -26,7 +36,7 @@ func (r *CompanyRepositoryBun) CreateSubscription(ctx context.Context, subscript
 	return tx.Commit()
 }
 
-func (r *CompanyRepositoryBun) UpdateSubscription(ctx context.Context, subscription *model.CompanySubscription) error {
+func (r *CompanySubscriptionRepositoryBun) UpdateSubscription(ctx context.Context, subscription *model.CompanySubscription) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -45,7 +55,7 @@ func (r *CompanyRepositoryBun) UpdateSubscription(ctx context.Context, subscript
 	return tx.Commit()
 }
 
-func (r *CompanyRepositoryBun) MarkActiveSubscriptionAsCanceled(ctx context.Context, companyID uuid.UUID) error {
+func (r *CompanySubscriptionRepositoryBun) MarkActiveSubscriptionAsCanceled(ctx context.Context, companyID uuid.UUID) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -75,55 +85,53 @@ func (r *CompanyRepositoryBun) MarkActiveSubscriptionAsCanceled(ctx context.Cont
 	return tx.Commit()
 }
 
-func (r *CompanyRepositoryBun) GetActiveSubscription(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
+func (r *CompanySubscriptionRepositoryBun) GetActiveAndUpcomingSubscriptions(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, *model.CompanySubscription, error) {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	defer cancel()
 	defer tx.Rollback()
 
-	subscription := &model.CompanySubscription{}
+	// Get Active
+	active := &model.CompanySubscription{}
 	if err := tx.NewSelect().
-		Model(subscription).
+		Model(active).
 		Where("company_id = ?", companyID).
 		Where("is_active = ?", true).
 		Where("end_date > ?", time.Now().UTC()).
 		Order("end_date DESC").
 		Limit(1).
 		Scan(ctx); err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			active = nil
+		} else {
+			return nil, nil, err
+		}
 	}
 
-	return subscription, nil
-}
-
-func (r *CompanyRepositoryBun) GetUpcomingSubscription(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
-	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
-	if err != nil {
-		return nil, err
-	}
-
-	defer cancel()
-	defer tx.Rollback()
-
-	subscription := &model.CompanySubscription{}
+	// Get Upcoming
+	upcoming := &model.CompanySubscription{}
 	if err := tx.NewSelect().
-		Model(subscription).
+		Model(upcoming).
 		Where("company_id = ?", companyID).
 		Where("is_active = ?", true).
 		Where("start_date > ?", time.Now().UTC()).
 		Order("start_date ASC").
 		Limit(1).
 		Scan(ctx); err != nil {
-		return nil, err
+		if err == sql.ErrNoRows {
+			upcoming = nil
+		} else {
+			return nil, nil, err
+		}
 	}
 
-	return subscription, nil
+	return active, upcoming, nil
 }
 
-func (r *CompanyRepositoryBun) UpdateCompanyPlans(ctx context.Context) error {
+func (r *CompanySubscriptionRepositoryBun) UpdateCompanyPlans(ctx context.Context) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err

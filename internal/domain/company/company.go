@@ -23,18 +23,16 @@ type Company struct {
 }
 
 type CompanyCommonAttributes struct {
-	SchemaName            string
-	BusinessName          string
-	TradeName             string
-	Cnpj                  string
-	Email                 string
-	Contacts              []string
-	Address               *addressentity.Address
-	Users                 []User
-	Preferences           Preferences
-	IsBlocked             bool
-	SubscriptionExpiresAt *time.Time
-	CurrentPlan           PlanType
+	SchemaName   string
+	BusinessName string
+	TradeName    string
+	Cnpj         string
+	Email        string
+	Contacts     []string
+	Address      *addressentity.Address
+	Users        []User
+	Preferences  Preferences
+	IsBlocked    bool
 
 	// Billing
 	MonthlyPaymentDueDay          int

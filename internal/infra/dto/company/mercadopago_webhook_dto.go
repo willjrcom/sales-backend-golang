@@ -1,7 +1,12 @@
 package companydto
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
 type MercadoPagoWebhookDTO struct {
-	ID      int64                     `json:"id"`
+	ID      FlexibleID                `json:"id"`
 	Live    bool                      `json:"live_mode"`
 	Type    string                    `json:"type"`
 	Action  string                    `json:"action"`
@@ -16,4 +21,20 @@ type MercadoPagoWebhookDTO struct {
 
 type MercadoPagoWebhookDataDTO struct {
 	ID string `json:"id"`
+}
+
+type FlexibleID string
+
+func (fi *FlexibleID) UnmarshalJSON(data []byte) error {
+	var i int64
+	if err := json.Unmarshal(data, &i); err == nil {
+		*fi = FlexibleID(fmt.Sprintf("%d", i))
+		return nil
+	}
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		*fi = FlexibleID(s)
+		return nil
+	}
+	return nil
 }

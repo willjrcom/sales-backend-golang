@@ -3,7 +3,6 @@ package companyrepositorybun
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -327,41 +326,6 @@ func (r *CompanyRepositoryBun) ListCompaniesByPaymentDueDay(ctx context.Context,
 	}
 
 	return companies, nil
-}
-
-func (r *CompanyRepositoryBun) UpdateCompanySubscription(ctx context.Context, companyID uuid.UUID, schema string, expiresAt *time.Time, planType string) error {
-	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
-	if err != nil {
-		return err
-	}
-
-	defer cancel()
-	defer tx.Rollback()
-
-	update := tx.NewUpdate().
-		Model((*model.Company)(nil)).
-		Where("id = ?", companyID)
-
-	if expiresAt == nil {
-		update = update.Set("subscription_expires_at = NULL")
-	} else {
-		update = update.Set("subscription_expires_at = ?", expiresAt)
-	}
-
-	if planType != "" {
-		// Only update plan if currently 'free'. Otherwise rely on scheduler.
-		// This ensures immediate access for new subs, but defers complex switches to the daily job.
-		update = update.Set("current_plan = CASE WHEN current_plan = 'free' THEN ? ELSE current_plan END", planType)
-	}
-
-	if _, err := update.Exec(ctx); err != nil {
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (r *CompanyRepositoryBun) UpdateBlockStatus(ctx context.Context, companyID uuid.UUID, isBlocked bool) error {

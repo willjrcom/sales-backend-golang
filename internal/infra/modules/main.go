@@ -43,13 +43,14 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 
 	// Usage Cost Repository (Creating here to pass to both Company and Fiscal modules)
 	usageCostRepo := companyrepositorybun.NewCompanyUsageCostRepository(db)
+	companySubscriptionRepo := companyrepositorybun.NewCompanySubscriptionRepositoryBun(db)
 
 	companyRepository, companyService, _ := NewCompanyModule(db, chi, usageCostRepo)
 	_, schemaService := NewSchemaModule(db, chi)
 	userRepository, userService, _ := NewUserModule(db, chi)
 
 	// Fiscal invoice and usage cost modules
-	_, _, _ = NewFiscalInvoiceModule(db, chi, companyRepository, orderRepository, companyService, usageCostRepo)
+	_, _, _ = NewFiscalInvoiceModule(db, chi, companyRepository, companySubscriptionRepo, orderRepository, companyService, usageCostRepo)
 	NewFiscalSettingsModule(db, chi, companyRepository, companyService)
 
 	orderPrintService, _ := NewOrderPrintModule(db, chi)
@@ -71,7 +72,8 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	groupItemService.AddDependencies(itemRepository, productRepository, orderService, orderProcessService)
 
 	stockService.AddDependencies(productRepository, itemRepository)
-	orderService.AddDependencies(orderRepository, shiftRepository, productRepository, processRuleRepository, orderDeliveryRepository, stockRepository, stockMovementRepository, groupItemService, orderProcessService, orderQueueService, orderDeliveryService, orderPickupService, orderTableService, companyService)
+
+	orderService.AddDependencies(orderRepository, shiftRepository, productRepository, processRuleRepository, orderDeliveryRepository, stockRepository, stockMovementRepository, companySubscriptionRepo, groupItemService, orderProcessService, orderQueueService, orderDeliveryService, orderPickupService, orderTableService, companyService)
 	orderDeliveryService.AddDependencies(addressRepository, clientRepository, orderRepository, orderService, deliveryDriverRepository, companyService)
 	deliveryDriverService.AddDependencies(employeeRepository)
 	orderTableService.AddDependencies(tableRepository, orderService, companyService)

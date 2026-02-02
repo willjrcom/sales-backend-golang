@@ -29,29 +29,32 @@ var (
 )
 
 type Service struct {
-	invoiceRepo        model.FiscalInvoiceRepository
-	companyRepo        model.CompanyRepository
-	fiscalSettingsRepo model.FiscalSettingsRepository
-	orderRepo          model.OrderRepository
-	usageCostService   *companyusecases.UsageCostService
-	focusClient        *focusnfe.Client
+	invoiceRepo             model.FiscalInvoiceRepository
+	companyRepo             model.CompanyRepository
+	companySubscriptionRepo model.CompanySubscriptionRepository
+	fiscalSettingsRepo      model.FiscalSettingsRepository
+	orderRepo               model.OrderRepository
+	usageCostService        *companyusecases.UsageCostService
+	focusClient             *focusnfe.Client
 }
 
 func NewService(
 	invoiceRepo model.FiscalInvoiceRepository,
 	companyRepo model.CompanyRepository,
+	companySubscriptionRepo model.CompanySubscriptionRepository,
 	fiscalSettingsRepo model.FiscalSettingsRepository,
 	orderRepo model.OrderRepository,
 	usageCostService *companyusecases.UsageCostService,
 	focusClient *focusnfe.Client,
 ) *Service {
 	return &Service{
-		invoiceRepo:        invoiceRepo,
-		companyRepo:        companyRepo,
-		fiscalSettingsRepo: fiscalSettingsRepo,
-		orderRepo:          orderRepo,
-		usageCostService:   usageCostService,
-		focusClient:        focusClient,
+		invoiceRepo:             invoiceRepo,
+		companyRepo:             companyRepo,
+		companySubscriptionRepo: companySubscriptionRepo,
+		fiscalSettingsRepo:      fiscalSettingsRepo,
+		orderRepo:               orderRepo,
+		usageCostService:        usageCostService,
+		focusClient:             focusClient,
 	}
 }
 
@@ -65,14 +68,17 @@ func (s *Service) EmitirNFCeParaPedido(ctx context.Context, orderID uuid.UUID) (
 
 	company := companyModel.ToDomain()
 
-	// Guard Clause: Check Subscription Plan
-	// NFC-e emission is only allowed for paid plans (Basic, Intermediate, Advanced)
-	if company.CurrentPlan == companyentity.PlanTypeFree { // Or use IsPaidPlan() helper if available?
+	sub, _, err := s.companySubscriptionRepo.GetActiveAndUpcomingSubscriptions(ctx, company.ID)
+	if err != nil || sub == nil {
+		return nil, ErrFunctionalityNotAvailableForPlan
+	}
+
+	if sub.PlanType == companyentity.PlanFree {
 		return nil, ErrFunctionalityNotAvailableForPlan
 	}
 
 	// Fetch Fiscal Settings
-	settings, err := s.fiscalSettingsRepo.GetByCompanyID(ctx, company.ID)
+	settings, err := s.fiscalSettingsRepo.GetByCompanyID(ctx, sub.CompanyID)
 	if err != nil || settings == nil {
 		return nil, ErrFiscalNotEnabled
 	}

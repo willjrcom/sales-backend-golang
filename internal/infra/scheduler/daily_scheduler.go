@@ -11,18 +11,20 @@ import (
 )
 
 type DailyScheduler struct {
-	companyRepo        model.CompanyRepository
-	companyPaymentRepo model.CompanyPaymentRepository
-	checkoutUseCase    *billing.CheckoutUseCase
-	companyUseCase     *companyusecases.Service
+	companyRepo             model.CompanyRepository
+	companyPaymentRepo      model.CompanyPaymentRepository
+	companySubscriptionRepo model.CompanySubscriptionRepository
+	checkoutUseCase         *billing.CheckoutUseCase
+	companyUseCase          *companyusecases.Service
 }
 
-func NewDailyScheduler(companyRepo model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository, checkoutUseCase *billing.CheckoutUseCase, companyUseCase *companyusecases.Service) *DailyScheduler {
+func NewDailyScheduler(companyRepo model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository, companySubscriptionRepo model.CompanySubscriptionRepository, checkoutUseCase *billing.CheckoutUseCase, companyUseCase *companyusecases.Service) *DailyScheduler {
 	return &DailyScheduler{
-		companyRepo:        companyRepo,
-		companyPaymentRepo: companyPaymentRepo,
-		checkoutUseCase:    checkoutUseCase,
-		companyUseCase:     companyUseCase,
+		companyRepo:             companyRepo,
+		companyPaymentRepo:      companyPaymentRepo,
+		companySubscriptionRepo: companySubscriptionRepo,
+		checkoutUseCase:         checkoutUseCase,
+		companyUseCase:          companyUseCase,
 	}
 }
 
@@ -49,7 +51,7 @@ func (s *DailyScheduler) Start(ctx context.Context) {
 }
 
 func (s *DailyScheduler) UpdateCompanyPlans(ctx context.Context) error {
-	return s.companyRepo.UpdateCompanyPlans(ctx)
+	return s.companySubscriptionRepo.UpdateCompanyPlans(ctx)
 }
 
 func (s *DailyScheduler) CheckOverdueAccounts(ctx context.Context) {

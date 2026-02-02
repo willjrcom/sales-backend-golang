@@ -2,11 +2,9 @@ package billing
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -15,29 +13,31 @@ import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	billingdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/checkout"
-	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	mercadopagoservice "github.com/willjrcom/sales-backend-go/internal/infra/service/mercadopago"
 )
 
 type CheckoutUseCase struct {
-	costRepo           model.CompanyUsageCostRepository
-	companyRepo        model.CompanyRepository
-	companyPaymentRepo model.CompanyPaymentRepository
-	mpService          *mercadopagoservice.Client
+	costRepo                model.CompanyUsageCostRepository
+	companyRepo             model.CompanyRepository
+	companyPaymentRepo      model.CompanyPaymentRepository
+	companySubscriptionRepo model.CompanySubscriptionRepository
+	mpService               *mercadopagoservice.Client
 }
 
 func NewCheckoutUseCase(
 	costRepo model.CompanyUsageCostRepository,
 	companyRepo model.CompanyRepository,
 	companyPaymentRepo model.CompanyPaymentRepository,
+	companySubscriptionRepo model.CompanySubscriptionRepository,
 	mpService *mercadopagoservice.Client,
 ) *CheckoutUseCase {
 	return &CheckoutUseCase{
-		costRepo:           costRepo,
-		companyRepo:        companyRepo,
-		companyPaymentRepo: companyPaymentRepo,
-		mpService:          mpService,
+		costRepo:                costRepo,
+		companyRepo:             companyRepo,
+		companyPaymentRepo:      companyPaymentRepo,
+		companySubscriptionRepo: companySubscriptionRepo,
+		mpService:               mpService,
 	}
 }
 
@@ -58,14 +58,22 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		return nil, fmt.Errorf("company email is required for subscription")
 	}
 
-	// Check if user has active subscription
-	hasActiveSubscription := companyModel.SubscriptionExpiresAt != nil && companyModel.SubscriptionExpiresAt.After(time.Now().UTC())
+	// Fetch active/upcoming subscriptions
+	activeSub, _, _ := uc.companySubscriptionRepo.GetActiveAndUpcomingSubscriptions(ctx, companyModel.ID)
+	subscriptionExpiresAt := time.Now().UTC()
+	if activeSub != nil && activeSub.PlanType != companyentity.PlanFree {
+		return nil, fmt.Errorf("company already has an active subscription")
+	}
 
-	if hasActiveSubscription {
+	if activeSub != nil {
+		subscriptionExpiresAt = activeSub.EndDate
+	}
+
+	if activeSub != nil {
 		// User has active subscription - will create UPCOMING/SCHEDULED subscription
 		// Do NOT cancel current subscription
 		fmt.Printf("Creating scheduled subscription for company %s, will start after %s\n",
-			companyModel.ID.String(), companyModel.SubscriptionExpiresAt.Format("2006-01-02"))
+			companyModel.ID.String(), subscriptionExpiresAt.Format("2006-01-02"))
 	} else {
 		// No active subscription or expired - cancel any lingering preapproval and create new
 		if err := uc.CancelSubscription(ctx, companyModel.ID); err != nil {
@@ -87,21 +95,16 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		basePrice = decimal.NewFromFloat(price)
 	}
 
-	months := 1
-	discount := 0.0
 	frequency := 1
+	discount := 0.0
 	frequencyType := "months"
 	switch req.ToPeriodicity() {
 	case companyentity.PeriodicitySemiannual:
-		months = 6
-		discount = 0.05
 		frequency = 6
+		discount = 0.05
 	case companyentity.PeriodicityAnnual:
-		months = 12
-		discount = 0.10
 		frequency = 12
-	default:
-		frequency = 1
+		discount = 0.10
 	}
 
 	// DEBUG: Force daily frequency for testing if env set
@@ -110,92 +113,54 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		frequencyType = "days"
 	}
 
-	totalAmount := basePrice.Mul(decimal.NewFromInt(int64(months)))
+	totalAmount := basePrice.Mul(decimal.NewFromInt(int64(frequency)))
 	finalAmount := totalAmount.Mul(decimal.NewFromFloat(1.0 - discount))
 
 	title := fmt.Sprintf("Assinatura Gfood Plano %s - %s", translatePlanType(req.ToPlanType()), translatePeriodicity(req.ToPeriodicity()))
 	description := fmt.Sprintf("Cobrança recorrente a cada %d meses. Valor: %s", frequency, finalAmount.StringFixed(2))
 
-	externalRef := fmt.Sprintf("SUB:%s:%s:%d", companyModel.ID.String(), req.ToPlanType(), months)
+	externalRef := fmt.Sprintf("SUB:%s:%s:%d", companyModel.ID.String(), req.ToPlanType(), frequency)
 
 	paymentEntity := entity.NewEntity()
-	var checkoutURL string
-	var providerID string
 
-	if hasActiveSubscription {
-		// SCHEDULED SUBSCRIPTION: Create one-time payment (no Preapproval yet)
-		// The subscription will be created as "upcoming" when payment is approved
-		description = fmt.Sprintf("Assinatura Agendada - %s. Iniciará em %s",
-			title, companyModel.SubscriptionExpiresAt.AddDate(0, 0, 1).Format("02/01/2006"))
-
-		checkoutItem := mercadopagoservice.NewCheckoutItem(
-			title,
-			description,
-			1,
-			finalAmount.InexactFloat64(),
-		)
-
-		mpReq := &mercadopagoservice.CheckoutRequest{
-			CompanyID:         companyModel.ID.String(),
-			Schema:            companyModel.SchemaName,
-			PaymentType:       mercadopagoservice.PaymentCheckoutTypeSubscription,
-			Item:              checkoutItem,
-			ExternalReference: paymentEntity.ID.String(),
-			Metadata: map[string]any{
-				"plan_type": string(req.ToPlanType()),
-				"months":    months,
-			},
-		}
-
-		pref, err := uc.mpService.CreateCheckoutPreference(ctx, mpReq)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create scheduled subscription checkout: %w", err)
-		}
-
-		checkoutURL = pref.InitPoint
-		providerID = paymentEntity.ID.String()
-	} else {
-		// IMMEDIATE SUBSCRIPTION: Create Mercado Pago Preapproval (recurring)
-		subReq := &mercadopagoservice.SubscriptionRequest{
-			Title:         title,
-			Description:   description,
-			Price:         finalAmount.InexactFloat64(),
-			Frequency:     frequency,
-			FrequencyType: frequencyType,
-			ExternalRef:   externalRef,
-			PayerEmail:    companyModel.Email,
-			BackURL:       uc.mpService.SuccessURL(),
-		}
-
-		subResp, err := uc.mpService.CreateSubscription(ctx, subReq)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create subscription: %w", err)
-		}
-
-		checkoutURL = subResp.InitPoint
-		providerID = subResp.ID
+	// Create Mercado Pago Preapproval (recurring)
+	subReq := &mercadopagoservice.SubscriptionRequest{
+		Title:         title,
+		Description:   description,
+		Price:         finalAmount.InexactFloat64(),
+		Frequency:     frequency,
+		FrequencyType: frequencyType,
+		ExternalRef:   externalRef,
+		PayerEmail:    companyModel.Email,
+		BackURL:       uc.mpService.SuccessURL(),
 	}
 
+	// Create subscription
+	subResp, err := uc.mpService.CreateSubscription(ctx, subReq)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create subscription: %w", err)
+	}
+
+	preapprovalID := ""
+	if activeSub == nil {
+		preapprovalID = subResp.ID
+	}
+
+	paymentExpiresAt := time.Now().UTC().AddDate(0, 0, 5)
 	payment := &companyentity.CompanyPayment{
 		Entity:            paymentEntity,
 		CompanyID:         companyModel.ID,
 		Provider:          mercadoPagoProvider,
-		ProviderPaymentID: providerID,
-		PreapprovalID: func() string {
-			if hasActiveSubscription {
-				return ""
-			} else {
-				return providerID
-			}
-		}(),
+		ProviderPaymentID: subResp.ID,
+		PreapprovalID:     preapprovalID,
 		Status:            companyentity.PaymentStatusPending,
 		Currency:          "BRL",
 		Amount:            finalAmount,
-		Months:            months,
+		Months:            frequency,
 		PlanType:          companyentity.PlanType(req.ToPlanType()),
-		PaymentURL:        checkoutURL,
+		PaymentURL:        subResp.InitPoint,
 		ExternalReference: externalRef, // Always use SUB: format so frontend detects as "Assinatura"
-		ExpiresAt:         func() *time.Time { t := time.Now().UTC().AddDate(0, 0, 5); return &t }(),
+		ExpiresAt:         &paymentExpiresAt,
 		IsMandatory:       false,
 	}
 
@@ -206,287 +171,17 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		return nil, fmt.Errorf("failed to create pending subscription payment: %w", err)
 	}
 
+	if activeSub.PlanType != companyentity.PlanFree {
+		activeSub.PlanType = companyentity.PlanType(req.ToPlanType())
+		if err := uc.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
+			return nil, fmt.Errorf("failed to update current free subscription to new plan: %w", err)
+		}
+	}
+
 	return &billingdto.CheckoutResponseDTO{
 		PaymentID:   payment.ID.String(),
-		CheckoutUrl: checkoutURL,
+		CheckoutUrl: subResp.InitPoint,
 	}, nil
-}
-
-func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *companydto.MercadoPagoWebhookDTO) error {
-	if s.mpService == nil || !s.mpService.Enabled() {
-		return ErrMercadoPagoDisabled
-	}
-
-	if dto == nil || dto.Type != "payment" || dto.Data.ID == "" {
-		return nil
-	}
-
-	// Get data.id for signature validation (prefer query param, fallback to body)
-	dataIDForSignature := dto.DataIDFromQuery
-	if dataIDForSignature == "" {
-		dataIDForSignature = dto.Data.ID
-	}
-
-	// Validate signature from Mercado Pago
-	if !s.mpService.ValidateSignature(dto.XSignature, dto.XRequestID, dataIDForSignature) {
-		return ErrInvalidWebhookSecret
-	}
-
-	mpPaymentID := dto.Data.ID
-	details, err := s.mpService.GetPayment(ctx, mpPaymentID)
-	if err != nil {
-		return err
-	}
-
-	if details.Status != "approved" {
-		return nil
-	}
-
-	// add schema_name to context from metadata
-	ctx = context.WithValue(ctx, model.Schema("schema"), details.Metadata.SchemaName)
-	companyModel, err := s.companyRepo.GetCompany(ctx)
-	if err != nil {
-		return err
-	}
-
-	company := companyModel.ToDomain()
-
-	// Route based on payment type
-	paymentType := details.Metadata.PaymentType
-
-	// Fallback: If payment type is missing, check ExternalReference for legacy/recurring format
-	if paymentType == "" && strings.HasPrefix(details.ExternalReference, "SUB:") {
-		paymentType = string(mercadopagoservice.PaymentCheckoutTypeSubscription)
-	}
-
-	switch paymentType {
-	case string(mercadopagoservice.PaymentCheckoutTypeSubscription):
-		return s.runSubscriptionWebhook(ctx, details, company, dto)
-	case string(mercadopagoservice.PaymentCheckoutTypeCost):
-		return s.runCostWebhook(ctx, details, company, dto)
-	case string(mercadopagoservice.PaymentCheckoutTypeSubscriptionUpgrade):
-		return s.runSubscriptionUpgradeWebhook(ctx, details, company, dto)
-	default:
-		return fmt.Errorf("unknown payment type: %s", details.Metadata.PaymentType)
-	}
-}
-
-// runSubscriptionWebhook handles payments from Mercado Pago Preapprovals (recurrent subscriptions)
-
-func (s *CheckoutUseCase) runSubscriptionWebhook(ctx context.Context, details *mercadopagoservice.PaymentDetails, company *companyentity.Company, dto *companydto.MercadoPagoWebhookDTO) error {
-	companyID := details.Metadata.CompanyID
-	planType := details.Metadata.PlanType
-	months := details.Metadata.Months
-
-	// Fallback: If metadata is missing (recurring payment), parse from ExternalReference
-	// Format: SUB:<CompanyID>:<PlanType>:<Months>
-	if planType == "" && strings.HasPrefix(details.ExternalReference, "SUB:") {
-		parts := strings.Split(details.ExternalReference, ":")
-		if len(parts) >= 4 {
-			// parts[0] = "SUB"
-			// parts[1] = CompanyID
-			// parts[2] = PlanType
-			// parts[3] = Months
-			if companyID == "" {
-				companyID = parts[1]
-			}
-			planType = parts[2]
-			if m, err := strconv.Atoi(parts[3]); err == nil {
-				months = m
-			}
-		}
-	}
-
-	existing, err := s.companyPaymentRepo.GetCompanyPaymentByProviderID(ctx, details.ID)
-	if err == nil && existing != nil {
-		return nil
-	}
-
-	paidAt := time.Now().UTC()
-	if details.DateApproved != nil {
-		paidAt = details.DateApproved.UTC()
-	}
-
-	amount := decimal.NewFromFloat(details.TransactionAmount)
-	startDate := paidAt
-	endDate := startDate.AddDate(0, months, 0)
-
-	if company.SubscriptionExpiresAt != nil && company.SubscriptionExpiresAt.After(paidAt) {
-		newExpire := company.SubscriptionExpiresAt.AddDate(0, months, 0)
-		endDate = newExpire
-	}
-
-	if err := s.companyRepo.UpdateCompanySubscription(ctx, company.ID, company.SchemaName, &endDate, string(planType)); err != nil {
-		return err
-	}
-
-	var paymentToSave *model.CompanyPayment
-	pending, _ := s.companyPaymentRepo.GetPendingPaymentByExternalReference(ctx, details.ExternalReference)
-	// First payment will exists
-	if pending != nil {
-		paymentToSave = pending
-
-		rawPayload, _ := json.Marshal(dto)
-		paymentToSave.Status = details.Status
-		paymentToSave.ProviderPaymentID = details.ID
-		paymentToSave.PaidAt = &paidAt
-		paymentToSave.RawPayload = rawPayload
-
-		if err := s.companyPaymentRepo.UpdateCompanyPayment(ctx, paymentToSave); err != nil {
-			return err
-		}
-
-		sub := companyentity.NewCompanySubscription(company.ID, companyentity.PlanType(planType), startDate, endDate)
-		sub.PaymentID = &paymentToSave.ID
-
-		subModel := &model.CompanySubscription{}
-		subModel.FromDomain(sub)
-		if err := s.companyRepo.CreateSubscription(ctx, subModel); err != nil {
-			return err
-		}
-
-		return nil
-	}
-
-	// Recurrency payments must create
-	paymentEntity := entity.NewEntity()
-	domPay := &companyentity.CompanyPayment{
-		Entity:            paymentEntity,
-		CompanyID:         uuid.MustParse(companyID),
-		Provider:          mercadoPagoProvider,
-		Status:            companyentity.PaymentStatusPending,
-		Currency:          "BRL",
-		Amount:            amount,
-		Months:            months,
-		PlanType:          companyentity.PlanType(planType),
-		ProviderPaymentID: details.ID,
-		ExternalReference: details.ExternalReference,
-		IsMandatory:       false,
-	}
-	paymentToSave = &model.CompanyPayment{}
-	paymentToSave.FromDomain(domPay)
-
-	rawPayload, _ := json.Marshal(dto)
-	paymentToSave.Status = details.Status
-	paymentToSave.ProviderPaymentID = details.ID
-	paymentToSave.PaidAt = &paidAt
-	paymentToSave.RawPayload = rawPayload
-
-	if err := s.companyPaymentRepo.CreateCompanyPayment(ctx, paymentToSave); err != nil {
-		return err
-	}
-
-	sub := companyentity.NewCompanySubscription(company.ID, companyentity.PlanType(planType), startDate, endDate)
-	sub.PaymentID = &paymentToSave.ID
-
-	subModel := &model.CompanySubscription{}
-	subModel.FromDomain(sub)
-	if err := s.companyRepo.CreateSubscription(ctx, subModel); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// runCostWebhook handles payments for extra costs (NFC-e, etc)
-func (s *CheckoutUseCase) runCostWebhook(ctx context.Context, details *mercadopagoservice.PaymentDetails, company *companyentity.Company, dto *companydto.MercadoPagoWebhookDTO) error {
-	// Parse payment ID from external reference
-	paymentID, err := uuid.Parse(details.ExternalReference)
-	if err != nil {
-		return fmt.Errorf("invalid external reference (payment_id): %w", err)
-	}
-
-	// Get payment
-	paymentModel, err := s.companyPaymentRepo.GetCompanyPaymentByID(ctx, paymentID)
-	if err != nil {
-		return fmt.Errorf("payment %s not found: %w", paymentID, err)
-	}
-
-	// Idempotency check
-	if paymentModel.Status == string(companyentity.PaymentStatusApproved) || paymentModel.Status == string(companyentity.PaymentStatusPaid) {
-		return nil
-	}
-
-	// Update payment status
-	paidAt := time.Now().UTC()
-	if details.DateApproved != nil {
-		paidAt = details.DateApproved.UTC()
-	}
-
-	rawPayload, _ := json.Marshal(dto)
-	paymentModel.Status = details.Status
-	paymentModel.ProviderPaymentID = details.ID
-	paymentModel.PaidAt = &paidAt
-	paymentModel.RawPayload = rawPayload
-
-	if err := s.companyPaymentRepo.UpdateCompanyPayment(ctx, paymentModel); err != nil {
-		return err
-	}
-
-	// Mark linked costs as PAID
-	costs, err := s.costRepo.GetByPaymentID(ctx, paymentID)
-	if err != nil {
-		return fmt.Errorf("failed to get associated costs: %w", err)
-	}
-
-	for _, cost := range costs {
-		cost.Status = "PAID"
-		if err := s.costRepo.Update(ctx, cost); err != nil {
-			return fmt.Errorf("failed to update cost status: %w", err)
-		}
-	}
-
-	return nil
-}
-
-// runSubscriptionUpgradeWebhook handles subscription upgrade payments
-func (s *CheckoutUseCase) runSubscriptionUpgradeWebhook(ctx context.Context, details *mercadopagoservice.PaymentDetails, company *companyentity.Company, dto *companydto.MercadoPagoWebhookDTO) error {
-	// Parse payment ID from external reference
-	paymentID, err := uuid.Parse(details.ExternalReference)
-	if err != nil {
-		return fmt.Errorf("invalid external reference (payment_id): %w", err)
-	}
-
-	// Get payment
-	paymentModel, err := s.companyPaymentRepo.GetCompanyPaymentByID(ctx, paymentID)
-	if err != nil {
-		return fmt.Errorf("payment %s not found: %w", paymentID, err)
-	}
-
-	// Idempotency check
-	if paymentModel.Status == string(companyentity.PaymentStatusApproved) || paymentModel.Status == string(companyentity.PaymentStatusPaid) {
-		return nil
-	}
-
-	// Update payment status
-	paidAt := time.Now().UTC()
-	if details.DateApproved != nil {
-		paidAt = details.DateApproved.UTC()
-	}
-
-	rawPayload, _ := json.Marshal(dto)
-	paymentModel.Status = details.Status
-	paymentModel.ProviderPaymentID = details.ID
-	paymentModel.PaidAt = &paidAt
-	paymentModel.RawPayload = rawPayload
-
-	if err := s.companyPaymentRepo.UpdateCompanyPayment(ctx, paymentModel); err != nil {
-		return err
-	}
-
-	// Get target plan from metadata
-	targetPlan := details.Metadata.UpgradeTargetPlan
-	if targetPlan == "" {
-		return fmt.Errorf("upgrade_target_plan missing from metadata")
-	}
-
-	// Update company plan (keeps same expiration date - proration)
-	if err := s.companyRepo.UpdateCompanySubscription(ctx, company.ID, company.SchemaName, company.SubscriptionExpiresAt, targetPlan); err != nil {
-		return fmt.Errorf("failed to upgrade company plan: %w", err)
-	}
-
-	fmt.Printf("Company %s plan upgraded successfully to %s\n", company.ID, targetPlan)
-	return nil
 }
 
 func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, companyID uuid.UUID) error {
@@ -497,6 +192,7 @@ func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, compa
 	}
 
 	if len(pendingCosts) == 0 {
+		fmt.Println("No pending costs found")
 		return nil // Nothing to pay
 	}
 
@@ -532,6 +228,8 @@ func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, compa
 
 	// 3. Create Checkout Item
 	checkoutItem := mercadopagoservice.NewCheckoutItem(
+		"COST-"+description, // ID
+		"services",          // CategoryID
 		description,
 		"Pagamento de custos mensais acumulados",
 		1,
@@ -545,10 +243,11 @@ func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, compa
 		Schema:            companyModel.SchemaName,
 		PaymentType:       mercadopagoservice.PaymentCheckoutTypeCost,
 		Item:              checkoutItem,
+		Payer:             uc.getPayerFromCompany(companyModel), // Added Payer
 		ExternalReference: paymentEntity.ID.String(),
 	}
 
-	pref, err := uc.mpService.CreateCheckoutPreference(ctx, mpReq)
+	pref, err := uc.mpService.CreateUniqueCheckout(ctx, mpReq)
 	if err != nil {
 		return fmt.Errorf("failed to create preference: %w", err)
 	}
@@ -571,15 +270,6 @@ func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, compa
 
 	paymentModel := &model.CompanyPayment{}
 	paymentModel.FromDomain(payment)
-	// Add Description manually as it's not in Domain yet?
-	// Wait, I updated Domain to have ExpiresAt and IsMandatory.
-	// I didn't add Description to Domain/Model?
-	// Let's check repository model again.
-	// Repository model has Description. Domain CompanyPayment DOES NOT have Description in my previous read?
-	// Let's check 'internal/domain/company/payment.go'.
-	// It doesn't have Description.
-	// I should probably add Description to Domain too or just rely on MP Title.
-	// For now, I'll skip Description mapping if it's missing in Domain.
 
 	if err := uc.companyPaymentRepo.CreateCompanyPayment(ctx, paymentModel); err != nil {
 		return fmt.Errorf("failed to create payment: %w", err)
@@ -591,58 +281,6 @@ func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, compa
 	}
 
 	return nil
-}
-
-func translateMonth(m time.Month) string {
-	months := []string{"", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"}
-	if m >= 1 && m <= 12 {
-		return months[m]
-	}
-	return m.String()
-}
-
-func getEnvFloat(key string, fallback float64) float64 {
-	if value, exists := os.LookupEnv(key); exists {
-		if floatVal, err := strconv.ParseFloat(value, 64); err == nil {
-			return floatVal
-		}
-	}
-	return fallback
-}
-
-func getEnvInt(key string, fallback int) int {
-	if value, exists := os.LookupEnv(key); exists {
-		if intVal, err := strconv.Atoi(value); err == nil {
-			return intVal
-		}
-	}
-	return fallback
-}
-
-func translatePeriodicity(p companyentity.Periodicity) string {
-	switch p {
-	case companyentity.PeriodicityMonthly:
-		return "Mensal"
-	case companyentity.PeriodicitySemiannual:
-		return "Semestral"
-	case companyentity.PeriodicityAnnual:
-		return "Anual"
-	default:
-		return string(p)
-	}
-}
-
-func translatePlanType(p companyentity.PlanType) string {
-	switch p {
-	case companyentity.PlanBasic:
-		return "Básico"
-	case companyentity.PlanIntermediate:
-		return "Intermediário"
-	case companyentity.PlanAdvanced:
-		return "Avançado"
-	default:
-		return string(p)
-	}
 }
 
 // CancelSubscription cancels the company's active subscription (Preapproval).
@@ -674,7 +312,7 @@ func (uc *CheckoutUseCase) CancelSubscription(ctx context.Context, companyID uui
 	}
 
 	// Mark the active subscription as canceled directly (no fetch needed)
-	if err := uc.companyRepo.MarkActiveSubscriptionAsCanceled(ctx, companyID); err != nil {
+	if err := uc.companySubscriptionRepo.MarkActiveSubscriptionAsCanceled(ctx, companyID); err != nil {
 		return fmt.Errorf("failed to mark subscription as canceled: %w", err)
 	}
 
@@ -688,7 +326,14 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 		return nil, err
 	}
 
-	currentPlan := companyentity.PlanType(companyModel.CurrentPlan)
+	activeSub, _, _ := uc.companySubscriptionRepo.GetActiveAndUpcomingSubscriptions(ctx, companyModel.ID)
+	if activeSub == nil {
+		return nil, errors.New("no active subscription found")
+	}
+
+	// Get current plan from active subscription
+	currentPlan := activeSub.PlanType
+
 	if currentPlan == targetPlan {
 		return nil, errors.New("target plan is same as current plan")
 	}
@@ -711,8 +356,8 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 
 	// Calculate remaining days
 	daysRemaining := 0
-	if companyModel.SubscriptionExpiresAt != nil && companyModel.SubscriptionExpiresAt.After(time.Now().UTC()) {
-		daysRemaining = int(time.Until(*companyModel.SubscriptionExpiresAt).Hours() / 24)
+	if activeSub.EndDate.After(time.Now().UTC()) {
+		daysRemaining = int(time.Until(activeSub.EndDate).Hours() / 24)
 	}
 	isFullRenewal := false
 	var upgradeAmount float64
@@ -757,7 +402,10 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, targetPlan
 	description := fmt.Sprintf("Upgrade para plano %s (%d dias restantes)", translatePlanType(targetPlan), sim.DaysRemaining)
 
 	// Create Checkout Item
+	// Create Checkout Item
 	checkoutItem := mercadopagoservice.NewCheckoutItem(
+		string(targetPlan), // ID
+		"services",         // CategoryID
 		description,
 		"Upgrade de Plano",
 		1,
@@ -771,6 +419,7 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, targetPlan
 		Schema:            companyModel.SchemaName,
 		PaymentType:       mercadopagoservice.PaymentCheckoutTypeSubscriptionUpgrade,
 		Item:              checkoutItem,
+		Payer:             uc.getPayerFromCompany(companyModel), // Added Payer
 		ExternalReference: paymentEntity.ID.String(),
 		Metadata: map[string]interface{}{
 			"upgrade_target_plan": string(targetPlan),
@@ -779,7 +428,7 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, targetPlan
 		},
 	}
 
-	pref, err := uc.mpService.CreateCheckoutPreference(ctx, mpReq)
+	pref, err := uc.mpService.CreateUniqueCheckout(ctx, mpReq)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create preference: %w", err)
 	}
@@ -851,6 +500,47 @@ func getPlanPriceWithDiscount(p companyentity.PlanType, months int) float64 {
 	}
 
 	return basePrice * (1 - discountPercent/100)
+}
+
+func (uc *CheckoutUseCase) getPayerFromCompany(company *model.Company) *mercadopagoservice.CheckoutPayer {
+	payer := &mercadopagoservice.CheckoutPayer{
+		Email: company.Email,
+		Name:  company.BusinessName,
+	}
+
+	// Try to get phone from contacts
+	if len(company.Contacts) > 0 {
+		// Simple parser for phone: +5511999999999 or 11999999999
+		// Provide basic AreaCode/Number split if possible, otherwise send as number
+		phone := company.Contacts[0]
+		// Remove non-numeric characters
+		numericPhone := strings.Map(func(r rune) rune {
+			if r >= '0' && r <= '9' {
+				return r
+			}
+			return -1
+		}, phone)
+
+		if len(numericPhone) >= 10 {
+			// Assume standard Brazil format with DDD (2 digits)
+			payer.Phone.AreaCode = numericPhone[:2]
+			payer.Phone.Number = numericPhone[2:]
+		} else {
+			payer.Phone.Number = numericPhone
+		}
+	}
+
+	// Address
+	if company.Address != nil {
+		payer.Address.ZipCode = company.Address.Cep
+		payer.Address.StreetName = company.Address.Street
+		payer.Address.StreetNumber = company.Address.Number
+		payer.Address.Neighborhood = company.Address.Neighborhood
+		payer.Address.City = company.Address.City
+		payer.Address.State = company.Address.UF
+	}
+
+	return payer
 }
 
 func checkoutPaymentEntity() entity.Entity {
