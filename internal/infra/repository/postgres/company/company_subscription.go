@@ -101,6 +101,7 @@ func (r *CompanySubscriptionRepositoryBun) GetActiveSubscription(ctx context.Con
 		Where("company_id = ?", companyID).
 		Where("is_active = ?", true).
 		Where("end_date > ?", time.Now().UTC()).
+		Relation("Payment").
 		Order("end_date DESC").
 		Limit(1).
 		Scan(ctx); err != nil {

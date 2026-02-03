@@ -12,7 +12,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/mercadopago/sdk-go/pkg/config"
 	"github.com/mercadopago/sdk-go/pkg/payment"
@@ -67,13 +66,8 @@ type PaymentMetadata struct {
 
 // PaymentDetails wraps the fields we use when reconciling payments.
 type PaymentDetails struct {
-	ID                string
-	Status            string
-	CurrencyID        string
-	TransactionAmount float64
-	DateApproved      *time.Time
-	ExternalReference string
-	Metadata          PaymentMetadata
+	*payment.Response
+	Metadata PaymentMetadata
 }
 
 // NewClient configures the Mercado Pago SDK clients using environment variables.
@@ -443,20 +437,9 @@ func (c *Client) GetPayment(ctx context.Context, id string) (*PaymentDetails, er
 		}
 	}
 
-	var approved *time.Time
-	if !resource.DateApproved.IsZero() {
-		t := resource.DateApproved
-		approved = &t
-	}
-
 	return &PaymentDetails{
-		ID:                strconv.Itoa(resource.ID),
-		Status:            resource.Status,
-		CurrencyID:        resource.CurrencyID,
-		TransactionAmount: resource.TransactionAmount,
-		DateApproved:      approved,
-		ExternalReference: resource.ExternalReference,
-		Metadata:          meta,
+		Response: resource,
+		Metadata: meta,
 	}, nil
 }
 

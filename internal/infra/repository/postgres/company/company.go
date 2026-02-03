@@ -279,7 +279,7 @@ func (r *CompanyRepositoryBun) ListPublicCompanies(ctx context.Context) ([]model
 	return companies, nil
 }
 
-func (r *CompanyRepositoryBun) ListCompaniesForBilling(ctx context.Context) ([]model.Company, error) {
+func (r *CompanyRepositoryBun) ListBlockCompaniesForBilling(ctx context.Context) ([]model.Company, error) {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -292,6 +292,7 @@ func (r *CompanyRepositoryBun) ListCompaniesForBilling(ctx context.Context) ([]m
 	if err := tx.NewSelect().
 		Model(&companies).
 		Column("id", "schema_name", "business_name", "trade_name", "subscription_expires_at", "is_blocked").
+		Where("is_blocked = ?", true).
 		Scan(ctx); err != nil {
 		return nil, err
 	}

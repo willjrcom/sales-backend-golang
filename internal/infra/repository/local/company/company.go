@@ -70,7 +70,7 @@ func (r *CompanyRepositoryLocal) ListPublicCompanies(ctx context.Context) ([]mod
 	return result, nil
 }
 
-func (r *CompanyRepositoryLocal) ListCompaniesForBilling(ctx context.Context) ([]model.Company, error) {
+func (r *CompanyRepositoryLocal) ListBlockCompaniesForBilling(ctx context.Context) ([]model.Company, error) {
 	return r.ListPublicCompanies(ctx)
 }
 
@@ -181,14 +181,6 @@ func (r *CompanyRepositoryLocal) GetPendingPaymentByExternalReference(ctx contex
 }
 
 func (r *CompanyRepositoryLocal) GetCompanyPaymentByExternalReference(ctx context.Context, externalReference string) (*model.CompanyPayment, error) {
-	return nil, nil // Stub
-}
-
-func (r *CompanyRepositoryLocal) GetLastPaymentByExternalReferencePrefix(ctx context.Context, externalReferencePrefix string) (*model.CompanyPayment, error) {
-	return nil, nil // Stub
-}
-
-func (r *CompanyRepositoryLocal) GetLastApprovedPaymentByExternalReferencePrefix(ctx context.Context, externalReferencePrefix string) (*model.CompanyPayment, error) {
 	return nil, nil // Stub
 }
 

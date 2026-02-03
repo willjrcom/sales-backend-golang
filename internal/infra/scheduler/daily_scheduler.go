@@ -65,7 +65,7 @@ func (s *DailyScheduler) CheckOverdueAccounts(ctx context.Context) {
 	}
 
 	// 2. Unblock companies that have settled their mandatory payments
-	companies, err := s.companyRepo.ListCompaniesForBilling(ctx)
+	companies, err := s.companyRepo.ListBlockCompaniesForBilling(ctx)
 	if err == nil {
 		for _, company := range companies {
 			if company.IsBlocked {

@@ -61,9 +61,9 @@ func ExtractSubscriptionExternalRef(externalRef string) (SubscriptionExternalRef
 }
 
 // ----------------------------------------------------------------------------------------------
-func NewSubscriptionUpgradeExternalRef(companyID string, planType string, newAmount float64, paymentID string) string {
+func NewSubscriptionUpgradeExternalRef(companyID string, planType string, frequency int, newAmount float64, paymentID string) string {
 	now := time.Now().UTC()
-	return fmt.Sprintf("SUB_UP:%s:%d:%s:%d:%s:%f:%s", companyID, now.Day(), now.Month().String(), now.Year(), planType, newAmount, paymentID)
+	return fmt.Sprintf("SUB_UP:%s:%d:%s:%d:%s:%d:%f:%s", companyID, now.Day(), now.Month().String(), now.Year(), planType, frequency, newAmount, paymentID)
 }
 
 type SubscriptionUpgradeExternalRef struct {
@@ -72,6 +72,7 @@ type SubscriptionUpgradeExternalRef struct {
 	Month     string
 	Year      int
 	PlanType  string
+	Frequency int
 	NewAmount float64
 	PaymentID string
 }
@@ -79,7 +80,7 @@ type SubscriptionUpgradeExternalRef struct {
 func ExtractSubscriptionUpgradeExternalRef(externalRef string) (SubscriptionUpgradeExternalRef, error) {
 	parts := strings.Split(externalRef, ":")
 
-	if len(parts) != 8 {
+	if len(parts) != 9 {
 		return SubscriptionUpgradeExternalRef{}, errors.New("invalid external ref format")
 	}
 
@@ -97,7 +98,12 @@ func ExtractSubscriptionUpgradeExternalRef(externalRef string) (SubscriptionUpgr
 		return SubscriptionUpgradeExternalRef{}, errors.New("invalid external ref format")
 	}
 
-	newAmount, err := strconv.ParseFloat(parts[6], 64)
+	frequency, err := strconv.Atoi(parts[6])
+	if err != nil {
+		return SubscriptionUpgradeExternalRef{}, errors.New("invalid external ref format")
+	}
+
+	newAmount, err := strconv.ParseFloat(parts[7], 64)
 	if err != nil {
 		return SubscriptionUpgradeExternalRef{}, errors.New("invalid external ref format")
 	}
@@ -108,8 +114,9 @@ func ExtractSubscriptionUpgradeExternalRef(externalRef string) (SubscriptionUpgr
 		Month:     parts[3],
 		Year:      year,
 		PlanType:  parts[5],
+		Frequency: frequency,
 		NewAmount: newAmount,
-		PaymentID: parts[7],
+		PaymentID: parts[8],
 	}, nil
 }
 

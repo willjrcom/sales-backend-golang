@@ -325,13 +325,11 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 	if currentPlan == targetPlan {
 		return nil, errors.New("target plan is same as current plan")
 	}
-
 	// Get current subscription to determine periodicity (months)
-	subRefPrefix := fmt.Sprintf("SUB:%s:", companyModel.ID.String())
-	currentPayment, err := uc.companyPaymentRepo.GetLastApprovedPaymentByExternalReferencePrefix(ctx, subRefPrefix)
 	months := 1 // Default to monthly if no subscription found
-	if err == nil && currentPayment != nil && currentPayment.Months > 0 {
-		months = currentPayment.Months
+
+	if activeSub.Payment != nil && activeSub.Payment.Months > 0 {
+		months = activeSub.Payment.Months
 	}
 
 	// Prices with discount applied based on periodicity
@@ -370,6 +368,7 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 		DaysRemaining:  daysRemaining,
 		UpgradeAmount:  upgradeAmount,
 		NewMonthlyCost: targetPrice,
+		Frequency:      months,
 	}, nil
 }
 
@@ -402,7 +401,7 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, targetPlan
 	paymentEntity := checkoutPaymentEntity()
 
 	// Generate external reference
-	externalRef := mercadopagoservice.NewSubscriptionUpgradeExternalRef(companyModel.ID.String(), sim.TargetPlan, sim.UpgradeAmount, paymentEntity.ID.String())
+	externalRef := mercadopagoservice.NewSubscriptionUpgradeExternalRef(companyModel.ID.String(), sim.TargetPlan, sim.Frequency, sim.NewMonthlyCost, paymentEntity.ID.String())
 
 	mpReq := &mercadopagoservice.CheckoutRequest{
 		CompanyID:         companyModel.ID.String(),
