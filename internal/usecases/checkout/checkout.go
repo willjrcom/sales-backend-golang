@@ -60,7 +60,7 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 
 	// Fetch active/upcoming subscriptions
 	activeSub, _ := uc.companySubscriptionRepo.GetActiveSubscription(ctx, companyModel.ID)
-	if activeSub != nil && activeSub.PlanType != companyentity.PlanFree {
+	if activeSub != nil && activeSub.PlanType != string(companyentity.PlanFree) {
 		return nil, fmt.Errorf("company already has an active subscription")
 	}
 
@@ -80,11 +80,11 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 	frequency := 1
 	discount := 0.0
 	frequencyType := "months"
-	switch req.ToPeriodicity() {
-	case companyentity.PeriodicitySemiannual:
+	switch req.ToFrequency() {
+	case companyentity.FrequencySemiannual:
 		frequency = 6
 		discount = 0.05
-	case companyentity.PeriodicityAnnual:
+	case companyentity.FrequencyAnnual:
 		frequency = 12
 		discount = 0.10
 	}
@@ -100,13 +100,10 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 	totalAmount := basePrice.Mul(decimal.NewFromInt(int64(frequency)))
 	finalAmount := totalAmount.Mul(decimal.NewFromFloat(1.0 - discount)).Round(2)
 
-	title := fmt.Sprintf("Assinatura Gfood Plano %s - %s", translatePlanType(req.ToPlanType()), translatePeriodicity(req.ToPeriodicity()))
-	description := fmt.Sprintf("Cobrança recorrente a cada %d meses. Valor Total: %s", frequency, finalAmount.StringFixed(2))
-
-	paymentEntity := entity.NewEntity()
+	title := fmt.Sprintf("Assinatura Gfood Plano %s - %s", translatePlanType(req.ToPlanType()), translateFrequency(req.ToFrequency()))
 
 	// Generate external reference
-	externalRef := mercadopagoservice.NewSubscriptionExternalRef(companyModel.ID.String(), string(req.ToPlanType()), frequency, paymentEntity.ID.String())
+	externalRef := mercadopagoservice.NewSubscriptionExternalRef(companyModel.ID.String(), string(req.ToPlanType()), frequency)
 
 	// DEBUG: Verify amount being sent
 	fmt.Printf("DEBUG: Creating subscription. Frequency: %d, Total Amount: %s\n", frequency, finalAmount.String())
@@ -114,7 +111,6 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 	// Create Mercado Pago Preapproval (recurring)
 	subReq := &mercadopagoservice.SubscriptionRequest{
 		Title:         title,
-		Description:   description,
 		Price:         finalAmount.InexactFloat64(),
 		Frequency:     frequency,
 		FrequencyType: frequencyType,
@@ -172,6 +168,8 @@ func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, compa
 		totalAmount = totalAmount.Add(cost.Amount)
 		costIDs[i] = cost.ID
 	}
+
+	totalAmount = totalAmount.Round(2)
 
 	companyModel, err := uc.companyRepo.GetCompany(ctx)
 	if err != nil {
@@ -282,7 +280,7 @@ func (uc *CheckoutUseCase) CancelSubscription(ctx context.Context) error {
 	}
 
 	// Mark the active subscription as canceled directly
-	if err := uc.companySubscriptionRepo.MarkActiveSubscriptionAsCanceled(ctx, companyModel.ID); err != nil {
+	if err := uc.companySubscriptionRepo.MarkSubscriptionAsCanceled(ctx, companyModel.ID); err != nil {
 		return fmt.Errorf("failed to mark subscription as canceled: %w", err)
 	}
 
@@ -304,10 +302,10 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 	// Get current plan from active subscription
 	currentPlan := activeSub.PlanType
 
-	if currentPlan == targetPlan {
+	if currentPlan == string(targetPlan) {
 		return nil, errors.New("target plan is same as current plan")
 	}
-	// Get current subscription to determine periodicity (months)
+	// Get current subscription to determine frequency (months)
 	months := 1 // Default to monthly if no subscription found
 
 	if activeSub.ExternalReference == nil {
@@ -319,11 +317,11 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 	}
 	months = subExtRef.Frequency
 
-	// Prices with discount applied based on periodicity
-	currentPrice := getPlanPriceWithDiscount(currentPlan, months)
+	// Prices with discount applied based on frequency
+	currentPrice := getPlanPriceWithDiscount(companyentity.PlanType(currentPlan), months)
 	targetPrice := getPlanPriceWithDiscount(targetPlan, months)
 
-	if targetPrice <= currentPrice {
+	if targetPrice.LessThanOrEqual(currentPrice) {
 		return nil, errors.New("target plan must be higher value (downgrade not supported via this flow)")
 	}
 
@@ -332,29 +330,36 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 	if activeSub.EndDate.After(time.Now().UTC()) {
 		daysRemaining = int(time.Until(activeSub.EndDate).Hours() / 24)
 	}
-	var upgradeAmount float64
 
-	if daysRemaining < 1 || currentPrice == 0 {
-		// Early Renewal Logic OR Upgrading from Free Plan
+	// Default logic: calculate proration based on remaining days
+	// targetPrice and currentPrice are now TOTAL amounts for the period (months)
+	diffTotal := targetPrice.Sub(currentPrice)
+
+	// Calculate daily difference: Total Difference / Total Days (approx 30 days per month)
+	totalDays := int64(months * 30)
+	dailyDiff := diffTotal.Div(decimal.NewFromInt(totalDays))
+
+	upgradeAmount := dailyDiff.Mul(decimal.NewFromFloat(float64(daysRemaining))).InexactFloat64()
+
+	// Early Renewal Logic OR Upgrading from Free Plan
+	if daysRemaining < 1 || currentPrice.IsZero() {
 		// User pays full price of new plan, and subscription is extended by 1 full period
 		daysRemaining = 0
-		upgradeAmount = targetPrice
-	} else {
-		// Standard Proration Logic
-		diffPerMonth := targetPrice - currentPrice
-		dailyDiff := diffPerMonth / 30.0
-		upgradeAmount = dailyDiff * float64(daysRemaining)
+		upgradeAmount = targetPrice.InexactFloat64()
 	}
 
 	// Always round to 2 decimals for API compatibility
 	upgradeAmount = decimal.NewFromFloat(upgradeAmount).Round(2).InexactFloat64()
+
+	// For display simplicity, monthly cost is Total / Months
+	monthlyDisplayCost := targetPrice.Div(decimal.NewFromInt(int64(months))).Round(2).InexactFloat64()
 
 	return &billingdto.UpgradeSimulationDTO{
 		TargetPlan:     string(targetPlan),
 		OldPlan:        string(currentPlan),
 		DaysRemaining:  daysRemaining,
 		UpgradeAmount:  upgradeAmount,
-		NewMonthlyCost: targetPrice,
+		NewMonthlyCost: monthlyDisplayCost,
 		Frequency:      months,
 	}, nil
 }
@@ -387,8 +392,10 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, targetPlan
 
 	paymentEntity := checkoutPaymentEntity()
 
+	totalCost := decimal.NewFromFloat(sim.NewMonthlyCost).Mul(decimal.NewFromInt(int64(sim.Frequency))).Round(2).InexactFloat64()
+
 	// Generate external reference
-	externalRef := mercadopagoservice.NewSubscriptionUpgradeExternalRef(companyModel.ID.String(), sim.TargetPlan, sim.Frequency, sim.NewMonthlyCost, paymentEntity.ID.String())
+	externalRef := mercadopagoservice.NewSubscriptionUpgradeExternalRef(companyModel.ID.String(), sim.TargetPlan, sim.Frequency, totalCost, paymentEntity.ID.String())
 
 	mpReq := &mercadopagoservice.CheckoutRequest{
 		CompanyID:         companyModel.ID.String(),
@@ -455,14 +462,14 @@ func getPlanPrice(p companyentity.PlanType) float64 {
 	}
 }
 
-// getPlanPriceWithDiscount returns the plan price with discount applied based on periodicity
-func getPlanPriceWithDiscount(p companyentity.PlanType, months int) float64 {
-	basePrice := getPlanPrice(p)
-	if basePrice == 0 {
-		return 0
+// getPlanPriceWithDiscount returns the plan price with discount applied based on frequency
+func getPlanPriceWithDiscount(p companyentity.PlanType, months int) decimal.Decimal {
+	basePrice := decimal.NewFromFloat(getPlanPrice(p))
+	if basePrice.IsZero() {
+		return decimal.Zero
 	}
 
-	// Apply discount based on periodicity
+	// Apply discount based on frequency
 	var discountPercent float64
 	if months >= 12 {
 		// Annual discount
@@ -472,7 +479,8 @@ func getPlanPriceWithDiscount(p companyentity.PlanType, months int) float64 {
 		discountPercent = getEnvFloat("DISCOUNT_SEMESTER_PERCENT", 5)
 	}
 
-	return basePrice * (1 - discountPercent/100)
+	discountedMonthly := basePrice.Mul(decimal.NewFromFloat(1 - discountPercent/100))
+	return discountedMonthly.Mul(decimal.NewFromInt(int64(months))).Round(2)
 }
 
 func (uc *CheckoutUseCase) getPayerFromCompany(company *model.Company) *mercadopagoservice.CheckoutPayer {

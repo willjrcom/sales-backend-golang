@@ -18,7 +18,7 @@ func (s *Service) GetSubscriptionStatus(ctx context.Context) (*companydto.Subscr
 	dto := &companydto.SubscriptionStatusDTO{
 		CurrentPlan:      string(companyentity.PlanFree),
 		CanCancelRenewal: false,
-		Periodicity:      "MONTHLY",
+		Frequency:        "MONTHLY",
 	}
 
 	// Get active and upcoming subscriptions - single call
@@ -37,14 +37,14 @@ func (s *Service) GetSubscriptionStatus(ctx context.Context) (*companydto.Subscr
 		dto.CanCancelRenewal = !activeSub.IsCanceled
 
 		monthsBetween := MonthsBetween(activeSub.StartDate, activeSub.EndDate)
-		// Get periodicity from linked payment
+		// Get frequency from linked payment
 		switch monthsBetween {
 		case 6:
-			dto.Periodicity = "SEMIANNUAL"
+			dto.Frequency = "SEMIANNUAL"
 		case 12:
-			dto.Periodicity = "ANNUAL"
+			dto.Frequency = "ANNUAL"
 		default:
-			dto.Periodicity = "MONTHLY"
+			dto.Frequency = "MONTHLY"
 		}
 	}
 

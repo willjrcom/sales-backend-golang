@@ -235,7 +235,7 @@ func (r *CompanyRepositoryLocal) UpdateSubscription(ctx context.Context, subscri
 	return nil // Stub
 }
 
-func (r *CompanyRepositoryLocal) MarkActiveSubscriptionAsCanceled(ctx context.Context, companyID uuid.UUID) error {
+func (r *CompanyRepositoryLocal) MarkSubscriptionAsCanceled(ctx context.Context, companyID uuid.UUID) error {
 	return nil // Stub
 }
 

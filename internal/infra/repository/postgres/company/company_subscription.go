@@ -55,7 +55,7 @@ func (r *CompanySubscriptionRepositoryBun) UpdateSubscription(ctx context.Contex
 	return tx.Commit()
 }
 
-func (r *CompanySubscriptionRepositoryBun) MarkActiveSubscriptionAsCanceled(ctx context.Context, companyID uuid.UUID) error {
+func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsCanceled(ctx context.Context, companyID uuid.UUID) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -67,10 +67,8 @@ func (r *CompanySubscriptionRepositoryBun) MarkActiveSubscriptionAsCanceled(ctx 
 	result, err := tx.NewUpdate().
 		Model((*model.CompanySubscription)(nil)).
 		Set("is_canceled = ?", true).
+		Set("status = ?", "cancelled").
 		Where("company_id = ?", companyID).
-		Where("is_active = ?", true).
-		Where("start_date <= NOW()"). // Must have already started (not upcoming)
-		Where("end_date > NOW()").    // Must not have expired yet
 		Exec(ctx)
 
 	if err != nil {
@@ -85,7 +83,7 @@ func (r *CompanySubscriptionRepositoryBun) MarkActiveSubscriptionAsCanceled(ctx 
 	return tx.Commit()
 }
 
-func (r *CompanySubscriptionRepositoryBun) MarkInactiveSubscriptionAsActive(ctx context.Context, companyID uuid.UUID) error {
+func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsActive(ctx context.Context, companyID uuid.UUID) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -97,10 +95,8 @@ func (r *CompanySubscriptionRepositoryBun) MarkInactiveSubscriptionAsActive(ctx 
 	result, err := tx.NewUpdate().
 		Model((*model.CompanySubscription)(nil)).
 		Set("is_active = ?", true).
+		Set("status = ?", "authorized").
 		Where("company_id = ?", companyID).
-		Where("is_active = ?", false).
-		Where("start_date <= NOW()"). // Must have already started (not upcoming)
-		Where("end_date > NOW()").    // Must not have expired yet
 		Exec(ctx)
 
 	if err != nil {
@@ -109,7 +105,34 @@ func (r *CompanySubscriptionRepositoryBun) MarkInactiveSubscriptionAsActive(ctx 
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("no inactive subscription found to cancel")
+		return fmt.Errorf("no inactive subscription found to active")
+	}
+
+	return tx.Commit()
+}
+
+func (r *CompanySubscriptionRepositoryBun) UpdateSubscriptionStatus(ctx context.Context, companyID uuid.UUID, status string) error {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	result, err := tx.NewUpdate().
+		Model((*model.CompanySubscription)(nil)).
+		Set("status = ?", status).
+		Where("company_id = ?", companyID).
+		Exec(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf("no active subscription found to update")
 	}
 
 	return tx.Commit()

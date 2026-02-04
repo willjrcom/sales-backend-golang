@@ -81,11 +81,6 @@ func (s *CheckoutUseCase) runSubscriptionPreapprovalWebhook(ctx context.Context,
 
 	fmt.Printf("Subscription preapproval webhook received: %s status: %s\n", preapprovalID, preapproval.Status)
 
-	if preapproval.Status != "authorized" {
-		fmt.Println("Preapproval not authorized")
-		return nil
-	}
-
 	subscriptionExternalRef, err := mercadopagoservice.ExtractSubscriptionExternalRef(preapproval.ExternalReference)
 	if err != nil {
 		return err
@@ -103,26 +98,32 @@ func (s *CheckoutUseCase) runSubscriptionPreapprovalWebhook(ctx context.Context,
 		return fmt.Errorf("frequency not found")
 	}
 
-	// Check removed: We allow multiple payments for the same preapproval (recurrence)
-	// and we don't store PreapprovalID in ProviderPaymentID anymore.
-
-	// Handle cancellation
 	if preapproval.Status == "cancelled" {
 		fmt.Printf("Subscription cancelled for company %s\n", subscriptionExternalRef.CompanyID)
-		if err := s.companySubscriptionRepo.MarkActiveSubscriptionAsCanceled(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID)); err != nil {
+		if err := s.companySubscriptionRepo.MarkSubscriptionAsCanceled(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID)); err != nil {
 			return fmt.Errorf("failed to cancel subscription: %w", err)
 		}
+
+		fmt.Printf("Subscription cancelled for company %s\n", subscriptionExternalRef.CompanyID)
 		return nil
 	}
 
 	if preapproval.Status == "authorized" {
 		fmt.Printf("Subscription authorized for company %s\n", subscriptionExternalRef.CompanyID)
-		if err := s.companySubscriptionRepo.MarkInactiveSubscriptionAsActive(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID)); err != nil {
+		if err := s.companySubscriptionRepo.MarkSubscriptionAsActive(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID)); err != nil {
 			return fmt.Errorf("failed to activate subscription: %w", err)
 		}
+		fmt.Printf("Subscription authorized for company %s\n", subscriptionExternalRef.CompanyID)
 		return nil
 	}
-	// Backfill removed: PreapprovalID is now stored in CompanySubscription, not CompanyPayment.
+
+	// Unknown status
+	if err := s.companySubscriptionRepo.UpdateSubscriptionStatus(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID), preapproval.Status); err != nil {
+		fmt.Printf("Failed to update subscription status: %s\n", err.Error())
+		return err
+	}
+
+	fmt.Printf("Subscription status updated for company %s\n", subscriptionExternalRef.CompanyID)
 	return nil
 }
 
@@ -366,12 +367,14 @@ func (s *CheckoutUseCase) runSubscriptionUpgradeWebhook(ctx context.Context, det
 			return fmt.Errorf("active subscription has no preapproval ID")
 		}
 
+		title := fmt.Sprintf("Assinatura Gfood Plano %s - %s", translatePlanType(companyentity.PlanType(subscriptionUpgradeExternalRef.PlanType)), translateFrequency(companyentity.Frequency(subscriptionUpgradeExternalRef.Frequency)))
+
 		// Update Mercado Pago Subscription Amount with FULL new plan price
-		if err := s.mpService.UpdateSubscriptionAmount(ctx, *activeSub.PreapprovalID, subscriptionUpgradeExternalRef.NewAmount); err != nil {
+		if err := s.mpService.UpdateSubscriptionAmount(ctx, *activeSub.PreapprovalID, title, subscriptionUpgradeExternalRef.NewAmount); err != nil {
 			return fmt.Errorf("failed to update subscription amount: %w", err)
 		}
 
-		activeSub.PlanType = companyentity.PlanType(targetPlan)
+		activeSub.PlanType = targetPlan
 		if err := s.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
 			return fmt.Errorf("failed to update subscription plan: %w", err)
 		}

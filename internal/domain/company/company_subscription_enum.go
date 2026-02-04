@@ -6,7 +6,7 @@ import (
 )
 
 type PlanType string
-type Periodicity string
+type Frequency string
 
 const (
 	PlanFree         PlanType = "free"
@@ -14,9 +14,9 @@ const (
 	PlanIntermediate PlanType = "intermediate"
 	PlanAdvanced     PlanType = "advanced"
 
-	PeriodicityMonthly    Periodicity = "MONTHLY"
-	PeriodicitySemiannual Periodicity = "SEMIANNUAL"
-	PeriodicityAnnual     Periodicity = "ANNUAL"
+	FrequencyMonthly    Frequency = "MONTHLY"
+	FrequencySemiannual Frequency = "SEMIANNUAL"
+	FrequencyAnnual     Frequency = "ANNUAL"
 )
 
 type Plan struct {

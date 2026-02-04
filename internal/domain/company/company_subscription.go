@@ -17,6 +17,7 @@ type CompanySubscription struct {
 	IsCanceled        bool    // If true, renewal (Preapproval) was cancelled in MercadoPago
 	PreapprovalID     *string // Unique identifier for the subscription contract
 	ExternalReference *string // Reference for the subscription flow
+	Status            string
 }
 
 func NewCompanySubscription(companyID uuid.UUID, planType PlanType, startDate, endDate time.Time) *CompanySubscription {

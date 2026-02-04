@@ -336,7 +336,6 @@ func (c *Client) CreateUniqueCheckout(ctx context.Context, req *CheckoutRequest)
 // SubscriptionRequest wraps the information required to create a subscription (preapproval).
 type SubscriptionRequest struct {
 	Title         string
-	Description   string
 	Price         float64
 	Frequency     int
 	FrequencyType string // "months"
@@ -398,12 +397,13 @@ func (c *Client) CancelSubscription(ctx context.Context, preapprovalID string) e
 }
 
 // UpdateSubscriptionAmount updates the recurring amount of a subscription.
-func (c *Client) UpdateSubscriptionAmount(ctx context.Context, preapprovalID string, newAmount float64) error {
+func (c *Client) UpdateSubscriptionAmount(ctx context.Context, preapprovalID string, title string, newAmount float64) error {
 	if c == nil || !c.Enabled() {
 		return fmt.Errorf("mercado pago client is not configured")
 	}
 
 	updateReq := preapproval.UpdateRequest{
+		Reason: title,
 		AutoRecurring: &preapproval.AutoRecurringUpdateRequest{
 			TransactionAmount: newAmount,
 		},

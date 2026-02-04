@@ -8,9 +8,9 @@ import (
 	"time"
 )
 
-func NewSubscriptionExternalRef(companyID string, planType string, frequency int, paymentID string) string {
+func NewSubscriptionExternalRef(companyID string, planType string, frequency int) string {
 	now := time.Now().UTC()
-	return fmt.Sprintf("SUB:%s:%d:%s:%d:%s:%d:%s", companyID, now.Day(), now.Month().String(), now.Year(), planType, frequency, paymentID)
+	return fmt.Sprintf("SUB:%s:%d:%s:%d:%s:%d", companyID, now.Day(), now.Month().String(), now.Year(), planType, frequency)
 }
 
 type SubscriptionExternalRef struct {
@@ -20,13 +20,12 @@ type SubscriptionExternalRef struct {
 	Year      int
 	PlanType  string
 	Frequency int
-	PaymentID string
 }
 
 func ExtractSubscriptionExternalRef(externalRef string) (SubscriptionExternalRef, error) {
 	parts := strings.Split(externalRef, ":")
 
-	if len(parts) != 8 {
+	if len(parts) != 7 {
 		return SubscriptionExternalRef{}, errors.New("invalid external ref format")
 	}
 
@@ -56,7 +55,6 @@ func ExtractSubscriptionExternalRef(externalRef string) (SubscriptionExternalRef
 		Year:      year,
 		PlanType:  parts[5],
 		Frequency: frequency,
-		PaymentID: parts[7],
 	}, nil
 }
 

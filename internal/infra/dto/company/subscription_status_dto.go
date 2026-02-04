@@ -5,7 +5,7 @@ type SubscriptionStatusDTO struct {
 	ExpiresAt        *string   `json:"expires_at"`         // ISO 8601 ou null se free
 	DaysRemaining    *int      `json:"days_remaining"`     // null se free
 	CanCancelRenewal bool      `json:"can_cancel_renewal"` // true se tem assinatura ativa cancelável
-	Periodicity      string    `json:"periodicity"`        // "MONTHLY", "SEMIANNUAL", "ANNUAL" (derived from active subscription)
+	Frequency        string    `json:"frequency"`          // "MONTHLY", "SEMIANNUAL", "ANNUAL" (derived from active subscription)
 	AvailablePlans   []PlanDTO `json:"available_plans,omitempty"`
 }
 

@@ -34,13 +34,13 @@ func getEnvInt(key string, fallback int) int {
 	return fallback
 }
 
-func translatePeriodicity(p companyentity.Periodicity) string {
+func translateFrequency(p companyentity.Frequency) string {
 	switch p {
-	case companyentity.PeriodicityMonthly:
+	case companyentity.FrequencyMonthly:
 		return "Mensal"
-	case companyentity.PeriodicitySemiannual:
+	case companyentity.FrequencySemiannual:
 		return "Semestral"
-	case companyentity.PeriodicityAnnual:
+	case companyentity.FrequencyAnnual:
 		return "Anual"
 	default:
 		return string(p)

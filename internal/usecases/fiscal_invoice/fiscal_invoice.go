@@ -26,7 +26,7 @@ var (
 	ErrInvoiceNotFound                  = errors.New("fiscal invoice not found")
 	ErrCannotCancelInvoice              = errors.New("invoice cannot be cancelled (not authorized or already cancelled)")
 	ErrOrderNotFound                    = errors.New("order not found")
-	ErrFunctionalityNotAvailableForPlan = errors.New("funcionalidade não disponível para o plano atual")
+	ErrFunctionalityNotAvailableForPlan = errors.New("feature not available for your plan")
 )
 
 type Service struct {
@@ -74,7 +74,7 @@ func (s *Service) EmitNFCeOrder(ctx context.Context, orderID uuid.UUID) (*fiscal
 		return nil, ErrFunctionalityNotAvailableForPlan
 	}
 
-	if sub.PlanType == companyentity.PlanFree {
+	if sub.PlanType == string(companyentity.PlanFree) {
 		return nil, ErrFunctionalityNotAvailableForPlan
 	}
 
