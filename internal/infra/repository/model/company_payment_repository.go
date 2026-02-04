@@ -19,6 +19,7 @@ type CompanyPaymentRepository interface {
 	GetCompanyPaymentByExternalReference(ctx context.Context, externalReference string) (*CompanyPayment, error)
 	GetCompanyPaymentByExternalReferenceAndProviderID(ctx context.Context, externalReference string, providerPaymentID string) (*CompanyPayment, error)
 	ListExpiredOptionalPayments(ctx context.Context) ([]CompanyPayment, error)
+	ListByExternalReference(ctx context.Context, externalReference string) ([]CompanyPayment, error)
 
 	// not used
 	GetPendingPaymentByExternalReference(ctx context.Context, externalReference string) (*CompanyPayment, error)

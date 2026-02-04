@@ -129,31 +129,26 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		return nil, fmt.Errorf("failed to create subscription: %w", err)
 	}
 
-	paymentExpiresAt := time.Now().UTC().AddDate(0, 0, 5)
-	payment := &companyentity.CompanyPayment{
-		Entity:            paymentEntity,
-		CompanyID:         companyModel.ID,
-		Provider:          mercadoPagoProvider,
-		Status:            companyentity.PaymentStatusPending,
-		Currency:          "BRL",
-		Amount:            finalAmount,
-		Months:            frequency,
-		PlanType:          companyentity.PlanType(req.ToPlanType()),
-		PaymentURL:        subResp.InitPoint,
-		ExternalReference: externalRef, // Always use SUB: format so frontend detects as "Assinatura"
-		ExpiresAt:         &paymentExpiresAt,
-		IsMandatory:       false,
-	}
+	// Create Inactive Subscription Record (Single record per contract)
+	inactiveSub := companyentity.NewCompanySubscription(
+		companyModel.ID,
+		companyentity.PlanType(req.ToPlanType()),
+		time.Now().UTC(), // StartDate placeholder
+		time.Now().UTC(), // EndDate placeholder
+	)
+	inactiveSub.IsActive = false
+	pid := subResp.ID
+	inactiveSub.PreapprovalID = &pid
+	inactiveSub.ExternalReference = &externalRef
 
-	paymentModel := &model.CompanyPayment{}
-	paymentModel.FromDomain(payment)
+	inactiveSubModel := &model.CompanySubscription{}
+	inactiveSubModel.FromDomain(inactiveSub)
 
-	if err := uc.companyPaymentRepo.CreateCompanyPayment(ctx, paymentModel); err != nil {
-		return nil, fmt.Errorf("failed to create pending subscription payment: %w", err)
+	if err := uc.companySubscriptionRepo.CreateSubscription(ctx, inactiveSubModel); err != nil {
+		return nil, fmt.Errorf("failed to create inactive subscription: %w", err)
 	}
 
 	return &billingdto.CheckoutResponseDTO{
-		PaymentID:   payment.ID.String(),
 		CheckoutUrl: subResp.InitPoint,
 	}, nil
 }
@@ -277,25 +272,12 @@ func (uc *CheckoutUseCase) CancelSubscription(ctx context.Context) error {
 		return fmt.Errorf("no active subscription found")
 	}
 
-	if activeSub.PaymentID == nil {
-		return fmt.Errorf("active subscription has no linked payment")
-	}
-
-	// Get linked payment to find PreapprovalID
-	payment, err := uc.companyPaymentRepo.GetCompanyPaymentByID(ctx, *activeSub.PaymentID)
-	if err != nil {
-		return fmt.Errorf("failed to get subscription payment: %w", err)
-	}
-	if payment == nil {
-		return fmt.Errorf("subscription payment not found")
-	}
-
-	if payment.PreapprovalID == nil || *payment.PreapprovalID == "" {
-		return fmt.Errorf("subscription payment has no preapproval ID")
+	if activeSub.PreapprovalID == nil || *activeSub.PreapprovalID == "" {
+		return fmt.Errorf("active subscription has no preapproval ID")
 	}
 
 	// Cancel the subscription (Preapproval) at Mercado Pago - stops future renewals
-	if err := uc.mpService.CancelSubscription(ctx, *payment.PreapprovalID); err != nil {
+	if err := uc.mpService.CancelSubscription(ctx, *activeSub.PreapprovalID); err != nil {
 		return fmt.Errorf("failed to cancel subscription at Mercado Pago: %w", err)
 	}
 
@@ -328,9 +310,14 @@ func (uc *CheckoutUseCase) CalculateUpgradeProration(ctx context.Context, target
 	// Get current subscription to determine periodicity (months)
 	months := 1 // Default to monthly if no subscription found
 
-	if activeSub.Payment != nil && activeSub.Payment.Months > 0 {
-		months = activeSub.Payment.Months
+	if activeSub.ExternalReference == nil {
+		return nil, errors.New("active subscription has no external reference")
 	}
+	subExtRef, err := mercadopagoservice.ExtractSubscriptionExternalRef(*activeSub.ExternalReference)
+	if err != nil {
+		return nil, err
+	}
+	months = subExtRef.Frequency
 
 	// Prices with discount applied based on periodicity
 	currentPrice := getPlanPriceWithDiscount(currentPlan, months)
@@ -451,7 +438,6 @@ func (uc *CheckoutUseCase) CreateUpgradeCheckout(ctx context.Context, targetPlan
 	fmt.Printf("DEBUG: Payment created successfully with ID: %s\n", payment.ID)
 
 	return &billingdto.CheckoutResponseDTO{
-		PaymentID:   payment.ID.String(),
 		CheckoutUrl: pref.InitPoint,
 	}, nil
 }

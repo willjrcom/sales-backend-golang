@@ -264,6 +264,32 @@ func (r *CompanyPaymentRepositoryBun) GetCompanyPaymentsByExternalReference(ctx 
 	return payments, nil
 }
 
+// GetCompanyPaymentByExternalReference implements [model.CompanyPaymentRepository].
+func (r *CompanyPaymentRepositoryBun) GetCompanyPaymentByExternalReference(ctx context.Context, externalReference string) (*model.CompanyPayment, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	payment := &model.CompanyPayment{}
+	query := tx.NewSelect().
+		Model(payment).
+		Where("external_reference = ?", externalReference).
+		Order("created_at DESC").
+		Limit(1)
+
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return payment, nil
+}
+
 func (r *CompanyPaymentRepositoryBun) GetCompanyPaymentByExternalReferenceAndProviderID(ctx context.Context, externalReference string, providerPaymentID string) (*model.CompanyPayment, error) {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -330,6 +356,29 @@ func (r *CompanyPaymentRepositoryBun) ListExpiredOptionalPayments(ctx context.Co
 		Where("status = ?", "pending").
 		Where("is_mandatory = ?", false).
 		Where("expires_at < ?", time.Now().UTC()).
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return payments, nil
+}
+
+func (r *CompanyPaymentRepositoryBun) ListByExternalReference(ctx context.Context, externalReference string) ([]model.CompanyPayment, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	var payments []model.CompanyPayment
+	if err := tx.NewSelect().
+		Model(&payments).
+		Where("external_reference = ?", externalReference).
+		Order("created_at DESC").
 		Scan(ctx); err != nil {
 		return nil, err
 	}

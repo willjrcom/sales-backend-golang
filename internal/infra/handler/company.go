@@ -237,14 +237,7 @@ func (h *handlerCompanyImpl) handlerGetMonthlyCosts(w http.ResponseWriter, r *ht
 func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("========== MERCADO PAGO WEBHOOK RECEIVED ==========\n")
-	fmt.Printf("Method: %s\n", r.Method)
 	fmt.Printf("URL: %s\n", r.URL.String())
-	fmt.Printf("Headers:\n")
-	for name, values := range r.Header {
-		for _, value := range values {
-			fmt.Printf("  %s: %s\n", name, value)
-		}
-	}
 
 	dto := &companydto.MercadoPagoWebhookDTO{}
 	// Parse body manually or use helper. The payload from MP matches the DTO
@@ -268,9 +261,6 @@ func (h *handlerCompanyImpl) handlerMercadoPagoWebhook(w http.ResponseWriter, r 
 	dto.XSignature = r.Header.Get("x-signature")
 	dto.XRequestID = r.Header.Get("x-request-id")
 	dto.DataIDFromQuery = r.URL.Query().Get("data.id")
-
-	fmt.Printf("XSignature: %s\n", dto.XSignature)
-	fmt.Printf("XRequestID: %s\n", dto.XRequestID)
 
 	fmt.Printf("Processing webhook...\n")
 	if err := h.checkoutUC.HandleMercadoPagoWebhook(context.Background(), dto); err != nil {

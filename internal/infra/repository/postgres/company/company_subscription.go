@@ -85,6 +85,61 @@ func (r *CompanySubscriptionRepositoryBun) MarkActiveSubscriptionAsCanceled(ctx 
 	return tx.Commit()
 }
 
+func (r *CompanySubscriptionRepositoryBun) MarkInactiveSubscriptionAsActive(ctx context.Context, companyID uuid.UUID) error {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	result, err := tx.NewUpdate().
+		Model((*model.CompanySubscription)(nil)).
+		Set("is_active = ?", true).
+		Where("company_id = ?", companyID).
+		Where("is_active = ?", false).
+		Where("start_date <= NOW()"). // Must have already started (not upcoming)
+		Where("end_date > NOW()").    // Must not have expired yet
+		Exec(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		return fmt.Errorf("no inactive subscription found to cancel")
+	}
+
+	return tx.Commit()
+}
+
+func (r *CompanySubscriptionRepositoryBun) GetByExternalReference(ctx context.Context, externalReference string) (*model.CompanySubscription, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	sub := &model.CompanySubscription{}
+	if err := tx.NewSelect().
+		Model(sub).
+		Where("external_reference = ?", externalReference).
+		Limit(1).
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return sub, nil
+}
+
 func (r *CompanySubscriptionRepositoryBun) GetActiveSubscription(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
@@ -101,7 +156,6 @@ func (r *CompanySubscriptionRepositoryBun) GetActiveSubscription(ctx context.Con
 		Where("company_id = ?", companyID).
 		Where("is_active = ?", true).
 		Where("end_date > ?", time.Now().UTC()).
-		Relation("Payment").
 		Order("end_date DESC").
 		Limit(1).
 		Scan(ctx); err != nil {
@@ -133,4 +187,28 @@ func (r *CompanySubscriptionRepositoryBun) UpdateCompanyPlans(ctx context.Contex
 	}
 
 	return tx.Commit()
+}
+
+func (r *CompanySubscriptionRepositoryBun) GetByPreapprovalID(ctx context.Context, preapprovalID string) (*model.CompanySubscription, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	sub := &model.CompanySubscription{}
+	if err := tx.NewSelect().
+		Model(sub).
+		Where("preapproval_id = ?", preapprovalID).
+		Limit(1).
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+
+	return sub, nil
 }

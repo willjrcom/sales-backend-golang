@@ -13,37 +13,39 @@ type CompanySubscription struct {
 	entitymodel.Entity
 	bun.BaseModel `bun:"table:company_subscriptions"`
 
-	CompanyID  uuid.UUID              `bun:"company_id,type:uuid,notnull"`
-	Company    *Company               `bun:"rel:belongs-to,join:company_id=id"`
-	PaymentID  *uuid.UUID             `bun:"payment_id,type:uuid"` // Nullable
-	Payment    *CompanyPayment        `bun:"rel:belongs-to,join:payment_id=id"`
-	PlanType   companyentity.PlanType `bun:"plan_type,notnull"`
-	StartDate  time.Time              `bun:"start_date,notnull"`
-	EndDate    time.Time              `bun:"end_date,notnull"`
-	IsActive   bool                   `bun:"is_active,notnull"`
-	IsCanceled bool                   `bun:"is_canceled,notnull,default:false"` // Renewal cancelled in MP
+	CompanyID         uuid.UUID              `bun:"company_id,type:uuid,notnull"`
+	Company           *Company               `bun:"rel:belongs-to,join:company_id=id"`
+	PlanType          companyentity.PlanType `bun:"plan_type,notnull"`
+	StartDate         time.Time              `bun:"start_date,notnull"`
+	EndDate           time.Time              `bun:"end_date,notnull"`
+	IsActive          bool                   `bun:"is_active,notnull"`
+	IsCanceled        bool                   `bun:"is_canceled,notnull,default:false"` // Renewal cancelled in MP
+	PreapprovalID     *string                `bun:"preapproval_id"`                    // Unique index in DB
+	ExternalReference *string                `bun:"external_reference"`
 }
 
 func (c *CompanySubscription) ToDomain() *companyentity.CompanySubscription {
 	return &companyentity.CompanySubscription{
-		Entity:     c.Entity.ToDomain(),
-		CompanyID:  c.CompanyID,
-		PaymentID:  c.PaymentID,
-		PlanType:   c.PlanType,
-		StartDate:  c.StartDate,
-		EndDate:    c.EndDate,
-		IsActive:   c.IsActive,
-		IsCanceled: c.IsCanceled,
+		Entity:            c.Entity.ToDomain(),
+		CompanyID:         c.CompanyID,
+		PlanType:          c.PlanType,
+		StartDate:         c.StartDate,
+		EndDate:           c.EndDate,
+		IsActive:          c.IsActive,
+		IsCanceled:        c.IsCanceled,
+		PreapprovalID:     c.PreapprovalID,
+		ExternalReference: c.ExternalReference,
 	}
 }
 
 func (c *CompanySubscription) FromDomain(entity *companyentity.CompanySubscription) {
 	c.Entity = entitymodel.FromDomain(entity.Entity)
 	c.CompanyID = entity.CompanyID
-	c.PaymentID = entity.PaymentID
 	c.PlanType = entity.PlanType
 	c.StartDate = entity.StartDate
 	c.EndDate = entity.EndDate
 	c.IsActive = entity.IsActive
 	c.IsCanceled = entity.IsCanceled
+	c.PreapprovalID = entity.PreapprovalID
+	c.ExternalReference = entity.ExternalReference
 }

@@ -9,25 +9,28 @@ import (
 
 type CompanySubscription struct {
 	entity.Entity
-	CompanyID  uuid.UUID
-	PaymentID  *uuid.UUID // Link to the payment that created this subscription
-	PlanType   PlanType
-	StartDate  time.Time
-	EndDate    time.Time
-	IsActive   bool
-	IsCanceled bool // If true, renewal (Preapproval) was cancelled in MercadoPago
+	CompanyID         uuid.UUID
+	PlanType          PlanType
+	StartDate         time.Time
+	EndDate           time.Time
+	IsActive          bool
+	IsCanceled        bool    // If true, renewal (Preapproval) was cancelled in MercadoPago
+	PreapprovalID     *string // Unique identifier for the subscription contract
+	ExternalReference *string // Reference for the subscription flow
 }
 
 func NewCompanySubscription(companyID uuid.UUID, planType PlanType, startDate, endDate time.Time) *CompanySubscription {
 	ent := entity.NewEntity()
 	return &CompanySubscription{
-		Entity:     ent,
-		CompanyID:  companyID,
-		PlanType:   planType,
-		StartDate:  startDate,
-		EndDate:    endDate,
-		IsActive:   true,
-		IsCanceled: false,
+		Entity:            ent,
+		CompanyID:         companyID,
+		PlanType:          planType,
+		StartDate:         startDate,
+		EndDate:           endDate,
+		IsActive:          true,
+		IsCanceled:        false,
+		PreapprovalID:     nil,
+		ExternalReference: nil,
 	}
 }
 

@@ -12,7 +12,6 @@ type CreateSubscriptionCheckoutDTO struct {
 }
 
 type CheckoutResponseDTO struct {
-	PaymentID   string `json:"payment_id"`
 	CheckoutUrl string `json:"checkout_url"`
 }
 

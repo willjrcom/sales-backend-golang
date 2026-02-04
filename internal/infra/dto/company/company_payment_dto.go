@@ -13,7 +13,6 @@ type CompanyPaymentDTO struct {
 	ID                uuid.UUID       `json:"id"`
 	Provider          string          `json:"provider"`
 	ProviderPaymentID *string         `json:"provider_payment_id"`
-	PreapprovalID     *string         `json:"preapproval_id"`
 	Status            string          `json:"status"`
 	Currency          string          `json:"currency"`
 	Amount            decimal.Decimal `json:"amount"`
@@ -38,7 +37,6 @@ func (c *CompanyPaymentDTO) FromDomain(payment *companyentity.CompanyPayment) {
 		ID:                payment.ID,
 		Provider:          payment.Provider,
 		ProviderPaymentID: payment.ProviderPaymentID,
-		PreapprovalID:     payment.PreapprovalID,
 		Status:            string(payment.Status),
 		Currency:          payment.Currency,
 		Amount:            payment.Amount,

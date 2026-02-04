@@ -49,9 +49,9 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 		return err
 	}
 
-	if details.Status != "approved" {
-		return nil
-	}
+	// if details.Status != "approved" {
+	// 	return nil
+	// }
 
 	parts := strings.Split(details.ExternalReference, ":")
 	if len(parts) == 0 {
@@ -115,100 +115,14 @@ func (s *CheckoutUseCase) runSubscriptionPreapprovalWebhook(ctx context.Context,
 		return nil
 	}
 
-	// Use DateCreated for subscriptions as approval date isn't always present in the same format
-	paidAt := preapproval.DateCreated.UTC()
-
-	amount := decimal.NewFromFloat(preapproval.AutoRecurring.TransactionAmount)
-	startDate := paidAt
-
-	// Check for active subscription to determine start date (renewal vs new)
-	activeSub, _ := s.companySubscriptionRepo.GetActiveSubscription(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID))
-	if activeSub != nil && activeSub.PlanType != companyentity.PlanFree {
-		if activeSub.EndDate.After(paidAt) {
-			startDate = activeSub.EndDate
+	if preapproval.Status == "authorized" {
+		fmt.Printf("Subscription authorized for company %s\n", subscriptionExternalRef.CompanyID)
+		if err := s.companySubscriptionRepo.MarkInactiveSubscriptionAsActive(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID)); err != nil {
+			return fmt.Errorf("failed to activate subscription: %w", err)
 		}
-	}
-
-	// Calculate end date based on start date
-	endDate := startDate.AddDate(0, subscriptionExternalRef.Frequency, 0)
-
-	// Removed UpdateCompanySubscription call as fields are moved to Subscription entity
-
-	existingPayments, _ := s.companyPaymentRepo.GetCompanyPaymentsByExternalReference(ctx, subscriptionExternalRef.ExternalReference)
-	if len(existingPayments) > 0 {
-		fmt.Printf("Updating existing subscription payment (First Payment) %s\n", existingPayments[0].ID)
-		// We only update the PreapprovalID linkage if missing, but we DON'T touch payment status/dates here.
-		// The Payment Webhook logic (runSubscriptionPaymentWebhook) is the owner of Status, PaidAt and ProviderPaymentID.
-		if existingPayments[0].PreapprovalID == nil || *existingPayments[0].PreapprovalID == "" {
-			existingPayment.PreapprovalID = &preapproval.ID
-			_ = s.companyPaymentRepo.UpdateCompanyPayment(ctx, existingPayment)
-		}
-
-		sub := companyentity.NewCompanySubscription(uuid.MustParse(subscriptionExternalRef.CompanyID), companyentity.PlanType(subscriptionExternalRef.PlanType), startDate, endDate)
-		sub.PaymentID = &existingPayment.ID
-
-		subModel := &model.CompanySubscription{}
-		subModel.FromDomain(sub)
-		if err := s.companySubscriptionRepo.CreateSubscription(ctx, subModel); err != nil {
-			return err
-		}
-
-		// Update active free subscription plan type to finish the free trial
-		if activeSub != nil && activeSub.PlanType == companyentity.PlanFree {
-			activeSub.EndDate = startDate
-			if err := s.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
-				return fmt.Errorf("failed to update current free subscription to new plan: %w", err)
-			}
-		}
-
 		return nil
 	}
-
-	fmt.Printf("Creating recurrency subscription by company id %s", subscriptionExternalRef.CompanyID)
-
-	// Recurrency payments must create
-	paymentEntity := entity.NewEntity()
-	domPay := &companyentity.CompanyPayment{
-		Entity:            paymentEntity,
-		CompanyID:         uuid.MustParse(subscriptionExternalRef.CompanyID),
-		Provider:          mercadoPagoProvider,
-		Status:            companyentity.PaymentStatus(preapproval.Status),
-		Currency:          "BRL",
-		Amount:            amount,
-		Months:            subscriptionExternalRef.Frequency,
-		PlanType:          companyentity.PlanType(subscriptionExternalRef.PlanType),
-		ProviderPaymentID: nil,             // No payment ID yet. Will be updated by payment webhook
-		PreapprovalID:     &preapproval.ID, // Link to the same preapproval
-		ExternalReference: preapproval.ExternalReference,
-		IsMandatory:       false,
-		PaidAt:            &paidAt,
-	}
-	paymentToSave := &model.CompanyPayment{}
-	paymentToSave.FromDomain(domPay)
-
-	rawPayload, _ := json.Marshal(dto)
-	paymentToSave.RawPayload = rawPayload
-
-	if err := s.companyPaymentRepo.CreateCompanyPayment(ctx, paymentToSave); err != nil {
-		return err
-	}
-
-	sub := companyentity.NewCompanySubscription(uuid.MustParse(subscriptionExternalRef.CompanyID), companyentity.PlanType(subscriptionExternalRef.PlanType), startDate, endDate)
-	sub.PaymentID = &paymentToSave.ID
-
-	subModel := &model.CompanySubscription{}
-	subModel.FromDomain(sub)
-	if err := s.companySubscriptionRepo.CreateSubscription(ctx, subModel); err != nil {
-		return err
-	}
-
-	// Update active free subscription plan type to finish the free trial
-	if activeSub != nil && activeSub.PlanType == companyentity.PlanFree {
-		activeSub.EndDate = startDate
-		if err := s.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
-			return fmt.Errorf("failed to update current free subscription to new plan: %w", err)
-		}
-	}
+	// Backfill removed: PreapprovalID is now stored in CompanySubscription, not CompanyPayment.
 	return nil
 }
 
@@ -220,37 +134,93 @@ func (s *CheckoutUseCase) runSubscriptionPaymentWebhook(ctx context.Context, det
 		return fmt.Errorf("invalid external reference (subscription): %w", err)
 	}
 
-	if details.Order.ID == "" {
-		return fmt.Errorf("order id not found")
-	}
+	// 1. Upsert Payment Record (History)
+	transactionID := strconv.Itoa(details.ID)
+	existingPayment, err := s.companyPaymentRepo.GetCompanyPaymentByExternalReferenceAndProviderID(ctx, details.ExternalReference, transactionID)
 
-	// se ja existir, é porque o pagamento ja foi processado
-	paymentModel, err := s.companyPaymentRepo.GetCompanyPaymentByExternalReferenceAndProviderID(ctx, details.ExternalReference, strconv.Itoa(details.ID))
-	if paymentModel != nil {
-		return fmt.Errorf("payment already processed")
-	}
-
-	// 2. Update with Payment Transaction details
 	paidAt := time.Now().UTC()
 	if !details.DateApproved.IsZero() {
 		paidAt = details.DateApproved.UTC()
 	}
-
-	transactionID := strconv.Itoa(details.ID)
 	rawPayload, _ := json.Marshal(dto)
-	paymentModel = &model.CompanyPayment{
-		Status:            details.Status,
-		ProviderPaymentID: &transactionID,
-		PaidAt:            &paidAt,
-		RawPayload:        rawPayload,
+
+	if existingPayment != nil {
+		// Update existing payment
+		fmt.Printf("Updating existing subscription payment: %s status: %s\n", existingPayment.ID, details.Status)
+		existingPayment.Status = details.Status
+		existingPayment.PaidAt = &paidAt
+		existingPayment.RawPayload = rawPayload
+		// PreapprovalID removed from CompanyPayment
+
+		if err := s.companyPaymentRepo.UpdateCompanyPayment(ctx, existingPayment); err != nil {
+			return fmt.Errorf("failed to update subscription payment: %w", err)
+		}
+	} else {
+		// Create new payment (Recurrence or missed initial webhook)
+		fmt.Printf("Creating new subscription payment (Recurrence): %s status: %s\n", transactionID, details.Status)
+		amount := decimal.NewFromFloat(details.TransactionAmount)
+		paymentEntity := entity.NewEntity()
+
+		newPayment := &companyentity.CompanyPayment{
+			Entity:            paymentEntity,
+			CompanyID:         uuid.MustParse(subscriptionExternalRef.CompanyID),
+			Provider:          mercadoPagoProvider,
+			Status:            companyentity.PaymentStatus(details.Status),
+			Currency:          details.CurrencyID,
+			Amount:            amount,
+			Months:            subscriptionExternalRef.Frequency,
+			PaymentURL:        "", // No init point for recurrence
+			ExternalReference: details.ExternalReference,
+			ProviderPaymentID: &transactionID,
+			IsMandatory:       false,
+			PlanType:          companyentity.PlanType(subscriptionExternalRef.PlanType),
+		}
+
+		if details.Status == "approved" {
+			newPayment.PaidAt = &paidAt
+		}
+		newPayment.RawPayload = rawPayload
+
+		paymentModel := &model.CompanyPayment{}
+		paymentModel.FromDomain(newPayment)
+
+		if err := s.companyPaymentRepo.CreateCompanyPayment(ctx, paymentModel); err != nil {
+			return fmt.Errorf("failed to create subscription payment: %w", err)
+		}
 	}
 
-	// 3. Save updates
-	if err := s.companyPaymentRepo.UpdateCompanyPayment(ctx, paymentModel); err != nil {
-		return fmt.Errorf("failed to update subscription payment: %w", err)
+	// 3. Manage Subscription Contract (Activation/Renewal)
+	// Only proceed if payment is approved
+	if details.Status == "approved" {
+		// Fetch the single subscription record for this contract
+		subModel, err := s.companySubscriptionRepo.GetByExternalReference(ctx, details.ExternalReference)
+		if err != nil {
+			return fmt.Errorf("failed to get subscription: %w", err)
+		}
+
+		// Subscription found: Activate or Extend
+		fmt.Printf("Updating active subscription %s for external reference %s\n", subModel.ID, details.ExternalReference)
+
+		// If inactive (First payment logic), set start date
+		if !subModel.IsActive {
+			subModel.IsActive = true
+			subModel.StartDate = paidAt
+			subModel.EndDate = paidAt.AddDate(0, subscriptionExternalRef.Frequency, 0)
+		} else {
+			// Renewal: Extend end date
+			// Simple logic: If expired, reset start/end from now. If valid, extend.
+			if subModel.EndDate.Before(paidAt) {
+				subModel.EndDate = paidAt.AddDate(0, subscriptionExternalRef.Frequency, 0)
+			} else {
+				subModel.EndDate = subModel.EndDate.AddDate(0, subscriptionExternalRef.Frequency, 0)
+			}
+		}
+
+		if err := s.companySubscriptionRepo.UpdateSubscription(ctx, subModel); err != nil {
+			return fmt.Errorf("failed to update subscription contract: %w", err)
+		}
 	}
 
-	fmt.Printf("Subscription payment processed: %s (Transaction ID: %s)\n", subscriptionExternalRef.CompanyID, transactionID)
 	return nil
 }
 
@@ -278,47 +248,55 @@ func (s *CheckoutUseCase) runCostWebhook(ctx context.Context, details *mercadopa
 	}
 
 	// Update payment status
-	paidAt := time.Now().UTC()
-	if !details.DateApproved.IsZero() {
-		paidAt = details.DateApproved.UTC()
+	// Update payment status
+	var paidAt *time.Time
+	if details.Status == "approved" {
+		t := time.Now().UTC()
+		if !details.DateApproved.IsZero() {
+			t = details.DateApproved.UTC()
+		}
+		paidAt = &t
 	}
 
 	transactionID := strconv.Itoa(details.ID)
 	rawPayload, _ := json.Marshal(dto)
 	paymentModel.Status = details.Status
 	paymentModel.ProviderPaymentID = &transactionID
-	paymentModel.PaidAt = &paidAt
+	paymentModel.PaidAt = paidAt
 	paymentModel.RawPayload = rawPayload
 
 	if err := s.companyPaymentRepo.UpdateCompanyPayment(ctx, paymentModel); err != nil {
 		return err
 	}
 
-	// Mark linked costs as PAID
-	costs, err := s.costRepo.GetByPaymentID(ctx, paymentID)
-	if err != nil {
-		return fmt.Errorf("failed to get associated costs: %w", err)
-	}
+	// Mark linked costs as PAID only if approved
+	if details.Status == "approved" {
+		costs, err := s.costRepo.GetByPaymentID(ctx, paymentID)
+		if err != nil {
+			return fmt.Errorf("failed to get associated costs: %w", err)
+		}
 
-	for _, cost := range costs {
-		cost.Status = "PAID"
-		if err := s.costRepo.Update(ctx, cost); err != nil {
-			return fmt.Errorf("failed to update cost status: %w", err)
+		for _, cost := range costs {
+			cost.Status = "PAID"
+			if err := s.costRepo.Update(ctx, cost); err != nil {
+				return fmt.Errorf("failed to update cost status: %w", err)
+			}
 		}
 	}
 
-	payments, err := s.companyPaymentRepo.ListOverduePaymentsByCompany(ctx, paymentModel.CompanyID, time.Now().UTC())
-	if err != nil {
-		return fmt.Errorf("failed to get associated payments: %w", err)
-	}
+	// Unblock company only if approved
+	if details.Status == "approved" {
+		// Verify if there are other overdue payments before unblocking?
+		payments, err := s.companyPaymentRepo.ListOverduePaymentsByCompany(ctx, paymentModel.CompanyID, time.Now().UTC())
+		if err != nil {
+			return fmt.Errorf("failed to get associated payments: %w", err)
+		}
 
-	if len(payments) > 0 {
-		return nil
-	}
-
-	// Unblock company
-	if err := s.companyRepo.UpdateBlockStatus(ctx, paymentModel.CompanyID, false); err != nil {
-		return fmt.Errorf("failed to update company: %w", err)
+		if len(payments) == 0 {
+			if err := s.companyRepo.UpdateBlockStatus(ctx, paymentModel.CompanyID, false); err != nil {
+				return fmt.Errorf("failed to update company: %w", err)
+			}
+		}
 	}
 	return nil
 }
@@ -348,59 +326,57 @@ func (s *CheckoutUseCase) runSubscriptionUpgradeWebhook(ctx context.Context, det
 	}
 
 	// Update payment status
-	paidAt := time.Now().UTC()
-	if !details.DateApproved.IsZero() {
-		paidAt = details.DateApproved.UTC()
+	// Update payment status
+	var paidAt *time.Time
+	if details.Status == "approved" {
+		t := time.Now().UTC()
+		if !details.DateApproved.IsZero() {
+			t = details.DateApproved.UTC()
+		}
+		paidAt = &t
 	}
 
 	transactionID := strconv.Itoa(details.ID)
 	rawPayload, _ := json.Marshal(dto)
 	paymentModel.Status = details.Status
 	paymentModel.ProviderPaymentID = &transactionID
-	paymentModel.PaidAt = &paidAt
+	paymentModel.PaidAt = paidAt
 	paymentModel.RawPayload = rawPayload
 
 	if err := s.companyPaymentRepo.UpdateCompanyPayment(ctx, paymentModel); err != nil {
 		return err
 	}
 
-	// Get target plan from metadata
-	targetPlan := details.Metadata.UpgradeTargetPlan
-	if targetPlan == "" {
-		return fmt.Errorf("upgrade_target_plan missing from metadata")
-	}
+	// Update company plan only if approved
+	if details.Status == "approved" {
+		// Get target plan from metadata
+		targetPlan := details.Metadata.UpgradeTargetPlan
+		if targetPlan == "" {
+			return fmt.Errorf("upgrade_target_plan missing from metadata")
+		}
 
-	// Update company plan (keeps same expiration date - proration)
-	// Update active subscription plan
-	activeSub, err := s.companySubscriptionRepo.GetActiveSubscription(ctx, paymentModel.CompanyID)
-	if err != nil || activeSub == nil {
-		return fmt.Errorf("active subscription not found for upgrade")
-	}
+		// Update active subscription plan
+		activeSub, err := s.companySubscriptionRepo.GetActiveSubscription(ctx, paymentModel.CompanyID)
+		if err != nil || activeSub == nil {
+			return fmt.Errorf("active subscription not found for upgrade")
+		}
 
-	// Get the payment linked to the active subscription to find the PreapprovalID
-	if activeSub.PaymentID == nil {
-		return fmt.Errorf("active subscription has no linked payment")
-	}
+		// Get PreapprovalID directly from active subscription
+		if activeSub.PreapprovalID == nil {
+			return fmt.Errorf("active subscription has no preapproval ID")
+		}
 
-	subPayment, err := s.companyPaymentRepo.GetCompanyPaymentByID(ctx, *activeSub.PaymentID)
-	if err != nil {
-		return fmt.Errorf("failed to get subscription payment: %w", err)
-	}
+		// Update Mercado Pago Subscription Amount with FULL new plan price
+		if err := s.mpService.UpdateSubscriptionAmount(ctx, *activeSub.PreapprovalID, subscriptionUpgradeExternalRef.NewAmount); err != nil {
+			return fmt.Errorf("failed to update subscription amount: %w", err)
+		}
 
-	if subPayment.PreapprovalID == nil {
-		return fmt.Errorf("subscription payment has no preapproval ID")
-	}
+		activeSub.PlanType = companyentity.PlanType(targetPlan)
+		if err := s.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
+			return fmt.Errorf("failed to update subscription plan: %w", err)
+		}
 
-	// Update Mercado Pago Subscription Amount with FULL new plan price
-	if err := s.mpService.UpdateSubscriptionAmount(ctx, *subPayment.PreapprovalID, subscriptionUpgradeExternalRef.NewAmount); err != nil {
-		return fmt.Errorf("failed to update subscription amount: %w", err)
+		fmt.Printf("Company %s plan upgraded successfully to %s\n", paymentModel.CompanyID, targetPlan)
 	}
-
-	activeSub.PlanType = companyentity.PlanType(targetPlan)
-	if err := s.companySubscriptionRepo.UpdateSubscription(ctx, activeSub); err != nil {
-		return fmt.Errorf("failed to update subscription plan: %w", err)
-	}
-
-	fmt.Printf("Company %s plan upgraded successfully to %s\n", paymentModel.CompanyID, targetPlan)
 	return nil
 }
