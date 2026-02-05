@@ -44,7 +44,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	usageCostRepo := companyrepositorybun.NewCompanyUsageCostRepository(db)
 	companySubscriptionRepo := companyrepositorybun.NewCompanySubscriptionRepositoryBun(db)
 
-	companyRepository, companyService, _ := NewCompanyModule(db, chi, usageCostRepo)
+	companyRepository, companyService, checkoutUC, _ := NewCompanyModule(db, chi, usageCostRepo)
 	_, schemaService := NewSchemaModule(db, chi)
 	userRepository, userService, _ := NewUserModule(db, chi)
 
@@ -61,6 +61,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	// Public analytics handler for company/user listing
 	chi.AddHandler(handlerimpl.NewHandlerPublicData(companyService, userService))
 
+	checkoutUC.AddDependencies(userRepository)
 	clientService.AddDependencies(contactRepository, companyService)
 	employeeService.AddDependencies(contactRepository, userRepository, companyRepository)
 

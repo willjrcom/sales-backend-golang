@@ -23,6 +23,7 @@ type CheckoutUseCase struct {
 	companyPaymentRepo      model.CompanyPaymentRepository
 	companySubscriptionRepo model.CompanySubscriptionRepository
 	mpService               *mercadopagoservice.Client
+	userRepo                model.UserRepository
 }
 
 func NewCheckoutUseCase(
@@ -47,6 +48,10 @@ var (
 	ErrMercadoPagoDisabled  = errors.New("mercado pago integration disabled")
 	ErrInvalidWebhookSecret = errors.New("invalid mercado pago webhook secret")
 )
+
+func (uc *CheckoutUseCase) AddDependencies(userRepo model.UserRepository) {
+	uc.userRepo = userRepo
+}
 
 func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *billingdto.CreateSubscriptionCheckoutDTO) (*billingdto.CheckoutResponseDTO, error) {
 	companyModel, err := uc.companyRepo.GetCompany(ctx)
@@ -108,6 +113,17 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 	// DEBUG: Verify amount being sent
 	fmt.Printf("DEBUG: Creating subscription. Frequency: %d, Total Amount: %s\n", frequency, finalAmount.String())
 
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	if !ok {
+		return nil, errors.New("context user not found")
+	}
+
+	userIDUUID := uuid.MustParse(userID)
+	userModel, err := uc.userRepo.GetUserByID(ctx, userIDUUID, false)
+	if err != nil {
+		return nil, err
+	}
+
 	// Create Mercado Pago Preapproval (recurring)
 	subReq := &mercadopagoservice.SubscriptionRequest{
 		Title:         title,
@@ -115,7 +131,7 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 		Frequency:     frequency,
 		FrequencyType: frequencyType,
 		ExternalRef:   externalRef,
-		PayerEmail:    "test_user_4780522383580900169@testuser.com",
+		PayerEmail:    userModel.Email,
 		BackURL:       uc.mpService.SuccessURL(),
 	}
 

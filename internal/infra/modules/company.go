@@ -16,7 +16,7 @@ import (
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 )
 
-func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyUsageCostRepository) (model.CompanyRepository, *companyusecases.Service, *handler.Handler) {
+func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyUsageCostRepository) (model.CompanyRepository, *companyusecases.Service, *billingusecases.CheckoutUseCase, *handler.Handler) {
 	companyRepository := companyrepositorybun.NewCompanyRepositoryBun(db)
 	companySubscriptionRepo := companyrepositorybun.NewCompanySubscriptionRepositoryBun(db)
 	companyPaymentRepo := companyrepositorybun.NewCompanyPaymentRepositoryBun(db)
@@ -34,5 +34,5 @@ func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyU
 
 	handler := handlerimpl.NewHandlerCompany(service, checkoutUC, costService, dailyScheduler)
 	chi.AddHandler(handler)
-	return companyRepository, service, handler
+	return companyRepository, service, checkoutUC, handler
 }
