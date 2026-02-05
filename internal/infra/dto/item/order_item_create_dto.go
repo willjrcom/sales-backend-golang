@@ -17,7 +17,7 @@ var (
 type OrderItemCreateDTO struct {
 	OrderID     uuid.UUID  `json:"order_id"`
 	ProductID   uuid.UUID  `json:"product_id"`
-	QuantityID  uuid.UUID  `json:"quantity_id"`
+	Quantity    float64    `json:"quantity"`
 	GroupItemID *uuid.UUID `json:"group_item_id"`
 	Observation string     `json:"observation"`
 	Flavor      *string    `json:"flavor,omitempty"`
@@ -32,18 +32,14 @@ func (a *OrderItemCreateDTO) Validate() error {
 		return errors.New("item id is required")
 	}
 
-	if a.QuantityID == uuid.Nil {
-		return errors.New("quantity id is required")
+	if a.Quantity == 0 {
+		return errors.New("quantity is required")
 	}
 
 	return nil
 }
 
-func (a *OrderItemCreateDTO) validateInternal(product *productentity.Product, groupItem *orderentity.GroupItem, quantity *productentity.Quantity) error {
-	if a.QuantityID != quantity.ID {
-		return errors.New("quantity id is invalid")
-	}
-
+func (a *OrderItemCreateDTO) validateInternal(product *productentity.Product, groupItem *orderentity.GroupItem) error {
 	if groupItem.Status != orderentity.StatusGroupStaging {
 		return ErrGroupItemNotStaging
 	}
@@ -65,12 +61,12 @@ func (a *OrderItemCreateDTO) validateInternal(product *productentity.Product, gr
 	return nil
 }
 
-func (a *OrderItemCreateDTO) ToDomain(product *productentity.Product, groupItem *orderentity.GroupItem, quantity *productentity.Quantity) (item *orderentity.Item, err error) {
-	if err = a.validateInternal(product, groupItem, quantity); err != nil {
+func (a *OrderItemCreateDTO) ToDomain(product *productentity.Product, groupItem *orderentity.GroupItem, quantity float64) (item *orderentity.Item, err error) {
+	if err = a.validateInternal(product, groupItem); err != nil {
 		return
 	}
 
-	item = orderentity.NewItem(product.Name, product.Price, quantity.Quantity, product.Size.Name, product.ID, product.CategoryID, a.Flavor)
+	item = orderentity.NewItem(product.Name, product.Price, quantity, product.Size.Name, product.ID, product.CategoryID, a.Flavor)
 	item.AddSizeToName()
 	item.GroupItemID = *a.GroupItemID
 	item.Observation = a.Observation

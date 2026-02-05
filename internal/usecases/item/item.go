@@ -3,7 +3,6 @@ package itemusecases
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
@@ -28,7 +27,6 @@ type Service struct {
 	rgi model.GroupItemRepository
 	ro  model.OrderRepository
 	rp  model.ProductRepository
-	rq  model.QuantityRepository
 	rc  model.CategoryRepository
 	so  *orderusecases.OrderService
 	sgi *orderusecases.GroupItemService
@@ -38,11 +36,10 @@ func NewService(ri model.ItemRepository) *Service {
 	return &Service{ri: ri}
 }
 
-func (s *Service) AddDependencies(rgi model.GroupItemRepository, ro model.OrderRepository, rp model.ProductRepository, rq model.QuantityRepository, rc model.CategoryRepository, so *orderusecases.OrderService, sgi *orderusecases.GroupItemService) {
+func (s *Service) AddDependencies(rgi model.GroupItemRepository, ro model.OrderRepository, rp model.ProductRepository, rc model.CategoryRepository, so *orderusecases.OrderService, sgi *orderusecases.GroupItemService) {
 	s.rgi = rgi
 	s.ro = ro
 	s.rp = rp
-	s.rq = rq
 	s.rc = rc
 	s.so = so
 	s.sgi = sgi
@@ -100,14 +97,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 		return nil, err
 	}
 
-	quantityModel, err := s.rq.GetQuantityById(ctx, dto.QuantityID.String())
-
-	if err != nil {
-		return nil, errors.New("quantity not found: " + err.Error())
-	}
-
-	quantity := quantityModel.ToDomain()
-	item, err := dto.ToDomain(product, groupItem, quantity)
+	item, err := dto.ToDomain(product, groupItem, dto.Quantity)
 
 	if err != nil {
 		return nil, err
@@ -149,28 +139,28 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 	return itemdto.FromDomain(item.ID, groupItem.ID), nil
 }
 
-func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest) (err error) {
+func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest) (groupItemDeleted bool, err error) {
 	item, err := s.ri.GetItemById(ctx, dto.ID.String())
 
 	if err != nil {
-		return err
+		return false, err
 	}
 
 	if err = s.ri.DeleteItem(ctx, dto.ID.String()); err != nil {
-		return errors.New("delete item error: " + err.Error())
+		return false, errors.New("delete item error: " + err.Error())
 	}
 
 	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
 
 	if err != nil {
-		return errors.New("group item not found: " + err.Error())
+		return false, errors.New("group item not found: " + err.Error())
 	}
 
 	// Update complement item quantity
 	if groupItem.ComplementItemID != nil && len(groupItem.Items) != 0 {
 		groupItem.ComplementItem.Quantity -= item.Quantity
 		if err = s.ri.UpdateItem(ctx, groupItem.ComplementItem); err != nil {
-			return errors.New("update complement item error: " + err.Error())
+			return false, errors.New("update complement item error: " + err.Error())
 		}
 	}
 
@@ -183,25 +173,25 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest)
 		}
 
 		if err = s.rgi.DeleteGroupItem(ctx, groupItem.ID.String(), complementItemID); err != nil {
-			return err
+			return false, err
 		}
 
 		if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
-			return err
+			return false, err
 		}
 
-		return nil
+		return true, nil
 	}
 
 	if err := s.sgi.UpdateGroupItemTotal(ctx, groupItem.ID.String()); err != nil {
-		return err
+		return false, err
 	}
 
 	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	return false, nil
 }
 
 func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDRequest, dtoAdditional *itemdto.OrderAdditionalItemCreateDTO) (id uuid.UUID, err error) {
@@ -217,13 +207,6 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 		return uuid.Nil, errors.New("item not found: " + err.Error())
 	}
 
-	productAdditionalModel, err := s.rp.GetProductById(ctx, productID.String())
-
-	if err != nil {
-		return uuid.Nil, errors.New("product not found: " + err.Error())
-	}
-	productAdditional := productAdditionalModel.ToDomain()
-
 	groupItemModel, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
 	if err != nil {
 		return uuid.Nil, errors.New("group item not found: " + err.Error())
@@ -234,6 +217,13 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 	if ok, err := groupItem.CanAddItems(); !ok {
 		return uuid.Nil, err
 	}
+
+	productAdditionalModel, err := s.rp.GetProductById(ctx, productID.String())
+	if err != nil {
+		return uuid.Nil, errors.New("product not found: " + err.Error())
+	}
+
+	productAdditional := productAdditionalModel.ToDomain()
 
 	found := false
 	for _, additionalCategory := range groupItem.Category.AdditionalCategories {
@@ -247,33 +237,12 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 		return uuid.Nil, errors.New("additional category does not belong to this category")
 	}
 
-	quantities, err := s.rq.GetQuantitiesByCategoryId(ctx, productAdditional.CategoryID.String())
-	if err != nil {
-		return uuid.Nil, errors.New("quantities not found by category id: " + err.Error())
-	}
-
-	quantity := &model.Quantity{}
-	for _, q := range quantities {
-		if q.Quantity == quantityValue {
-			quantity = q
-			break
-		}
-	}
-
-	if quantity == nil {
-		return uuid.Nil, fmt.Errorf("quantity %f not found", quantityValue)
-	}
-
-	if productAdditional.CategoryID != quantity.CategoryID {
-		return uuid.Nil, errors.New("product category and quantity not match")
-	}
-
 	normalizedFlavor, err := itemdto.NormalizeFlavor(flavor, productAdditional.Flavors)
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	additionalItem := orderentity.NewItem(productAdditional.Name, productAdditional.Price, quantity.Quantity, item.Size, productAdditional.ID, productAdditional.CategoryID, normalizedFlavor)
+	additionalItem := orderentity.NewItem(productAdditional.Name, productAdditional.Price, quantityValue, item.Size, productAdditional.ID, productAdditional.CategoryID, normalizedFlavor)
 	additionalItem.IsAdditional = true
 	additionalItem.GroupItemID = groupItem.ID
 

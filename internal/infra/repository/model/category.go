@@ -21,7 +21,6 @@ type ProductCategoryCommonAttributes struct {
 	RemovableIngredients []string          `bun:"removable_ingredients,type:jsonb"`
 	IsActive             bool              `bun:"column:is_active,type:boolean"`
 	Sizes                []Size            `bun:"rel:has-many,join:id=category_id"`
-	Quantities           []Quantity        `bun:"rel:has-many,join:id=category_id"`
 	Products             []Product         `bun:"rel:has-many,join:id=category_id"`
 	ProcessRules         []ProcessRule     `bun:"rel:has-many,join:id=category_id"`
 	IsAdditional         bool              `bun:"is_additional"`
@@ -45,7 +44,6 @@ func (c *ProductCategory) FromDomain(category *productentity.ProductCategory) {
 			RemovableIngredients: category.RemovableIngredients,
 			IsActive:             category.IsActive,
 			Sizes:                []Size{},
-			Quantities:           []Quantity{},
 			Products:             []Product{},
 			ProcessRules:         []ProcessRule{},
 			IsAdditional:         category.IsAdditional,
@@ -59,12 +57,6 @@ func (c *ProductCategory) FromDomain(category *productentity.ProductCategory) {
 		s := Size{}
 		s.FromDomain(&size)
 		c.Sizes = append(c.Sizes, s)
-	}
-
-	for _, quantity := range category.Quantities {
-		q := Quantity{}
-		q.FromDomain(&quantity)
-		c.Quantities = append(c.Quantities, q)
 	}
 
 	for _, product := range category.Products {
@@ -107,7 +99,6 @@ func (c *ProductCategory) ToDomain() *productentity.ProductCategory {
 			RemovableIngredients: c.RemovableIngredients,
 			IsActive:             c.IsActive,
 			Sizes:                []productentity.Size{},
-			Quantities:           []productentity.Quantity{},
 			Products:             []productentity.Product{},
 			ProcessRules:         []productentity.ProcessRule{},
 			IsAdditional:         c.IsAdditional,
@@ -119,10 +110,6 @@ func (c *ProductCategory) ToDomain() *productentity.ProductCategory {
 
 	for _, size := range c.Sizes {
 		category.Sizes = append(category.Sizes, *size.ToDomain())
-	}
-
-	for _, quantity := range c.Quantities {
-		category.Quantities = append(category.Quantities, *quantity.ToDomain())
 	}
 
 	for _, product := range c.Products {

@@ -13,18 +13,15 @@ import (
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
 
 	categoryrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product_category"
-	quantityrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/quantity"
 	sizerepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/size"
 
 	productcategoryusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category"
-	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size"
 )
 
 var (
 	service                *sizeusecases.Service
 	productCategoryService *productcategoryusecases.Service
-	quantityService        *quantityusecases.Service
 	szctx                  context.Context
 )
 
@@ -33,13 +30,11 @@ func TestMain(m *testing.M) {
 
 	// Shared in-memory repositories
 	catRepo := categoryrepolocal.NewCategoryRepositoryLocal()
-	qtyRepo := quantityrepolocal.NewQuantityRepositoryLocal()
 	szRepo := sizerepolocal.NewSizeRepositoryLocal()
 
 	// Initialize dependent services
-	quantityService = quantityusecases.NewService(qtyRepo, catRepo)
 	service = sizeusecases.NewService(szRepo, catRepo)
-	productCategoryService = productcategoryusecases.NewService(catRepo, quantityService, service)
+	productCategoryService = productcategoryusecases.NewService(catRepo, service)
 
 	os.Exit(m.Run())
 }

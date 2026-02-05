@@ -7,10 +7,8 @@ import (
 	"github.com/google/uuid"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
-	quantitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/quantity"
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
-	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size"
 )
 
@@ -21,12 +19,11 @@ var (
 
 type Service struct {
 	r  model.CategoryRepository
-	sq quantityusecases.Service
 	ss sizeusecases.Service
 }
 
-func NewService(c model.CategoryRepository, sq *quantityusecases.Service, ss *sizeusecases.Service) *Service {
-	return &Service{r: c, sq: *sq, ss: *ss}
+func NewService(c model.CategoryRepository, ss *sizeusecases.Service) *Service {
+	return &Service{r: c, ss: *ss}
 }
 
 func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.CategoryCreateDTO) (uuid.UUID, error) {
@@ -48,21 +45,10 @@ func (s *Service) CreateCategory(ctx context.Context, dto *productcategorydto.Ca
 		return uuid.Nil, err
 	}
 
-	quantities := []float64{0.3, 0.4, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	sizes := []string{"P", "M", "G"}
 
 	if category.IsAdditional {
-		quantities = []float64{1, 2, 3, 4, 5}
 		sizes = []string{"Padrão"}
-	}
-
-	registerQuantities := &quantitydto.QuantityCreateBatchDTO{
-		Quantities: quantities,
-		CategoryID: category.ID,
-	}
-
-	if err := s.sq.AddQuantitiesByValues(ctx, registerQuantities); err != nil {
-		return category.ID, err
 	}
 
 	registerSizes := &sizedto.SizeCreateBatchDTO{

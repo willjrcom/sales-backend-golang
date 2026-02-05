@@ -9,7 +9,7 @@ import (
 )
 
 // FormatGroupItemKitchen generates ESC/POS bytes for a kitchen print of a group of items,
-// showing only item names, quantities, and complements, without prices or totals.
+// showing only item names, and complements, without prices or totals.
 func FormatGroupItemKitchen(group *orderentity.GroupItem) ([]byte, error) {
 	var buf bytes.Buffer
 	// Initialize printer and select Latin-1 code page

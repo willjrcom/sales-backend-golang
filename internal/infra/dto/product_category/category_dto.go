@@ -5,7 +5,6 @@ import (
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	processruledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process_rule"
 
-	quantitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/quantity"
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
 )
 
@@ -21,7 +20,6 @@ type CategoryDTO struct {
 	IsActive             bool                            `json:"is_active"`
 	RemovableIngredients []string                        `json:"removable_ingredients,omitempty"`
 	Sizes                []sizedto.SizeDTO               `json:"sizes,omitempty"`
-	Quantities           []quantitydto.QuantityDTO       `json:"quantities,omitempty"`
 	Products             []ProductDTO                    `json:"products,omitempty"`
 	AdditionalCategories []CategoryDTO                   `json:"additional_categories,omitempty"`
 	ComplementCategories []CategoryDTO                   `json:"complement_categories,omitempty"`
@@ -44,7 +42,6 @@ func (c *CategoryDTO) FromDomain(category *productentity.ProductCategory) {
 		IsActive:             category.IsActive,
 		RemovableIngredients: category.RemovableIngredients,
 		Sizes:                []sizedto.SizeDTO{},
-		Quantities:           []quantitydto.QuantityDTO{},
 		Products:             []ProductDTO{},
 		AdditionalCategories: []CategoryDTO{},
 		ComplementCategories: []CategoryDTO{},
@@ -61,12 +58,6 @@ func (c *CategoryDTO) FromDomain(category *productentity.ProductCategory) {
 		s := sizedto.SizeDTO{}
 		s.FromDomain(&size)
 		c.Sizes = append(c.Sizes, s)
-	}
-
-	for _, quantity := range category.Quantities {
-		q := quantitydto.QuantityDTO{}
-		q.FromDomain(&quantity)
-		c.Quantities = append(c.Quantities, q)
 	}
 
 	for _, product := range category.Products {
@@ -92,9 +83,6 @@ func (c *CategoryDTO) FromDomain(category *productentity.ProductCategory) {
 	}
 	if len(category.Sizes) == 0 {
 		c.Sizes = nil
-	}
-	if len(category.Quantities) == 0 {
-		c.Quantities = nil
 	}
 	if len(category.Products) == 0 {
 		c.Products = nil

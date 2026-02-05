@@ -318,7 +318,6 @@ func registerModels(db *bun.DB) error {
 	db.RegisterModel((*model.ProductCategoryToComplement)(nil))
 	db.RegisterModel((*model.ProductToCombo)(nil))
 	db.RegisterModel((*model.Size)(nil))
-	db.RegisterModel((*model.Quantity)(nil))
 	db.RegisterModel((*model.ProductCategory)(nil))
 	db.RegisterModel((*model.ProductCategoryWithOrderProcess)(nil))
 	db.RegisterModel((*model.ProcessRule)(nil))
@@ -396,10 +395,6 @@ func createTables(ctx context.Context, tx *bun.Tx) error {
 	}
 
 	if err := createTableIfNotExists(ctx, tx, (*model.ProductCategory)(nil)); err != nil {
-		return err
-	}
-
-	if err := createTableIfNotExists(ctx, tx, (*model.Quantity)(nil)); err != nil {
 		return err
 	}
 

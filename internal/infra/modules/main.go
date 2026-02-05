@@ -12,7 +12,6 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	productRepository, _, _ := NewProductModule(db, chi)
 	productCategoryRepository, _, _ := NewProductCategoryModule(db, chi)
 	NewProductCategorySizeModule(db, chi)
-	quantityRepository, _, _ := NewProductCategoryQuantityModule(db, chi)
 	processRuleRepository, _, _ := NewProductCategoryProcessRuleModule(db, chi)
 
 	addressRepository := NewAddressModule(db, chi)
@@ -68,7 +67,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	orderQueueService.AddDependencies(orderProcessRepository)
 	orderProcessService.AddDependencies(orderQueueService, processRuleRepository, groupItemService, orderRepository, employeeService, groupItemRepository, orderService)
 
-	itemService.AddDependencies(groupItemRepository, orderRepository, productRepository, quantityRepository, productCategoryRepository, orderService, groupItemService)
+	itemService.AddDependencies(groupItemRepository, orderRepository, productRepository, productCategoryRepository, orderService, groupItemService)
 	groupItemService.AddDependencies(itemRepository, productRepository, orderService, orderProcessService)
 
 	stockService.AddDependencies(productRepository, itemRepository)

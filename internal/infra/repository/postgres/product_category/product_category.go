@@ -294,7 +294,6 @@ func (r *ProductCategoryRepositoryBun) GetCategoryById(ctx context.Context, id s
 
 	if err := tx.NewSelect().Model(category).Where("category.id = ?", id).
 		Relation("Sizes").
-		Relation("Quantities").
 		Relation("Products").
 		Relation("ProcessRules").
 		Relation("AdditionalCategories").
@@ -323,7 +322,7 @@ func (r *ProductCategoryRepositoryBun) GetCategoryByName(ctx context.Context, na
 	query := tx.NewSelect().Model(category).Where("name = ?", name)
 
 	if withRelation {
-		query.Relation("Products").Relation("Sizes").Relation("Quantities").Relation("ProcessRules").Relation("AdditionalCategories").Relation("ComplementCategories")
+		query.Relation("Products").Relation("Sizes").Relation("ProcessRules").Relation("AdditionalCategories").Relation("ComplementCategories")
 	}
 
 	if err := query.Scan(ctx); err != nil {

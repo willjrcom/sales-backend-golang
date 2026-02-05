@@ -69,12 +69,13 @@ func (h *handlerItemImpl) handlerDeleteItem(w http.ResponseWriter, r *http.Reque
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.DeleteItemOrder(ctx, dtoId); err != nil {
+	groupItemDeleted, err := h.s.DeleteItemOrder(ctx, dtoId)
+	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+	jsonpkg.ResponseJson(w, r, http.StatusOK, groupItemDeleted)
 }
 
 func (h *handlerItemImpl) handlerAddAdditionalItem(w http.ResponseWriter, r *http.Request) {

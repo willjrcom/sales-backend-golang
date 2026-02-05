@@ -11,10 +11,8 @@ import (
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 
 	categoryrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product_category"
-	quantityrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/quantity"
 	sizerepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/size"
 
-	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size"
 )
 
@@ -28,13 +26,11 @@ func TestMain(m *testing.M) {
 
 	// Shared repositories for test isolation
 	catRepo := categoryrepolocal.NewCategoryRepositoryLocal()
-	qtyRepo := quantityrepolocal.NewQuantityRepositoryLocal()
 	szRepo := sizerepolocal.NewSizeRepositoryLocal()
 
 	// Use-case services with shared category repository
-	qtySvc := quantityusecases.NewService(qtyRepo, catRepo)
 	szSvc := sizeusecases.NewService(szRepo, catRepo)
-	service = NewService(catRepo, qtySvc, szSvc)
+	service = NewService(catRepo, szSvc)
 
 	m.Run()
 }

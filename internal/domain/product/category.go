@@ -18,7 +18,6 @@ type ProductCategoryCommonAttributes struct {
 	RemovableIngredients []string
 	IsActive             bool
 	Sizes                []Size
-	Quantities           []Quantity
 	Products             []Product
 	ProcessRules         []ProcessRule
 	IsAdditional         bool

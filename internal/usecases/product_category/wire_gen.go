@@ -10,7 +10,6 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	productcategoryrepositorylocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product_category"
 	productcategoryrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/product_category"
-	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size"
 )
 
@@ -19,28 +18,22 @@ import (
 func InitializeService() (*Service, error) {
 	db := database.NewPostgreSQLConnection()
 	categoryRepository := productcategoryrepositorybun.NewProductCategoryRepositoryBun(db)
-	service, err := quantityusecases.InitializeService()
-	if err != nil {
-		return nil, err
-	}
+
 	sizeusecasesService, err := sizeusecases.InitializeService()
 	if err != nil {
 		return nil, err
 	}
-	productcategoryusecasesService := NewService(categoryRepository, service, sizeusecasesService)
+	productcategoryusecasesService := NewService(categoryRepository, sizeusecasesService)
 	return productcategoryusecasesService, nil
 }
 
 func InitializeServiceForTest() (*Service, error) {
 	categoryRepository := productcategoryrepositorylocal.NewCategoryRepositoryLocal()
-	service, err := quantityusecases.InitializeServiceForTest()
-	if err != nil {
-		return nil, err
-	}
+
 	sizeusecasesService, err := sizeusecases.InitializeServiceForTest()
 	if err != nil {
 		return nil, err
 	}
-	productcategoryusecasesService := NewService(categoryRepository, service, sizeusecasesService)
+	productcategoryusecasesService := NewService(categoryRepository, sizeusecasesService)
 	return productcategoryusecasesService, nil
 }

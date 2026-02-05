@@ -16,11 +16,9 @@ import (
 
 	productrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product"
 	categoryrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/product_category"
-	quantityrepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/quantity"
 	sizerepolocal "github.com/willjrcom/sales-backend-go/internal/infra/repository/local/size"
 
 	productcategoryusecases "github.com/willjrcom/sales-backend-go/internal/usecases/product_category"
-	quantityusecases "github.com/willjrcom/sales-backend-go/internal/usecases/quantity"
 	sizeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/size"
 
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
@@ -43,14 +41,12 @@ func TestMain(m *testing.M) {
 
 	// Shared in-memory repositories for test isolation
 	catRepo := categoryrepolocal.NewCategoryRepositoryLocal()
-	qtyRepo := quantityrepolocal.NewQuantityRepositoryLocal()
 	szRepo := sizerepolocal.NewSizeRepositoryLocal()
 	prdRepo := productrepolocal.NewProductRepositoryLocal()
 
 	// Use-case services with shared category repository
-	qtySvc := quantityusecases.NewService(qtyRepo, catRepo)
 	szSvc := sizeusecases.NewService(szRepo, catRepo)
-	productCategoryService = productcategoryusecases.NewService(catRepo, qtySvc, szSvc)
+	productCategoryService = productcategoryusecases.NewService(catRepo, szSvc)
 	sizeService = sizeusecases.NewService(szRepo, catRepo)
 	productService = NewService(prdRepo, catRepo, s3service.NewS3Client())
 
