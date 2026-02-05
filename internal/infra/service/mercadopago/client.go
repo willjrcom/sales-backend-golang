@@ -387,7 +387,7 @@ func (c *Client) CancelSubscription(ctx context.Context, preapprovalID string) e
 		return fmt.Errorf("mercado pago client is not configured")
 	}
 
-	// Update the preapproval status to "cancelled"
+	// Update the preapproval status to "cancelled" not "cancelled"
 	updateReq := preapproval.UpdateRequest{
 		Status: "cancelled",
 	}

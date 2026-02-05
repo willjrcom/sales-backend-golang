@@ -40,12 +40,12 @@ func (dto *FiscalInvoiceDTO) FromDomain(invoice *fiscalinvoice.FiscalInvoice) {
 	dto.CreatedAt = invoice.CreatedAt.Format("2006-01-02T15:04:05Z07:00")
 }
 
-type EmitirNFCeRequestDTO struct {
+type EmitNFCeRequestDTO struct {
 	OrderID uuid.UUID `json:"order_id" validate:"required"`
 }
 
-type CancelarNFCeRequestDTO struct {
-	Justificativa string `json:"justificativa" validate:"required,min=15"`
+type CancelNFCeRequestDTO struct {
+	Justification string `json:"justification" validate:"required,min=15"`
 }
 
 type ListFiscalInvoicesRequestDTO struct {

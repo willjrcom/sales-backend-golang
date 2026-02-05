@@ -34,8 +34,8 @@ type OrderProcessTimeLogs struct {
 	PausedAt          *time.Time    `bun:"paused_at"`
 	ContinuedAt       *time.Time    `bun:"continued_at"`
 	FinishedAt        *time.Time    `bun:"finished_at"`
-	CanceledAt        *time.Time    `bun:"canceled_at"`
-	CanceledReason    *string       `bun:"canceled_reason"`
+	CancelledAt       *time.Time    `bun:"cancelled_at"`
+	CancelledReason   *string       `bun:"cancelled_reason"`
 	Duration          time.Duration `bun:"duration"`
 	DurationFormatted string        `bun:"duration_formatted"`
 	TotalPaused       int8          `bun:"total_paused"`
@@ -67,8 +67,8 @@ func (op *OrderProcess) FromDomain(orderProcess *orderprocessentity.OrderProcess
 			PausedAt:          orderProcess.PausedAt,
 			ContinuedAt:       orderProcess.ContinuedAt,
 			FinishedAt:        orderProcess.FinishedAt,
-			CanceledAt:        orderProcess.CanceledAt,
-			CanceledReason:    orderProcess.CanceledReason,
+			CancelledAt:       orderProcess.CancelledAt,
+			CancelledReason:   orderProcess.CancelledReason,
 			Duration:          orderProcess.Duration,
 			DurationFormatted: orderProcess.Duration.String(),
 			TotalPaused:       orderProcess.TotalPaused,
@@ -107,8 +107,8 @@ func (op *OrderProcess) ToDomain() *orderprocessentity.OrderProcess {
 			PausedAt:          op.PausedAt,
 			ContinuedAt:       op.ContinuedAt,
 			FinishedAt:        op.FinishedAt,
-			CanceledAt:        op.CanceledAt,
-			CanceledReason:    op.CanceledReason,
+			CancelledAt:       op.CancelledAt,
+			CancelledReason:   op.CancelledReason,
 			Duration:          op.Duration,
 			DurationFormatted: op.Duration.String(),
 			TotalPaused:       op.TotalPaused,

@@ -132,7 +132,7 @@ func (r *OrderTableRepositoryBun) GetAllOrderTables(ctx context.Context) (tables
 	defer cancel()
 	defer tx.Rollback()
 
-	if err = tx.NewSelect().Model(&tables).Where("status != 'Closed' AND status != 'Canceled'").Scan(ctx); err != nil {
+	if err = tx.NewSelect().Model(&tables).Where("status != 'Closed' AND status != 'Cancelled'").Scan(ctx); err != nil {
 		return nil, err
 	}
 

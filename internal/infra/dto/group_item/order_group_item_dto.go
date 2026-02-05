@@ -31,11 +31,11 @@ type GroupItemDTO struct {
 }
 
 type GroupItemTimeLogsDTO struct {
-	StartAt    *time.Time `json:"start_at"`
-	PendingAt  *time.Time `json:"pending_at"`
-	StartedAt  *time.Time `json:"started_at"`
-	ReadyAt    *time.Time `json:"ready_at"`
-	CanceledAt *time.Time `json:"canceled_at"`
+	StartAt     *time.Time `json:"start_at"`
+	PendingAt   *time.Time `json:"pending_at"`
+	StartedAt   *time.Time `json:"started_at"`
+	ReadyAt     *time.Time `json:"ready_at"`
+	CancelledAt *time.Time `json:"cancelled_at"`
 }
 
 func (i *GroupItemDTO) FromDomain(groupItem *orderentity.GroupItem) {
@@ -60,11 +60,11 @@ func (i *GroupItemDTO) FromDomain(groupItem *orderentity.GroupItem) {
 		OrderID:          groupItem.OrderID,
 		CreatedAt:        groupItem.CreatedAt,
 		GroupItemTimeLogsDTO: GroupItemTimeLogsDTO{
-			StartAt:    groupItem.StartAt,
-			PendingAt:  groupItem.PendingAt,
-			StartedAt:  groupItem.StartedAt,
-			ReadyAt:    groupItem.ReadyAt,
-			CanceledAt: groupItem.CanceledAt,
+			StartAt:     groupItem.StartAt,
+			PendingAt:   groupItem.PendingAt,
+			StartedAt:   groupItem.StartedAt,
+			ReadyAt:     groupItem.ReadyAt,
+			CancelledAt: groupItem.CancelledAt,
 		},
 	}
 

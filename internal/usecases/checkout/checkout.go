@@ -86,10 +86,10 @@ func (uc *CheckoutUseCase) CreateSubscriptionCheckout(ctx context.Context, req *
 	discount := 0.0
 	frequencyType := "months"
 	switch req.ToFrequency() {
-	case companyentity.FrequencySemiannual:
+	case companyentity.FrequencySemiannually:
 		frequency = 6
 		discount = 0.05
-	case companyentity.FrequencyAnnual:
+	case companyentity.FrequencyAnnually:
 		frequency = 12
 		discount = 0.10
 	}
@@ -295,9 +295,9 @@ func (uc *CheckoutUseCase) CancelSubscription(ctx context.Context) error {
 		return fmt.Errorf("failed to cancel subscription at Mercado Pago: %w", err)
 	}
 
-	// Mark the active subscription as canceled directly
-	if err := uc.companySubscriptionRepo.MarkSubscriptionAsCanceled(ctx, companyModel.ID); err != nil {
-		return fmt.Errorf("failed to mark subscription as canceled: %w", err)
+	// Mark the active subscription as cancelled directly
+	if err := uc.companySubscriptionRepo.MarkSubscriptionAsCancelled(ctx, companyModel.ID); err != nil {
+		return fmt.Errorf("failed to mark subscription as cancelled: %w", err)
 	}
 
 	return nil
@@ -489,10 +489,10 @@ func getPlanPriceWithDiscount(p companyentity.PlanType, months int) decimal.Deci
 	var discountPercent float64
 	if months >= 12 {
 		// Annual discount
-		discountPercent = getEnvFloat("DISCOUNT_ANNUAL_PERCENT", 10)
+		discountPercent = getEnvFloat("DISCOUNT_ANNUALLY_PERCENT", 10)
 	} else if months >= 6 {
 		// Semester discount
-		discountPercent = getEnvFloat("DISCOUNT_SEMESTER_PERCENT", 5)
+		discountPercent = getEnvFloat("DISCOUNT_SEMIANNUALLY_PERCENT", 5)
 	}
 
 	discountedMonthly := basePrice.Mul(decimal.NewFromFloat(1 - discountPercent/100))

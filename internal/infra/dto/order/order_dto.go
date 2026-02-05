@@ -43,11 +43,11 @@ type OrderType struct {
 }
 
 type OrderTimeLogs struct {
-	PendingAt  *time.Time `json:"pending_at"`
-	FinishedAt *time.Time `json:"finished_at"`
-	ReadyAt    *time.Time `json:"ready_at"`
-	CanceledAt *time.Time `json:"canceled_at"`
-	ArchivedAt *time.Time `json:"archived_at"`
+	PendingAt   *time.Time `json:"pending_at"`
+	FinishedAt  *time.Time `json:"finished_at"`
+	ReadyAt     *time.Time `json:"ready_at"`
+	CancelledAt *time.Time `json:"cancelled_at"`
+	ArchivedAt  *time.Time `json:"archived_at"`
 }
 
 func (o *OrderDTO) FromDomain(order *orderentity.Order) {
@@ -61,11 +61,11 @@ func (o *OrderDTO) FromDomain(order *orderentity.Order) {
 			Pickup:   &orderpickupdto.OrderPickupDTO{},
 		},
 		OrderTimeLogs: OrderTimeLogs{
-			PendingAt:  order.PendingAt,
-			ReadyAt:    order.ReadyAt,
-			FinishedAt: order.FinishedAt,
-			CanceledAt: order.CanceledAt,
-			ArchivedAt: order.ArchivedAt,
+			PendingAt:   order.PendingAt,
+			ReadyAt:     order.ReadyAt,
+			FinishedAt:  order.FinishedAt,
+			CancelledAt: order.CancelledAt,
+			ArchivedAt:  order.ArchivedAt,
 		},
 		OrderDetail: OrderDetail{
 			TotalPayable:  order.TotalPayable,

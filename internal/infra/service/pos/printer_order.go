@@ -121,8 +121,8 @@ func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 	// if group.StartedAt != nil {
 	// 	buf.WriteString(fmt.Sprintf("Iniciado:\t\t%s%s", group.StartedAt.Format("15:04"), newline))
 	// }
-	// if group.CanceledAt != nil {
-	// 	buf.WriteString(fmt.Sprintf("Cancelado:\t\t%s%s", group.CanceledAt.Format("15:04"), newline))
+	// if group.CancelledAt != nil {
+	// 	buf.WriteString(fmt.Sprintf("Cancelado:\t\t%s%s", group.CancelledAt.Format("15:04"), newline))
 	// }
 
 	// Items: quantidade | produto | valor

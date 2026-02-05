@@ -1630,7 +1630,7 @@
 											"body": "{}"
 										},
 										{
-											"name": "already canceled",
+											"name": "already cancelled",
 											"originalRequest": {
 												"method": "POST",
 												"header": [],
@@ -1667,7 +1667,7 @@
 												}
 											],
 											"cookie": [],
-											"body": "{\n    \"message\": \"order already canceled\"\n}"
+											"body": "{\n    \"message\": \"order already cancelled\"\n}"
 										}
 									]
 								},
@@ -1892,7 +1892,7 @@
 											"body": "{}"
 										},
 										{
-											"name": "already canceled",
+											"name": "already cancelled",
 											"originalRequest": {
 												"method": "POST",
 												"header": [],
@@ -1929,7 +1929,7 @@
 												}
 											],
 											"cookie": [],
-											"body": "{\n    \"message\": \"order already canceled\"\n}"
+											"body": "{\n    \"message\": \"order already cancelled\"\n}"
 										}
 									]
 								},
@@ -2003,7 +2003,7 @@
 											"body": "{}"
 										},
 										{
-											"name": "must be canceled",
+											"name": "must be cancelled",
 											"originalRequest": {
 												"method": "POST",
 												"header": [],
@@ -2040,7 +2040,7 @@
 												}
 											],
 											"cookie": [],
-											"body": "{\n    \"message\": \"order must be canceled\"\n}"
+											"body": "{\n    \"message\": \"order must be cancelled\"\n}"
 										}
 									]
 								},

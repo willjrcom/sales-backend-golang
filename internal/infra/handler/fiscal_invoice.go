@@ -24,30 +24,30 @@ func NewHandlerFiscalInvoice(service *fiscalinvoiceusecases.Service) *handler.Ha
 	}
 
 	c.With().Group(func(c chi.Router) {
-		c.Post("/nfce/emitir", h.handlerEmitirNFCe)
-		c.Get("/nfce/{id}", h.handlerConsultarNFCe)
-		c.Get("/nfce", h.handlerListarNFCe)
-		c.Post("/nfce/{id}/cancelar", h.handlerCancelarNFCe)
+		c.Post("/nfce/emit", h.handlerEmitNFCe)
+		c.Get("/nfce/{id}", h.handlerSearchNFCe)
+		c.Get("/nfce", h.handlerListNFCe)
+		c.Post("/nfce/{id}/cancel", h.handlerCancelNFCe)
 	})
 
 	return handler.NewHandler("/fiscal", c)
 }
 
-// handlerEmitirNFCe godoc
+// handlerEmitNFCe godoc
 // @Summary Emit NFC-e for order
 // @Description Emit electronic fiscal coupon for an order
 // @Tags Fiscal Invoice
 // @Accept json
 // @Produce json
-// @Param request body fiscalinvoicedto.EmitirNFCeRequestDTO true "Order ID"
+// @Param request body fiscalinvoicedto.EmitNFCeRequestDTO true "Order ID"
 // @Success 200 {object} fiscalinvoicedto.FiscalInvoiceDTO
 // @Failure 400 {object} error
 // @Failure 500 {object} error
-// @Router /api/fiscal/nfce/emitir [post]
-func (h *handlerFiscalInvoiceImpl) handlerEmitirNFCe(w http.ResponseWriter, r *http.Request) {
+// @Router /api/fiscal/nfce/emit [post]
+func (h *handlerFiscalInvoiceImpl) handlerEmitNFCe(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dto := &fiscalinvoicedto.EmitirNFCeRequestDTO{}
+	dto := &fiscalinvoicedto.EmitNFCeRequestDTO{}
 	if err := jsonpkg.ParseBody(r, dto); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
@@ -73,7 +73,7 @@ func (h *handlerFiscalInvoiceImpl) handlerEmitirNFCe(w http.ResponseWriter, r *h
 	jsonpkg.ResponseJson(w, r, http.StatusOK, response)
 }
 
-// handlerConsultarNFCe godoc
+// handlerSearchNFCe godoc
 // @Summary Query NFC-e
 // @Description Get fiscal invoice details
 // @Tags Fiscal Invoice
@@ -84,7 +84,7 @@ func (h *handlerFiscalInvoiceImpl) handlerEmitirNFCe(w http.ResponseWriter, r *h
 // @Failure 404 {object} error
 // @Failure 500 {object} error
 // @Router /api/fiscal/nfce/{id} [get]
-func (h *handlerFiscalInvoiceImpl) handlerConsultarNFCe(w http.ResponseWriter, r *http.Request) {
+func (h *handlerFiscalInvoiceImpl) handlerSearchNFCe(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	idStr := chi.URLParam(r, "id")
 
@@ -94,7 +94,7 @@ func (h *handlerFiscalInvoiceImpl) handlerConsultarNFCe(w http.ResponseWriter, r
 		return
 	}
 
-	invoice, err := h.service.ConsultarNFCe(ctx, id)
+	invoice, err := h.service.SearchNFCe(ctx, id)
 	if err != nil {
 		status := http.StatusInternalServerError
 		if err == fiscalinvoiceusecases.ErrInvoiceNotFound {
@@ -109,7 +109,7 @@ func (h *handlerFiscalInvoiceImpl) handlerConsultarNFCe(w http.ResponseWriter, r
 	jsonpkg.ResponseJson(w, r, http.StatusOK, response)
 }
 
-// handlerListarNFCe godoc
+// handlerListNFCe godoc
 // @Summary List NFC-e
 // @Description List fiscal invoices for the company
 // @Tags Fiscal Invoice
@@ -120,7 +120,7 @@ func (h *handlerFiscalInvoiceImpl) handlerConsultarNFCe(w http.ResponseWriter, r
 // @Success 200 {array} fiscalinvoicedto.FiscalInvoiceDTO
 // @Failure 500 {object} error
 // @Router /api/fiscal/nfce [get]
-func (h *handlerFiscalInvoiceImpl) handlerListarNFCe(w http.ResponseWriter, r *http.Request) {
+func (h *handlerFiscalInvoiceImpl) handlerListNFCe(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	pageStr := r.URL.Query().Get("page")
@@ -153,20 +153,20 @@ func (h *handlerFiscalInvoiceImpl) handlerListarNFCe(w http.ResponseWriter, r *h
 	jsonpkg.ResponseJson(w, r, http.StatusOK, dtos)
 }
 
-// handlerCancelarNFCe godoc
+// handlerCancelNFCe godoc
 // @Summary Cancel NFC-e
 // @Description Cancel an authorized fiscal invoice
 // @Tags Fiscal Invoice
 // @Accept json
 // @Produce json
 // @Param id path string true "Invoice ID"
-// @Param request body fiscalinvoicedto.CancelarNFCeRequestDTO true "Cancellation reason"
+// @Param request body fiscalinvoicedto.CancelNFCeRequestDTO true "Cancellation reason"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} error
 // @Failure 404 {object} error
 // @Failure 500 {object} error
-// @Router /api/fiscal/nfce/{id}/cancelar [post]
-func (h *handlerFiscalInvoiceImpl) handlerCancelarNFCe(w http.ResponseWriter, r *http.Request) {
+// @Router /api/fiscal/nfce/{id}/cancel [post]
+func (h *handlerFiscalInvoiceImpl) handlerCancelNFCe(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	idStr := chi.URLParam(r, "id")
 
@@ -176,13 +176,13 @@ func (h *handlerFiscalInvoiceImpl) handlerCancelarNFCe(w http.ResponseWriter, r 
 		return
 	}
 
-	dto := &fiscalinvoicedto.CancelarNFCeRequestDTO{}
+	dto := &fiscalinvoicedto.CancelNFCeRequestDTO{}
 	if err := jsonpkg.ParseBody(r, dto); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	if err := h.service.CancelarNFCe(ctx, id, dto.Justificativa); err != nil {
+	if err := h.service.CancelNFCe(ctx, id, dto.Justification); err != nil {
 		status := http.StatusInternalServerError
 		switch err {
 		case fiscalinvoiceusecases.ErrInvoiceNotFound:

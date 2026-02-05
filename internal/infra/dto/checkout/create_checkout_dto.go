@@ -8,7 +8,7 @@ import (
 
 type CreateSubscriptionCheckoutDTO struct {
 	Plan      string `json:"plan"`      // "BASIC", "INTERMEDIATE", "ADVANCED"
-	Frequency string `json:"frequency"` // "MONTHLY", "SEMIANNUAL", "ANNUAL"
+	Frequency string `json:"frequency"` // "MONTHLY", "SEMIANNUALLY", "ANNUALLY"
 }
 
 type CheckoutResponseDTO struct {
@@ -28,10 +28,10 @@ func (c *CreateSubscriptionCheckoutDTO) ToPlanType() companyentity.PlanType {
 
 func (c *CreateSubscriptionCheckoutDTO) ToFrequency() companyentity.Frequency {
 	switch strings.ToUpper(c.Frequency) {
-	case "SEMIANNUAL":
-		return companyentity.FrequencySemiannual
-	case "ANNUAL":
-		return companyentity.FrequencyAnnual
+	case "SEMIANNUALLY":
+		return companyentity.FrequencySemiannually
+	case "ANNUALLY":
+		return companyentity.FrequencyAnnually
 	default:
 		return companyentity.FrequencyMonthly
 	}

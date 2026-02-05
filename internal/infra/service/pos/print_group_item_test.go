@@ -78,11 +78,11 @@ func Test_FormatGroupItem(t *testing.T) {
 			},
 		},
 		GroupItemTimeLogs: orderentity.GroupItemTimeLogs{
-			StartAt:    &now,
-			PendingAt:  &now,
-			StartedAt:  &now,
-			ReadyAt:    &now,
-			CanceledAt: &now,
+			StartAt:     &now,
+			PendingAt:   &now,
+			StartedAt:   &now,
+			ReadyAt:     &now,
+			CancelledAt: &now,
 		},
 	}
 

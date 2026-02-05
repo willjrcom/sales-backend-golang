@@ -55,7 +55,7 @@ func (r *CompanySubscriptionRepositoryBun) UpdateSubscription(ctx context.Contex
 	return tx.Commit()
 }
 
-func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsCanceled(ctx context.Context, companyID uuid.UUID) error {
+func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsCancelled(ctx context.Context, companyID uuid.UUID) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -66,7 +66,7 @@ func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsCanceled(ctx contex
 
 	result, err := tx.NewUpdate().
 		Model((*model.CompanySubscription)(nil)).
-		Set("is_canceled = ?", true).
+		Set("is_cancelled = ?", true).
 		Set("status = ?", "cancelled").
 		Where("company_id = ?", companyID).
 		Exec(ctx)

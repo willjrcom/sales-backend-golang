@@ -44,7 +44,7 @@ type DeliveryTimeLogs struct {
 	ReadyAt     *time.Time
 	ShippedAt   *time.Time
 	DeliveredAt *time.Time
-	CanceledAt  *time.Time
+	CancelledAt *time.Time
 }
 
 func NewOrderDelivery(clientID uuid.UUID) *OrderDelivery {
@@ -100,9 +100,9 @@ func (d *OrderDelivery) Ship(driverID *uuid.UUID) error {
 }
 
 func (d *OrderDelivery) Cancel() error {
-	d.CanceledAt = &time.Time{}
-	*d.CanceledAt = time.Now().UTC()
-	d.Status = OrderDeliveryStatusCanceled
+	d.CancelledAt = &time.Time{}
+	*d.CancelledAt = time.Now().UTC()
+	d.Status = OrderDeliveryStatusCancelled
 	return nil
 }
 

@@ -8,7 +8,7 @@ const (
 	OrderDeliveryStatusReady     StatusOrderDelivery = "Ready"
 	OrderDeliveryStatusShipped   StatusOrderDelivery = "Shipped"
 	OrderDeliveryStatusDelivered StatusOrderDelivery = "Delivered"
-	OrderDeliveryStatusCanceled  StatusOrderDelivery = "Canceled"
+	OrderDeliveryStatusCancelled StatusOrderDelivery = "Cancelled"
 )
 
 func GetAllDeliveryStatus() []StatusOrderDelivery {

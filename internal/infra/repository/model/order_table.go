@@ -28,9 +28,9 @@ type OrderTableCommonAttributes struct {
 }
 
 type OrderTableTimeLogs struct {
-	PendingAt  *time.Time `bun:"pending_at"`
-	ClosedAt   *time.Time `bun:"closed_at"`
-	CanceledAt *time.Time `bun:"canceled_at"`
+	PendingAt   *time.Time `bun:"pending_at"`
+	ClosedAt    *time.Time `bun:"closed_at"`
+	CancelledAt *time.Time `bun:"cancelled_at"`
 }
 
 func (t *OrderTable) FromDomain(table *orderentity.OrderTable) {
@@ -49,9 +49,9 @@ func (t *OrderTable) FromDomain(table *orderentity.OrderTable) {
 			OrderNumber: table.OrderNumber,
 		},
 		OrderTableTimeLogs: OrderTableTimeLogs{
-			PendingAt:  table.PendingAt,
-			ClosedAt:   table.ClosedAt,
-			CanceledAt: table.CanceledAt,
+			PendingAt:   table.PendingAt,
+			ClosedAt:    table.ClosedAt,
+			CancelledAt: table.CancelledAt,
 		},
 	}
 }
@@ -72,9 +72,9 @@ func (t *OrderTable) ToDomain() *orderentity.OrderTable {
 			OrderNumber: t.OrderNumber,
 		},
 		OrderTableTimeLogs: orderentity.OrderTableTimeLogs{
-			PendingAt:  t.PendingAt,
-			ClosedAt:   t.ClosedAt,
-			CanceledAt: t.CanceledAt,
+			PendingAt:   t.PendingAt,
+			ClosedAt:    t.ClosedAt,
+			CancelledAt: t.CancelledAt,
 		},
 	}
 }

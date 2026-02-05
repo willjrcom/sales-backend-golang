@@ -39,11 +39,11 @@ type GroupDetails struct {
 }
 
 type GroupItemTimeLogs struct {
-	StartAt    *time.Time `bun:"start_at"`
-	PendingAt  *time.Time `bun:"pending_at"`
-	StartedAt  *time.Time `bun:"started_at"`
-	ReadyAt    *time.Time `bun:"ready_at"`
-	CanceledAt *time.Time `bun:"canceled_at"`
+	StartAt     *time.Time `bun:"start_at"`
+	PendingAt   *time.Time `bun:"pending_at"`
+	StartedAt   *time.Time `bun:"started_at"`
+	ReadyAt     *time.Time `bun:"ready_at"`
+	CancelledAt *time.Time `bun:"cancelled_at"`
 }
 
 func (g *GroupItem) FromDomain(groupItem *orderentity.GroupItem) {
@@ -71,11 +71,11 @@ func (g *GroupItem) FromDomain(groupItem *orderentity.GroupItem) {
 			},
 		},
 		GroupItemTimeLogs: GroupItemTimeLogs{
-			StartAt:    groupItem.StartAt,
-			PendingAt:  groupItem.PendingAt,
-			StartedAt:  groupItem.StartedAt,
-			ReadyAt:    groupItem.ReadyAt,
-			CanceledAt: groupItem.CanceledAt,
+			StartAt:     groupItem.StartAt,
+			PendingAt:   groupItem.PendingAt,
+			StartedAt:   groupItem.StartedAt,
+			ReadyAt:     groupItem.ReadyAt,
+			CancelledAt: groupItem.CancelledAt,
 		},
 	}
 
@@ -114,11 +114,11 @@ func (g *GroupItem) ToDomain() *orderentity.GroupItem {
 			},
 		},
 		GroupItemTimeLogs: orderentity.GroupItemTimeLogs{
-			StartAt:    g.StartAt,
-			PendingAt:  g.PendingAt,
-			StartedAt:  g.StartedAt,
-			ReadyAt:    g.ReadyAt,
-			CanceledAt: g.CanceledAt,
+			StartAt:     g.StartAt,
+			PendingAt:   g.PendingAt,
+			StartedAt:   g.StartedAt,
+			ReadyAt:     g.ReadyAt,
+			CancelledAt: g.CancelledAt,
 		},
 	}
 

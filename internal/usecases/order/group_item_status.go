@@ -95,7 +95,7 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, dto *entitydto.I
 		return err
 	}
 
-	reason := "group item canceled"
+	reason := "group item cancelled"
 	processes, err := s.sop.GetProcessesByGroupItemID(ctx, dto)
 	if err != nil {
 		return err

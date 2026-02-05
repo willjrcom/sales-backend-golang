@@ -28,7 +28,7 @@ type ShiftCommonAttributes struct {
 	Attendant          *Employee        `bun:"rel:belongs-to"`
 
 	TotalOrdersFinished    int                        `bun:"total_orders_finished"`
-	TotalOrdersCanceled    int                        `bun:"total_orders_canceled"`
+	TotalOrdersCancelled   int                        `bun:"total_orders_cancelled"`
 	TotalSales             decimal.Decimal            `bun:"total_sales,type:decimal(10,2)"`
 	SalesByCategory        map[string]decimal.Decimal `bun:"sales_by_category,type:jsonb"`
 	ProductsSoldByCategory map[string]float64         `bun:"products_sold_by_category,type:jsonb"`
@@ -67,7 +67,7 @@ func (s *Shift) FromDomain(shift *shiftentity.Shift) {
 			Orders:                 []Order{},
 			Attendant:              &Employee{},
 			TotalOrdersFinished:    shift.TotalOrdersFinished,
-			TotalOrdersCanceled:    shift.TotalOrdersCanceled,
+			TotalOrdersCancelled:   shift.TotalOrdersCancelled,
 			TotalSales:             shift.TotalSales,
 			SalesByCategory:        shift.SalesByCategory,
 			ProductsSoldByCategory: shift.ProductsSoldByCategory,
@@ -126,7 +126,7 @@ func (s *Shift) ToDomain() *shiftentity.Shift {
 			Orders:                 []orderentity.Order{},
 			Attendant:              s.Attendant.ToDomain(),
 			TotalOrdersFinished:    s.TotalOrdersFinished,
-			TotalOrdersCanceled:    s.TotalOrdersCanceled,
+			TotalOrdersCancelled:   s.TotalOrdersCancelled,
 			TotalSales:             s.TotalSales,
 			SalesByCategory:        s.SalesByCategory,
 			ProductsSoldByCategory: s.ProductsSoldByCategory,

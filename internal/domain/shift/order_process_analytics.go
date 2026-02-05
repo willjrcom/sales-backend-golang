@@ -14,7 +14,7 @@ type OrderProcessAnalytics struct {
 	ProcessRuleName     string
 	TotalProcesses      int
 	CompletedProcesses  int
-	CanceledProcesses   int
+	CancelledProcesses  int
 	AverageProcessTime  time.Duration
 	TotalProcessTime    time.Duration
 	TotalPausedTime     time.Duration
@@ -33,7 +33,7 @@ type CategoryProcessMetrics struct {
 	TotalProcessed     int
 	AverageProcessTime time.Duration
 	TotalProcessTime   time.Duration
-	CanceledCount      int
+	CancelledCount     int
 }
 
 // EmployeeProcessMetrics representa métricas por funcionário
@@ -79,8 +79,8 @@ func (a *OrderProcessAnalytics) AddProcess(process *orderprocessentity.OrderProc
 	switch process.Status {
 	case orderprocessentity.ProcessStatusFinished:
 		a.CompletedProcesses++
-	case orderprocessentity.ProcessStatusCanceled:
-		a.CanceledProcesses++
+	case orderprocessentity.ProcessStatusCancelled:
+		a.CancelledProcesses++
 	}
 
 	// Calcula tempos
@@ -111,8 +111,8 @@ func (a *OrderProcessAnalytics) AddProcess(process *orderprocessentity.OrderProc
 		}
 
 		categoryMetrics.TotalProcessed++
-		if process.Status == orderprocessentity.ProcessStatusCanceled {
-			categoryMetrics.CanceledCount++
+		if process.Status == orderprocessentity.ProcessStatusCancelled {
+			categoryMetrics.CancelledCount++
 		}
 
 		if process.FinishedAt != nil && process.StartedAt != nil {

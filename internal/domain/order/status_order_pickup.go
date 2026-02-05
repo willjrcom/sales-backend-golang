@@ -7,7 +7,7 @@ const (
 	OrderPickupStatusPending   StatusOrderPickup = "Pending"
 	OrderPickupStatusReady     StatusOrderPickup = "Ready"
 	OrderPickupStatusDelivered StatusOrderPickup = "Delivered"
-	OrderPickupStatusCanceled  StatusOrderPickup = "Canceled"
+	OrderPickupStatusCancelled StatusOrderPickup = "Cancelled"
 )
 
 func GetAllPickupStatus() []StatusOrderPickup {
@@ -16,6 +16,6 @@ func GetAllPickupStatus() []StatusOrderPickup {
 		OrderPickupStatusPending,
 		OrderPickupStatusReady,
 		OrderPickupStatusDelivered,
-		OrderPickupStatusCanceled,
+		OrderPickupStatusCancelled,
 	}
 }

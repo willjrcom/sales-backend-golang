@@ -27,7 +27,7 @@ type PickupTimeLogs struct {
 	PendingAt   *time.Time `bun:"pending_at"`
 	ReadyAt     *time.Time `bun:"ready_at"`
 	DeliveredAt *time.Time `bun:"delivered_at"`
-	CanceledAt  *time.Time `bun:"canceled_at"`
+	CancelledAt *time.Time `bun:"cancelled_at"`
 }
 
 func (p *OrderPickup) FromDomain(pickup *orderentity.OrderPickup) {
@@ -40,7 +40,7 @@ func (p *OrderPickup) FromDomain(pickup *orderentity.OrderPickup) {
 			PendingAt:   pickup.PendingAt,
 			ReadyAt:     pickup.ReadyAt,
 			DeliveredAt: pickup.DeliveredAt,
-			CanceledAt:  pickup.CanceledAt,
+			CancelledAt: pickup.CancelledAt,
 		},
 		OrderPickupCommonAttributes: OrderPickupCommonAttributes{
 			Name:        pickup.Name,
@@ -61,7 +61,7 @@ func (p *OrderPickup) ToDomain() *orderentity.OrderPickup {
 			PendingAt:   p.PendingAt,
 			ReadyAt:     p.ReadyAt,
 			DeliveredAt: p.DeliveredAt,
-			CanceledAt:  p.CanceledAt,
+			CancelledAt: p.CancelledAt,
 		},
 		OrderPickupCommonAttributes: orderentity.OrderPickupCommonAttributes{
 			Name:        p.Name,

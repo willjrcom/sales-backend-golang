@@ -26,7 +26,7 @@ type ShiftCommonAttributes struct {
 	AttendantID            *uuid.UUID
 	Attendant              *employeeentity.Employee
 	TotalOrdersFinished    int
-	TotalOrdersCanceled    int
+	TotalOrdersCancelled   int
 	TotalSales             decimal.Decimal
 	SalesByCategory        map[string]decimal.Decimal
 	ProductsSoldByCategory map[string]float64
@@ -81,7 +81,7 @@ func (s *Shift) CloseShift(endChange decimal.Decimal) {
 func (s *Shift) Load(deliveryDrivers map[uuid.UUID]orderentity.DeliveryDriver, processes []orderprocessentity.OrderProcess, queues []*orderprocessentity.OrderQueue, processRules map[uuid.UUID]string, employees map[uuid.UUID]string) {
 	// compute analytics for reporting
 	s.TotalOrdersFinished = 0
-	s.TotalOrdersCanceled = 0
+	s.TotalOrdersCancelled = 0
 	s.TotalSales = decimal.Zero
 
 	// initialize maps
@@ -93,8 +93,8 @@ func (s *Shift) Load(deliveryDrivers map[uuid.UUID]orderentity.DeliveryDriver, p
 
 	// aggregate orders data
 	for _, o := range s.Orders {
-		if o.Status == orderentity.OrderStatusCanceled {
-			s.TotalOrdersCanceled++
+		if o.Status == orderentity.OrderStatusCancelled {
+			s.TotalOrdersCancelled++
 			continue
 		}
 

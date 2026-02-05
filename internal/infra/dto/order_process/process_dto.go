@@ -27,8 +27,8 @@ type OrderProcessDTO struct {
 	PausedAt          *time.Time                          `json:"paused_at,omitempty"`
 	ContinuedAt       *time.Time                          `json:"continued_at,omitempty"`
 	FinishedAt        *time.Time                          `json:"finished_at,omitempty"`
-	CanceledAt        *time.Time                          `json:"canceled_at,omitempty"`
-	CanceledReason    *string                             `json:"canceled_reason,omitempty"`
+	CancelledAt       *time.Time                          `json:"cancelled_at,omitempty"`
+	CancelledReason   *string                             `json:"cancelled_reason,omitempty"`
 	Duration          time.Duration                       `json:"duration,omitempty"`
 	DurationFormatted string                              `json:"duration_formatted,omitempty"`
 	TotalPaused       int8                                `json:"total_paused,omitempty"`
@@ -55,8 +55,8 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 		PausedAt:          orderProcess.PausedAt,
 		ContinuedAt:       orderProcess.ContinuedAt,
 		FinishedAt:        orderProcess.FinishedAt,
-		CanceledAt:        orderProcess.CanceledAt,
-		CanceledReason:    orderProcess.CanceledReason,
+		CancelledAt:       orderProcess.CancelledAt,
+		CancelledReason:   orderProcess.CancelledReason,
 		Duration:          elapsedDuration,
 		DurationFormatted: formatDurationToClock(elapsedDuration),
 		TotalPaused:       orderProcess.TotalPaused,

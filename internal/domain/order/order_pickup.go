@@ -29,7 +29,7 @@ type PickupTimeLogs struct {
 	PendingAt   *time.Time
 	ReadyAt     *time.Time
 	DeliveredAt *time.Time
-	CanceledAt  *time.Time
+	CancelledAt *time.Time
 }
 
 func NewOrderPickup(name string) *OrderPickup {
@@ -78,9 +78,9 @@ func (d *OrderPickup) Delivery() error {
 }
 
 func (d *OrderPickup) Cancel() error {
-	d.CanceledAt = &time.Time{}
-	*d.CanceledAt = time.Now().UTC()
-	d.Status = OrderPickupStatusCanceled
+	d.CancelledAt = &time.Time{}
+	*d.CancelledAt = time.Now().UTC()
+	d.Status = OrderPickupStatusCancelled
 	return nil
 }
 

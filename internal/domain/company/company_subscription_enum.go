@@ -14,9 +14,9 @@ const (
 	PlanIntermediate PlanType = "intermediate"
 	PlanAdvanced     PlanType = "advanced"
 
-	FrequencyMonthly    Frequency = "MONTHLY"
-	FrequencySemiannual Frequency = "SEMIANNUAL"
-	FrequencyAnnual     Frequency = "ANNUAL"
+	FrequencyMonthly      Frequency = "MONTHLY"
+	FrequencySemiannually Frequency = "SEMIANNUALLY"
+	FrequencyAnnually     Frequency = "ANNUALLY"
 )
 
 type Plan struct {

@@ -47,11 +47,11 @@ type GroupDetails struct {
 }
 
 type GroupItemTimeLogs struct {
-	StartAt    *time.Time
-	PendingAt  *time.Time
-	StartedAt  *time.Time
-	ReadyAt    *time.Time
-	CanceledAt *time.Time
+	StartAt     *time.Time
+	PendingAt   *time.Time
+	StartedAt   *time.Time
+	ReadyAt     *time.Time
+	CancelledAt *time.Time
 }
 
 func NewGroupItem(groupCommonAttributes GroupCommonAttributes) *GroupItem {
@@ -106,16 +106,16 @@ func (i *GroupItem) ReadyGroupItem() (err error) {
 }
 
 func (i *GroupItem) CancelGroupItem() {
-	i.Status = StatusGroupCanceled
-	i.CanceledAt = &time.Time{}
-	*i.CanceledAt = time.Now().UTC()
+	i.Status = StatusGroupCancelled
+	i.CancelledAt = &time.Time{}
+	*i.CancelledAt = time.Now().UTC()
 }
 
 func (i *GroupItem) CalculateTotalPrice() {
 	qtdItems := 0.0
 	totalPrice := decimal.Zero
 
-	if i.Status == StatusGroupCanceled {
+	if i.Status == StatusGroupCancelled {
 		i.GroupDetails.TotalPrice = decimal.Zero
 		i.GroupDetails.Quantity = 0.0
 		return

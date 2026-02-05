@@ -392,7 +392,7 @@ type CancellationRateDTO struct {
 	Rate float64 `bun:"rate"`
 }
 
-// CancellationRate returns percentage of orders canceled.
+// CancellationRate returns percentage of orders cancelled.
 func (s *ReportService) CancellationRate(ctx context.Context) (*CancellationRateDTO, error) {
 	schemaName, err := database.GetCurrentSchema(ctx)
 	if err != nil {
@@ -401,7 +401,7 @@ func (s *ReportService) CancellationRate(ctx context.Context) (*CancellationRate
 
 	var resp CancellationRateDTO
 	query := `
-        SELECT SUM(CASE WHEN status = 'canceled' THEN 1 ELSE 0 END)::float / COUNT(*) AS rate
+        SELECT SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END)::float / COUNT(*) AS rate
         FROM ` + schemaName + `.orders`
 	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
 		return nil, err

@@ -14,10 +14,10 @@ var (
 	ErrOrderWithoutItems            = errors.New("order must have at least one item")
 	ErrOrderMustBePending           = errors.New("order must be pending")
 	ErrOrderMustBePendingOrReady    = errors.New("order must be pending or ready")
-	ErrOrderMustBeCanceled          = errors.New("order must be canceled")
+	ErrOrderMustBeCancelled         = errors.New("order must be cancelled")
 	ErrOrderMustBeArchived          = errors.New("order must be archived")
 	ErrOrderAlreadyFinished         = errors.New("order already finished")
-	ErrOrderAlreadyCanceled         = errors.New("order already canceled")
+	ErrOrderAlreadyCancelled        = errors.New("order already cancelled")
 	ErrOrderAlreadyArchived         = errors.New("order already archived")
 	ErrOrderPaidMoreThanTotal       = errors.New("order paid more than total")
 	ErrOrderPaidLessThanTotal       = errors.New("order paid less than total")
@@ -60,11 +60,11 @@ type OrderType struct {
 }
 
 type OrderTimeLogs struct {
-	PendingAt  *time.Time
-	ReadyAt    *time.Time
-	FinishedAt *time.Time
-	CanceledAt *time.Time
-	ArchivedAt *time.Time
+	PendingAt   *time.Time
+	ReadyAt     *time.Time
+	FinishedAt  *time.Time
+	CancelledAt *time.Time
+	ArchivedAt  *time.Time
 }
 
 func NewDefaultOrder(shiftID uuid.UUID, currentOrderNumber int, attendantID *uuid.UUID) *Order {
@@ -94,8 +94,8 @@ func (o *Order) PendingOrder() (err error) {
 		return ErrOrderAlreadyFinished
 	}
 
-	if o.Status == OrderStatusCanceled {
-		return ErrOrderAlreadyCanceled
+	if o.Status == OrderStatusCancelled {
+		return ErrOrderAlreadyCancelled
 	}
 
 	if o.Status == OrderStatusArchived {
@@ -187,8 +187,8 @@ func (o *Order) FinishOrder() (err error) {
 }
 
 func (o *Order) CancelOrder() (err error) {
-	if o.Status == OrderStatusCanceled {
-		return ErrOrderAlreadyCanceled
+	if o.Status == OrderStatusCancelled {
+		return ErrOrderAlreadyCancelled
 	}
 
 	if o.Status == OrderStatusArchived {
@@ -199,15 +199,15 @@ func (o *Order) CancelOrder() (err error) {
 		o.GroupItems[i].CancelGroupItem()
 	}
 
-	o.Status = OrderStatusCanceled
-	o.CanceledAt = &time.Time{}
-	*o.CanceledAt = time.Now().UTC()
+	o.Status = OrderStatusCancelled
+	o.CancelledAt = &time.Time{}
+	*o.CancelledAt = time.Now().UTC()
 	return nil
 }
 
 func (o *Order) ArchiveOrder() (err error) {
-	if o.Status != OrderStatusCanceled {
-		return ErrOrderMustBeCanceled
+	if o.Status != OrderStatusCancelled {
+		return ErrOrderMustBeCancelled
 	}
 
 	if o.Status == OrderStatusArchived {
@@ -225,12 +225,12 @@ func (o *Order) UnarchiveOrder() (err error) {
 		return ErrOrderMustBeArchived
 	}
 
-	if o.CanceledAt != nil {
-		o.Status = OrderStatusCanceled
+	if o.CancelledAt != nil {
+		o.Status = OrderStatusCancelled
 		return
 	}
 
-	o.Status = OrderStatusCanceled
+	o.Status = OrderStatusCancelled
 	return
 }
 

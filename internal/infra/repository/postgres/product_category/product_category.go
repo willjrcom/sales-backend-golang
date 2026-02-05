@@ -418,8 +418,8 @@ func (r *ProductCategoryRepositoryBun) GetAllCategoriesWithProcessRulesAndOrderP
 	// Query SQL para contar os processos em geral
 	rows, err := r.db.QueryContext(ctx, `
 		SELECT process_rule_id, 
-			COUNT(CASE WHEN status NOT IN ('Finished', 'Canceled') THEN 1 END) AS total_orders, 
-			COUNT(CASE WHEN status NOT IN ('Finished', 'Canceled') AND (EXTRACT(EPOCH FROM (NOW() - started_at::timestamptz)) * 1000000000) > pr.ideal_time THEN 1 END) AS late_orders
+			COUNT(CASE WHEN status NOT IN ('Finished', 'Cancelled') THEN 1 END) AS total_orders, 
+			COUNT(CASE WHEN status NOT IN ('Finished', 'Cancelled') AND (EXTRACT(EPOCH FROM (NOW() - started_at::timestamptz)) * 1000000000) > pr.ideal_time THEN 1 END) AS late_orders
 		FROM `+schemaName+`.order_processes AS process
 		JOIN `+schemaName+`.process_rules AS pr ON process.process_rule_id = pr.id
 		WHERE process_rule_id IN (?) 

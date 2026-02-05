@@ -38,7 +38,7 @@ type DeliveryTimeLogs struct {
 	ReadyAt     *time.Time `bun:"ready_at"`
 	ShippedAt   *time.Time `bun:"shipped_at"`
 	DeliveredAt *time.Time `bun:"delivered_at"`
-	CanceledAt  *time.Time `bun:"canceled_at"`
+	CancelledAt *time.Time `bun:"cancelled_at"`
 }
 
 func (d *OrderDelivery) FromDomain(delivery *orderentity.OrderDelivery) {
@@ -67,7 +67,7 @@ func (d *OrderDelivery) FromDomain(delivery *orderentity.OrderDelivery) {
 			ReadyAt:     delivery.ReadyAt,
 			ShippedAt:   delivery.ShippedAt,
 			DeliveredAt: delivery.DeliveredAt,
-			CanceledAt:  delivery.CanceledAt,
+			CancelledAt: delivery.CancelledAt,
 		},
 	}
 
@@ -102,7 +102,7 @@ func (d *OrderDelivery) ToDomain() *orderentity.OrderDelivery {
 			ReadyAt:     d.ReadyAt,
 			ShippedAt:   d.ShippedAt,
 			DeliveredAt: d.DeliveredAt,
-			CanceledAt:  d.CanceledAt,
+			CancelledAt: d.CancelledAt,
 		},
 	}
 }

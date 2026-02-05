@@ -38,9 +38,9 @@ func translateFrequency(p companyentity.Frequency) string {
 	switch p {
 	case companyentity.FrequencyMonthly:
 		return "Mensal"
-	case companyentity.FrequencySemiannual:
+	case companyentity.FrequencySemiannually:
 		return "Semestral"
-	case companyentity.FrequencyAnnual:
+	case companyentity.FrequencyAnnually:
 		return "Anual"
 	default:
 		return string(p)

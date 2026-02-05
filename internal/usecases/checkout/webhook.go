@@ -100,7 +100,7 @@ func (s *CheckoutUseCase) runSubscriptionPreapprovalWebhook(ctx context.Context,
 
 	if preapproval.Status == "cancelled" {
 		fmt.Printf("Subscription cancelled for company %s\n", subscriptionExternalRef.CompanyID)
-		if err := s.companySubscriptionRepo.MarkSubscriptionAsCanceled(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID)); err != nil {
+		if err := s.companySubscriptionRepo.MarkSubscriptionAsCancelled(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID)); err != nil {
 			return fmt.Errorf("failed to cancel subscription: %w", err)
 		}
 
@@ -367,7 +367,19 @@ func (s *CheckoutUseCase) runSubscriptionUpgradeWebhook(ctx context.Context, det
 			return fmt.Errorf("active subscription has no preapproval ID")
 		}
 
-		title := fmt.Sprintf("Assinatura Gfood Plano %s - %s", translatePlanType(companyentity.PlanType(subscriptionUpgradeExternalRef.PlanType)), translateFrequency(companyentity.Frequency(subscriptionUpgradeExternalRef.Frequency)))
+		var frequencyMonth string
+		switch subscriptionUpgradeExternalRef.Frequency {
+		case 1:
+			frequencyMonth = "MONTHLY"
+		case 6:
+			frequencyMonth = "SEMIANNUALLY"
+		case 12:
+			frequencyMonth = "ANNUALLY"
+		}
+
+		translatedPlanType := translatePlanType(companyentity.PlanType(subscriptionUpgradeExternalRef.PlanType))
+		translatedFrequency := translateFrequency(companyentity.Frequency(frequencyMonth))
+		title := fmt.Sprintf("Assinatura Gfood Plano %s - %s", translatedPlanType, translatedFrequency)
 
 		// Update Mercado Pago Subscription Amount with FULL new plan price
 		if err := s.mpService.UpdateSubscriptionAmount(ctx, *activeSub.PreapprovalID, title, subscriptionUpgradeExternalRef.NewAmount); err != nil {

@@ -19,8 +19,8 @@ type CompanySubscription struct {
 	StartDate         time.Time `bun:"start_date,notnull"`
 	EndDate           time.Time `bun:"end_date,notnull"`
 	IsActive          bool      `bun:"is_active,notnull"`
-	IsCanceled        bool      `bun:"is_canceled,notnull,default:false"` // Renewal cancelled in MP
-	PreapprovalID     *string   `bun:"preapproval_id"`                    // Unique index in DB
+	IsCancelled       bool      `bun:"is_cancelled,notnull,default:false"` // Renewal cancelled in MP
+	PreapprovalID     *string   `bun:"preapproval_id"`                     // Unique index in DB
 	ExternalReference *string   `bun:"external_reference"`
 	Status            string    `bun:"status"`
 }
@@ -33,7 +33,7 @@ func (c *CompanySubscription) ToDomain() *companyentity.CompanySubscription {
 		StartDate:         c.StartDate,
 		EndDate:           c.EndDate,
 		IsActive:          c.IsActive,
-		IsCanceled:        c.IsCanceled,
+		IsCancelled:       c.IsCancelled,
 		PreapprovalID:     c.PreapprovalID,
 		ExternalReference: c.ExternalReference,
 		Status:            c.Status,
@@ -47,7 +47,7 @@ func (c *CompanySubscription) FromDomain(entity *companyentity.CompanySubscripti
 	c.StartDate = entity.StartDate
 	c.EndDate = entity.EndDate
 	c.IsActive = entity.IsActive
-	c.IsCanceled = entity.IsCanceled
+	c.IsCancelled = entity.IsCancelled
 	c.PreapprovalID = entity.PreapprovalID
 	c.ExternalReference = entity.ExternalReference
 	c.Status = entity.Status

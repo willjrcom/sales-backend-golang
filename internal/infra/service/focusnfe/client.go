@@ -163,12 +163,12 @@ func (c *Client) doRequest(ctx context.Context, method, endpoint string, reqBody
 
 // NFCeRequest represents the request to emit NFC-e
 type NFCeRequest struct {
-	NaturezaOperacao string           `json:"natureza_operacao"`
-	DataEmissao      string           `json:"data_emissao,omitempty"`
-	Itens            []NFCeItem       `json:"items"` // Note: Focus might use "items" or "itens" depending on version. Usually "items".
-	Cliente          *NFCeCliente     `json:"cliente,omitempty"`
-	Pagamento        *NFCePagamento   `json:"pagamento,omitempty"` // Or FormasPagamento
-	FormasPagamento  []FormaPagamento `json:"formas_pagamento,omitempty"`
+	NaturezaOperacao string          `json:"natureza_operacao"`
+	DataEmissao      string          `json:"data_emissao,omitempty"`
+	Itens            []NFCeItem      `json:"items"` // Note: Focus might use "items" or "itens" depending on version. Usually "items".
+	Cliente          *NFCeClient     `json:"cliente,omitempty"`
+	Pagamento        *NFCePayment    `json:"pagamento,omitempty"` // Or FormasPagamento
+	FormasPagamento  []PaymentMethod `json:"formas_pagamento,omitempty"`
 	// Additional fields
 	Serie             string `json:"serie,omitempty"`
 	Numero            string `json:"numero,omitempty"`
@@ -191,21 +191,21 @@ type NFCeItem struct {
 	// PIS/COFINS usually needed too
 }
 
-type NFCeCliente struct {
+type NFCeClient struct {
 	CPF   string `json:"cpf,omitempty"`
 	Nome  string `json:"nome_completo,omitempty"`
 	Email string `json:"email,omitempty"`
 }
 
-type FormaPagamento struct {
+type PaymentMethod struct {
 	FormaPagamento string  `json:"forma_pagamento"` // 01, 03...
 	ValorPagamento float64 `json:"valor_pagamento"`
 }
 
 // Keep older struct for compat if needed, but we are building new.
-type NFCePagamento struct {
-	FormasPagamento []FormaPagamento `json:"formas_pagamento"`
-	Troco           float64          `json:"troco,omitempty"`
+type NFCePayment struct {
+	FormasPagamento []PaymentMethod `json:"formas_pagamento"`
+	Troco           float64         `json:"troco,omitempty"`
 }
 
 type NFCeResponse struct {
@@ -220,14 +220,14 @@ type NFCeResponse struct {
 	Erros      json.RawMessage `json:"erros,omitempty"`
 }
 
-// CancelamentoRequest
-type CancelamentoRequest struct {
-	Justify string `json:"justificativa"`
+// CancelRequest
+type CancelRequest struct {
+	Justificativa string `json:"justificativa"`
 }
 
-// EmitirNFCe emits a new NFC-e
+// EmitNFCe emits a new NFC-e
 // Reference maps "reference" to our internal ID to query later if stuck in processing
-func (c *Client) EmitirNFCe(ctx context.Context, reference string, req *NFCeRequest, token string) (*NFCeResponse, error) {
+func (c *Client) EmitNFCe(ctx context.Context, reference string, req *NFCeRequest, token string) (*NFCeResponse, error) {
 	// POST /v2/nfce?ref=reference
 	endpoint := fmt.Sprintf("/v2/nfce?ref=%s", reference)
 
@@ -245,8 +245,8 @@ func (c *Client) EmitirNFCe(ctx context.Context, reference string, req *NFCeRequ
 	return resp, nil
 }
 
-// ConsultarNFCe queries NFC-e. Can query by reference.
-func (c *Client) ConsultarNFCe(ctx context.Context, reference string, token string) (*NFCeResponse, error) {
+// SearchNFCe queries NFC-e. Can query by reference.
+func (c *Client) SearchNFCe(ctx context.Context, reference string, token string) (*NFCeResponse, error) {
 	endpoint := fmt.Sprintf("/v2/nfce/%s", reference)
 
 	resp := &NFCeResponse{}
@@ -257,8 +257,8 @@ func (c *Client) ConsultarNFCe(ctx context.Context, reference string, token stri
 	return resp, nil
 }
 
-// CancelarNFCe cancels an NFC-e using its reference (or key)
-func (c *Client) CancelarNFCe(ctx context.Context, reference string, req *CancelamentoRequest, token string) error {
+// CancelNFCe cancels an NFC-e using its reference (or key)
+func (c *Client) CancelNFCe(ctx context.Context, reference string, req *CancelRequest, token string) error {
 	endpoint := fmt.Sprintf("/v2/nfce/%s", reference)
 
 	// Cancellation in Focus NFe: DELETE /v2/nfce/{ref} with body?

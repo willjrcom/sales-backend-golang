@@ -3,10 +3,10 @@ package orderentity
 type StatusOrderTable string
 
 const (
-	OrderTableStatusStaging  StatusOrderTable = "Staging"
-	OrderTableStatusPending  StatusOrderTable = "Pending"
-	OrderTableStatusClosed   StatusOrderTable = "Closed"
-	OrderTableStatusCanceled StatusOrderTable = "Canceled"
+	OrderTableStatusStaging   StatusOrderTable = "Staging"
+	OrderTableStatusPending   StatusOrderTable = "Pending"
+	OrderTableStatusClosed    StatusOrderTable = "Closed"
+	OrderTableStatusCancelled StatusOrderTable = "Cancelled"
 )
 
 func GetAllTableStatus() []StatusOrderTable {
@@ -14,6 +14,6 @@ func GetAllTableStatus() []StatusOrderTable {
 		OrderTableStatusStaging,
 		OrderTableStatusPending,
 		OrderTableStatusClosed,
-		OrderTableStatusCanceled,
+		OrderTableStatusCancelled,
 	}
 }

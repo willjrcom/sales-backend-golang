@@ -147,11 +147,11 @@ func (s *Service) EmitNFCeOrder(ctx context.Context, orderID uuid.UUID) (*fiscal
 	}
 
 	// Build payment info from order
-	formasPagamento := make([]focusnfe.FormaPagamento, 0)
+	formasPagamento := make([]focusnfe.PaymentMethod, 0)
 	for _, payment := range orderModel.Payments {
 		valor, _ := payment.TotalPaid.Float64()
 		forma := mapPaymentMethod(payment.Method)
-		formasPagamento = append(formasPagamento, focusnfe.FormaPagamento{
+		formasPagamento = append(formasPagamento, focusnfe.PaymentMethod{
 			FormaPagamento: forma,
 			ValorPagamento: valor,
 		})
@@ -160,7 +160,7 @@ func (s *Service) EmitNFCeOrder(ctx context.Context, orderID uuid.UUID) (*fiscal
 	// If no payments yet, add "dinheiro" with total
 	if len(formasPagamento) == 0 {
 		valorTotal, _ := orderModel.TotalPayable.Float64()
-		formasPagamento = append(formasPagamento, focusnfe.FormaPagamento{
+		formasPagamento = append(formasPagamento, focusnfe.PaymentMethod{
 			FormaPagamento: "01", // 01 = Dinheiro
 			ValorPagamento: valorTotal,
 		})
@@ -191,7 +191,7 @@ func (s *Service) EmitNFCeOrder(ctx context.Context, orderID uuid.UUID) (*fiscal
 	}
 
 	// Emit NFC-e via Focus NFe API
-	response, err := s.focusClient.EmitirNFCe(
+	response, err := s.focusClient.EmitNFCe(
 		ctx,
 		reference,
 		nfceRequest,
@@ -228,11 +228,6 @@ func (s *Service) EmitNFCeOrder(ctx context.Context, orderID uuid.UUID) (*fiscal
 	if response.Status == "autorizado" {
 		// Mark as authorized
 		invoice.Authorize(response.ChaveNFe, response.Protocolo, response.CaminhoXML, response.CaminhoPDF)
-	} else {
-		// Use "Processing" status if available in domain, or just save generic status.
-		// Assuming current domain only has Pending, Authorized, Rejected, Cancelled.
-		// If "processando", we might leave it as Pending (Created).
-		// But we should update ChaveNFe if available.
 	}
 
 	// Save invoice
@@ -263,8 +258,8 @@ func (s *Service) EmitNFCeOrder(ctx context.Context, orderID uuid.UUID) (*fiscal
 	return invoice, nil
 }
 
-// ConsultarNFCe queries NFC-e status
-func (s *Service) ConsultarNFCe(ctx context.Context, invoiceID uuid.UUID) (*fiscalinvoice.FiscalInvoice, error) {
+// SearchNFCe queries NFC-e status
+func (s *Service) SearchNFCe(ctx context.Context, invoiceID uuid.UUID) (*fiscalinvoice.FiscalInvoice, error) {
 	invoiceModel, err := s.invoiceRepo.GetByID(ctx, invoiceID)
 	if err != nil {
 		return nil, ErrInvoiceNotFound
@@ -287,7 +282,7 @@ func (s *Service) ConsultarNFCe(ctx context.Context, invoiceID uuid.UUID) (*fisc
 		token = settings.TokenProduction
 	}
 
-	response, err := s.focusClient.ConsultarNFCe(
+	response, err := s.focusClient.SearchNFCe(
 		ctx,
 		invoice.ID.String(),
 		token,
@@ -326,8 +321,8 @@ func (s *Service) ConsultarNFCe(ctx context.Context, invoiceID uuid.UUID) (*fisc
 	return invoice, nil
 }
 
-// CancelarNFCe cancels an NFC-e
-func (s *Service) CancelarNFCe(ctx context.Context, invoiceID uuid.UUID, justify string) error {
+// CancelNFCe cancels an NFC-e
+func (s *Service) CancelNFCe(ctx context.Context, invoiceID uuid.UUID, justification string) error {
 	invoiceModel, err := s.invoiceRepo.GetByID(ctx, invoiceID)
 	if err != nil {
 		return ErrInvoiceNotFound
@@ -340,7 +335,7 @@ func (s *Service) CancelarNFCe(ctx context.Context, invoiceID uuid.UUID, justify
 	}
 
 	// Validate justification (minimum 15 characters as per SEFAZ rules)
-	if len(justify) < 15 {
+	if len(justification) < 15 {
 		return errors.New("justify must be at least 15 characters long")
 	}
 
@@ -349,8 +344,8 @@ func (s *Service) CancelarNFCe(ctx context.Context, invoiceID uuid.UUID, justify
 		return errors.New("focus client not enabled")
 	}
 
-	cancelRequest := &focusnfe.CancelamentoRequest{
-		Justify: justify,
+	cancelRequest := &focusnfe.CancelRequest{
+		Justificativa: justification,
 	}
 
 	// Fetch settings to get token
@@ -365,7 +360,7 @@ func (s *Service) CancelarNFCe(ctx context.Context, invoiceID uuid.UUID, justify
 		token = settings.TokenProduction
 	}
 
-	if err = s.focusClient.CancelarNFCe(
+	if err = s.focusClient.CancelNFCe(
 		ctx,
 		invoice.ID.String(), // Use reference
 		cancelRequest,
@@ -375,7 +370,7 @@ func (s *Service) CancelarNFCe(ctx context.Context, invoiceID uuid.UUID, justify
 	}
 
 	// Mark as cancelled
-	invoice.Cancel(justify)
+	invoice.Cancel(justification)
 	invoiceModel.FromDomain(invoice)
 
 	if err := s.invoiceRepo.Update(ctx, invoiceModel); err != nil {

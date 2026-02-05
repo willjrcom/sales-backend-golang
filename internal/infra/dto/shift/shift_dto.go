@@ -25,7 +25,7 @@ type ShiftCommonAttributes struct {
 	AttendantID            *uuid.UUID                 `json:"attendant_id"`
 	Attendant              *employeedto.EmployeeDTO   `json:"attendant"`
 	TotalOrdersFinished    int                        `json:"total_orders_finished"`
-	TotalOrdersCanceled    int                        `json:"total_orders_canceled"`
+	TotalOrdersCancelled   int                        `json:"total_orders_cancelled"`
 	TotalSales             decimal.Decimal            `json:"total_sales"`
 	SalesByCategory        map[string]decimal.Decimal `json:"sales_by_category"`
 	ProductsSoldByCategory map[string]float64         `json:"products_sold_by_category"`
@@ -54,7 +54,7 @@ type OrderProcessAnalyticsDTO struct {
 	ProcessRuleName     string                                `json:"process_rule_name"`
 	TotalProcesses      int                                   `json:"total_processes"`
 	CompletedProcesses  int                                   `json:"completed_processes"`
-	CanceledProcesses   int                                   `json:"canceled_processes"`
+	CancelledProcesses  int                                   `json:"cancelled_processes"`
 	AverageProcessTime  int64                                 `json:"average_process_time"` // em segundos
 	TotalProcessTime    int64                                 `json:"total_process_time"`   // em segundos
 	TotalPausedCount    int                                   `json:"total_paused_count"`
@@ -110,7 +110,7 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 			AttendantID:            shift.AttendantID,
 			Attendant:              &employeedto.EmployeeDTO{},
 			TotalOrdersFinished:    shift.TotalOrdersFinished,
-			TotalOrdersCanceled:    shift.TotalOrdersCanceled,
+			TotalOrdersCancelled:   shift.TotalOrdersCancelled,
 			TotalSales:             shift.TotalSales,
 			SalesByCategory:        shift.SalesByCategory,
 			ProductsSoldByCategory: shift.ProductsSoldByCategory,
@@ -160,7 +160,7 @@ func (s *ShiftDTO) FromDomain(shift *shiftentity.Shift) {
 			ProcessRuleName:     analytics.ProcessRuleName,
 			TotalProcesses:      analytics.TotalProcesses,
 			CompletedProcesses:  analytics.CompletedProcesses,
-			CanceledProcesses:   analytics.CanceledProcesses,
+			CancelledProcesses:  analytics.CancelledProcesses,
 			AverageProcessTime:  int64(analytics.AverageProcessTime.Seconds()),
 			TotalProcessTime:    int64(analytics.TotalProcessTime.Seconds()),
 			TotalPausedCount:    analytics.TotalPausedCount,

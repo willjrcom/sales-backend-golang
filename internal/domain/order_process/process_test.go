@@ -32,6 +32,6 @@ func TestStartAndCancelProcess(t *testing.T) {
 	assert.Error(t, err)
 	err = p.CancelProcess(&reason)
 	assert.NoError(t, err)
-	assert.Equal(t, ProcessStatusCanceled, p.Status)
-	assert.Equal(t, &reason, p.CanceledReason)
+	assert.Equal(t, ProcessStatusCancelled, p.Status)
+	assert.Equal(t, &reason, p.CancelledReason)
 }

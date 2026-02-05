@@ -57,8 +57,8 @@ type OrderProcessTimeLogs struct {
 	PausedAt          *time.Time
 	ContinuedAt       *time.Time
 	FinishedAt        *time.Time
-	CanceledAt        *time.Time
-	CanceledReason    *string
+	CancelledAt       *time.Time
+	CancelledReason   *string
 	Duration          time.Duration
 	DurationFormatted string
 	TotalPaused       int8
@@ -181,9 +181,9 @@ func (p *OrderProcess) CancelProcess(reason *string) error {
 		*p.StartedAt = time.Now().UTC()
 	}
 
-	p.CanceledReason = reason
-	p.CanceledAt = &time.Time{}
-	*p.CanceledAt = time.Now().UTC()
-	p.Status = ProcessStatusCanceled
+	p.CancelledReason = reason
+	p.CancelledAt = &time.Time{}
+	*p.CancelledAt = time.Now().UTC()
+	p.Status = ProcessStatusCancelled
 	return nil
 }
