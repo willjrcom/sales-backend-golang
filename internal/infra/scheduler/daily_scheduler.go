@@ -41,6 +41,7 @@ func (s *DailyScheduler) Start(ctx context.Context) {
 				if t.Hour() == 5 {
 					log.Println("Running Daily Billing Batch...")
 					s.ProcessCostsToPay(ctx)
+					s.UpdateCompanyPlans(ctx)
 					s.CheckOverdueAccounts(ctx)
 					s.CheckExpiredOptionalPayments(ctx)
 					log.Println("Daily Billing Batch Completed.")

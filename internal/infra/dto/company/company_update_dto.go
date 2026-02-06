@@ -1,6 +1,7 @@
 package companydto
 
 import (
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
 )
@@ -46,6 +47,10 @@ func (c *CompanyUpdateDTO) UpdateDomain(company *companyentity.Company) (err err
 	}
 
 	if c.Address != nil {
+		if company.Address == nil {
+			company.AddAddress(&addressentity.AddressCommonAttributes{})
+		}
+
 		if err := c.Address.UpdateDomain(company.Address); err != nil {
 			return err
 		}
