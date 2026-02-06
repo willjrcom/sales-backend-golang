@@ -91,7 +91,7 @@ func (r *CompanyRepositoryBun) GetCompany(ctx context.Context, withoutRelations 
 	defer tx.Rollback()
 
 	query := tx.NewSelect().Model(company).Where("schema_name = ?", schema)
-	if len(withoutRelations) > 0 && withoutRelations[0] {
+	if len(withoutRelations) == 0 || !withoutRelations[0] {
 		query = query.Relation("Address").Relation("Users")
 	}
 
