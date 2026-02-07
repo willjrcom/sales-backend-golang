@@ -55,7 +55,7 @@ func (r *CompanySubscriptionRepositoryBun) UpdateSubscription(ctx context.Contex
 	return tx.Commit()
 }
 
-func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsCancelled(ctx context.Context, companyID uuid.UUID) error {
+func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsCancelled(ctx context.Context, companyID uuid.UUID, externalReference string) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -69,6 +69,7 @@ func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsCancelled(ctx conte
 		Set("is_cancelled = ?", true).
 		Set("status = ?", "cancelled").
 		Where("company_id = ?", companyID).
+		Where("external_reference = ?", externalReference).
 		Exec(ctx)
 
 	if err != nil {
@@ -83,7 +84,7 @@ func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsCancelled(ctx conte
 	return tx.Commit()
 }
 
-func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsActive(ctx context.Context, companyID uuid.UUID) error {
+func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsActive(ctx context.Context, companyID uuid.UUID, externalReference string) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -97,6 +98,7 @@ func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsActive(ctx context.
 		Set("is_active = ?", true).
 		Set("status = ?", "authorized").
 		Where("company_id = ?", companyID).
+		Where("external_reference = ?", externalReference).
 		Exec(ctx)
 
 	if err != nil {

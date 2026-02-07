@@ -10,8 +10,8 @@ type CompanySubscriptionRepository interface {
 	// Subscriptions
 	CreateSubscription(ctx context.Context, subscription *CompanySubscription) error
 	UpdateSubscription(ctx context.Context, subscription *CompanySubscription) error
-	MarkSubscriptionAsCancelled(ctx context.Context, companyID uuid.UUID) error
-	MarkSubscriptionAsActive(ctx context.Context, companyID uuid.UUID) error
+	MarkSubscriptionAsCancelled(ctx context.Context, companyID uuid.UUID, externalReference string) error
+	MarkSubscriptionAsActive(ctx context.Context, companyID uuid.UUID, externalReference string) error
 	UpdateSubscriptionStatus(ctx context.Context, companyID uuid.UUID, status string, externalReference string) error
 	GetActiveSubscription(ctx context.Context, companyID uuid.UUID) (*CompanySubscription, error)
 	GetByPreapprovalID(ctx context.Context, preapprovalID string) (*CompanySubscription, error)

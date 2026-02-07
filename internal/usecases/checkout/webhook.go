@@ -100,7 +100,7 @@ func (s *CheckoutUseCase) runSubscriptionPreapprovalWebhook(ctx context.Context,
 
 	if preapproval.Status == "cancelled" {
 		fmt.Printf("Subscription cancelled for company %s\n", subscriptionExternalRef.CompanyID)
-		if err := s.companySubscriptionRepo.MarkSubscriptionAsCancelled(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID)); err != nil {
+		if err := s.companySubscriptionRepo.MarkSubscriptionAsCancelled(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID), preapproval.ExternalReference); err != nil {
 			return fmt.Errorf("failed to cancel subscription: %w", err)
 		}
 
@@ -110,7 +110,7 @@ func (s *CheckoutUseCase) runSubscriptionPreapprovalWebhook(ctx context.Context,
 
 	if preapproval.Status == "authorized" {
 		fmt.Printf("Subscription authorized for company %s\n", subscriptionExternalRef.CompanyID)
-		if err := s.companySubscriptionRepo.MarkSubscriptionAsActive(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID)); err != nil {
+		if err := s.companySubscriptionRepo.MarkSubscriptionAsActive(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID), preapproval.ExternalReference); err != nil {
 			return fmt.Errorf("failed to activate subscription: %w", err)
 		}
 		fmt.Printf("Subscription authorized for company %s\n", subscriptionExternalRef.CompanyID)

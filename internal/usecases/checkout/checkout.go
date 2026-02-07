@@ -295,8 +295,12 @@ func (uc *CheckoutUseCase) CancelSubscription(ctx context.Context) error {
 		return fmt.Errorf("failed to cancel subscription at Mercado Pago: %w", err)
 	}
 
+	if activeSub.ExternalReference == nil || *activeSub.ExternalReference == "" {
+		return fmt.Errorf("active subscription has no external reference")
+	}
+
 	// Mark the active subscription as cancelled directly
-	if err := uc.companySubscriptionRepo.MarkSubscriptionAsCancelled(ctx, companyModel.ID); err != nil {
+	if err := uc.companySubscriptionRepo.MarkSubscriptionAsCancelled(ctx, companyModel.ID, *activeSub.ExternalReference); err != nil {
 		return fmt.Errorf("failed to mark subscription as cancelled: %w", err)
 	}
 
