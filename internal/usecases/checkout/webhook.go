@@ -29,9 +29,9 @@ func (s *CheckoutUseCase) HandleMercadoPagoWebhook(ctx context.Context, dto *com
 	}
 
 	// Validate signature from Mercado Pago
-	// if !s.mpService.ValidateSignature(dto.XSignature, dto.XRequestID, dataIDForSignature) {
-	// 	return ErrInvalidWebhookSecret
-	// }
+	if !s.mpService.ValidateSignature(dto.XSignature, dto.XRequestID, dataIDForSignature) {
+		return ErrInvalidWebhookSecret
+	}
 
 	if dto.Type == companydto.MercadoPagoWebhookTypeSubscriptionPreapproval {
 		return s.runSubscriptionPreapprovalWebhook(ctx, dto)
