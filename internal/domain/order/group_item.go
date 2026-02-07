@@ -2,7 +2,6 @@ package orderentity
 
 import (
 	"errors"
-	"math"
 	"time"
 
 	"github.com/google/uuid"
@@ -69,9 +68,10 @@ func (i *GroupItem) Schedule(startAt *time.Time) (err error) {
 }
 
 func (i *GroupItem) PendingGroupItem() (err error) {
-	if math.Mod(i.Quantity, 1) != 0 {
-		return ErrQuantityNotInteger
-	}
+	// uma regra maravilhosa, pena que os usuarios as vezes sao burros para entender
+	// if math.Mod(i.Quantity, 1) != 0 {
+	// 	return ErrQuantityNotInteger
+	// }
 
 	if i.Status != StatusGroupStaging {
 		return nil
