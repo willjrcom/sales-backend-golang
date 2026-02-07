@@ -111,7 +111,7 @@ func (r *CompanySubscriptionRepositoryBun) MarkSubscriptionAsActive(ctx context.
 	return tx.Commit()
 }
 
-func (r *CompanySubscriptionRepositoryBun) UpdateSubscriptionStatus(ctx context.Context, companyID uuid.UUID, status string) error {
+func (r *CompanySubscriptionRepositoryBun) UpdateSubscriptionStatus(ctx context.Context, companyID uuid.UUID, status string, externalReference string) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -124,6 +124,7 @@ func (r *CompanySubscriptionRepositoryBun) UpdateSubscriptionStatus(ctx context.
 		Model((*model.CompanySubscription)(nil)).
 		Set("status = ?", status).
 		Where("company_id = ?", companyID).
+		Where("external_reference = ?", externalReference).
 		Exec(ctx)
 
 	if err != nil {

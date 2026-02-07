@@ -118,7 +118,7 @@ func (s *CheckoutUseCase) runSubscriptionPreapprovalWebhook(ctx context.Context,
 	}
 
 	// Unknown status
-	if err := s.companySubscriptionRepo.UpdateSubscriptionStatus(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID), preapproval.Status); err != nil {
+	if err := s.companySubscriptionRepo.UpdateSubscriptionStatus(ctx, uuid.MustParse(subscriptionExternalRef.CompanyID), preapproval.Status, preapproval.ExternalReference); err != nil {
 		fmt.Printf("Failed to update subscription status: %s\n", err.Error())
 		return err
 	}
