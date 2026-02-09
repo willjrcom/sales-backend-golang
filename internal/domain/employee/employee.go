@@ -57,8 +57,6 @@ const (
 	PermissionPlace                PermissionKey = "place"
 	PermissionPrint                PermissionKey = "print"
 	PermissionProduct              PermissionKey = "product"
-	PermissionCategory             PermissionKey = "category"
-	PermissionProcessRule          PermissionKey = "process-rule"
 	PermissionManageStock          PermissionKey = "manage-stock"
 	PermissionShift                PermissionKey = "shift"
 	PermissionManageCompany        PermissionKey = "manage-company"
@@ -79,8 +77,6 @@ func GetAllPermissions() []PermissionKey {
 		PermissionPlace,
 		PermissionPrint,
 		PermissionProduct,
-		PermissionCategory,
-		PermissionProcessRule,
 		PermissionManageStock,
 		PermissionShift,
 		PermissionManageCompany,
