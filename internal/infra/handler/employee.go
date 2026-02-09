@@ -11,6 +11,7 @@ import (
 	employeedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/employee"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
+	jwtservice "github.com/willjrcom/sales-backend-go/internal/infra/service/jwt"
 	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
@@ -39,6 +40,7 @@ func NewHandlerEmployee(employeeService *employeeusecases.Service) *handler.Hand
 		c.Get("/{id}/payments", h.handlerGetPayments)
 		c.Post("/{id}/salary-history", h.handlerCreateSalaryHistory)
 		c.Post("/{id}/payments", h.handlerCreatePayment)
+		c.Get("/me", h.handlerGetAuthenticatedEmployee)
 	})
 
 	return handler.NewHandler("/employee", c)
@@ -296,4 +298,30 @@ func (h *handlerEmployeeImpl) handlerGetAllEmployeesWithoutDeliveryDrivers(w htt
 		return
 	}
 	jsonpkg.ResponseJson(w, r, http.StatusOK, employees)
+}
+
+func (h *handlerEmployeeImpl) handlerGetAuthenticatedEmployee(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	validToken, err := headerservice.GetAccessTokenFromHeader(ctx, r)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
+		return
+	}
+
+	userID := jwtservice.GetUserIDFromToken(validToken)
+	if userID == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("user_id not found in token"))
+		return
+	}
+
+	dtoID := &entitydto.IDRequest{ID: uuid.MustParse(userID)}
+
+	employee, err := h.s.GetEmployeeByUserID(ctx, dtoID)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, employee)
 }

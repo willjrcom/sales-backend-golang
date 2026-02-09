@@ -43,12 +43,49 @@ type EmployeeSalaryHistory struct {
 // PermissionKey define as permissões possíveis para um funcionário.
 type PermissionKey string
 
-// Enum de permissões exemplo (adicione conforme necessário)
+// Enum de permissões
 const (
-	PermissionViewOrders  PermissionKey = "view_orders"
-	PermissionEditOrders  PermissionKey = "edit_orders"
-	PermissionManageUsers PermissionKey = "manage_users"
+	PermissionBilling              PermissionKey = "billing"
+	PermissionClient               PermissionKey = "client"
+	PermissionEmployee             PermissionKey = "employee"
+	PermissionNewOrder             PermissionKey = "new-order"
+	PermissionOrderControl         PermissionKey = "order-control"
+	PermissionOrderDeliveryControl PermissionKey = "order-delivery-control"
+	PermissionOrderPickupControl   PermissionKey = "order-pickup-control"
+	PermissionOrderProcess         PermissionKey = "order-process"
+	PermissionOrderTableControl    PermissionKey = "order-table-control"
+	PermissionPlace                PermissionKey = "place"
+	PermissionPrint                PermissionKey = "print"
+	PermissionProduct              PermissionKey = "product"
+	PermissionCategory             PermissionKey = "category"
+	PermissionProcessRule          PermissionKey = "process-rule"
+	PermissionManageStock          PermissionKey = "manage-stock"
+	PermissionShift                PermissionKey = "shift"
+	PermissionManageCompany        PermissionKey = "manage-company"
 )
+
+// GetAllPermissions retorna todas as permissões possíveis
+func GetAllPermissions() []PermissionKey {
+	return []PermissionKey{
+		PermissionBilling,
+		PermissionClient,
+		PermissionEmployee,
+		PermissionNewOrder,
+		PermissionOrderControl,
+		PermissionOrderDeliveryControl,
+		PermissionOrderPickupControl,
+		PermissionOrderProcess,
+		PermissionOrderTableControl,
+		PermissionPlace,
+		PermissionPrint,
+		PermissionProduct,
+		PermissionCategory,
+		PermissionProcessRule,
+		PermissionManageStock,
+		PermissionShift,
+		PermissionManageCompany,
+	}
+}
 
 // Permission representa um par chave-valor de permissão.
 type Permission struct {

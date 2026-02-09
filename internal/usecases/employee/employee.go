@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	employeeentity "github.com/willjrcom/sales-backend-go/internal/domain/employee"
 	employeedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/employee"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -57,6 +58,24 @@ func (s *Service) CreateEmployee(ctx context.Context, dto *employeedto.EmployeeC
 	}
 
 	employeeModel := &model.Employee{}
+
+	// Se não houver permissões definidas (ou mesmo se houver, queremos garantir defaults?),
+	// o usuário pediu "ao criar... ja crie com todas ativadas por padrao".
+	// Assumo que se o DTO vier vazio, preenchemos. Se vier preenchido, respeitamos?
+	// O DTO normalmente vem do front. Se o front não manda nada, DTO é nil ou vazio.
+	// Vamos iterar e setar true para todas que não estiverem no map.
+	if employee.Permissions == nil {
+		employee.Permissions = make(employeeentity.Permissions)
+	}
+
+	allPerms := employeeentity.GetAllPermissions()
+	for _, p := range allPerms {
+		// Se não existe na lista de input, seta como true
+		if _, exists := employee.Permissions[p]; !exists {
+			employee.Permissions[p] = true
+		}
+	}
+
 	employeeModel.FromDomain(employee)
 	if err := s.re.CreateEmployee(ctx, employeeModel); err != nil {
 		return nil, err
