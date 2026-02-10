@@ -30,7 +30,7 @@ func NewHandlerUser(userService *userusecases.Service) *handler.Handler {
 
 	route := "/user"
 
-	c.With().Group(func(c chi.Router) {
+	c.Group(func(c chi.Router) {
 		c.Post("/new", h.handlerNewUser)
 		c.Patch("/update/password", h.handlerUpdateUserPassword)
 		c.Patch("/update/forget-password", h.handlerUpdateUserForgetPassword)

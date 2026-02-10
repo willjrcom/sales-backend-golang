@@ -2,12 +2,9 @@ package companydto
 
 import (
 	"errors"
-	"time"
 
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
-	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
-	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/utils"
 )
 
@@ -17,15 +14,11 @@ var (
 )
 
 type UserCreateDTO struct {
-	Email            string                       `json:"email"`
-	ImagePath        string                       `json:"image_path"`
-	Password         string                       `json:"password"`
-	GeneratePassword bool                         `json:"generate_password"`
-	Name             string                       `json:"name"`
-	Cpf              string                       `json:"cpf,omitempty"`
-	Birthday         *time.Time                   `json:"birthday,omitempty"`
-	Contact          *contactdto.ContactCreateDTO `json:"contact,omitempty"`
-	Address          *addressdto.AddressCreateDTO `json:"address,omitempty"`
+	Email            string `json:"email"`
+	Password         string `json:"password"`
+	GeneratePassword bool   `json:"generate_password"`
+	Name             string `json:"name"`
+	Cpf              string `json:"cpf,omitempty"`
 }
 
 func (u *UserCreateDTO) validate() error {
@@ -43,15 +36,6 @@ func (u *UserCreateDTO) validate() error {
 	if u.Cpf == "" {
 		return errors.New("cpf is required")
 	}
-	if u.Birthday == nil {
-		return errors.New("birthday is required")
-	}
-	if u.Contact == nil {
-		return errors.New("contact is required")
-	}
-	if u.Address == nil {
-		return errors.New("address is required")
-	}
 	return nil
 }
 
@@ -65,11 +49,9 @@ func (u *UserCreateDTO) ToDomain() (*companyentity.User, error) {
 	}
 
 	personCommonAttributes := &personentity.PersonCommonAttributes{
-		Name:      u.Name,
-		ImagePath: u.ImagePath,
-		Email:     u.Email,
-		Cpf:       u.Cpf,
-		Birthday:  u.Birthday,
+		Name:  u.Name,
+		Email: u.Email,
+		Cpf:   u.Cpf,
 	}
 
 	person := personentity.NewPerson(personCommonAttributes)
@@ -79,26 +61,6 @@ func (u *UserCreateDTO) ToDomain() (*companyentity.User, error) {
 		Password: u.Password,
 	}
 	user := companyentity.NewUser(userCommonAttributes)
-
-	if u.Contact != nil {
-		contact, err := u.Contact.ToDomain()
-		if err != nil {
-			return nil, err
-		}
-		if err := user.AddContact(contact); err != nil {
-			return nil, err
-		}
-	}
-	if u.Address != nil {
-		address, err := u.Address.ToDomain(false)
-		if err != nil {
-			return nil, err
-		}
-
-		if err := user.AddAddress(address); err != nil {
-			return nil, err
-		}
-	}
 
 	return user, nil
 }
