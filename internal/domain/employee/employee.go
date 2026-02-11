@@ -45,22 +45,26 @@ type PermissionKey string
 
 // Enum de permissões
 const (
-	PermissionBilling              PermissionKey = "billing"
-	PermissionClient               PermissionKey = "client"
-	PermissionEmployee             PermissionKey = "employee"
-	PermissionNewOrder             PermissionKey = "new-order"
-	PermissionOrderControl         PermissionKey = "order-control"
-	PermissionOrderDeliveryControl PermissionKey = "order-delivery-control"
-	PermissionOrderPickupControl   PermissionKey = "order-pickup-control"
-	PermissionOrderProcess         PermissionKey = "order-process"
-	PermissionOrderTableControl    PermissionKey = "order-table-control"
-	PermissionPlace                PermissionKey = "place"
-	PermissionPrint                PermissionKey = "print"
-	PermissionProduct              PermissionKey = "product"
-	PermissionManageStock          PermissionKey = "manage-stock"
-	PermissionShift                PermissionKey = "shift"
-	PermissionManageCompany        PermissionKey = "manage-company"
-	PermissionStatistics           PermissionKey = "statistics"
+	PermissionBilling                      PermissionKey = "billing"
+	PermissionClient                       PermissionKey = "client"
+	PermissionEmployee                     PermissionKey = "employee"
+	PermissionNewOrder                     PermissionKey = "new-order"
+	PermissionOrderControl                 PermissionKey = "order-control"
+	PermissionOrderDeliveryControlToShip   PermissionKey = "order-delivery-control-to-ship"
+	PermissionOrderDeliveryControlToFinish PermissionKey = "order-delivery-control-to-finish"
+	PermissionOrderDeliveryControlFinished PermissionKey = "order-delivery-control-finished"
+	PermissionOrderPickupControl           PermissionKey = "order-pickup-control"
+	PermissionOrderProcess                 PermissionKey = "order-process"
+	PermissionOrderTableControl            PermissionKey = "order-table-control"
+	PermissionPlace                        PermissionKey = "place"
+	PermissionPrint                        PermissionKey = "print"
+	PermissionProduct                      PermissionKey = "product"
+	PermissionProcessRule                  PermissionKey = "process-rule"
+	PermissionCategory                     PermissionKey = "category"
+	PermissionManageStock                  PermissionKey = "manage-stock"
+	PermissionShift                        PermissionKey = "shift"
+	PermissionManageCompany                PermissionKey = "manage-company"
+	PermissionStatistics                   PermissionKey = "statistics"
 )
 
 // GetAllPermissions retorna todas as permissões possíveis
@@ -71,13 +75,17 @@ func GetAllPermissions() []PermissionKey {
 		PermissionEmployee,
 		PermissionNewOrder,
 		PermissionOrderControl,
-		PermissionOrderDeliveryControl,
+		PermissionOrderDeliveryControlToShip,
+		PermissionOrderDeliveryControlToFinish,
+		PermissionOrderDeliveryControlFinished,
 		PermissionOrderPickupControl,
 		PermissionOrderProcess,
 		PermissionOrderTableControl,
 		PermissionPlace,
 		PermissionPrint,
 		PermissionProduct,
+		PermissionProcessRule,
+		PermissionCategory,
 		PermissionManageStock,
 		PermissionShift,
 		PermissionManageCompany,
