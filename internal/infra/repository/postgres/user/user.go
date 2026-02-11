@@ -284,7 +284,7 @@ func (r *UserRepositoryBun) GetIDByEmailOrCPF(ctx context.Context, email string,
 	defer tx.Rollback()
 
 	user := &model.User{}
-	if err := tx.NewSelect().Model(user).Where("u.email = ? or u.cpf = ?", email, cpf).Column("id").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(user).Where("u.email = ? or u.cpf = ?", email, cpf).Column("id", "email", "cpf").Scan(ctx); err != nil {
 		return nil, "", err
 	}
 

@@ -38,10 +38,12 @@ func (s *Service) CreateUser(ctx context.Context, dto *companydto.UserCreateDTO)
 	}
 
 	if id, key, _ := s.r.GetIDByEmailOrCPF(ctx, user.Email, user.Cpf); id != nil {
-		if key == "email" {
+		switch key {
+		case "email":
 			return nil, fmt.Errorf("user email already exists")
+		case "cpf":
+			return nil, fmt.Errorf("user cpf already exists")
 		}
-		return nil, fmt.Errorf("user cpf already exists")
 	}
 
 	hash, err := bcryptservice.HashPassword(dto.Password)
