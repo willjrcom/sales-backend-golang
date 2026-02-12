@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	processruledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process_rule"
+	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
@@ -22,11 +22,16 @@ func NewService(c model.ProcessRuleRepository) *Service {
 	return &Service{r: c}
 }
 
-func (s *Service) CreateProcessRule(ctx context.Context, dto *processruledto.ProcessRuleCreateDTO) (uuid.UUID, error) {
+func (s *Service) CreateProcessRule(ctx context.Context, dto *productcategorydto.ProcessRuleCreateDTO) (uuid.UUID, error) {
 	processRule, err := dto.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
+	}
+
+	// Validate Order uniqueness
+	if _, err := s.r.GetProcessRuleByCategoryIdAndOrder(ctx, processRule.CategoryID.String(), int8(processRule.Order)); err == nil {
+		return uuid.Nil, errors.New("order number already exists in this category")
 	}
 
 	processRuleModel := &model.ProcessRule{}
@@ -40,7 +45,7 @@ func (s *Service) CreateProcessRule(ctx context.Context, dto *processruledto.Pro
 	return processRule.ID, nil
 }
 
-func (s *Service) UpdateProcessRule(ctx context.Context, dtoId *entitydto.IDRequest, dto *processruledto.ProcessRuleUpdateDTO) error {
+func (s *Service) UpdateProcessRule(ctx context.Context, dtoId *entitydto.IDRequest, dto *productcategorydto.ProcessRuleUpdateDTO) error {
 	processRuleModel, err := s.r.GetProcessRuleById(ctx, dtoId.ID.String())
 
 	if err != nil {
@@ -50,6 +55,13 @@ func (s *Service) UpdateProcessRule(ctx context.Context, dtoId *entitydto.IDRequ
 	processRule := processRuleModel.ToDomain()
 	if err = dto.UpdateDomain(processRule); err != nil {
 		return err
+	}
+
+	// Validate Order uniqueness
+	if existingRule, err := s.r.GetProcessRuleByCategoryIdAndOrder(ctx, processRule.CategoryID.String(), int8(processRule.Order)); err == nil {
+		if existingRule.ID != processRule.ID {
+			return errors.New("order number already exists in this category")
+		}
 	}
 
 	processRuleModel.FromDomain(processRule)
@@ -72,27 +84,27 @@ func (s *Service) DeleteProcessRule(ctx context.Context, dto *entitydto.IDReques
 	return nil
 }
 
-func (s *Service) GetProcessRuleById(ctx context.Context, dto *entitydto.IDRequest) (*processruledto.ProcessRuleDTO, error) {
+func (s *Service) GetProcessRuleById(ctx context.Context, dto *entitydto.IDRequest) (*productcategorydto.ProcessRuleDTO, error) {
 	if processRuleModel, err := s.r.GetProcessRuleById(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		processRule := processRuleModel.ToDomain()
 
-		processRuleDto := &processruledto.ProcessRuleDTO{}
+		processRuleDto := &productcategorydto.ProcessRuleDTO{}
 		processRuleDto.FromDomain(processRule)
 		return processRuleDto, nil
 	}
 }
 
-func (s *Service) GetProcessRulesByCategoryId(ctx context.Context, dto *entitydto.IDRequest) ([]processruledto.ProcessRuleDTO, error) {
+func (s *Service) GetProcessRulesByCategoryId(ctx context.Context, dto *entitydto.IDRequest) ([]productcategorydto.ProcessRuleDTO, error) {
 	if processRuleModels, err := s.r.GetProcessRulesByCategoryId(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		processRules := []processruledto.ProcessRuleDTO{}
+		processRules := []productcategorydto.ProcessRuleDTO{}
 		for _, processRuleModel := range processRuleModels {
 			processRule := processRuleModel.ToDomain()
 
-			processRuleDto := &processruledto.ProcessRuleDTO{}
+			processRuleDto := &productcategorydto.ProcessRuleDTO{}
 			processRuleDto.FromDomain(processRule)
 			processRules = append(processRules, *processRuleDto)
 		}
@@ -100,15 +112,15 @@ func (s *Service) GetProcessRulesByCategoryId(ctx context.Context, dto *entitydt
 	}
 }
 
-func (s *Service) GetProcessRulesWithOrderProcessByCategoryId(ctx context.Context, dto *entitydto.IDRequest) ([]processruledto.ProcessRuleWithOrderProcessDTO, error) {
+func (s *Service) GetProcessRulesWithOrderProcessByCategoryId(ctx context.Context, dto *entitydto.IDRequest) ([]productcategorydto.ProcessRuleWithOrderProcessDTO, error) {
 	if processRuleModels, err := s.r.GetProcessRulesWithOrderProcessByCategoryId(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
-		processRules := []processruledto.ProcessRuleWithOrderProcessDTO{}
+		processRules := []productcategorydto.ProcessRuleWithOrderProcessDTO{}
 		for _, processRuleModel := range processRuleModels {
 			processRule := processRuleModel.ToDomain()
 
-			processRuleDto := &processruledto.ProcessRuleWithOrderProcessDTO{}
+			processRuleDto := &productcategorydto.ProcessRuleWithOrderProcessDTO{}
 			processRuleDto.FromDomain(processRule)
 			processRules = append(processRules, *processRuleDto)
 		}
@@ -116,14 +128,14 @@ func (s *Service) GetProcessRulesWithOrderProcessByCategoryId(ctx context.Contex
 	}
 }
 
-func (s *Service) GetAllProcessRules(ctx context.Context, page, perPage int, isActive bool) ([]processruledto.ProcessRuleDTO, int, error) {
+func (s *Service) GetAllProcessRules(ctx context.Context, page, perPage int, isActive bool) ([]productcategorydto.ProcessRuleDTO, int, error) {
 	processRuleModels, total, err := s.r.GetAllProcessRules(ctx, page, perPage, isActive)
 	if err != nil {
 		return nil, 0, err
 	}
 	return s.processRulesToDto(processRuleModels), total, nil
 }
-func (s *Service) GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]processruledto.ProcessRuleDTO, error) {
+func (s *Service) GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]productcategorydto.ProcessRuleDTO, error) {
 	if processRuleModels, err := s.r.GetAllProcessRulesWithOrderProcess(ctx); err != nil {
 		return nil, err
 	} else {
@@ -131,12 +143,12 @@ func (s *Service) GetAllProcessRulesWithOrderProcess(ctx context.Context) ([]pro
 	}
 }
 
-func (s *Service) processRulesToDto(processRuleModels []model.ProcessRule) []processruledto.ProcessRuleDTO {
-	var processRuleDTOs []processruledto.ProcessRuleDTO
+func (s *Service) processRulesToDto(processRuleModels []model.ProcessRule) []productcategorydto.ProcessRuleDTO {
+	var processRuleDTOs []productcategorydto.ProcessRuleDTO
 
 	for _, processRuleModel := range processRuleModels {
 		processRule := processRuleModel.ToDomain()
-		processRuleDTO := processruledto.ProcessRuleDTO{}
+		processRuleDTO := productcategorydto.ProcessRuleDTO{}
 		processRuleDTO.FromDomain(processRule)
 		processRuleDTOs = append(processRuleDTOs, processRuleDTO)
 	}

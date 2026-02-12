@@ -1,4 +1,4 @@
-package processruledto
+package productcategorydto
 
 import (
 	"errors"
@@ -8,10 +8,8 @@ import (
 )
 
 var (
-	ErrNameRequired      = errors.New("name is required")
 	ErrOrderRequired     = errors.New("order min: 1is required")
 	ErrIdealTimeRequired = errors.New("ideal time is required")
-	ErrCategoryRequired  = errors.New("category ID is required")
 )
 
 type ProcessRuleCreateDTO struct {

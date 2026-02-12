@@ -16,13 +16,14 @@ type ProcessRule struct {
 }
 
 type ProcessRuleCommonAttributes struct {
-	Name        string        `bun:"name,notnull"`
-	Order       int8          `bun:"order,notnull"`
-	Description string        `bun:"description"`
-	ImagePath   *string       `bun:"image_path"`
-	IdealTime   time.Duration `bun:"ideal_time,notnull"`
-	CategoryID  uuid.UUID     `bun:"column:category_id,type:uuid,notnull"`
-	IsActive    bool          `bun:"is_active,notnull"`
+	Name        string           `bun:"name,notnull"`
+	Order       int8             `bun:"order,notnull"`
+	Description string           `bun:"description"`
+	ImagePath   *string          `bun:"image_path"`
+	IdealTime   time.Duration    `bun:"ideal_time,notnull"`
+	CategoryID  uuid.UUID        `bun:"column:category_id,type:uuid,notnull"`
+	Category    *ProductCategory `bun:"rel:belongs-to"`
+	IsActive    bool             `bun:"is_active,notnull"`
 }
 
 func (p *ProcessRule) FromDomain(processRule *productentity.ProcessRule) {
@@ -38,8 +39,13 @@ func (p *ProcessRule) FromDomain(processRule *productentity.ProcessRule) {
 			ImagePath:   processRule.ImagePath,
 			IdealTime:   processRule.IdealTime,
 			CategoryID:  processRule.CategoryID,
+			Category:    &ProductCategory{},
 			IsActive:    processRule.IsActive,
 		},
+	}
+
+	if processRule.Category != nil {
+		p.Category.FromDomain(processRule.Category)
 	}
 }
 
@@ -47,7 +53,7 @@ func (p *ProcessRule) ToDomain() *productentity.ProcessRule {
 	if p == nil {
 		return nil
 	}
-	return &productentity.ProcessRule{
+	processRule := &productentity.ProcessRule{
 		Entity: p.Entity.ToDomain(),
 		ProcessRuleCommonAttributes: productentity.ProcessRuleCommonAttributes{
 			Name:        p.Name,
@@ -56,7 +62,10 @@ func (p *ProcessRule) ToDomain() *productentity.ProcessRule {
 			ImagePath:   p.ImagePath,
 			IdealTime:   p.IdealTime,
 			CategoryID:  p.CategoryID,
+			Category:    p.Category.ToDomain(),
 			IsActive:    p.IsActive,
 		},
 	}
+
+	return processRule
 }

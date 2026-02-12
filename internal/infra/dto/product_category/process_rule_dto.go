@@ -1,4 +1,4 @@
-package processruledto
+package productcategorydto
 
 import (
 	"fmt"
@@ -9,20 +9,22 @@ import (
 )
 
 type ProcessRuleDTO struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Order       int8      `json:"order"`
-	Description string    `json:"description"`
-	ImagePath   *string   `json:"image_path"`
-	IdealTime   string    `json:"ideal_time"`
-	CategoryID  uuid.UUID `json:"category_id"`
-	IsActive    bool      `json:"is_active"`
+	ID          uuid.UUID    `json:"id"`
+	Name        string       `json:"name"`
+	Order       int8         `json:"order"`
+	Description string       `json:"description"`
+	ImagePath   *string      `json:"image_path"`
+	IdealTime   string       `json:"ideal_time"`
+	CategoryID  uuid.UUID    `json:"category_id"`
+	Category    *CategoryDTO `json:"category"`
+	IsActive    bool         `json:"is_active"`
 }
 
 func (s *ProcessRuleDTO) FromDomain(processRule *productentity.ProcessRule) {
 	if processRule == nil {
 		return
 	}
+
 	*s = ProcessRuleDTO{
 		ID:          processRule.ID,
 		Name:        processRule.Name,
@@ -32,6 +34,12 @@ func (s *ProcessRuleDTO) FromDomain(processRule *productentity.ProcessRule) {
 		IdealTime:   getTimeFormatted(processRule.IdealTime),
 		CategoryID:  processRule.CategoryID,
 		IsActive:    processRule.IsActive,
+	}
+
+	if processRule.Category != nil {
+		category := CategoryDTO{}
+		category.FromDomain(processRule.Category)
+		s.Category = &category
 	}
 }
 

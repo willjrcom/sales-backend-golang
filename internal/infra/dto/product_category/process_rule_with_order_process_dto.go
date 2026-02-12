@@ -1,4 +1,4 @@
-package processruledto
+package productcategorydto
 
 import (
 	"github.com/google/uuid"
@@ -6,15 +6,16 @@ import (
 )
 
 type ProcessRuleWithOrderProcessDTO struct {
-	ID                    uuid.UUID `json:"id"`
-	Name                  string    `json:"name"`
-	Order                 int8      `json:"order"`
-	Description           string    `json:"description"`
-	ImagePath             *string   `json:"image_path"`
-	IdealTime             string    `json:"ideal_time"`
-	CategoryID            uuid.UUID `json:"category_id"`
-	TotalOrderProcessLate int       `json:"total_order_process_late"`
-	TotalOrderQueue       int       `json:"total_order_queue"`
+	ID                    uuid.UUID    `json:"id"`
+	Name                  string       `json:"name"`
+	Order                 int8         `json:"order"`
+	Description           string       `json:"description"`
+	ImagePath             *string      `json:"image_path"`
+	IdealTime             string       `json:"ideal_time"`
+	CategoryID            uuid.UUID    `json:"category_id"`
+	Category              *CategoryDTO `json:"category"`
+	TotalOrderProcessLate int          `json:"total_order_process_late"`
+	TotalOrderQueue       int          `json:"total_order_queue"`
 }
 
 func (s *ProcessRuleWithOrderProcessDTO) FromDomain(processRule *productentity.ProcessRuleWithOrderProcess) {
@@ -32,4 +33,7 @@ func (s *ProcessRuleWithOrderProcessDTO) FromDomain(processRule *productentity.P
 		TotalOrderProcessLate: processRule.TotalOrderProcessLate,
 		TotalOrderQueue:       processRule.TotalOrderQueue,
 	}
+
+	category := CategoryDTO{}
+	category.FromDomain(processRule.Category)
 }

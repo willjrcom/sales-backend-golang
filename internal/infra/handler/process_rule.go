@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	processruledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process_rule"
+	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	processruleusecases "github.com/willjrcom/sales-backend-go/internal/usecases/process_rule"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
@@ -42,7 +42,7 @@ func NewHandlerProcessRuleCategory(processRuleService *processruleusecases.Servi
 func (h *handlerProcessRuleCategoryImpl) handlerCreateProcessRule(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	dtoProcessRule := &processruledto.ProcessRuleCreateDTO{}
+	dtoProcessRule := &productcategorydto.ProcessRuleCreateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoProcessRule); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
@@ -69,7 +69,7 @@ func (h *handlerProcessRuleCategoryImpl) handlerUpdateProcessRule(w http.Respons
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	dtoProcessRule := &processruledto.ProcessRuleUpdateDTO{}
+	dtoProcessRule := &productcategorydto.ProcessRuleUpdateDTO{}
 	if err := jsonpkg.ParseBody(r, dtoProcessRule); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return

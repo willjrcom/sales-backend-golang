@@ -3,27 +3,26 @@ package productcategorydto
 import (
 	"github.com/google/uuid"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
-	processruledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/process_rule"
 
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
 )
 
 type CategoryDTO struct {
-	ID                   uuid.UUID                       `json:"id"`
-	Name                 string                          `json:"name"`
-	ImagePath            string                          `json:"image_path,omitempty"`
-	NeedPrint            bool                            `json:"need_print"`
-	PrinterName          string                          `json:"printer_name,omitempty"`
-	UseProcessRule       bool                            `json:"use_process_rule"`
-	IsAdditional         bool                            `json:"is_additional"`
-	IsComplement         bool                            `json:"is_complement"`
-	IsActive             bool                            `json:"is_active"`
-	RemovableIngredients []string                        `json:"removable_ingredients,omitempty"`
-	Sizes                []sizedto.SizeDTO               `json:"sizes,omitempty"`
-	Products             []ProductDTO                    `json:"products,omitempty"`
-	AdditionalCategories []CategoryDTO                   `json:"additional_categories,omitempty"`
-	ComplementCategories []CategoryDTO                   `json:"complement_categories,omitempty"`
-	ProcessRules         []processruledto.ProcessRuleDTO `json:"process_rules,omitempty"`
+	ID                   uuid.UUID         `json:"id"`
+	Name                 string            `json:"name"`
+	ImagePath            string            `json:"image_path,omitempty"`
+	NeedPrint            bool              `json:"need_print"`
+	PrinterName          string            `json:"printer_name,omitempty"`
+	UseProcessRule       bool              `json:"use_process_rule"`
+	IsAdditional         bool              `json:"is_additional"`
+	IsComplement         bool              `json:"is_complement"`
+	IsActive             bool              `json:"is_active"`
+	RemovableIngredients []string          `json:"removable_ingredients,omitempty"`
+	Sizes                []sizedto.SizeDTO `json:"sizes,omitempty"`
+	Products             []ProductDTO      `json:"products,omitempty"`
+	AdditionalCategories []CategoryDTO     `json:"additional_categories,omitempty"`
+	ComplementCategories []CategoryDTO     `json:"complement_categories,omitempty"`
+	ProcessRules         []ProcessRuleDTO  `json:"process_rules,omitempty"`
 }
 
 func (c *CategoryDTO) FromDomain(category *productentity.ProductCategory) {
@@ -45,11 +44,11 @@ func (c *CategoryDTO) FromDomain(category *productentity.ProductCategory) {
 		Products:             []ProductDTO{},
 		AdditionalCategories: []CategoryDTO{},
 		ComplementCategories: []CategoryDTO{},
-		ProcessRules:         []processruledto.ProcessRuleDTO{},
+		ProcessRules:         []ProcessRuleDTO{},
 	}
 
 	for _, processRule := range category.ProcessRules {
-		p := processruledto.ProcessRuleDTO{}
+		p := ProcessRuleDTO{}
 		p.FromDomain(&processRule)
 		c.ProcessRules = append(c.ProcessRules, p)
 	}

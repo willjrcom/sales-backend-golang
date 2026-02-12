@@ -1,4 +1,4 @@
-package processruledto
+package productcategorydto
 
 import (
 	"fmt"

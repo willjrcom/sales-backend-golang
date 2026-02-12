@@ -19,6 +19,7 @@ type ProcessRuleCommonAttributes struct {
 	ImagePath   *string
 	IdealTime   time.Duration
 	CategoryID  uuid.UUID
+	Category    *ProductCategory
 	IsActive    bool
 }
 
