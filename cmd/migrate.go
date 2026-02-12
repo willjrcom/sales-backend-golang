@@ -125,7 +125,7 @@ var PublicMigrateCmd = &cobra.Command{
 // MigrateAllCmd applies all pending SQL migrations to every tenant schema.
 var MigrateAllCmd = &cobra.Command{
 	Use:   "migrate-all",
-	Short: "Execute all pending SQL migrations for every tenant schema",
+	Short: "Execute all pending SQL migrations for every tenant schema (ignores deleted files)",
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		cmd.Printf("connecting to database...\n")
 		db := database.NewPostgreSQLConnection()
@@ -149,7 +149,9 @@ var MigrateAllCmd = &cobra.Command{
 
 		cmd.Printf("found %d tenant schemas\n", len(schemas))
 
-		// Lista todas as migrações disponíveis
+		// Lista todas as migrações disponíveis no disco.
+		// NOTA: Migrações já aplicadas cujos arquivos foram deletados não serão listadas aqui,
+		// o que garante que não tentaremos buscar arquivos que não existem mais.
 		migrations, err := listMigrationFiles()
 		if err != nil {
 			return fmt.Errorf("failed to list migration files: %w", err)
@@ -169,6 +171,8 @@ var MigrateAllCmd = &cobra.Command{
 				return fmt.Errorf("schema %s: failed to get applied migrations: %w", schema, err)
 			}
 
+			// Filtra apenas as migrações que estão no disco mas não no banco via `applied`.
+			// Arquivos deletados (que não estão em `migrations`) são ignorados automaticamente.
 			pending := filterPendingMigrations(migrations, applied)
 			if len(pending) == 0 {
 				cmd.Printf("schema %s: all migrations already applied\n", schema)

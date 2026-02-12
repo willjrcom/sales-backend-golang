@@ -247,7 +247,7 @@ func employeesModelToMap(employeesModel []model.Employee) map[uuid.UUID]string {
 // LoadShiftWithProductionAnalytics carrega um shift com todas as métricas de produção
 func (s *Service) LoadShiftWithProductionAnalytics(ctx context.Context, shift *shiftentity.Shift) error {
 	// Busca todos os processos (vamos usar GetAllProcesses e filtrar por shift depois)
-	allProcesses, err := s.orderProcessRepo.GetAllProcesses(ctx)
+	allProcesses, err := s.orderProcessRepo.GetAllProcessesFinishedByShiftID(ctx, shift.ID.String())
 	if err != nil {
 		return err
 	}

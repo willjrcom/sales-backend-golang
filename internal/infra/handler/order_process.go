@@ -32,7 +32,7 @@ func NewHandlerOrderProcess(processService *orderusecases.OrderProcessService) *
 		c.Post("/finish/{id}", h.handlerFinishProcess)
 		c.Post("/cancel/{id}", h.handlerCancelProcess)
 		c.Get("/{id}", h.handlerGetProcess)
-		c.Get("/all", h.handlerGetAllProcesses)
+		c.Get("/by-shift/{shift_id}", h.handlerGetAllProcesses)
 		c.Get("/by-process-rule/{id}", h.handlerGetProcessesByProcessRuleID)
 		c.Get("/by-group-item/{id}", h.handlerGetProcessesByGroupItem)
 		c.Get("/by-product/{id}", h.handlerGetProcessesByProduct)
@@ -185,7 +185,16 @@ func (h *handlerProcessImpl) handlerGetProcess(w http.ResponseWriter, r *http.Re
 func (h *handlerProcessImpl) handlerGetAllProcesses(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	processes, err := h.s.GetAllProcesses(ctx)
+	shiftID := chi.URLParam(r, "shift_id")
+
+	if shiftID == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("shiftID is required"))
+		return
+	}
+
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(shiftID)}
+
+	processes, err := h.s.GetAllProcessesFinishedByShiftID(ctx, dtoId)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

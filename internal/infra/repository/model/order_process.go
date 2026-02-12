@@ -21,6 +21,7 @@ type OrderProcessCommonAttributes struct {
 	OrderNumber   int         `bun:"order_number,notnull"`
 	OrderType     string      `bun:"order_type,notnull"`
 	EmployeeID    *uuid.UUID  `bun:"employee_id,type:uuid"`
+	OrderID       uuid.UUID   `bun:"order_id,type:uuid,notnull"`
 	GroupItemID   uuid.UUID   `bun:"group_item_id,type:uuid,notnull"`
 	GroupItem     *GroupItem  `bun:"rel:belongs-to,join:group_item_id=id"`
 	ProcessRuleID uuid.UUID   `bun:"process_rule_id,type:uuid,notnull"`
@@ -55,6 +56,7 @@ func (op *OrderProcess) FromDomain(orderProcess *orderprocessentity.OrderProcess
 			OrderNumber:   orderProcess.OrderNumber,
 			OrderType:     string(orderProcess.OrderType),
 			EmployeeID:    orderProcess.EmployeeID,
+			OrderID:       orderProcess.OrderID,
 			GroupItemID:   orderProcess.GroupItemID,
 			GroupItem:     &GroupItem{},
 			ProcessRuleID: orderProcess.ProcessRuleID,
@@ -95,6 +97,7 @@ func (op *OrderProcess) ToDomain() *orderprocessentity.OrderProcess {
 			OrderNumber:   op.OrderNumber,
 			OrderType:     orderprocessentity.OrderProcessType(op.OrderType),
 			EmployeeID:    op.EmployeeID,
+			OrderID:       op.OrderID,
 			GroupItemID:   op.GroupItemID,
 			GroupItem:     op.GroupItem.ToDomain(),
 			ProcessRuleID: op.ProcessRuleID,

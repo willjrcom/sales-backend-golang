@@ -44,6 +44,7 @@ type OrderProcessCommonAttributes struct {
 	OrderNumber   int
 	OrderType     OrderProcessType
 	EmployeeID    *uuid.UUID
+	OrderID       uuid.UUID
 	GroupItemID   uuid.UUID
 	GroupItem     *orderentity.GroupItem
 	ProcessRuleID uuid.UUID

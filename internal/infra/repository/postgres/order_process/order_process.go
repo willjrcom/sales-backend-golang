@@ -126,7 +126,7 @@ func (r *ProcessRepositoryBun) GetProcessById(ctx context.Context, id string) (*
 	return process, nil
 }
 
-func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]model.OrderProcess, error) {
+func (r *ProcessRepositoryBun) GetAllProcessesFinishedByShiftID(ctx context.Context, shiftID string) ([]model.OrderProcess, error) {
 	processes := []model.OrderProcess{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -137,7 +137,15 @@ func (r *ProcessRepositoryBun) GetAllProcesses(ctx context.Context) ([]model.Ord
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&processes).Scan(ctx); err != nil {
+	validStatus := []orderprocessentity.StatusProcess{
+		orderprocessentity.ProcessStatusFinished,
+	}
+
+	if err := tx.NewSelect().Model(&processes).
+		Join("LEFT JOIN orders AS o ON o.id = process.order_id").
+		Where("process.status IN (?)", bun.In(validStatus)).
+		Where("o.shift_id = ?", shiftID).
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 

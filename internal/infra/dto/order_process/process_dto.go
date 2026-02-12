@@ -17,6 +17,7 @@ type OrderProcessDTO struct {
 	OrderNumber       int                                 `json:"order_number"`
 	OrderType         orderprocessentity.OrderProcessType `json:"order_type"`
 	EmployeeID        *uuid.UUID                          `json:"employee_id,omitempty"`
+	OrderID           uuid.UUID                           `json:"order_id,omitempty"`
 	GroupItemID       uuid.UUID                           `json:"group_item_id,omitempty"`
 	GroupItem         *groupitemdto.GroupItemDTO          `json:"group_item,omitempty"`
 	ProcessRuleID     uuid.UUID                           `json:"process_rule_id,omitempty"`
@@ -47,6 +48,7 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 		OrderNumber:       orderProcess.OrderNumber,
 		OrderType:         orderProcess.OrderType,
 		EmployeeID:        orderProcess.EmployeeID,
+		OrderID:           orderProcess.OrderID,
 		GroupItemID:       orderProcess.GroupItemID,
 		GroupItem:         &groupitemdto.GroupItemDTO{},
 		ProcessRuleID:     orderProcess.ProcessRuleID,

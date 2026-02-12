@@ -54,6 +54,7 @@ func (s *OrderProcessService) CreateProcess(ctx context.Context, dto *orderproce
 	}
 
 	groupItem := groupItemModel.ToDomain()
+	process.OrderID = groupItem.OrderID
 
 	productIDs, err := groupItem.GetDistinctProductIDs()
 	if err != nil {
@@ -310,8 +311,8 @@ func (s *OrderProcessService) GetProcessById(ctx context.Context, dto *entitydto
 	}
 }
 
-func (s *OrderProcessService) GetAllProcesses(ctx context.Context) ([]orderprocessdto.OrderProcessDTO, error) {
-	if processModels, err := s.r.GetAllProcesses(ctx); err != nil {
+func (s *OrderProcessService) GetAllProcessesFinishedByShiftID(ctx context.Context, dto *entitydto.IDRequest) ([]orderprocessdto.OrderProcessDTO, error) {
+	if processModels, err := s.r.GetAllProcessesFinishedByShiftID(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		return s.modelsToDTOs(processModels), nil
