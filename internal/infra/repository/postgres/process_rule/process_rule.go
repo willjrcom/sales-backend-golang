@@ -70,7 +70,7 @@ func (r *ProcessRuleRepositoryBun) DeleteProcessRule(ctx context.Context, id str
 	defer tx.Rollback()
 
 	isActive := false
-	if _, err := tx.NewUpdate().Model(&model.ProcessRule{}).Set("is_active = ?", isActive).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(&model.ProcessRule{}).Set("pr.is_active = ?", isActive).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -245,7 +245,7 @@ func (r *ProcessRuleRepositoryBun) GetProcessRulesByCategoryId(ctx context.Conte
 
 	if err := tx.NewSelect().Model(&processRules).
 		Relation("Category").
-		Where("category_id = ? and is_active = true", id).
+		Where("category_id = ? and pr.is_active = true", id).
 		Order("order ASC").
 		Scan(ctx); err != nil {
 		return nil, err
@@ -271,7 +271,7 @@ func (r *ProcessRuleRepositoryBun) GetProcessRulesWithOrderProcessByCategoryId(c
 	// 1. Fetch ProcessRules for the category
 	if err := tx.NewSelect().Model(&processRules).
 		Relation("Category").
-		Where("category_id = ? and is_active = true", id).
+		Where("category_id = ? and pr.is_active = true", id).
 		Order("order ASC").
 		Scan(ctx); err != nil {
 		return nil, err
