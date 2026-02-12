@@ -183,6 +183,7 @@ func (r *ProductRepositoryBun) GetDefaultProducts(ctx context.Context, page, per
 		Where("product.is_active = ?", isActive).
 		Where("cat.is_additional = ?", false).
 		Where("cat.is_complement = ?", false).
+		Where("size.is_active = ?", true).
 		Order("product.name ASC").
 		Limit(perPage).
 		Offset(page * perPage).

@@ -111,19 +111,19 @@ func (r *ProductCategoryRepositoryBun) GetDefaultProducts(ctx context.Context, c
 	query := tx.NewSelect().
 		Model(&products).
 		Join("JOIN product_categories AS cat ON cat.id = product.category_id").
+		Relation("Size").
 		Where("product.category_id = ?", categoryID).
 		Where("cat.is_additional = ?", false).
 		Where("cat.is_complement = ?", false).
-		Where("product.is_active = ?", true)
+		Where("product.is_active = ?", true).
+		Where("size.is_active = ?", true)
 
 	if isMap {
 		// Only select necessary columns for map format
-		query.Column("product.id", "product.name", "product.size_id").
-			Relation("Size")
+		query.Column("product.id", "product.name", "product.size_id")
 	} else {
 		// Select all columns and relations for complete format
-		query.Relation("Category").
-			Relation("Size")
+		query.Relation("Category")
 	}
 
 	if err := query.Scan(ctx); err != nil {

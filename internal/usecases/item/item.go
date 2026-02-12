@@ -16,6 +16,7 @@ import (
 var (
 	ErrCategoryNotFound           = errors.New("category not found")
 	ErrSizeNotFound               = errors.New("size not found")
+	ErrSizeNotActive              = errors.New("size not active")
 	ErrSizeMustBeTheSame          = errors.New("size must be the same")
 	ErrGroupItemNotBelongsToOrder = errors.New("group item not belongs to order")
 	ErrGroupNotStaging            = errors.New("group not staging")
@@ -61,12 +62,24 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 
 	product := productModel.ToDomain()
 
+	if !product.IsAvailable {
+		return nil, errors.New("product not available")
+	}
+
+	if !product.IsActive {
+		return nil, errors.New("product not active")
+	}
+
 	if product.Category == nil {
 		return nil, ErrCategoryNotFound
 	}
 
 	if product.Size == nil {
 		return nil, ErrSizeNotFound
+	}
+
+	if !product.Size.IsActive {
+		return nil, ErrSizeNotActive
 	}
 
 	// If group item id is not provided, create a new group item
