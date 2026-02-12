@@ -9,7 +9,7 @@ type ProductRepository interface {
 	UpdateProduct(ctx context.Context, p *Product) error
 	DeleteProduct(ctx context.Context, id string) error
 	GetProductById(ctx context.Context, id string) (*Product, error)
-	GetProductByCode(ctx context.Context, code string) (*Product, error)
+	GetProductBySKU(ctx context.Context, sku string) (*Product, error)
 	GetAllProducts(ctx context.Context, page, perPage int, isActive bool, categoryID string) ([]Product, int, error)
 	GetDefaultProducts(ctx context.Context, page, perPage int, isActive bool) ([]Product, int, error)
 	GetAllProductsMap(ctx context.Context, isActive bool, categoryID string) ([]Product, error)

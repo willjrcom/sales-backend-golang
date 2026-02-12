@@ -7,7 +7,7 @@ import (
 )
 
 type ProductUpdateDTO struct {
-	Code        *string          `json:"code"`
+	SKU         *string          `json:"sku"`
 	Name        *string          `json:"name"`
 	Flavors     []string         `json:"flavors,omitempty"`
 	ImagePath   *string          `json:"image_path"`
@@ -21,8 +21,8 @@ type ProductUpdateDTO struct {
 }
 
 func (p *ProductUpdateDTO) Validate(product *productentity.Product) error {
-	if product.Code == "" {
-		return ErrCodeRequired
+	if product.SKU == "" {
+		return ErrSKURequired
 	}
 	if product.Name == "" {
 		return ErrNameRequired
@@ -35,8 +35,8 @@ func (p *ProductUpdateDTO) Validate(product *productentity.Product) error {
 }
 
 func (p *ProductUpdateDTO) UpdateDomain(product *productentity.Product) (err error) {
-	if p.Code != nil {
-		product.Code = *p.Code
+	if p.SKU != nil {
+		product.SKU = *p.SKU
 	}
 	if p.Name != nil {
 		product.Name = *p.Name

@@ -70,7 +70,7 @@ func TestCreateProduct(t *testing.T) {
 	dto := &productcategorydto.ProductCreateDTO{
 		CategoryID: &categoryId,
 		SizeID:     &sizeId,
-		Code:       "test",
+		SKU:        "test",
 		Name:       "Test Product",
 	}
 
@@ -89,14 +89,14 @@ func TestCreateProduct(t *testing.T) {
 }
 
 func TestCreateProductError(t *testing.T) {
-	// Test 1 - No Code
+	// Test 1 - No SKU
 	dto := &productcategorydto.ProductCreateDTO{}
 	_, err := productService.CreateProduct(ctx, dto)
-	assert.EqualError(t, err, productcategorydto.ErrCodeRequired.Error())
+	assert.EqualError(t, err, productcategorydto.ErrSKURequired.Error())
 
 	// Test 2 - No Name
 	dto = &productcategorydto.ProductCreateDTO{
-		Code:       "code",
+		SKU:        "sku",
 		CategoryID: ptrUUID(uuid.Nil),
 		SizeID:     ptrUUID(uuid.Nil),
 	}
@@ -105,7 +105,7 @@ func TestCreateProductError(t *testing.T) {
 
 	// Test 3 - Price less than Cost
 	dto = &productcategorydto.ProductCreateDTO{
-		Code:       "code",
+		SKU:        "sku",
 		Name:       "name",
 		Price:      decimal.NewFromInt(1),
 		Cost:       decimal.NewFromInt(2),
@@ -117,7 +117,7 @@ func TestCreateProductError(t *testing.T) {
 
 	// Test 4 - No Category
 	dto = &productcategorydto.ProductCreateDTO{
-		Code:   "code",
+		SKU:    "sku",
 		Name:   "name",
 		Price:  decimal.NewFromInt(2),
 		Cost:   decimal.NewFromInt(1),
@@ -128,7 +128,7 @@ func TestCreateProductError(t *testing.T) {
 
 	// Test 5 - No Size
 	dto = &productcategorydto.ProductCreateDTO{
-		Code:       "code",
+		SKU:        "sku",
 		Name:       "name",
 		Price:      decimal.NewFromInt(2),
 		Cost:       decimal.NewFromInt(1),

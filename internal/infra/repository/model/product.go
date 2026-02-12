@@ -15,7 +15,7 @@ type Product struct {
 }
 
 type ProductCommonAttributes struct {
-	Code        string           `bun:"code,notnull"`
+	SKU         string           `bun:"sku,notnull"`
 	Name        string           `bun:"name,notnull"`
 	Flavors     []string         `bun:"flavors,type:jsonb,notnull"`
 	ImagePath   *string          `bun:"image_path"`
@@ -37,7 +37,7 @@ func (p *Product) FromDomain(product *productentity.Product) {
 	*p = Product{
 		Entity: entitymodel.FromDomain(product.Entity),
 		ProductCommonAttributes: ProductCommonAttributes{
-			Code:        product.Code,
+			SKU:         product.SKU,
 			Name:        product.Name,
 			Flavors:     cloneFlavors(product.Flavors),
 			ImagePath:   product.ImagePath,
@@ -64,7 +64,7 @@ func (p *Product) ToDomain() *productentity.Product {
 	return &productentity.Product{
 		Entity: p.Entity.ToDomain(),
 		ProductCommonAttributes: productentity.ProductCommonAttributes{
-			Code:        p.Code,
+			SKU:         p.SKU,
 			Name:        p.Name,
 			Flavors:     cloneFlavors(p.Flavors),
 			ImagePath:   p.ImagePath,

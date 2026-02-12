@@ -21,7 +21,7 @@ type StockAlertCommonAttributes struct {
 	ResolvedAt  *time.Time
 	ResolvedBy  *uuid.UUID
 	ProductName string
-	ProductCode string
+	ProductSKU  string
 }
 
 // AlertType define o tipo de alerta

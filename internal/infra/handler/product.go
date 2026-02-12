@@ -32,7 +32,7 @@ func NewHandlerProduct(productService *productusecases.Service) *handler.Handler
 		c.Get("/all/default", h.handlerGetDefaultProducts)
 		c.Get("/all/by-category-id/{category_id}", h.handlerGetProductsByCategoryId)
 		c.Get("/all-map", h.handlerGetAllProductsMap)
-		c.Get("/code/{code}", h.handlerGetProductByCode)
+		c.Get("/sku/{sku}", h.handlerGetProductBySKU)
 		c.Patch("/update/{id}", h.handlerUpdateProduct)
 		c.Delete("/{id}", h.handlerDeleteProduct)
 		c.Get("/{id}", h.handlerGetProduct)
@@ -126,19 +126,19 @@ func (h *HandlerProductImpl) handlerGetProduct(w http.ResponseWriter, r *http.Re
 	jsonpkg.ResponseJson(w, r, http.StatusOK, product)
 }
 
-func (h *HandlerProductImpl) handlerGetProductByCode(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerProductImpl) handlerGetProductBySKU(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	code := chi.URLParam(r, "code")
+	sku := chi.URLParam(r, "sku")
 
-	if code == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+	if sku == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("sku is required"))
 		return
 	}
 
-	dto := &productcategorydto.Keys{Code: code}
+	dto := &productcategorydto.Keys{SKU: sku}
 
-	product, err := h.s.GetProductByCode(ctx, dto)
+	product, err := h.s.GetProductBySKU(ctx, dto)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

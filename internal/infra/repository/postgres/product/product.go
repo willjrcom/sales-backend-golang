@@ -99,7 +99,7 @@ func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*
 	return product, nil
 }
 
-func (r *ProductRepositoryBun) GetProductByCode(ctx context.Context, code string) (*model.Product, error) {
+func (r *ProductRepositoryBun) GetProductBySKU(ctx context.Context, sku string) (*model.Product, error) {
 	product := &model.Product{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -110,7 +110,7 @@ func (r *ProductRepositoryBun) GetProductByCode(ctx context.Context, code string
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(product).Where("product.code = ?", code).Relation("Category").Relation("Size").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(product).Where("product.sku = ?", sku).Relation("Category").Relation("Size").Scan(ctx); err != nil {
 		return nil, err
 	}
 

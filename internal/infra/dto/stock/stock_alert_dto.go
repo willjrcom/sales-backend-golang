@@ -18,7 +18,7 @@ type StockAlertDTO struct {
 	ResolvedBy  *uuid.UUID `json:"resolved_by,omitempty"`
 	CreatedAt   time.Time  `json:"created_at"`
 	ProductName string     `json:"product_name"`
-	ProductCode string     `json:"product_code"`
+	ProductSKU  string     `json:"product_sku"`
 }
 
 // FromDomain converte domain para DTO
@@ -36,6 +36,6 @@ func (sa *StockAlertDTO) FromDomain(alert *stockentity.StockAlert) {
 		ResolvedBy:  alert.ResolvedBy,
 		CreatedAt:   alert.CreatedAt,
 		ProductName: alert.ProductName,
-		ProductCode: alert.ProductCode,
+		ProductSKU:  alert.ProductSKU,
 	}
 }

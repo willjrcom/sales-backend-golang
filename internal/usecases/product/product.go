@@ -36,8 +36,8 @@ func (s *Service) CreateProduct(ctx context.Context, dto *productcategorydto.Pro
 		return uuid.Nil, err
 	}
 
-	if p, _ := s.rp.GetProductByCode(ctx, product.Code); p != nil {
-		return uuid.Nil, errors.New("code product already exists")
+	if p, _ := s.rp.GetProductBySKU(ctx, product.SKU); p != nil {
+		return uuid.Nil, errors.New("sku product already exists")
 	}
 
 	categoryModel, err := s.rc.GetCategoryById(ctx, product.CategoryID.String())
@@ -57,8 +57,8 @@ func (s *Service) CreateProduct(ctx context.Context, dto *productcategorydto.Pro
 	return product.ID, nil
 }
 
-func (s *Service) GetProductByCode(ctx context.Context, keys *productcategorydto.Keys) (*productcategorydto.ProductDTO, error) {
-	if productModel, err := s.rp.GetProductByCode(ctx, keys.Code); err != nil {
+func (s *Service) GetProductBySKU(ctx context.Context, keys *productcategorydto.Keys) (*productcategorydto.ProductDTO, error) {
+	if productModel, err := s.rp.GetProductBySKU(ctx, keys.SKU); err != nil {
 		return nil, err
 	} else {
 		product := productModel.ToDomain()
@@ -80,8 +80,8 @@ func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IDRequest,
 		return err
 	}
 
-	if p, _ := s.rp.GetProductByCode(ctx, product.Code); p != nil && p.ID != product.ID {
-		return errors.New("code product already exists")
+	if p, _ := s.rp.GetProductBySKU(ctx, product.SKU); p != nil && p.ID != product.ID {
+		return errors.New("sku product already exists")
 	}
 
 	productModel.FromDomain(product)

@@ -9,7 +9,7 @@ import (
 
 type ProductDTO struct {
 	ID          uuid.UUID        `json:"id"`
-	Code        string           `json:"code"`
+	SKU         string           `json:"sku"`
 	Name        string           `json:"name"`
 	Flavors     []string         `json:"flavors"`
 	ImagePath   *string          `json:"image_path"`
@@ -31,7 +31,7 @@ func (p *ProductDTO) FromDomain(product *productentity.Product) {
 
 	*p = ProductDTO{
 		ID:          product.ID,
-		Code:        product.Code,
+		SKU:         product.SKU,
 		Name:        product.Name,
 		Flavors:     append([]string{}, product.Flavors...),
 		ImagePath:   product.ImagePath,

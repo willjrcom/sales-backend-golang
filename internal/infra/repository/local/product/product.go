@@ -60,10 +60,10 @@ func (r *ProductRepositoryLocal) GetProductById(_ context.Context, id string) (*
 	return nil, errProductNotFound
 }
 
-func (r *ProductRepositoryLocal) GetProductByCode(_ context.Context, code string) (*model.Product, error) {
+func (r *ProductRepositoryLocal) GetProductBySKU(_ context.Context, sku string) (*model.Product, error) {
 
 	for _, p := range r.products {
-		if p.Code == code {
+		if p.SKU == sku {
 			return p, nil
 		}
 	}

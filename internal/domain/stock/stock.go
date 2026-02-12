@@ -225,7 +225,7 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 				Message:     "Estoque abaixo do mínimo",
 				IsResolved:  false,
 				ProductName: s.Product.Name,
-				ProductCode: s.Product.Code,
+				ProductSKU:  s.Product.SKU,
 			},
 		})
 	}
@@ -240,7 +240,7 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 				Message:     "Produto sem estoque",
 				IsResolved:  false,
 				ProductName: s.Product.Name,
-				ProductCode: s.Product.Code,
+				ProductSKU:  s.Product.SKU,
 			},
 		})
 	}
@@ -255,7 +255,7 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 				Message:     "Estoque acima do máximo",
 				IsResolved:  false,
 				ProductName: s.Product.Name,
-				ProductCode: s.Product.Code,
+				ProductSKU:  s.Product.SKU,
 			},
 		})
 	}

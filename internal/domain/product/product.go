@@ -19,7 +19,7 @@ type Product struct {
 }
 
 type ProductCommonAttributes struct {
-	Code        string
+	SKU         string
 	Name        string
 	Flavors     []string
 	ImagePath   *string

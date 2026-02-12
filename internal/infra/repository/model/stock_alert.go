@@ -24,7 +24,7 @@ type StockAlertCommonAttributes struct {
 	ResolvedAt  *time.Time `bun:"resolved_at"`
 	ResolvedBy  *uuid.UUID `bun:"resolved_by,type:uuid"`
 	ProductName string     `bun:"product_name,notnull"`
-	ProductCode string     `bun:"product_code,notnull"`
+	ProductSKU  string     `bun:"product_sku,notnull"`
 }
 
 // FromDomain converte domain para model
@@ -42,7 +42,7 @@ func (sa *StockAlert) FromDomain(alert *stockentity.StockAlert) {
 			ResolvedAt:  alert.ResolvedAt,
 			ResolvedBy:  alert.ResolvedBy,
 			ProductName: alert.ProductName,
-			ProductCode: alert.ProductCode,
+			ProductSKU:  alert.ProductSKU,
 		},
 	}
 }
@@ -62,7 +62,7 @@ func (sa *StockAlert) ToDomain() *stockentity.StockAlert {
 			ResolvedAt:  sa.ResolvedAt,
 			ResolvedBy:  sa.ResolvedBy,
 			ProductName: sa.ProductName,
-			ProductCode: sa.ProductCode,
+			ProductSKU:  sa.ProductSKU,
 		},
 	}
 }

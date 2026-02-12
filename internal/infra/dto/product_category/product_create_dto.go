@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	ErrCodeRequired         = errors.New("code is required")
+	ErrSKURequired          = errors.New("sku is required")
 	ErrNameRequired         = errors.New("name is required")
 	ErrCostGreaterThanPrice = errors.New("cost must be greater than Price")
 	ErrCategoryRequired     = errors.New("category is required")
@@ -17,7 +17,7 @@ var (
 )
 
 type ProductCreateDTO struct {
-	Code        string          `json:"code"`
+	SKU         string          `json:"sku"`
 	Name        string          `json:"name"`
 	Flavors     []string        `json:"flavors"`
 	Description string          `json:"description"`
@@ -31,8 +31,8 @@ type ProductCreateDTO struct {
 }
 
 func (p *ProductCreateDTO) validate() error {
-	if p.Code == "" {
-		return ErrCodeRequired
+	if p.SKU == "" {
+		return ErrSKURequired
 	}
 	if p.Name == "" {
 		return ErrNameRequired
@@ -66,7 +66,7 @@ func (p *ProductCreateDTO) ToDomain() (*productentity.Product, error) {
 	}
 
 	productCommonAttributes := productentity.ProductCommonAttributes{
-		Code:        p.Code,
+		SKU:         p.SKU,
 		Name:        p.Name,
 		Flavors:     flavors,
 		Description: p.Description,
