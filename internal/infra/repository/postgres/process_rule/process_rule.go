@@ -49,7 +49,7 @@ func (r *ProcessRuleRepositoryBun) UpdateProcessRule(ctx context.Context, s *mod
 	defer cancel()
 	defer tx.Rollback()
 
-	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(s).Where("pr.id = ?", s.ID).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -70,7 +70,7 @@ func (r *ProcessRuleRepositoryBun) DeleteProcessRule(ctx context.Context, id str
 	defer tx.Rollback()
 
 	isActive := false
-	if _, err := tx.NewUpdate().Model(&model.ProcessRule{}).Set("pr.is_active = ?", isActive).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(&model.ProcessRule{}).Set("pr.is_active = ?", isActive).Where("pr.id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -91,7 +91,7 @@ func (r *ProcessRuleRepositoryBun) GetProcessRuleById(ctx context.Context, id st
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(processRule).Relation("Category").Where("id = ?", id).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(processRule).Relation("Category").Where("pr.id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
