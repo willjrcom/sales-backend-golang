@@ -56,7 +56,47 @@ func (s *Service) CreateUser(ctx context.Context, dto *companydto.UserCreateDTO)
 	userModel := &model.User{}
 	userModel.FromDomain(user)
 
-	err = s.r.CreateUser(ctx, userModel)
+	if err = s.r.CreateUser(ctx, userModel); err != nil {
+		return nil, err
+	}
+
+	// send email
+	go func() {
+		frontendURL := os.Getenv("FRONTEND_URL")
+		if frontendURL == "" {
+			frontendURL = "http://localhost:3000"
+		}
+
+		bodyEmail := &emailservice.BodyEmail{
+			Email:   user.Email,
+			Subject: "Bem-vindo à GazalTech",
+			Body: `<div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px;">
+			<h2 style="color: #eab308; margin-bottom: 16px;">Bem-vindo à GazalTech</h2>
+			
+			<p style="color: #333; font-size: 16px; margin-bottom: 24px;">
+				Sua conta foi criada com sucesso.<br>
+				Clique no botão abaixo para acessar o sistema:
+			</p>
+
+			<div style="text-align: center; margin-bottom: 24px;">
+				<a href="` + frontendURL + `/login" style="display: inline-block; background-color: #eab308; color: #ffffff; font-size: 16px; font-weight: bold; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
+					Acessar Sistema
+				</a>
+			</div>
+			
+			<p style="color: #999; font-size: 13px; margin-top: 24px;">
+				Atenciosamente,<br>
+				Equipe GazalTech
+			</p>
+			</div>
+		`,
+		}
+
+		// Send email service
+		if err := emailservice.SendEmail(bodyEmail); err != nil {
+			fmt.Println("Error sending email:", err)
+		}
+	}()
 	return &user.ID, err
 }
 
@@ -162,7 +202,7 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 			Equipe GazalTech
 		</p>
 		</div>
-`,
+	`,
 	}
 	// Send email service
 	if err := emailservice.SendEmail(bodyEmail); err != nil {
