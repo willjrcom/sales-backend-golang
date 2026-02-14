@@ -218,6 +218,9 @@ func createPublicTables(db *bun.DB) error {
 		return err
 	}
 
+	if err := createTableIfNotExists(ctx, tx, (*model.CompanyCategory)(nil)); err != nil {
+		return err
+	}
 	if err := createTableIfNotExists(ctx, tx, (*model.Company)(nil)); err != nil {
 		return err
 	}
@@ -357,6 +360,7 @@ func registerModels(db *bun.DB) error {
 
 	db.RegisterModel((*model.Shift)(nil))
 	db.RegisterModel((*model.CompanyToUsers)(nil))
+	db.RegisterModel((*model.CompanyCategory)(nil))
 	db.RegisterModel((*model.Company)(nil))
 	db.RegisterModel((*model.CompanyPayment)(nil))
 	db.RegisterModel((*model.User)(nil))

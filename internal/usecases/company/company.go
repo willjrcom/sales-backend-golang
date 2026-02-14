@@ -3,6 +3,7 @@ package companyusecases
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -47,7 +48,7 @@ func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Se
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (response *companydto.CompanySchemaDTO, err error) {
-	cnpjString, tradeName, contacts, err := dto.ToDomain()
+	cnpjString, tradeName, contacts, categoryID, err := dto.ToDomain()
 	if err != nil {
 		return nil, err
 	}
@@ -76,6 +77,12 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	company := companyentity.NewCompany(cnpjData)
 	company.Email = userModel.Email
 	company.Contacts = contacts
+	categoryIDUUID, err := uuid.Parse(categoryID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid category id: %s", categoryID)
+	}
+
+	company.CategoryID = &categoryIDUUID
 
 	coordinates, _ := geocodeservice.GetCoordinates(&company.Address.AddressCommonAttributes)
 

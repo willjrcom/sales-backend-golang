@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
@@ -26,6 +27,10 @@ type CompanyCommonAttributes struct {
 	Preferences  companyentity.Preferences `bun:"preferences,type:jsonb"`
 	IsBlocked    bool                      `bun:"is_blocked"`
 
+	// Category
+	CategoryID *uuid.UUID       `bun:"category_id,type:uuid"`
+	Category   *CompanyCategory `bun:"rel:has-one,join:category_id=id"`
+
 	// Billing
 	MonthlyPaymentDueDay          int        `bun:"monthly_payment_due_day,default:10"`
 	MonthlyPaymentDueDayUpdatedAt *time.Time `bun:"monthly_payment_due_day_updated_at"`
@@ -48,6 +53,8 @@ func (c *Company) FromDomain(company *companyentity.Company) {
 			Users:                         []User{},
 			Preferences:                   company.Preferences,
 			IsBlocked:                     company.IsBlocked,
+			CategoryID:                    company.CategoryID,
+			Category:                      &CompanyCategory{},
 			MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
 			MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
 		},
@@ -60,6 +67,8 @@ func (c *Company) FromDomain(company *companyentity.Company) {
 		userModel.FromDomain(&user)
 		c.Users = append(c.Users, userModel)
 	}
+
+	c.Category.FromDomain(company.Category)
 }
 
 func (c *Company) ToDomain() *companyentity.Company {
@@ -85,6 +94,8 @@ func (c *Company) ToDomain() *companyentity.Company {
 			Users:                         users,
 			Preferences:                   c.Preferences,
 			IsBlocked:                     c.IsBlocked,
+			CategoryID:                    c.CategoryID,
+			Category:                      c.Category.ToDomain(),
 			MonthlyPaymentDueDay:          c.MonthlyPaymentDueDay,
 			MonthlyPaymentDueDayUpdatedAt: c.MonthlyPaymentDueDayUpdatedAt,
 		},

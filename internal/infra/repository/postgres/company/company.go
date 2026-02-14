@@ -92,7 +92,7 @@ func (r *CompanyRepositoryBun) GetCompany(ctx context.Context, withoutRelations 
 
 	query := tx.NewSelect().Model(company).Where("schema_name = ?", schema)
 	if len(withoutRelations) == 0 || !withoutRelations[0] {
-		query = query.Relation("Address").Relation("Users")
+		query = query.Relation("Address").Relation("Users").Relation("Category")
 	}
 
 	if err := query.Scan(ctx); err != nil {

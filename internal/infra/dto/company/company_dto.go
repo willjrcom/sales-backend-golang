@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
+	companycategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company_category"
 )
 
 type CompanyDTO struct {
@@ -20,6 +21,10 @@ type CompanyDTO struct {
 	Users        []UserDTO                 `json:"users,omitempty"`
 	Preferences  companyentity.Preferences `json:"preferences,omitempty"`
 	IsBlocked    bool                      `json:"is_blocked,omitempty"`
+
+	// Category
+	CategoryID *uuid.UUID                             `json:"category_id,omitempty"`
+	Category   *companycategorydto.CompanyCategoryDTO `json:"category,omitempty"`
 
 	MonthlyPaymentDueDay          int        `json:"monthly_payment_due_day,omitempty"`
 	MonthlyPaymentDueDayUpdatedAt *time.Time `json:"monthly_payment_due_day_updated_at,omitempty"`
@@ -41,6 +46,7 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 		Users:                         []UserDTO{},
 		Preferences:                   company.Preferences,
 		IsBlocked:                     company.IsBlocked,
+		CategoryID:                    company.CategoryID,
 		MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
 		MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
 	}
@@ -55,5 +61,10 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 
 	if company.Address == nil {
 		c.Address = nil
+	}
+
+	if company.Category != nil {
+		c.Category = &companycategorydto.CompanyCategoryDTO{}
+		c.Category.FromDomain(company.Category)
 	}
 }

@@ -1,5 +1,5 @@
 -- Create company_subscriptions table
-CREATE TABLE company_subscriptions (
+CREATE TABLE IF NOT EXISTS company_subscriptions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     company_id UUID NOT NULL REFERENCES companies(id),
     payment_id UUID REFERENCES company_payments(id), -- Nullable for manual grants/trials
@@ -12,4 +12,4 @@ CREATE TABLE company_subscriptions (
 );
 
 -- Add current_plan to companies (snapshot/cache)
-ALTER TABLE companies ADD COLUMN current_plan TEXT DEFAULT 'free';
+ALTER TABLE companies ADD COLUMN IF NOT EXISTS current_plan TEXT DEFAULT 'free';

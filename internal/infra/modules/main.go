@@ -45,6 +45,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
 	companySubscriptionRepo := companyrepositorybun.NewCompanySubscriptionRepositoryBun(db)
 
 	companyRepository, companyService, checkoutUC, _ := NewCompanyModule(db, chi, usageCostRepo)
+	NewCompanyCategoryModule(db, chi)
 	_, schemaService := NewSchemaModule(db, chi)
 	userRepository, userService, _ := NewUserModule(db, chi)
 

@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/teris-io/shortid"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
+	companycategoryentity "github.com/willjrcom/sales-backend-go/internal/domain/company_category"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/cnpj"
 )
@@ -34,6 +35,10 @@ type CompanyCommonAttributes struct {
 	Users        []User
 	Preferences  Preferences
 	IsBlocked    bool
+
+	// Category
+	CategoryID *uuid.UUID
+	Category   *companycategoryentity.CompanyCategory
 
 	// Billing
 	MonthlyPaymentDueDay          int

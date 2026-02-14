@@ -108,13 +108,13 @@ func (h *handlerCompanyImpl) handlerUpdateCompany(w http.ResponseWriter, r *http
 func (h *handlerCompanyImpl) handlerGetCompany(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	id, err := h.s.GetCompany(ctx)
+	company, err := h.s.GetCompany(ctx)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	jsonpkg.ResponseJson(w, r, http.StatusOK, id)
+	jsonpkg.ResponseJson(w, r, http.StatusOK, company)
 }
 
 func (h *handlerCompanyImpl) handlerGetCompanyUsers(w http.ResponseWriter, r *http.Request) {
