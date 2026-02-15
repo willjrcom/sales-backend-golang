@@ -1,8 +1,10 @@
 package companydto
 
 import (
+	"github.com/google/uuid"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	companycategoryentity "github.com/willjrcom/sales-backend-go/internal/domain/company_category"
 	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
 )
 
@@ -14,6 +16,7 @@ type CompanyUpdateDTO struct {
 	Contacts     []string                     `json:"contacts"`
 	Address      *addressdto.AddressUpdateDTO `json:"address"`
 	Preferences  companyentity.Preferences    `json:"preferences"`
+	CategoryIDs  []string                     `json:"category_ids"`
 
 	MonthlyPaymentDueDay *int `json:"monthly_payment_due_day,omitempty"`
 }
@@ -58,6 +61,20 @@ func (c *CompanyUpdateDTO) UpdateDomain(company *companyentity.Company) (err err
 
 	if c.MonthlyPaymentDueDay != nil {
 		company.MonthlyPaymentDueDay = *c.MonthlyPaymentDueDay
+	}
+
+	if len(c.CategoryIDs) > 0 {
+		company.Categories = []companycategoryentity.CompanyCategory{}
+		for _, id := range c.CategoryIDs {
+			categoryIDUUID, err := uuid.Parse(id)
+			if err != nil {
+				return err
+			}
+
+			category := companycategoryentity.CompanyCategory{}
+			category.ID = categoryIDUUID
+			company.Categories = append(company.Categories, category)
+		}
 	}
 
 	return nil

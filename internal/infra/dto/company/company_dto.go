@@ -22,9 +22,8 @@ type CompanyDTO struct {
 	Preferences  companyentity.Preferences `json:"preferences,omitempty"`
 	IsBlocked    bool                      `json:"is_blocked,omitempty"`
 
-	// Category
-	CategoryID *uuid.UUID                             `json:"category_id,omitempty"`
-	Category   *companycategorydto.CompanyCategoryDTO `json:"category,omitempty"`
+	// Categories
+	Categories []companycategorydto.CompanyCategoryDTO `json:"categories,omitempty"`
 
 	MonthlyPaymentDueDay          int        `json:"monthly_payment_due_day,omitempty"`
 	MonthlyPaymentDueDayUpdatedAt *time.Time `json:"monthly_payment_due_day_updated_at,omitempty"`
@@ -46,7 +45,7 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 		Users:                         []UserDTO{},
 		Preferences:                   company.Preferences,
 		IsBlocked:                     company.IsBlocked,
-		CategoryID:                    company.CategoryID,
+		Categories:                    []companycategorydto.CompanyCategoryDTO{},
 		MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
 		MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
 	}
@@ -63,8 +62,9 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 		c.Address = nil
 	}
 
-	if company.Category != nil {
-		c.Category = &companycategorydto.CompanyCategoryDTO{}
-		c.Category.FromDomain(company.Category)
+	for _, category := range company.Categories {
+		categoryDTO := companycategorydto.CompanyCategoryDTO{}
+		categoryDTO.FromDomain(&category)
+		c.Categories = append(c.Categories, categoryDTO)
 	}
 }

@@ -36,6 +36,16 @@ func (r *CompanyRepositoryBun) NewCompany(ctx context.Context, company *model.Co
 		return err
 	}
 
+	for _, category := range company.Categories {
+		companyToCategory := &model.CompanyToCategory{
+			CompanyID:  company.ID,
+			CategoryID: category.ID,
+		}
+		if _, err = tx.NewInsert().Model(companyToCategory).Exec(ctx); err != nil {
+			return err
+		}
+	}
+
 	if err = tx.Commit(); err != nil {
 		return err
 	}
@@ -68,6 +78,21 @@ func (r *CompanyRepositoryBun) UpdateCompany(ctx context.Context, company *model
 		}
 	}
 
+	// Update categories
+	if _, err := tx.NewDelete().Model((*model.CompanyToCategory)(nil)).Where("company_id = ?", company.ID).Exec(ctx); err != nil {
+		return err
+	}
+
+	for _, category := range company.Categories {
+		companyToCategory := &model.CompanyToCategory{
+			CompanyID:  company.ID,
+			CategoryID: category.ID,
+		}
+		if _, err = tx.NewInsert().Model(companyToCategory).Exec(ctx); err != nil {
+			return err
+		}
+	}
+
 	if err = tx.Commit(); err != nil {
 		return err
 	}
@@ -92,7 +117,7 @@ func (r *CompanyRepositoryBun) GetCompany(ctx context.Context, withoutRelations 
 
 	query := tx.NewSelect().Model(company).Where("schema_name = ?", schema)
 	if len(withoutRelations) == 0 || !withoutRelations[0] {
-		query = query.Relation("Address").Relation("Users").Relation("Category")
+		query = query.Relation("Address").Relation("Users").Relation("Categories")
 	}
 
 	if err := query.Scan(ctx); err != nil {

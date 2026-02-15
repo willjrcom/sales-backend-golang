@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	companycategoryentity "github.com/willjrcom/sales-backend-go/internal/domain/company_category"
 	schemaentity "github.com/willjrcom/sales-backend-go/internal/domain/schema"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	employeedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/employee"
@@ -48,7 +49,7 @@ func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Se
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (response *companydto.CompanySchemaDTO, err error) {
-	cnpjString, tradeName, contacts, categoryID, err := dto.ToDomain()
+	cnpjString, tradeName, contacts, categoryIDs, err := dto.ToDomain()
 	if err != nil {
 		return nil, err
 	}
@@ -77,12 +78,17 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	company := companyentity.NewCompany(cnpjData)
 	company.Email = userModel.Email
 	company.Contacts = contacts
-	categoryIDUUID, err := uuid.Parse(categoryID)
-	if err != nil {
-		return nil, fmt.Errorf("invalid category id: %s", categoryID)
-	}
 
-	company.CategoryID = &categoryIDUUID
+	for _, id := range categoryIDs {
+		categoryIDUUID, err := uuid.Parse(id)
+		if err != nil {
+			return nil, fmt.Errorf("invalid category id: %s", id)
+		}
+
+		category := companycategoryentity.CompanyCategory{}
+		category.ID = categoryIDUUID
+		company.Categories = append(company.Categories, category)
+	}
 
 	coordinates, _ := geocodeservice.GetCoordinates(&company.Address.AddressCommonAttributes)
 

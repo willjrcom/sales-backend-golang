@@ -36,9 +36,8 @@ type CompanyCommonAttributes struct {
 	Preferences  Preferences
 	IsBlocked    bool
 
-	// Category
-	CategoryID *uuid.UUID
-	Category   *companycategoryentity.CompanyCategory
+	// Categories
+	Categories []companycategoryentity.CompanyCategory
 
 	// Billing
 	MonthlyPaymentDueDay          int

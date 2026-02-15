@@ -11,10 +11,10 @@ var (
 )
 
 type CompanyCreateDTO struct {
-	TradeName  string   `json:"trade_name"`
-	Cnpj       string   `json:"cnpj"`
-	Contacts   []string `json:"contacts"`
-	CategoryID string   `json:"category_id"`
+	TradeName   string   `json:"trade_name"`
+	Cnpj        string   `json:"cnpj"`
+	Contacts    []string `json:"contacts"`
+	CategoryIDs []string `json:"category_ids"`
 }
 
 func (c *CompanyCreateDTO) validate() error {
@@ -26,17 +26,17 @@ func (c *CompanyCreateDTO) validate() error {
 		return ErrMustBeContacts
 	}
 
-	if c.CategoryID == "" {
+	if len(c.CategoryIDs) == 0 {
 		return ErrMustBeCategoryID
 	}
 
 	return nil
 }
 
-func (c *CompanyCreateDTO) ToDomain() (cnpj string, tradeName string, contacts []string, categoryID string, err error) {
+func (c *CompanyCreateDTO) ToDomain() (cnpj string, tradeName string, contacts []string, categoryIDs []string, err error) {
 	if err := c.validate(); err != nil {
-		return "", "", nil, "", err
+		return "", "", nil, nil, err
 	}
 
-	return c.Cnpj, c.TradeName, c.Contacts, c.CategoryID, nil
+	return c.Cnpj, c.TradeName, c.Contacts, c.CategoryIDs, nil
 }
