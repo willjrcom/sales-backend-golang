@@ -2,6 +2,9 @@ package companydto
 
 import (
 	"errors"
+
+	"github.com/google/uuid"
+	companycategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company_category"
 )
 
 var (
@@ -11,10 +14,10 @@ var (
 )
 
 type CompanyCreateDTO struct {
-	TradeName   string   `json:"trade_name"`
-	Cnpj        string   `json:"cnpj"`
-	Contacts    []string `json:"contacts"`
-	CategoryIDs []string `json:"category_ids"`
+	TradeName  string                                  `json:"trade_name"`
+	Cnpj       string                                  `json:"cnpj"`
+	Contacts   []string                                `json:"contacts"`
+	Categories []companycategorydto.CompanyCategoryDTO `json:"categories"`
 }
 
 func (c *CompanyCreateDTO) validate() error {
@@ -26,7 +29,7 @@ func (c *CompanyCreateDTO) validate() error {
 		return ErrMustBeContacts
 	}
 
-	if len(c.CategoryIDs) == 0 {
+	if len(c.Categories) == 0 {
 		return ErrMustBeCategoryID
 	}
 
@@ -38,5 +41,11 @@ func (c *CompanyCreateDTO) ToDomain() (cnpj string, tradeName string, contacts [
 		return "", "", nil, nil, err
 	}
 
-	return c.Cnpj, c.TradeName, c.Contacts, c.CategoryIDs, nil
+	for _, category := range c.Categories {
+		if category.ID != uuid.Nil {
+			categoryIDs = append(categoryIDs, category.ID.String())
+		}
+	}
+
+	return c.Cnpj, c.TradeName, c.Contacts, categoryIDs, nil
 }

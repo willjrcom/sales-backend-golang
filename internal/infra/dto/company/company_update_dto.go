@@ -6,17 +6,18 @@ import (
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	companycategoryentity "github.com/willjrcom/sales-backend-go/internal/domain/company_category"
 	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
+	companycategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company_category"
 )
 
 type CompanyUpdateDTO struct {
-	BusinessName *string                      `json:"business_name"`
-	TradeName    *string                      `json:"trade_name"`
-	Cnpj         *string                      `json:"cnpj"`
-	Email        *string                      `json:"email"`
-	Contacts     []string                     `json:"contacts"`
-	Address      *addressdto.AddressUpdateDTO `json:"address"`
-	Preferences  companyentity.Preferences    `json:"preferences"`
-	CategoryIDs  []string                     `json:"category_ids"`
+	BusinessName *string                                 `json:"business_name"`
+	TradeName    *string                                 `json:"trade_name"`
+	Cnpj         *string                                 `json:"cnpj"`
+	Email        *string                                 `json:"email"`
+	Contacts     []string                                `json:"contacts"`
+	Address      *addressdto.AddressUpdateDTO            `json:"address"`
+	Preferences  companyentity.Preferences               `json:"preferences"`
+	Categories   []companycategorydto.CompanyCategoryDTO `json:"categories"`
 
 	MonthlyPaymentDueDay *int `json:"monthly_payment_due_day,omitempty"`
 }
@@ -63,16 +64,15 @@ func (c *CompanyUpdateDTO) UpdateDomain(company *companyentity.Company) (err err
 		company.MonthlyPaymentDueDay = *c.MonthlyPaymentDueDay
 	}
 
-	if len(c.CategoryIDs) > 0 {
+	if len(c.Categories) > 0 {
 		company.Categories = []companycategoryentity.CompanyCategory{}
-		for _, id := range c.CategoryIDs {
-			categoryIDUUID, err := uuid.Parse(id)
-			if err != nil {
-				return err
+		for _, catDTO := range c.Categories {
+			if catDTO.ID == uuid.Nil {
+				continue
 			}
 
 			category := companycategoryentity.CompanyCategory{}
-			category.ID = categoryIDUUID
+			category.ID = catDTO.ID
 			company.Categories = append(company.Categories, category)
 		}
 	}
