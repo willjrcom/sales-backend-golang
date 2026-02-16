@@ -86,7 +86,7 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 		}
 
 		appToken := r.Header.Get("Authorization")
-		if shouldValidate && appToken != "" {
+		if appToken != "" {
 			// Remover o prefixo "Bearer " se existir
 			appToken = strings.TrimPrefix(appToken, "Bearer ")
 
@@ -105,6 +105,6 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 
 		}
 
-		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("unauthorized"))
+		next.ServeHTTP(w, r)
 	})
 }
