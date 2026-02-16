@@ -4,22 +4,24 @@ import (
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 )
 
 type ItemDTO struct {
-	ID              uuid.UUID       `json:"id"`
-	Name            string          `json:"name"`
-	Observation     string          `json:"observation"`
-	Price           decimal.Decimal `json:"price"`
-	TotalPrice      decimal.Decimal `json:"total_price"`
-	Size            string          `json:"size"`
-	Quantity        float64         `json:"quantity"`
-	GroupItemID     uuid.UUID       `json:"group_item_id"`
-	CategoryID      uuid.UUID       `json:"category_id"`
-	AdditionalItems []ItemDTO       `json:"additional_items"`
-	RemovedItems    []string        `json:"removed_items"`
-	ProductID       uuid.UUID       `json:"product_id"`
-	Flavor          *string         `json:"flavor,omitempty"`
+	ID              uuid.UUID                      `json:"id"`
+	Name            string                         `json:"name"`
+	Observation     string                         `json:"observation"`
+	Price           decimal.Decimal                `json:"price"`
+	TotalPrice      decimal.Decimal                `json:"total_price"`
+	Size            string                         `json:"size"`
+	Quantity        float64                        `json:"quantity"`
+	GroupItemID     uuid.UUID                      `json:"group_item_id"`
+	CategoryID      uuid.UUID                      `json:"category_id"`
+	AdditionalItems []ItemDTO                      `json:"additional_items"`
+	RemovedItems    []string                       `json:"removed_items"`
+	ProductID       uuid.UUID                      `json:"product_id"`
+	Product         *productcategorydto.ProductDTO `json:"product"`
+	Flavor          *string                        `json:"flavor,omitempty"`
 }
 
 func (i *ItemDTO) FromDomain(item *orderentity.Item) {
@@ -50,5 +52,10 @@ func (i *ItemDTO) FromDomain(item *orderentity.Item) {
 
 	if len(item.AdditionalItems) == 0 {
 		i.AdditionalItems = nil
+	}
+
+	if item.Product != nil {
+		i.Product = &productcategorydto.ProductDTO{}
+		i.Product.FromDomain(item.Product)
 	}
 }

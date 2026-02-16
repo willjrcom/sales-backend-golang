@@ -269,6 +269,46 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		}
 	}
 
+	// load products
+	var products []model.Product
+	var productIDs []uuid.UUID
+	for _, g := range order.GroupItems {
+		for _, item := range g.Items {
+			productIDs = append(productIDs, item.ProductID)
+			for _, addItem := range item.AdditionalItems {
+				productIDs = append(productIDs, addItem.ProductID)
+			}
+		}
+	}
+
+	if len(productIDs) > 0 {
+		if err := tx.NewSelect().Model(&products).
+			Where("id IN (?)", bun.In(productIDs)).
+			Scan(ctx); err != nil {
+			return nil, err
+		}
+		prodMap := make(map[uuid.UUID]*model.Product, len(products))
+		for k := range products {
+			p := products[k]
+			prodMap[p.ID] = &p
+		}
+		for i := range order.GroupItems {
+			g := &order.GroupItems[i]
+			for j := range g.Items {
+				item := &g.Items[j]
+				if prod, ok := prodMap[item.ProductID]; ok {
+					item.Product = prod
+				}
+				for k := range item.AdditionalItems {
+					addItem := &item.AdditionalItems[k]
+					if prod, ok := prodMap[addItem.ProductID]; ok {
+						addItem.Product = prod
+					}
+				}
+			}
+		}
+	}
+
 	if order.Delivery != nil {
 		if err := tx.NewSelect().Model(order.Delivery).WherePK().
 			Relation("Client.Contact").

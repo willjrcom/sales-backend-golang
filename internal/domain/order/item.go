@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
 var (
@@ -34,6 +35,7 @@ type ItemCommonAttributes struct {
 	AdditionalItems []Item
 	RemovedItems    []string
 	ProductID       uuid.UUID
+	Product         *productentity.Product
 	Flavor          *string
 }
 
