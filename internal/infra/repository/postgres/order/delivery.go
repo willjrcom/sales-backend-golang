@@ -139,3 +139,24 @@ func (r *OrderDeliveryRepositoryBun) GetDeliveriesByIds(ctx context.Context, ids
 	}
 	return deliveries, nil
 }
+
+func (r *OrderDeliveryRepositoryBun) GetDeliveriesByClientId(ctx context.Context, clientID string) ([]model.OrderDelivery, error) {
+	deliveries := []model.OrderDelivery{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	if err := tx.NewSelect().Model(&deliveries).Where("delivery.client_id = ?", clientID).Relation("Client").Relation("Address").Relation("Driver").Order("delivery.created_at DESC").Limit(5).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return deliveries, nil
+}

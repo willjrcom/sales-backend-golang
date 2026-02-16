@@ -21,6 +21,27 @@ func (s *OrderService) GetOrderById(ctx context.Context, dto *entitydto.IDReques
 	}
 }
 
+func (s *OrderService) GetOrdersDeliveryByClientId(ctx context.Context, dto *entitydto.IDRequest) ([]orderdto.OrderDTO, error) {
+	if deliveryModels, err := s.rdo.GetDeliveriesByClientId(ctx, dto.ID.String()); err != nil {
+		return nil, err
+	} else {
+		orders := []orderdto.OrderDTO{}
+		for _, deliveryModel := range deliveryModels {
+			orderModel, err := s.ro.GetOrderById(ctx, deliveryModel.OrderID.String())
+			if err != nil {
+				continue
+			}
+
+			order := orderModel.ToDomain()
+
+			dto := &orderdto.OrderDTO{}
+			dto.FromDomain(order)
+			orders = append(orders, *dto)
+		}
+		return orders, nil
+	}
+}
+
 func (s *OrderService) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, error) {
 	shiftID := uuid.Nil
 	shiftModel, _ := s.rs.GetCurrentShift(ctx)

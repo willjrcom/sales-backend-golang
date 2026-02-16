@@ -33,6 +33,7 @@ type ICreateDeliveryService interface {
 
 type IGetDeliveryService interface {
 	GetDeliveryById(ctx context.Context, dto *entitydto.IDRequest) (*orderdeliverydto.OrderDeliveryDTO, error)
+	GetDeliveriesByClientId(ctx context.Context, dtoID *entitydto.IDRequest) ([]orderdeliverydto.OrderDeliveryDTO, error)
 	GetAllDeliveries(ctx context.Context) ([]orderdeliverydto.OrderDeliveryDTO, error)
 }
 
@@ -144,6 +145,21 @@ func (s *OrderDeliveryService) GetDeliveryById(ctx context.Context, dto *entityd
 		deliveryDTO := &orderdeliverydto.OrderDeliveryDTO{}
 		deliveryDTO.FromDomain(delivery)
 		return deliveryDTO, nil
+	}
+}
+
+func (s *OrderDeliveryService) GetDeliveriesByClientId(ctx context.Context, dto *entitydto.IDRequest) ([]orderdeliverydto.OrderDeliveryDTO, error) {
+	if deliveryModels, err := s.rdo.GetDeliveriesByClientId(ctx, dto.ID.String()); err != nil {
+		return nil, err
+	} else {
+		deliveries := []orderdeliverydto.OrderDeliveryDTO{}
+		for _, deliveryModel := range deliveryModels {
+			delivery := deliveryModel.ToDomain()
+			deliveryDTO := &orderdeliverydto.OrderDeliveryDTO{}
+			deliveryDTO.FromDomain(delivery)
+			deliveries = append(deliveries, *deliveryDTO)
+		}
+		return deliveries, nil
 	}
 }
 

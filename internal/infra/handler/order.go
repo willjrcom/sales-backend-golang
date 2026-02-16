@@ -32,6 +32,7 @@ func NewHandlerOrder(orderService *orderusecases.OrderService) *handler.Handler 
 		c.Get("/all/delivery", h.GetAllOrdersWithDelivery)
 		c.Get("/all/pickup/ready", h.GetAllOrdersWithPickupReady)
 		c.Get("/all/pickup/delivered", h.GetAllOrdersWithPickupDelivered)
+		c.Get("/all/delivery/by-client/{id}", h.handlerGetAllOrdersDeliveryByClient)
 		c.Put("/update/{id}/observation", h.handlerUpdateObservation)
 		c.Put("/update/{id}/payment", h.handlerUpdatePaymentMethod)
 		c.Post("/pending/{id}", h.handlerPendingOrder)
@@ -99,6 +100,27 @@ func (h *handlerOrderImpl) GetAllOrdersWithPickupReady(w http.ResponseWriter, r 
 	page, perPage := headerservice.GetPageAndPerPage(r, 0, 100)
 
 	orders, err := h.s.GetAllOrdersWithPickup(ctx, orderentity.OrderPickupStatusReady, page, perPage)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
+}
+
+func (h *handlerOrderImpl) handlerGetAllOrdersDeliveryByClient(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+
+	orders, err := h.s.GetOrdersDeliveryByClientId(ctx, dtoId)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
