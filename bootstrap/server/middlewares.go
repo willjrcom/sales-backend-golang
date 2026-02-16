@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
@@ -41,6 +42,9 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
+		// Executar a lógica desejada apenas para os endpoints selecionados
+		fmt.Println("Antes de chamar o endpoint:", r.URL.Path)
+
 		// liberação de preflight
 		if r.Method == http.MethodOptions {
 			fmt.Println("middlewareAuthUser options")
@@ -69,24 +73,38 @@ func (c *ServerChi) middlewareAuthUser(next http.Handler) http.Handler {
 			}
 		}
 
-		if shouldValidate {
-			// Executar a lógica desejada apenas para os endpoints selecionados
-			fmt.Println("Antes de chamar o endpoint:", r.URL.Path)
+		validToken, _ := headerservice.GetAccessTokenFromHeader(ctx, r)
+		if shouldValidate && validToken != nil && validToken.Valid {
+			schema := jwtservice.GetSchemaFromAccessToken(validToken)
+			userID := jwtservice.GetUserIDFromToken(validToken)
+			ctx = context.WithValue(ctx, model.Schema("schema"), schema)
+			ctx = context.WithValue(ctx, companyentity.UserValue("user_id"), userID)
 
-			validToken, err := headerservice.GetAccessTokenFromHeader(ctx, r)
+			// Chamando o próximo handler
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
 
+		appToken := r.Header.Get("Authorization")
+		if shouldValidate && appToken != "" {
+			// Remover o prefixo "Bearer " se existir
+			appToken = strings.TrimPrefix(appToken, "Bearer ")
+
+			// Tentar decodificar Base64
+			schemaBytes, err := base64.StdEncoding.DecodeString(appToken)
 			if err != nil {
 				jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, err)
 				return
 			}
 
-			schema := jwtservice.GetSchemaFromAccessToken(validToken)
-			userID := jwtservice.GetUserIDFromToken(validToken)
+			schema := string(schemaBytes)
 			ctx = context.WithValue(ctx, model.Schema("schema"), schema)
-			ctx = context.WithValue(ctx, companyentity.UserValue("user_id"), userID)
+			// Chamando o próximo handler com o contexto atualizado
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+
 		}
 
-		// Chamando o próximo handler
-		next.ServeHTTP(w, r.WithContext(ctx))
+		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("unauthorized"))
 	})
 }
