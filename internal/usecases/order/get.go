@@ -42,6 +42,27 @@ func (s *OrderService) GetOrdersDeliveryByClientId(ctx context.Context, dto *ent
 	}
 }
 
+func (s *OrderService) GetOrdersTableByTableId(ctx context.Context, dto *entitydto.IDRequest) ([]orderdto.OrderDTO, error) {
+	if tableModels, err := s.st.rto.GetPendingOrderTablesByTableId(ctx, dto.ID.String()); err != nil {
+		return nil, err
+	} else {
+		orders := []orderdto.OrderDTO{}
+		for _, tableModel := range tableModels {
+			orderModel, err := s.ro.GetOrderById(ctx, tableModel.OrderID.String())
+			if err != nil {
+				continue
+			}
+
+			order := orderModel.ToDomain()
+
+			dto := &orderdto.OrderDTO{}
+			dto.FromDomain(order)
+			orders = append(orders, *dto)
+		}
+		return orders, nil
+	}
+}
+
 func (s *OrderService) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, error) {
 	shiftID := uuid.Nil
 	shiftModel, _ := s.rs.GetCurrentShift(ctx)
