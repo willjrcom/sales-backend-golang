@@ -25,6 +25,7 @@ type ICreatePickupService interface {
 
 type IGetPickupService interface {
 	GetPickupById(ctx context.Context, dto *entitydto.IDRequest) (*orderpickupdto.OrderPickupDTO, error)
+	GetPickupsByContact(ctx context.Context, contact string) ([]orderpickupdto.OrderPickupDTO, error)
 	GetAllPickups(ctx context.Context) ([]orderpickupdto.OrderPickupDTO, error)
 }
 
@@ -39,6 +40,7 @@ type IUpdatePickupService interface {
 type OrderPickupService struct {
 	rp model.OrderPickupRepository
 	os *OrderService
+	ro model.OrderRepository
 }
 
 func NewPickupService(rp model.OrderPickupRepository) IPickupService {
@@ -164,13 +166,17 @@ func (s *OrderPickupService) CancelOrderPickup(ctx context.Context, dtoID *entit
 
 func (s *OrderPickupService) UpdateName(ctx context.Context, dtoID *entitydto.IDRequest, dtoPickup *orderpickupdto.UpdateOrderPickupInput) (err error) {
 	orderPickupModel, err := s.rp.GetPickupById(ctx, dtoID.ID.String())
+	if err != nil {
+		return err
+	}
 
+	name, err := dtoPickup.ToDomain()
 	if err != nil {
 		return err
 	}
 
 	orderPickup := orderPickupModel.ToDomain()
-	if err := orderPickup.UpdateName(dtoPickup.Name); err != nil {
+	if err := orderPickup.UpdateName(name); err != nil {
 		return err
 	}
 
@@ -180,6 +186,22 @@ func (s *OrderPickupService) UpdateName(ctx context.Context, dtoID *entitydto.ID
 	}
 
 	return nil
+}
+
+func (s *OrderPickupService) GetPickupsByContact(ctx context.Context, contact string) ([]orderpickupdto.OrderPickupDTO, error) {
+	if pickupModels, err := s.rp.GetPickupsByContact(ctx, contact); err != nil {
+		return nil, err
+	} else {
+
+		orders := []orderpickupdto.OrderPickupDTO{}
+		for _, pickupModel := range pickupModels {
+			pickup := pickupModel.ToDomain()
+			pickupDTO := &orderpickupdto.OrderPickupDTO{}
+			pickupDTO.FromDomain(pickup)
+			orders = append(orders, *pickupDTO)
+		}
+		return orders, nil
+	}
 }
 
 func (s *OrderPickupService) GetPickupById(ctx context.Context, dto *entitydto.IDRequest) (*orderpickupdto.OrderPickupDTO, error) {

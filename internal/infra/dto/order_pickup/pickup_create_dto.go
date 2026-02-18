@@ -11,7 +11,8 @@ var (
 )
 
 type OrderPickupCreateDTO struct {
-	Name string `json:"name"`
+	Name    string `json:"name"`
+	Contact string `json:"contact"`
 }
 
 func (o *OrderPickupCreateDTO) validate() error {
@@ -27,5 +28,5 @@ func (o *OrderPickupCreateDTO) ToDomain() (*orderentity.OrderPickup, error) {
 		return nil, err
 	}
 
-	return orderentity.NewOrderPickup(o.Name), nil
+	return orderentity.NewOrderPickup(o.Name, o.Contact), nil
 }

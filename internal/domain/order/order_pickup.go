@@ -20,6 +20,7 @@ type OrderPickup struct {
 
 type OrderPickupCommonAttributes struct {
 	Name        string
+	Contact     string
 	Status      StatusOrderPickup
 	OrderID     uuid.UUID
 	OrderNumber int
@@ -32,10 +33,11 @@ type PickupTimeLogs struct {
 	CancelledAt *time.Time
 }
 
-func NewOrderPickup(name string) *OrderPickup {
+func NewOrderPickup(name, contact string) *OrderPickup {
 	orderPickupCommonAttributes := OrderPickupCommonAttributes{
-		Name:   name,
-		Status: OrderPickupStatusStaging,
+		Name:    name,
+		Contact: contact,
+		Status:  OrderPickupStatusStaging,
 	}
 
 	return &OrderPickup{

@@ -32,6 +32,7 @@ func NewHandlerOrder(orderService *orderusecases.OrderService) *handler.Handler 
 		c.Get("/all/delivery", h.GetAllOrdersWithDelivery)
 		c.Get("/all/pickup/ready", h.GetAllOrdersWithPickupReady)
 		c.Get("/all/pickup/delivered", h.GetAllOrdersWithPickupDelivered)
+		c.Get("/all/pickup/by-contact/{contact}", h.GetAllOrdersWithPickupByContact)
 		c.Get("/all/delivery/by-client/{id}", h.handlerGetAllOrdersByClient)
 		c.Get("/all/table/by-table/{id}", h.handlerGetAllOrdersByTable)
 		c.Put("/update/{id}/observation", h.handlerUpdateObservation)
@@ -157,6 +158,25 @@ func (h *handlerOrderImpl) GetAllOrdersWithPickupDelivered(w http.ResponseWriter
 	page, perPage := headerservice.GetPageAndPerPage(r, 0, 10)
 
 	orders, err := h.s.GetAllOrdersWithPickup(ctx, orderentity.OrderPickupStatusDelivered, page, perPage)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
+}
+
+func (h *handlerOrderImpl) GetAllOrdersWithPickupByContact(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	contact := chi.URLParam(r, "contact")
+
+	if contact == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("contact is required"))
+		return
+	}
+
+	orders, err := h.s.GetOrdersPickupByContact(ctx, contact)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

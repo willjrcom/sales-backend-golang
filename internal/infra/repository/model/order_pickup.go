@@ -18,6 +18,7 @@ type OrderPickup struct {
 
 type OrderPickupCommonAttributes struct {
 	Name        string    `bun:"name,notnull"`
+	Contact     string    `bun:"contact"`
 	Status      string    `bun:"status"`
 	OrderID     uuid.UUID `bun:"column:order_id,type:uuid,notnull"`
 	OrderNumber int       `bun:"order_number,notnull"`
@@ -44,6 +45,7 @@ func (p *OrderPickup) FromDomain(pickup *orderentity.OrderPickup) {
 		},
 		OrderPickupCommonAttributes: OrderPickupCommonAttributes{
 			Name:        pickup.Name,
+			Contact:     pickup.Contact,
 			Status:      string(pickup.Status),
 			OrderID:     pickup.OrderID,
 			OrderNumber: pickup.OrderNumber,
@@ -65,6 +67,7 @@ func (p *OrderPickup) ToDomain() *orderentity.OrderPickup {
 		},
 		OrderPickupCommonAttributes: orderentity.OrderPickupCommonAttributes{
 			Name:        p.Name,
+			Contact:     p.Contact,
 			Status:      orderentity.StatusOrderPickup(p.Status),
 			OrderID:     p.OrderID,
 			OrderNumber: p.OrderNumber,

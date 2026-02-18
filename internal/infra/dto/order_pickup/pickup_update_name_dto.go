@@ -1,9 +1,5 @@
 package orderpickupdto
 
-import (
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
-)
-
 type UpdateOrderPickupInput struct {
 	Name string `json:"name"`
 }
@@ -16,10 +12,10 @@ func (o *UpdateOrderPickupInput) validate() error {
 	return nil
 }
 
-func (o *UpdateOrderPickupInput) ToDomain() (*orderentity.OrderPickup, error) {
+func (o *UpdateOrderPickupInput) ToDomain() (string, error) {
 	if err := o.validate(); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return orderentity.NewOrderPickup(o.Name), nil
+	return o.Name, nil
 }

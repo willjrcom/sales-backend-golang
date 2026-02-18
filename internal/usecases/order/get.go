@@ -111,6 +111,27 @@ func (s *OrderService) GetAllOrdersWithDelivery(ctx context.Context, page, perPa
 	}
 }
 
+func (s *OrderService) GetOrdersPickupByContact(ctx context.Context, contact string) ([]orderdto.OrderDTO, error) {
+	if pickups, err := s.sp.GetPickupsByContact(ctx, contact); err != nil {
+		return nil, err
+	} else {
+		orders := []orderdto.OrderDTO{}
+		for _, pickup := range pickups {
+			orderModel, err := s.ro.GetOrderById(ctx, pickup.OrderID.String())
+			if err != nil {
+				continue
+			}
+
+			order := orderModel.ToDomain()
+
+			dto := &orderdto.OrderDTO{}
+			dto.FromDomain(order)
+			orders = append(orders, *dto)
+		}
+		return orders, nil
+	}
+}
+
 func (s *OrderService) GetAllOrdersWithPickup(ctx context.Context, status orderentity.StatusOrderPickup, page, perPage int) ([]orderdto.OrderDTO, error) {
 	shiftID := uuid.Nil
 	shiftModel, _ := s.rs.GetCurrentShift(ctx)

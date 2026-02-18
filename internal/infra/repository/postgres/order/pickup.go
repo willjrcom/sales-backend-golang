@@ -117,3 +117,24 @@ func (r *OrderPickupRepositoryBun) GetPickupById(ctx context.Context, id string)
 	}
 	return orderPickup, nil
 }
+
+func (r *OrderPickupRepositoryBun) GetPickupsByContact(ctx context.Context, contact string) ([]model.OrderPickup, error) {
+	pickups := []model.OrderPickup{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	if err := tx.NewSelect().Model(&pickups).Where("contact = ?", contact).Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return pickups, nil
+}

@@ -15,6 +15,7 @@ type OrderPickupDTO struct {
 
 type OrderPickupCommonAttributes struct {
 	Name        string                        `json:"name"`
+	Contact     string                        `json:"contact"`
 	Status      orderentity.StatusOrderPickup `json:"status"`
 	OrderID     uuid.UUID                     `json:"order_id"`
 	OrderNumber int                           `json:"order_number"`
@@ -34,6 +35,7 @@ func (o *OrderPickupDTO) FromDomain(pickup *orderentity.OrderPickup) {
 		ID: pickup.ID,
 		OrderPickupCommonAttributes: OrderPickupCommonAttributes{
 			Name:        pickup.Name,
+			Contact:     pickup.Contact,
 			Status:      pickup.Status,
 			OrderID:     pickup.OrderID,
 			OrderNumber: pickup.OrderNumber,
