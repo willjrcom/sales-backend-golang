@@ -320,6 +320,13 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		}
 	}
 
+	if order.OrderType.Table != nil && order.OrderType.Table.TableID != uuid.Nil {
+		table := &model.Table{}
+		if err := tx.NewSelect().Model(table).Where("id = ?", order.OrderType.Table.TableID).Scan(ctx); err == nil {
+			order.OrderType.Table.Table = table
+		}
+	}
+
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}

@@ -3,7 +3,7 @@ package placedto
 import (
 	"errors"
 
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 var (
@@ -25,7 +25,7 @@ func (o *CreatePlaceInput) validate() error {
 	return nil
 }
 
-func (o *CreatePlaceInput) ToDomain() (*tableentity.Place, error) {
+func (o *CreatePlaceInput) ToDomain() (*orderentity.Place, error) {
 	if err := o.validate(); err != nil {
 		return nil, err
 	}
@@ -34,12 +34,12 @@ func (o *CreatePlaceInput) ToDomain() (*tableentity.Place, error) {
 	if o.IsActive != nil {
 		isActive = *o.IsActive
 	}
-	placeCommonAttributes := tableentity.PlaceCommonAttributes{
+	placeCommonAttributes := orderentity.PlaceCommonAttributes{
 		Name:        o.Name,
 		ImagePath:   o.ImagePath,
 		IsAvailable: o.IsAvailable,
 		IsActive:    isActive,
 	}
 
-	return tableentity.NewPlace(placeCommonAttributes), nil
+	return orderentity.NewPlace(placeCommonAttributes), nil
 }

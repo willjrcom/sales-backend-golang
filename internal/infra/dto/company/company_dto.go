@@ -21,6 +21,7 @@ type CompanyDTO struct {
 	Users        []UserDTO                 `json:"users,omitempty"`
 	Preferences  companyentity.Preferences `json:"preferences,omitempty"`
 	IsBlocked    bool                      `json:"is_blocked,omitempty"`
+	ImagePath    string                    `json:"image_path"`
 
 	// Categories
 	Categories []companycategorydto.CompanyCategoryDTO `json:"categories,omitempty"`
@@ -45,6 +46,7 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 		Users:                         []UserDTO{},
 		Preferences:                   company.Preferences,
 		IsBlocked:                     company.IsBlocked,
+		ImagePath:                     company.ImagePath,
 		Categories:                    []companycategorydto.CompanyCategoryDTO{},
 		MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
 		MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,

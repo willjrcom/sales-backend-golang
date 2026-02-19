@@ -26,6 +26,7 @@ type CompanyCommonAttributes struct {
 	Users        []User                    `bun:"m2m:public.company_to_users,join:Company=User"`
 	Preferences  companyentity.Preferences `bun:"preferences,type:jsonb"`
 	IsBlocked    bool                      `bun:"is_blocked"`
+	ImagePath    string                    `bun:"image_path"`
 
 	// Categories
 	Categories []CompanyCategory `bun:"m2m:company_to_category,join:Company=Category"`
@@ -52,6 +53,7 @@ func (c *Company) FromDomain(company *companyentity.Company) {
 			Users:                         []User{},
 			Preferences:                   company.Preferences,
 			IsBlocked:                     company.IsBlocked,
+			ImagePath:                     company.ImagePath,
 			Categories:                    []CompanyCategory{},
 			MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
 			MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
@@ -101,6 +103,7 @@ func (c *Company) ToDomain() *companyentity.Company {
 			Users:                         users,
 			Preferences:                   c.Preferences,
 			IsBlocked:                     c.IsBlocked,
+			ImagePath:                     c.ImagePath,
 			Categories:                    categories,
 			MonthlyPaymentDueDay:          c.MonthlyPaymentDueDay,
 			MonthlyPaymentDueDayUpdatedAt: c.MonthlyPaymentDueDayUpdatedAt,

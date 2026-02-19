@@ -35,6 +35,7 @@ type CompanyCommonAttributes struct {
 	Users        []User
 	Preferences  Preferences
 	IsBlocked    bool
+	ImagePath    string
 
 	// Categories
 	Categories []companycategoryentity.CompanyCategory

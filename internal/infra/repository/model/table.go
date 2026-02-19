@@ -3,7 +3,6 @@ package model
 import (
 	"github.com/uptrace/bun"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
@@ -20,7 +19,7 @@ type TableCommonAttributes struct {
 	Orders      []OrderTable `bun:"rel:has-many,join:id=table_id"`
 }
 
-func (t *Table) FromDomain(table *tableentity.Table) {
+func (t *Table) FromDomain(table *orderentity.Table) {
 	if table == nil {
 		return
 	}
@@ -41,13 +40,13 @@ func (t *Table) FromDomain(table *tableentity.Table) {
 	}
 }
 
-func (t *Table) ToDomain() *tableentity.Table {
+func (t *Table) ToDomain() *orderentity.Table {
 	if t == nil {
 		return nil
 	}
-	table := &tableentity.Table{
+	table := &orderentity.Table{
 		Entity: t.Entity.ToDomain(),
-		TableCommonAttributes: tableentity.TableCommonAttributes{
+		TableCommonAttributes: orderentity.TableCommonAttributes{
 			Name:        t.Name,
 			IsAvailable: t.IsAvailable,
 			IsActive:    t.IsActive,

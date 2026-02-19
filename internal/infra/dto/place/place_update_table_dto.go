@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 var (
@@ -40,10 +40,10 @@ func (o *PlaceUpdateTableDTO) validate() error {
 	return nil
 }
 
-func (o *PlaceUpdateTableDTO) ToDomain() (placeToTables *tableentity.PlaceToTables, err error) {
+func (o *PlaceUpdateTableDTO) ToDomain() (placeToTables *orderentity.PlaceToTables, err error) {
 	if err := o.validate(); err != nil {
 		return nil, err
 	}
 
-	return tableentity.NewPlaceToTable(o.PlaceID, o.TableID, o.Column, o.Row), nil
+	return orderentity.NewPlaceToTable(o.PlaceID, o.TableID, o.Column, o.Row), nil
 }

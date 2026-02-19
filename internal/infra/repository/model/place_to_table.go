@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/google/uuid"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 type PlaceToTables struct {
@@ -14,7 +14,7 @@ type PlaceToTables struct {
 	Row     int       `bun:"column:row,notnull"`
 }
 
-func (p *PlaceToTables) FromDomain(placeToTables *tableentity.PlaceToTables) {
+func (p *PlaceToTables) FromDomain(placeToTables *orderentity.PlaceToTables) {
 	if placeToTables == nil {
 		return
 	}
@@ -28,11 +28,11 @@ func (p *PlaceToTables) FromDomain(placeToTables *tableentity.PlaceToTables) {
 	}
 }
 
-func (p *PlaceToTables) ToDomain() *tableentity.PlaceToTables {
+func (p *PlaceToTables) ToDomain() *orderentity.PlaceToTables {
 	if p == nil {
 		return nil
 	}
-	return &tableentity.PlaceToTables{
+	return &orderentity.PlaceToTables{
 		PlaceID: p.PlaceID,
 		Place:   p.Place.ToDomain(),
 		TableID: p.TableID,

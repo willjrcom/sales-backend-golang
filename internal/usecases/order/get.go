@@ -7,6 +7,7 @@ import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
+	ordertabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_table"
 )
 
 func (s *OrderService) GetOrderById(ctx context.Context, dto *entitydto.IDRequest) (*orderdto.OrderDTO, error) {
@@ -21,8 +22,8 @@ func (s *OrderService) GetOrderById(ctx context.Context, dto *entitydto.IDReques
 	}
 }
 
-func (s *OrderService) GetOrdersDeliveryByClientId(ctx context.Context, dto *entitydto.IDRequest) ([]orderdto.OrderDTO, error) {
-	if deliveryModels, err := s.rdo.GetDeliveriesByClientId(ctx, dto.ID.String()); err != nil {
+func (s *OrderService) GetOrderIDFromOrderDeliveriesByClientId(ctx context.Context, dto *entitydto.IDRequest) ([]orderdto.OrderDTO, error) {
+	if deliveryModels, err := s.rdo.GetOrderIDFromOrderDeliveriesByClientId(ctx, dto.ID.String()); err != nil {
 		return nil, err
 	} else {
 		orders := []orderdto.OrderDTO{}
@@ -42,8 +43,8 @@ func (s *OrderService) GetOrdersDeliveryByClientId(ctx context.Context, dto *ent
 	}
 }
 
-func (s *OrderService) GetOrdersTableByTableId(ctx context.Context, dto *entitydto.IDRequest) ([]orderdto.OrderDTO, error) {
-	if tableModels, err := s.st.rto.GetPendingOrderTablesByTableId(ctx, dto.ID.String()); err != nil {
+func (s *OrderService) GetOrdersTableByTableId(ctx context.Context, dto *ordertabledto.OrderTableContactInput) ([]orderdto.OrderDTO, error) {
+	if tableModels, err := s.st.rto.GetOrderTablesByTableId(ctx, dto.TableID.String(), dto.Contact); err != nil {
 		return nil, err
 	} else {
 		orders := []orderdto.OrderDTO{}
@@ -112,7 +113,7 @@ func (s *OrderService) GetAllOrdersWithDelivery(ctx context.Context, page, perPa
 }
 
 func (s *OrderService) GetOrdersPickupByContact(ctx context.Context, contact string) ([]orderdto.OrderDTO, error) {
-	if pickups, err := s.sp.GetPickupsByContact(ctx, contact); err != nil {
+	if pickups, err := s.sp.GetOrderIDFromOrderPickupsByContact(ctx, contact); err != nil {
 		return nil, err
 	} else {
 		orders := []orderdto.OrderDTO{}

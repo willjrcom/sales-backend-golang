@@ -1,8 +1,7 @@
-package tableentity
+package orderentity
 
 import (
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 type Table struct {
@@ -14,7 +13,7 @@ type TableCommonAttributes struct {
 	Name        string
 	IsAvailable bool
 	IsActive    bool
-	Orders      []orderentity.OrderTable
+	Orders      []OrderTable
 }
 
 func (t *Table) LockTable() {

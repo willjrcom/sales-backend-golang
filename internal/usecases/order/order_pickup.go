@@ -25,7 +25,7 @@ type ICreatePickupService interface {
 
 type IGetPickupService interface {
 	GetPickupById(ctx context.Context, dto *entitydto.IDRequest) (*orderpickupdto.OrderPickupDTO, error)
-	GetPickupsByContact(ctx context.Context, contact string) ([]orderpickupdto.OrderPickupDTO, error)
+	GetOrderIDFromOrderPickupsByContact(ctx context.Context, contact string) ([]orderpickupdto.OrderPickupDTO, error)
 	GetAllPickups(ctx context.Context) ([]orderpickupdto.OrderPickupDTO, error)
 }
 
@@ -188,8 +188,8 @@ func (s *OrderPickupService) UpdateName(ctx context.Context, dtoID *entitydto.ID
 	return nil
 }
 
-func (s *OrderPickupService) GetPickupsByContact(ctx context.Context, contact string) ([]orderpickupdto.OrderPickupDTO, error) {
-	if pickupModels, err := s.rp.GetPickupsByContact(ctx, contact); err != nil {
+func (s *OrderPickupService) GetOrderIDFromOrderPickupsByContact(ctx context.Context, contact string) ([]orderpickupdto.OrderPickupDTO, error) {
+	if pickupModels, err := s.rp.GetOrderIDFromOrderPickupsByContact(ctx, contact); err != nil {
 		return nil, err
 	} else {
 

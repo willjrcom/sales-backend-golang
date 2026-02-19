@@ -18,6 +18,7 @@ type CompanyUpdateDTO struct {
 	Address      *addressdto.AddressUpdateDTO            `json:"address"`
 	Preferences  companyentity.Preferences               `json:"preferences"`
 	Categories   []companycategorydto.CompanyCategoryDTO `json:"categories"`
+	ImagePath    *string                                 `json:"image_path"`
 
 	MonthlyPaymentDueDay *int `json:"monthly_payment_due_day,omitempty"`
 }
@@ -48,6 +49,9 @@ func (c *CompanyUpdateDTO) UpdateDomain(company *companyentity.Company) (err err
 	}
 	if c.Preferences != nil {
 		company.Preferences = c.Preferences
+	}
+	if c.ImagePath != nil {
+		company.ImagePath = *c.ImagePath
 	}
 
 	if c.Address != nil {

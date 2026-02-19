@@ -76,12 +76,6 @@ func (s *OrderTableService) CreateOrderTable(ctx context.Context, dto *ordertabl
 	table := tableModel.ToDomain()
 	table.LockTable()
 
-	if orderTable.Name == "" {
-		orderTable.Name = table.Name
-	} else {
-		orderTable.Name = table.Name + " - " + orderTable.Name
-	}
-
 	orderTable.UpdatePreferences(company.Preferences)
 
 	orderTableModel := &model.OrderTable{}
@@ -156,7 +150,6 @@ func (s *OrderTableService) ChangeTable(ctx context.Context, dtoOrderTable *enti
 	}
 
 	table := tableModel.ToDomain()
-	orderTable.Name = newTableModel.Name
 
 	tablesOrdersTogether, err := s.rto.GetPendingOrderTablesByTableId(ctx, orderTable.TableID.String())
 	if err != nil {

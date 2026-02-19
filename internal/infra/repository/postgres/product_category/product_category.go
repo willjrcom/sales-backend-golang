@@ -479,7 +479,7 @@ func (r *ProductCategoryRepositoryBun) GetAllCategoriesMap(ctx context.Context, 
 
 	query := tx.NewSelect().
 		Model(&categories).
-		Column("id", "name").
+		Column("id", "name", "image_path").
 		Where("is_active = ?", isActive)
 
 	if isAdditional != nil {

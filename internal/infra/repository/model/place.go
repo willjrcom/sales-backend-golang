@@ -2,7 +2,7 @@ package model
 
 import (
 	"github.com/uptrace/bun"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
@@ -20,7 +20,7 @@ type PlaceCommonAttributes struct {
 	Tables      []PlaceToTables `bun:"rel:has-many,join:id=place_id"`
 }
 
-func (p *Place) FromDomain(place *tableentity.Place) {
+func (p *Place) FromDomain(place *orderentity.Place) {
 	if place == nil {
 		return
 	}
@@ -42,18 +42,18 @@ func (p *Place) FromDomain(place *tableentity.Place) {
 	}
 }
 
-func (p *Place) ToDomain() *tableentity.Place {
+func (p *Place) ToDomain() *orderentity.Place {
 	if p == nil {
 		return nil
 	}
-	place := &tableentity.Place{
+	place := &orderentity.Place{
 		Entity: p.Entity.ToDomain(),
-		PlaceCommonAttributes: tableentity.PlaceCommonAttributes{
+		PlaceCommonAttributes: orderentity.PlaceCommonAttributes{
 			Name:        p.Name,
 			ImagePath:   p.ImagePath,
 			IsAvailable: p.IsAvailable,
 			IsActive:    p.IsActive,
-			Tables:      []tableentity.PlaceToTables{},
+			Tables:      []orderentity.PlaceToTables{},
 		},
 	}
 

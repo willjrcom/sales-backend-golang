@@ -8,5 +8,6 @@ type OrderTableRepository interface {
 	DeleteOrderTable(ctx context.Context, id string) error
 	GetOrderTableById(ctx context.Context, id string) (*OrderTable, error)
 	GetPendingOrderTablesByTableId(ctx context.Context, id string) ([]OrderTable, error)
+	GetOrderTablesByTableId(ctx context.Context, id string, contact string) ([]OrderTable, error)
 	GetAllOrderTables(ctx context.Context) ([]OrderTable, error)
 }

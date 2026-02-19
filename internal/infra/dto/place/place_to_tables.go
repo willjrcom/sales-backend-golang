@@ -2,7 +2,7 @@ package placedto
 
 import (
 	"github.com/google/uuid"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	tabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/table"
 )
 
@@ -15,7 +15,7 @@ type PlaceToTablesDTO struct {
 	Row     int                `json:"row"`
 }
 
-func (p *PlaceToTablesDTO) FromDomain(placeToTables *tableentity.PlaceToTables) {
+func (p *PlaceToTablesDTO) FromDomain(placeToTables *orderentity.PlaceToTables) {
 	if placeToTables == nil {
 		return
 	}

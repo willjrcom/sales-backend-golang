@@ -121,6 +121,37 @@ func (r *OrderTableRepositoryBun) GetPendingOrderTablesByTableId(ctx context.Con
 	return tables, err
 }
 
+func (r *OrderTableRepositoryBun) GetOrderTablesByTableId(ctx context.Context, tableId string, contact string) (tables []model.OrderTable, err error) {
+	tables = []model.OrderTable{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	query := tx.NewSelect().Model(&tables).
+		Where("table_id = ?", tableId).
+		Where("status != ?", orderentity.OrderTableStatusClosed).
+		Where("status != ?", orderentity.OrderTableStatusCancelled).
+		Column("order_id")
+
+	if contact != "" {
+		query = query.Where("contact = ?", contact)
+	}
+
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return tables, err
+}
+
 func (r *OrderTableRepositoryBun) GetAllOrderTables(ctx context.Context) (tables []model.OrderTable, err error) {
 	tables = make([]model.OrderTable, 0)
 

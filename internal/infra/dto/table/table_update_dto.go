@@ -1,8 +1,6 @@
 package tabledto
 
-import (
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
-)
+import orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 
 type TableUpdateDTO struct {
 	Name        *string `json:"name"`
@@ -10,7 +8,7 @@ type TableUpdateDTO struct {
 	IsActive    *bool   `json:"is_active"`
 }
 
-func (c *TableUpdateDTO) UpdateDomain(table *tableentity.Table) (err error) {
+func (c *TableUpdateDTO) UpdateDomain(table *orderentity.Table) (err error) {
 	if c.Name != nil {
 		table.Name = *c.Name
 	}

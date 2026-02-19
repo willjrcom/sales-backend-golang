@@ -2,7 +2,7 @@ package placedto
 
 import (
 	"github.com/google/uuid"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 type PlaceDTO struct {
@@ -18,7 +18,7 @@ type PlaceCommonAttributes struct {
 	Tables      []PlaceToTablesDTO `json:"tables"`
 }
 
-func (p *PlaceDTO) FromDomain(place *tableentity.Place) {
+func (p *PlaceDTO) FromDomain(place *orderentity.Place) {
 	if place == nil {
 		return
 	}

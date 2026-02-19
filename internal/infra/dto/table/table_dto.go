@@ -2,7 +2,7 @@ package tabledto
 
 import (
 	"github.com/google/uuid"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 type TableDTO struct {
@@ -12,7 +12,7 @@ type TableDTO struct {
 	IsActive    bool      `json:"is_active"`
 }
 
-func (c *TableDTO) FromDomain(table *tableentity.Table) (err error) {
+func (c *TableDTO) FromDomain(table *orderentity.Table) (err error) {
 	if table == nil {
 		return
 	}

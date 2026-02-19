@@ -10,6 +10,7 @@ import (
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
+	ordertabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_table"
 	headerservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
 	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
@@ -33,7 +34,7 @@ func NewHandlerOrder(orderService *orderusecases.OrderService) *handler.Handler 
 		c.Get("/all/pickup/ready", h.GetAllOrdersWithPickupReady)
 		c.Get("/all/pickup/delivered", h.GetAllOrdersWithPickupDelivered)
 		c.Get("/all/pickup/by-contact/{contact}", h.GetAllOrdersWithPickupByContact)
-		c.Get("/all/delivery/by-client/{id}", h.handlerGetAllOrdersByClient)
+		c.Get("/all/delivery/by-client/{id}", h.handlerGetAllOrdersByClientID)
 		c.Get("/all/table/by-table/{id}", h.handlerGetAllOrdersByTable)
 		c.Put("/update/{id}/observation", h.handlerUpdateObservation)
 		c.Put("/update/{id}/payment", h.handlerUpdatePaymentMethod)
@@ -110,7 +111,7 @@ func (h *handlerOrderImpl) GetAllOrdersWithPickupReady(w http.ResponseWriter, r 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
 }
 
-func (h *handlerOrderImpl) handlerGetAllOrdersByClient(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderImpl) handlerGetAllOrdersByClientID(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -122,7 +123,7 @@ func (h *handlerOrderImpl) handlerGetAllOrdersByClient(w http.ResponseWriter, r 
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	orders, err := h.s.GetOrdersDeliveryByClientId(ctx, dtoId)
+	orders, err := h.s.GetOrderIDFromOrderDeliveriesByClientId(ctx, dtoId)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -134,16 +135,21 @@ func (h *handlerOrderImpl) handlerGetAllOrdersByClient(w http.ResponseWriter, r 
 func (h *handlerOrderImpl) handlerGetAllOrdersByTable(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	// Parse query parameters
 	id := chi.URLParam(r, "id")
+	contact := r.URL.Query().Get("contact")
 
 	if id == "" {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
 		return
 	}
 
-	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+	dtoContact := &ordertabledto.OrderTableContactInput{
+		TableID: uuid.MustParse(id),
+		Contact: contact,
+	}
 
-	orders, err := h.s.GetOrdersTableByTableId(ctx, dtoId)
+	orders, err := h.s.GetOrdersTableByTableId(ctx, dtoContact)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

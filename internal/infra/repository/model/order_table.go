@@ -24,6 +24,7 @@ type OrderTableCommonAttributes struct {
 	TaxRate     decimal.Decimal `bun:"tax_rate,type:decimal(10,2),notnull"`
 	OrderID     uuid.UUID       `bun:"column:order_id,type:uuid,notnull"`
 	TableID     uuid.UUID       `bun:"column:table_id,type:uuid,notnull"`
+	Table       *Table          `bun:"rel:belongs-to,join=table_id=id"`
 	OrderNumber int             `bun:"order_number,notnull"`
 }
 
@@ -54,6 +55,9 @@ func (t *OrderTable) FromDomain(table *orderentity.OrderTable) {
 			CancelledAt: table.CancelledAt,
 		},
 	}
+
+	t.Table = &Table{}
+	t.Table.FromDomain(table.Table)
 }
 
 func (t *OrderTable) ToDomain() *orderentity.OrderTable {
@@ -69,6 +73,7 @@ func (t *OrderTable) ToDomain() *orderentity.OrderTable {
 			TaxRate:     t.TaxRate,
 			OrderID:     t.OrderID,
 			TableID:     t.TableID,
+			Table:       t.Table.ToDomain(),
 			OrderNumber: t.OrderNumber,
 		},
 		OrderTableTimeLogs: orderentity.OrderTableTimeLogs{

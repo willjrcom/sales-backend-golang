@@ -227,8 +227,9 @@ func (s *Service) GetAllCategoriesMap(ctx context.Context, isActive bool, isAddi
 		dtos := make([]productcategorydto.CategoryMapDTO, 0)
 		for _, model := range categoryModels {
 			dtos = append(dtos, productcategorydto.CategoryMapDTO{
-				ID:   model.ID,
-				Name: model.Name,
+				ID:        model.ID,
+				Name:      model.Name,
+				ImagePath: model.ImagePath,
 			})
 		}
 		return dtos, nil

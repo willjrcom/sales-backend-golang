@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	tabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/table"
 )
 
 type OrderTableDTO struct {
@@ -22,6 +23,7 @@ type OrderTableCommonAttributes struct {
 	TaxRate     decimal.Decimal              `json:"tax_rate"`
 	OrderID     uuid.UUID                    `json:"order_id"`
 	TableID     uuid.UUID                    `json:"table_id"`
+	Table       tabledto.TableDTO            `json:"table"`
 	OrderNumber int                          `json:"order_number"`
 }
 
@@ -50,5 +52,10 @@ func (t *OrderTableDTO) FromDomain(table *orderentity.OrderTable) {
 			PendingAt: table.PendingAt,
 			ClosedAt:  table.ClosedAt,
 		},
+	}
+
+	if table.Table != nil {
+		t.Table = tabledto.TableDTO{}
+		t.Table.FromDomain(table.Table)
 	}
 }

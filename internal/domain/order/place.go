@@ -1,4 +1,4 @@
-package tableentity
+package orderentity
 
 import (
 	"github.com/google/uuid"

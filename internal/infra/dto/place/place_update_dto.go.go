@@ -1,8 +1,6 @@
 package placedto
 
-import (
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
-)
+import orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 
 type PlaceUpdateDTO struct {
 	Name        *string `json:"name"`
@@ -11,7 +9,7 @@ type PlaceUpdateDTO struct {
 	IsActive    *bool   `json:"is_active"`
 }
 
-func (c *PlaceUpdateDTO) UpdateDomain(place *tableentity.Place) (err error) {
+func (c *PlaceUpdateDTO) UpdateDomain(place *orderentity.Place) (err error) {
 	if c.Name != nil {
 		place.Name = *c.Name
 	}

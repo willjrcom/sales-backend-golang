@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
-	tableentity "github.com/willjrcom/sales-backend-go/internal/domain/table"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 )
 
 var (
@@ -25,7 +25,7 @@ func (o *TableCreateDTO) validate() error {
 	return nil
 }
 
-func (o *TableCreateDTO) ToDomain() (*tableentity.Table, error) {
+func (o *TableCreateDTO) ToDomain() (*orderentity.Table, error) {
 	if err := o.validate(); err != nil {
 		return nil, err
 	}
@@ -35,13 +35,13 @@ func (o *TableCreateDTO) ToDomain() (*tableentity.Table, error) {
 		isActive = *o.IsActive
 	}
 
-	tableCommonAttributes := tableentity.TableCommonAttributes{
+	tableCommonAttributes := orderentity.TableCommonAttributes{
 		Name:        o.Name,
 		IsAvailable: true,
 		IsActive:    isActive,
 	}
 
-	table := &tableentity.Table{
+	table := &orderentity.Table{
 		Entity:                entity.NewEntity(),
 		TableCommonAttributes: tableCommonAttributes,
 	}

@@ -58,7 +58,7 @@ func (r *OrderDeliveryRepositoryLocal) GetDeliveriesByIds(ctx context.Context, i
 	return out, nil
 }
 
-func (r *OrderDeliveryRepositoryLocal) GetDeliveriesByClientId(ctx context.Context, clientID string) ([]model.OrderDelivery, error) {
+func (r *OrderDeliveryRepositoryLocal) GetOrderIDFromOrderDeliveriesByClientId(ctx context.Context, clientID string) ([]model.OrderDelivery, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	out := []model.OrderDelivery{}

@@ -46,7 +46,7 @@ func (r *OrderPickupRepositoryLocal) GetPickupById(ctx context.Context, id strin
 	return nil, nil
 }
 
-func (r *OrderPickupRepositoryLocal) GetPickupsByContact(ctx context.Context, contact string) ([]model.OrderPickup, error) {
+func (r *OrderPickupRepositoryLocal) GetOrderIDFromOrderPickupsByContact(ctx context.Context, contact string) ([]model.OrderPickup, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	var out []model.OrderPickup

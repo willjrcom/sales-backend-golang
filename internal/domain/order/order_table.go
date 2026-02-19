@@ -22,6 +22,7 @@ type OrderTableCommonAttributes struct {
 	TaxRate     decimal.Decimal
 	OrderID     uuid.UUID
 	TableID     uuid.UUID
+	Table       *Table
 	OrderNumber int
 }
 
