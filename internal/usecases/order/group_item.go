@@ -74,7 +74,7 @@ func (s *GroupItemService) DeleteGroupItem(ctx context.Context, dto *entitydto.I
 	return nil
 }
 
-func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto.IDRequest, dtoComplement *entitydto.IDRequest) (err error) {
+func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto.IDRequest, dtoComplement *entitydto.IDRequest, dtoVariationId *entitydto.IDRequest) (err error) {
 	groupItemModel, err := s.r.GetGroupByID(ctx, dto.ID.String(), true)
 
 	if err != nil {
@@ -96,10 +96,20 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 	productComplement := productComplementModel.ToDomain()
 
 	var variation *productentity.ProductVariation
-	for _, v := range productComplement.Variations {
-		if v.Size != nil && v.Size.Name == groupItem.Size {
-			variation = &v
-			break
+	if dtoVariationId != nil {
+		for _, v := range productComplement.Variations {
+			if v.ID == dtoVariationId.ID {
+				variation = &v
+				break
+			}
+		}
+	} else {
+		// Fallback for backwards compatibility if no variation passed
+		for _, v := range productComplement.Variations {
+			if v.Size != nil && v.Size.Name == groupItem.Size {
+				variation = &v
+				break
+			}
 		}
 	}
 

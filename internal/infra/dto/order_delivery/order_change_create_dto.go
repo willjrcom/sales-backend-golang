@@ -26,10 +26,6 @@ func (u *OrderChangeCreateDTO) validate() error {
 }
 
 func (u *OrderChangeCreateDTO) validatePayMethod() error {
-	if u.Change.IsZero() {
-		return ErrChangeInvalid
-	}
-
 	for _, method := range orderentity.GetAllPayMethod() {
 		if method == u.PaymentMethod {
 			return nil

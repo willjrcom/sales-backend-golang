@@ -211,9 +211,17 @@ func (h *handlerGroupItemImpl) handlerAddComplementItem(w http.ResponseWriter, r
 		return
 	}
 
-	dtoIdComplement := &entitydto.IDRequest{ID: uuid.MustParse(idComplement)}
+	variationId := r.URL.Query().Get("variation_id")
 
-	if err := h.s.AddComplementItem(ctx, dtoId, dtoIdComplement); err != nil {
+	if variationId == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("variation_id is required"))
+		return
+	}
+
+	dtoIdComplement := &entitydto.IDRequest{ID: uuid.MustParse(idComplement)}
+	dtoVariationId := &entitydto.IDRequest{ID: uuid.MustParse(variationId)}
+
+	if err := h.s.AddComplementItem(ctx, dtoId, dtoIdComplement, dtoVariationId); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
