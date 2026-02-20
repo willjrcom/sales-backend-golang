@@ -14,10 +14,10 @@ type Size struct {
 }
 
 type SizeCommonAttributes struct {
-	Name       string    `bun:"name"`
-	IsActive   bool      `bun:"is_active"`
-	CategoryID uuid.UUID `bun:"column:category_id,type:uuid,notnull"`
-	Products   []Product `bun:"rel:has-many,join:id=size_id"`
+	Name       string              `bun:"name"`
+	IsActive   bool                `bun:"is_active"`
+	CategoryID uuid.UUID           `bun:"column:category_id,type:uuid,notnull"`
+	Variations []*ProductVariation `bun:"rel:has-many,join:id=size_id"`
 }
 
 func (s *Size) FromDomain(size *productentity.Size) {
@@ -33,10 +33,10 @@ func (s *Size) FromDomain(size *productentity.Size) {
 		},
 	}
 
-	for _, product := range size.Products {
-		p := Product{}
-		p.FromDomain(&product)
-		s.Products = append(s.Products, p)
+	for _, variation := range size.Variations {
+		v := &ProductVariation{}
+		v.FromDomain(variation)
+		s.Variations = append(s.Variations, v)
 	}
 }
 
@@ -53,8 +53,8 @@ func (s *Size) ToDomain() *productentity.Size {
 		},
 	}
 
-	for _, product := range s.Products {
-		size.Products = append(size.Products, *product.ToDomain())
+	for _, variation := range s.Variations {
+		size.Variations = append(size.Variations, variation.ToDomain())
 	}
 
 	return size

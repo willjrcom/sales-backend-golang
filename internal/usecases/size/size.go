@@ -92,7 +92,7 @@ func (s *Service) DeleteSize(ctx context.Context, dto *entitydto.IDRequest) erro
 		return err
 	}
 
-	if len(size.Products) > 0 {
+	if len(size.Variations) > 0 {
 		return ErrProductsExists
 	}
 

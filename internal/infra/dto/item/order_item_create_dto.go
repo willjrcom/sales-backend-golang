@@ -17,6 +17,7 @@ var (
 type OrderItemCreateDTO struct {
 	OrderID     uuid.UUID  `json:"order_id"`
 	ProductID   uuid.UUID  `json:"product_id"`
+	VariationID uuid.UUID  `json:"variation_id"`
 	Quantity    float64    `json:"quantity"`
 	GroupItemID *uuid.UUID `json:"group_item_id"`
 	Observation string     `json:"observation"`
@@ -29,7 +30,11 @@ func (a *OrderItemCreateDTO) Validate() error {
 	}
 
 	if a.ProductID == uuid.Nil {
-		return errors.New("item id is required")
+		return errors.New("product id is required")
+	}
+
+	if a.VariationID == uuid.Nil {
+		return errors.New("variation id is required")
 	}
 
 	if a.Quantity == 0 {
@@ -39,7 +44,7 @@ func (a *OrderItemCreateDTO) Validate() error {
 	return nil
 }
 
-func (a *OrderItemCreateDTO) validateInternal(product *productentity.Product, groupItem *orderentity.GroupItem) error {
+func (a *OrderItemCreateDTO) validateInternal(product *productentity.Product, variation *productentity.ProductVariation, groupItem *orderentity.GroupItem) error {
 	if groupItem.Status != orderentity.StatusGroupStaging {
 		return ErrGroupItemNotStaging
 	}
@@ -48,7 +53,7 @@ func (a *OrderItemCreateDTO) validateInternal(product *productentity.Product, gr
 		return ErrGroupItemCategoryInvalid
 	}
 
-	if groupItem.Size != product.Size.Name {
+	if groupItem.Size != variation.Size.Name {
 		return ErrGroupItemSizeInvalid
 	}
 
@@ -61,12 +66,12 @@ func (a *OrderItemCreateDTO) validateInternal(product *productentity.Product, gr
 	return nil
 }
 
-func (a *OrderItemCreateDTO) ToDomain(product *productentity.Product, groupItem *orderentity.GroupItem, quantity float64) (item *orderentity.Item, err error) {
-	if err = a.validateInternal(product, groupItem); err != nil {
+func (a *OrderItemCreateDTO) ToDomain(product *productentity.Product, variation *productentity.ProductVariation, groupItem *orderentity.GroupItem, quantity float64) (item *orderentity.Item, err error) {
+	if err = a.validateInternal(product, variation, groupItem); err != nil {
 		return
 	}
 
-	item = orderentity.NewItem(product.Name, product.Price, quantity, product.Size.Name, product.ID, product.CategoryID, a.Flavor)
+	item = orderentity.NewItem(product.Name, variation.Price, quantity, variation.Size.Name, product.ID, product.CategoryID, a.Flavor)
 	item.AddSizeToName()
 	item.GroupItemID = *a.GroupItemID
 	item.Observation = a.Observation

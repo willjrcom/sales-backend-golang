@@ -3,6 +3,7 @@ package productrepositorybun
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -30,6 +31,13 @@ func (r *ProductRepositoryBun) CreateProduct(ctx context.Context, p *model.Produ
 		return err
 	}
 
+	for _, v := range p.Variations {
+		v.ProductID = p.ID
+		if _, err := tx.NewInsert().Model(v).Exec(ctx); err != nil {
+			return err
+		}
+	}
+
 	if err := tx.Commit(); err != nil {
 		return err
 	}
@@ -49,6 +57,73 @@ func (r *ProductRepositoryBun) UpdateProduct(ctx context.Context, p *model.Produ
 
 	if _, err := tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
 		return err
+	}
+
+	// Fetch existing variations
+	var existingVariations []model.ProductVariation
+	if err := tx.NewSelect().Model(&existingVariations).Where("product_id = ?", p.ID).Scan(ctx); err != nil {
+		return err
+	}
+
+	// Map existing variations by SizeID
+	existingMap := make(map[uuid.UUID]model.ProductVariation)
+	for _, v := range existingVariations {
+		existingMap[v.SizeID] = v
+	}
+
+	// Lists to handle db operations
+	var toInsert []*model.ProductVariation
+	var toUpdate []*model.ProductVariation
+	processedSizeIDs := make(map[uuid.UUID]bool)
+
+	for _, v := range p.Variations {
+		v.ProductID = p.ID
+		processedSizeIDs[v.SizeID] = true
+
+		if existing, ok := existingMap[v.SizeID]; ok {
+			// Update existing variation
+			v.ID = existing.ID
+			v.CreatedAt = existing.CreatedAt
+			v.DeletedAt = nil // Ensure it's not deleted
+			toUpdate = append(toUpdate, v)
+		} else {
+			// Insert new variation
+			if v.ID == uuid.Nil {
+				v.ID = uuid.New()
+			}
+			toInsert = append(toInsert, v)
+		}
+	}
+
+	// Delete variations that are not in the new list
+	var idsToDelete []uuid.UUID
+	for _, v := range existingVariations {
+		if !processedSizeIDs[v.SizeID] {
+			idsToDelete = append(idsToDelete, v.ID)
+		}
+	}
+
+	if len(idsToDelete) > 0 {
+		if _, err := tx.NewDelete().Model((*model.ProductVariation)(nil)).
+			Where("id IN (?)", bun.In(idsToDelete)).
+			Exec(ctx); err != nil {
+			return err
+		}
+	}
+
+	if len(toInsert) > 0 {
+		if _, err := tx.NewInsert().Model(&toInsert).Exec(ctx); err != nil {
+			return err
+		}
+	}
+
+	for _, v := range toUpdate {
+		if _, err := tx.NewUpdate().Model(v).
+			Column("price", "cost", "is_available", "deleted_at").
+			WherePK().
+			Exec(ctx); err != nil {
+			return err
+		}
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -89,7 +164,7 @@ func (r *ProductRepositoryBun) GetProductById(ctx context.Context, id string) (*
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(product).Where("product.id = ?", id).Relation("Category").Relation("Size").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(product).Where("product.id = ?", id).Relation("Category").Relation("Variations.Size").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -110,7 +185,7 @@ func (r *ProductRepositoryBun) GetProductBySKU(ctx context.Context, sku string) 
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(product).Where("product.sku = ?", sku).Relation("Category").Relation("Size").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(product).Where("product.sku = ?", sku).Relation("Category").Relation("Variations.Size").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -135,7 +210,7 @@ func (r *ProductRepositoryBun) GetAllProducts(ctx context.Context, page, perPage
 	query := tx.NewSelect().
 		Model(&products).
 		Relation("Category").
-		Relation("Size").
+		Relation("Variations.Size").
 		Where("product.is_active = ?", isActive).
 		Order("product.name ASC").
 		Limit(perPage).
@@ -178,12 +253,11 @@ func (r *ProductRepositoryBun) GetDefaultProducts(ctx context.Context, page, per
 	if err := tx.NewSelect().
 		Model(&products).
 		Relation("Category").
-		Relation("Size").
+		Relation("Variations.Size").
 		Join("JOIN product_categories AS cat ON cat.id = product.category_id").
 		Where("product.is_active = ?", isActive).
 		Where("cat.is_additional = ?", false).
 		Where("cat.is_complement = ?", false).
-		Where("size.is_active = ?", true).
 		Order("product.name ASC").
 		Limit(perPage).
 		Offset(page * perPage).
@@ -222,8 +296,8 @@ func (r *ProductRepositoryBun) GetAllProductsMap(ctx context.Context, isActive b
 
 	query := tx.NewSelect().
 		Model(&products).
-		Relation("Size").
-		Column("product.id", "product.name", "product.size_id").
+		Relation("Variations.Size").
+		Column("product.id", "product.name").
 		Where("product.is_active = ?", isActive)
 
 	if categoryID != "" {

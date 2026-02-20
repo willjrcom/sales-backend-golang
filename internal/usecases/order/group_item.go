@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -86,13 +87,23 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 		return ErrComplementItemAlreadyAdded
 	}
 
-	productComplement, err := s.rp.GetProductById(ctx, dtoComplement.ID.String())
+	productComplementModel, err := s.rp.GetProductById(ctx, dtoComplement.ID.String())
 
 	if err != nil {
 		return err
 	}
 
-	if groupItem.Size != productComplement.Size.Name {
+	productComplement := productComplementModel.ToDomain()
+
+	var variation *productentity.ProductVariation
+	for _, v := range productComplement.Variations {
+		if v.Size != nil && v.Size.Name == groupItem.Size {
+			variation = &v
+			break
+		}
+	}
+
+	if variation == nil {
 		return ErrSizeMustBeTheSame
 	}
 
@@ -109,7 +120,7 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 		return errors.New("complement category does not belong to this category")
 	}
 
-	itemComplement := orderentity.NewItem(productComplement.Name, productComplement.Price, groupItem.Quantity, groupItem.Size, productComplement.ID, productComplement.CategoryID, nil)
+	itemComplement := orderentity.NewItem(productComplement.Name, variation.Price, groupItem.Quantity, groupItem.Size, productComplement.ID, productComplement.CategoryID, nil)
 
 	itemComplementModel := &model.Item{}
 	itemComplementModel.FromDomain(itemComplement)

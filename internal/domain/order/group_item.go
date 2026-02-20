@@ -129,13 +129,13 @@ func (i *GroupItem) CalculateTotalPrice() {
 	if i.ComplementItem != nil {
 		i.ComplementItem.Quantity = qtdItems
 		// price * quantity
-		compTotal := i.ComplementItem.TotalPrice.Mul(decimal.NewFromFloat(qtdItems))
+		compTotal := i.ComplementItem.Price.Mul(decimal.NewFromFloat(qtdItems)).Round(2)
 		i.ComplementItem.TotalPrice = compTotal
 		totalPrice = totalPrice.Add(compTotal)
 	}
 
 	i.GroupDetails.Quantity = qtdItems
-	i.GroupDetails.TotalPrice = totalPrice
+	i.GroupDetails.TotalPrice = totalPrice.Round(2)
 }
 
 func (i *GroupItem) CanAddItems() (bool, error) {

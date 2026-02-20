@@ -20,7 +20,7 @@ type SizeCommonAttributes struct {
 	Name       string
 	IsActive   bool
 	CategoryID uuid.UUID
-	Products   []Product
+	Variations []ProductVariation
 }
 
 func NewSize(sizeCommonAttributes SizeCommonAttributes) *Size {

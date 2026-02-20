@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
@@ -17,17 +16,14 @@ var (
 )
 
 type ProductCreateDTO struct {
-	SKU         string          `json:"sku"`
-	Name        string          `json:"name"`
-	Flavors     []string        `json:"flavors"`
-	Description string          `json:"description"`
-	Price       decimal.Decimal `json:"price"`
-	Cost        decimal.Decimal `json:"cost"`
-	IsAvailable bool            `json:"is_available"`
-	IsActive    *bool           `json:"is_active"`
-	CategoryID  *uuid.UUID      `json:"category_id"`
-	SizeID      *uuid.UUID      `json:"size_id"`
-	ImagePath   string          `json:"image_path"`
+	SKU         string                      `json:"sku"`
+	Name        string                      `json:"name"`
+	Flavors     []string                    `json:"flavors"`
+	Description string                      `json:"description"`
+	IsActive    *bool                       `json:"is_active"`
+	CategoryID  *uuid.UUID                  `json:"category_id"`
+	ImagePath   string                      `json:"image_path"`
+	Variations  []ProductVariationCreateDTO `json:"variations"`
 }
 
 func (p *ProductCreateDTO) validate() error {
@@ -37,14 +33,21 @@ func (p *ProductCreateDTO) validate() error {
 	if p.Name == "" {
 		return ErrNameRequired
 	}
-	if p.Price.LessThan(p.Cost) {
-		return ErrCostGreaterThanPrice
-	}
 	if p.CategoryID == nil || len(p.CategoryID.String()) == 0 {
 		return ErrCategoryRequired
 	}
-	if p.SizeID == nil {
-		return ErrSizeRequired
+
+	if len(p.Variations) == 0 {
+		return errors.New("at least one variation is required")
+	}
+
+	for _, v := range p.Variations {
+		if v.Price.LessThan(v.Cost) {
+			return ErrCostGreaterThanPrice
+		}
+		if v.SizeID == uuid.Nil {
+			return ErrSizeRequired
+		}
 	}
 
 	return nil
@@ -70,14 +73,16 @@ func (p *ProductCreateDTO) ToDomain() (*productentity.Product, error) {
 		Name:        p.Name,
 		Flavors:     flavors,
 		Description: p.Description,
-		Price:       p.Price,
-		Cost:        p.Cost,
-		IsAvailable: p.IsAvailable,
 		IsActive:    isActive,
 		CategoryID:  *p.CategoryID,
-		SizeID:      *p.SizeID,
 		ImagePath:   &p.ImagePath,
 	}
 
-	return productentity.NewProduct(productCommonAttributes), nil
+	product := productentity.NewProduct(productCommonAttributes)
+
+	for _, v := range p.Variations {
+		product.AddVariation(v.ToDomain())
+	}
+
+	return product, nil
 }

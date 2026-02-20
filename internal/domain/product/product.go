@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
@@ -16,6 +15,7 @@ var (
 type Product struct {
 	entity.Entity
 	ProductCommonAttributes
+	Variations []ProductVariation
 }
 
 type ProductCommonAttributes struct {
@@ -24,14 +24,13 @@ type ProductCommonAttributes struct {
 	Flavors     []string
 	ImagePath   *string
 	Description string
-	Price       decimal.Decimal
-	Cost        decimal.Decimal
-	IsAvailable bool
 	IsActive    bool
 	CategoryID  uuid.UUID
 	Category    *ProductCategory
-	SizeID      uuid.UUID
-	Size        *Size
+}
+
+func (p *Product) AddVariation(variation ProductVariation) {
+	p.Variations = append(p.Variations, variation)
 }
 
 func NewProduct(productCommonAttributes ProductCommonAttributes) *Product {
@@ -42,19 +41,6 @@ func NewProduct(productCommonAttributes ProductCommonAttributes) *Product {
 	return &Product{
 		Entity:                  entity.NewEntity(),
 		ProductCommonAttributes: productCommonAttributes,
+		Variations:              []ProductVariation{},
 	}
-}
-
-func (p *Product) FindSizeInCategory() (bool, error) {
-	if p.Category == nil {
-		return false, ErrCategoryNotFound
-	}
-
-	for _, v := range p.Category.Sizes {
-		if v.ID == p.SizeID {
-			return true, nil
-		}
-	}
-
-	return false, errors.New("size not found")
 }

@@ -114,7 +114,7 @@ func (r *SizeRepositoryBun) GetSizeByIdWithProducts(ctx context.Context, id stri
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(size).Where("id = ?", id).Relation("Products").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(size).Where("id = ?", id).Relation("Variations").Scan(ctx); err != nil {
 		return nil, err
 	}
 

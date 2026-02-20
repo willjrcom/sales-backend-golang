@@ -24,7 +24,7 @@ type OrderTableCommonAttributes struct {
 	TaxRate     decimal.Decimal `bun:"tax_rate,type:decimal(10,2),notnull"`
 	OrderID     uuid.UUID       `bun:"column:order_id,type:uuid,notnull"`
 	TableID     uuid.UUID       `bun:"column:table_id,type:uuid,notnull"`
-	Table       *Table          `bun:"rel:belongs-to,join=table_id=id"`
+	Table       *Table          `bun:"rel:belongs-to,join:table_id=id"`
 	OrderNumber int             `bun:"order_number,notnull"`
 }
 

@@ -272,6 +272,8 @@ func (o *Order) CalculateTotalPrice() {
 		o.TotalPayable = o.TotalPayable.Add(*o.Delivery.DeliveryTax)
 	}
 
+	o.TotalPayable = o.TotalPayable.Round(2)
+
 	if o.TotalPaid.GreaterThan(o.TotalPayable) {
 		o.TotalChange = o.TotalPaid.Sub(o.TotalPayable)
 	} else {

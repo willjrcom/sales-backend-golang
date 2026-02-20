@@ -46,7 +46,7 @@ func (r *ProductCategoryRepositoryBun) GetComplementProducts(ctx context.Context
 		Model(&products).
 		Where("product.category_id IN (?)", bun.In(complementCategoryIDs)).
 		Where("product.is_active = ?", true).
-		Relation("Size").
+		Relation("Variations.Size").
 		Scan(ctx); err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ func (r *ProductCategoryRepositoryBun) GetAdditionalProducts(ctx context.Context
 		Model(&products).
 		Where("product.category_id IN (?)", bun.In(additionalCategoryIDs)).
 		Where("product.is_active = ?", true).
-		Relation("Size").
+		Relation("Variations.Size").
 		Scan(ctx); err != nil {
 		return nil, err
 	}
@@ -111,16 +111,15 @@ func (r *ProductCategoryRepositoryBun) GetDefaultProducts(ctx context.Context, c
 	query := tx.NewSelect().
 		Model(&products).
 		Join("JOIN product_categories AS cat ON cat.id = product.category_id").
-		Relation("Size").
+		Relation("Variations.Size").
 		Where("product.category_id = ?", categoryID).
 		Where("cat.is_additional = ?", false).
 		Where("cat.is_complement = ?", false).
-		Where("product.is_active = ?", true).
-		Where("size.is_active = ?", true)
+		Where("product.is_active = ?", true)
 
 	if isMap {
 		// Only select necessary columns for map format
-		query.Column("product.id", "product.name", "product.size_id")
+		query.Column("product.id", "product.name")
 	} else {
 		// Select all columns and relations for complete format
 		query.Relation("Category")

@@ -62,8 +62,20 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 
 	product := productModel.ToDomain()
 
-	if !product.IsAvailable {
-		return nil, errors.New("product not available")
+	var variation *productentity.ProductVariation
+	for _, v := range product.Variations {
+		if v.ID == dto.VariationID {
+			variation = &v
+			break
+		}
+	}
+
+	if variation == nil {
+		return nil, errors.New("variation not found")
+	}
+
+	if !variation.IsAvailable {
+		return nil, errors.New("product variation not available")
 	}
 
 	if !product.IsActive {
@@ -74,17 +86,17 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 		return nil, ErrCategoryNotFound
 	}
 
-	if product.Size == nil {
+	if variation.Size == nil {
 		return nil, ErrSizeNotFound
 	}
 
-	if !product.Size.IsActive {
+	if !variation.Size.IsActive {
 		return nil, ErrSizeNotActive
 	}
 
 	// If group item id is not provided, create a new group item
 	if dto.GroupItemID == nil {
-		groupItem, err := s.newGroupItem(ctx, dto.OrderID, product)
+		groupItem, err := s.newGroupItem(ctx, dto.OrderID, product, variation)
 
 		if err != nil {
 			return nil, errors.New("new group item error: " + err.Error())
@@ -110,7 +122,7 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 		return nil, err
 	}
 
-	item, err := dto.ToDomain(product, groupItem, dto.Quantity)
+	item, err := dto.ToDomain(product, variation, groupItem, dto.Quantity)
 
 	if err != nil {
 		return nil, err
@@ -208,7 +220,7 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest)
 }
 
 func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDRequest, dtoAdditional *itemdto.OrderAdditionalItemCreateDTO) (id uuid.UUID, err error) {
-	productID, quantityValue, flavor, err := dtoAdditional.ToDomain()
+	productID, variationID, quantityValue, flavor, err := dtoAdditional.ToDomain()
 
 	if err != nil {
 		return uuid.Nil, err
@@ -238,6 +250,18 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 
 	productAdditional := productAdditionalModel.ToDomain()
 
+	var variationAdditional *productentity.ProductVariation
+	for _, v := range productAdditional.Variations {
+		if v.ID == variationID {
+			variationAdditional = &v
+			break
+		}
+	}
+
+	if variationAdditional == nil {
+		return uuid.Nil, errors.New("variation not found")
+	}
+
 	found := false
 	for _, additionalCategory := range groupItem.Category.AdditionalCategories {
 		if additionalCategory.ID == productAdditional.CategoryID {
@@ -255,7 +279,7 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 		return uuid.Nil, err
 	}
 
-	additionalItem := orderentity.NewItem(productAdditional.Name, productAdditional.Price, quantityValue, item.Size, productAdditional.ID, productAdditional.CategoryID, normalizedFlavor)
+	additionalItem := orderentity.NewItem(productAdditional.Name, variationAdditional.Price, quantityValue, item.Size, productAdditional.ID, productAdditional.CategoryID, normalizedFlavor)
 	additionalItem.IsAdditional = true
 	additionalItem.GroupItemID = groupItem.ID
 
@@ -376,12 +400,12 @@ func (s *Service) RemoveRemovedItem(ctx context.Context, dtoID *entitydto.IDRequ
 	return s.ri.UpdateItem(ctx, itemModel)
 }
 
-func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product) (groupItem *orderentity.GroupItem, err error) {
+func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product, variation *productentity.ProductVariation) (groupItem *orderentity.GroupItem, err error) {
 	groupCommonAttributes := orderentity.GroupCommonAttributes{
 		OrderID: orderID,
 		GroupDetails: orderentity.GroupDetails{
 			CategoryID:     product.CategoryID,
-			Size:           product.Size.Name,
+			Size:           variation.Size.Name,
 			NeedPrint:      product.Category.NeedPrint,
 			PrinterName:    product.Category.PrinterName,
 			UseProcessRule: product.Category.UseProcessRule,
