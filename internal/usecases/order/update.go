@@ -96,6 +96,10 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 // debitStockFromOrder debita estoque dos produtos do pedido
 func (s *OrderService) debitStockFromOrder(ctx context.Context, order *orderentity.Order) error {
 	for _, groupItem := range order.GroupItems {
+		if groupItem.Status != orderentity.StatusGroupStaging {
+			continue
+		}
+
 		for _, item := range groupItem.Items {
 			if item.ProductID != uuid.Nil {
 				fmt.Printf("DEBUG: Produto %s - Quantidade: %f\n", item.Name, item.Quantity)
