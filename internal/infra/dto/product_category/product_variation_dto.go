@@ -3,6 +3,7 @@ package productcategorydto
 import (
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	sizedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/size"
 )
@@ -42,6 +43,7 @@ type ProductVariationCreateDTO struct {
 
 func (d *ProductVariationCreateDTO) ToDomain() productentity.ProductVariation {
 	return productentity.ProductVariation{
+		Entity:      entity.NewEntity(),
 		SizeID:      d.SizeID,
 		Price:       d.Price,
 		Cost:        d.Cost,
