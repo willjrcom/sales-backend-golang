@@ -86,7 +86,7 @@ func Test_FormatGroupItem(t *testing.T) {
 		},
 	}
 
-	out, err := FormatGroupItemKitchen(&groupItem)
+	out, err := FormatGroupItemKitchen(&groupItem, nil)
 	assert.NoError(t, err)
 	if err := os.WriteFile("printer_group_item.txt", out, 0644); err != nil {
 		t.Fatalf("failed to write printer buffer to file: %v", err)

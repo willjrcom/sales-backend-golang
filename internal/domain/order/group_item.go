@@ -121,9 +121,9 @@ func (i *GroupItem) CalculateTotalPrice() {
 		return
 	}
 
-	for _, item := range i.Items {
-		totalPrice = totalPrice.Add(item.CalculateTotalPrice())
-		qtdItems += item.Quantity
+	for j := range i.Items {
+		totalPrice = totalPrice.Add(i.Items[j].CalculateTotalPrice())
+		qtdItems += i.Items[j].Quantity
 	}
 
 	if i.ComplementItem != nil {

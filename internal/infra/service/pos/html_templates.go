@@ -60,8 +60,9 @@ const KitchenTicketTemplate = `
 </head>
 <body>
     <div class="header bold">
-        Cozinha ({{.Quantity}} itens)
+        {{if .Company}}{{.Company.TradeName}}{{end}}
     </div>
+    <div class="header">Cozinha ({{.Quantity}} itens)</div>
     <div class="divider"></div>
     
     <div class="item bold">
@@ -81,7 +82,7 @@ const KitchenTicketTemplate = `
         </div>
         {{range .AdditionalItems}}
         <div class="row">
-            <span>+ {{.Name}}</span>
+            <span>+ {{.Quantity}}x {{.Name}}</span>
         </div>
         {{end}}
         {{range .RemovedItems}}
@@ -129,6 +130,21 @@ const OrderReceiptTemplate = `
     ` + style + `
 </head>
 <body>
+    <div class="header bold">
+        {{if .Company}}{{.Company.TradeName}}{{end}}
+    </div>
+    {{if .Company}}
+    <div class="header">
+        {{if .Company.Cnpj}}CNPJ: {{.Company.Cnpj}}<br>{{end}}
+        {{if .Company.Address}}
+            {{.Company.Address.Street}}, {{.Company.Address.Number}} - {{.Company.Address.Neighborhood}}<br>
+        {{end}}
+        {{if .Company.Contacts}}
+            Contato: {{index .Company.Contacts 0}}
+        {{end}}
+    </div>
+    {{end}}
+    <div class="divider"></div>
     <div class="header bold">
         PEDIDO #{{.OrderNumber}}
     </div>
@@ -192,11 +208,11 @@ const OrderReceiptTemplate = `
             {{range .Items}}
                 <div class="row">
                     <span class="col-name">{{.Quantity}}x {{.Name}}</span>
-                    <span class="col-price">{{formatMoney .TotalPrice}}</span>
+                    <span class="col-price">{{ multiply .Price .Quantity | formatMoney }}</span>
                 </div>
                 {{range .AdditionalItems}}
                     <div class="row">
-                        <span class="col-name">+ {{.Name}}</span>
+                        <span class="col-name">+ {{.Quantity}}x {{.Name}}</span>
                         <span class="col-price">{{formatMoney .TotalPrice}}</span>
                     </div>
                 {{end}}

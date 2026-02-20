@@ -82,8 +82,8 @@ func (i *Item) RemoveRemovedItem(name string) {
 func (i *Item) CalculateTotalPrice() decimal.Decimal {
 	total := i.Price.Mul(decimal.NewFromFloat(i.Quantity)).Round(2)
 
-	for _, additionalItem := range i.AdditionalItems {
-		total = total.Add(additionalItem.TotalPrice)
+	for j := range i.AdditionalItems {
+		total = total.Add(i.AdditionalItems[j].CalculateTotalPrice())
 	}
 	i.TotalPrice = total.Round(2)
 	return i.TotalPrice

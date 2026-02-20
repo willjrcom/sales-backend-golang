@@ -7,6 +7,7 @@ import (
 	"text/tabwriter"
 
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 )
 
 // truncate returns a string truncated to at most max runes, preserving UTF-8 boundaries
@@ -20,20 +21,22 @@ func truncate(s string, max int) string {
 
 // FormatOrder generates ESC/POS bytes for a 40-column receipt of the given order.
 // It initializes the printer, selects Latin-1 code page, prints the header, item groups, footer, and cuts the paper.
-func FormatOrder(o *orderentity.Order) ([]byte, error) {
+func FormatOrder(o *orderentity.Order, company *companydto.CompanyDTO) ([]byte, error) {
 	var buf bytes.Buffer
 	buf.WriteString(escInit)
 	buf.WriteString(escCodePageLatin1)
 
 	// Build raw text for receipt
 	var raw bytes.Buffer
+	formatHeader(&raw, o, company)
+
 	switch {
 	case o.Delivery != nil:
-		formatDeliverySection(&raw, o)
+		formatDeliverySection(&raw, o, company)
 	case o.Pickup != nil:
-		formatPickupSection(&raw, o)
+		formatPickupSection(&raw, o, company)
 	case o.Table != nil:
-		formatTableSection(&raw, o)
+		formatTableSection(&raw, o, company)
 	}
 
 	// Observation (Top)
@@ -68,8 +71,29 @@ func FormatOrder(o *orderentity.Order) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func formatHeader(buf *bytes.Buffer, o *orderentity.Order) {
+func formatHeader(buf *bytes.Buffer, o *orderentity.Order, company *companydto.CompanyDTO) {
+	buf.WriteString(escAlignCenter)
+	buf.WriteString(escBoldOn)
+	if company != nil {
+		fmt.Fprintf(buf, "%s%s", company.TradeName, newline)
+		buf.WriteString(escBoldOff)
+		if company.Cnpj != "" {
+			fmt.Fprintf(buf, "CNPJ: %s%s", company.Cnpj, newline)
+		}
+		if company.Address != nil {
+			fmt.Fprintf(buf, "%s, %s%s", company.Address.Street, company.Address.Number, newline)
+			fmt.Fprintf(buf, "%s%s", company.Address.Neighborhood, newline)
+		}
+		if len(company.Contacts) > 0 {
+			fmt.Fprintf(buf, "Contato: %s%s", company.Contacts[0], newline)
+		}
+	}
+	buf.WriteString(escBoldOff)
+	buf.WriteString(newline)
+
 	buf.WriteString(escAlignLeft)
+	fmt.Fprintf(buf, "PEDIDO #%d%s", o.OrderNumber, newline)
+
 	if o.PendingAt != nil {
 		fmt.Fprintf(buf, "Gerado:\t\t%s%s", o.PendingAt.Format("15:04"), newline)
 	}
@@ -192,7 +216,7 @@ func printItem(buf *bytes.Buffer, item *orderentity.Item) {
 func printAdditionalItem(buf *bytes.Buffer, add *orderentity.Item) {
 	// truncate additional item name to 17 runes to avoid breaking UTF-8
 	name := truncate(add.Name, 17)
-	fmt.Fprintf(buf, "+\t%-17s\tR$ %.2f%s", name, d2f(add.TotalPrice), newline)
+	fmt.Fprintf(buf, "+\t%.0fx %-17s\tR$ %.2f%s", add.Quantity, name, d2f(add.TotalPrice), newline)
 }
 
 // formatTotalFooter writes the total payable amount to the buffer.
@@ -201,7 +225,7 @@ func formatTotalFooter(buf *bytes.Buffer, o *orderentity.Order) {
 }
 
 // formatDeliverySection prints delivery-related details if present.
-func formatDeliverySection(buf *bytes.Buffer, o *orderentity.Order) {
+func formatDeliverySection(buf *bytes.Buffer, o *orderentity.Order, company *companydto.CompanyDTO) {
 	if o.Delivery == nil {
 		return
 	}
@@ -211,7 +235,7 @@ func formatDeliverySection(buf *bytes.Buffer, o *orderentity.Order) {
 	fmt.Fprintf(buf, "PEDIDO DE ENTREGA %d%s", o.OrderNumber, newline)
 	fmt.Fprintf(buf, escBoldOff)
 
-	formatHeader(buf, o)
+	formatHeader(buf, o, company)
 
 	fmt.Fprintf(buf, escAlignCenter)
 	fmt.Fprintf(buf, "ENTREGA"+newline)
@@ -274,7 +298,7 @@ func formatDeliverySection(buf *bytes.Buffer, o *orderentity.Order) {
 }
 
 // formatPickupSection prints pickup-related details if present.
-func formatPickupSection(buf *bytes.Buffer, o *orderentity.Order) {
+func formatPickupSection(buf *bytes.Buffer, o *orderentity.Order, company *companydto.CompanyDTO) {
 	if o.Pickup == nil {
 		return
 	}
@@ -284,7 +308,7 @@ func formatPickupSection(buf *bytes.Buffer, o *orderentity.Order) {
 	fmt.Fprintf(buf, "PEDIDO DE RETIRADA %d%s", o.OrderNumber, newline)
 	fmt.Fprintf(buf, escBoldOff)
 
-	formatHeader(buf, o)
+	formatHeader(buf, o, company)
 	fmt.Fprintf(buf, escAlignLeft)
 
 	// if pa := o.Pickup.PendingAt; pa != nil {
@@ -303,7 +327,7 @@ func formatPickupSection(buf *bytes.Buffer, o *orderentity.Order) {
 }
 
 // formatTableSection prints table-related details if present.
-func formatTableSection(buf *bytes.Buffer, o *orderentity.Order) {
+func formatTableSection(buf *bytes.Buffer, o *orderentity.Order, company *companydto.CompanyDTO) {
 	if o.Table == nil {
 		return
 	}
@@ -313,7 +337,7 @@ func formatTableSection(buf *bytes.Buffer, o *orderentity.Order) {
 	fmt.Fprintf(buf, "PEDIDO DE MESA %d%s", o.OrderNumber, newline)
 	fmt.Fprintf(buf, escBoldOff)
 
-	formatHeader(buf, o)
+	formatHeader(buf, o, company)
 	fmt.Fprintf(buf, escAlignLeft)
 
 	// if pa := o.Table.PendingAt; pa != nil {

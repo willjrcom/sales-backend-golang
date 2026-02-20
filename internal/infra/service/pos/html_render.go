@@ -8,17 +8,26 @@ import (
 
 	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 )
 
 // RenderGroupItemKitchenHTML returns the rendered HTML for a kitchen ticket
-func RenderGroupItemKitchenHTML(group *orderentity.GroupItem) ([]byte, error) {
+func RenderGroupItemKitchenHTML(group *orderentity.GroupItem, company *companydto.CompanyDTO) ([]byte, error) {
 	tmpl, err := template.New("kitchen").Parse(KitchenTicketTemplate)
 	if err != nil {
 		return nil, err
 	}
 
 	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, group); err != nil {
+	data := struct {
+		*orderentity.GroupItem
+		Company *companydto.CompanyDTO
+	}{
+		GroupItem: group,
+		Company:   company,
+	}
+
+	if err := tmpl.Execute(&buf, data); err != nil {
 		return nil, err
 	}
 
@@ -26,7 +35,7 @@ func RenderGroupItemKitchenHTML(group *orderentity.GroupItem) ([]byte, error) {
 }
 
 // RenderOrderHTML returns the rendered HTML for a full order receipt
-func RenderOrderHTML(order *orderentity.Order) ([]byte, error) {
+func RenderOrderHTML(order *orderentity.Order, company *companydto.CompanyDTO) ([]byte, error) {
 	// Helper function for date formatting
 	funcMap := template.FuncMap{
 		"formatDate": func(t *time.Time) string {
@@ -38,6 +47,9 @@ func RenderOrderHTML(order *orderentity.Order) ([]byte, error) {
 		"formatMoney": func(d decimal.Decimal) string {
 			return "R$ " + d.StringFixed(2)
 		},
+		"multiply": func(d decimal.Decimal, q float64) decimal.Decimal {
+			return d.Mul(decimal.NewFromFloat(q))
+		},
 		"printf": fmt.Sprintf,
 	}
 
@@ -47,7 +59,15 @@ func RenderOrderHTML(order *orderentity.Order) ([]byte, error) {
 	}
 
 	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, order); err != nil {
+	data := struct {
+		*orderentity.Order
+		Company *companydto.CompanyDTO
+	}{
+		Order:   order,
+		Company: company,
+	}
+
+	if err := tmpl.Execute(&buf, data); err != nil {
 		return nil, err
 	}
 

@@ -192,7 +192,7 @@ func Test_FormatOrder(t *testing.T) {
 		},
 	}
 
-	out, err := FormatOrder(o)
+	out, err := FormatOrder(o, nil)
 	assert.NoError(t, err)
 	if err := os.WriteFile("printer_order.txt", out, 0644); err != nil {
 		t.Fatalf("failed to write printer buffer to file: %v", err)

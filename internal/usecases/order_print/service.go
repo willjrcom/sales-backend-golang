@@ -3,6 +3,7 @@ package orderprintusecases
 import (
 	"context"
 
+	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/pos"
@@ -17,6 +18,7 @@ type Service struct {
 	shiftService        *shiftusecases.Service
 	orderRepository     model.OrderRepository
 	groupItemRepository model.GroupItemRepository
+	companyRepository   model.CompanyRepository
 }
 
 // NewService creates a new print service using the given order and report usecase services.
@@ -24,11 +26,12 @@ func NewService() *Service {
 	return &Service{}
 }
 
-func (s *Service) AddDependencies(orderService *orderusecases.OrderService, orderRepository model.OrderRepository, shiftService *shiftusecases.Service, groupItemRepository model.GroupItemRepository) {
+func (s *Service) AddDependencies(orderService *orderusecases.OrderService, orderRepository model.OrderRepository, shiftService *shiftusecases.Service, groupItemRepository model.GroupItemRepository, companyRepository model.CompanyRepository) {
 	s.orderService = orderService
 	s.orderRepository = orderRepository
 	s.shiftService = shiftService
 	s.groupItemRepository = groupItemRepository
+	s.companyRepository = companyRepository
 }
 
 // PrintOrder retrieves the order by ID and returns its printable representation.
@@ -38,8 +41,13 @@ func (s *Service) PrintOrder(ctx context.Context, req *entitydto.IDRequest) ([]b
 		return nil, err
 	}
 
+	company, err := s.getCompany(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	order := model.ToDomain()
-	data, err := pos.FormatOrder(order)
+	data, err := pos.FormatOrder(order, company)
 	if err != nil {
 		return nil, err
 	}
@@ -66,9 +74,14 @@ func (s *Service) PrintGroupItemKitchen(ctx context.Context, req *entitydto.IDRe
 		return nil, err
 	}
 
+	company, err := s.getCompany(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	// convert to domain
 	groupItem := modelGroupItem.ToDomain()
-	data, err := pos.FormatGroupItemKitchen(groupItem)
+	data, err := pos.FormatGroupItemKitchen(groupItem, company)
 	if err != nil {
 		return nil, err
 	}
@@ -82,8 +95,13 @@ func (s *Service) PrintOrderHTML(ctx context.Context, req *entitydto.IDRequest) 
 		return nil, err
 	}
 
+	company, err := s.getCompany(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	order := model.ToDomain()
-	data, err := pos.RenderOrderHTML(order)
+	data, err := pos.RenderOrderHTML(order, company)
 	if err != nil {
 		return nil, err
 	}
@@ -99,11 +117,28 @@ func (s *Service) PrintGroupItemKitchenHTML(ctx context.Context, req *entitydto.
 		return nil, err
 	}
 
+	company, err := s.getCompany(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	// convert to domain
 	groupItem := modelGroupItem.ToDomain()
-	data, err := pos.RenderGroupItemKitchenHTML(groupItem)
+	data, err := pos.RenderGroupItemKitchenHTML(groupItem, company)
 	if err != nil {
 		return nil, err
 	}
 	return data, nil
+}
+
+func (s *Service) getCompany(ctx context.Context) (*companydto.CompanyDTO, error) {
+	companyModel, err := s.companyRepository.GetCompany(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	company := companyModel.ToDomain()
+	dto := &companydto.CompanyDTO{}
+	dto.FromDomain(company)
+	return dto, nil
 }

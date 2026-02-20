@@ -63,6 +63,11 @@ func (r *OrderRepositoryLocal) UpdateOrder(ctx context.Context, order *model.Ord
 	return nil
 }
 
+func (r *OrderRepositoryLocal) UpdateOrderWithRelations(ctx context.Context, order *model.Order) error {
+	r.orders[order.ID] = order
+	return nil
+}
+
 func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*model.Order, error) {
 	if p, ok := r.orders[uuid.MustParse(id)]; ok {
 		return p, nil
