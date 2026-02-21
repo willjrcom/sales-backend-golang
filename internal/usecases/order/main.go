@@ -15,6 +15,7 @@ type OrderService struct {
 	stockRepo               model.StockRepository
 	stockMovementRepo       model.StockMovementRepository
 	companySubscriptionRepo model.CompanySubscriptionRepository
+	re                      model.EmployeeRepository
 	sgi                     *GroupItemService
 	sop                     *OrderProcessService
 	sq                      *orderqueueusecases.Service
@@ -44,6 +45,7 @@ func (s *OrderService) AddDependencies(
 	sp IPickupService,
 	st *OrderTableService,
 	sc *companyusecases.Service,
+	re model.EmployeeRepository,
 ) {
 	s.ro = ro
 	s.rs = rs
@@ -60,4 +62,5 @@ func (s *OrderService) AddDependencies(
 	s.sp = sp
 	s.st = st
 	s.sc = sc
+	s.re = re
 }

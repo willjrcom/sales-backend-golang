@@ -7,7 +7,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
@@ -47,8 +50,25 @@ func (s *OrderService) CreateDefaultOrder(ctx context.Context) (uuid.UUID, error
 	}
 
 	shiftModel, err := s.rs.GetCurrentShift(ctx)
+
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("must open a new shift")
+		// Attempt to auto-open shift
+		shift := shiftentity.NewShift(decimal.Zero)
+
+		if userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string); ok {
+			userIDUUID := uuid.MustParse(userID)
+			employee, err := s.re.GetEmployeeByUserID(ctx, userIDUUID.String())
+			if err == nil && employee != nil {
+				shift.AttendantID = &employee.ID
+			}
+		}
+
+		shiftModel = &model.Shift{}
+		shiftModel.FromDomain(shift)
+
+		if err = s.rs.CreateShift(ctx, shiftModel); err != nil {
+			return uuid.Nil, fmt.Errorf("failed to auto-open shift: %w", err)
+		}
 	}
 
 	currentOrderNumber, err := s.rs.IncrementCurrentOrder(ctx, shiftModel.ID.String())
