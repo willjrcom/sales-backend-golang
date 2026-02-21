@@ -23,33 +23,35 @@ type Item struct {
 }
 
 type ItemCommonAttributes struct {
-	Name            string
-	Observation     string
-	Price           decimal.Decimal
-	TotalPrice      decimal.Decimal
-	Size            string
-	Quantity        float64
-	GroupItemID     uuid.UUID
-	CategoryID      uuid.UUID
-	IsAdditional    bool
-	AdditionalItems []Item
-	RemovedItems    []string
-	ProductID       uuid.UUID
-	Product         *productentity.Product
-	Flavor          *string
+	Name               string
+	Observation        string
+	Price              decimal.Decimal
+	TotalPrice         decimal.Decimal
+	Size               string
+	Quantity           float64
+	GroupItemID        uuid.UUID
+	CategoryID         uuid.UUID
+	IsAdditional       bool
+	AdditionalItems    []Item
+	RemovedItems       []string
+	ProductID          uuid.UUID
+	Product            *productentity.Product
+	ProductVariationID uuid.UUID
+	Flavor             *string
 }
 
 // NewItem creates a new order item with initial price and total
-func NewItem(name string, price decimal.Decimal, quantity float64, size string, productID uuid.UUID, categoryID uuid.UUID, flavor *string) *Item {
+func NewItem(name string, price decimal.Decimal, quantity float64, size string, productID uuid.UUID, productVariationID uuid.UUID, categoryID uuid.UUID, flavor *string) *Item {
 	itemAdditionalCommonAttributes := ItemCommonAttributes{
-		Name:       name,
-		Price:      price,
-		TotalPrice: price.Mul(decimal.NewFromFloat(quantity)),
-		Size:       size,
-		Quantity:   quantity,
-		ProductID:  productID,
-		CategoryID: categoryID,
-		Flavor:     flavor,
+		Name:               name,
+		Price:              price,
+		TotalPrice:         price.Mul(decimal.NewFromFloat(quantity)),
+		Size:               size,
+		Quantity:           quantity,
+		ProductID:          productID,
+		ProductVariationID: productVariationID,
+		CategoryID:         categoryID,
+		Flavor:             flavor,
 	}
 
 	return &Item{

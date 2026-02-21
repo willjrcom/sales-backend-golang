@@ -135,7 +135,7 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 		size = variation.Size.Name
 	}
 
-	itemComplement := orderentity.NewItem(productComplement.Name, variation.Price, groupItem.Quantity, size, productComplement.ID, productComplement.CategoryID, nil)
+	itemComplement := orderentity.NewItem(productComplement.Name, variation.Price, groupItem.Quantity, size, productComplement.ID, variation.ID, productComplement.CategoryID, nil)
 	itemComplement.AddSizeToName()
 
 	itemComplementModel := &model.Item{}

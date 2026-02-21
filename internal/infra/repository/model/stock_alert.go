@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
+	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	stockentity "github.com/willjrcom/sales-backend-go/internal/domain/stock"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
@@ -16,53 +17,71 @@ type StockAlert struct {
 	StockAlertCommonAttributes
 }
 
+type AlertType string
+
 type StockAlertCommonAttributes struct {
-	StockID     uuid.UUID  `bun:"stock_id,type:uuid,notnull"`
-	Type        string     `bun:"type,notnull"`
-	Message     string     `bun:"message,notnull"`
-	IsResolved  bool       `bun:"is_resolved,notnull"`
-	ResolvedAt  *time.Time `bun:"resolved_at"`
-	ResolvedBy  *uuid.UUID `bun:"resolved_by,type:uuid"`
-	ProductName string     `bun:"product_name,notnull"`
-	ProductSKU  string     `bun:"product_sku,notnull"`
+	StockID            uuid.UUID         `bun:"stock_id,type:uuid,notnull"`
+	Type               AlertType         `bun:"type,notnull"`
+	Message            string            `bun:"message,notnull"`
+	IsResolved         bool              `bun:"is_resolved,notnull"`
+	ResolvedAt         *time.Time        `bun:"resolved_at"`
+	ResolvedBy         *uuid.UUID        `bun:"resolved_by,type:uuid"`
+	ProductID          uuid.UUID         `bun:"product_id,type:uuid,notnull"`
+	Product            *Product          `bun:"rel:belongs-to"`
+	ProductVariationID uuid.UUID         `bun:"product_variation_id,type:uuid,notnull"`
+	ProductVariation   *ProductVariation `bun:"rel:belongs-to"`
 }
 
 // FromDomain converte domain para model
-func (sa *StockAlert) FromDomain(alert *stockentity.StockAlert) {
+func (s *StockAlert) FromDomain(alert *stockentity.StockAlert) {
 	if alert == nil {
 		return
 	}
-	*sa = StockAlert{
+	*s = StockAlert{
 		Entity: entitymodel.FromDomain(alert.Entity),
 		StockAlertCommonAttributes: StockAlertCommonAttributes{
-			StockID:     alert.StockID,
-			Type:        string(alert.Type),
-			Message:     alert.Message,
-			IsResolved:  alert.IsResolved,
-			ResolvedAt:  alert.ResolvedAt,
-			ResolvedBy:  alert.ResolvedBy,
-			ProductName: alert.ProductName,
-			ProductSKU:  alert.ProductSKU,
+			StockID:            alert.StockID,
+			Type:               AlertType(alert.Type),
+			Message:            alert.Message,
+			IsResolved:         alert.IsResolved,
+			ResolvedAt:         alert.ResolvedAt,
+			ResolvedBy:         alert.ResolvedBy,
+			ProductID:          alert.ProductID,
+			ProductVariationID: alert.ProductVariationID,
 		},
 	}
 }
 
 // ToDomain converte model para domain
-func (sa *StockAlert) ToDomain() *stockentity.StockAlert {
-	if sa == nil {
+func (s *StockAlert) ToDomain() *stockentity.StockAlert {
+	if s == nil {
 		return nil
 	}
+
+	var product *productentity.Product
+	if s.Product != nil {
+		product = s.Product.ToDomain()
+	}
+
+	var productVariation *productentity.ProductVariation
+	if s.ProductVariation != nil {
+		v := s.ProductVariation.ToDomain()
+		productVariation = &v
+	}
+
 	return &stockentity.StockAlert{
-		Entity: sa.Entity.ToDomain(),
+		Entity: s.Entity.ToDomain(),
 		StockAlertCommonAttributes: stockentity.StockAlertCommonAttributes{
-			StockID:     sa.StockID,
-			Type:        stockentity.AlertType(sa.Type),
-			Message:     sa.Message,
-			IsResolved:  sa.IsResolved,
-			ResolvedAt:  sa.ResolvedAt,
-			ResolvedBy:  sa.ResolvedBy,
-			ProductName: sa.ProductName,
-			ProductSKU:  sa.ProductSKU,
+			StockID:            s.StockID,
+			Type:               stockentity.AlertType(s.Type),
+			Message:            s.Message,
+			IsResolved:         s.IsResolved,
+			ResolvedAt:         s.ResolvedAt,
+			ResolvedBy:         s.ResolvedBy,
+			ProductID:          s.ProductID,
+			Product:            product,
+			ProductVariationID: s.ProductVariationID,
+			ProductVariation:   productVariation,
 		},
 	}
 }

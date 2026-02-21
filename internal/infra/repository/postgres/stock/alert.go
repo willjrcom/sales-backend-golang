@@ -46,7 +46,7 @@ func (r *StockAlertRepositoryBun) UpdateAlert(ctx context.Context, a *model.Stoc
 	defer cancel()
 	defer tx.Rollback()
 
-	if _, err := tx.NewUpdate().Model(a).Where("id = ?", a.ID).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(a).Where("stock_alert.id = ?", a.ID).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -68,7 +68,12 @@ func (r *StockAlertRepositoryBun) GetAlertsByStockID(ctx context.Context, stockI
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&alerts).Where("stock_alert.stock_id = ?", stockID).Order("created_at DESC").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&alerts).
+		Where("stock_alert.stock_id = ?", stockID).
+		Relation("Product").
+		Relation("ProductVariation").
+		Relation("ProductVariation.Size").
+		Order("created_at DESC").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -89,7 +94,12 @@ func (r *StockAlertRepositoryBun) GetActiveAlerts(ctx context.Context) ([]model.
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&alerts).Where("stock_alert.is_resolved = ?", false).Order("created_at DESC").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&alerts).
+		Where("stock_alert.is_resolved = ?", false).
+		Relation("Product").
+		Relation("ProductVariation").
+		Relation("ProductVariation.Size").
+		Order("created_at DESC").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -110,7 +120,12 @@ func (r *StockAlertRepositoryBun) GetResolvedAlerts(ctx context.Context) ([]mode
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&alerts).Where("stock_alert.is_resolved = ?", true).Order("created_at DESC").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&alerts).
+		Where("stock_alert.is_resolved = ?", true).
+		Relation("Product").
+		Relation("ProductVariation").
+		Relation("ProductVariation.Size").
+		Order("created_at DESC").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -134,7 +149,7 @@ func (r *StockAlertRepositoryBun) ResolveAlert(ctx context.Context, alertID stri
 		Set("is_resolved = ?", true).
 		Set("resolved_by = ?", resolvedBy).
 		Set("resolved_at = NOW() ").
-		Where("id = ?", alertID).
+		Where("stock_alert.id = ?", alertID).
 		Exec(ctx)
 	if err != nil {
 		return err
@@ -160,7 +175,10 @@ func (r *StockAlertRepositoryBun) GetAlertByID(ctx context.Context, alertID stri
 
 	if err := tx.NewSelect().
 		Model(alert).
-		Where("id = ?", alertID).
+		Where("stock_alert.id = ?", alertID).
+		Relation("Product").
+		Relation("ProductVariation").
+		Relation("ProductVariation.Size").
 		Scan(ctx); err != nil {
 		return nil, err
 	}
@@ -184,6 +202,9 @@ func (r *StockAlertRepositoryBun) GetAllAlerts(ctx context.Context) ([]model.Sto
 
 	if err := tx.NewSelect().
 		Model(&alerts).
+		Relation("Product").
+		Relation("ProductVariation").
+		Relation("ProductVariation.Size").
 		Order("created_at DESC").
 		Scan(ctx); err != nil {
 		return nil, err
@@ -207,7 +228,7 @@ func (r *StockAlertRepositoryBun) DeleteAlert(ctx context.Context, alertID strin
 
 	if _, err := tx.NewDelete().
 		Model((*model.StockAlert)(nil)).
-		Where("id = ?", alertID).
+		Where("stock_alert.id = ?", alertID).
 		Exec(ctx); err != nil {
 		return err
 	}

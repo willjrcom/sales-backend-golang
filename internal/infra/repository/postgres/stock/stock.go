@@ -69,7 +69,11 @@ func (r *StockRepositoryBun) GetStockByID(ctx context.Context, id string) (*mode
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(stock).Where("stock.id = ?", id).Relation("Product").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(stock).Where("stock.id = ?", id).
+		Relation("Product").
+		Relation("Product.Variations").
+		Relation("Product.Variations.Size").
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -79,7 +83,31 @@ func (r *StockRepositoryBun) GetStockByID(ctx context.Context, id string) (*mode
 	return stock, nil
 }
 
-func (r *StockRepositoryBun) GetStockByProductID(ctx context.Context, productID string) (*model.Stock, error) {
+func (r *StockRepositoryBun) GetStockByProductID(ctx context.Context, productID string) ([]model.Stock, error) {
+	stocks := []model.Stock{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	if err := tx.NewSelect().Model(&stocks).Where("stock.product_id = ?", productID).
+		Relation("Product").
+		Relation("Product.Variations").
+		Relation("Product.Variations.Size").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return stocks, nil
+}
+func (r *StockRepositoryBun) GetStockByVariationID(ctx context.Context, variationID string) (*model.Stock, error) {
 	stock := &model.Stock{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -90,7 +118,11 @@ func (r *StockRepositoryBun) GetStockByProductID(ctx context.Context, productID 
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(stock).Where("stock.product_id = ?", productID).Relation("Product").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(stock).Where("stock.product_variation_id = ?", variationID).
+		Relation("Product").
+		Relation("Product.Variations").
+		Relation("Product.Variations.Size").
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -111,7 +143,11 @@ func (r *StockRepositoryBun) GetAllStocks(ctx context.Context, page, perPage int
 	defer cancel()
 	defer tx.Rollback()
 
-	query := tx.NewSelect().Model(&stocks).Relation("Product").Limit(perPage).Offset(page * perPage)
+	query := tx.NewSelect().Model(&stocks).
+		Relation("Product").
+		Relation("Product.Variations").
+		Relation("Product.Variations.Size").
+		Limit(perPage).Offset(page * perPage)
 
 	count, err := query.ScanAndCount(ctx)
 	if err != nil {
@@ -135,7 +171,11 @@ func (r *StockRepositoryBun) GetActiveStocks(ctx context.Context) ([]model.Stock
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&stocks).Where("stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&stocks).Where("stock.is_active = ?", true).
+		Relation("Product").
+		Relation("Product.Variations").
+		Relation("Product.Variations.Size").
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -156,7 +196,11 @@ func (r *StockRepositoryBun) GetLowStockProducts(ctx context.Context) ([]model.S
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&stocks).Where("stock.current_stock <= stock.min_stock AND stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&stocks).Where("stock.current_stock <= stock.min_stock AND stock.is_active = ?", true).
+		Relation("Product").
+		Relation("Product.Variations").
+		Relation("Product.Variations.Size").
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -177,7 +221,11 @@ func (r *StockRepositoryBun) GetOutOfStockProducts(ctx context.Context) ([]model
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&stocks).Where("stock.current_stock <= 0 AND stock.is_active = ?", true).Relation("Product").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&stocks).Where("stock.current_stock <= 0 AND stock.is_active = ?", true).
+		Relation("Product").
+		Relation("Product.Variations").
+		Relation("Product.Variations.Size").
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 

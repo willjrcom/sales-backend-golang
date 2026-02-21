@@ -44,10 +44,19 @@ func (s *Service) CreateStock(ctx context.Context, dto *stockdto.StockCreateDTO)
 		return nil, fmt.Errorf("produto não encontrado: %w", err)
 	}
 
-	// Verificar se já existe estoque para este produto
-	existingStock, _ := s.stockRepo.GetStockByProductID(ctx, dto.ProductID.String())
+	// Verificar se já existe estoque para este produto/variação
+	var existingStock *model.Stock
+	if dto.ProductVariationID != nil {
+		existingStock, _ = s.stockRepo.GetStockByVariationID(ctx, dto.ProductVariationID.String())
+	} else {
+		stocks, _ := s.stockRepo.GetStockByProductID(ctx, dto.ProductID.String())
+		if len(stocks) > 0 {
+			existingStock = &stocks[0]
+		}
+	}
+
 	if existingStock != nil {
-		return nil, fmt.Errorf("já existe controle de estoque para este produto")
+		return nil, fmt.Errorf("já existe controle de estoque para este produto/variação")
 	}
 
 	// Criar estoque
@@ -104,9 +113,27 @@ func (s *Service) GetStockByID(ctx context.Context, dtoID *entitydto.IDRequest) 
 	return stockDTO, nil
 }
 
-// GetStockByProductID busca estoque por produto
-func (s *Service) GetStockByProductID(ctx context.Context, productID string) (*stockdto.StockDTO, error) {
-	stockModel, err := s.stockRepo.GetStockByProductID(ctx, productID)
+// GetStockByProductID busca estoques por produto
+func (s *Service) GetStockByProductID(ctx context.Context, productID string) ([]stockdto.StockDTO, error) {
+	stocksModel, err := s.stockRepo.GetStockByProductID(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+
+	var stocksDTO []stockdto.StockDTO
+	for _, stockModel := range stocksModel {
+		stock := stockModel.ToDomain()
+		stockDTO := stockdto.StockDTO{}
+		stockDTO.FromDomain(stock)
+		stocksDTO = append(stocksDTO, stockDTO)
+	}
+
+	return stocksDTO, nil
+}
+
+// GetStockByVariationID busca estoque por variação
+func (s *Service) GetStockByVariationID(ctx context.Context, variationID string) (*stockdto.StockDTO, error) {
+	stockModel, err := s.stockRepo.GetStockByVariationID(ctx, variationID)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +226,7 @@ func (s *Service) GetStockWithProduct(ctx context.Context, dtoID *entitydto.IDRe
 
 // GetAllStocksWithProduct busca todos os estoques com informações dos produtos
 func (s *Service) GetAllStocksWithProduct(ctx context.Context) ([]stockdto.StockWithProductDTO, error) {
-	stocksModel, _, err := s.stockRepo.GetAllStocks(ctx, 1, 1000) // Fetch all (or a large page) for now as this seems to be used for reports
+	stocksModel, _, err := s.stockRepo.GetAllStocks(ctx, 0, 1000) // Fetch all (or a large page) for now as this seems to be used for reports
 	if err != nil {
 		return nil, err
 	}

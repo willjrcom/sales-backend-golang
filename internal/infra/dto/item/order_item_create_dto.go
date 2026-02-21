@@ -71,7 +71,7 @@ func (a *OrderItemCreateDTO) ToDomain(product *productentity.Product, variation 
 		return
 	}
 
-	item = orderentity.NewItem(product.Name, variation.Price, quantity, variation.Size.Name, product.ID, product.CategoryID, a.Flavor)
+	item = orderentity.NewItem(product.Name, variation.Price, quantity, variation.Size.Name, product.ID, variation.ID, product.CategoryID, a.Flavor)
 	item.AddSizeToName()
 	item.GroupItemID = *a.GroupItemID
 	item.Observation = a.Observation

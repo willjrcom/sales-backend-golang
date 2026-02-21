@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 )
 
 // StockAlert representa alertas de estoque (baixo estoque, etc)
@@ -14,14 +15,16 @@ type StockAlert struct {
 }
 
 type StockAlertCommonAttributes struct {
-	StockID     uuid.UUID
-	Type        AlertType
-	Message     string
-	IsResolved  bool
-	ResolvedAt  *time.Time
-	ResolvedBy  *uuid.UUID
-	ProductName string
-	ProductSKU  string
+	StockID            uuid.UUID
+	Type               AlertType
+	Message            string
+	IsResolved         bool
+	ResolvedAt         *time.Time
+	ResolvedBy         *uuid.UUID
+	ProductID          uuid.UUID
+	Product            *productentity.Product
+	ProductVariationID uuid.UUID
+	ProductVariation   *productentity.ProductVariation
 }
 
 // AlertType define o tipo de alerta

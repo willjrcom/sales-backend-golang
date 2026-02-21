@@ -104,12 +104,17 @@ func (s *OrderService) debitStockFromOrder(ctx context.Context, order *orderenti
 			if item.ProductID != uuid.Nil {
 				fmt.Printf("DEBUG: Produto %s - Quantidade: %f\n", item.Name, item.Quantity)
 
-				// Buscar estoque do produto
-				stockModel, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
+				// Buscar estoque do produto/variação
+				stockModel, err := s.stockRepo.GetStockByVariationID(ctx, item.ProductVariationID.String())
 				if err != nil {
-					// Se não há controle de estoque para o produto, continuar
-					fmt.Printf("Produto %s não tem controle de estoque configurado\n", item.Name)
-					continue
+					// Fallback para buscar apenas por ProductID se não houver variação específica (ex: adicionais sem tamanho)
+					stocks, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
+					if err != nil || len(stocks) == 0 {
+						// Se não há controle de estoque para o produto, continuar
+						fmt.Printf("Produto/Variação %s não tem controle de estoque configurado\n", item.Name)
+						continue
+					}
+					stockModel = &stocks[0]
 				}
 
 				stock := stockModel.ToDomain()
@@ -157,12 +162,17 @@ func (s *OrderService) restoreStockFromOrder(ctx context.Context, order *orderen
 			if item.ProductID != uuid.Nil {
 				fmt.Printf("DEBUG: Restaurando estoque para produto %s - Quantidade: %f\n", item.Name, item.Quantity)
 
-				// Buscar estoque do produto
-				stockModel, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
+				// Buscar estoque do produto/variação
+				stockModel, err := s.stockRepo.GetStockByVariationID(ctx, item.ProductVariationID.String())
 				if err != nil {
-					// Se não há controle de estoque para o produto, continuar
-					fmt.Printf("Produto %s não tem controle de estoque configurado\n", item.Name)
-					continue
+					// Fallback para buscar apenas por ProductID
+					stocks, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
+					if err != nil || len(stocks) == 0 {
+						// Se não há controle de estoque para o produto, continuar
+						fmt.Printf("Produto/Variação %s não tem controle de estoque configurado\n", item.Name)
+						continue
+					}
+					stockModel = &stocks[0]
 				}
 
 				stock := stockModel.ToDomain()

@@ -6,7 +6,8 @@ type StockRepository interface {
 	CreateStock(ctx context.Context, s *Stock) error
 	UpdateStock(ctx context.Context, s *Stock) error
 	GetStockByID(ctx context.Context, id string) (*Stock, error)
-	GetStockByProductID(ctx context.Context, productID string) (*Stock, error)
+	GetStockByProductID(ctx context.Context, productID string) ([]Stock, error)
+	GetStockByVariationID(ctx context.Context, variationID string) (*Stock, error)
 	GetAllStocks(ctx context.Context, page, perPage int) ([]Stock, int, error)
 	GetActiveStocks(ctx context.Context) ([]Stock, error)
 	GetLowStockProducts(ctx context.Context) ([]Stock, error)
