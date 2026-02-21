@@ -23,7 +23,8 @@ func (s *OrderService) GetOrderById(ctx context.Context, dto *entitydto.IDReques
 }
 
 func (s *OrderService) GetOrderIDFromOrderDeliveriesByClientId(ctx context.Context, dto *entitydto.IDRequest) ([]orderdto.OrderDTO, error) {
-	if deliveryModels, err := s.rdo.GetOrderIDFromOrderDeliveriesByClientId(ctx, dto.ID.String()); err != nil {
+	deliveryModels, err := s.rdo.GetOrderIDFromOrderDeliveriesByClientId(ctx, dto.ID.String())
+	if err != nil {
 		return nil, err
 	} else {
 		orders := []orderdto.OrderDTO{}

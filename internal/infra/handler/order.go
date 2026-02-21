@@ -129,6 +129,27 @@ func (h *handlerOrderImpl) handlerGetAllOrdersByClientID(w http.ResponseWriter, 
 		return
 	}
 
+	if len(orders) == 0 {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
+		return
+	}
+
+	delivery := orders[0].Delivery
+	var contact string
+	if delivery != nil && delivery.Client != nil && delivery.Client.Contact != nil {
+		contact = delivery.Client.Contact.Number
+	}
+
+	if contact == "" {
+		jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
+		return
+	}
+
+	pickupOrders, err := h.s.GetOrdersPickupByContact(ctx, contact)
+	if len(pickupOrders) > 0 {
+		orders = append(orders, pickupOrders...)
+	}
+
 	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
 }
 
