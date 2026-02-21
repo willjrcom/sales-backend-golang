@@ -94,3 +94,14 @@ func (r *OrderProcessRepositoryLocal) GetProcessesByGroupItemID(ctx context.Cont
 	}
 	return out, nil
 }
+
+func (r *OrderProcessRepositoryLocal) GetActiveProcessByGroupItemAndProcessRule(ctx context.Context, groupItemID, processRuleID string) (*model.OrderProcess, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for _, p := range r.processes {
+		if p.GroupItemID.String() == groupItemID && p.ProcessRuleID.String() == processRuleID && p.FinishedAt == nil {
+			return p, nil
+		}
+	}
+	return nil, nil
+}

@@ -257,7 +257,16 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 		return uuid.Nil, err
 	}
 
-	// Create next process
+	// Create next process (idempotent: skip if one already exists)
+	existing, err := s.r.GetActiveProcessByGroupItemAndProcessRule(ctx, process.GroupItemID.String(), nextProcessRule.ID.String())
+	if err != nil {
+		return uuid.Nil, err
+	}
+	if existing != nil {
+		// Process already exists for the next step — return its ID without creating a duplicate
+		return existing.ID, nil
+	}
+
 	createProcessInput := &orderprocessdto.OrderProcessCreateDTO{
 		OrderNumber:   process.OrderNumber,
 		OrderType:     process.OrderType,

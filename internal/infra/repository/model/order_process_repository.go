@@ -13,4 +13,5 @@ type OrderProcessRepository interface {
 	GetProcessesByProcessRuleID(ctx context.Context, id string) ([]OrderProcess, error)
 	GetProcessesByProductID(ctx context.Context, id string) ([]OrderProcess, error)
 	GetProcessesByGroupItemID(ctx context.Context, id string) ([]OrderProcess, error)
+	GetActiveProcessByGroupItemAndProcessRule(ctx context.Context, groupItemID, processRuleID string) (*OrderProcess, error)
 }

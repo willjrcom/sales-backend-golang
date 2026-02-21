@@ -143,7 +143,7 @@ func (r *ProductRepositoryBun) DeleteProduct(ctx context.Context, id string) err
 	defer cancel()
 	defer tx.Rollback()
 
-	if _, err := tx.NewDelete().Model(&model.Product{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if _, err := tx.NewUpdate().Model(&model.Product{}).Set("is_active = false").Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 

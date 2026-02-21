@@ -47,7 +47,8 @@ func (s *Service) StartQueue(ctx context.Context, dto *orderqueuedto.QueueCreate
 func (s *Service) FinishQueue(ctx context.Context, process *orderprocessentity.OrderProcess) error {
 	queueModel, err := s.r.GetOpenedQueueByGroupItemId(ctx, process.GroupItemID.String())
 	if err != nil {
-		return fmt.Errorf("opened queue not found")
+		fmt.Printf("opened queue not found: %s\n", err.Error())
+		return nil
 	}
 
 	queue := queueModel.ToDomain()

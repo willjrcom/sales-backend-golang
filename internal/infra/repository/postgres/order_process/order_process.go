@@ -264,3 +264,34 @@ func (r *ProcessRepositoryBun) GetProcessesByGroupItemID(ctx context.Context, id
 	}
 	return processes, nil
 }
+
+func (r *ProcessRepositoryBun) GetActiveProcessByGroupItemAndProcessRule(ctx context.Context, groupItemID, processRuleID string) (*model.OrderProcess, error) {
+	process := &model.OrderProcess{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	err = tx.NewSelect().Model(process).
+		Where("process.group_item_id = ?", groupItemID).
+		Where("process.process_rule_id = ?", processRuleID).
+		Where("process.finished_at IS NULL").
+		Limit(1).
+		Scan(ctx)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "no rows") {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return process, nil
+}
