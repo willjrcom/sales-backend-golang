@@ -208,20 +208,10 @@ func productsToDTOs(products []model.Product) []productcategorydto.ProductDTO {
 func productsToMapDTOs(products []model.Product) []productcategorydto.ProductMapDTO {
 	dtos := []productcategorydto.ProductMapDTO{}
 	for _, p := range products {
-		if len(p.Variations) == 0 {
-			continue
-		}
-
-		for _, v := range p.Variations {
-			name := p.Name
-			if v.Size != nil && v.Size.Name != "" {
-				name = name + " - " + v.Size.Name
-			}
-			dtos = append(dtos, productcategorydto.ProductMapDTO{
-				ID:   v.ID,
-				Name: name,
-			})
-		}
+		dtos = append(dtos, productcategorydto.ProductMapDTO{
+			ID:   p.ID,
+			Name: p.Name,
+		})
 	}
 	return dtos
 }

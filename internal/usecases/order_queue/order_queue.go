@@ -2,6 +2,7 @@ package orderqueueusecases
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
@@ -46,7 +47,7 @@ func (s *Service) StartQueue(ctx context.Context, dto *orderqueuedto.QueueCreate
 func (s *Service) FinishQueue(ctx context.Context, process *orderprocessentity.OrderProcess) error {
 	queueModel, err := s.r.GetOpenedQueueByGroupItemId(ctx, process.GroupItemID.String())
 	if err != nil {
-		return err
+		return fmt.Errorf("opened queue not found")
 	}
 
 	queue := queueModel.ToDomain()
