@@ -3,6 +3,7 @@ package orderusecases
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
@@ -111,7 +112,7 @@ func (s *OrderProcessService) StartProcess(ctx context.Context, dtoID *entitydto
 	if processRule.Order == 1 {
 		entityDtoID := entitydto.NewIdRequest(process.GroupItemID)
 		if err := s.sgi.StartGroupItem(ctx, entityDtoID); err != nil {
-			return err
+			fmt.Printf("error starting group item: %v", err)
 		}
 	}
 
@@ -194,7 +195,7 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 	if isLast {
 		entityDtoID := &entitydto.IDRequest{ID: process.GroupItemID}
 		if err := s.sgi.ReadyGroupItem(ctx, entityDtoID); err != nil {
-			return uuid.Nil, err
+			fmt.Printf("error ready group item: %v", err)
 		}
 
 		groupItemDTO, err := s.sgi.GetGroupByID(ctx, entityDtoID)
