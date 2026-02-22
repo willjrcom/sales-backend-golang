@@ -46,6 +46,11 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 			continue
 		}
 
+		if groupItem.Category.NeedPrint {
+			//rabbitmq
+
+		}
+
 		processRuleID, ok := processRules[groupItem.CategoryID]
 		if !ok {
 			fmt.Println("process rule not found for category ID: " + groupItem.CategoryID.String())

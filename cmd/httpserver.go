@@ -6,11 +6,15 @@ package cmd
 import (
 	"flag"
 	"fmt"
+	"log"
+	"os"
+	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	"github.com/willjrcom/sales-backend-go/internal/infra/modules"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/rabbitmq"
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
@@ -33,16 +37,16 @@ var HttpserverCmd = &cobra.Command{
 		db := database.NewPostgreSQLConnection()
 		cmd.Println("db loaded")
 
-		// Iniciar a goroutine para flush
-		// go func() {
-		// 	for {
-		// 		// Esperar 1 segundo antes de chamar o Flush novamente
-		// 		time.Sleep(10 * time.Second)
-		// 		producerKafka.Flush(int(time.Second) * 15)
-		// 	}
-		// }()
+		conn := os.Getenv("RABBITMQ_URL")
+		rabbitmqService, err := rabbitmq.NewInstance(conn, 5, 1*time.Second)
+		if err != nil {
+			log.Fatalf("Error creating RabbitMQ instance: %s", err)
+		}
 
-		modules.MainModules(db, chi, s3Service)
+		defer rabbitmqService.Close()
+		fmt.Println("rabbitmq loaded")
+
+		modules.MainModules(db, chi, s3Service, rabbitmqService)
 		cmd.Println("modules loaded")
 
 		if err := chi.StartServer(port); err != nil {

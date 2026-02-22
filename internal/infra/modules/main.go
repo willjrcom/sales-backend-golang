@@ -5,10 +5,11 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
 	companyrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/company"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/rabbitmq"
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
 
-func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client) {
+func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, rabbitmq *rabbitmq.RabbitMQ) {
 	productRepository, _, _ := NewProductModule(db, chi)
 	productCategoryRepository, _, _ := NewProductCategoryModule(db, chi)
 	NewProductCategorySizeModule(db, chi)
