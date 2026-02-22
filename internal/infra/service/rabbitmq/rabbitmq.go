@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	GROUP_ITEM_RK = "print.group.item.rk"
-	ORDER_RK      = "print.order.rk"
+	GROUP_ITEM_RK = "print.group.item"
+	ORDER_RK      = "print.order"
 )
 
 // RabbitMQ structure to manage connection and channel

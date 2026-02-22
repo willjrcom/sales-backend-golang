@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -107,6 +108,22 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 	orderModel.FromDomain(order)
 	if err := s.ro.PendingOrder(ctx, orderModel); err != nil {
 		return err
+	}
+
+	company, err := s.sc.GetCompany(ctx)
+	if err != nil {
+		return err
+	}
+
+	if printOrder, err := company.Preferences.GetBool(companyentity.EnablePrintOrderOnShipOrder); printOrder && err == nil {
+		schemaName, err := database.GetCurrentSchema(ctx)
+		if err != nil {
+			fmt.Println("error getting schema name: " + err.Error())
+		} else if s.rabbitmq != nil {
+			if err := s.rabbitmq.SendMessage(schemaName, rabbitmq.ORDER_RK, order.ID.String()); err != nil {
+				fmt.Println("error sending message to rabbitmq: " + err.Error())
+			}
+		}
 	}
 
 	return nil
