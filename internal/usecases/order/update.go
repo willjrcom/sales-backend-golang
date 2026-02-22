@@ -3,6 +3,7 @@ package orderusecases
 import (
 	"context"
 	"fmt"
+	"math"
 
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
@@ -19,12 +20,17 @@ import (
 
 func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) error {
 	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
-
 	if err != nil {
 		return err
 	}
 
 	order := orderModel.ToDomain()
+
+	for _, groupItem := range order.GroupItems {
+		if math.Mod(groupItem.Quantity, 1) != 0 {
+			return orderentity.ErrQuantityNotInteger
+		}
+	}
 
 	processRules, err := s.rpr.GetMapProcessRulesByFirstOrder(ctx)
 	if err != nil {
@@ -53,7 +59,7 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 			if err != nil {
 				fmt.Println("error getting schema name: " + err.Error())
 			} else if s.rabbitmq != nil {
-				if err := s.rabbitmq.SendMessage(schemaName, rabbitmq.GROUP_ITEM_QUEUE, groupItem.ID.String()); err != nil {
+				if err := s.rabbitmq.SendMessage(schemaName, rabbitmq.GROUP_ITEM_RK, groupItem.ID.String()); err != nil {
 					fmt.Println("error sending message to rabbitmq: " + err.Error())
 				}
 			}

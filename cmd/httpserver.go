@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	"github.com/spf13/cobra"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
@@ -38,7 +37,7 @@ var HttpserverCmd = &cobra.Command{
 		cmd.Println("db loaded")
 
 		conn := os.Getenv("RABBITMQ_URL")
-		rabbitmqService, err := rabbitmq.NewInstance(conn, 5, 1*time.Second)
+		rabbitmqService, err := rabbitmq.NewInstance(conn)
 		if err != nil {
 			log.Fatalf("Error creating RabbitMQ instance: %s", err)
 		}
