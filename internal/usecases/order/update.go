@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -13,6 +14,7 @@ import (
 	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
 	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/rabbitmq"
 )
 
 func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDRequest) error {
@@ -47,8 +49,14 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 		}
 
 		if groupItem.Category.NeedPrint {
-			//rabbitmq
-
+			schemaName, err := database.GetCurrentSchema(ctx)
+			if err != nil {
+				fmt.Println("error getting schema name: " + err.Error())
+			} else if s.rabbitmq != nil {
+				if err := s.rabbitmq.SendMessage(schemaName, rabbitmq.GROUP_ITEM_QUEUE, groupItem.ID.String()); err != nil {
+					fmt.Println("error sending message to rabbitmq: " + err.Error())
+				}
+			}
 		}
 
 		processRuleID, ok := processRules[groupItem.CategoryID]

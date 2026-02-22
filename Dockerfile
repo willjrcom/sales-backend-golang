@@ -11,7 +11,7 @@ RUN go mod download
 COPY . .
 
 # Compile o binário
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/sales-backend main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o sales-backend .
 
 # Runtime stage
 FROM alpine:3.19

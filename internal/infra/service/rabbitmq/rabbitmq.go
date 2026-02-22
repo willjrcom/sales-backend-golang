@@ -8,6 +8,11 @@ import (
 	"github.com/streadway/amqp"
 )
 
+const (
+	GROUP_ITEM_QUEUE = "group_item_queue"
+	ORDER_QUEUE      = "order_queue"
+)
+
 // RabbitMQ structure to manage connection and channel
 type RabbitMQ struct {
 	conn    *amqp.Connection
