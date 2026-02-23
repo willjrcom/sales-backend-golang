@@ -19,6 +19,7 @@ type CategoryCreateDTO struct {
 	RemovableIngredients []string `json:"removable_ingredients"`
 	IsAdditional         bool     `json:"is_additional"`
 	IsComplement         bool     `json:"is_complement"`
+	AllowFractional      bool     `json:"allow_fractional"`
 	IsActive             *bool    `json:"is_active"`
 }
 
@@ -50,6 +51,7 @@ func (c *CategoryCreateDTO) ToDomain() (*productentity.ProductCategory, error) {
 		IsAdditional:         c.IsAdditional,
 		IsComplement:         c.IsComplement,
 		IsActive:             isActive,
+		AllowFractional:      c.AllowFractional,
 	}
 
 	return productentity.NewProductCategory(categoryCommonAttributes), nil

@@ -24,6 +24,7 @@ type ProductCategoryCommonAttributes struct {
 	IsComplement         bool
 	AdditionalCategories []ProductCategory
 	ComplementCategories []ProductCategory
+	AllowFractional      bool
 }
 
 func NewProductCategory(categoryCommonAttributes ProductCategoryCommonAttributes) *ProductCategory {

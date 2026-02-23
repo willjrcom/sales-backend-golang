@@ -16,12 +16,13 @@ import (
 )
 
 var (
-	ErrCategoryNotFound           = errors.New("category not found")
-	ErrSizeNotFound               = errors.New("size not found")
-	ErrSizeNotActive              = errors.New("size not active")
-	ErrGroupItemNotBelongsToOrder = errors.New("group item not belongs to order")
-	ErrGroupNotStaging            = errors.New("group not staging")
-	ErrItemNotStagingAndPending   = errors.New("item not staging or pending")
+	ErrCategoryNotFound             = errors.New("category not found")
+	ErrSizeNotFound                 = errors.New("size not found")
+	ErrSizeNotActive                = errors.New("size not active")
+	ErrGroupItemNotBelongsToOrder   = errors.New("group item not belongs to order")
+	ErrGroupNotStaging              = errors.New("group not staging")
+	ErrItemNotStagingAndPending     = errors.New("item not staging or pending")
+	ErrFractionalQuantityNotAllowed = errors.New("fractional quantity not allowed for this category")
 )
 
 type ItemService struct {
@@ -91,6 +92,10 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 
 	if product.Category == nil {
 		return nil, ErrCategoryNotFound
+	}
+
+	if product.Category.AllowFractional == false && dto.Quantity != float64(int64(dto.Quantity)) {
+		return nil, ErrFractionalQuantityNotAllowed
 	}
 
 	if variation.Size == nil {

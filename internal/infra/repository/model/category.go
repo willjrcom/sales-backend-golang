@@ -20,6 +20,7 @@ type ProductCategoryCommonAttributes struct {
 	UseProcessRule       bool              `bun:"use_process_rule,notnull"`
 	RemovableIngredients []string          `bun:"removable_ingredients,type:jsonb"`
 	IsActive             bool              `bun:"column:is_active,type:boolean"`
+	AllowFractional      bool              `bun:"allow_fractional"`
 	Sizes                []Size            `bun:"rel:has-many,join:id=category_id"`
 	Products             []Product         `bun:"rel:has-many,join:id=category_id"`
 	ProcessRules         []ProcessRule     `bun:"rel:has-many,join:id=category_id"`
@@ -43,6 +44,7 @@ func (c *ProductCategory) FromDomain(category *productentity.ProductCategory) {
 			UseProcessRule:       category.UseProcessRule,
 			RemovableIngredients: category.RemovableIngredients,
 			IsActive:             category.IsActive,
+			AllowFractional:      category.AllowFractional,
 			Sizes:                []Size{},
 			Products:             []Product{},
 			ProcessRules:         []ProcessRule{},
@@ -98,6 +100,7 @@ func (c *ProductCategory) ToDomain() *productentity.ProductCategory {
 			UseProcessRule:       c.UseProcessRule,
 			RemovableIngredients: c.RemovableIngredients,
 			IsActive:             c.IsActive,
+			AllowFractional:      c.AllowFractional,
 			Sizes:                []productentity.Size{},
 			Products:             []productentity.Product{},
 			ProcessRules:         []productentity.ProcessRule{},
