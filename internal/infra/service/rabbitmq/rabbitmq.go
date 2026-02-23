@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/streadway/amqp"
@@ -21,6 +22,7 @@ type RabbitMQ struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
 	url     string
+	mu      sync.Mutex
 }
 
 type PrintMessage struct {
@@ -30,41 +32,57 @@ type PrintMessage struct {
 
 // NewInstance creates and returns a new instance of RabbitMQ with retries
 func NewInstance(url string) (*RabbitMQ, error) {
-	var conn *amqp.Connection
-	var ch *amqp.Channel
-	var err error
+	r := &RabbitMQ{url: url}
+	if err := r.connect(); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
 
-	// Try to connect and create a channel with retries
-	for i := range 5 {
-		conn, err = amqp.Dial(url)
+// connect handles the actual connection and channel creation with retries
+func (r *RabbitMQ) connect() error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	var err error
+	for i := 0; i < 5; i++ {
+		r.conn, err = amqp.Dial(r.url)
 		if err == nil {
-			ch, err = conn.Channel()
+			r.channel, err = r.conn.Channel()
 			if err == nil {
-				break
+				log.Println("Successfully connected to RabbitMQ")
+				return nil
 			}
-			conn.Close()
+			r.conn.Close()
 		}
 		log.Printf("Retrying RabbitMQ connection (attempt %d/5)...", i+1)
 		time.Sleep(2 * time.Second)
 	}
 
-	// If we failed to connect after retries
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect to RabbitMQ: %s", err)
-	}
+	return fmt.Errorf("failed to connect to RabbitMQ after retries: %v", err)
+}
 
-	return &RabbitMQ{
-		conn:    conn,
-		channel: ch,
-		url:     url,
-	}, nil
+// reconnectIfClosed checks if connection or channel is closed and reconnects if necessary
+func (r *RabbitMQ) reconnectIfClosed() error {
+	if r.conn == nil || r.conn.IsClosed() || r.channel == nil {
+		log.Println("RabbitMQ connection closed, attempting to reconnect...")
+		return r.connect()
+	}
+	return nil
 }
 
 // EnsureExchangeQueueAndBind ensures the exchange, queue, and binding exist
 func (r *RabbitMQ) EnsureExchangeQueueAndBind(exchange, routingKey string) error {
+	if err := r.reconnectIfClosed(); err != nil {
+		return err
+	}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	// Names for Exchange and Queue
-	exchangeName := fmt.Sprintf("%s_exchange", exchange)          // Example: empresa_123_exchange
-	queueName := fmt.Sprintf("%s_%s_queue", exchange, routingKey) // Example: empresa_123_impressao.pedido_queue
+	exchangeName := fmt.Sprintf("%s_exchange", exchange)
+	queueName := fmt.Sprintf("%s_%s_queue", exchange, routingKey)
 
 	// Declare the Exchange (direct type)
 	err := r.channel.ExchangeDeclare(
@@ -130,6 +148,9 @@ func (r *RabbitMQ) SendMessage(exchange, routingKey, message string) error {
 		return fmt.Errorf("failed to ensure exchange, queue and binding: %s", err)
 	}
 
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	// Publish the message to the exchange with the routing key
 	exchangeName := fmt.Sprintf("%s_exchange", exchange)
 	err = r.channel.Publish(
@@ -158,8 +179,11 @@ func (r *RabbitMQ) ConsumeMessages(exchange, routingKey string) (<-chan amqp.Del
 		return nil, fmt.Errorf("failed to ensure exchange, queue and binding: %s", err)
 	}
 
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	// Start consuming messages from the queue
-	queueName := fmt.Sprintf("%s_%s_queue", exchange, routingKey) // Example: empresa_123_impressao.pedido_queue
+	queueName := fmt.Sprintf("%s_%s_queue", exchange, routingKey)
 	msgs, err := r.channel.Consume(
 		queueName, // Queue name
 		"",        // Consumer name
@@ -178,10 +202,17 @@ func (r *RabbitMQ) ConsumeMessages(exchange, routingKey string) (<-chan amqp.Del
 
 // Close closes the RabbitMQ connection and channel
 func (r *RabbitMQ) Close() {
-	if err := r.channel.Close(); err != nil {
-		log.Printf("Error closing channel: %s", err)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if r.channel != nil {
+		if err := r.channel.Close(); err != nil {
+			log.Printf("Error closing channel: %s", err)
+		}
 	}
-	if err := r.conn.Close(); err != nil {
-		log.Printf("Error closing connection: %s", err)
+	if r.conn != nil {
+		if err := r.conn.Close(); err != nil {
+			log.Printf("Error closing connection: %s", err)
+		}
 	}
 }
