@@ -65,6 +65,7 @@ const (
 	PermissionShift                        PermissionKey = "shift"
 	PermissionManageCompany                PermissionKey = "manage-company"
 	PermissionStatistics                   PermissionKey = "statistics"
+	PermissionMenuDigital                  PermissionKey = "menu-digital"
 )
 
 // GetAllPermissions retorna todas as permissões possíveis
@@ -90,6 +91,7 @@ func GetAllPermissions() []PermissionKey {
 		PermissionShift,
 		PermissionManageCompany,
 		PermissionStatistics,
+		PermissionMenuDigital,
 	}
 }
 
