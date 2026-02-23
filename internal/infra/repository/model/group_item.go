@@ -36,6 +36,7 @@ type GroupDetails struct {
 	Category         *ProductCategory `bun:"rel:belongs-to,join:category_id=id"`
 	ComplementItemID *uuid.UUID       `bun:"column:complement_item_id,type:uuid"`
 	ComplementItem   *Item            `bun:"rel:belongs-to,join:complement_item_id=id"`
+	CancelledReason  string           `bun:"cancelled_reason"`
 }
 
 type GroupItemTimeLogs struct {
@@ -68,6 +69,7 @@ func (g *GroupItem) FromDomain(groupItem *orderentity.GroupItem) {
 				Category:         &ProductCategory{},
 				ComplementItemID: groupItem.ComplementItemID,
 				ComplementItem:   &Item{},
+				CancelledReason:  groupItem.CancelledReason,
 			},
 		},
 		GroupItemTimeLogs: GroupItemTimeLogs{
@@ -111,6 +113,7 @@ func (g *GroupItem) ToDomain() *orderentity.GroupItem {
 				Category:         g.Category.ToDomain(),
 				ComplementItemID: g.ComplementItemID,
 				ComplementItem:   g.ComplementItem.ToDomain(),
+				CancelledReason:  g.CancelledReason,
 			},
 		},
 		GroupItemTimeLogs: orderentity.GroupItemTimeLogs{

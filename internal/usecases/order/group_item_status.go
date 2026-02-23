@@ -3,6 +3,7 @@ package orderusecases
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
@@ -101,6 +102,11 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, id string, dto *
 		s.restoreStockFromGroupItem(ctx, groupItem, employee.ID)
 	}
 
+	if dto.Reason != nil && *dto.Reason != "" {
+		return fmt.Errorf("reason is required")
+	}
+
+	groupItem.CancelledReason = *dto.Reason
 	groupItem.CancelGroupItem()
 
 	groupItemModel.FromDomain(groupItem)
@@ -116,11 +122,6 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, id string, dto *
 		return err
 	}
 
-	reason := "group item cancelled"
-	if dto.Reason != nil && *dto.Reason != "" {
-		reason = *dto.Reason
-	}
-
 	dtoId := &entitydto.IDRequest{ID: groupItemModel.ID}
 	processes, err := s.sop.GetProcessesByGroupItemID(ctx, dtoId)
 	if err != nil {
@@ -133,7 +134,7 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, id string, dto *
 
 	for _, process := range processes {
 		dtoProcessID := entitydto.NewIdRequest(process.ID)
-		orderProcessCancelDTO := &orderprocessdto.OrderProcessCancelDTO{Reason: &reason}
+		orderProcessCancelDTO := &orderprocessdto.OrderProcessCancelDTO{Reason: dto.Reason}
 		if err = s.sop.CancelProcess(ctx, dtoProcessID, orderProcessCancelDTO); err != nil {
 			return err
 		}
