@@ -102,7 +102,7 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, id string, dto *
 		s.restoreStockFromGroupItem(ctx, groupItem, employee.ID)
 	}
 
-	if dto.Reason != nil && *dto.Reason != "" {
+	if dto.Reason == nil || *dto.Reason == "" {
 		return fmt.Errorf("reason is required")
 	}
 
