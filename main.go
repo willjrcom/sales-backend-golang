@@ -37,6 +37,9 @@ func main() {
 	rootCmd.AddCommand(cmd.MigrateAllCmd)
 	rootCmd.AddCommand(cmd.PublicMigrateAllCmd)
 
+	// Email Worker
+	rootCmd.AddCommand(cmd.EmailworkerCmd)
+
 	ctx := context.Background()
 	if err := rootCmd.ExecuteContext(ctx); err != nil {
 		panic(err)

@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
-	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
@@ -43,6 +42,11 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 		return err
 	}
 
+	company, err := s.sc.GetCompany(ctx)
+	if err != nil {
+		return err
+	}
+
 	for i, groupItem := range order.GroupItems {
 		if groupItem.Status != orderentity.StatusGroupStaging {
 			continue
@@ -55,14 +59,9 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 			continue
 		}
 
-		if groupItem.Category.NeedPrint {
-			schemaName, err := database.GetCurrentSchema(ctx)
-			if err != nil {
-				fmt.Println("error getting schema name: " + err.Error())
-			} else if s.rabbitmq != nil {
-				if err := s.rabbitmq.SendMessage(schemaName, rabbitmq.GROUP_ITEM_RK, groupItem.ID.String()); err != nil {
-					fmt.Println("error sending message to rabbitmq: " + err.Error())
-				}
+		if groupItem.Category.NeedPrint && s.rabbitmq != nil {
+			if err := s.rabbitmq.SendPrintMessage(rabbitmq.GROUP_ITEM_EX, company.SchemaName, groupItem.ID.String(), groupItem.Category.PrinterName); err != nil {
+				fmt.Println("error sending message to rabbitmq: " + err.Error())
 			}
 		}
 
@@ -110,17 +109,11 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 		return err
 	}
 
-	company, err := s.sc.GetCompany(ctx)
-	if err != nil {
-		return err
-	}
-
-	if printOrder, err := company.Preferences.GetBool(companyentity.EnablePrintOrderOnShipOrder); printOrder && err == nil {
-		schemaName, err := database.GetCurrentSchema(ctx)
-		if err != nil {
-			fmt.Println("error getting schema name: " + err.Error())
-		} else if s.rabbitmq != nil {
-			if err := s.rabbitmq.SendMessage(schemaName, rabbitmq.ORDER_RK, order.ID.String()); err != nil {
+	EnablePrintOrder, _ := company.Preferences.GetBool(companyentity.EnablePrintOrderOnShipOrder)
+	printerName, _ := company.Preferences.GetString(companyentity.PrinterOrderOnPendOrder)
+	if EnablePrintOrder && err == nil && printerName != "" {
+		if s.rabbitmq != nil {
+			if err := s.rabbitmq.SendPrintMessage(rabbitmq.ORDER_EX, company.SchemaName, order.ID.String(), printerName); err != nil {
 				fmt.Println("error sending message to rabbitmq: " + err.Error())
 			}
 		}

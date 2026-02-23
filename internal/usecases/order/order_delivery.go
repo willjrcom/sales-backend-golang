@@ -3,12 +3,14 @@ package orderusecases
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdeliverydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_delivery"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/rabbitmq"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 )
 
@@ -24,7 +26,7 @@ type IDeliveryService interface {
 	IUpdateDeliveryService
 }
 type ISetupDeliveryService interface {
-	AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, so *OrderService, rdd model.DeliveryDriverRepository, cs *companyusecases.Service)
+	AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, so *OrderService, rdd model.DeliveryDriverRepository, cs *companyusecases.Service, rabbitmq *rabbitmq.RabbitMQ)
 }
 
 type ICreateDeliveryService interface {
@@ -48,26 +50,28 @@ type IUpdateDeliveryService interface {
 }
 
 type OrderDeliveryService struct {
-	rdo model.OrderDeliveryRepository
-	ra  model.AddressRepository
-	rc  model.ClientRepository
-	ro  model.OrderRepository
-	rdd model.DeliveryDriverRepository
-	so  *OrderService
-	cs  *companyusecases.Service
+	rdo      model.OrderDeliveryRepository
+	ra       model.AddressRepository
+	rc       model.ClientRepository
+	ro       model.OrderRepository
+	rdd      model.DeliveryDriverRepository
+	so       *OrderService
+	cs       *companyusecases.Service
+	rabbitmq *rabbitmq.RabbitMQ
 }
 
 func NewDeliveryService(rdo model.OrderDeliveryRepository) IDeliveryService {
 	return &OrderDeliveryService{rdo: rdo}
 }
 
-func (s *OrderDeliveryService) AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, os *OrderService, rdd model.DeliveryDriverRepository, cs *companyusecases.Service) {
+func (s *OrderDeliveryService) AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, os *OrderService, rdd model.DeliveryDriverRepository, cs *companyusecases.Service, rabbitmq *rabbitmq.RabbitMQ) {
 	s.ra = ra
 	s.rc = rc
 	s.ro = ro
 	s.so = os
 	s.rdd = rdd
 	s.cs = cs
+	s.rabbitmq = rabbitmq
 }
 
 func (s *OrderDeliveryService) CreateOrderDelivery(ctx context.Context, dto *orderdeliverydto.DeliveryOrderCreateDTO) (*orderdeliverydto.OrderDeliveryIDDTO, error) {
@@ -225,6 +229,11 @@ func (s *OrderDeliveryService) ShipOrderDelivery(ctx context.Context, dtoShip *o
 		return err
 	}
 
+	company, err := s.cs.GetCompany(ctx)
+	if err != nil {
+		return err
+	}
+
 	for i := range orderDeliveries {
 		if err := orderDeliveries[i].Ship(&dtoShip.DriverID); err != nil {
 			return err
@@ -233,6 +242,14 @@ func (s *OrderDeliveryService) ShipOrderDelivery(ctx context.Context, dtoShip *o
 		orderDeliveryModel[i].FromDomain(&orderDeliveries[i])
 		if err := s.rdo.UpdateOrderDelivery(ctx, &orderDeliveryModel[i]); err != nil {
 			return err
+		}
+
+		EnablePrintOrderOnShipDelivery, _ := company.Preferences.GetBool(companyentity.EnablePrintOrderOnShipDelivery)
+		printerName, _ := company.Preferences.GetString(companyentity.PrinterDeliveryOnShipDelivery)
+		if s.rabbitmq != nil && EnablePrintOrderOnShipDelivery && printerName != "" {
+			if err := s.rabbitmq.SendPrintMessage(rabbitmq.ORDER_DELIVERY_EX, company.SchemaName, orderDeliveryModel[i].ID.String(), printerName); err != nil {
+				fmt.Println("error sending message to rabbitmq: " + err.Error())
+			}
 		}
 	}
 

@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"time"
@@ -9,8 +10,10 @@ import (
 )
 
 const (
-	GROUP_ITEM_RK = "print.group.item"
-	ORDER_RK      = "print.order"
+	GROUP_ITEM_EX     = "print.group.item"
+	ORDER_EX          = "print.order"
+	ORDER_DELIVERY_EX = "print.order.delivery"
+	EMAIL_EX          = "email"
 )
 
 // RabbitMQ structure to manage connection and channel
@@ -18,6 +21,11 @@ type RabbitMQ struct {
 	conn    *amqp.Connection
 	channel *amqp.Channel
 	url     string
+}
+
+type PrintMessage struct {
+	Id          string `json:"id"`
+	PrinterName string `json:"printer_name"`
 }
 
 // NewInstance creates and returns a new instance of RabbitMQ with retries
@@ -53,10 +61,10 @@ func NewInstance(url string) (*RabbitMQ, error) {
 }
 
 // EnsureExchangeQueueAndBind ensures the exchange, queue, and binding exist
-func (r *RabbitMQ) EnsureExchangeQueueAndBind(schemaName, routingKey string) error {
+func (r *RabbitMQ) EnsureExchangeQueueAndBind(exchange, routingKey string) error {
 	// Names for Exchange and Queue
-	exchangeName := fmt.Sprintf("%s_exchange", schemaName)         // Example: empresa_123_exchange
-	queueName := fmt.Sprintf("%s_%s_fila", schemaName, routingKey) // Example: empresa_123_impressao.pedido_fila
+	exchangeName := fmt.Sprintf("%s_exchange", exchange)          // Example: empresa_123_exchange
+	queueName := fmt.Sprintf("%s_%s_queue", exchange, routingKey) // Example: empresa_123_impressao.pedido_queue
 
 	// Declare the Exchange (direct type)
 	err := r.channel.ExchangeDeclare(
@@ -100,16 +108,30 @@ func (r *RabbitMQ) EnsureExchangeQueueAndBind(schemaName, routingKey string) err
 	return nil
 }
 
+func (r *RabbitMQ) SendPrintMessage(exchage, routingKey, message, printerName string) error {
+	printMessage := PrintMessage{
+		Id:          message,
+		PrinterName: printerName,
+	}
+
+	printMessageJSON, err := json.Marshal(printMessage)
+	if err != nil {
+		return fmt.Errorf("failed to marshal print message: %s", err)
+	}
+
+	return r.SendMessage(exchage, routingKey, string(printMessageJSON))
+}
+
 // SendMessage sends a message to a specific company's exchange with a routing key
-func (r *RabbitMQ) SendMessage(schemaName, routingKey, message string) error {
+func (r *RabbitMQ) SendMessage(exchange, routingKey, message string) error {
 	// Ensure the exchange, queue, and binding are created
-	err := r.EnsureExchangeQueueAndBind(schemaName, routingKey)
+	err := r.EnsureExchangeQueueAndBind(exchange, routingKey)
 	if err != nil {
 		return fmt.Errorf("failed to ensure exchange, queue and binding: %s", err)
 	}
 
 	// Publish the message to the exchange with the routing key
-	exchangeName := fmt.Sprintf("%s_exchange", schemaName)
+	exchangeName := fmt.Sprintf("%s_exchange", exchange)
 	err = r.channel.Publish(
 		exchangeName, // Exchange name
 		routingKey,   // Routing key (topic)
@@ -129,15 +151,15 @@ func (r *RabbitMQ) SendMessage(schemaName, routingKey, message string) error {
 }
 
 // ConsumeMessages starts consuming messages from the specified company's queue
-func (r *RabbitMQ) ConsumeMessages(schemaName, routingKey string) (<-chan amqp.Delivery, error) {
+func (r *RabbitMQ) ConsumeMessages(exchange, routingKey string) (<-chan amqp.Delivery, error) {
 	// Ensure the exchange, queue, and binding exist
-	err := r.EnsureExchangeQueueAndBind(schemaName, routingKey)
+	err := r.EnsureExchangeQueueAndBind(exchange, routingKey)
 	if err != nil {
 		return nil, fmt.Errorf("failed to ensure exchange, queue and binding: %s", err)
 	}
 
 	// Start consuming messages from the queue
-	queueName := fmt.Sprintf("%s_%s_fila", schemaName, routingKey) // Example: empresa_123_impressao.pedido_fila
+	queueName := fmt.Sprintf("%s_%s_queue", exchange, routingKey) // Example: empresa_123_impressao.pedido_queue
 	msgs, err := r.channel.Consume(
 		queueName, // Queue name
 		"",        // Consumer name

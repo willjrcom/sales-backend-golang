@@ -1,47 +1,42 @@
 package emailservice
 
 import (
+	"encoding/json"
 	"fmt"
-	"os"
-	"strconv"
 
-	"gopkg.in/gomail.v2"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/rabbitmq"
 )
 
 type BodyEmail struct {
-	Email   string
-	Subject string
-	Body    string
+	Email   string `json:"email"`
+	Subject string `json:"subject"`
+	Body    string `json:"body"`
 }
 
-func SendEmail(bodyEmail *BodyEmail) error {
-	// Configurações do e-mail
-	smtpHost := os.Getenv("SMTP_HOST")
-	smtpPort := os.Getenv("SMTP_PORT")
-	senderEmail := os.Getenv("EMAIL_SERVICE")
-	senderPass := os.Getenv("PASSWORD_EMAIL_SERVICE")
+type Service struct {
+	rabbitmq *rabbitmq.RabbitMQ
+}
 
-	port, err := strconv.Atoi(smtpPort)
+func NewService(rabbitmq *rabbitmq.RabbitMQ) *Service {
+	return &Service{rabbitmq: rabbitmq}
+}
+
+func (s *Service) SendEmail(bodyEmail *BodyEmail) error {
+	if s.rabbitmq == nil {
+		return fmt.Errorf("rabbitmq service not initialized")
+	}
+
+	bodyJSON, err := json.Marshal(bodyEmail)
 	if err != nil {
-		return fmt.Errorf("Erro ao converter a porta do email: %v", err)
+		return fmt.Errorf("error marshaling email body: %v", err)
 	}
 
-	// Criar mensagem
-	m := gomail.NewMessage()
-	m.SetHeader("From", senderEmail)
-	m.SetHeader("To", bodyEmail.Email)
-	m.SetHeader("Subject", bodyEmail.Subject)
-	m.SetBody("text/html", bodyEmail.Body)
-
-	// Configurar servidor SMTP
-	d := gomail.NewDialer(smtpHost, port, senderEmail, senderPass)
-
-	// Enviar o e-mail
-	if err := d.DialAndSend(m); err != nil {
-		fmt.Printf("Erro ao enviar o e-mail: %v\n", err)
-		return err
+	// Publish to RabbitMQ using the common EMAIL_EX exchange
+	// We use an empty routing key since it's a direct exchange for emails
+	if err := s.rabbitmq.SendMessage(rabbitmq.EMAIL_EX, "", string(bodyJSON)); err != nil {
+		return fmt.Errorf("error publishing email to rabbitmq: %v", err)
 	}
 
-	fmt.Println("E-mail enviado com sucesso!")
+	fmt.Println("Email message published to RabbitMQ successfully")
 	return nil
 }

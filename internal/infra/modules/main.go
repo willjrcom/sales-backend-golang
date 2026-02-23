@@ -5,6 +5,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
 	companyrepositorybun "github.com/willjrcom/sales-backend-go/internal/infra/repository/postgres/company"
+	emailservice "github.com/willjrcom/sales-backend-go/internal/infra/service/email"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/rabbitmq"
 	s3service "github.com/willjrcom/sales-backend-go/internal/infra/service/s3"
 )
@@ -49,7 +50,9 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, rabb
 	NewCompanyCategoryModule(db, chi)
 	_, schemaService := NewSchemaModule(db, chi)
 	userRepository, userService, _ := NewUserModule(db, chi)
+	emailService := emailservice.NewService(rabbitmq)
 
+	go emailService.RunConsumer()
 	// Fiscal invoice and usage cost modules
 	_, _, _ = NewFiscalInvoiceModule(db, chi, companyRepository, companySubscriptionRepo, orderRepository, companyService, usageCostRepo)
 	NewFiscalSettingsModule(db, chi, companyRepository, companyService)
@@ -64,6 +67,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, rabb
 	chi.AddHandler(handlerimpl.NewHandlerPublicData(companyService, userService))
 
 	checkoutUC.AddDependencies(userRepository)
+	userService.AddDependencies(emailService)
 	clientService.AddDependencies(contactRepository, companyService)
 	employeeService.AddDependencies(contactRepository, userRepository, companyRepository)
 
@@ -76,7 +80,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, rabb
 	stockService.AddDependencies(productRepository, itemRepository)
 
 	orderService.AddDependencies(orderRepository, shiftRepository, productRepository, processRuleRepository, orderDeliveryRepository, stockRepository, stockMovementRepository, companySubscriptionRepo, groupItemService, orderProcessService, orderQueueService, orderDeliveryService, orderPickupService, orderTableService, companyService, employeeRepository, rabbitmq)
-	orderDeliveryService.AddDependencies(addressRepository, clientRepository, orderRepository, orderService, deliveryDriverRepository, companyService)
+	orderDeliveryService.AddDependencies(addressRepository, clientRepository, orderRepository, orderService, deliveryDriverRepository, companyService, rabbitmq)
 	deliveryDriverService.AddDependencies(employeeRepository)
 	orderTableService.AddDependencies(tableRepository, orderService, companyService)
 	orderPickupService.AddDependencies(orderService)

@@ -23,11 +23,16 @@ var (
 )
 
 type Service struct {
-	r model.UserRepository
+	r            model.UserRepository
+	emailService *emailservice.Service
 }
 
 func NewService(r model.UserRepository) *Service {
 	return &Service{r: r}
+}
+
+func (s *Service) AddDependencies(emailService *emailservice.Service) {
+	s.emailService = emailService
 }
 
 func (s *Service) CreateUser(ctx context.Context, dto *companydto.UserCreateDTO) (*uuid.UUID, error) {
@@ -93,8 +98,10 @@ func (s *Service) CreateUser(ctx context.Context, dto *companydto.UserCreateDTO)
 		}
 
 		// Send email service
-		if err := emailservice.SendEmail(bodyEmail); err != nil {
-			fmt.Println("Error sending email:", err)
+		if s.emailService != nil {
+			if err := s.emailService.SendEmail(bodyEmail); err != nil {
+				fmt.Println("Error sending email:", err)
+			}
 		}
 	}()
 	return &user.ID, err
@@ -205,8 +212,10 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 	`,
 	}
 	// Send email service
-	if err := emailservice.SendEmail(bodyEmail); err != nil {
-		return err
+	if s.emailService != nil {
+		if err := s.emailService.SendEmail(bodyEmail); err != nil {
+			return err
+		}
 	}
 
 	return nil
