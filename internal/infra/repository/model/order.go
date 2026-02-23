@@ -32,7 +32,7 @@ type OrderDetail struct {
 	TotalChange   decimal.Decimal `bun:"total_change,type:decimal(10,2)"`
 	QuantityItems float64         `bun:"quantity_items"`
 	Observation   string          `bun:"observation"`
-	AttendantID   *uuid.UUID      `bun:"column:attendant_id,type:uuid,notnull"`
+	AttendantID   *uuid.UUID      `bun:"column:attendant_id,type:uuid"`
 	Attendant     *Employee       `bun:"rel:belongs-to"`
 	ShiftID       uuid.UUID       `bun:"column:shift_id,type:uuid,notnull"`
 }

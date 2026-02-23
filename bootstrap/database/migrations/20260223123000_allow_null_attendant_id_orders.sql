@@ -1,0 +1,1 @@
+ALTER TABLE orders ALTER COLUMN attendant_id DROP NOT NULL;

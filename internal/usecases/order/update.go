@@ -148,11 +148,16 @@ func (s *OrderService) debitStockFromOrder(ctx context.Context, order *orderenti
 
 				stock := stockModel.ToDomain()
 
+				attendantID := uuid.Nil
+				if order.AttendantID != nil {
+					attendantID = *order.AttendantID
+				}
+
 				// Reservar estoque (permite estoque negativo)
 				movement, err := stock.ReserveStock(
 					decimal.NewFromFloat(item.Quantity),
 					order.ID,
-					*order.AttendantID,
+					attendantID,
 					item.Price,
 					item.TotalPrice,
 				)
@@ -206,11 +211,16 @@ func (s *OrderService) restoreStockFromOrder(ctx context.Context, order *orderen
 
 				stock := stockModel.ToDomain()
 
+				attendantID := uuid.Nil
+				if order.AttendantID != nil {
+					attendantID = *order.AttendantID
+				}
+
 				// Restaurar estoque
 				movement, err := stock.RestoreStock(
 					decimal.NewFromFloat(item.Quantity),
 					order.ID,
-					*order.AttendantID,
+					attendantID,
 					item.Price,
 					item.TotalPrice,
 				)
