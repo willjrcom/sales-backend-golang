@@ -22,61 +22,56 @@ func truncate(s string, max int) string {
 // FormatOrder generates ESC/POS bytes for a 40-column receipt of the given order.
 // It initializes the printer, selects Latin-1 code page, prints the header, item groups, footer, and cuts the paper.
 func FormatOrder(o *orderentity.Order, company *companydto.CompanyDTO) ([]byte, error) {
-	var buf bytes.Buffer
-	buf.WriteString(escInit)
-	buf.WriteString(escCodePageLatin1)
+	var final bytes.Buffer
+	final.WriteString(escInit)
+	final.WriteString(escCodePageLatin1)
 
-	// Build raw text for receipt
-	var raw bytes.Buffer
-	formatHeader(&raw, o, company)
+	// --- CABEÇALHO (Centralizado e Negrito) ---
+	var headerRaw bytes.Buffer
+	formatHeader(&headerRaw, o, company)
+	final.WriteString(escAlignCenter)
+	final.WriteString(escBoldOn)
+	final.Write(ToLatin1(headerRaw.String()))
+	final.WriteString(escBoldOff)
+	final.WriteString(escAlignLeft)
 
+	// --- CORPO (Tabelado) ---
+	var bodyRaw bytes.Buffer
 	switch {
 	case o.Delivery != nil:
-		formatDeliverySection(&raw, o, company)
+		formatDeliverySection(&bodyRaw, o, company)
 	case o.Pickup != nil:
-		formatPickupSection(&raw, o, company)
+		formatPickupSection(&bodyRaw, o, company)
 	case o.Table != nil:
-		formatTableSection(&raw, o, company)
+		formatTableSection(&bodyRaw, o, company)
 	}
 
-	// Observation (Top)
 	if o.Observation != "" {
-		raw.WriteString(escBoldOn)
-		raw.WriteString("Observação do pedido" + newline)
-		raw.WriteString(o.Observation + newline)
-		raw.WriteString(escBoldOff)
-		raw.WriteString(newline)
+		bodyRaw.WriteString("Observação do pedido" + newline)
+		bodyRaw.WriteString(o.Observation + newline + newline)
 	}
 
-	printGroupItemsSection(&raw, o.GroupItems)
+	printGroupItemsSection(&bodyRaw, o.GroupItems)
+	formatTotalFooter(&bodyRaw, o)
+	formatPaymentsSection(&bodyRaw, o)
+	formatOrderValuesFooter(&bodyRaw, o)
+	bodyRaw.WriteString(strings.Repeat(newline, 3))
 
-	formatTotalFooter(&raw, o)
+	// Alinha colunas do corpo
+	var bodyAligned bytes.Buffer
+	tw := tabwriter.NewWriter(&bodyAligned, 6, 11, 2, ' ', 0)
+	tw.Write(bodyRaw.Bytes())
+	tw.Flush()
 
-	formatPaymentsSection(&raw, o)
+	final.Write(ToLatin1(bodyAligned.String()))
 
-	// Change/Paid Details aka Footer
-	formatOrderValuesFooter(&raw, o)
-	raw.WriteString(strings.Repeat(newline, 3))
-
-	// Align columns using tabwriter into main buffer, checking for errors
-	tw := tabwriter.NewWriter(&buf, 6, 11, 2, ' ', 0)
-	if _, err := tw.Write(raw.Bytes()); err != nil {
-		return nil, err
-	}
-	if err := tw.Flush(); err != nil {
-		return nil, err
-	}
-
-	buf.WriteString(escCut)
-	return buf.Bytes(), nil
+	final.WriteString(escCut)
+	return final.Bytes(), nil
 }
 
 func formatHeader(buf *bytes.Buffer, o *orderentity.Order, company *companydto.CompanyDTO) {
-	buf.WriteString(escAlignCenter)
-	buf.WriteString(escBoldOn)
 	if company != nil {
 		fmt.Fprintf(buf, "%s%s", company.TradeName, newline)
-		buf.WriteString(escBoldOff)
 		if company.Cnpj != "" {
 			fmt.Fprintf(buf, "CNPJ: %s%s", company.Cnpj, newline)
 		}
@@ -88,10 +83,8 @@ func formatHeader(buf *bytes.Buffer, o *orderentity.Order, company *companydto.C
 			fmt.Fprintf(buf, "Contato: %s%s", company.Contacts[0], newline)
 		}
 	}
-	buf.WriteString(escBoldOff)
 	buf.WriteString(newline)
 
-	buf.WriteString(escAlignLeft)
 	fmt.Fprintf(buf, "PEDIDO #%d%s", o.OrderNumber, newline)
 
 	if o.PendingAt != nil {
@@ -117,8 +110,6 @@ func printGroupItemsSection(buf *bytes.Buffer, groups []orderentity.GroupItem) {
 // printGroupItem prints group header, its items, any complement, and subtotal.
 func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 	// Header: category and size
-	buf.WriteString(escAlignLeft)
-	buf.WriteString(escBoldOn)
 	var parts []string
 
 	if c := group.Category; c != nil && c.Name != "" {
@@ -171,9 +162,7 @@ func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 	}
 
 	// Subtotal for this group
-	buf.WriteString(escBoldOn)
 	buf.WriteString(fmt.Sprintf("Subtotal:\t\tR$ %.2f%s", d2f(group.TotalPrice), newline))
-	buf.WriteString(escBoldOff)
 }
 
 func printComplementItem(buf *bytes.Buffer, comp *orderentity.Item, group *orderentity.GroupItem) {
@@ -385,15 +374,48 @@ func formatPaymentsSection(buf *bytes.Buffer, o *orderentity.Order) {
 // FormatGroupItem generates ESC/POS bytes for a 40-column receipt section for a single group of items.
 // It prints each item of the group followed by a separator line.
 func FormatGroupItem(group *orderentity.GroupItem) ([]byte, error) {
-	var buf bytes.Buffer
-	printGroupItem(&buf, group)
-	buf.WriteString(strings.Repeat("-", 40) + newline)
-	return buf.Bytes(), nil
+	var body bytes.Buffer
+	var raw bytes.Buffer
+
+	printGroupItem(&raw, group)
+	raw.WriteString(strings.Repeat("-", 40) + newline)
+
+	tw := tabwriter.NewWriter(&body, 6, 11, 2, ' ', 0)
+	if _, err := tw.Write(raw.Bytes()); err != nil {
+		return nil, err
+	}
+	if err := tw.Flush(); err != nil {
+		return nil, err
+	}
+
+	var final bytes.Buffer
+	final.WriteString(escInit)
+	final.WriteString(escCodePageLatin1)
+	final.Write(ToLatin1(body.String()))
+	final.WriteString(escCut)
+
+	return final.Bytes(), nil
 }
 
 // FormatItem generates ESC/POS bytes for a single order item, including its additional items.
 func FormatItem(item *orderentity.Item) ([]byte, error) {
-	var buf bytes.Buffer
-	printItem(&buf, item)
-	return buf.Bytes(), nil
+	var body bytes.Buffer
+	var raw bytes.Buffer
+
+	printItem(&raw, item)
+
+	tw := tabwriter.NewWriter(&body, 6, 11, 2, ' ', 0)
+	if _, err := tw.Write(raw.Bytes()); err != nil {
+		return nil, err
+	}
+	if err := tw.Flush(); err != nil {
+		return nil, err
+	}
+
+	var final bytes.Buffer
+	final.WriteString(escInit)
+	final.WriteString(escCodePageLatin1)
+	final.Write(ToLatin1(body.String()))
+	// No cut for single item by default, but let's keep consistency with encoding
+	return final.Bytes(), nil
 }

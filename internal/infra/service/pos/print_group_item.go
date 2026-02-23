@@ -12,27 +12,35 @@ import (
 // FormatGroupItemKitchen generates ESC/POS bytes for a kitchen print of a group of items,
 // showing only item names, and complements, without prices or totals.
 func FormatGroupItemKitchen(group *orderentity.GroupItem, company *companydto.CompanyDTO) ([]byte, error) {
-	var buf bytes.Buffer
+	var final bytes.Buffer
 	// Initialize printer and select Latin-1 code page
-	buf.WriteString(escInit)
-	buf.WriteString(escCodePageLatin1)
+	final.WriteString(escInit)
+	final.WriteString(escCodePageLatin1)
 
-	// print group items for kitchen
-	printGroupItemKitchenHeader(&buf, company)
-	printGroupItemKitchen(&buf, group)
+	// --- CABEÇALHO COZINHA (Centralizado e Negrito) ---
+	var headerRaw bytes.Buffer
+	printGroupItemKitchenHeader(&headerRaw, company)
+	final.WriteString(escAlignCenter)
+	final.WriteString(escBoldOn)
+	final.Write(ToLatin1(headerRaw.String()))
+	final.WriteString(escBoldOff)
+	final.WriteString(escAlignLeft)
 
-	// extra line feeds after group
-	buf.WriteString(strings.Repeat(newline, 2))
+	// --- CORPO COZINHA ---
+	var bodyRaw bytes.Buffer
+	printGroupItemKitchen(&bodyRaw, group)
+	bodyRaw.WriteString(strings.Repeat(newline, 2))
+
+	final.Write(ToLatin1(bodyRaw.String()))
 
 	// cut ticket
-	buf.WriteString(escCut)
-	return buf.Bytes(), nil
+	final.WriteString(escCut)
+	return final.Bytes(), nil
 }
 
 // printGroupItemKitchen writes group header, items, additions, removals, and group complement,
 // ignoring price values for kitchen production.
 func printGroupItemKitchen(buf *bytes.Buffer, group *orderentity.GroupItem) {
-	buf.WriteString(escAlignLeft)
 	// Header: category, size, quantity
 	var parts []string
 	if c := group.Category; c != nil && c.Name != "" {
@@ -68,12 +76,9 @@ func printGroupItemKitchen(buf *bytes.Buffer, group *orderentity.GroupItem) {
 }
 
 func printGroupItemKitchenHeader(buf *bytes.Buffer, company *companydto.CompanyDTO) {
-	buf.WriteString(escAlignCenter)
-	buf.WriteString(escBoldOn)
 	if company != nil {
 		fmt.Fprintf(buf, "%s%s", company.TradeName, newline)
 	}
 	buf.WriteString("Cozinha" + newline)
-	buf.WriteString(escBoldOff)
 	buf.WriteString(newline)
 }
