@@ -44,6 +44,7 @@ type GroupDetails struct {
 	Category         *productentity.ProductCategory
 	ComplementItemID *uuid.UUID
 	ComplementItem   *Item
+	CancelledReason  string
 }
 
 type GroupItemTimeLogs struct {

@@ -162,9 +162,13 @@ func (h *handlerGroupItemImpl) handlerCancelGroupByID(w http.ResponseWriter, r *
 		return
 	}
 
-	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+	dto := &groupitemdto.OrderGroupItemCancelDTO{}
+	if err := jsonpkg.ParseBody(r, dto); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
 
-	if err := h.s.CancelGroupItem(ctx, dtoId); err != nil {
+	if err := h.s.CancelGroupItem(ctx, id, dto); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}

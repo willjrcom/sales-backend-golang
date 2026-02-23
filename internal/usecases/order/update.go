@@ -2,15 +2,16 @@ package orderusecases
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
+	groupitemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/group_item"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
 	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
@@ -34,11 +35,6 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 
 	processRules, err := s.rpr.GetMapProcessRulesByFirstOrder(ctx)
 	if err != nil {
-		return err
-	}
-
-	// Controle de estoque - debitar estoque dos produtos
-	if err := s.debitStockFromOrder(ctx, order); err != nil {
 		return err
 	}
 
@@ -122,131 +118,21 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 	return nil
 }
 
-// debitStockFromOrder debita estoque dos produtos do pedido
-func (s *OrderService) debitStockFromOrder(ctx context.Context, order *orderentity.Order) error {
-	for _, groupItem := range order.GroupItems {
-		if groupItem.Status != orderentity.StatusGroupStaging {
-			continue
-		}
-
-		for _, item := range groupItem.Items {
-			if item.ProductID != uuid.Nil {
-				fmt.Printf("DEBUG: Produto %s - Quantidade: %f\n", item.Name, item.Quantity)
-
-				// Buscar estoque do produto/variação
-				stockModel, err := s.stockRepo.GetStockByVariationID(ctx, item.ProductVariationID.String())
-				if err != nil {
-					// Fallback para buscar apenas por ProductID se não houver variação específica (ex: adicionais sem tamanho)
-					stocks, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
-					if err != nil || len(stocks) == 0 {
-						// Se não há controle de estoque para o produto, continuar
-						fmt.Printf("Produto/Variação %s não tem controle de estoque configurado\n", item.Name)
-						continue
-					}
-					stockModel = &stocks[0]
-				}
-
-				stock := stockModel.ToDomain()
-
-				attendantID := uuid.Nil
-				if order.AttendantID != nil {
-					attendantID = *order.AttendantID
-				}
-
-				// Reservar estoque (permite estoque negativo)
-				movement, err := stock.ReserveStock(
-					decimal.NewFromFloat(item.Quantity),
-					order.ID,
-					attendantID,
-					item.Price,
-					item.TotalPrice,
-				)
-				if err != nil {
-					fmt.Printf("Erro ao reservar estoque para produto %s: %v\n", item.Name, err)
-					continue
-				}
-
-				// Salvar movimento
-				movementModel := &model.StockMovement{}
-				movementModel.FromDomain(movement)
-				if err := s.stockMovementRepo.CreateMovement(ctx, movementModel); err != nil {
-					fmt.Printf("Erro ao salvar movimento de estoque: %v\n", err)
-					continue
-				}
-
-				// Atualizar estoque
-				stockModel.FromDomain(stock)
-				if err := s.stockRepo.UpdateStock(ctx, stockModel); err != nil {
-					fmt.Printf("Erro ao atualizar estoque: %v\n", err)
-					continue
-				}
-
-				fmt.Printf("Estoque debitado para produto %s: %f\n", item.Name, item.Quantity)
-			}
-		}
-	}
-
-	return nil
-}
-
 // restoreStockFromOrder restaura estoque dos produtos do pedido cancelado
 func (s *OrderService) restoreStockFromOrder(ctx context.Context, order *orderentity.Order) error {
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	if !ok {
+		return errors.New("context user not found")
+	}
+
+	userIDUUID := uuid.MustParse(userID)
+	employee, err := s.re.GetEmployeeByUserID(ctx, userIDUUID.String())
+	if err != nil {
+		return err
+	}
+
 	for _, groupItem := range order.GroupItems {
-		for _, item := range groupItem.Items {
-			if item.ProductID != uuid.Nil {
-				fmt.Printf("DEBUG: Restaurando estoque para produto %s - Quantidade: %f\n", item.Name, item.Quantity)
-
-				// Buscar estoque do produto/variação
-				stockModel, err := s.stockRepo.GetStockByVariationID(ctx, item.ProductVariationID.String())
-				if err != nil {
-					// Fallback para buscar apenas por ProductID
-					stocks, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
-					if err != nil || len(stocks) == 0 {
-						// Se não há controle de estoque para o produto, continuar
-						fmt.Printf("Produto/Variação %s não tem controle de estoque configurado\n", item.Name)
-						continue
-					}
-					stockModel = &stocks[0]
-				}
-
-				stock := stockModel.ToDomain()
-
-				attendantID := uuid.Nil
-				if order.AttendantID != nil {
-					attendantID = *order.AttendantID
-				}
-
-				// Restaurar estoque
-				movement, err := stock.RestoreStock(
-					decimal.NewFromFloat(item.Quantity),
-					order.ID,
-					attendantID,
-					item.Price,
-					item.TotalPrice,
-				)
-				if err != nil {
-					fmt.Printf("Erro ao restaurar estoque para produto %s: %v\n", item.Name, err)
-					continue
-				}
-
-				// Salvar movimento
-				movementModel := &model.StockMovement{}
-				movementModel.FromDomain(movement)
-				if err := s.stockMovementRepo.CreateMovement(ctx, movementModel); err != nil {
-					fmt.Printf("Erro ao salvar movimento de estoque: %v\n", err)
-					continue
-				}
-
-				// Atualizar estoque
-				stockModel.FromDomain(stock)
-				if err := s.stockRepo.UpdateStock(ctx, stockModel); err != nil {
-					fmt.Printf("Erro ao atualizar estoque: %v\n", err)
-					continue
-				}
-
-				fmt.Printf("Estoque restaurado para produto %s: %f\n", item.Name, item.Quantity)
-			}
-		}
+		s.sgi.restoreStockFromGroupItem(ctx, &groupItem, employee.ID)
 	}
 
 	return nil
@@ -356,9 +242,11 @@ func (s *OrderService) CancelOrder(ctx context.Context, dtoOrderID *entitydto.ID
 		}
 	}
 
+	reason := "order cancelled"
+	cancelDTO := &groupitemdto.OrderGroupItemCancelDTO{Reason: &reason}
+
 	for _, groupItem := range order.GroupItems {
-		dtoGroupItemID := entitydto.NewIdRequest(groupItem.ID)
-		if err = s.sgi.CancelGroupItem(ctx, dtoGroupItemID); err != nil {
+		if err = s.sgi.CancelGroupItem(ctx, groupItem.ID.String(), cancelDTO); err != nil {
 			return err
 		}
 	}

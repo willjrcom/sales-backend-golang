@@ -22,19 +22,23 @@ type GroupItemService struct {
 	r   model.GroupItemRepository
 	ri  model.ItemRepository
 	rp  model.ProductRepository
+	re  model.EmployeeRepository
 	sop *OrderProcessService
 	so  *OrderService
+	si  *ItemService
 }
 
 func NewGroupItemService(rgi model.GroupItemRepository) *GroupItemService {
 	return &GroupItemService{r: rgi}
 }
 
-func (s *GroupItemService) AddDependencies(ri model.ItemRepository, rp model.ProductRepository, so *OrderService, sop *OrderProcessService) {
+func (s *GroupItemService) AddDependencies(ri model.ItemRepository, rp model.ProductRepository, so *OrderService, sop *OrderProcessService, re model.EmployeeRepository, si *ItemService) {
 	s.ri = ri
 	s.rp = rp
 	s.so = so
 	s.sop = sop
+	s.re = re
+	s.si = si
 }
 
 func (s *GroupItemService) GetGroupByID(ctx context.Context, dto *entitydto.IDRequest) (groupItemDTO *groupitemdto.GroupItemDTO, err error) {

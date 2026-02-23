@@ -1,52 +1,59 @@
-package itemusecases
+package orderusecases
 
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	itemdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/item"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
-	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 )
 
 var (
 	ErrCategoryNotFound           = errors.New("category not found")
 	ErrSizeNotFound               = errors.New("size not found")
 	ErrSizeNotActive              = errors.New("size not active")
-	ErrSizeMustBeTheSame          = errors.New("size must be the same")
 	ErrGroupItemNotBelongsToOrder = errors.New("group item not belongs to order")
 	ErrGroupNotStaging            = errors.New("group not staging")
 	ErrItemNotStagingAndPending   = errors.New("item not staging or pending")
 )
 
-type Service struct {
-	ri  model.ItemRepository
-	rgi model.GroupItemRepository
-	ro  model.OrderRepository
-	rp  model.ProductRepository
-	rc  model.CategoryRepository
-	so  *orderusecases.OrderService
-	sgi *orderusecases.GroupItemService
+type ItemService struct {
+	ri                model.ItemRepository
+	rgi               model.GroupItemRepository
+	ro                model.OrderRepository
+	rp                model.ProductRepository
+	rc                model.CategoryRepository
+	re                model.EmployeeRepository
+	so                *OrderService
+	sgi               *GroupItemService
+	stockRepo         model.StockRepository
+	stockMovementRepo model.StockMovementRepository
 }
 
-func NewService(ri model.ItemRepository) *Service {
-	return &Service{ri: ri}
+func NewService(ri model.ItemRepository) *ItemService {
+	return &ItemService{ri: ri}
 }
 
-func (s *Service) AddDependencies(rgi model.GroupItemRepository, ro model.OrderRepository, rp model.ProductRepository, rc model.CategoryRepository, so *orderusecases.OrderService, sgi *orderusecases.GroupItemService) {
+func (s *ItemService) AddDependencies(rgi model.GroupItemRepository, ro model.OrderRepository, rp model.ProductRepository, rc model.CategoryRepository, re model.EmployeeRepository, so *OrderService, sgi *GroupItemService, stockRepo model.StockRepository, stockMovementRepo model.StockMovementRepository) {
 	s.rgi = rgi
 	s.ro = ro
 	s.rp = rp
 	s.rc = rc
+	s.re = re
 	s.so = so
 	s.sgi = sgi
+	s.stockRepo = stockRepo
+	s.stockMovementRepo = stockMovementRepo
 }
 
-func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreateDTO) (ids *itemdto.ItemIDDTO, err error) {
+func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreateDTO) (ids *itemdto.ItemIDDTO, err error) {
 	if err := dto.Validate(); err != nil {
 		return nil, err
 	}
@@ -131,6 +138,21 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 	itemModel := &model.Item{}
 	itemModel.FromDomain(item)
 
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	attendantID := uuid.Nil
+	if ok {
+		userIDUUID := uuid.MustParse(userID)
+		employee, err := s.re.GetEmployeeByUserID(ctx, userIDUUID.String())
+		if err != nil {
+			return nil, err
+		}
+		attendantID = employee.ID
+	}
+
+	if err := s.DebitStockFromItem(ctx, item, groupItem, attendantID); err != nil {
+		return nil, err
+	}
+
 	if err = s.ri.AddItem(ctx, itemModel); err != nil {
 		return nil, errors.New("add item error: " + err.Error())
 	}
@@ -164,18 +186,86 @@ func (s *Service) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCreate
 	return itemdto.FromDomain(item.ID, groupItem.ID), nil
 }
 
-func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest) (groupItemDeleted bool, err error) {
-	item, err := s.ri.GetItemById(ctx, dto.ID.String())
+func (s *ItemService) DebitStockFromItem(ctx context.Context, item *orderentity.Item, groupItem *orderentity.GroupItem, attendantID uuid.UUID) error {
+	// Buscar estoque do produto/variação
+	stockModel, err := s.stockRepo.GetStockByVariationID(ctx, item.ProductVariationID.String())
+	if err != nil {
+		// Fallback para buscar apenas por ProductID se não houver variação específica (ex: adicionais sem tamanho)
+		stocks, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
+		if err != nil || len(stocks) == 0 {
+			// Se não há controle de estoque para o produto, continuar
+			fmt.Printf("Produto/Variação %s não tem controle de estoque configurado\n", item.Name)
+			return err
+		}
+		stockModel = &stocks[0]
+	}
 
+	stock := stockModel.ToDomain()
+
+	// Reservar estoque (permite estoque negativo)
+	movement, err := stock.ReserveStock(
+		decimal.NewFromFloat(item.Quantity),
+		groupItem.OrderID,
+		attendantID,
+		item.Price,
+		item.TotalPrice,
+	)
+	if err != nil {
+		fmt.Printf("Erro ao reservar estoque para produto %s: %v\n", item.Name, err)
+		return err
+	}
+
+	// Salvar movimento
+	movementModel := &model.StockMovement{}
+	movementModel.FromDomain(movement)
+	if err := s.stockMovementRepo.CreateMovement(ctx, movementModel); err != nil {
+		fmt.Printf("Erro ao salvar movimento de estoque: %v\n", err)
+		return err
+	}
+
+	// Atualizar estoque
+	stockModel.FromDomain(stock)
+	if err := s.stockRepo.UpdateStock(ctx, stockModel); err != nil {
+		fmt.Printf("Erro ao atualizar estoque: %v\n", err)
+		return err
+	}
+
+	fmt.Printf("Estoque debitado para produto %s: %f\n", item.Name, item.Quantity)
+
+	return nil
+}
+
+func (s *ItemService) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest) (groupItemDeleted bool, err error) {
+	itemModel, err := s.ri.GetItemById(ctx, dto.ID.String())
 	if err != nil {
 		return false, err
 	}
+
+	item := itemModel.ToDomain()
+
+	groupItemModel, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
+	if err != nil {
+		return false, err
+	}
+
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	attendantID := uuid.Nil
+	if ok {
+		userIDUUID := uuid.MustParse(userID)
+		employee, err := s.re.GetEmployeeByUserID(ctx, userIDUUID.String())
+		if err != nil {
+			return false, err
+		}
+		attendantID = employee.ID
+	}
+
+	s.RestoreStockFromItem(ctx, item, groupItemModel.ToDomain(), attendantID)
 
 	if err = s.ri.DeleteItem(ctx, dto.ID.String()); err != nil {
 		return false, errors.New("delete item error: " + err.Error())
 	}
 
-	groupItem, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
+	groupItem, err := s.rgi.GetGroupByID(ctx, itemModel.GroupItemID.String(), true)
 
 	if err != nil {
 		return false, errors.New("group item not found: " + err.Error())
@@ -183,7 +273,7 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest)
 
 	// Update complement item quantity
 	if groupItem.ComplementItemID != nil && len(groupItem.Items) != 0 {
-		groupItem.ComplementItem.Quantity -= item.Quantity
+		groupItem.ComplementItem.Quantity -= itemModel.Quantity
 		if err = s.ri.UpdateItem(ctx, groupItem.ComplementItem); err != nil {
 			return false, errors.New("update complement item error: " + err.Error())
 		}
@@ -219,7 +309,54 @@ func (s *Service) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest)
 	return false, nil
 }
 
-func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDRequest, dtoAdditional *itemdto.OrderAdditionalItemCreateDTO) (id uuid.UUID, err error) {
+func (s ItemService) RestoreStockFromItem(ctx context.Context, item *orderentity.Item, groupItem *orderentity.GroupItem, attendantID uuid.UUID) error {
+	// Buscar estoque do produto/variação
+	stockModel, err := s.stockRepo.GetStockByVariationID(ctx, item.ProductVariationID.String())
+	if err != nil {
+		// Fallback para buscar apenas por ProductID
+		stocks, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
+		if err != nil || len(stocks) == 0 {
+			return errors.New("stock not found")
+		}
+		stockModel = &stocks[0]
+	}
+
+	stock := stockModel.ToDomain()
+
+	// Restaurar estoque
+	movement, err := stock.RestoreStock(
+		decimal.NewFromFloat(item.Quantity),
+		groupItem.OrderID,
+		attendantID,
+		item.Price,
+		item.TotalPrice,
+	)
+	if err != nil {
+		fmt.Printf("Erro ao restaurar estoque para produto %s: %v\n", item.Name, err)
+		return err
+	}
+
+	// Salvar movimento
+	movementModel := &model.StockMovement{}
+	movementModel.FromDomain(movement)
+	if err := s.stockMovementRepo.CreateMovement(ctx, movementModel); err != nil {
+		fmt.Printf("Erro ao salvar movimento de estoque: %v\n", err)
+		return err
+	}
+
+	// Atualizar estoque
+	stockModel.FromDomain(stock)
+	if err := s.stockRepo.UpdateStock(ctx, stockModel); err != nil {
+		fmt.Printf("Erro ao atualizar estoque: %v\n", err)
+		return err
+	}
+
+	fmt.Printf("Estoque creditado para produto %s: %f\n", item.Name, item.Quantity)
+
+	return nil
+}
+
+func (s *ItemService) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDRequest, dtoAdditional *itemdto.OrderAdditionalItemCreateDTO) (id uuid.UUID, err error) {
 	productID, variationID, quantityValue, flavor, err := dtoAdditional.ToDomain()
 
 	if err != nil {
@@ -305,7 +442,7 @@ func (s *Service) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDR
 	return additionalItem.ID, nil
 }
 
-func (s *Service) DeleteAdditionalItemOrder(ctx context.Context, dtoAdditional *entitydto.IDRequest) (err error) {
+func (s *ItemService) DeleteAdditionalItemOrder(ctx context.Context, dtoAdditional *entitydto.IDRequest) (err error) {
 	additionalItem, err := s.ri.GetItemById(ctx, dtoAdditional.ID.String())
 	if err != nil {
 		return errors.New("item not found: " + err.Error())
@@ -340,7 +477,7 @@ func (s *Service) DeleteAdditionalItemOrder(ctx context.Context, dtoAdditional *
 	return nil
 }
 
-func (s *Service) AddRemovedItem(ctx context.Context, dtoID *entitydto.IDRequest, dto *itemdto.RemovedItemDTO) (err error) {
+func (s *ItemService) AddRemovedItem(ctx context.Context, dtoID *entitydto.IDRequest, dto *itemdto.RemovedItemDTO) (err error) {
 	name, err := dto.ToDomain()
 	if err != nil {
 		return err
@@ -382,7 +519,7 @@ func (s *Service) AddRemovedItem(ctx context.Context, dtoID *entitydto.IDRequest
 	return s.ri.UpdateItem(ctx, itemModel)
 }
 
-func (s *Service) RemoveRemovedItem(ctx context.Context, dtoID *entitydto.IDRequest, dto *itemdto.RemovedItemDTO) (err error) {
+func (s *ItemService) RemoveRemovedItem(ctx context.Context, dtoID *entitydto.IDRequest, dto *itemdto.RemovedItemDTO) (err error) {
 	name, err := dto.ToDomain()
 	if err != nil {
 		return err
@@ -400,7 +537,7 @@ func (s *Service) RemoveRemovedItem(ctx context.Context, dtoID *entitydto.IDRequ
 	return s.ri.UpdateItem(ctx, itemModel)
 }
 
-func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product, variation *productentity.ProductVariation) (groupItem *orderentity.GroupItem, err error) {
+func (s *ItemService) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product, variation *productentity.ProductVariation) (groupItem *orderentity.GroupItem, err error) {
 	groupCommonAttributes := orderentity.GroupCommonAttributes{
 		OrderID: orderID,
 		GroupDetails: orderentity.GroupDetails{
@@ -420,7 +557,7 @@ func (s *Service) newGroupItem(ctx context.Context, orderID uuid.UUID, product *
 	return
 }
 
-func (s *Service) UpdateItemTotal(ctx context.Context, id string) error {
+func (s *ItemService) UpdateItemTotal(ctx context.Context, id string) error {
 	itemModel, err := s.ri.GetItemById(ctx, id)
 	if err != nil {
 		return err
