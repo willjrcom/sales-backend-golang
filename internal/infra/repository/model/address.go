@@ -24,7 +24,6 @@ type AddressCommonAttributes struct {
 	City         string          `bun:"city,notnull"`
 	UF           string          `bun:"uf,notnull"`
 	Cep          string          `bun:"cep"`
-	AddressType  string          `bun:"address_type,notnull"`
 	DeliveryTax  decimal.Decimal `bun:"delivery_tax,type:decimal(10,2),notnull"`
 	Coordinates  Coordinates     `bun:"coordinates,type:jsonb"`
 }
@@ -45,7 +44,6 @@ func (a *Address) FromDomain(address *addressentity.Address) {
 			City:         address.City,
 			UF:           address.UF,
 			Cep:          address.Cep,
-			AddressType:  string(address.AddressType),
 			DeliveryTax:  address.DeliveryTax,
 		},
 	}
@@ -70,7 +68,6 @@ func (a *Address) ToDomain() *addressentity.Address {
 			City:         a.City,
 			UF:           a.UF,
 			Cep:          a.Cep,
-			AddressType:  addressentity.AddressType(a.AddressType),
 			DeliveryTax:  a.DeliveryTax,
 		},
 	}

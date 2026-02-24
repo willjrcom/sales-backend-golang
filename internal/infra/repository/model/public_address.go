@@ -30,7 +30,6 @@ func (a *PublicAddress) FromDomain(address *addressentity.Address) {
 			City:         address.City,
 			UF:           address.UF,
 			Cep:          address.Cep,
-			AddressType:  string(address.AddressType),
 			DeliveryTax:  address.DeliveryTax,
 		},
 	}
@@ -55,7 +54,6 @@ func (a *PublicAddress) ToDomain() *addressentity.Address {
 			City:         a.City,
 			UF:           a.UF,
 			Cep:          a.Cep,
-			AddressType:  addressentity.AddressType(a.AddressType),
 			DeliveryTax:  a.DeliveryTax,
 		},
 	}

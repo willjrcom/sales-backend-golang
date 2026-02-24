@@ -7,18 +7,17 @@ import (
 )
 
 type AddressDTO struct {
-	ID           uuid.UUID                 `json:"id"`
-	Street       string                    `json:"street"`
-	Number       string                    `json:"number"`
-	Complement   string                    `json:"complement"`
-	Reference    string                    `json:"reference"`
-	Neighborhood string                    `json:"neighborhood"`
-	City         string                    `json:"city"`
-	UF           string                    `json:"uf"`
-	Cep          string                    `json:"cep"`
-	AddressType  addressentity.AddressType `json:"address_type"`
-	DeliveryTax  decimal.Decimal           `json:"delivery_tax"`
-	Coordinates  Coordinates               `json:"coordinates"`
+	ID           uuid.UUID       `json:"id"`
+	Street       string          `json:"street"`
+	Number       string          `json:"number"`
+	Complement   string          `json:"complement"`
+	Reference    string          `json:"reference"`
+	Neighborhood string          `json:"neighborhood"`
+	City         string          `json:"city"`
+	UF           string          `json:"uf"`
+	Cep          string          `json:"cep"`
+	DeliveryTax  decimal.Decimal `json:"delivery_tax"`
+	Coordinates  Coordinates     `json:"coordinates"`
 }
 
 func (a *AddressDTO) FromDomain(address *addressentity.Address) {
@@ -40,7 +39,6 @@ func (a *AddressDTO) FromDomain(address *addressentity.Address) {
 		City:         address.City,
 		UF:           address.UF,
 		Cep:          address.Cep,
-		AddressType:  address.AddressType,
 		DeliveryTax:  address.DeliveryTax,
 		Coordinates:  coordinates,
 	}

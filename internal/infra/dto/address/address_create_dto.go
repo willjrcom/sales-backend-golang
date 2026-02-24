@@ -17,17 +17,16 @@ var (
 )
 
 type AddressCreateDTO struct {
-	Street       string                    `json:"street"`
-	Number       string                    `json:"number"`
-	Complement   string                    `json:"complement"`
-	Reference    string                    `json:"reference"`
-	Neighborhood string                    `json:"neighborhood"`
-	City         string                    `json:"city"`
-	UF           string                    `json:"uf"`
-	Cep          string                    `json:"cep"`
-	AddressType  addressentity.AddressType `json:"address_type"`
-	DeliveryTax  *decimal.Decimal          `json:"delivery_tax"`
-	Coordinates  Coordinates               `json:"coordinates"`
+	Street       string           `json:"street"`
+	Number       string           `json:"number"`
+	Complement   string           `json:"complement"`
+	Reference    string           `json:"reference"`
+	Neighborhood string           `json:"neighborhood"`
+	City         string           `json:"city"`
+	UF           string           `json:"uf"`
+	Cep          string           `json:"cep"`
+	DeliveryTax  *decimal.Decimal `json:"delivery_tax"`
+	Coordinates  Coordinates      `json:"coordinates"`
 }
 
 func (a *AddressCreateDTO) validate(withDeliveryTax bool) error {
@@ -45,10 +44,6 @@ func (a *AddressCreateDTO) validate(withDeliveryTax bool) error {
 	}
 	if a.UF == "" {
 		return ErrUfRequired
-	}
-	if a.AddressType == "" {
-		house := addressentity.AddressTypeHouse
-		a.AddressType = house
 	}
 
 	if withDeliveryTax && a.DeliveryTax == nil {
@@ -72,7 +67,6 @@ func (a *AddressCreateDTO) ToDomain(withDeliveryTax bool) (*addressentity.Addres
 		City:         a.City,
 		UF:           a.UF,
 		Cep:          a.Cep,
-		AddressType:  a.AddressType,
 	}
 
 	if withDeliveryTax {

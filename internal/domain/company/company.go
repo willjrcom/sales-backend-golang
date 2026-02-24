@@ -73,7 +73,6 @@ func NewCompany(cnpjData *cnpj.Cnpj) *Company {
 		City:         cnpjData.City,
 		UF:           cnpjData.UF,
 		Cep:          cnpjData.Cep,
-		AddressType:  addressentity.AddressTypeWork,
 	}
 
 	company.AddAddress(addressCommonAttributes)
@@ -93,7 +92,6 @@ func (c *Company) UpdateCompany(cnpjData *cnpj.Cnpj) {
 		City:         cnpjData.City,
 		UF:           cnpjData.UF,
 		Cep:          cnpjData.Cep,
-		AddressType:  addressentity.AddressTypeWork,
 	}
 
 	c.AddAddress(addressCommonAttributes)

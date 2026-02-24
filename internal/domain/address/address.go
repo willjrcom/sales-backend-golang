@@ -1,9 +1,9 @@
 package addressentity
 
 import (
-   "github.com/google/uuid"
-   "github.com/shopspring/decimal"
-   "github.com/willjrcom/sales-backend-go/internal/domain/entity"
+	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 )
 
 type Address struct {
@@ -21,21 +21,9 @@ type AddressCommonAttributes struct {
 	City         string
 	UF           string
 	Cep          string
-	AddressType  AddressType
-   DeliveryTax  decimal.Decimal
+	DeliveryTax  decimal.Decimal
 	Coordinates  Coordinates
 }
-
-type AddressType string
-
-const (
-	AddressTypeHouse       AddressType = "house"
-	AddressTypeApartment   AddressType = "apartment"
-	AddressTypeCondominium AddressType = "condominium"
-	AddressTypeWork        AddressType = "work"
-	AddressTypeHotel       AddressType = "hotel"
-	AddressTypeShed        AddressType = "shed"
-)
 
 func NewAddress(addressCommonAttributes *AddressCommonAttributes) *Address {
 	return &Address{

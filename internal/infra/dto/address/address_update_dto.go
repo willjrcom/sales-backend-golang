@@ -6,17 +6,16 @@ import (
 )
 
 type AddressUpdateDTO struct {
-	Street       *string                    `json:"street"`
-	Number       *string                    `json:"number"`
-	Complement   *string                    `json:"complement"`
-	Reference    *string                    `json:"reference"`
-	Neighborhood *string                    `json:"neighborhood"`
-	City         *string                    `json:"city"`
-	UF           *string                    `json:"uf"`
-	Cep          *string                    `json:"cep"`
-	AddressType  *addressentity.AddressType `json:"address_type"`
-	DeliveryTax  *decimal.Decimal           `json:"delivery_tax"`
-	Coordinates  *Coordinates               `json:"coordinates"`
+	Street       *string          `json:"street"`
+	Number       *string          `json:"number"`
+	Complement   *string          `json:"complement"`
+	Reference    *string          `json:"reference"`
+	Neighborhood *string          `json:"neighborhood"`
+	City         *string          `json:"city"`
+	UF           *string          `json:"uf"`
+	Cep          *string          `json:"cep"`
+	DeliveryTax  *decimal.Decimal `json:"delivery_tax"`
+	Coordinates  *Coordinates     `json:"coordinates"`
 }
 
 func (a *AddressUpdateDTO) validate() error {
@@ -69,10 +68,6 @@ func (a *AddressUpdateDTO) UpdateDomain(address *addressentity.Address) error {
 			Latitude:  a.Coordinates.Latitude,
 			Longitude: a.Coordinates.Longitude,
 		}
-	}
-
-	if a.AddressType != nil {
-		address.AddressType = *a.AddressType
 	}
 
 	return nil
