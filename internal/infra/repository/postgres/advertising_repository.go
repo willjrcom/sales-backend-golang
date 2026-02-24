@@ -114,7 +114,7 @@ func (r *AdvertisingRepository) GetByID(ctx context.Context, id uuid.UUID) (*mod
 	defer tx.Rollback()
 
 	advertising := new(model.Advertising)
-	err = tx.NewSelect().Model(advertising).Relation("Sponsor").Where("advertising.id = ?", id).Scan(ctx)
+	err = tx.NewSelect().Model(advertising).Relation("Sponsor").Relation("Categories").Where("advertising.id = ?", id).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (r *AdvertisingRepository) GetAllAdvertisements(ctx context.Context) ([]mod
 	defer tx.Rollback()
 
 	var advertisements []model.Advertising
-	err = tx.NewSelect().Model(&advertisements).Relation("Sponsor").Order("title ASC").Scan(ctx)
+	err = tx.NewSelect().Model(&advertisements).Relation("Sponsor").Relation("Categories").Order("title ASC").Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
