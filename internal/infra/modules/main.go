@@ -48,6 +48,10 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, rabb
 
 	companyRepository, companyService, checkoutUC, _ := NewCompanyModule(db, chi, usageCostRepo)
 	NewCompanyCategoryModule(db, chi)
+
+	sponsorRepository, _, _ := NewSponsorModule(db, chi)
+	NewAdvertisingModule(db, chi, sponsorRepository)
+
 	_, schemaService := NewSchemaModule(db, chi)
 	userRepository, userService, _ := NewUserModule(db, chi)
 	emailService := emailservice.NewService(rabbitmq)

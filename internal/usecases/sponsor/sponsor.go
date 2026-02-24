@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	sponsorentity "github.com/willjrcom/sales-backend-go/internal/domain/sponsor"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	sponsordto "github.com/willjrcom/sales-backend-go/internal/infra/dto/sponsor"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -60,24 +59,27 @@ func (s *SponsorService) DeleteSponsor(ctx context.Context, idDto *entitydto.IDR
 	return s.repo.Delete(ctx, idDto.ID)
 }
 
-func (s *SponsorService) GetSponsorById(ctx context.Context, idDto *entitydto.IDRequest) (*sponsorentity.Sponsor, error) {
+func (s *SponsorService) GetSponsorById(ctx context.Context, idDto *entitydto.IDRequest) (*sponsordto.SponsorDTO, error) {
 	sponsorModel, err := s.repo.GetByID(ctx, idDto.ID)
 	if err != nil {
 		return nil, err
 	}
-	return sponsorModel.ToDomain(), nil
+
+	dto := &sponsordto.SponsorDTO{}
+	dto.FromDomain(sponsorModel.ToDomain())
+	return dto, nil
 }
 
-func (s *SponsorService) GetAllSponsors(ctx context.Context) ([]sponsorentity.Sponsor, error) {
+func (s *SponsorService) GetAllSponsors(ctx context.Context) ([]sponsordto.SponsorDTO, error) {
 	models, err := s.repo.GetAllSponsors(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	domainEntities := make([]sponsorentity.Sponsor, len(models))
+	dtos := make([]sponsordto.SponsorDTO, len(models))
 	for i, m := range models {
-		domainEntities[i] = *m.ToDomain()
+		dtos[i].FromDomain(m.ToDomain())
 	}
 
-	return domainEntities, nil
+	return dtos, nil
 }

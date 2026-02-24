@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	advertisingentity "github.com/willjrcom/sales-backend-go/internal/domain/advertising"
 	advertisingdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/advertising"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -78,24 +77,27 @@ func (s *AdvertisingService) DeleteAdvertising(ctx context.Context, idDto *entit
 	return s.repo.Delete(ctx, idDto.ID)
 }
 
-func (s *AdvertisingService) GetAdvertisingById(ctx context.Context, idDto *entitydto.IDRequest) (*advertisingentity.Advertising, error) {
+func (s *AdvertisingService) GetAdvertisingById(ctx context.Context, idDto *entitydto.IDRequest) (*advertisingdto.AdvertisingDTO, error) {
 	advertisingModel, err := s.repo.GetByID(ctx, idDto.ID)
 	if err != nil {
 		return nil, err
 	}
-	return advertisingModel.ToDomain(), nil
+
+	dto := &advertisingdto.AdvertisingDTO{}
+	dto.FromDomain(advertisingModel.ToDomain())
+	return dto, nil
 }
 
-func (s *AdvertisingService) GetAllAdvertisements(ctx context.Context) ([]advertisingentity.Advertising, error) {
+func (s *AdvertisingService) GetAllAdvertisements(ctx context.Context) ([]advertisingdto.AdvertisingDTO, error) {
 	models, err := s.repo.GetAllAdvertisements(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	domainEntities := make([]advertisingentity.Advertising, len(models))
+	dtos := make([]advertisingdto.AdvertisingDTO, len(models))
 	for i, m := range models {
-		domainEntities[i] = *m.ToDomain()
+		dtos[i].FromDomain(m.ToDomain())
 	}
 
-	return domainEntities, nil
+	return dtos, nil
 }

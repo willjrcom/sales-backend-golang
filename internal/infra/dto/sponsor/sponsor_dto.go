@@ -1,8 +1,10 @@
 package sponsordto
 
 import (
+	"github.com/google/uuid"
 	sponsorentity "github.com/willjrcom/sales-backend-go/internal/domain/sponsor"
 	addressdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/address"
+	companycategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company_category"
 )
 
 type CreateSponsorDTO struct {
@@ -82,4 +84,35 @@ func (dto *UpdateSponsorDTO) UpdateDomain(s *sponsorentity.Sponsor) error {
 		}
 	}
 	return nil
+}
+
+type SponsorDTO struct {
+	ID         uuid.UUID                               `json:"id"`
+	Name       string                                  `json:"name"`
+	CNPJ       string                                  `json:"cnpj"`
+	Email      string                                  `json:"email"`
+	Contact    string                                  `json:"contact"`
+	Address    *addressdto.AddressDTO                  `json:"address"`
+	Categories []companycategorydto.CompanyCategoryDTO `json:"categories"`
+}
+
+func (dto *SponsorDTO) FromDomain(s *sponsorentity.Sponsor) {
+	dto.ID = s.ID
+	dto.Name = s.Name
+	dto.CNPJ = s.CNPJ
+	dto.Email = s.Email
+	dto.Contact = s.Contact
+
+	if s.Address != nil {
+		dto.Address = &addressdto.AddressDTO{}
+		dto.Address.FromDomain(s.Address)
+	}
+
+	dto.Categories = make([]companycategorydto.CompanyCategoryDTO, len(s.CompanyCategorySponsor))
+	for i, cat := range s.CompanyCategorySponsor {
+		id, _ := uuid.Parse(cat.ID)
+		dto.Categories[i] = companycategorydto.CompanyCategoryDTO{
+			ID: id,
+		}
+	}
 }

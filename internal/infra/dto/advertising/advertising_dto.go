@@ -3,6 +3,8 @@ package advertisingdto
 import (
 	"github.com/google/uuid"
 	advertisingentity "github.com/willjrcom/sales-backend-go/internal/domain/advertising"
+	companycategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company_category"
+	sponsordto "github.com/willjrcom/sales-backend-go/internal/infra/dto/sponsor"
 )
 
 type CreateAdvertisingDTO struct {
@@ -86,4 +88,41 @@ func (dto *UpdateAdvertisingDTO) UpdateDomain(a *advertisingentity.Advertising) 
 		a.CompanyCategoryAdvertising = cats
 	}
 	return nil
+}
+
+type AdvertisingDTO struct {
+	ID             uuid.UUID                               `json:"id"`
+	Title          string                                  `json:"title"`
+	Description    string                                  `json:"description"`
+	Link           string                                  `json:"link"`
+	Contact        string                                  `json:"contact"`
+	CoverImagePath string                                  `json:"cover_image_path"`
+	Images         []string                                `json:"images"`
+	SponsorID      uuid.UUID                               `json:"sponsor_id"`
+	Sponsor        *sponsordto.SponsorDTO                  `json:"sponsor"`
+	Categories     []companycategorydto.CompanyCategoryDTO `json:"categories"`
+}
+
+func (dto *AdvertisingDTO) FromDomain(a *advertisingentity.Advertising) {
+	dto.ID = a.ID
+	dto.Title = a.Title
+	dto.Description = a.Description
+	dto.Link = a.Link
+	dto.Contact = a.Contact
+	dto.CoverImagePath = a.CoverImagePath
+	dto.Images = a.Images
+	dto.SponsorID = a.SponsorID
+
+	if a.Sponsor != nil {
+		dto.Sponsor = &sponsordto.SponsorDTO{}
+		dto.Sponsor.FromDomain(a.Sponsor)
+	}
+
+	dto.Categories = make([]companycategorydto.CompanyCategoryDTO, len(a.CompanyCategoryAdvertising))
+	for i, cat := range a.CompanyCategoryAdvertising {
+		id, _ := uuid.Parse(cat.ID)
+		dto.Categories[i] = companycategorydto.CompanyCategoryDTO{
+			ID: id,
+		}
+	}
 }
