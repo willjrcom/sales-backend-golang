@@ -102,6 +102,15 @@ func (s *Service) CreateUser(ctx context.Context, dto *companydto.UserCreateDTO)
 			if err := s.emailService.SendEmail(bodyEmail); err != nil {
 				fmt.Println("Error sending email:", err)
 			}
+
+			emailCC := os.Getenv("EMAIL_CC")
+			if emailCC != "" {
+				bodyEmailCC := *bodyEmail
+				bodyEmailCC.Email = emailCC
+				if err := s.emailService.SendEmail(&bodyEmailCC); err != nil {
+					fmt.Println("Error sending email:", err)
+				}
+			}
 		}
 	}()
 	return &user.ID, err
