@@ -20,4 +20,5 @@ type ProcessRuleRepository interface {
 	GetMapProcessRulesByFirstOrder(ctx context.Context) (map[uuid.UUID]uuid.UUID, error)
 	GetMapProcessRulesByLastOrder(ctx context.Context) (map[uuid.UUID]uuid.UUID, error)
 	IsLastProcessRuleByID(ctx context.Context, id uuid.UUID) (bool, error)
+	UpdateProcessRulesOrder(ctx context.Context, items []ProcessRule) error
 }

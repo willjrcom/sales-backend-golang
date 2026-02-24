@@ -403,3 +403,23 @@ func (r *ProcessRuleRepositoryBun) GetAllProcessRulesWithOrderProcess(ctx contex
 	}
 	return processRules, nil
 }
+func (r *ProcessRuleRepositoryBun) UpdateProcessRulesOrder(ctx context.Context, items []model.ProcessRule) error {
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	for _, item := range items {
+		if _, err := tx.NewUpdate().Model(&item).Column("order").Where("id = ?", item.ID).Exec(ctx); err != nil {
+			return err
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return nil
+}

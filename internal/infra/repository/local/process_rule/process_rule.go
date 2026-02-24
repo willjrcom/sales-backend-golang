@@ -160,3 +160,13 @@ func (r *ProcessRuleRepositoryLocal) IsLastProcessRuleByID(ctx context.Context, 
 	}
 	return false, nil
 }
+func (r *ProcessRuleRepositoryLocal) UpdateProcessRulesOrder(ctx context.Context, items []model.ProcessRule) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for _, item := range items {
+		if rule, ok := r.rules[item.ID.String()]; ok {
+			rule.Order = item.Order
+		}
+	}
+	return nil
+}

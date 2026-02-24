@@ -8,6 +8,7 @@ import (
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	productcategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/product_category"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 )
 
 var (
@@ -154,4 +155,19 @@ func (s *Service) processRulesToDto(processRuleModels []model.ProcessRule) []pro
 	}
 
 	return processRuleDTOs
+}
+
+func (s *Service) ReorderProcessRules(ctx context.Context, dto *productcategorydto.ProcessRuleReorderDTO) error {
+	processRules := make([]model.ProcessRule, len(dto.ProcessRules))
+
+	for i, item := range dto.ProcessRules {
+		processRules[i] = model.ProcessRule{
+			Entity: entitymodel.Entity{ID: item.ID},
+			ProcessRuleCommonAttributes: model.ProcessRuleCommonAttributes{
+				Order: item.Order,
+			},
+		}
+	}
+
+	return s.r.UpdateProcessRulesOrder(ctx, processRules)
 }

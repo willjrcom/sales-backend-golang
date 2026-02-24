@@ -29,6 +29,7 @@ func NewHandlerProcessRuleCategory(processRuleService *processruleusecases.Servi
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerCreateProcessRule)
 		c.Patch("/update/{id}", h.handlerUpdateProcessRule)
+		c.Patch("/reorder", h.handlerReorderProcessRules)
 		c.Delete("/{id}", h.handlerDeleteProcessRule)
 		c.Get("/{id}", h.handlerGetProcessRuleById)
 		c.Get("/by-category-id/{id}", h.handlerGetProcessRulesByCategoryID)
@@ -200,4 +201,21 @@ func (h *handlerProcessRuleCategoryImpl) handlerGetAllProcessRulesWithOrderProce
 	}
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, processRules)
+}
+
+func (h *handlerProcessRuleCategoryImpl) handlerReorderProcessRules(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	dto := &productcategorydto.ProcessRuleReorderDTO{}
+	if err := jsonpkg.ParseBody(r, dto); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := h.s.ReorderProcessRules(ctx, dto); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
