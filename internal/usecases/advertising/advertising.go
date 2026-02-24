@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	advertisingdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/advertising"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -17,12 +18,14 @@ var (
 type AdvertisingService struct {
 	repo        model.AdvertisingRepository
 	sponsorRepo model.SponsorRepository
+	userRepo    model.UserRepository
 }
 
-func NewAdvertisingService(repo model.AdvertisingRepository, sponsorRepo model.SponsorRepository) *AdvertisingService {
+func NewAdvertisingService(repo model.AdvertisingRepository, sponsorRepo model.SponsorRepository, userRepo model.UserRepository) *AdvertisingService {
 	return &AdvertisingService{
 		repo:        repo,
 		sponsorRepo: sponsorRepo,
+		userRepo:    userRepo,
 	}
 }
 
@@ -90,6 +93,43 @@ func (s *AdvertisingService) GetAdvertisingById(ctx context.Context, idDto *enti
 
 func (s *AdvertisingService) GetAllAdvertisements(ctx context.Context) ([]advertisingdto.AdvertisingDTO, error) {
 	models, err := s.repo.GetAllAdvertisements(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	dtos := make([]advertisingdto.AdvertisingDTO, len(models))
+	for i, m := range models {
+		dtos[i].FromDomain(m.ToDomain())
+	}
+
+	return dtos, nil
+}
+
+func (s *AdvertisingService) GetActiveAdvertisements(ctx context.Context) ([]advertisingdto.AdvertisingDTO, error) {
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	if !ok {
+		return nil, errors.New("user not found in context")
+	}
+
+	userIDUUID := uuid.MustParse(userID)
+	userModel, err := s.userRepo.GetUserByID(ctx, userIDUUID, true)
+	if err != nil {
+		return nil, err
+	}
+
+	categoryIDsMap := make(map[uuid.UUID]struct{})
+	for _, company := range userModel.Companies {
+		for _, category := range company.Categories {
+			categoryIDsMap[category.ID] = struct{}{}
+		}
+	}
+
+	categoryIDs := make([]uuid.UUID, 0, len(categoryIDsMap))
+	for id := range categoryIDsMap {
+		categoryIDs = append(categoryIDs, id)
+	}
+
+	models, err := s.repo.GetActiveAdvertisements(ctx, categoryIDs)
 	if err != nil {
 		return nil, err
 	}

@@ -319,7 +319,7 @@ func (r *UserRepositoryBun) GetUserByID(ctx context.Context, id uuid.UUID, withC
 	query := tx.NewSelect().Model(user).Where("u.id = ?", id).Relation("Address").Relation("Contact")
 
 	if withCompanies {
-		query = query.Relation("Companies")
+		query = query.Relation("Companies.Categories")
 	}
 
 	if err := query.ExcludeColumn("hash").Scan(ctx); err != nil {

@@ -1,6 +1,8 @@
 package advertisingdto
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	advertisingentity "github.com/willjrcom/sales-backend-go/internal/domain/advertising"
 	companycategorydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company_category"
@@ -8,14 +10,17 @@ import (
 )
 
 type CreateAdvertisingDTO struct {
-	Title          string   `json:"title"`
-	Description    string   `json:"description"`
-	Link           string   `json:"link"`
-	Contact        string   `json:"contact"`
-	CoverImagePath string   `json:"cover_image_path"`
-	Images         []string `json:"images"`
-	SponsorID      string   `json:"sponsor_id"`
-	CategoryIDs    []string `json:"category_ids,omitempty"`
+	Title          string     `json:"title"`
+	Description    string     `json:"description"`
+	Link           string     `json:"link"`
+	Contact        string     `json:"contact"`
+	Type           string     `json:"type"`
+	StartedAt      *time.Time `json:"started_at"`
+	EndedAt        *time.Time `json:"ended_at"`
+	CoverImagePath string     `json:"cover_image_path"`
+	Images         []string   `json:"images"`
+	SponsorID      string     `json:"sponsor_id"`
+	CategoryIDs    []string   `json:"category_ids,omitempty"`
 }
 
 func (dto *CreateAdvertisingDTO) ToDomain() (*advertisingentity.Advertising, error) {
@@ -34,6 +39,9 @@ func (dto *CreateAdvertisingDTO) ToDomain() (*advertisingentity.Advertising, err
 		Description:                dto.Description,
 		Link:                       dto.Link,
 		Contact:                    dto.Contact,
+		Type:                       dto.Type,
+		StartedAt:                  dto.StartedAt,
+		EndedAt:                    dto.EndedAt,
 		CoverImagePath:             dto.CoverImagePath,
 		Images:                     dto.Images,
 		SponsorID:                  sponsorID,
@@ -44,14 +52,17 @@ func (dto *CreateAdvertisingDTO) ToDomain() (*advertisingentity.Advertising, err
 }
 
 type UpdateAdvertisingDTO struct {
-	Title          *string  `json:"title,omitempty"`
-	Description    *string  `json:"description,omitempty"`
-	Link           *string  `json:"link,omitempty"`
-	Contact        *string  `json:"contact,omitempty"`
-	CoverImagePath *string  `json:"cover_image_path,omitempty"`
-	Images         []string `json:"images,omitempty"`
-	SponsorID      *string  `json:"sponsor_id,omitempty"`
-	CategoryIDs    []string `json:"category_ids,omitempty"`
+	Title          *string    `json:"title,omitempty"`
+	Description    *string    `json:"description,omitempty"`
+	Link           *string    `json:"link,omitempty"`
+	Contact        *string    `json:"contact,omitempty"`
+	Type           *string    `json:"type,omitempty"`
+	StartedAt      *time.Time `json:"started_at,omitempty"`
+	EndedAt        *time.Time `json:"ended_at,omitempty"`
+	CoverImagePath *string    `json:"cover_image_path,omitempty"`
+	Images         []string   `json:"images,omitempty"`
+	SponsorID      *string    `json:"sponsor_id,omitempty"`
+	CategoryIDs    []string   `json:"category_ids,omitempty"`
 }
 
 func (dto *UpdateAdvertisingDTO) UpdateDomain(a *advertisingentity.Advertising) error {
@@ -66,6 +77,15 @@ func (dto *UpdateAdvertisingDTO) UpdateDomain(a *advertisingentity.Advertising) 
 	}
 	if dto.Contact != nil {
 		a.Contact = *dto.Contact
+	}
+	if dto.Type != nil {
+		a.Type = *dto.Type
+	}
+	if dto.StartedAt != nil {
+		a.StartedAt = dto.StartedAt
+	}
+	if dto.EndedAt != nil {
+		a.EndedAt = dto.EndedAt
 	}
 	if dto.CoverImagePath != nil {
 		a.CoverImagePath = *dto.CoverImagePath
@@ -96,6 +116,9 @@ type AdvertisingDTO struct {
 	Description    string                                  `json:"description"`
 	Link           string                                  `json:"link"`
 	Contact        string                                  `json:"contact"`
+	Type           string                                  `json:"type"`
+	StartedAt      *time.Time                              `json:"started_at"`
+	EndedAt        *time.Time                              `json:"ended_at"`
 	CoverImagePath string                                  `json:"cover_image_path"`
 	Images         []string                                `json:"images"`
 	SponsorID      uuid.UUID                               `json:"sponsor_id"`
@@ -109,6 +132,9 @@ func (dto *AdvertisingDTO) FromDomain(a *advertisingentity.Advertising) {
 	dto.Description = a.Description
 	dto.Link = a.Link
 	dto.Contact = a.Contact
+	dto.Type = a.Type
+	dto.StartedAt = a.StartedAt
+	dto.EndedAt = a.EndedAt
 	dto.CoverImagePath = a.CoverImagePath
 	dto.Images = a.Images
 	dto.SponsorID = a.SponsorID

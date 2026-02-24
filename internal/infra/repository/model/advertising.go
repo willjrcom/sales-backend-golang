@@ -2,6 +2,7 @@ package model
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -20,6 +21,9 @@ type AdvertisingCommonAttributes struct {
 	Description    string            `bun:"description"`
 	Link           string            `bun:"link"`
 	Contact        string            `bun:"contact"`
+	Type           string            `bun:"type"`
+	StartedAt      *time.Time        `bun:"started_at"`
+	EndedAt        *time.Time        `bun:"ended_at"`
 	CoverImagePath string            `bun:"cover_image_path"`
 	Images         []string          `bun:"images,type:jsonb"`
 	SponsorID      uuid.UUID         `bun:"sponsor_id,type:uuid"`
@@ -38,6 +42,9 @@ func (a *Advertising) FromDomain(ad *advertisingentity.Advertising) {
 			Description:    ad.Description,
 			Link:           ad.Link,
 			Contact:        ad.Contact,
+			Type:           ad.Type,
+			StartedAt:      ad.StartedAt,
+			EndedAt:        ad.EndedAt,
 			CoverImagePath: ad.CoverImagePath,
 			Images:         ad.Images,
 			SponsorID:      ad.SponsorID,
@@ -70,6 +77,9 @@ func (a *Advertising) ToDomain() *advertisingentity.Advertising {
 			Description:    a.Description,
 			Link:           a.Link,
 			Contact:        a.Contact,
+			Type:           a.Type,
+			StartedAt:      a.StartedAt,
+			EndedAt:        a.EndedAt,
 			CoverImagePath: a.CoverImagePath,
 			Images:         a.Images,
 			SponsorID:      a.SponsorID,
@@ -94,4 +104,5 @@ type AdvertisingRepository interface {
 	Delete(ctx context.Context, id uuid.UUID) error
 	GetByID(ctx context.Context, id uuid.UUID) (*Advertising, error)
 	GetAllAdvertisements(ctx context.Context) ([]Advertising, error)
+	GetActiveAdvertisements(ctx context.Context, categoryIDs []uuid.UUID) ([]Advertising, error)
 }

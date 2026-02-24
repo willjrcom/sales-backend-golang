@@ -10,9 +10,9 @@ import (
 	advertisingusecases "github.com/willjrcom/sales-backend-go/internal/usecases/advertising"
 )
 
-func NewAdvertisingModule(db *bun.DB, chi *server.ServerChi, sponsorRepo model.SponsorRepository) (model.AdvertisingRepository, *advertisingusecases.AdvertisingService, *handler.Handler) {
+func NewAdvertisingModule(db *bun.DB, chi *server.ServerChi, sponsorRepo model.SponsorRepository, userRepo model.UserRepository) (model.AdvertisingRepository, *advertisingusecases.AdvertisingService, *handler.Handler) {
 	repo := advertisingrepositorybun.NewAdvertisingRepository(db)
-	service := advertisingusecases.NewAdvertisingService(repo, sponsorRepo)
+	service := advertisingusecases.NewAdvertisingService(repo, sponsorRepo, userRepo)
 	handlerObj := handlerimpl.NewHandlerAdvertising(service)
 	chi.AddHandler(handlerObj)
 	return repo, service, handlerObj

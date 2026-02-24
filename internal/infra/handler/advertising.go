@@ -27,6 +27,7 @@ func NewHandlerAdvertising(s *advertisingusecases.AdvertisingService) *handler.H
 		c.Delete("/delete/{id}", h.handlerDeleteAdvertising)
 		c.Get("/{id}", h.handlerGetAdvertisingByID)
 		c.Get("/all", h.handlerGetAllAdvertisements)
+		c.Get("/active", h.handlerGetActiveAdvertisements)
 	})
 
 	return handler.NewHandler("/advertising", c)
@@ -115,6 +116,17 @@ func (h *handlerAdvertisingImpl) handlerGetAllAdvertisements(w http.ResponseWrit
 	ctx := r.Context()
 
 	advs, err := h.s.GetAllAdvertisements(ctx)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, advs)
+}
+func (h *handlerAdvertisingImpl) handlerGetActiveAdvertisements(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	advs, err := h.s.GetActiveAdvertisements(ctx)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
