@@ -66,6 +66,11 @@ func (t *OrderTable) Cancel() error {
 	return nil
 }
 
+func (t *OrderTable) UpdateName(name string) error {
+	t.Name = name
+	return nil
+}
+
 func (t *OrderTable) UpdatePreferences(preferences companyentity.Preferences) {
 	t.TaxRate, _ = preferences.GetDecimal(companyentity.TableTaxRate)
 }

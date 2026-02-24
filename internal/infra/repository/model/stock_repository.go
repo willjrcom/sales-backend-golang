@@ -16,7 +16,7 @@ type StockRepository interface {
 
 type StockMovementRepository interface {
 	CreateMovement(ctx context.Context, m *StockMovement) error
-	GetMovementsByStockID(ctx context.Context, stockID string) ([]StockMovement, error)
+	GetMovementsByStockID(ctx context.Context, stockID string, date *string) ([]StockMovement, error)
 	GetMovementsByProductID(ctx context.Context, productID string) ([]StockMovement, error)
 	GetMovementsByOrderID(ctx context.Context, orderID string) ([]StockMovement, error)
 	GetAllMovements(ctx context.Context) ([]StockMovement, error)

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	stockdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/stock"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -17,11 +19,21 @@ func (s *Service) AddMovementStock(ctx context.Context, dtoID *entitydto.IDReque
 
 	stock := stockModel.ToDomain()
 
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	if !ok {
+	}
+
+	userIDUUID := uuid.MustParse(userID)
+	employee, err := s.employeeRepo.GetEmployeeByUserID(ctx, userIDUUID.String())
+	if err != nil {
+		return nil, err
+	}
+
 	// Adicionar estoque
 	movement, err := stock.AddMovementStock(
 		dto.Quantity,
 		dto.Reason,
-		dto.EmployeeID,
+		employee.ID,
 		dto.Price,
 		dto.TotalPrice,
 	)
@@ -68,11 +80,21 @@ func (s *Service) RemoveMovementStock(ctx context.Context, dtoID *entitydto.IDRe
 
 	stock := stockModel.ToDomain()
 
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	if !ok {
+	}
+
+	userIDUUID := uuid.MustParse(userID)
+	employee, err := s.employeeRepo.GetEmployeeByUserID(ctx, userIDUUID.String())
+	if err != nil {
+		return nil, err
+	}
+
 	// Remover estoque
 	movement, err := stock.RemoveMovementStock(
 		dto.Quantity,
 		dto.Reason,
-		dto.EmployeeID,
+		employee.ID,
 		dto.Price,
 		dto.TotalPrice,
 	)
@@ -119,11 +141,21 @@ func (s *Service) AdjustMovementStock(ctx context.Context, dtoID *entitydto.IDRe
 
 	stock := stockModel.ToDomain()
 
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	if !ok {
+	}
+
+	userIDUUID := uuid.MustParse(userID)
+	employee, err := s.employeeRepo.GetEmployeeByUserID(ctx, userIDUUID.String())
+	if err != nil {
+		return nil, err
+	}
+
 	// Ajustar estoque
 	movement, err := stock.AdjustMovementStock(
 		dto.NewStock,
 		dto.Reason,
-		dto.EmployeeID,
+		employee.ID,
 	)
 	if err != nil {
 		return nil, err
@@ -165,8 +197,8 @@ func (s *Service) AdjustMovementStock(ctx context.Context, dtoID *entitydto.IDRe
 }
 
 // GetMovementsByStockID busca movimentos por estoque
-func (s *Service) GetMovementsByStockID(ctx context.Context, stockID string) ([]stockdto.StockMovementDTO, error) {
-	movementsModel, err := s.stockMovementRepo.GetMovementsByStockID(ctx, stockID)
+func (s *Service) GetMovementsByStockID(ctx context.Context, stockID string, date *string) ([]stockdto.StockMovementDTO, error) {
+	movementsModel, err := s.stockMovementRepo.GetMovementsByStockID(ctx, stockID, date)
 	if err != nil {
 		return nil, err
 	}

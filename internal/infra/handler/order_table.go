@@ -27,6 +27,7 @@ func NewHandlerOrderTable(orderService *orderusecases.OrderTableService) *handle
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerCreateOrderTable)
 		c.Post("/update/change-table/{id}", h.handlerChangeTable)
+		c.Post("/update/name/{id}", h.handlerUpdateName)
 		c.Post("/update/close/{id}", h.handlerCloseOrderTable)
 		c.Post("/update/add-tax/{id}", h.handlerAddTableTax)
 		c.Post("/update/remove-tax/{id}", h.handlerRemoveTableTax)
@@ -73,6 +74,32 @@ func (h *handlerOrderTableImpl) handlerChangeTable(w http.ResponseWriter, r *htt
 	}
 
 	if err := h.s.ChangeTable(ctx, dtoId, dtoTable); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+func (h *handlerOrderTableImpl) handlerUpdateName(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id := chi.URLParam(r, "id")
+
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+
+	dtoTable := &ordertabledto.UpdateOrderTableNameDTO{}
+	if err := jsonpkg.ParseBody(r, dtoTable); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	if err := h.s.UpdateName(ctx, dtoId, dtoTable); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}

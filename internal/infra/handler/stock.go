@@ -38,7 +38,7 @@ func NewHandlerStock(stockService *stockusecases.Service) *handler.Handler {
 		c.Post("/{id}/movement/add", h.handlerAddStock)
 		c.Post("/{id}/movement/remove", h.handlerRemoveStock)
 		c.Post("/{id}/movement/adjust", h.handlerAdjustStock)
-		c.Get("/movements/{stock_id}", h.handlerGetMovementsByStockID)
+		c.Get("/{stock_id}/movement", h.handlerGetMovementsByStockID)
 
 		// Alerts
 		c.Get("/alerts", h.handlerGetAllAlerts)
@@ -298,7 +298,13 @@ func (h *handlerStockImpl) handlerGetMovementsByStockID(w http.ResponseWriter, r
 		return
 	}
 
-	movements, err := h.s.GetMovementsByStockID(ctx, stockID)
+	var datePtr *string
+	date := r.URL.Query().Get("date")
+	if date != "" {
+		datePtr = &date
+	}
+
+	movements, err := h.s.GetMovementsByStockID(ctx, stockID, datePtr)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

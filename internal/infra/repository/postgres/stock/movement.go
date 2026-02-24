@@ -37,7 +37,7 @@ func (r *StockMovementRepositoryBun) CreateMovement(ctx context.Context, m *mode
 	return nil
 }
 
-func (r *StockMovementRepositoryBun) GetMovementsByStockID(ctx context.Context, stockID string) ([]model.StockMovement, error) {
+func (r *StockMovementRepositoryBun) GetMovementsByStockID(ctx context.Context, stockID string, date *string) ([]model.StockMovement, error) {
 	movements := []model.StockMovement{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -48,7 +48,12 @@ func (r *StockMovementRepositoryBun) GetMovementsByStockID(ctx context.Context, 
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&movements).Where("stock_movement.stock_id = ?", stockID).Order("created_at DESC").Scan(ctx); err != nil {
+	query := tx.NewSelect().Model(&movements).Where("stock_movement.stock_id = ?", stockID)
+	if date != nil && *date != "" {
+		query = query.Where("DATE(stock_movement.created_at) = ?", *date)
+	}
+
+	if err := query.Order("created_at DESC").Scan(ctx); err != nil {
 		return nil, err
 	}
 

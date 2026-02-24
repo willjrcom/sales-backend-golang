@@ -17,6 +17,7 @@ type Service struct {
 	stockAlertRepo    model.StockAlertRepository
 	productRepo       model.ProductRepository
 	itemRepo          model.ItemRepository
+	employeeRepo      model.EmployeeRepository
 }
 
 func NewStockService(
@@ -31,9 +32,10 @@ func NewStockService(
 	}
 }
 
-func (s *Service) AddDependencies(productRepo model.ProductRepository, itemRepo model.ItemRepository) {
+func (s *Service) AddDependencies(productRepo model.ProductRepository, itemRepo model.ItemRepository, employeeRepo model.EmployeeRepository) {
 	s.itemRepo = itemRepo
 	s.productRepo = productRepo
+	s.employeeRepo = employeeRepo
 }
 
 // CreateStock cria um novo controle de estoque

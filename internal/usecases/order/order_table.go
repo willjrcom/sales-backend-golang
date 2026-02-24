@@ -178,6 +178,30 @@ func (s *OrderTableService) ChangeTable(ctx context.Context, dtoOrderTable *enti
 
 }
 
+func (s *OrderTableService) UpdateName(ctx context.Context, dtoID *entitydto.IDRequest, dtoTable *ordertabledto.UpdateOrderTableNameDTO) (err error) {
+	orderTableModel, err := s.rto.GetOrderTableById(ctx, dtoID.ID.String())
+	if err != nil {
+		return err
+	}
+
+	name, err := dtoTable.ToDomain()
+	if err != nil {
+		return err
+	}
+
+	orderTable := orderTableModel.ToDomain()
+	if err := orderTable.UpdateName(name); err != nil {
+		return err
+	}
+
+	orderTableModel.FromDomain(orderTable)
+	if err = s.rto.UpdateOrderTable(ctx, orderTableModel); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // AddTableTax applies the configured table tax rate to the order-table.
 func (s *OrderTableService) AddTableTax(ctx context.Context, dtoID *entitydto.IDRequest) error {
 	// Retrieve existing order-table record
