@@ -18,7 +18,7 @@ func NewCompanyCategoryRepositoryBun(db *bun.DB) model.CompanyCategoryRepository
 }
 
 func (r *CompanyCategoryRepositoryBun) Create(ctx context.Context, category *model.CompanyCategory) error {
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (r *CompanyCategoryRepositoryBun) Create(ctx context.Context, category *mod
 }
 
 func (r *CompanyCategoryRepositoryBun) Update(ctx context.Context, category *model.CompanyCategory) error {
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (r *CompanyCategoryRepositoryBun) Update(ctx context.Context, category *mod
 }
 
 func (r *CompanyCategoryRepositoryBun) Delete(ctx context.Context, id uuid.UUID) error {
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (r *CompanyCategoryRepositoryBun) Delete(ctx context.Context, id uuid.UUID)
 func (r *CompanyCategoryRepositoryBun) GetByID(ctx context.Context, id uuid.UUID) (*model.CompanyCategory, error) {
 	category := &model.CompanyCategory{}
 
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +102,7 @@ func (r *CompanyCategoryRepositoryBun) GetByID(ctx context.Context, id uuid.UUID
 func (r *CompanyCategoryRepositoryBun) GetAllCompanyCategories(ctx context.Context) ([]model.CompanyCategory, error) {
 	categories := []model.CompanyCategory{}
 
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
 	}
