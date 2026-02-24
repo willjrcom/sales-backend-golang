@@ -43,3 +43,44 @@ func (a *AddressDTO) FromDomain(address *addressentity.Address) {
 		Coordinates:  coordinates,
 	}
 }
+
+func (a *AddressDTO) ToDomain() (*addressentity.Address, error) {
+	if a == nil {
+		return nil, nil
+	}
+	coordinates := addressentity.Coordinates{
+		Latitude:  a.Coordinates.Latitude,
+		Longitude: a.Coordinates.Longitude,
+	}
+
+	return addressentity.NewAddress(&addressentity.AddressCommonAttributes{
+		Street:       a.Street,
+		Number:       a.Number,
+		Complement:   a.Complement,
+		Reference:    a.Reference,
+		Neighborhood: a.Neighborhood,
+		City:         a.City,
+		UF:           a.UF,
+		Cep:          a.Cep,
+		DeliveryTax:  a.DeliveryTax,
+		Coordinates:  coordinates,
+	}), nil
+}
+
+func (a *AddressDTO) UpdateDomain(address *addressentity.Address) error {
+	if a == nil || address == nil {
+		return nil
+	}
+	address.Street = a.Street
+	address.Number = a.Number
+	address.Complement = a.Complement
+	address.Reference = a.Reference
+	address.Neighborhood = a.Neighborhood
+	address.City = a.City
+	address.UF = a.UF
+	address.Cep = a.Cep
+	address.DeliveryTax = a.DeliveryTax
+	address.Coordinates.Latitude = a.Coordinates.Latitude
+	address.Coordinates.Longitude = a.Coordinates.Longitude
+	return nil
+}

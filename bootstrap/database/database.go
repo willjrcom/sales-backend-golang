@@ -257,6 +257,22 @@ func createPublicTables(db *bun.DB) error {
 		return err
 	}
 
+	if err := createTableIfNotExists(ctx, tx, (*model.Sponsor)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, tx, (*model.Advertising)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, tx, (*model.CategoryToSponsor)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, tx, (*model.CategoryToAdvertising)(nil)); err != nil {
+		return err
+	}
+
 	// if err := setupPublicMigrations(ctx, tx); err != nil {
 	// 	return err
 	// }
@@ -362,6 +378,9 @@ func registerModels(db *bun.DB) error {
 	db.RegisterModel((*model.PlaceToTables)(nil))
 	db.RegisterModel((*model.Place)(nil))
 
+	db.RegisterModel((*model.CategoryToSponsor)(nil))
+	db.RegisterModel((*model.CategoryToAdvertising)(nil))
+
 	db.RegisterModel((*model.Shift)(nil))
 	db.RegisterModel((*model.CompanyToUsers)(nil))
 	db.RegisterModel((*model.CompanyToCategory)(nil))
@@ -370,6 +389,9 @@ func registerModels(db *bun.DB) error {
 	db.RegisterModel((*model.CompanyPayment)(nil))
 	db.RegisterModel((*model.User)(nil))
 	var _ bun.BeforeSelectHook = (*model.User)(nil)
+
+	db.RegisterModel((*model.Sponsor)(nil))
+	db.RegisterModel((*model.Advertising)(nil))
 
 	// Fiscal invoice models
 	db.RegisterModel((*model.CompanyUsageCost)(nil))

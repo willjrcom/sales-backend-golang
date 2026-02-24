@@ -1,11 +1,15 @@
 package model
 
-import "context"
+import (
+	"context"
+
+	"github.com/google/uuid"
+)
 
 type SponsorRepository interface {
-	CreateSponsor(ctx context.Context, Sponsor *Sponsor) (err error)
-	UpdateSponsor(ctx context.Context, Sponsor *Sponsor) (err error)
-	DeleteSponsor(ctx context.Context, id string) (err error)
-	GetSponsorByID(ctx context.Context, id string) (Sponsor *Sponsor, err error)
+	Create(ctx context.Context, sponsor *Sponsor) error
+	Update(ctx context.Context, sponsor *Sponsor) error
+	Delete(ctx context.Context, id uuid.UUID) error
+	GetByID(ctx context.Context, id uuid.UUID) (*Sponsor, error)
 	GetAllSponsors(ctx context.Context) ([]Sponsor, error)
 }

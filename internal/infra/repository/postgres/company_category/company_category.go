@@ -88,7 +88,7 @@ func (r *CompanyCategoryRepositoryBun) GetByID(ctx context.Context, id uuid.UUID
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(category).Where("id = ?", id).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(category).Relation("Sponsors").Relation("Advertisements").Where("id = ?", id).Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -110,7 +110,7 @@ func (r *CompanyCategoryRepositoryBun) GetAllCompanyCategories(ctx context.Conte
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(&categories).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&categories).Relation("Sponsors").Relation("Advertisements").Scan(ctx); err != nil {
 		return nil, err
 	}
 

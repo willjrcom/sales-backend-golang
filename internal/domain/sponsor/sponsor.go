@@ -11,11 +11,16 @@ type Sponsor struct {
 }
 
 type SponsorCommonAttributes struct {
-	Name     string
-	CNPJ     string
-	Email    string
-	Contacts []string
-	Address  *addressentity.Address
+	Name                   string
+	CNPJ                   string
+	Email                  string
+	Contact                string
+	Address                *addressentity.Address
+	CompanyCategorySponsor []CompanyCategory
+}
+
+type CompanyCategory struct {
+	ID string
 }
 
 func NewSponsor(sponsorCommonAttributes SponsorCommonAttributes) *Sponsor {
