@@ -21,7 +21,7 @@ func FormatShift(shift *shiftentity.Shift) ([]byte, error) {
 	raw.WriteString("RELATORIO DE PEDIDOS")
 	raw.WriteString(escBoldOff)
 	raw.WriteString(newline)
-	fmt.Fprintf(&raw, "Turno: %s%s", shift.OpenedAt.Format("2005-01-02 15:04"), newline)
+	fmt.Fprintf(&raw, "Abertura: %s%s", shift.OpenedAt.Format("02/01/2006 15:04"), newline)
 
 	raw.WriteString(escAlignLeft)
 	raw.WriteString(strings.Repeat("-", 40) + newline)
@@ -52,7 +52,7 @@ func FormatShift(shift *shiftentity.Shift) ([]byte, error) {
 	raw.WriteString(newline)
 
 	raw.WriteString(escAlignLeft)
-	raw.WriteString(fmt.Sprintf("TOTAL: R$ %.2f", d2f(totalVendas)))
+	raw.WriteString(fmt.Sprintf("TOTAL GERAL:\tR$ %7.2f", d2f(totalVendas)))
 	tw := tabwriter.NewWriter(&buf, 6, 11, 2, ' ', 0)
 	tw.Write(raw.Bytes())
 	tw.Flush()
@@ -62,6 +62,5 @@ func FormatShift(shift *shiftentity.Shift) ([]byte, error) {
 }
 
 func FormatOrderShift(buf *bytes.Buffer, o *orderentity.Order) {
-	buf.WriteString(fmt.Sprintf("%d\tR$%.2f", o.OrderNumber, d2f(o.TotalPayable)))
-	buf.WriteString(newline)
+	buf.WriteString(fmt.Sprintf("%d\tR$ %7.2f%s", o.OrderNumber, d2f(o.TotalPayable), newline))
 }

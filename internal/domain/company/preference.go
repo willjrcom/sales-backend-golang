@@ -34,6 +34,8 @@ const (
 	PrinterDeliveryOnShipDelivery Key = "printer_delivery_on_ship_delivery"
 	// EnablePrintOrderOnShipDelivery toggles printing when finish a process.
 	EnablePrintItemsOnFinishProcess Key = "enable_print_items_on_finish_process"
+	// PrinterShiftReport is the printer used for shift reports.
+	PrinterShiftReport Key = "printer_shift_report"
 )
 
 // Preference holds a single key-value pair.

@@ -26,6 +26,8 @@ func NewHandlerOrderPrint(svc *orderprintusecases.Service) *handler.Handler {
 		r.Get("/kitchen/{id}", h.handlePrintGroupItemKitchen)
 		// Full order print
 		r.Get("/{id}", h.handlePrintOrder)
+		// Shift report print
+		r.Get("/shift/{id}", h.handlePrintShift)
 		// Daily report print
 		r.Post("/daily", h.handlePrintByShift)
 	})
@@ -110,6 +112,28 @@ func (h *handlerOrderPrintImpl) handlePrintGroupItemKitchen(w http.ResponseWrite
 		return
 	}
 
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(data)
+}
+
+// handlePrintShift handles GET /order-print/shift/{id}
+func (h *handlerOrderPrintImpl) handlePrintShift(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+
+	data, err := h.s.PrintShift(ctx, dtoId)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/octet-stream")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(data)
 }

@@ -65,6 +65,21 @@ func (s *Service) PrintDailyReport(ctx context.Context, req *entitydto.IDRequest
 	return shift, nil
 }
 
+// PrintShift retrieves the shift by ID and returns its printable representation.
+func (s *Service) PrintShift(ctx context.Context, req *entitydto.IDRequest) ([]byte, error) {
+	shift, err := s.shiftService.GetShiftDomainByID(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := pos.FormatShift(shift)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
 // PrintGroupItemKitchen retrieves the order by ID and returns its kitchen-printable bytes
 // showing only items and complements, without prices or totals.
 func (s *Service) PrintGroupItemKitchen(ctx context.Context, req *entitydto.IDRequest) ([]byte, error) {

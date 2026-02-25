@@ -47,7 +47,7 @@ func FormatOrder(o *orderentity.Order, company *companydto.CompanyDTO) ([]byte, 
 	}
 
 	if o.Observation != "" {
-		bodyRaw.WriteString("Observação do pedido" + newline)
+		bodyRaw.WriteString("OBSERVAÇÃO DO PEDIDO" + newline)
 		bodyRaw.WriteString(o.Observation + newline + newline)
 	}
 
@@ -57,9 +57,9 @@ func FormatOrder(o *orderentity.Order, company *companydto.CompanyDTO) ([]byte, 
 	formatOrderValuesFooter(&bodyRaw, o)
 	bodyRaw.WriteString(strings.Repeat(newline, 3))
 
-	// Alinha colunas do corpo
+	// Alinha colunas do corpo (alinhamento minimalista para 40 colunas)
 	var bodyAligned bytes.Buffer
-	tw := tabwriter.NewWriter(&bodyAligned, 6, 11, 2, ' ', 0)
+	tw := tabwriter.NewWriter(&bodyAligned, 0, 0, 1, ' ', 0)
 	tw.Write(bodyRaw.Bytes())
 	tw.Flush()
 
@@ -88,11 +88,11 @@ func formatHeader(buf *bytes.Buffer, o *orderentity.Order, company *companydto.C
 	fmt.Fprintf(buf, "PEDIDO #%d%s", o.OrderNumber, newline)
 
 	if o.PendingAt != nil {
-		fmt.Fprintf(buf, "Gerado:\t\t%s%s", o.PendingAt.Format("15:04"), newline)
+		fmt.Fprintf(buf, "GERADO EM:\t%s%s", o.PendingAt.Format("15:04"), newline)
 	}
 
 	if o.Attendant != nil && o.Attendant.User != nil {
-		fmt.Fprintf(buf, "Atendente:\t\t%s%s", o.Attendant.User.Name, newline)
+		fmt.Fprintf(buf, "ATENDENTE:\t%s%s", o.Attendant.User.Name, newline)
 	}
 
 	buf.WriteString(strings.Repeat("-", 40) + newline)
@@ -100,6 +100,10 @@ func formatHeader(buf *bytes.Buffer, o *orderentity.Order, company *companydto.C
 
 // printGroupItemsSection prints all item groups of the order.
 func printGroupItemsSection(buf *bytes.Buffer, groups []orderentity.GroupItem) {
+	fmt.Fprintf(buf, escAlignCenter)
+	fmt.Fprintf(buf, "ITENS"+newline)
+	fmt.Fprintf(buf, escAlignLeft)
+
 	for _, grp := range groups {
 		printGroupItem(buf, &grp)
 	}
@@ -110,25 +114,20 @@ func printGroupItemsSection(buf *bytes.Buffer, groups []orderentity.GroupItem) {
 // printGroupItem prints group header, its items, any complement, and subtotal.
 func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 	// Header: category and size
-	var parts []string
-
+	categoryName := ""
 	if c := group.Category; c != nil && c.Name != "" {
-		parts = append(parts, c.Name)
+		categoryName = truncate(c.Name, 15)
 	}
 
-	if s := group.Size; s != "" {
-		parts = append(parts, s)
-	}
+	sizeName := truncate(group.Size, 10)
+	quantityStr := fmt.Sprintf("Qtd:%.0f", group.Quantity)
 
-	parts = append(parts, "Qtd:"+fmt.Sprintf("%.0f", group.Quantity))
-	header := strings.Join(parts, "\t")
-
-	fmt.Fprintf(buf, "%-40s%s", header, newline)
+	fmt.Fprintf(buf, "%-15s\t%-10s\t%s%s", categoryName, sizeName, quantityStr, newline)
 	buf.WriteString(escBoldOff)
 
 	// Group time logs
 	if group.StartAt != nil {
-		fmt.Fprintf(buf, "Agendado:\t%s%s", group.StartAt.Format("15:04"), newline)
+		fmt.Fprintf(buf, "AGENDADO PARA:\t%s%s", group.StartAt.Format("15:04"), newline)
 	}
 	// if group.PendingAt != nil {
 	// 	buf.WriteString(fmt.Sprintf("Pendente:\t\t%s%s", group.PendingAt.Format("15:04"), newline))
@@ -153,23 +152,23 @@ func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 	// Observation
 	if obs := group.Observation; obs != "" {
 		buf.WriteString(escBoldOn)
-		fmt.Fprintf(buf, "Obs: %s%s", obs, newline)
+		fmt.Fprintf(buf, "Obs:\t%s%s", obs, newline)
 		buf.WriteString(escBoldOff)
 	}
 
 	if group.ReadyAt != nil {
-		fmt.Fprintf(buf, "Pronto as:\t\t%s%s", group.ReadyAt.Format("15:04"), newline)
+		fmt.Fprintf(buf, "PRONTO ÀS:\t%s%s", group.ReadyAt.Format("15:04"), newline)
 	}
 
 	// Subtotal for this group
-	buf.WriteString(fmt.Sprintf("Subtotal:\t\tR$ %.2f%s", d2f(group.TotalPrice), newline))
+	buf.WriteString(fmt.Sprintf("SUBTOTAL DO GRUPO:\tR$ %7.2f%s", d2f(group.TotalPrice), newline))
 }
 
 func printComplementItem(buf *bytes.Buffer, comp *orderentity.Item, group *orderentity.GroupItem) {
 	buf.WriteString(escBoldOn)
 	// truncate complement name to 20 runes to avoid breaking UTF-8
 	name := truncate(comp.Name, 20)
-	buf.WriteString(fmt.Sprintf("%4.1f\t%-20s\tR$ %7.2f%s", group.Quantity, name, d2f(comp.TotalPrice), newline))
+	fmt.Fprintf(buf, "%-4.1f\t%-20s\tR$ %7.2f%s", group.Quantity, name, d2f(comp.TotalPrice), newline)
 	buf.WriteString(escBoldOff)
 }
 
@@ -178,7 +177,7 @@ func printComplementItem(buf *bytes.Buffer, comp *orderentity.Item, group *order
 func printItem(buf *bytes.Buffer, item *orderentity.Item) {
 	// truncate item name to 20 runes to avoid breaking UTF-8
 	name := truncate(item.Name, 20)
-	fmt.Fprintf(buf, "%.1f\t%-20s\tR$ %.2f%s", item.Quantity, name, d2f(item.TotalPrice), newline)
+	fmt.Fprintf(buf, "%-4.1f\t%-20s\tR$ %7.2f%s", item.Quantity, name, d2f(item.TotalPrice), newline)
 
 	for _, add := range item.AdditionalItems {
 		printAdditionalItem(buf, &add)
@@ -194,7 +193,7 @@ func printItem(buf *bytes.Buffer, item *orderentity.Item) {
 	// Observation for item
 	if obs := item.Observation; obs != "" {
 		fmt.Fprintf(buf, escBoldOn)
-		fmt.Fprintf(buf, "Obs: %s%s", obs, newline)
+		fmt.Fprintf(buf, "OBS:\t%s%s", obs, newline)
 		fmt.Fprintf(buf, escBoldOff)
 	}
 
@@ -205,12 +204,12 @@ func printItem(buf *bytes.Buffer, item *orderentity.Item) {
 func printAdditionalItem(buf *bytes.Buffer, add *orderentity.Item) {
 	// truncate additional item name to 17 runes to avoid breaking UTF-8
 	name := truncate(add.Name, 17)
-	fmt.Fprintf(buf, "+\t%.0fx %-17s\tR$ %.2f%s", add.Quantity, name, d2f(add.TotalPrice), newline)
+	fmt.Fprintf(buf, "+\t%-17s\tR$ %7.2f%s", name, d2f(add.TotalPrice), newline)
 }
 
 // formatTotalFooter writes the total payable amount to the buffer.
 func formatTotalFooter(buf *bytes.Buffer, o *orderentity.Order) {
-	fmt.Fprintf(buf, "TOTAL:\t\tR$ %.2f%s", d2f(o.TotalPayable), newline)
+	fmt.Fprintf(buf, "TOTAL:\tR$ %7.2f%s", d2f(o.TotalPayable), newline)
 }
 
 // formatDeliverySection prints delivery-related details if present.
@@ -224,8 +223,6 @@ func formatDeliverySection(buf *bytes.Buffer, o *orderentity.Order, company *com
 	fmt.Fprintf(buf, "PEDIDO DE ENTREGA %d%s", o.OrderNumber, newline)
 	fmt.Fprintf(buf, escBoldOff)
 
-	formatHeader(buf, o, company)
-
 	fmt.Fprintf(buf, escAlignCenter)
 	fmt.Fprintf(buf, "ENTREGA"+newline)
 	fmt.Fprintf(buf, escAlignLeft)
@@ -236,53 +233,55 @@ func formatDeliverySection(buf *bytes.Buffer, o *orderentity.Order, company *com
 	// }
 
 	if sa := o.Delivery.ShippedAt; sa != nil {
-		fmt.Fprintf(buf, "Despachado:\t\t%s%s", sa.Format("15:04"), newline)
+		fmt.Fprintf(buf, "DESPACHADO ÀS:\t%s%s", sa.Format("15:04"), newline)
 	}
 
 	// Client name
 	if o.Delivery.Client != nil && o.Delivery.Client.Name != "" {
 		// truncate client name to 20 runes to avoid breaking UTF-8
 		clientName := truncate(o.Delivery.Client.Name, 20)
-		fmt.Fprintf(buf, "Cliente:\t\t%-20s%s", clientName, newline)
+		fmt.Fprintf(buf, "CLIENTE:\t%s%s", clientName, newline)
 	}
 
 	// Address
 	if a := o.Delivery.Address; a != nil {
 		fmt.Fprintf(buf, escAlignCenter)
-		fmt.Fprintf(buf, "Endereço")
+		fmt.Fprintf(buf, "ENDEREÇO"+newline)
 		fmt.Fprintf(buf, newline)
 
 		fmt.Fprintf(buf, escAlignLeft)
 		fmt.Fprintf(buf, "%s, %s%s", a.Street, a.Number, newline)
 
 		if a.Complement != "" {
-			fmt.Fprintf(buf, "Complemento:\t%s%s", a.Complement, newline)
+			fmt.Fprintf(buf, "COMPLEMENTO:\t%s%s", a.Complement, newline)
 		}
 
 		if a.Reference != "" {
-			fmt.Fprintf(buf, "Ref:\t%s%s", a.Reference, newline)
+			fmt.Fprintf(buf, "REFERÊNCIA:\t%s%s", a.Reference, newline)
 		}
 
-		fmt.Fprintf(buf, "Bairro:\t%s%s", a.Neighborhood, newline)
-		fmt.Fprintf(buf, "Cidade:\t%s - %s%s", a.City, a.UF, newline)
-		fmt.Fprintf(buf, "CEP:\t%s%s", a.Cep, newline)
+		fmt.Fprintf(buf, "BAIRRO:\t%s%s", a.Neighborhood, newline)
+		fmt.Fprintf(buf, "CIDADE:\t%s - %s%s", a.City, a.UF, newline)
+		if a.Cep != "" {
+			fmt.Fprintf(buf, "CEP:\t%s%s", a.Cep, newline)
+		}
 	}
 
 	// Delivery driver
 	if d := o.Delivery.Driver; d != nil && d.Employee != nil && d.Employee.User != nil {
-		fmt.Fprintf(buf, "Entregador:\t%s%s", d.Employee.User.Name, newline)
+		fmt.Fprintf(buf, "ENTREGADOR:\t%s%s", d.Employee.User.Name, newline)
 	}
 
 	// Delivery tax
 	if t := o.Delivery.DeliveryTax; t != nil {
-		fmt.Fprintf(buf, "Taxa entrega:\t\tR$ %.2f%s", d2f(*t), newline)
+		fmt.Fprintf(buf, "Taxa de Entrega:\tR$ %7.2f%s", d2f(*t), newline)
 	}
 
 	// Change for delivery
-	fmt.Fprintf(buf, "Troco:\t\tR$ %.2f%s", d2f(o.Delivery.Change), newline)
+	fmt.Fprintf(buf, "TROCO:\tR$ %7.2f%s", d2f(o.Delivery.Change), newline)
 
 	// Payment method for delivery
-	fmt.Fprintf(buf, "Forma de pagamento:\t%s%s", o.Delivery.PaymentMethod, newline)
+	fmt.Fprintf(buf, "FORMA DE PAGAMENTO:\t%s%s", o.Delivery.PaymentMethod, newline)
 	fmt.Fprintf(buf, strings.Repeat("-", 40)+newline)
 }
 
@@ -297,20 +296,19 @@ func formatPickupSection(buf *bytes.Buffer, o *orderentity.Order, company *compa
 	fmt.Fprintf(buf, "PEDIDO DE RETIRADA %d%s", o.OrderNumber, newline)
 	fmt.Fprintf(buf, escBoldOff)
 
-	formatHeader(buf, o, company)
 	fmt.Fprintf(buf, escAlignLeft)
 
 	// if pa := o.Pickup.PendingAt; pa != nil {
 	// 	buf.WriteString(fmt.Sprintf("Pendente: %s%s", pa.Format("15:04"), newline))
 	// }
 	if ra := o.Pickup.ReadyAt; ra != nil {
-		fmt.Fprintf(buf, "Pronto:\t\t%s%s", ra.Format("15:04"), newline)
+		fmt.Fprintf(buf, "PRONTO ÀS:\t%s%s", ra.Format("15:04"), newline)
 	}
 	if name := o.Pickup.Name; name != "" {
-		fmt.Fprintf(buf, "Cliente:\t\t%s%s", name, newline)
+		fmt.Fprintf(buf, "CLIENTE:\t%s%s", name, newline)
 	}
 	if contact := o.Pickup.Contact; contact != "" {
-		fmt.Fprintf(buf, "Contato:\t\t%s%s", contact, newline)
+		fmt.Fprintf(buf, "CONTATO:\t%s%s", contact, newline)
 	}
 	fmt.Fprintf(buf, strings.Repeat("-", 40)+newline)
 }
@@ -326,7 +324,6 @@ func formatTableSection(buf *bytes.Buffer, o *orderentity.Order, company *compan
 	fmt.Fprintf(buf, "PEDIDO DE MESA %d%s", o.OrderNumber, newline)
 	fmt.Fprintf(buf, escBoldOff)
 
-	formatHeader(buf, o, company)
 	fmt.Fprintf(buf, escAlignLeft)
 
 	// if pa := o.Table.PendingAt; pa != nil {
@@ -336,10 +333,10 @@ func formatTableSection(buf *bytes.Buffer, o *orderentity.Order, company *compan
 	// 	buf.WriteString(fmt.Sprintf("Fechado: %s%s", ca.Format("15:04"), newline))
 	// }
 	if name := o.Table.Name; name != "" {
-		fmt.Fprintf(buf, "Nome:\t%s%s", name, newline)
+		fmt.Fprintf(buf, "NOME:\t%s%s", name, newline)
 	}
 	if contact := o.Table.Contact; contact != "" {
-		fmt.Fprintf(buf, "Contato:\t%s%s", contact, newline)
+		fmt.Fprintf(buf, "CONTATO:\t%s%s", contact, newline)
 	}
 	fmt.Fprintf(buf, strings.Repeat("-", 40)+newline)
 }
@@ -349,13 +346,13 @@ func formatOrderValuesFooter(buf *bytes.Buffer, o *orderentity.Order) {
 	fmt.Fprintf(buf, escAlignLeft)
 
 	// Total items
-	fmt.Fprintf(buf, "Total de itens:\t\t%.0f%s", o.QuantityItems, newline)
+	fmt.Fprintf(buf, "TOTAL DE ITENS:\t%.0f%s", o.QuantityItems, newline)
 
 	// Total paid
-	fmt.Fprintf(buf, "Pago:\t\tR$ %.2f%s", d2f(o.TotalPaid), newline)
+	fmt.Fprintf(buf, "TOTAL PAGO:\tR$ %7.2f%s", d2f(o.TotalPaid), newline)
 
 	// Total change
-	fmt.Fprintf(buf, "Troco:\t\tR$ %.2f%s", d2f(o.TotalChange), newline)
+	fmt.Fprintf(buf, "TOTAL TROCO:\tR$ %7.2f%s", d2f(o.TotalChange), newline)
 	fmt.Fprintf(buf, strings.Repeat("-", 40)+newline)
 }
 
@@ -364,9 +361,13 @@ func formatPaymentsSection(buf *bytes.Buffer, o *orderentity.Order) {
 	if len(o.Payments) == 0 {
 		return
 	}
+
+	fmt.Fprintf(buf, escAlignCenter)
+	fmt.Fprintf(buf, "PAGAMENTOS REALIZADOS"+newline)
 	fmt.Fprintf(buf, escAlignLeft)
 	for _, p := range o.Payments {
-		fmt.Fprintf(buf, "%s:%7sR$ %.2f%s", p.Method, "", d2f(p.TotalPaid), newline)
+		method := truncate(string(p.Method), 14) + ":"
+		fmt.Fprintf(buf, "%-15s\tR$ %7.2f%s", method, d2f(p.TotalPaid), newline)
 	}
 	fmt.Fprintf(buf, strings.Repeat("-", 40)+newline)
 }
@@ -380,7 +381,7 @@ func FormatGroupItem(group *orderentity.GroupItem) ([]byte, error) {
 	printGroupItem(&raw, group)
 	raw.WriteString(strings.Repeat("-", 40) + newline)
 
-	tw := tabwriter.NewWriter(&body, 6, 11, 2, ' ', 0)
+	tw := tabwriter.NewWriter(&body, 0, 0, 1, ' ', 0)
 	if _, err := tw.Write(raw.Bytes()); err != nil {
 		return nil, err
 	}
@@ -404,7 +405,7 @@ func FormatItem(item *orderentity.Item) ([]byte, error) {
 
 	printItem(&raw, item)
 
-	tw := tabwriter.NewWriter(&body, 6, 11, 2, ' ', 0)
+	tw := tabwriter.NewWriter(&body, 0, 0, 1, ' ', 0)
 	if _, err := tw.Write(raw.Bytes()); err != nil {
 		return nil, err
 	}

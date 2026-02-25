@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"text/tabwriter"
 
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
@@ -26,12 +27,17 @@ func FormatGroupItemKitchen(group *orderentity.GroupItem, company *companydto.Co
 	final.WriteString(escBoldOff)
 	final.WriteString(escAlignLeft)
 
-	// --- CORPO COZINHA ---
+	// --- CORPO COZINHA (Tabelado) ---
 	var bodyRaw bytes.Buffer
 	printGroupItemKitchen(&bodyRaw, group)
 	bodyRaw.WriteString(strings.Repeat(newline, 2))
 
-	final.Write(ToLatin1(bodyRaw.String()))
+	var bodyAligned bytes.Buffer
+	tw := tabwriter.NewWriter(&bodyAligned, 0, 0, 1, ' ', 0)
+	tw.Write(bodyRaw.Bytes())
+	tw.Flush()
+
+	final.Write(ToLatin1(bodyAligned.String()))
 
 	// cut ticket
 	final.WriteString(escCut)
@@ -41,21 +47,20 @@ func FormatGroupItemKitchen(group *orderentity.GroupItem, company *companydto.Co
 // printGroupItemKitchen writes group header, items, additions, removals, and group complement,
 // ignoring price values for kitchen production.
 func printGroupItemKitchen(buf *bytes.Buffer, group *orderentity.GroupItem) {
-	// Header: category, size, quantity
-	var parts []string
+	categoryName := ""
 	if c := group.Category; c != nil && c.Name != "" {
-		parts = append(parts, c.Name)
+		categoryName = c.Name
 	}
-	if s := group.Size; s != "" {
-		parts = append(parts, s)
-	}
-	parts = append(parts, fmt.Sprintf("Qtd:%.0f", group.Quantity))
-	buf.WriteString(strings.Join(parts, " ") + newline)
+	categoryLabel := truncate(categoryName, 15)
+	sizeLabel := truncate(group.Size, 10)
+	quantityStr := fmt.Sprintf("Qtd:%.0f", group.Quantity)
+
+	buf.WriteString(fmt.Sprintf("%-15s\t%-10s\t%s%s", categoryLabel, sizeLabel, quantityStr, newline))
 
 	// Items and their observations
 	for _, item := range group.Items {
 		name := truncate(item.Name, 20)
-		buf.WriteString(fmt.Sprintf("%.1f\t%s%s", item.Quantity, name, newline))
+		buf.WriteString(fmt.Sprintf("%-4.1f\t%s%s", item.Quantity, name, newline))
 		for _, add := range item.AdditionalItems {
 			addName := truncate(add.Name, 17)
 			buf.WriteString(fmt.Sprintf("+\t%.0fx %s%s", add.Quantity, addName, newline))
@@ -64,14 +69,14 @@ func printGroupItemKitchen(buf *bytes.Buffer, group *orderentity.GroupItem) {
 			buf.WriteString(fmt.Sprintf("-\t%s%s", rm, newline))
 		}
 		if obs := item.Observation; obs != "" {
-			buf.WriteString(fmt.Sprintf("Obs: %s%s", obs, newline))
+			buf.WriteString(fmt.Sprintf("OBS:\t%s%s", obs, newline))
 		}
 	}
 
 	// Group complement item
 	if comp := group.ComplementItem; comp != nil {
 		compName := truncate(comp.Name, 20)
-		buf.WriteString(fmt.Sprintf("Complemento: %s%s", compName, newline))
+		buf.WriteString(fmt.Sprintf("COMPLEMENTO:\t%s%s", compName, newline))
 	}
 }
 
@@ -79,6 +84,6 @@ func printGroupItemKitchenHeader(buf *bytes.Buffer, company *companydto.CompanyD
 	if company != nil {
 		fmt.Fprintf(buf, "%s%s", company.TradeName, newline)
 	}
-	buf.WriteString("Cozinha" + newline)
+	buf.WriteString("COZINHA" + newline)
 	buf.WriteString(newline)
 }
