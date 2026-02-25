@@ -129,15 +129,11 @@ func (h *handlerOrderImpl) handlerGetAllOrdersByClientID(w http.ResponseWriter, 
 		return
 	}
 
-	if len(orders) == 0 {
-		jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
-		return
-	}
+	client, err := h.s.GetClientByID(ctx, dtoId)
 
-	delivery := orders[0].Delivery
 	var contact string
-	if delivery != nil && delivery.Client != nil && delivery.Client.Contact != nil {
-		contact = delivery.Client.Contact.Number
+	if client != nil && client.Contact != nil {
+		contact = client.Contact.Number
 	}
 
 	if contact == "" {

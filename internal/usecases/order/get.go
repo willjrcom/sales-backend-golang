@@ -5,10 +5,15 @@ import (
 
 	"github.com/google/uuid"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order"
 	ordertabledto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_table"
 )
+
+func (s *OrderService) GetClientByID(ctx context.Context, dto *entitydto.IDRequest) (*clientdto.ClientDTO, error) {
+	return s.clientService.GetClientById(ctx, dto)
+}
 
 func (s *OrderService) GetOrderById(ctx context.Context, dto *entitydto.IDRequest) (*orderdto.OrderDTO, error) {
 	if orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String()); err != nil {

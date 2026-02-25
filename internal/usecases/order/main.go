@@ -3,6 +3,7 @@ package orderusecases
 import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/rabbitmq"
+	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 )
@@ -25,6 +26,7 @@ type OrderService struct {
 	st                      *OrderTableService
 	sc                      *companyusecases.Service
 	rabbitmq                *rabbitmq.RabbitMQ
+	clientService           *clientusecases.Service
 }
 
 func NewOrderService(ro model.OrderRepository) *OrderService {
@@ -49,6 +51,7 @@ func (s *OrderService) AddDependencies(
 	sc *companyusecases.Service,
 	re model.EmployeeRepository,
 	rabbitmq *rabbitmq.RabbitMQ,
+	clientService *clientusecases.Service,
 ) {
 	s.ro = ro
 	s.rs = rs
@@ -67,4 +70,5 @@ func (s *OrderService) AddDependencies(
 	s.sc = sc
 	s.re = re
 	s.rabbitmq = rabbitmq
+	s.clientService = clientService
 }
