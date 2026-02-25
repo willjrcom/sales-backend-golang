@@ -381,21 +381,11 @@ func (s *OrderService) updateFreeDelivery(ctx context.Context, order *orderentit
 		return err
 	}
 
-	isMinOrderForFreeEnabled, err := company.Preferences.GetBool("enable_min_order_value_for_free_delivery")
-	if err != nil {
-		return err
-	}
+	minOrderForFree, _ := company.Preferences.GetDecimal(companyentity.MinOrderValueForFreeDelivery)
 
-	if isMinOrderForFreeEnabled {
-		minOrderForFree, err := company.Preferences.GetDecimal("min_order_value_for_free_delivery")
-		if err != nil {
-			return err
-		}
-
-		order.Delivery.IsDeliveryFree = false
-		if order.TotalPayable.GreaterThan(minOrderForFree) {
-			order.Delivery.IsDeliveryFree = true
-		}
+	order.Delivery.IsDeliveryFree = false
+	if !minOrderForFree.IsZero() && order.TotalPayable.GreaterThan(minOrderForFree) {
+		order.Delivery.IsDeliveryFree = true
 	}
 
 	if IsDeliveryFreeUpdated == order.Delivery.IsDeliveryFree {

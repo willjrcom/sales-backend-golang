@@ -48,7 +48,22 @@ func (c *CompanyUpdateDTO) UpdateDomain(company *companyentity.Company) (err err
 		company.Contacts = c.Contacts
 	}
 	if c.Preferences != nil {
+		printerKeys := []companyentity.Key{
+			companyentity.PrinterOrder,
+			companyentity.PrinterDeliveryOnShipDelivery,
+			companyentity.PrinterShiftReport,
+		}
+
+		// Preserve existing printer values if the incoming update leaves them empty
+		oldPrefs := company.Preferences
 		company.Preferences = c.Preferences
+		for _, key := range printerKeys {
+			if newVal, _ := company.Preferences.GetString(key); newVal == "" {
+				if oldVal, _ := oldPrefs.GetString(key); oldVal != "" {
+					company.Preferences[key] = oldVal
+				}
+			}
+		}
 	}
 	if c.ImagePath != nil {
 		company.ImagePath = *c.ImagePath

@@ -15,8 +15,6 @@ const (
 	TableTaxRate Key = "table_tax_rate"
 	// MinOrderValueForFreeDelivery is the minimum order value to qualify for free delivery.
 	MinOrderValueForFreeDelivery Key = "min_order_value_for_free_delivery"
-	// EnableMinOrderValueForFreeDelivery toggles the free delivery minimum order value rule.
-	EnableMinOrderValueForFreeDelivery Key = "enable_min_order_value_for_free_delivery"
 	// EnableDelivery toggles delivery availability.
 	EnableDelivery Key = "enable_delivery"
 	// EnableTable toggles table service availability.
@@ -60,13 +58,12 @@ func NewPreferences(entries []Preference) Preferences {
 
 func NewDefaultPreferences() Preferences {
 	return Preferences{
-		EnableDelivery:                     "true",
-		EnableTable:                        "true",
-		EnableMinOrderValueForFreeDelivery: "true",
-		TableTaxRate:                       "10",
-		MinDeliveryTax:                     "0.00",
-		DeliveryFeePerKm:                   "0.00",
-		MinOrderValueForFreeDelivery:       "0.00",
+		EnableDelivery:               "true",
+		EnableTable:                  "true",
+		TableTaxRate:                 "10",
+		MinDeliveryTax:               "0.00",
+		DeliveryFeePerKm:             "0.00",
+		MinOrderValueForFreeDelivery: "0.00",
 	}
 }
 

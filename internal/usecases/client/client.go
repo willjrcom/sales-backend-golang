@@ -68,14 +68,11 @@ func (s *Service) UpdateClientWithShippingFee(ctx context.Context, client *clien
 	}
 
 	client.Address.AddressCommonAttributes.Coordinates = *coordinates
-	distance, dynamicTax := s.calculateShippingFee(client.Address.Coordinates, company)
+	distance, _ := s.calculateShippingFee(client.Address.Coordinates, company)
 
 	client.Address.Distance = distance
-
-	// Se a taxa for enviada como 0 (ex: via app ou admin deixou em branco), usa a dinâmica
-	if client.Address.DeliveryTax.IsZero() {
-		client.Address.DeliveryTax = dynamicTax
-	}
+	// delivery_tax não é atualizado aqui — se for 0 significa "usar cálculo km",
+	// se for > 0 é taxa fixa enviada pelo usuário
 }
 
 func (s *Service) calculateShippingFee(clientCoord addressentity.Coordinates, company *companydto.CompanyDTO) (float64, decimal.Decimal) {
@@ -108,8 +105,8 @@ func (s *Service) GetShippingFeeByCEP(ctx context.Context, cep string) (decimal.
 		return decimal.Zero, err
 	}
 
-	_, tax := s.calculateShippingFee(*coordinates, company)
-	return tax, nil
+	distance, _ := s.calculateShippingFee(*coordinates, company)
+	return decimal.NewFromFloat(distance), nil
 }
 
 func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IDRequest, dto *clientdto.ClientUpdateDTO) error {
