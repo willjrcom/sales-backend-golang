@@ -5,22 +5,27 @@ import (
 	"log"
 	"time"
 
+	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	billing "github.com/willjrcom/sales-backend-go/internal/usecases/checkout"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 )
 
 type DailyScheduler struct {
+	db                      *bun.DB
 	companyRepo             model.CompanyRepository
+	orderRepo               model.OrderRepository
 	companyPaymentRepo      model.CompanyPaymentRepository
 	companySubscriptionRepo model.CompanySubscriptionRepository
 	checkoutUseCase         *billing.CheckoutUseCase
 	companyUseCase          *companyusecases.Service
 }
 
-func NewDailyScheduler(companyRepo model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository, companySubscriptionRepo model.CompanySubscriptionRepository, checkoutUseCase *billing.CheckoutUseCase, companyUseCase *companyusecases.Service) *DailyScheduler {
+func NewDailyScheduler(db *bun.DB, companyRepo model.CompanyRepository, orderRepo model.OrderRepository, companyPaymentRepo model.CompanyPaymentRepository, companySubscriptionRepo model.CompanySubscriptionRepository, checkoutUseCase *billing.CheckoutUseCase, companyUseCase *companyusecases.Service) *DailyScheduler {
 	return &DailyScheduler{
+		db:                      db,
 		companyRepo:             companyRepo,
+		orderRepo:               orderRepo,
 		companyPaymentRepo:      companyPaymentRepo,
 		companySubscriptionRepo: companySubscriptionRepo,
 		checkoutUseCase:         checkoutUseCase,
@@ -37,18 +42,37 @@ func (s *DailyScheduler) Start(ctx context.Context) {
 				ticker.Stop()
 				return
 			case t := <-ticker.C:
-				// Run billing checks at 8 AM
+				// Run billing checks at 5 AM
 				if t.Hour() == 5 {
-					log.Println("Running Daily Billing Batch...")
+					log.Println("Running Daily Batch...")
 					s.ProcessCostsToPay(ctx)
 					s.UpdateCompanyPlans(ctx)
 					s.CheckOverdueAccounts(ctx)
 					s.CheckExpiredOptionalPayments(ctx)
-					log.Println("Daily Billing Batch Completed.")
+					s.CleanStagingOrders(ctx)
+					log.Println("Daily Batch Completed.")
 				}
 			}
 		}
 	}()
+}
+
+func (s *DailyScheduler) CleanStagingOrders(ctx context.Context) {
+	log.Println("Scheduler: Cleaning up staging orders...")
+	var schemas []string
+	if err := s.db.NewRaw("SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname LIKE 'company_%'").Scan(ctx, &schemas); err != nil {
+		log.Printf("Scheduler: Error fetching schemas: %v", err)
+		return
+	}
+
+	for _, schema := range schemas {
+		ctxSchema := context.WithValue(ctx, model.Schema("schema"), schema)
+		if err := s.orderRepo.DeleteOrdersByStatus(ctxSchema, "Staging"); err != nil {
+			log.Printf("Scheduler: Error deleting staging orders in schema %s: %v", schema, err)
+			continue
+		}
+		log.Printf("Scheduler: Cleaned staging orders in schema %s", schema)
+	}
 }
 
 func (s *DailyScheduler) UpdateCompanyPlans(ctx context.Context) error {

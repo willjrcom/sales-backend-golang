@@ -12,6 +12,7 @@ type OrderRepository interface {
 	UpdateOrder(ctx context.Context, order *Order) error
 	UpdateOrderWithRelations(ctx context.Context, order *Order) error
 	DeleteOrder(ctx context.Context, id string) error
+	DeleteOrdersByStatus(ctx context.Context, status orderentity.StatusOrder) error
 	GetOrderById(ctx context.Context, id string) (*Order, error)
 	GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder, withCategory bool, queryCondition string) ([]Order, error)
 	GetAllOrdersWithDelivery(ctx context.Context, shiftID string, page, perPage int) ([]Order, error)

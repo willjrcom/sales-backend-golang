@@ -16,7 +16,7 @@ import (
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 )
 
-func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyUsageCostRepository) (model.CompanyRepository, *companyusecases.Service, *billingusecases.CheckoutUseCase, *handler.Handler) {
+func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyUsageCostRepository, orderRepository model.OrderRepository) (model.CompanyRepository, *companyusecases.Service, *billingusecases.CheckoutUseCase, *handler.Handler) {
 	companyRepository := companyrepositorybun.NewCompanyRepositoryBun(db)
 	companySubscriptionRepo := companyrepositorybun.NewCompanySubscriptionRepositoryBun(db)
 	companyPaymentRepo := companyrepositorybun.NewCompanyPaymentRepositoryBun(db)
@@ -29,7 +29,7 @@ func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyU
 	costService := companyusecases.NewUsageCostService(costRepo, companyRepository)
 
 	// Start Daily Scheduler
-	dailyScheduler := scheduler.NewDailyScheduler(companyRepository, companyPaymentRepo, companySubscriptionRepo, checkoutUC, service)
+	dailyScheduler := scheduler.NewDailyScheduler(db, companyRepository, orderRepository, companyPaymentRepo, companySubscriptionRepo, checkoutUC, service)
 	dailyScheduler.Start(context.Background())
 
 	handler := handlerimpl.NewHandlerCompany(service, checkoutUC, costService, dailyScheduler)

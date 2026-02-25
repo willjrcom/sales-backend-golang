@@ -46,7 +46,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, rabb
 	usageCostRepo := companyrepositorybun.NewCompanyUsageCostRepository(db)
 	companySubscriptionRepo := companyrepositorybun.NewCompanySubscriptionRepositoryBun(db)
 
-	companyRepository, companyService, checkoutUC, _ := NewCompanyModule(db, chi, usageCostRepo)
+	companyRepository, companyService, checkoutUC, _ := NewCompanyModule(db, chi, usageCostRepo, orderRepository)
 	sponsorRepository, _, _ := NewSponsorModule(db, chi)
 	NewCompanyCategoryModule(db, chi)
 

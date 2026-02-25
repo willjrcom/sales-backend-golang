@@ -49,6 +49,17 @@ func (r *OrderRepositoryLocal) DeleteOrder(ctx context.Context, id string) error
 	return nil
 }
 
+func (r *OrderRepositoryLocal) DeleteOrdersByStatus(ctx context.Context, status orderentity.StatusOrder) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	for id, order := range r.orders {
+		if order.Status == string(status) {
+			delete(r.orders, id)
+		}
+	}
+	return nil
+}
+
 func (r *OrderRepositoryLocal) PendingOrder(ctx context.Context, order *model.Order) error {
 	if order == nil || order.Entity.ID == uuid.Nil {
 		return errors.New("invalid order")

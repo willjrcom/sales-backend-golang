@@ -2,6 +2,7 @@ package orderrepositorybun
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
@@ -16,6 +17,31 @@ type OrderRepositoryBun struct {
 
 func NewOrderRepositoryBun(db *bun.DB) model.OrderRepository {
 	return &OrderRepositoryBun{db: db}
+}
+
+func (r *OrderRepositoryBun) DeleteOrdersByStatus(ctx context.Context, status orderentity.StatusOrder) error {
+	var orderIDs []string
+	ctxT, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	if err := tx.NewSelect().Model((*model.Order)(nil)).Column("id").Where("status = ?", status).Scan(ctxT, &orderIDs); err != nil {
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	for _, id := range orderIDs {
+		if err := r.DeleteOrder(ctx, id); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (r *OrderRepositoryBun) CreateOrder(ctx context.Context, order *model.Order) error {
@@ -188,6 +214,14 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 
 	defer cancel()
 	defer tx.Rollback()
+
+	// valide o status staging
+	if exists, err := tx.NewSelect().Model((*model.Order)(nil)).Where("id = ? AND status = ?", id, orderentity.OrderStatusStaging).Exists(ctx); err != nil {
+		return err
+	} else if !exists {
+		fmt.Println("cant delete staging order")
+		return nil
+	}
 
 	if _, err := tx.NewDelete().Model(&model.Order{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
