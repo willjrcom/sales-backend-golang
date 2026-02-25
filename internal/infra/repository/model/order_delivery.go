@@ -21,7 +21,7 @@ type OrderDeliveryCommonAttributes struct {
 	Status         string           `bun:"status"`
 	DeliveryTax    *decimal.Decimal `bun:"delivery_tax,type:decimal(10,2)"`
 	IsDeliveryFree bool             `bun:"is_free_delivery"`
-	Change         decimal.Decimal  `bun:"change,type:decimal(10,2)"`
+	Change         *decimal.Decimal `bun:"change,type:decimal(10,2)"`
 	PaymentMethod  string           `bun:"payment_method"`
 	ClientID       uuid.UUID        `bun:"column:client_id,type:uuid,notnull"`
 	Client         *Client          `bun:"rel:belongs-to"`
@@ -51,7 +51,7 @@ func (d *OrderDelivery) FromDomain(delivery *orderentity.OrderDelivery) {
 			Status:         string(delivery.Status),
 			DeliveryTax:    delivery.DeliveryTax,
 			IsDeliveryFree: delivery.IsDeliveryFree,
-			Change:         delivery.Change,
+			Change:         &delivery.Change,
 			PaymentMethod:  string(delivery.PaymentMethod),
 			ClientID:       delivery.ClientID,
 			Client:         &Client{},
@@ -86,7 +86,7 @@ func (d *OrderDelivery) ToDomain() *orderentity.OrderDelivery {
 			Status:         orderentity.StatusOrderDelivery(d.Status),
 			DeliveryTax:    d.DeliveryTax,
 			IsDeliveryFree: d.IsDeliveryFree,
-			Change:         d.Change,
+			Change:         d.GetChange(),
 			PaymentMethod:  orderentity.PayMethod(d.PaymentMethod),
 			ClientID:       d.ClientID,
 			Client:         d.Client.ToDomain(),
@@ -105,4 +105,11 @@ func (d *OrderDelivery) ToDomain() *orderentity.OrderDelivery {
 			CancelledAt: d.CancelledAt,
 		},
 	}
+}
+
+func (d *OrderDelivery) GetChange() decimal.Decimal {
+	if d.Change == nil {
+		return decimal.Zero
+	}
+	return *d.Change
 }

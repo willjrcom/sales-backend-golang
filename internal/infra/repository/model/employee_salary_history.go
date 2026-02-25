@@ -17,13 +17,13 @@ type EmployeeSalaryHistory struct {
 }
 
 type EmployeeSalaryHistoryCommonAttributes struct {
-	EmployeeID uuid.UUID       `bun:"employee_id,type:uuid,notnull"`
-	StartDate  time.Time       `bun:"start_date,notnull"`
-	EndDate    *time.Time      `bun:"end_date"`
-	SalaryType string          `bun:"salary_type,notnull"`
-	BaseSalary decimal.Decimal `bun:"base_salary,type:numeric,notnull"`
-	HourlyRate decimal.Decimal `bun:"hourly_rate,type:numeric,notnull"`
-	Commission float64         `bun:"commission,type:numeric,notnull"`
+	EmployeeID uuid.UUID        `bun:"employee_id,type:uuid,notnull"`
+	StartDate  time.Time        `bun:"start_date,notnull"`
+	EndDate    *time.Time       `bun:"end_date"`
+	SalaryType string           `bun:"salary_type,notnull"`
+	BaseSalary *decimal.Decimal `bun:"base_salary,type:numeric,notnull"`
+	HourlyRate *decimal.Decimal `bun:"hourly_rate,type:numeric,notnull"`
+	Commission float64          `bun:"commission,type:numeric,notnull"`
 }
 
 func (h *EmployeeSalaryHistory) FromDomain(domain *employeeentity.EmployeeSalaryHistory) {
@@ -37,8 +37,8 @@ func (h *EmployeeSalaryHistory) FromDomain(domain *employeeentity.EmployeeSalary
 			StartDate:  domain.StartDate,
 			EndDate:    domain.EndDate,
 			SalaryType: domain.SalaryType,
-			BaseSalary: domain.BaseSalary,
-			HourlyRate: domain.HourlyRate,
+			BaseSalary: &domain.BaseSalary,
+			HourlyRate: &domain.HourlyRate,
 			Commission: domain.Commission,
 		},
 	}
@@ -54,8 +54,22 @@ func (h *EmployeeSalaryHistory) ToDomain() *employeeentity.EmployeeSalaryHistory
 		StartDate:  h.StartDate,
 		EndDate:    h.EndDate,
 		SalaryType: h.SalaryType,
-		BaseSalary: h.BaseSalary,
-		HourlyRate: h.HourlyRate,
+		BaseSalary: h.GetBaseSalary(),
+		HourlyRate: h.GetHourlyRate(),
 		Commission: h.Commission,
 	}
+}
+
+func (h *EmployeeSalaryHistory) GetBaseSalary() decimal.Decimal {
+	if h.BaseSalary == nil {
+		return decimal.Zero
+	}
+	return *h.BaseSalary
+}
+
+func (h *EmployeeSalaryHistory) GetHourlyRate() decimal.Decimal {
+	if h.HourlyRate == nil {
+		return decimal.Zero
+	}
+	return *h.HourlyRate
 }

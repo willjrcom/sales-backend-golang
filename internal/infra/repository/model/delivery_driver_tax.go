@@ -7,11 +7,11 @@ import (
 )
 
 type DeliveryDriverTax struct {
-	DeliveryDriverID   uuid.UUID       `bun:"column:delivery_driver_id,type:uuid,notnull"`
-	DeliveryDriverName string          `bun:"delivery_driver_name"`
-	OrderNumber        int             `bun:"order_number,notnull"`
-	DeliveryID         uuid.UUID       `bun:"column:delivery_id,type:uuid,notnull"`
-	DeliveryTax        decimal.Decimal `bun:"delivery_tax,type:decimal(10,2),notnull"`
+	DeliveryDriverID   uuid.UUID        `bun:"column:delivery_driver_id,type:uuid,notnull"`
+	DeliveryDriverName string           `bun:"delivery_driver_name"`
+	OrderNumber        int              `bun:"order_number,notnull"`
+	DeliveryID         uuid.UUID        `bun:"column:delivery_id,type:uuid,notnull"`
+	DeliveryTax        *decimal.Decimal `bun:"delivery_tax,type:decimal(10,2),notnull"`
 }
 
 func (d *DeliveryDriverTax) FromDomain(deliveryDriverTax *shiftentity.DeliveryDriverTax) {
@@ -23,7 +23,7 @@ func (d *DeliveryDriverTax) FromDomain(deliveryDriverTax *shiftentity.DeliveryDr
 		DeliveryDriverName: deliveryDriverTax.DeliveryDriverName,
 		OrderNumber:        deliveryDriverTax.OrderNumber,
 		DeliveryID:         deliveryDriverTax.DeliveryID,
-		DeliveryTax:        deliveryDriverTax.DeliveryTax,
+		DeliveryTax:        &deliveryDriverTax.DeliveryTax,
 	}
 }
 
@@ -36,6 +36,13 @@ func (d *DeliveryDriverTax) ToDomain() *shiftentity.DeliveryDriverTax {
 		DeliveryDriverName: d.DeliveryDriverName,
 		OrderNumber:        d.OrderNumber,
 		DeliveryID:         d.DeliveryID,
-		DeliveryTax:        d.DeliveryTax,
+		DeliveryTax:        d.GetDeliveryTax(),
 	}
+}
+
+func (d *DeliveryDriverTax) GetDeliveryTax() decimal.Decimal {
+	if d.DeliveryTax == nil {
+		return decimal.Zero
+	}
+	return *d.DeliveryTax
 }

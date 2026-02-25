@@ -181,7 +181,7 @@ func (uc *CheckoutUseCase) GenerateMonthlyCostPayment(ctx context.Context, compa
 	totalAmount := decimal.Zero
 	costIDs := make([]uuid.UUID, len(pendingCosts))
 	for i, cost := range pendingCosts {
-		totalAmount = totalAmount.Add(cost.Amount)
+		totalAmount = totalAmount.Add(cost.GetAmount())
 		costIDs[i] = cost.ID
 	}
 

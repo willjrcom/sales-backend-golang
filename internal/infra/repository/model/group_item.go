@@ -103,7 +103,7 @@ func (g *GroupItem) ToDomain() *orderentity.GroupItem {
 			GroupDetails: orderentity.GroupDetails{
 				Size:             g.Size,
 				Status:           orderentity.StatusGroupItem(g.Status),
-				TotalPrice:       g.getTotalPrice(),
+				TotalPrice:       g.GetTotalPrice(),
 				Quantity:         g.Quantity,
 				NeedPrint:        g.NeedPrint,
 				PrinterName:      g.PrinterName,
@@ -132,7 +132,7 @@ func (g *GroupItem) ToDomain() *orderentity.GroupItem {
 	return groupItem
 }
 
-func (g *GroupItem) getTotalPrice() decimal.Decimal {
+func (g *GroupItem) GetTotalPrice() decimal.Decimal {
 	if g.TotalPrice == nil {
 		return decimal.Zero
 	}

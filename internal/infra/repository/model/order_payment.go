@@ -51,7 +51,7 @@ func (p *PaymentOrder) ToDomain() *orderentity.PaymentOrder {
 	return &orderentity.PaymentOrder{
 		Entity: p.Entity.ToDomain(),
 		PaymentCommonAttributes: orderentity.PaymentCommonAttributes{
-			TotalPaid: p.getTotalPaid(),
+			TotalPaid: p.GetTotalPaid(),
 			Method:    orderentity.PayMethod(p.Method),
 			OrderID:   p.OrderID,
 		},
@@ -61,7 +61,7 @@ func (p *PaymentOrder) ToDomain() *orderentity.PaymentOrder {
 	}
 }
 
-func (p *PaymentOrder) getTotalPaid() decimal.Decimal {
+func (p *PaymentOrder) GetTotalPaid() decimal.Decimal {
 	if p.TotalPaid == nil {
 		return decimal.Zero
 	}

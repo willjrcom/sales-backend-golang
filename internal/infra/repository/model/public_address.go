@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
@@ -30,7 +31,7 @@ func (a *PublicAddress) FromDomain(address *addressentity.Address) {
 			City:         address.City,
 			UF:           address.UF,
 			Cep:          address.Cep,
-			DeliveryTax:  address.DeliveryTax,
+			DeliveryTax:  &address.DeliveryTax,
 		},
 	}
 
@@ -54,11 +55,18 @@ func (a *PublicAddress) ToDomain() *addressentity.Address {
 			City:         a.City,
 			UF:           a.UF,
 			Cep:          a.Cep,
-			DeliveryTax:  a.DeliveryTax,
+			DeliveryTax:  a.GetDeliveryTax(),
 		},
 	}
 
 	address.Coordinates = *a.Coordinates.ToDomain()
 
 	return address
+}
+
+func (a *PublicAddress) GetDeliveryTax() decimal.Decimal {
+	if a.DeliveryTax == nil {
+		return decimal.Zero
+	}
+	return *a.DeliveryTax
 }

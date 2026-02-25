@@ -363,7 +363,7 @@ func (s *Service) GetStockReport(ctx context.Context, page, perPage int) (*stock
 		// Usar o custo unitário do último movimento ou um valor padrão
 		// Por enquanto, vamos usar um valor estimado baseado no estoque atual
 		estimatedCost := decimal.NewFromFloat(10.0) // Valor estimado por unidade
-		totalStockValue = totalStockValue.Add(estimatedCost.Mul(stock.CurrentStock))
+		totalStockValue = totalStockValue.Add(estimatedCost.Mul(stock.GetCurrentStock()))
 	}
 
 	// Converter para DTOs

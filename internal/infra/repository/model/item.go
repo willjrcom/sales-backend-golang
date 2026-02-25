@@ -75,8 +75,8 @@ func (i *Item) ToDomain() *orderentity.Item {
 		ItemCommonAttributes: orderentity.ItemCommonAttributes{
 			Name:               i.Name,
 			Observation:        i.Observation,
-			Price:              i.getPrice(),
-			TotalPrice:         i.getTotalPrice(),
+			Price:              i.GetPrice(),
+			TotalPrice:         i.GetTotalPrice(),
 			Size:               i.Size,
 			Quantity:           i.Quantity,
 			GroupItemID:        i.GroupItemID,
@@ -98,14 +98,14 @@ func (i *Item) ToDomain() *orderentity.Item {
 	return item
 }
 
-func (i *Item) getPrice() decimal.Decimal {
+func (i *Item) GetPrice() decimal.Decimal {
 	if i.Price == nil {
 		return decimal.Zero
 	}
 	return *i.Price
 }
 
-func (i *Item) getTotalPrice() decimal.Decimal {
+func (i *Item) GetTotalPrice() decimal.Decimal {
 	if i.TotalPrice == nil {
 		return decimal.Zero
 	}

@@ -16,16 +16,16 @@ type Address struct {
 }
 
 type AddressCommonAttributes struct {
-	Street       string          `bun:"street,notnull"`
-	Number       string          `bun:"number,notnull"`
-	Complement   string          `bun:"complement"`
-	Reference    string          `bun:"reference"`
-	Neighborhood string          `bun:"neighborhood,notnull"`
-	City         string          `bun:"city,notnull"`
-	UF           string          `bun:"uf,notnull"`
-	Cep          string          `bun:"cep"`
-	DeliveryTax  decimal.Decimal `bun:"delivery_tax,type:decimal(10,2),notnull"`
-	Coordinates  Coordinates     `bun:"coordinates,type:jsonb"`
+	Street       string           `bun:"street,notnull"`
+	Number       string           `bun:"number,notnull"`
+	Complement   string           `bun:"complement"`
+	Reference    string           `bun:"reference"`
+	Neighborhood string           `bun:"neighborhood,notnull"`
+	City         string           `bun:"city,notnull"`
+	UF           string           `bun:"uf,notnull"`
+	Cep          string           `bun:"cep"`
+	DeliveryTax  *decimal.Decimal `bun:"delivery_tax,type:decimal(10,2),notnull"`
+	Coordinates  Coordinates      `bun:"coordinates,type:jsonb"`
 }
 
 func (a *Address) FromDomain(address *addressentity.Address) {
@@ -44,7 +44,7 @@ func (a *Address) FromDomain(address *addressentity.Address) {
 			City:         address.City,
 			UF:           address.UF,
 			Cep:          address.Cep,
-			DeliveryTax:  address.DeliveryTax,
+			DeliveryTax:  &address.DeliveryTax,
 		},
 	}
 
@@ -68,11 +68,18 @@ func (a *Address) ToDomain() *addressentity.Address {
 			City:         a.City,
 			UF:           a.UF,
 			Cep:          a.Cep,
-			DeliveryTax:  a.DeliveryTax,
+			DeliveryTax:  a.GetDeliveryTax(),
 		},
 	}
 
 	address.Coordinates = *a.Coordinates.ToDomain()
 
 	return address
+}
+
+func (a *Address) GetDeliveryTax() decimal.Decimal {
+	if a.DeliveryTax == nil {
+		return decimal.Zero
+	}
+	return *a.DeliveryTax
 }

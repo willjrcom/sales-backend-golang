@@ -16,14 +16,14 @@ type StockMovement struct {
 }
 
 type StockMovementCommonAttributes struct {
-	StockID    uuid.UUID       `bun:"stock_id,type:uuid,notnull"`
-	Type       string          `bun:"type,notnull"`
-	Quantity   decimal.Decimal `bun:"quantity,type:decimal(10,3),notnull"`
-	Reason     string          `bun:"reason,notnull"`
-	OrderID    *uuid.UUID      `bun:"order_id,type:uuid"`
-	EmployeeID uuid.UUID       `bun:"employee_id,type:uuid"`
-	Price      decimal.Decimal `bun:"unit_cost,type:decimal(10,2),notnull"`
-	TotalPrice decimal.Decimal `bun:"total_cost,type:decimal(10,2),notnull"`
+	StockID    uuid.UUID        `bun:"stock_id,type:uuid,notnull"`
+	Type       string           `bun:"type,notnull"`
+	Quantity   *decimal.Decimal `bun:"quantity,type:decimal(10,3),notnull"`
+	Reason     string           `bun:"reason,notnull"`
+	OrderID    *uuid.UUID       `bun:"order_id,type:uuid"`
+	EmployeeID uuid.UUID        `bun:"employee_id,type:uuid"`
+	Price      *decimal.Decimal `bun:"unit_cost,type:decimal(10,2),notnull"`
+	TotalPrice *decimal.Decimal `bun:"total_cost,type:decimal(10,2),notnull"`
 }
 
 // FromDomain converte domain para model
@@ -36,12 +36,12 @@ func (sm *StockMovement) FromDomain(movement *stockentity.StockMovement) {
 		StockMovementCommonAttributes: StockMovementCommonAttributes{
 			StockID:    movement.StockID,
 			Type:       string(movement.Type),
-			Quantity:   movement.Quantity,
+			Quantity:   &movement.Quantity,
 			Reason:     movement.Reason,
 			OrderID:    movement.OrderID,
 			EmployeeID: movement.EmployeeID,
-			Price:      movement.Price,
-			TotalPrice: movement.TotalPrice,
+			Price:      &movement.Price,
+			TotalPrice: &movement.TotalPrice,
 		},
 	}
 }
@@ -56,12 +56,33 @@ func (sm *StockMovement) ToDomain() *stockentity.StockMovement {
 		StockMovementCommonAttributes: stockentity.StockMovementCommonAttributes{
 			StockID:    sm.StockID,
 			Type:       stockentity.MovementType(sm.Type),
-			Quantity:   sm.Quantity,
+			Quantity:   sm.GetQuantity(),
 			Reason:     sm.Reason,
 			OrderID:    sm.OrderID,
 			EmployeeID: sm.EmployeeID,
-			Price:      sm.Price,
-			TotalPrice: sm.TotalPrice,
+			Price:      sm.GetPrice(),
+			TotalPrice: sm.GetTotalPrice(),
 		},
 	}
+}
+
+func (sm *StockMovement) GetQuantity() decimal.Decimal {
+	if sm.Quantity == nil {
+		return decimal.Zero
+	}
+	return *sm.Quantity
+}
+
+func (sm *StockMovement) GetPrice() decimal.Decimal {
+	if sm.Price == nil {
+		return decimal.Zero
+	}
+	return *sm.Price
+}
+
+func (sm *StockMovement) GetTotalPrice() decimal.Decimal {
+	if sm.TotalPrice == nil {
+		return decimal.Zero
+	}
+	return *sm.TotalPrice
 }

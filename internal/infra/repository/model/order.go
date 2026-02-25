@@ -133,9 +133,9 @@ func (o *Order) ToDomain() *orderentity.Order {
 				Pickup:   &orderentity.OrderPickup{},
 			},
 			OrderDetail: orderentity.OrderDetail{
-				TotalPayable:  o.getTotalPayable(),
-				TotalPaid:     o.getTotalPaid(),
-				TotalChange:   o.getTotalChange(),
+				TotalPayable:  o.GetTotalPayable(),
+				TotalPaid:     o.GetTotalPaid(),
+				TotalChange:   o.GetTotalChange(),
 				QuantityItems: o.QuantityItems,
 				Observation:   o.Observation,
 				AttendantID:   o.AttendantID,
@@ -166,21 +166,21 @@ func (o *Order) ToDomain() *orderentity.Order {
 	return order
 }
 
-func (o *Order) getTotalPayable() decimal.Decimal {
+func (o *Order) GetTotalPayable() decimal.Decimal {
 	if o.TotalPayable == nil {
 		return decimal.Zero
 	}
 	return *o.TotalPayable
 }
 
-func (o *Order) getTotalPaid() decimal.Decimal {
+func (o *Order) GetTotalPaid() decimal.Decimal {
 	if o.TotalPaid == nil {
 		return decimal.Zero
 	}
 	return *o.TotalPaid
 }
 
-func (o *Order) getTotalChange() decimal.Decimal {
+func (o *Order) GetTotalChange() decimal.Decimal {
 	if o.TotalChange == nil {
 		return decimal.Zero
 	}

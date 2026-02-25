@@ -18,14 +18,14 @@ type OrderTable struct {
 }
 
 type OrderTableCommonAttributes struct {
-	Name        string          `bun:"name,notnull"`
-	Contact     string          `bun:"contact,notnull"`
-	Status      string          `bun:"status,notnull"`
-	TaxRate     decimal.Decimal `bun:"tax_rate,type:decimal(10,2),notnull"`
-	OrderID     uuid.UUID       `bun:"column:order_id,type:uuid,notnull"`
-	TableID     uuid.UUID       `bun:"column:table_id,type:uuid,notnull"`
-	Table       *Table          `bun:"rel:belongs-to,join:table_id=id"`
-	OrderNumber int             `bun:"order_number,notnull"`
+	Name        string           `bun:"name,notnull"`
+	Contact     string           `bun:"contact,notnull"`
+	Status      string           `bun:"status,notnull"`
+	TaxRate     *decimal.Decimal `bun:"tax_rate,type:decimal(10,2),notnull"`
+	OrderID     uuid.UUID        `bun:"column:order_id,type:uuid,notnull"`
+	TableID     uuid.UUID        `bun:"column:table_id,type:uuid,notnull"`
+	Table       *Table           `bun:"rel:belongs-to,join:table_id=id"`
+	OrderNumber int              `bun:"order_number,notnull"`
 }
 
 type OrderTableTimeLogs struct {
@@ -44,7 +44,7 @@ func (t *OrderTable) FromDomain(table *orderentity.OrderTable) {
 			Name:        table.Name,
 			Contact:     table.Contact,
 			Status:      string(table.Status),
-			TaxRate:     table.TaxRate,
+			TaxRate:     &table.TaxRate,
 			OrderID:     table.OrderID,
 			TableID:     table.TableID,
 			OrderNumber: table.OrderNumber,
@@ -70,7 +70,7 @@ func (t *OrderTable) ToDomain() *orderentity.OrderTable {
 			Name:        t.Name,
 			Contact:     t.Contact,
 			Status:      orderentity.StatusOrderTable(t.Status),
-			TaxRate:     t.TaxRate,
+			TaxRate:     t.GetTaxRate(),
 			OrderID:     t.OrderID,
 			TableID:     t.TableID,
 			Table:       t.Table.ToDomain(),
@@ -82,4 +82,11 @@ func (t *OrderTable) ToDomain() *orderentity.OrderTable {
 			CancelledAt: t.CancelledAt,
 		},
 	}
+}
+
+func (t *OrderTable) GetTaxRate() decimal.Decimal {
+	if t.TaxRate == nil {
+		return decimal.Zero
+	}
+	return *t.TaxRate
 }

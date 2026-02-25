@@ -20,7 +20,7 @@ type PaymentEmployee struct {
 
 type EmployeePaymentCommonAttributes struct {
 	EmployeeID uuid.UUID                    `bun:"employee_id,type:uuid,notnull"`
-	Amount     decimal.Decimal              `bun:"amount,type:decimal(10,2),notnull"`
+	Amount     *decimal.Decimal             `bun:"amount,type:decimal(10,2),notnull"`
 	Status     employeeentity.PaymentStatus `bun:"status,notnull"`
 	Method     employeeentity.PaymentMethod `bun:"method,notnull"`
 	Notes      string                       `bun:"notes"`
@@ -38,7 +38,7 @@ func (p *PaymentEmployee) FromDomain(payment *employeeentity.PaymentEmployee) {
 		Entity: entitymodel.FromDomain(payment.Entity),
 		EmployeePaymentCommonAttributes: EmployeePaymentCommonAttributes{
 			EmployeeID: payment.EmployeeID,
-			Amount:     payment.Amount,
+			Amount:     &payment.Amount,
 			Status:     payment.Status,
 			Method:     payment.Method,
 			Notes:      payment.Notes,
@@ -58,7 +58,7 @@ func (p *PaymentEmployee) ToDomain() *employeeentity.PaymentEmployee {
 		Entity: p.Entity.ToDomain(),
 		PaymentCommonAttributes: employeeentity.PaymentCommonAttributes{
 			EmployeeID: p.EmployeeID,
-			Amount:     p.Amount,
+			Amount:     p.GetAmount(),
 			Status:     p.Status,
 			Method:     p.Method,
 			Notes:      p.Notes,
@@ -68,4 +68,11 @@ func (p *PaymentEmployee) ToDomain() *employeeentity.PaymentEmployee {
 		},
 		SalaryHistoryID: p.SalaryHistoryID,
 	}
+}
+
+func (p *PaymentEmployee) GetAmount() decimal.Decimal {
+	if p.Amount == nil {
+		return decimal.Zero
+	}
+	return *p.Amount
 }

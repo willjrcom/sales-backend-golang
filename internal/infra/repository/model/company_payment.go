@@ -14,21 +14,21 @@ type CompanyPayment struct {
 	entitymodel.Entity
 	bun.BaseModel `bun:"table:company_payments"`
 
-	CompanyID         uuid.UUID       `bun:"company_id,type:uuid,notnull"`
-	Provider          string          `bun:"provider,notnull"`
-	ProviderPaymentID *string         `bun:"provider_payment_id,unique"`
-	Status            string          `bun:"status,notnull"`
-	Currency          string          `bun:"currency,notnull"`
-	Amount            decimal.Decimal `bun:"amount,type:decimal(12,2),notnull"`
-	Months            int             `bun:"months,notnull"`
-	PaidAt            *time.Time      `bun:"paid_at"`
-	ExternalReference string          `bun:"external_reference"`
-	PaymentURL        string          `bun:"payment_url"`
-	ExpiresAt         *time.Time      `bun:"expires_at"`
-	IsMandatory       bool            `bun:"is_mandatory,notnull,default:false"`
-	Description       string          `bun:"description"`
-	PlanType          string          `bun:"plan_type"`
-	RawPayload        []byte          `bun:"raw_payload,type:jsonb"`
+	CompanyID         uuid.UUID        `bun:"company_id,type:uuid,notnull"`
+	Provider          string           `bun:"provider,notnull"`
+	ProviderPaymentID *string          `bun:"provider_payment_id,unique"`
+	Status            string           `bun:"status,notnull"`
+	Currency          string           `bun:"currency,notnull"`
+	Amount            *decimal.Decimal `bun:"amount,type:decimal(12,2),notnull"`
+	Months            int              `bun:"months,notnull"`
+	PaidAt            *time.Time       `bun:"paid_at"`
+	ExternalReference string           `bun:"external_reference"`
+	PaymentURL        string           `bun:"payment_url"`
+	ExpiresAt         *time.Time       `bun:"expires_at"`
+	IsMandatory       bool             `bun:"is_mandatory,notnull,default:false"`
+	Description       string           `bun:"description"`
+	PlanType          string           `bun:"plan_type"`
+	RawPayload        []byte           `bun:"raw_payload,type:jsonb"`
 }
 
 func (c *CompanyPayment) FromDomain(payment *companyentity.CompanyPayment) {
@@ -42,7 +42,7 @@ func (c *CompanyPayment) FromDomain(payment *companyentity.CompanyPayment) {
 		ProviderPaymentID: payment.ProviderPaymentID,
 		Status:            string(payment.Status),
 		Currency:          payment.Currency,
-		Amount:            payment.Amount,
+		Amount:            &payment.Amount,
 		Months:            payment.Months,
 		PaidAt:            payment.PaidAt,
 		ExternalReference: payment.ExternalReference,
@@ -66,7 +66,7 @@ func (c *CompanyPayment) ToDomain() *companyentity.CompanyPayment {
 		ProviderPaymentID: c.ProviderPaymentID,
 		Status:            companyentity.PaymentStatus(c.Status),
 		Currency:          c.Currency,
-		Amount:            c.Amount,
+		Amount:            c.GetAmount(),
 		Months:            c.Months,
 		PaidAt:            c.PaidAt,
 		ExternalReference: c.ExternalReference,
@@ -77,4 +77,10 @@ func (c *CompanyPayment) ToDomain() *companyentity.CompanyPayment {
 		Description:       c.Description,
 		PlanType:          companyentity.PlanType(c.PlanType),
 	}
+}
+func (c *CompanyPayment) GetAmount() decimal.Decimal {
+	if c.Amount == nil {
+		return decimal.Zero
+	}
+	return *c.Amount
 }

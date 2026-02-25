@@ -16,10 +16,10 @@ type Coupon struct {
 }
 
 type CouponCommonAttributes struct {
-	Discount decimal.Decimal `bun:"discount,type:decimal(10,2)"`
-	Min      decimal.Decimal `bun:"min,type:decimal(10,2)"`
-	StartAt  *time.Time      `bun:"start_at"`
-	EndAt    *time.Time      `bun:"end_at"`
+	Discount *decimal.Decimal `bun:"discount,type:decimal(10,2)"`
+	Min      *decimal.Decimal `bun:"min,type:decimal(10,2)"`
+	StartAt  *time.Time       `bun:"start_at"`
+	EndAt    *time.Time       `bun:"end_at"`
 }
 
 func (c *Coupon) FromDomain(coupon *orderentity.Coupon) {
@@ -29,8 +29,8 @@ func (c *Coupon) FromDomain(coupon *orderentity.Coupon) {
 	*c = Coupon{
 		Entity: entitymodel.FromDomain(coupon.Entity),
 		CouponCommonAttributes: CouponCommonAttributes{
-			Discount: coupon.Discount,
-			Min:      coupon.Min,
+			Discount: &coupon.Discount,
+			Min:      &coupon.Min,
 			StartAt:  coupon.StartAt,
 			EndAt:    coupon.EndAt,
 		},
@@ -44,10 +44,24 @@ func (c *Coupon) ToDomain() *orderentity.Coupon {
 	return &orderentity.Coupon{
 		Entity: c.Entity.ToDomain(),
 		CouponCommonAttributes: orderentity.CouponCommonAttributes{
-			Discount: c.Discount,
-			Min:      c.Min,
+			Discount: c.GetDiscount(),
+			Min:      c.GetMin(),
 			StartAt:  c.StartAt,
 			EndAt:    c.EndAt,
 		},
 	}
+}
+
+func (c *Coupon) GetDiscount() decimal.Decimal {
+	if c.Discount == nil {
+		return decimal.Zero
+	}
+	return *c.Discount
+}
+
+func (c *Coupon) GetMin() decimal.Decimal {
+	if c.Min == nil {
+		return decimal.Zero
+	}
+	return *c.Min
 }

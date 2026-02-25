@@ -83,7 +83,7 @@ func (s *UsageCostService) GetMonthlySummary(ctx context.Context, month, year, p
 	items := make([]companydto.CompanyUsageCostDTO, 0, len(paginatedCosts))
 
 	for _, cost := range allCosts {
-		amount := cost.Amount
+		amount := cost.GetAmount()
 		totalAmount = totalAmount.Add(amount)
 
 		if existing, ok := costsByType[cost.CostType]; ok {
