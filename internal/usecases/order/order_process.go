@@ -14,6 +14,7 @@ import (
 	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
 	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/rabbitmq"
 	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
 	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
 )
@@ -233,6 +234,19 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 			}
 			return uuid.Nil, nil
 		}
+
+		company, err := s.so.sc.GetCompany(ctx)
+		if err != nil {
+			fmt.Printf("error getting company: %v", err)
+			return uuid.Nil, nil
+		}
+
+		if enablePrintItemsOnFinishProcess, _ := company.Preferences.GetBool(companyentity.EnablePrintItemsOnFinishProcess); enablePrintItemsOnFinishProcess {
+			if err := s.so.rabbitmq.SendPrintMessage(rabbitmq.GROUP_ITEM_EX, company.SchemaName, process.GroupItemID.String(), groupItemDTO.PrinterName); err != nil {
+				fmt.Printf("error sending message: %v", err)
+			}
+		}
+
 		// finished last process for this group item, no next process
 		return uuid.Nil, nil
 	}

@@ -28,12 +28,12 @@ const (
 
 	// EnablePrintOrderOnShipOrder toggles printing when launching an order.
 	EnablePrintOrderOnShipOrder Key = "enable_print_order_on_pend_order"
-	// PrinterOrderOnPendOrder is the printer used for orders.
-	PrinterOrderOnPendOrder Key = "printer_order_on_pend_order"
+	// PrinterOrder is the printer used for orders.
+	PrinterOrder Key = "printer_order"
 	// EnablePrintOrderOnShipDelivery toggles printing when launching a delivery.
 	EnablePrintOrderOnShipDelivery Key = "enable_print_order_on_ship_delivery"
 	// PrinterDeliveryOnShipDelivery is the printer used for deliveries.
-	PrinterDeliveryOnShipDelivery Key = "printer_delivery_on_ship_delivery"
+	PrinterDeliveryOnShipDelivery Key = "printer_delivery"
 	// EnablePrintOrderOnShipDelivery toggles printing when finish a process.
 	EnablePrintItemsOnFinishProcess Key = "enable_print_items_on_finish_process"
 	// PrinterShiftReport is the printer used for shift reports.

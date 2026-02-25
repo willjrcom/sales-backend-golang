@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	SHIFT_EX          = "print.shift"
 	GROUP_ITEM_EX     = "print.group.item"
 	ORDER_EX          = "print.order"
 	ORDER_DELIVERY_EX = "print.order.delivery"
@@ -127,6 +128,9 @@ func (r *RabbitMQ) EnsureExchangeQueueAndBind(exchange, routingKey string) error
 }
 
 func (r *RabbitMQ) SendPrintMessage(exchage, routingKey, message, printerName string) error {
+	if printerName == "" {
+		printerName = "default"
+	}
 	printMessage := PrintMessage{
 		Id:          message,
 		PrinterName: printerName,

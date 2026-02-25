@@ -127,29 +127,29 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 	return nil
 }
 
-func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IDRequest) (shiftDTO *shiftdto.ShiftDTO, err error) {
-	shift, err := s.GetShiftDomainByID(ctx, dtoID)
+func (s *Service) GetOnlyShiftDomainByID(ctx context.Context, dtoID *entitydto.IDRequest) (shift *shiftentity.Shift, err error) {
+	shiftModel, err := s.r.GetShiftByID(ctx, dtoID.ID.String())
 	if err != nil {
+		return nil, err
+	}
+
+	return shiftModel.ToDomain(), nil
+}
+
+func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IDRequest) (shiftDTO *shiftdto.ShiftDTO, err error) {
+	shiftModel, err := s.r.GetShiftByID(ctx, dtoID.ID.String())
+	if err != nil {
+		return nil, err
+	}
+
+	shift := shiftModel.ToDomain()
+	if err := s.LoadShiftWithProductionAnalytics(ctx, shift); err != nil {
 		return nil, err
 	}
 
 	shiftDTO = &shiftdto.ShiftDTO{}
 	shiftDTO.FromDomain(shift)
 	return shiftDTO, nil
-}
-
-func (s *Service) GetShiftDomainByID(ctx context.Context, dtoID *entitydto.IDRequest) (shift *shiftentity.Shift, err error) {
-	shiftModel, err := s.r.GetShiftByID(ctx, dtoID.ID.String())
-	if err != nil {
-		return nil, err
-	}
-
-	shift = shiftModel.ToDomain()
-	if err := s.LoadShiftWithProductionAnalytics(ctx, shift); err != nil {
-		return nil, err
-	}
-
-	return shift, nil
 }
 
 func (s *Service) GetCurrentShift(ctx context.Context) (shiftDTO *shiftdto.ShiftDTO, err error) {

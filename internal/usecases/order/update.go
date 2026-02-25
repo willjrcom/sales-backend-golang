@@ -105,9 +105,8 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 		return err
 	}
 
-	EnablePrintOrder, _ := company.Preferences.GetBool(companyentity.EnablePrintOrderOnShipOrder)
-	printerName, _ := company.Preferences.GetString(companyentity.PrinterOrderOnPendOrder)
-	if EnablePrintOrder && err == nil && printerName != "" {
+	if EnablePrintOrderOnShipOrder, _ := company.Preferences.GetBool(companyentity.EnablePrintOrderOnShipOrder); EnablePrintOrderOnShipOrder {
+		printerName, _ := company.Preferences.GetString(companyentity.PrinterOrder)
 		if s.rabbitmq != nil {
 			if err := s.rabbitmq.SendPrintMessage(rabbitmq.ORDER_EX, company.SchemaName, order.ID.String(), printerName); err != nil {
 				fmt.Println("error sending message to rabbitmq: " + err.Error())

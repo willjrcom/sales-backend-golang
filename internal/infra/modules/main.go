@@ -92,5 +92,5 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, rabb
 	shiftService.AddDependencies(employeeService, orderRepository, deliveryDriverRepository, orderProcessRepository, orderQueueRepository, processRuleRepository, employeeRepository)
 	companyService.AddDependencies(addressRepository, *schemaService, userRepository, *userService, *employeeService, usageCostRepo, companySubscriptionRepo)
 
-	orderPrintService.AddDependencies(orderService, orderRepository, shiftService, groupItemRepository, companyRepository)
+	orderPrintService.AddDependencies(orderService, orderRepository, shiftService, groupItemRepository, companyRepository, rabbitmq)
 }

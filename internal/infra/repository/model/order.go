@@ -27,14 +27,14 @@ type OrderCommonAttributes struct {
 }
 
 type OrderDetail struct {
-	TotalPayable  decimal.Decimal `bun:"total_payable,type:decimal(10,2)"`
-	TotalPaid     decimal.Decimal `bun:"total_paid,type:decimal(10,2)"`
-	TotalChange   decimal.Decimal `bun:"total_change,type:decimal(10,2)"`
-	QuantityItems float64         `bun:"quantity_items"`
-	Observation   string          `bun:"observation"`
-	AttendantID   *uuid.UUID      `bun:"column:attendant_id,type:uuid"`
-	Attendant     *Employee       `bun:"rel:belongs-to"`
-	ShiftID       uuid.UUID       `bun:"column:shift_id,type:uuid,notnull"`
+	TotalPayable  *decimal.Decimal `bun:"total_payable,type:decimal(10,2)"`
+	TotalPaid     *decimal.Decimal `bun:"total_paid,type:decimal(10,2)"`
+	TotalChange   *decimal.Decimal `bun:"total_change,type:decimal(10,2)"`
+	QuantityItems float64          `bun:"quantity_items"`
+	Observation   string           `bun:"observation"`
+	AttendantID   *uuid.UUID       `bun:"column:attendant_id,type:uuid"`
+	Attendant     *Employee        `bun:"rel:belongs-to"`
+	ShiftID       uuid.UUID        `bun:"column:shift_id,type:uuid,notnull"`
 }
 
 type OrderType struct {
@@ -69,9 +69,9 @@ func (o *Order) FromDomain(order *orderentity.Order) {
 			},
 			OrderDetail: OrderDetail{
 				Attendant:     &Employee{},
-				TotalPayable:  order.TotalPayable,
-				TotalPaid:     order.TotalPaid,
-				TotalChange:   order.TotalChange,
+				TotalPayable:  &order.TotalPayable,
+				TotalPaid:     &order.TotalPaid,
+				TotalChange:   &order.TotalChange,
 				QuantityItems: order.QuantityItems,
 				Observation:   order.Observation,
 				AttendantID:   order.AttendantID,
@@ -133,9 +133,9 @@ func (o *Order) ToDomain() *orderentity.Order {
 				Pickup:   &orderentity.OrderPickup{},
 			},
 			OrderDetail: orderentity.OrderDetail{
-				TotalPayable:  o.TotalPayable,
-				TotalPaid:     o.TotalPaid,
-				TotalChange:   o.TotalChange,
+				TotalPayable:  o.getTotalPayable(),
+				TotalPaid:     o.getTotalPaid(),
+				TotalChange:   o.getTotalChange(),
 				QuantityItems: o.QuantityItems,
 				Observation:   o.Observation,
 				AttendantID:   o.AttendantID,
@@ -164,4 +164,25 @@ func (o *Order) ToDomain() *orderentity.Order {
 	order.Pickup = o.Pickup.ToDomain()
 	order.Attendant = o.Attendant.ToDomain()
 	return order
+}
+
+func (o *Order) getTotalPayable() decimal.Decimal {
+	if o.TotalPayable == nil {
+		return decimal.Zero
+	}
+	return *o.TotalPayable
+}
+
+func (o *Order) getTotalPaid() decimal.Decimal {
+	if o.TotalPaid == nil {
+		return decimal.Zero
+	}
+	return *o.TotalPaid
+}
+
+func (o *Order) getTotalChange() decimal.Decimal {
+	if o.TotalChange == nil {
+		return decimal.Zero
+	}
+	return *o.TotalChange
 }

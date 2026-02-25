@@ -6,14 +6,14 @@ import (
 	"github.com/willjrcom/sales-backend-go/bootstrap/server"
 	handlerimpl "github.com/willjrcom/sales-backend-go/internal/infra/handler"
 
-	orderprintusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_print"
+	orintmanagerusecases "github.com/willjrcom/sales-backend-go/internal/usecases/print_manager"
 )
 
 // NewOrderPrintModule registers endpoints for printing individual orders.
-func NewOrderPrintModule(db *bun.DB, chi *server.ServerChi) (*orderprintusecases.Service, *handler.Handler) {
-	printSvc := orderprintusecases.NewService()
+func NewOrderPrintModule(db *bun.DB, chi *server.ServerChi) (*orintmanagerusecases.Service, *handler.Handler) {
+	printSvc := orintmanagerusecases.NewService()
 
-	handler := handlerimpl.NewHandlerOrderPrint(printSvc)
+	handler := handlerimpl.NewHandlerPrintManager(printSvc)
 	chi.AddHandler(handler)
 	return printSvc, handler
 }

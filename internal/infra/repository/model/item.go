@@ -15,21 +15,21 @@ type Item struct {
 }
 
 type ItemCommonAttributes struct {
-	Name               string          `bun:"name,notnull"`
-	Observation        string          `bun:"observation"`
-	Price              decimal.Decimal `bun:"price,type:decimal(10,2),notnull"`
-	TotalPrice         decimal.Decimal `bun:"total_price,type:decimal(10,2),notnull"`
-	Size               string          `bun:"size,notnull"`
-	Quantity           float64         `bun:"quantity,notnull"`
-	GroupItemID        uuid.UUID       `bun:"group_item_id,type:uuid"`
-	CategoryID         uuid.UUID       `bun:"column:category_id,type:uuid,notnull"`
-	IsAdditional       bool            `bun:"is_additional"`
-	AdditionalItems    []Item          `bun:"m2m:item_to_additional,join:Item=AdditionalItem"`
-	RemovedItems       []string        `bun:"removed_items,type:jsonb"`
-	ProductID          uuid.UUID       `bun:"product_id,type:uuid,notnull"`
-	Product            *Product        `bun:"rel:has-one,join:product_id=id"`
-	ProductVariationID uuid.UUID       `bun:"product_variation_id,type:uuid,notnull"`
-	Flavor             *string         `bun:"flavor"`
+	Name               string           `bun:"name,notnull"`
+	Observation        string           `bun:"observation"`
+	Price              *decimal.Decimal `bun:"price,type:decimal(10,2),notnull"`
+	TotalPrice         *decimal.Decimal `bun:"total_price,type:decimal(10,2),notnull"`
+	Size               string           `bun:"size,notnull"`
+	Quantity           float64          `bun:"quantity,notnull"`
+	GroupItemID        uuid.UUID        `bun:"group_item_id,type:uuid"`
+	CategoryID         uuid.UUID        `bun:"column:category_id,type:uuid,notnull"`
+	IsAdditional       bool             `bun:"is_additional"`
+	AdditionalItems    []Item           `bun:"m2m:item_to_additional,join:Item=AdditionalItem"`
+	RemovedItems       []string         `bun:"removed_items,type:jsonb"`
+	ProductID          uuid.UUID        `bun:"product_id,type:uuid,notnull"`
+	Product            *Product         `bun:"rel:has-one,join:product_id=id"`
+	ProductVariationID uuid.UUID        `bun:"product_variation_id,type:uuid,notnull"`
+	Flavor             *string          `bun:"flavor"`
 }
 
 func (i *Item) FromDomain(item *orderentity.Item) {
@@ -41,8 +41,8 @@ func (i *Item) FromDomain(item *orderentity.Item) {
 		ItemCommonAttributes: ItemCommonAttributes{
 			Name:               item.Name,
 			Observation:        item.Observation,
-			Price:              item.Price,
-			TotalPrice:         item.TotalPrice,
+			Price:              &item.Price,
+			TotalPrice:         &item.TotalPrice,
 			Size:               item.Size,
 			Quantity:           item.Quantity,
 			GroupItemID:        item.GroupItemID,
@@ -75,8 +75,8 @@ func (i *Item) ToDomain() *orderentity.Item {
 		ItemCommonAttributes: orderentity.ItemCommonAttributes{
 			Name:               i.Name,
 			Observation:        i.Observation,
-			Price:              i.Price,
-			TotalPrice:         i.TotalPrice,
+			Price:              i.getPrice(),
+			TotalPrice:         i.getTotalPrice(),
 			Size:               i.Size,
 			Quantity:           i.Quantity,
 			GroupItemID:        i.GroupItemID,
@@ -96,4 +96,18 @@ func (i *Item) ToDomain() *orderentity.Item {
 	}
 
 	return item
+}
+
+func (i *Item) getPrice() decimal.Decimal {
+	if i.Price == nil {
+		return decimal.Zero
+	}
+	return *i.Price
+}
+
+func (i *Item) getTotalPrice() decimal.Decimal {
+	if i.TotalPrice == nil {
+		return decimal.Zero
+	}
+	return *i.TotalPrice
 }

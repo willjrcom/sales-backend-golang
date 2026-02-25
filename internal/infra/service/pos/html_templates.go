@@ -271,3 +271,78 @@ const OrderReceiptTemplate = `
 </body>
 </html>
 `
+
+const ShiftReportTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    ` + style + `
+</head>
+<body>
+    <div class="header bold">
+        RELATÓRIO DE TURNO
+    </div>
+    <div class="header">
+        Abertura: {{if .OpenedAt}}{{.OpenedAt.Format "02/01/2006 15:04"}}{{end}}<br>
+        {{if .ClosedAt}}Fechamento: {{.ClosedAt.Format "02/01/2006 15:04"}}{{end}}
+    </div>
+    <div class="divider"></div>
+
+    <div class="header bold">RESUMO DE VENDAS</div>
+    <div class="row">
+        <span>Pedidos Finalizados:</span>
+        <span>{{.TotalOrdersFinished}}</span>
+    </div>
+    <div class="row">
+        <span>Pedidos Cancelados:</span>
+        <span>{{.TotalOrdersCancelled}}</span>
+    </div>
+    <div class="row bold">
+        <span>TOTAL GERAL:</span>
+        <span>{{formatMoney .TotalSales}}</span>
+    </div>
+
+    <div class="divider"></div>
+    <div class="header bold">VENDAS POR CATEGORIA</div>
+    {{range $cat, $val := .SalesByCategory}}
+    <div class="row">
+        <span class="col-name">{{$cat}}</span>
+        <span class="col-price">{{formatMoney $val}}</span>
+    </div>
+    {{end}}
+
+    <div class="divider"></div>
+    <div class="header bold">PRODUTOS VENDIDOS</div>
+    {{range $cat, $qty := .ProductsSoldByCategory}}
+    <div class="row">
+        <span class="col-name">{{$cat}}</span>
+        <span class="col-price">{{$qty}}</span>
+    </div>
+    {{end}}
+
+    <div class="divider"></div>
+    <div class="header bold">PAGAMENTOS</div>
+    {{range .Payments}}
+    <div class="row">
+        <span class="col-name">{{.Method}}</span>
+        <span class="col-price">{{formatMoney .TotalPaid}}</span>
+    </div>
+    {{end}}
+
+    <div class="divider"></div>
+    <div class="header bold">LISTA DE PEDIDOS</div>
+    {{range .Orders}}
+    <div class="row">
+        <span class="col-name">Pedido #{{.OrderNumber}}</span>
+        <span class="col-price">{{formatMoney .TotalPayable}}</span>
+    </div>
+    {{end}}
+
+    <div class="divider"></div>
+    <div class="footer">
+        <p>Relatório gerado em: {{now}}</p>
+    </div>
+</body>
+</html>
+`

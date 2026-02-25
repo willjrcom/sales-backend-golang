@@ -8,8 +8,39 @@ import (
 
 	"github.com/shopspring/decimal"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	shiftentity "github.com/willjrcom/sales-backend-go/internal/domain/shift"
 	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 )
+
+// RenderShiftHTML returns the rendered HTML for a shift report
+func RenderShiftHTML(shift *shiftentity.Shift) ([]byte, error) {
+	funcMap := template.FuncMap{
+		"formatDate": func(t *time.Time) string {
+			if t == nil {
+				return ""
+			}
+			return t.Format("02/01/2006 15:04")
+		},
+		"formatMoney": func(d decimal.Decimal) string {
+			return "R$ " + d.StringFixed(2)
+		},
+		"now": func() string {
+			return time.Now().Format("02/01/2006 15:04:05")
+		},
+	}
+
+	tmpl, err := template.New("shift").Funcs(funcMap).Parse(ShiftReportTemplate)
+	if err != nil {
+		return nil, err
+	}
+
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, shift); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
 
 // RenderGroupItemKitchenHTML returns the rendered HTML for a kitchen ticket
 func RenderGroupItemKitchenHTML(group *orderentity.GroupItem, company *companydto.CompanyDTO) ([]byte, error) {

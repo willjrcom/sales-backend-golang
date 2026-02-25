@@ -246,7 +246,7 @@ func (s *OrderDeliveryService) ShipOrderDelivery(ctx context.Context, dtoShip *o
 
 		EnablePrintOrderOnShipDelivery, _ := company.Preferences.GetBool(companyentity.EnablePrintOrderOnShipDelivery)
 		printerName, _ := company.Preferences.GetString(companyentity.PrinterDeliveryOnShipDelivery)
-		if s.rabbitmq != nil && EnablePrintOrderOnShipDelivery && printerName != "" {
+		if s.rabbitmq != nil && EnablePrintOrderOnShipDelivery {
 			if err := s.rabbitmq.SendPrintMessage(rabbitmq.ORDER_DELIVERY_EX, company.SchemaName, orderDeliveryModel[i].ID.String(), printerName); err != nil {
 				fmt.Println("error sending message to rabbitmq: " + err.Error())
 			}

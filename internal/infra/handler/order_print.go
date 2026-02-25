@@ -8,34 +8,59 @@ import (
 	"github.com/google/uuid"
 	"github.com/willjrcom/sales-backend-go/bootstrap/handler"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
-	orderprintusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_print"
+	printmanagerusecases "github.com/willjrcom/sales-backend-go/internal/usecases/print_manager"
 	jsonpkg "github.com/willjrcom/sales-backend-go/pkg/json"
 )
 
 // handlerOrderPrintImpl implements print endpoints for orders.
 type handlerOrderPrintImpl struct {
-	s *orderprintusecases.Service
+	s *printmanagerusecases.Service
 }
 
-// NewHandlerOrderPrint returns a handler for printing individual orders.
-func NewHandlerOrderPrint(svc *orderprintusecases.Service) *handler.Handler {
+// NewHandlerPrintManager returns a handler for printing individual orders.
+func NewHandlerPrintManager(svc *printmanagerusecases.Service) *handler.Handler {
 	r := chi.NewRouter()
 	h := &handlerOrderPrintImpl{s: svc}
 	r.With().Group(func(r chi.Router) {
+		// Request print kitchen
+		r.Post("/kitchen", h.handleRequestPrintGroupItemKitchen)
 		// Kitchen print: only items and complements
-		r.Get("/kitchen/{id}", h.handlePrintGroupItemKitchen)
+		r.Get("/kitchen/{id}", h.handleGetPrintGroupItemKitchen)
+
+		// Request print order
+		r.Post("/order", h.handleRequestPrintOrder)
 		// Full order print
-		r.Get("/{id}", h.handlePrintOrder)
+		r.Get("/order/{id}", h.handleGetPrintOrder)
+
+		// Request print shift
+		r.Post("/shift", h.handleRequestPrintShift)
 		// Shift report print
-		r.Get("/shift/{id}", h.handlePrintShift)
-		// Daily report print
-		r.Post("/daily", h.handlePrintByShift)
+		r.Get("/shift/{id}", h.handleGetPrintShift)
 	})
-	return handler.NewHandler("/order-print", r)
+	return handler.NewHandler("/print-manager", r)
 }
 
-// handlePrintOrder handles GET /order-print/{id}
-func (h *handlerOrderPrintImpl) handlePrintOrder(w http.ResponseWriter, r *http.Request) {
+// handleRequestPrintOrder handles POST /order-print/order/{id}
+func (h *handlerOrderPrintImpl) handleRequestPrintOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+
+	if err := h.s.RequestPrintOrder(ctx, dtoId); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+// handleGetPrintOrder handles GET /order-print/order/{id}
+func (h *handlerOrderPrintImpl) handleGetPrintOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
 	if id == "" {
@@ -66,8 +91,8 @@ func (h *handlerOrderPrintImpl) handlePrintOrder(w http.ResponseWriter, r *http.
 	_, _ = w.Write(data)
 }
 
-// handlePrintByShift handles POST /order-print/daily to generate daily sales report.
-func (h *handlerOrderPrintImpl) handlePrintByShift(w http.ResponseWriter, r *http.Request) {
+// handleRequestPrintOrder handles POST /order-print/kitchen/{id}
+func (h *handlerOrderPrintImpl) handleRequestPrintGroupItemKitchen(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
 	if id == "" {
@@ -77,16 +102,16 @@ func (h *handlerOrderPrintImpl) handlePrintByShift(w http.ResponseWriter, r *htt
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	res, err := h.s.PrintDailyReport(ctx, dtoId)
-	if err != nil {
+	if err := h.s.RequestPrintGroupItemKitchen(ctx, dtoId); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
-	jsonpkg.ResponseJson(w, r, http.StatusOK, res)
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-// handlePrintGroupItemKitchen handles GET /order-print/kitchen/{id} for kitchen tickets.
-func (h *handlerOrderPrintImpl) handlePrintGroupItemKitchen(w http.ResponseWriter, r *http.Request) {
+// handleGetPrintGroupItemKitchen handles GET /order-print/kitchen/{id} for kitchen tickets.
+func (h *handlerOrderPrintImpl) handleGetPrintGroupItemKitchen(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
 	if id == "" {
@@ -116,8 +141,8 @@ func (h *handlerOrderPrintImpl) handlePrintGroupItemKitchen(w http.ResponseWrite
 	_, _ = w.Write(data)
 }
 
-// handlePrintShift handles GET /order-print/shift/{id}
-func (h *handlerOrderPrintImpl) handlePrintShift(w http.ResponseWriter, r *http.Request) {
+// handleRequestPrintShift handles POST /order-print/shift/{id}
+func (h *handlerOrderPrintImpl) handleRequestPrintShift(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
 	if id == "" {
@@ -127,13 +152,42 @@ func (h *handlerOrderPrintImpl) handlePrintShift(w http.ResponseWriter, r *http.
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	data, err := h.s.PrintShift(ctx, dtoId)
+	if err := h.s.RequestPrintShift(ctx, dtoId); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
+}
+
+// handleGetPrintShift handles GET /order-print/shift/{id}
+func (h *handlerOrderPrintImpl) handleGetPrintShift(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
+	format := r.URL.Query().Get("format")
+
+	var data []byte
+	var err error
+
+	if format == "html" {
+		data, err = h.s.PrintShiftHTML(ctx, dtoId)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	} else {
+		data, err = h.s.PrintShift(ctx, dtoId)
+		w.Header().Set("Content-Type", "application/octet-stream")
+	}
+
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/octet-stream")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(data)
 }

@@ -18,9 +18,9 @@ type PaymentOrder struct {
 }
 
 type PaymentCommonAttributes struct {
-	TotalPaid decimal.Decimal `bun:"total_paid,type:decimal(10,2)"`
-	Method    string          `bun:"method,notnull"`
-	OrderID   uuid.UUID       `bun:"column:order_id,type:uuid,notnull"`
+	TotalPaid *decimal.Decimal `bun:"total_paid,type:decimal(10,2)"`
+	Method    string           `bun:"method,notnull"`
+	OrderID   uuid.UUID        `bun:"column:order_id,type:uuid,notnull"`
 }
 
 type PaymentTimeLogs struct {
@@ -34,7 +34,7 @@ func (p *PaymentOrder) FromDomain(payment *orderentity.PaymentOrder) {
 	*p = PaymentOrder{
 		Entity: entitymodel.FromDomain(payment.Entity),
 		PaymentCommonAttributes: PaymentCommonAttributes{
-			TotalPaid: payment.TotalPaid,
+			TotalPaid: &payment.TotalPaid,
 			Method:    string(payment.Method),
 			OrderID:   payment.OrderID,
 		},
@@ -51,7 +51,7 @@ func (p *PaymentOrder) ToDomain() *orderentity.PaymentOrder {
 	return &orderentity.PaymentOrder{
 		Entity: p.Entity.ToDomain(),
 		PaymentCommonAttributes: orderentity.PaymentCommonAttributes{
-			TotalPaid: p.TotalPaid,
+			TotalPaid: p.getTotalPaid(),
 			Method:    orderentity.PayMethod(p.Method),
 			OrderID:   p.OrderID,
 		},
@@ -59,4 +59,11 @@ func (p *PaymentOrder) ToDomain() *orderentity.PaymentOrder {
 			PaidAt: p.PaidAt,
 		},
 	}
+}
+
+func (p *PaymentOrder) getTotalPaid() decimal.Decimal {
+	if p.TotalPaid == nil {
+		return decimal.Zero
+	}
+	return *p.TotalPaid
 }
