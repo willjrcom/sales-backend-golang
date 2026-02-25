@@ -22,7 +22,8 @@ func (s *Service) RequestPrintShift(ctx context.Context, req *entitydto.IDReques
 	}
 
 	printerName, _ := company.Preferences.GetString(companyentity.PrinterShiftReport)
-	if err := s.rabbitmq.SendPrintMessage(rabbitmq.SHIFT_EX, company.SchemaName, shift.ID.String(), printerName); err != nil {
+	path := rabbitmq.SHIFT_PATH + shift.ID.String()
+	if err := s.rabbitmq.SendPrintMessage(rabbitmq.SHIFT_EX, company.SchemaName, path, printerName); err != nil {
 		fmt.Println(err)
 		return fmt.Errorf("failed to send print message")
 	}

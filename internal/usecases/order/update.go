@@ -56,7 +56,8 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 		}
 
 		if groupItem.Category.NeedPrint && s.rabbitmq != nil {
-			if err := s.rabbitmq.SendPrintMessage(rabbitmq.GROUP_ITEM_EX, company.SchemaName, groupItem.ID.String(), groupItem.Category.PrinterName); err != nil {
+			path := rabbitmq.GROUP_ITEM_PATH + groupItem.ID.String()
+			if err := s.rabbitmq.SendPrintMessage(rabbitmq.GROUP_ITEM_EX, company.SchemaName, path, groupItem.Category.PrinterName); err != nil {
 				fmt.Println("error sending message to rabbitmq: " + err.Error())
 			}
 		}
@@ -108,7 +109,8 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 	if EnablePrintOrderOnShipOrder, _ := company.Preferences.GetBool(companyentity.EnablePrintOrderOnShipOrder); EnablePrintOrderOnShipOrder {
 		printerName, _ := company.Preferences.GetString(companyentity.PrinterOrder)
 		if s.rabbitmq != nil {
-			if err := s.rabbitmq.SendPrintMessage(rabbitmq.ORDER_EX, company.SchemaName, order.ID.String(), printerName); err != nil {
+			path := rabbitmq.ORDER_PATH + order.ID.String()
+			if err := s.rabbitmq.SendPrintMessage(rabbitmq.ORDER_EX, company.SchemaName, path, printerName); err != nil {
 				fmt.Println("error sending message to rabbitmq: " + err.Error())
 			}
 		}

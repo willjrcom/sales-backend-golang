@@ -23,24 +23,24 @@ func NewHandlerPrintManager(svc *printmanagerusecases.Service) *handler.Handler 
 	h := &handlerOrderPrintImpl{s: svc}
 	r.With().Group(func(r chi.Router) {
 		// Request print kitchen
-		r.Post("/kitchen", h.handleRequestPrintGroupItemKitchen)
+		r.Post("/group-item/{id}", h.handleRequestPrintGroupItem)
 		// Kitchen print: only items and complements
-		r.Get("/kitchen/{id}", h.handleGetPrintGroupItemKitchen)
+		r.Get("/group-item/{id}", h.handleGetPrintGroupItem)
 
 		// Request print order
-		r.Post("/order", h.handleRequestPrintOrder)
+		r.Post("/order/{id}", h.handleRequestPrintOrder)
 		// Full order print
 		r.Get("/order/{id}", h.handleGetPrintOrder)
 
 		// Request print shift
-		r.Post("/shift", h.handleRequestPrintShift)
+		r.Post("/shift/{id}", h.handleRequestPrintShift)
 		// Shift report print
 		r.Get("/shift/{id}", h.handleGetPrintShift)
 	})
 	return handler.NewHandler("/print-manager", r)
 }
 
-// handleRequestPrintOrder handles POST /order-print/order/{id}
+// handleRequestPrintOrder handles POST /print-manager/order/{id}
 func (h *handlerOrderPrintImpl) handleRequestPrintOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
@@ -59,7 +59,7 @@ func (h *handlerOrderPrintImpl) handleRequestPrintOrder(w http.ResponseWriter, r
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-// handleGetPrintOrder handles GET /order-print/order/{id}
+// handleGetPrintOrder handles GET /print-manager/order/{id}
 func (h *handlerOrderPrintImpl) handleGetPrintOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
@@ -91,8 +91,8 @@ func (h *handlerOrderPrintImpl) handleGetPrintOrder(w http.ResponseWriter, r *ht
 	_, _ = w.Write(data)
 }
 
-// handleRequestPrintOrder handles POST /order-print/kitchen/{id}
-func (h *handlerOrderPrintImpl) handleRequestPrintGroupItemKitchen(w http.ResponseWriter, r *http.Request) {
+// handleRequestPrintOrder handles POST /print-manager/group-item/{id}
+func (h *handlerOrderPrintImpl) handleRequestPrintGroupItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
 	if id == "" {
@@ -110,8 +110,8 @@ func (h *handlerOrderPrintImpl) handleRequestPrintGroupItemKitchen(w http.Respon
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-// handleGetPrintGroupItemKitchen handles GET /order-print/kitchen/{id} for kitchen tickets.
-func (h *handlerOrderPrintImpl) handleGetPrintGroupItemKitchen(w http.ResponseWriter, r *http.Request) {
+// handleGetPrintGroupItem handles GET /print-manager/group-item/{id} for kitchen tickets.
+func (h *handlerOrderPrintImpl) handleGetPrintGroupItem(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
 	if id == "" {
@@ -141,7 +141,7 @@ func (h *handlerOrderPrintImpl) handleGetPrintGroupItemKitchen(w http.ResponseWr
 	_, _ = w.Write(data)
 }
 
-// handleRequestPrintShift handles POST /order-print/shift/{id}
+// handleRequestPrintShift handles POST /print-manager/shift/{id}
 func (h *handlerOrderPrintImpl) handleRequestPrintShift(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")
@@ -160,7 +160,7 @@ func (h *handlerOrderPrintImpl) handleRequestPrintShift(w http.ResponseWriter, r
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-// handleGetPrintShift handles GET /order-print/shift/{id}
+// handleGetPrintShift handles GET /print-manager/shift/{id}
 func (h *handlerOrderPrintImpl) handleGetPrintShift(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := chi.URLParam(r, "id")

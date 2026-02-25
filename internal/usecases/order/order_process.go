@@ -242,7 +242,8 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 		}
 
 		if enablePrintItemsOnFinishProcess, _ := company.Preferences.GetBool(companyentity.EnablePrintItemsOnFinishProcess); enablePrintItemsOnFinishProcess {
-			if err := s.so.rabbitmq.SendPrintMessage(rabbitmq.GROUP_ITEM_EX, company.SchemaName, process.GroupItemID.String(), groupItemDTO.PrinterName); err != nil {
+			path := rabbitmq.GROUP_ITEM_PATH + process.GroupItemID.String()
+			if err := s.so.rabbitmq.SendPrintMessage(rabbitmq.GROUP_ITEM_EX, company.SchemaName, path, groupItemDTO.PrinterName); err != nil {
 				fmt.Printf("error sending message: %v", err)
 			}
 		}

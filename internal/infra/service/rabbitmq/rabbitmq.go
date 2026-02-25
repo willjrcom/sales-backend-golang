@@ -11,11 +11,16 @@ import (
 )
 
 const (
-	SHIFT_EX          = "print.shift"
-	GROUP_ITEM_EX     = "print.group.item"
-	ORDER_EX          = "print.order"
-	ORDER_DELIVERY_EX = "print.order.delivery"
-	EMAIL_EX          = "email"
+	SHIFT_EX      = "print.shift"
+	GROUP_ITEM_EX = "print.group.item"
+	ORDER_EX      = "print.order"
+	EMAIL_EX      = "email"
+)
+
+const (
+	SHIFT_PATH      = "/print-manager/shift/"
+	GROUP_ITEM_PATH = "/print-manager/group-item/"
+	ORDER_PATH      = "/print-manager/order/"
 )
 
 // RabbitMQ structure to manage connection and channel
@@ -27,7 +32,7 @@ type RabbitMQ struct {
 }
 
 type PrintMessage struct {
-	Id          string `json:"id"`
+	Path        string `json:"path"`
 	PrinterName string `json:"printer_name"`
 }
 
@@ -127,12 +132,12 @@ func (r *RabbitMQ) EnsureExchangeQueueAndBind(exchange, routingKey string) error
 	return nil
 }
 
-func (r *RabbitMQ) SendPrintMessage(exchage, routingKey, message, printerName string) error {
+func (r *RabbitMQ) SendPrintMessage(exchage, routingKey, path, printerName string) error {
 	if printerName == "" {
 		printerName = "default"
 	}
 	printMessage := PrintMessage{
-		Id:          message,
+		Path:        path,
 		PrinterName: printerName,
 	}
 

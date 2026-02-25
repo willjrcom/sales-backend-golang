@@ -20,7 +20,8 @@ func (s *Service) RequestPrintGroupItemKitchen(ctx context.Context, req *entityd
 		return err
 	}
 
-	if err := s.rabbitmq.SendPrintMessage(rabbitmq.GROUP_ITEM_EX, company.SchemaName, groupItem.ID.String(), groupItem.PrinterName); err != nil {
+	path := rabbitmq.GROUP_ITEM_PATH + groupItem.ID.String()
+	if err := s.rabbitmq.SendPrintMessage(rabbitmq.GROUP_ITEM_EX, company.SchemaName, path, groupItem.PrinterName); err != nil {
 		fmt.Println(err)
 		return fmt.Errorf("failed to send print message")
 	}

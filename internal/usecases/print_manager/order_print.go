@@ -22,7 +22,8 @@ func (s *Service) RequestPrintOrder(ctx context.Context, req *entitydto.IDReques
 	}
 
 	printerName, _ := company.Preferences.GetString(companyentity.PrinterOrder)
-	if err := s.rabbitmq.SendPrintMessage(rabbitmq.ORDER_EX, company.SchemaName, order.ID.String(), printerName); err != nil {
+	path := rabbitmq.ORDER_PATH + order.ID.String()
+	if err := s.rabbitmq.SendPrintMessage(rabbitmq.ORDER_EX, company.SchemaName, path, printerName); err != nil {
 		fmt.Println(err)
 		return fmt.Errorf("failed to send print message")
 	}
