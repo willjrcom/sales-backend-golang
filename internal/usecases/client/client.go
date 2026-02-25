@@ -68,12 +68,19 @@ func (s *Service) UpdateClientWithShippingFee(ctx context.Context, client *clien
 	}
 
 	client.Address.AddressCommonAttributes.Coordinates = *coordinates
-	client.Address.DeliveryTax = s.calculateShippingFee(client.Address.Coordinates, company)
+	distance, dynamicTax := s.calculateShippingFee(client.Address.Coordinates, company)
+
+	client.Address.Distance = distance
+
+	// Se a taxa for enviada como 0 (ex: via app ou admin deixou em branco), usa a dinâmica
+	if client.Address.DeliveryTax.IsZero() {
+		client.Address.DeliveryTax = dynamicTax
+	}
 }
 
-func (s *Service) calculateShippingFee(clientCoord addressentity.Coordinates, company *companydto.CompanyDTO) decimal.Decimal {
+func (s *Service) calculateShippingFee(clientCoord addressentity.Coordinates, company *companydto.CompanyDTO) (float64, decimal.Decimal) {
 	if company == nil || company.Address == nil || (company.Address.Coordinates.Latitude == 0 && company.Address.Coordinates.Longitude == 0) {
-		return decimal.Zero
+		return 0, decimal.Zero
 	}
 
 	companyCoord := addressentity.Coordinates{
@@ -84,15 +91,9 @@ func (s *Service) calculateShippingFee(clientCoord addressentity.Coordinates, co
 	distance := clientCoord.CalculateDistance(companyCoord)
 
 	feePerKm, _ := company.Preferences.GetDecimal(companyentity.DeliveryFeePerKm)
-	minTax, _ := company.Preferences.GetDecimal(companyentity.MinDeliveryTax)
-
 	totalTax := feePerKm.Mul(decimal.NewFromFloat(distance))
 
-	if totalTax.LessThan(minTax) {
-		totalTax = minTax
-	}
-
-	return totalTax
+	return distance, totalTax
 }
 
 func (s *Service) GetShippingFeeByCEP(ctx context.Context, cep string) (decimal.Decimal, error) {
@@ -107,7 +108,8 @@ func (s *Service) GetShippingFeeByCEP(ctx context.Context, cep string) (decimal.
 		return decimal.Zero, err
 	}
 
-	return s.calculateShippingFee(*coordinates, company), nil
+	_, tax := s.calculateShippingFee(*coordinates, company)
+	return tax, nil
 }
 
 func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IDRequest, dto *clientdto.ClientUpdateDTO) error {

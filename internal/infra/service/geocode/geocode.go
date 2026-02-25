@@ -1,30 +1,25 @@
 package geocodeservice
 
 import (
-	"encoding/json"
+	"context"
 	"fmt"
-	"net/http"
-	"net/url"
+	"os"
 
 	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
+	"googlemaps.github.io/maps"
 )
 
-type GeocodeResponse struct {
-	Results []struct {
-		Geometry struct {
-			Lat float64 `json:"lat"`
-			Lng float64 `json:"lng"`
-		} `json:"geometry"`
-	} `json:"results"`
-	Status map[string]interface{} `json:"status"`
-}
-
 func GetCoordinates(address *addressentity.AddressCommonAttributes) (*addressentity.Coordinates, error) {
-	baseURL := "https://api.opencagedata.com/geocode/v1/json"
-	apiKey := "4f638e9ecf444f81b5eb379318936d87"
+	apiKey := os.Getenv("GCP_KEY")
+	if apiKey == "" {
+		return nil, fmt.Errorf("GCP_KEY env var is not configured")
+	}
 
-	// Codifica o endereço na URL
-	params := url.Values{}
+	c, err := maps.NewClient(maps.WithAPIKey(apiKey))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create Google Maps client: %v", err)
+	}
+
 	q := address.Street + " " + address.Number + ", " + address.Neighborhood + ", " + address.City + ", " + address.UF
 
 	if address.Cep != "" {
@@ -33,36 +28,19 @@ func GetCoordinates(address *addressentity.AddressCommonAttributes) (*addressent
 		q += ", Brasil"
 	}
 
-	params.Add("q", q)
-	params.Add("key", apiKey)
+	r := &maps.GeocodingRequest{
+		Address: q,
+	}
 
-	// Constrói a URL completa
-	requestURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
-
-	// Faz a requisição HTTP
-	resp, err := http.Get(requestURL)
+	results, err := c.Geocode(context.Background(), r)
 	if err != nil {
-		return nil, fmt.Errorf("erro na requisição: %v", err)
-	}
-	defer resp.Body.Close()
-
-	// Decodifica a resposta JSON
-	var geocodeResponse GeocodeResponse
-	if err := json.NewDecoder(resp.Body).Decode(&geocodeResponse); err != nil {
-		return nil, fmt.Errorf("erro ao decodificar resposta JSON: %v", err)
+		return nil, fmt.Errorf("geocoding error: %v", err)
 	}
 
-	// Verifica o status da resposta
-	status, ok := geocodeResponse.Status["code"]
-	if !ok || status != float64(200) {
-		return nil, fmt.Errorf("erro na geocodificação: status %s", geocodeResponse.Status)
+	if len(results) == 0 {
+		return nil, fmt.Errorf("no results found for address")
 	}
 
-	// Extrai latitude e longitude do primeiro resultado
-	if len(geocodeResponse.Results) == 0 {
-		return nil, fmt.Errorf("nenhum resultado encontrado para o endereço")
-	}
-	location := geocodeResponse.Results[0].Geometry
-
+	location := results[0].Geometry.Location
 	return &addressentity.Coordinates{Latitude: location.Lat, Longitude: location.Lng}, nil
 }

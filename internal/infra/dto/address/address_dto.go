@@ -17,6 +17,7 @@ type AddressDTO struct {
 	UF           string          `json:"uf"`
 	Cep          string          `json:"cep"`
 	DeliveryTax  decimal.Decimal `json:"delivery_tax"`
+	Distance     float64         `json:"distance"`
 	Coordinates  Coordinates     `json:"coordinates"`
 }
 
@@ -40,6 +41,7 @@ func (a *AddressDTO) FromDomain(address *addressentity.Address) {
 		UF:           address.UF,
 		Cep:          address.Cep,
 		DeliveryTax:  address.DeliveryTax,
+		Distance:     address.Distance,
 		Coordinates:  coordinates,
 	}
 }
@@ -63,6 +65,7 @@ func (a *AddressDTO) ToDomain() (*addressentity.Address, error) {
 		UF:           a.UF,
 		Cep:          a.Cep,
 		DeliveryTax:  a.DeliveryTax,
+		Distance:     a.Distance,
 		Coordinates:  coordinates,
 	}), nil
 }
@@ -80,6 +83,7 @@ func (a *AddressDTO) UpdateDomain(address *addressentity.Address) error {
 	address.UF = a.UF
 	address.Cep = a.Cep
 	address.DeliveryTax = a.DeliveryTax
+	address.Distance = a.Distance
 	address.Coordinates.Latitude = a.Coordinates.Latitude
 	address.Coordinates.Longitude = a.Coordinates.Longitude
 	return nil

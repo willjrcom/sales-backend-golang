@@ -181,6 +181,8 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 
 	if err := tx.NewSelect().Model(&processes).
 		Join("LEFT JOIN employees as emp ON process.employee_id = emp.id").
+		Join("JOIN order_group_items as gi ON process.group_item_id = gi.id").
+		Join("JOIN orders as o ON gi.order_id = o.id").
 		Where("process.process_rule_id = ?", id).
 		Where("process.status IN (?)", bun.In(validStatus)).
 		Where("emp.user_id = ? or process.employee_id is null", userID).
@@ -193,6 +195,7 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 		Relation("GroupItem.Category").
 		Relation("Products").
 		Relation("Queue").
+		Order("o.created_at ASC").
 		Order("process.created_at ASC").
 		Scan(ctx); err != nil {
 		return nil, err

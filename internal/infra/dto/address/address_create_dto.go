@@ -26,6 +26,7 @@ type AddressCreateDTO struct {
 	UF           string           `json:"uf"`
 	Cep          string           `json:"cep"`
 	DeliveryTax  *decimal.Decimal `json:"delivery_tax"`
+	Distance     *float64         `json:"distance"`
 	Coordinates  Coordinates      `json:"coordinates"`
 }
 
@@ -71,6 +72,10 @@ func (a *AddressCreateDTO) ToDomain(withDeliveryTax bool) (*addressentity.Addres
 
 	if withDeliveryTax {
 		addressCommonAttributes.DeliveryTax = *a.DeliveryTax
+	}
+
+	if a.Distance != nil {
+		addressCommonAttributes.Distance = *a.Distance
 	}
 
 	return addressentity.NewAddress(&addressCommonAttributes), nil

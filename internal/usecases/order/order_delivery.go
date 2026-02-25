@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/shopspring/decimal"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -117,13 +118,29 @@ func (s *OrderDeliveryService) CreateOrderDelivery(ctx context.Context, dto *ord
 
 	delivery.ClientID = client.ID
 	delivery.AddressID = client.Address.ID
-	delivery.DeliveryTax = &client.Address.DeliveryTax
 
+	// Delivery Tax Logic
+	var calculatedTax decimal.Decimal
+	if client.Address.DeliveryTax.GreaterThan(decimal.Zero) {
+		// 1. Manual override takes precedence
+		calculatedTax = client.Address.DeliveryTax
+	} else if client.Address.Distance > 0 {
+		// 2. Dynamic calculation based on distance
+		feePerKm, _ := company.Preferences.GetDecimal(companyentity.DeliveryFeePerKm)
+		calculatedTax = feePerKm.Mul(decimal.NewFromFloat(client.Address.Distance))
+	} else {
+		// 3. Fallback to delivery_tax (even if 0) if no distance
+		calculatedTax = client.Address.DeliveryTax
+	}
+
+	// Apply Minimum Tax
 	if minDeliveryTax, err := company.Preferences.GetDecimal(companyentity.MinDeliveryTax); err == nil {
-		if delivery.DeliveryTax.LessThan(minDeliveryTax) {
-			delivery.DeliveryTax = &minDeliveryTax
+		if calculatedTax.LessThan(minDeliveryTax) {
+			calculatedTax = minDeliveryTax
 		}
 	}
+
+	delivery.DeliveryTax = &calculatedTax
 
 	deliveryModel := &model.OrderDelivery{}
 	deliveryModel.FromDomain(delivery)

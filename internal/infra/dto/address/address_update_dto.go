@@ -15,6 +15,7 @@ type AddressUpdateDTO struct {
 	UF           *string          `json:"uf"`
 	Cep          *string          `json:"cep"`
 	DeliveryTax  *decimal.Decimal `json:"delivery_tax"`
+	Distance     *float64         `json:"distance"`
 	Coordinates  *Coordinates     `json:"coordinates"`
 }
 
@@ -33,6 +34,10 @@ func (a *AddressUpdateDTO) UpdateDomain(address *addressentity.Address) error {
 
 	if a.DeliveryTax != nil {
 		address.DeliveryTax = *a.DeliveryTax
+	}
+
+	if a.Distance != nil {
+		address.Distance = *a.Distance
 	}
 
 	if a.Street != nil {

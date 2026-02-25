@@ -22,6 +22,7 @@ type AddressCommonAttributes struct {
 	UF           string
 	Cep          string
 	DeliveryTax  decimal.Decimal
+	Distance     float64
 	Coordinates  Coordinates
 }
 
