@@ -419,7 +419,8 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 		Relation("Payments").
 		Relation("Table").
 		Relation("Delivery").
-		Relation("Pickup")
+		Relation("Pickup").
+		Order("order.created_at ASC")
 
 	if err := query.Scan(ctx); err != nil {
 		return nil, err
@@ -545,6 +546,7 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 		Relation("Delivery.Client").
 		Relation("Delivery.Address").
 		Where(`"order"."status" IN (?) OR "order"."shift_id" = ?`, bun.In(validStatuses), shiftID).
+		Order("order.created_at ASC").
 		Limit(perPage).
 		Offset(page * perPage)
 
@@ -605,6 +607,7 @@ func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID
 		Relation("Pickup").
 		Where("pickup.id IS NOT NULL").
 		Where(`"pickup"."status" = ? AND "order"."shift_id" = ?`, string(status), shiftID).
+		Order("order.created_at ASC").
 		Limit(perPage).
 		Offset(page * perPage)
 

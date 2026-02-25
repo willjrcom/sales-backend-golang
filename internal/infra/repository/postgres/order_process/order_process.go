@@ -145,6 +145,7 @@ func (r *ProcessRepositoryBun) GetAllProcessesFinishedByShiftID(ctx context.Cont
 		Join("LEFT JOIN orders AS o ON o.id = process.order_id").
 		Where("process.status IN (?)", bun.In(validStatus)).
 		Where("o.shift_id = ?", shiftID).
+		Order("process.created_at ASC").
 		Scan(ctx); err != nil {
 		return nil, err
 	}
@@ -192,6 +193,7 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 		Relation("GroupItem.Category").
 		Relation("Products").
 		Relation("Queue").
+		Order("process.created_at ASC").
 		Scan(ctx); err != nil {
 		return nil, err
 	}
@@ -224,7 +226,7 @@ func (r *ProcessRepositoryBun) GetProcessesByProductID(ctx context.Context, id s
 		processIDs = append(processIDs, p.ProcessID.String())
 	}
 
-	if err := tx.NewSelect().Model(&processes).Where("id in (?)", bun.In(processIDs)).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&processes).Where("id in (?)", bun.In(processIDs)).Order("process.created_at ASC").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -255,7 +257,7 @@ func (r *ProcessRepositoryBun) GetProcessesByGroupItemID(ctx context.Context, id
 		processIDs = append(processIDs, p.ProcessID.String())
 	}
 
-	if err := tx.NewSelect().Model(&processes).Where("id in (?)", bun.In(processIDs)).Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&processes).Where("id in (?)", bun.In(processIDs)).Order("process.created_at ASC").Scan(ctx); err != nil {
 		return nil, err
 	}
 
