@@ -36,6 +36,7 @@ func NewHandlerClient(clientService *clientusecases.Service) *handler.Handler {
 		c.Get("/{id}", h.handlerGetClientById)
 		c.Get("/by-contact/{number}", h.handlerGetClientByContact)
 		c.Get("/all", h.handlerGetAllClients)
+		c.Get("/shipping-fee/cep/{cep}", h.handlerGetShippingFeeByCEP)
 	})
 
 	unprotectedRoutes := []string{}
@@ -179,4 +180,21 @@ func (h *handlerClientImpl) handlerGetAllClients(w http.ResponseWriter, r *http.
 	w.Header().Set("X-Total-Count", strconv.Itoa(total))
 	// respond with paginated clients
 	jsonpkg.ResponseJson(w, r, http.StatusOK, clients)
+}
+func (h *handlerClientImpl) handlerGetShippingFeeByCEP(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	cep := chi.URLParam(r, "cep")
+
+	if cep == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("cep is required"))
+		return
+	}
+
+	fee, err := h.s.GetShippingFeeByCEP(ctx, cep)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, fee)
 }

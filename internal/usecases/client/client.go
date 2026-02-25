@@ -6,10 +6,13 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	cliententity "github.com/willjrcom/sales-backend-go/internal/domain/client"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	personentity "github.com/willjrcom/sales-backend-go/internal/domain/person"
 	clientdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/client"
+	companydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/company"
 	contactdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/contact"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
@@ -44,13 +47,7 @@ func (s *Service) CreateClient(ctx context.Context, dto *clientdto.ClientCreateD
 		return uuid.Nil, err
 	}
 
-	if minDeliveryTax, err := company.Preferences.GetDecimal(companyentity.MinDeliveryTax); err == nil {
-		if client.Address.DeliveryTax.LessThan(minDeliveryTax) {
-			return uuid.Nil, errors.New("delivery tax is less than minimum delivery tax")
-		}
-	}
-
-	s.UpdateClientWithCoordinates(ctx, client)
+	s.UpdateClientWithShippingFee(ctx, client, company)
 
 	clientModel := &model.Client{}
 	clientModel.FromDomain(client)
@@ -64,13 +61,53 @@ func (s *Service) CreateClient(ctx context.Context, dto *clientdto.ClientCreateD
 	return client.ID, nil
 }
 
-func (s *Service) UpdateClientWithCoordinates(ctx context.Context, client *cliententity.Client) {
+func (s *Service) UpdateClientWithShippingFee(ctx context.Context, client *cliententity.Client, company *companydto.CompanyDTO) {
 	coordinates, _ := geocodeservice.GetCoordinates(&client.Address.AddressCommonAttributes)
 	if coordinates == nil {
 		return
 	}
 
 	client.Address.AddressCommonAttributes.Coordinates = *coordinates
+	client.Address.DeliveryTax = s.calculateShippingFee(client.Address.Coordinates, company)
+}
+
+func (s *Service) calculateShippingFee(clientCoord addressentity.Coordinates, company *companydto.CompanyDTO) decimal.Decimal {
+	if company == nil || company.Address == nil || (company.Address.Coordinates.Latitude == 0 && company.Address.Coordinates.Longitude == 0) {
+		return decimal.Zero
+	}
+
+	companyCoord := addressentity.Coordinates{
+		Latitude:  company.Address.Coordinates.Latitude,
+		Longitude: company.Address.Coordinates.Longitude,
+	}
+
+	distance := clientCoord.CalculateDistance(companyCoord)
+
+	feePerKm, _ := company.Preferences.GetDecimal(companyentity.DeliveryFeePerKm)
+	minTax, _ := company.Preferences.GetDecimal(companyentity.MinDeliveryTax)
+
+	totalTax := feePerKm.Mul(decimal.NewFromFloat(distance))
+
+	if totalTax.LessThan(minTax) {
+		totalTax = minTax
+	}
+
+	return totalTax
+}
+
+func (s *Service) GetShippingFeeByCEP(ctx context.Context, cep string) (decimal.Decimal, error) {
+	company, err := s.cs.GetCompany(ctx)
+	if err != nil {
+		return decimal.Zero, err
+	}
+
+	addressAttributes := &addressentity.AddressCommonAttributes{Cep: cep}
+	coordinates, err := geocodeservice.GetCoordinates(addressAttributes)
+	if err != nil {
+		return decimal.Zero, err
+	}
+
+	return s.calculateShippingFee(*coordinates, company), nil
 }
 
 func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IDRequest, dto *clientdto.ClientUpdateDTO) error {
@@ -89,13 +126,7 @@ func (s *Service) UpdateClient(ctx context.Context, dtoId *entitydto.IDRequest, 
 		return err
 	}
 
-	if minDeliveryTax, err := company.Preferences.GetDecimal(companyentity.MinDeliveryTax); err == nil {
-		if client.Address.DeliveryTax.LessThan(minDeliveryTax) {
-			return errors.New("delivery tax is less than minimum delivery tax")
-		}
-	}
-
-	s.UpdateClientWithCoordinates(ctx, client)
+	s.UpdateClientWithShippingFee(ctx, client, company)
 
 	clientModel.FromDomain(client)
 	if err := s.rclient.UpdateClient(ctx, clientModel); err != nil {

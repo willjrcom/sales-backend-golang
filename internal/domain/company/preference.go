@@ -23,6 +23,8 @@ const (
 	EnableTable Key = "enable_table"
 	// MinDeliveryTax is the minimum fee applied for delivery.
 	MinDeliveryTax Key = "min_delivery_tax"
+	// DeliveryFeePerKm is the fee applied per kilometer.
+	DeliveryFeePerKm Key = "delivery_fee_per_km"
 
 	// EnablePrintOrderOnShipOrder toggles printing when launching an order.
 	EnablePrintOrderOnShipOrder Key = "enable_print_order_on_pend_order"
@@ -63,6 +65,7 @@ func NewDefaultPreferences() Preferences {
 		EnableMinOrderValueForFreeDelivery: "true",
 		TableTaxRate:                       "10",
 		MinDeliveryTax:                     "0.00",
+		DeliveryFeePerKm:                   "0.00",
 		MinOrderValueForFreeDelivery:       "0.00",
 	}
 }
