@@ -151,6 +151,7 @@ func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context, page int, perPage
 
 	if err := tx.NewSelect().Model(&Shifts).
 		Relation("Orders").
+		OrderExpr("shift.opened_at DESC").
 		Limit(perPage).
 		Offset(page * perPage).
 		Scan(ctx); err != nil {
