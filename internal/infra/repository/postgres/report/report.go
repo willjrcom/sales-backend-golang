@@ -320,13 +320,19 @@ func (s *ReportService) NewVsRecurringClients(ctx context.Context, start, end ti
 	var resp []NewVsRecurringDTO
 	query := `
         SELECT
-            CASE WHEN c.created_at >= ? THEN 'new' ELSE 'recurring' END AS type,
-            COUNT(DISTINCT d.client_id) AS count
+            CASE 
+                WHEN d.created_at = (
+                    SELECT MIN(created_at) 
+                    FROM ` + schemaName + `.order_deliveries od2 
+                    WHERE od2.client_id = d.client_id
+                ) THEN 'Novos' 
+                ELSE 'Recorrentes' 
+            END AS type,
+            COUNT(*) AS count
         FROM ` + schemaName + `.order_deliveries d
-        JOIN ` + schemaName + `.clients c ON c.id = d.client_id
-        WHERE d.delivered_at BETWEEN ? AND ?
+        WHERE d.created_at BETWEEN ? AND ?
         GROUP BY type`
-	if err := s.db.NewRaw(query, start, start, end).Scan(ctx, &resp); err != nil {
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -341,7 +347,7 @@ type OrdersByStatusDTO struct {
 }
 
 // OrdersByStatus returns the number of orders per status.
-func (s *ReportService) OrdersByStatus(ctx context.Context) ([]OrdersByStatusDTO, error) {
+func (s *ReportService) OrdersByStatus(ctx context.Context, start, end time.Time) ([]OrdersByStatusDTO, error) {
 	schemaName, err := database.GetCurrentSchema(ctx)
 	if err != nil {
 		return nil, err
@@ -351,8 +357,9 @@ func (s *ReportService) OrdersByStatus(ctx context.Context) ([]OrdersByStatusDTO
 	query := `
         SELECT status, COUNT(*) AS count
         FROM ` + schemaName + `.orders
+        WHERE created_at BETWEEN ? AND ?
         GROUP BY status`
-	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -365,7 +372,7 @@ type AvgProcessStepDTO struct {
 }
 
 // AvgProcessStepDurationByRule returns average time per process rule.
-func (s *ReportService) AvgProcessStepDurationByRule(ctx context.Context) ([]AvgProcessStepDTO, error) {
+func (s *ReportService) AvgProcessStepDurationByRule(ctx context.Context, start, end time.Time) ([]AvgProcessStepDTO, error) {
 	schemaName, err := database.GetCurrentSchema(ctx)
 	if err != nil {
 		return nil, err
@@ -379,8 +386,9 @@ func (s *ReportService) AvgProcessStepDurationByRule(ctx context.Context) ([]Avg
 		JOIN ` + schemaName + `.process_rules pr ON pr.id = op.process_rule_id
 		WHERE op.finished_at IS NOT NULL
 		AND op.started_at IS NOT NULL
+		AND op.started_at BETWEEN ? AND ?
 		GROUP BY pr.name`
-	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -392,7 +400,7 @@ type CancellationRateDTO struct {
 }
 
 // CancellationRate returns percentage of orders cancelled.
-func (s *ReportService) CancellationRate(ctx context.Context) (*CancellationRateDTO, error) {
+func (s *ReportService) CancellationRate(ctx context.Context, start, end time.Time) (*CancellationRateDTO, error) {
 	schemaName, err := database.GetCurrentSchema(ctx)
 	if err != nil {
 		return nil, nil
@@ -400,9 +408,10 @@ func (s *ReportService) CancellationRate(ctx context.Context) (*CancellationRate
 
 	var resp CancellationRateDTO
 	query := `
-        SELECT SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END)::float / COUNT(*) AS rate
-        FROM ` + schemaName + `.orders`
-	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+        SELECT SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END)::float / NULLIF(COUNT(*), 0) AS rate
+        FROM ` + schemaName + `.orders
+        WHERE created_at BETWEEN ? AND ?`
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
@@ -439,18 +448,18 @@ type AvgQueueDurationDTO struct {
 }
 
 // AvgQueueDuration returns the average duration (in seconds) of all process queues.
-func (s *ReportService) AvgQueueDuration(ctx context.Context) (*AvgQueueDurationDTO, error) {
+func (s *ReportService) AvgQueueDuration(ctx context.Context, start, end time.Time) (*AvgQueueDurationDTO, error) {
 	schemaName, err := database.GetCurrentSchema(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	var resp AvgQueueDurationDTO
-	// duration is stored as bigint nanoseconds; convert to seconds
 	query := `
 		SELECT AVG(duration) / 1000000000.0 AS avg_seconds
-		FROM ` + schemaName + `.order_queues`
-	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+		FROM ` + schemaName + `.order_queues
+		WHERE created_at BETWEEN ? AND ?`
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
@@ -464,13 +473,12 @@ type AvgProcessByProductDTO struct {
 }
 
 // AvgProcessDurationByProduct returns average duration (seconds) of processes by product.
-func (s *ReportService) AvgProcessDurationByProduct(ctx context.Context) ([]AvgProcessByProductDTO, error) {
+func (s *ReportService) AvgProcessDurationByProduct(ctx context.Context, start, end time.Time) ([]AvgProcessByProductDTO, error) {
 	schemaName, err := database.GetCurrentSchema(ctx)
 	if err != nil {
 		return nil, err
 	}
 	var resp []AvgProcessByProductDTO
-	// p.duration is bigint nanoseconds; average and convert to seconds
 	query := `
 		SELECT prod.id::text AS product_id,
 			prod.name AS product_name,
@@ -478,9 +486,10 @@ func (s *ReportService) AvgProcessDurationByProduct(ctx context.Context) ([]AvgP
 		FROM ` + schemaName + `.process_to_product_to_group_item t
 		JOIN ` + schemaName + `.order_processes p ON p.id = t.process_id
 		JOIN ` + schemaName + `.products prod ON prod.id = t.product_id
+		WHERE p.started_at BETWEEN ? AND ?
         GROUP BY prod.id, prod.name
         ORDER BY prod.name`
-	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -493,20 +502,20 @@ type TotalQueueTimeByGroupItemDTO struct {
 }
 
 // TotalQueueTimeByGroupItem returns total sum of queue durations per group item.
-func (s *ReportService) TotalQueueTimeByGroupItem(ctx context.Context) ([]TotalQueueTimeByGroupItemDTO, error) {
+func (s *ReportService) TotalQueueTimeByGroupItem(ctx context.Context, start, end time.Time) ([]TotalQueueTimeByGroupItemDTO, error) {
 	schemaName, err := database.GetCurrentSchema(ctx)
 	if err != nil {
 		return nil, err
 	}
 	var resp []TotalQueueTimeByGroupItemDTO
-	// duration is bigint nanoseconds; sum and convert to seconds
 	query := `
 		SELECT pr.name::text AS name,
 		AVG(duration) / 1000000000.0 AS total_seconds
 		FROM ` + schemaName + `.order_queues oq
 		JOIN ` + schemaName + `.process_rules pr ON pr.id = oq.process_rule_id
+		WHERE oq.created_at BETWEEN ? AND ?
 		GROUP BY pr.name`
-	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -519,7 +528,7 @@ type AvgDeliveryTimeDTO struct {
 }
 
 // AvgDeliveryTimeByDriver returns average time from shipped to delivered per driver.
-func (s *ReportService) AvgDeliveryTimeByDriver(ctx context.Context) ([]AvgDeliveryTimeDTO, error) {
+func (s *ReportService) AvgDeliveryTimeByDriver(ctx context.Context, start, end time.Time) ([]AvgDeliveryTimeDTO, error) {
 	schemaName, err := database.GetCurrentSchema(ctx)
 	if err != nil {
 		return nil, err
@@ -535,8 +544,9 @@ func (s *ReportService) AvgDeliveryTimeByDriver(ctx context.Context) ([]AvgDeliv
 		JOIN public.users us ON us.id = em.user_id
         WHERE od.delivered_at IS NOT NULL 
 			AND od.shipped_at IS NOT NULL
+			AND od.delivered_at BETWEEN ? AND ?
         GROUP BY us.name`
-	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -549,7 +559,7 @@ type DeliveriesCountByDriverDTO struct {
 }
 
 // DeliveriesPerDriver returns number of deliveries made by each driver.
-func (s *ReportService) DeliveriesPerDriver(ctx context.Context) ([]DeliveriesCountByDriverDTO, error) {
+func (s *ReportService) DeliveriesPerDriver(ctx context.Context, start, end time.Time) ([]DeliveriesCountByDriverDTO, error) {
 	schemaName, err := database.GetCurrentSchema(ctx)
 	if err != nil {
 		return nil, err
@@ -562,8 +572,9 @@ func (s *ReportService) DeliveriesPerDriver(ctx context.Context) ([]DeliveriesCo
 		JOIN ` + schemaName + `.delivery_drivers dd ON dd.id = od.driver_id
 		JOIN ` + schemaName + `.employees em ON em.id = dd.employee_id
 		JOIN public.users us ON us.id = em.user_id
+        WHERE od.delivered_at BETWEEN ? AND ?
         GROUP BY us.name`
-	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -605,7 +616,7 @@ type OrdersPerTableDTO struct {
 }
 
 // OrdersPerTable returns number of orders per table.
-func (s *ReportService) OrdersPerTable(ctx context.Context) ([]OrdersPerTableDTO, error) {
+func (s *ReportService) OrdersPerTable(ctx context.Context, start, end time.Time) ([]OrdersPerTableDTO, error) {
 	schemaName, err := database.GetCurrentSchema(ctx)
 	if err != nil {
 		return nil, err
@@ -616,8 +627,10 @@ func (s *ReportService) OrdersPerTable(ctx context.Context) ([]OrdersPerTableDTO
         SELECT t.name::text AS table_name, COUNT(*) AS count
         FROM ` + schemaName + `.order_tables ot
 		JOIN ` + schemaName + `.tables t ON t.id = ot.table_id
+		JOIN ` + schemaName + `.orders o ON o.id = ot.order_id
+        WHERE o.created_at BETWEEN ? AND ?
         GROUP BY t.name`
-	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil

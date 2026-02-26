@@ -249,7 +249,10 @@ func (h *handlerReportImpl) handleNewVsRecurringClients(w http.ResponseWriter, r
 }
 
 func (h *handlerReportImpl) handleOrdersByStatus(w http.ResponseWriter, r *http.Request) {
-	req := reportdto.OrdersByStatusRequest{}
+	var req reportdto.OrdersByStatusRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
 	resp, err := h.s.OrdersByStatus(r.Context(), &req)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
@@ -259,7 +262,10 @@ func (h *handlerReportImpl) handleOrdersByStatus(w http.ResponseWriter, r *http.
 }
 
 func (h *handlerReportImpl) handleAvgProcessStepDurationByRule(w http.ResponseWriter, r *http.Request) {
-	req := reportdto.AvgProcessStepDurationRequest{}
+	var req reportdto.AvgProcessStepDurationRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
 	resp, err := h.s.AvgProcessStepDurationByRule(r.Context(), &req)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
@@ -269,7 +275,10 @@ func (h *handlerReportImpl) handleAvgProcessStepDurationByRule(w http.ResponseWr
 }
 
 func (h *handlerReportImpl) handleCancellationRate(w http.ResponseWriter, r *http.Request) {
-	req := reportdto.CancellationRateRequest{}
+	var req reportdto.CancellationRateRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
 	resp, err := h.s.CancellationRate(r.Context(), &req)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
@@ -289,7 +298,10 @@ func (h *handlerReportImpl) handleCurrentQueueLength(w http.ResponseWriter, r *h
 }
 
 func (h *handlerReportImpl) handleAvgDeliveryTimeByDriver(w http.ResponseWriter, r *http.Request) {
-	req := reportdto.AvgDeliveryTimeByDriverRequest{}
+	var req reportdto.AvgDeliveryTimeByDriverRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
 	resp, err := h.s.AvgDeliveryTimeByDriver(r.Context(), &req)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
@@ -299,7 +311,10 @@ func (h *handlerReportImpl) handleAvgDeliveryTimeByDriver(w http.ResponseWriter,
 }
 
 func (h *handlerReportImpl) handleDeliveriesPerDriver(w http.ResponseWriter, r *http.Request) {
-	req := reportdto.DeliveriesPerDriverRequest{}
+	var req reportdto.DeliveriesPerDriverRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
 	resp, err := h.s.DeliveriesPerDriver(r.Context(), &req)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
@@ -309,7 +324,10 @@ func (h *handlerReportImpl) handleDeliveriesPerDriver(w http.ResponseWriter, r *
 }
 
 func (h *handlerReportImpl) handleOrdersPerTable(w http.ResponseWriter, r *http.Request) {
-	req := reportdto.OrdersPerTableRequest{}
+	var req reportdto.OrdersPerTableRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
 	resp, err := h.s.OrdersPerTable(r.Context(), &req)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
@@ -320,7 +338,10 @@ func (h *handlerReportImpl) handleOrdersPerTable(w http.ResponseWriter, r *http.
 
 // handleAvgQueueDuration handles average queue duration report.
 func (h *handlerReportImpl) handleAvgQueueDuration(w http.ResponseWriter, r *http.Request) {
-	req := reportdto.AvgQueueDurationRequest{}
+	var req reportdto.AvgQueueDurationRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
 	resp, err := h.s.AvgQueueDuration(r.Context(), &req)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
@@ -331,7 +352,10 @@ func (h *handlerReportImpl) handleAvgQueueDuration(w http.ResponseWriter, r *htt
 
 // handleAvgProcessDurationByProduct handles average process duration by product report.
 func (h *handlerReportImpl) handleAvgProcessDurationByProduct(w http.ResponseWriter, r *http.Request) {
-	req := reportdto.AvgProcessDurationByProductRequest{}
+	var req reportdto.AvgProcessDurationByProductRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
 	resp, err := h.s.AvgProcessDurationByProduct(r.Context(), &req)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
@@ -342,7 +366,10 @@ func (h *handlerReportImpl) handleAvgProcessDurationByProduct(w http.ResponseWri
 
 // handleTotalQueueTimeByGroupItem handles total queue time per group item report.
 func (h *handlerReportImpl) handleTotalQueueTimeByGroupItem(w http.ResponseWriter, r *http.Request) {
-	req := reportdto.TotalQueueTimeByGroupItemRequest{}
+	var req reportdto.TotalQueueTimeByGroupItemRequest
+	if !parseBody(r, &req, w) {
+		return
+	}
 	resp, err := h.s.TotalQueueTimeByGroupItem(r.Context(), &req)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)

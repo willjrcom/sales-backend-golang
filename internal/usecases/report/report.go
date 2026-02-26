@@ -176,7 +176,7 @@ func (s *Service) NewVsRecurringClients(ctx context.Context, req *reportdto.NewV
 
 // OrdersByStatus returns count of orders per status.
 func (s *Service) OrdersByStatus(ctx context.Context, req *reportdto.OrdersByStatusRequest) ([]reportdto.OrdersByStatusResponse, error) {
-	data, err := s.reportSvc.OrdersByStatus(ctx)
+	data, err := s.reportSvc.OrdersByStatus(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +189,7 @@ func (s *Service) OrdersByStatus(ctx context.Context, req *reportdto.OrdersBySta
 
 // AvgProcessStepDurationByRule returns average duration per process rule.
 func (s *Service) AvgProcessStepDurationByRule(ctx context.Context, req *reportdto.AvgProcessStepDurationRequest) ([]reportdto.AvgProcessStepDurationResponse, error) {
-	data, err := s.reportSvc.AvgProcessStepDurationByRule(ctx)
+	data, err := s.reportSvc.AvgProcessStepDurationByRule(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +202,7 @@ func (s *Service) AvgProcessStepDurationByRule(ctx context.Context, req *reportd
 
 // CancellationRate returns the cancellation rate of orders.
 func (s *Service) CancellationRate(ctx context.Context, req *reportdto.CancellationRateRequest) (*reportdto.CancellationRateResponse, error) {
-	d, err := s.reportSvc.CancellationRate(ctx)
+	d, err := s.reportSvc.CancellationRate(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +220,7 @@ func (s *Service) CurrentQueueLength(ctx context.Context, req *reportdto.Current
 
 // AvgDeliveryTimeByDriver returns average delivery time per driver.
 func (s *Service) AvgDeliveryTimeByDriver(ctx context.Context, req *reportdto.AvgDeliveryTimeByDriverRequest) ([]reportdto.AvgDeliveryTimeByDriverResponse, error) {
-	data, err := s.reportSvc.AvgDeliveryTimeByDriver(ctx)
+	data, err := s.reportSvc.AvgDeliveryTimeByDriver(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -233,7 +233,7 @@ func (s *Service) AvgDeliveryTimeByDriver(ctx context.Context, req *reportdto.Av
 
 // DeliveriesPerDriver returns number of deliveries per driver.
 func (s *Service) DeliveriesPerDriver(ctx context.Context, req *reportdto.DeliveriesPerDriverRequest) ([]reportdto.DeliveriesPerDriverResponse, error) {
-	data, err := s.reportSvc.DeliveriesPerDriver(ctx)
+	data, err := s.reportSvc.DeliveriesPerDriver(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -246,7 +246,7 @@ func (s *Service) DeliveriesPerDriver(ctx context.Context, req *reportdto.Delive
 
 // OrdersPerTable returns number of orders per table.
 func (s *Service) OrdersPerTable(ctx context.Context, req *reportdto.OrdersPerTableRequest) ([]reportdto.OrdersPerTableResponse, error) {
-	data, err := s.reportSvc.OrdersPerTable(ctx)
+	data, err := s.reportSvc.OrdersPerTable(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -394,7 +394,7 @@ func (s *Service) DailySales(ctx context.Context, req *reportdto.DailySalesReque
 
 // AvgQueueDuration returns average duration of all queues.
 func (s *Service) AvgQueueDuration(ctx context.Context, req *reportdto.AvgQueueDurationRequest) (*reportdto.AvgQueueDurationResponse, error) {
-	d, err := s.reportSvc.AvgQueueDuration(ctx)
+	d, err := s.reportSvc.AvgQueueDuration(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -403,7 +403,7 @@ func (s *Service) AvgQueueDuration(ctx context.Context, req *reportdto.AvgQueueD
 
 // AvgProcessDurationByProduct returns average process duration by product.
 func (s *Service) AvgProcessDurationByProduct(ctx context.Context, req *reportdto.AvgProcessDurationByProductRequest) ([]reportdto.AvgProcessDurationByProductResponse, error) {
-	data, err := s.reportSvc.AvgProcessDurationByProduct(ctx)
+	data, err := s.reportSvc.AvgProcessDurationByProduct(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}
@@ -420,7 +420,7 @@ func (s *Service) AvgProcessDurationByProduct(ctx context.Context, req *reportdt
 
 // TotalQueueTimeByGroupItem returns total sum of queue durations per group item.
 func (s *Service) TotalQueueTimeByGroupItem(ctx context.Context, req *reportdto.TotalQueueTimeByGroupItemRequest) ([]reportdto.TotalQueueTimeByGroupItemResponse, error) {
-	data, err := s.reportSvc.TotalQueueTimeByGroupItem(ctx)
+	data, err := s.reportSvc.TotalQueueTimeByGroupItem(ctx, req.Start, req.End)
 	if err != nil {
 		return nil, err
 	}

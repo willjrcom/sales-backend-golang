@@ -25,7 +25,10 @@ type TopTablesResponse struct {
 }
 
 // AvgQueueDurationRequest filters for average queue duration.
-type AvgQueueDurationRequest struct{}
+type AvgQueueDurationRequest struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
+}
 
 // AvgQueueDurationResponse holds average duration of all queues in seconds.
 type AvgQueueDurationResponse struct {
@@ -33,7 +36,10 @@ type AvgQueueDurationResponse struct {
 }
 
 // AvgProcessDurationByProductRequest filters for average process duration by product.
-type AvgProcessDurationByProductRequest struct{}
+type AvgProcessDurationByProductRequest struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
+}
 
 // AvgProcessDurationByProductResponse holds average process duration per product.
 type AvgProcessDurationByProductResponse struct {
@@ -43,7 +49,10 @@ type AvgProcessDurationByProductResponse struct {
 }
 
 // TotalQueueTimeByGroupItemRequest filters for total queue time by group item.
-type TotalQueueTimeByGroupItemRequest struct{}
+type TotalQueueTimeByGroupItemRequest struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
+}
 
 // TotalQueueTimeByGroupItemResponse holds total queue time per group item in seconds.
 type TotalQueueTimeByGroupItemResponse struct {
@@ -199,6 +208,8 @@ type NewVsRecurringClientsResponse struct {
 
 // OrdersByStatusRequest filters for orders by status.
 type OrdersByStatusRequest struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
 }
 
 // OrdersByStatusResponse holds status and count.
@@ -209,9 +220,10 @@ type OrdersByStatusResponse struct {
 
 // AvgProcessStepDurationRequest filters for average process step duration.
 type AvgProcessStepDurationRequest struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
 }
 
-// AvgProcessStepDurationResponse holds process rule ID and average seconds.
 // AvgProcessStepDurationResponse holds process rule name and average seconds.
 type AvgProcessStepDurationResponse struct {
 	ProcessRuleName string  `json:"process_rule_name"`
@@ -220,6 +232,8 @@ type AvgProcessStepDurationResponse struct {
 
 // CancellationRateRequest filters for cancellation rate.
 type CancellationRateRequest struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
 }
 
 // CancellationRateResponse holds cancellation rate.
@@ -227,7 +241,7 @@ type CancellationRateResponse struct {
 	Rate float64 `json:"rate"`
 }
 
-// CurrentQueueLengthRequest filters for current queue length.
+// CurrentQueueLengthRequest filters for current queue length (always real-time, no date filter).
 type CurrentQueueLengthRequest struct {
 }
 
@@ -238,6 +252,8 @@ type CurrentQueueLengthResponse struct {
 
 // AvgDeliveryTimeByDriverRequest filters for avg delivery time.
 type AvgDeliveryTimeByDriverRequest struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
 }
 
 // AvgDeliveryTimeByDriverResponse holds driver ID and average seconds.
@@ -248,6 +264,8 @@ type AvgDeliveryTimeByDriverResponse struct {
 
 // DeliveriesPerDriverRequest filters for deliveries per driver.
 type DeliveriesPerDriverRequest struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
 }
 
 // DeliveriesPerDriverResponse holds driver ID and count.
@@ -258,6 +276,8 @@ type DeliveriesPerDriverResponse struct {
 
 // OrdersPerTableRequest filters for orders per table.
 type OrdersPerTableRequest struct {
+	Start time.Time `json:"start"`
+	End   time.Time `json:"end"`
 }
 
 // OrdersPerTableResponse holds table ID and count.
