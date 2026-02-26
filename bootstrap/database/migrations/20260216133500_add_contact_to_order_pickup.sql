@@ -1,1 +1,1 @@
-ALTER TABLE order_pickups ADD COLUMN contact VARCHAR(255);
+ALTER TABLE order_pickups ADD COLUMN IF NOT EXISTS contact VARCHAR(255);
