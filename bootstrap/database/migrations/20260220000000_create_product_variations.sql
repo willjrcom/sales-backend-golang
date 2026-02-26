@@ -8,7 +8,7 @@ CREATE TABLE if not exists "product_variations" (
   "created_at" timestamptz DEFAULT now(),
   "updated_at" timestamptz DEFAULT now(),
   "deleted_at" timestamptz,
-  PRIMARY KEY ("id"),
+  PRIMARY KEY ("id")
 );
 
 -- Drop columns from products
