@@ -1,4 +1,4 @@
-CREATE TABLE "product_variations" (
+CREATE TABLE if not exists "product_variations" (
   "id" uuid NOT NULL DEFAULT gen_random_uuid(),
   "product_id" uuid NOT NULL,
   "size_id" uuid NOT NULL,
