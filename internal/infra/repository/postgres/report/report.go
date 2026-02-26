@@ -2,7 +2,6 @@ package report
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -941,18 +940,19 @@ func (s *ReportService) ProductProfitability(ctx context.Context, start, end tim
             p.id::text AS product_id,
             p.name AS product_name,
             COALESCE(SUM(i.quantity), 0) AS total_sold,
-            COALESCE(SUM(i.quantity * p.cost), 0) AS total_cost,
+            COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS total_cost,
             COALESCE(SUM(i.quantity * i.price), 0) AS total_revenue,
-            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * p.cost), 0) AS profit,
+            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS profit,
             CASE 
                 WHEN COALESCE(SUM(i.quantity * i.price), 0) > 0 
-                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * p.cost), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
+                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
                 ELSE 0 
             END AS profit_margin
         FROM ` + schemaName + `.order_items i
         JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
         JOIN ` + schemaName + `.orders o ON o.id = g.order_id
         JOIN ` + schemaName + `.products p ON p.id = i.product_id
+        LEFT JOIN ` + schemaName + `.product_variations pv ON pv.id = i.product_variation_id
         WHERE o.created_at BETWEEN ? AND ?
         GROUP BY p.id, p.name
         ORDER BY profit DESC`
@@ -984,18 +984,19 @@ func (s *ReportService) CategoryProfitability(ctx context.Context, start, end ti
         SELECT 
             pc.name AS category_name,
             COALESCE(SUM(i.quantity), 0) AS total_sold,
-            COALESCE(SUM(i.quantity * p.cost), 0) AS total_cost,
+            COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS total_cost,
             COALESCE(SUM(i.quantity * i.price), 0) AS total_revenue,
-            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * p.cost), 0) AS profit,
+            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS profit,
             CASE 
                 WHEN COALESCE(SUM(i.quantity * i.price), 0) > 0 
-                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * p.cost), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
+                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
                 ELSE 0 
             END AS profit_margin
         FROM ` + schemaName + `.order_items i
         JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
         JOIN ` + schemaName + `.orders o ON o.id = g.order_id
         JOIN ` + schemaName + `.products p ON p.id = i.product_id
+        LEFT JOIN ` + schemaName + `.product_variations pv ON pv.id = i.product_variation_id
         JOIN ` + schemaName + `.product_categories pc ON pc.id = p.category_id
         WHERE o.created_at BETWEEN ? AND ?
         GROUP BY pc.name
@@ -1022,62 +1023,34 @@ func (s *ReportService) LowProfitProducts(ctx context.Context, minMargin float64
 		return nil, err
 	}
 
-	// Debug: Primeiro vamos verificar se há produtos cadastrados
-	var debugCount int
-	debugQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true`
-	if err := s.db.NewRaw(debugQuery).Scan(ctx, &debugCount); err != nil {
-		return nil, err
-	}
-
-	// Debug: Verificar produtos com custo
-	var productsWithCost int
-	costQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true AND cost > 0`
-	if err := s.db.NewRaw(costQuery).Scan(ctx, &productsWithCost); err != nil {
-		return nil, err
-	}
-
-	// Debug: Verificar produtos sem custo
-	var productsWithoutCost int
-	noCostQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true AND (cost = 0 OR cost IS NULL)`
-	if err := s.db.NewRaw(noCostQuery).Scan(ctx, &productsWithoutCost); err != nil {
-		return nil, err
-	}
-
-	fmt.Printf("Debug - Total produtos disponíveis: %d\n", debugCount)
-	fmt.Printf("Debug - Produtos com custo > 0: %d\n", productsWithCost)
-	fmt.Printf("Debug - Produtos sem custo: %d\n", productsWithoutCost)
-	fmt.Printf("Debug - Margem mínima configurada: %.2f%%\n", minMargin)
-
 	var resp []LowProfitProductsDTO
+	// Use AVG(pv.price) and AVG(pv.cost) aggregated per product from variations
 	query := `
         SELECT 
             p.id::text AS product_id,
             p.name AS product_name,
-            p.price,
-            p.cost,
+            AVG(pv.price) AS price,
+            AVG(pv.cost) AS cost,
             CASE 
-                WHEN p.price > 0 AND p.cost > 0
-                THEN ((p.price - p.cost) / p.price) * 100
-                WHEN p.price > 0 AND (p.cost = 0 OR p.cost IS NULL)
+                WHEN AVG(pv.price) > 0 AND AVG(pv.cost) > 0
+                THEN ((AVG(pv.price) - AVG(pv.cost)) / AVG(pv.price)) * 100
+                WHEN AVG(pv.price) > 0 AND (AVG(pv.cost) = 0 OR AVG(pv.cost) IS NULL)
                 THEN 100
                 ELSE 0 
             END AS profit_margin
         FROM ` + schemaName + `.products p
-        WHERE p.price > 0 
-        AND p.is_available = true
-        AND (
-            -- Produtos com margem baixa
-            (p.cost > 0 AND ((p.price - p.cost) / p.price) * 100 < ?)
-            OR 
-            -- Produtos sem custo definido (custo = 0 ou NULL)
-            (p.cost = 0 OR p.cost IS NULL)
+        JOIN ` + schemaName + `.product_variations pv ON pv.product_id = p.id
+        WHERE pv.price > 0
+        AND pv.is_available = true
+        GROUP BY p.id, p.name
+        HAVING (
+            (AVG(pv.cost) > 0 AND ((AVG(pv.price) - AVG(pv.cost)) / AVG(pv.price)) * 100 < ?)
+            OR (AVG(pv.cost) = 0 OR AVG(pv.cost) IS NULL)
         )
         ORDER BY profit_margin ASC`
 	if err := s.db.NewRaw(query, minMargin).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
-
-	fmt.Printf("Debug - Produtos retornados: %d\n", len(resp))
 	return resp, nil
 }
 
@@ -1088,72 +1061,25 @@ func (s *ReportService) DebugProducts(ctx context.Context) (map[string]interface
 		return nil, err
 	}
 
-	// Total produtos
 	var totalProducts int
-	totalQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products`
-	if err := s.db.NewRaw(totalQuery).Scan(ctx, &totalProducts); err != nil {
+	if err := s.db.NewRaw(`SELECT COUNT(*) FROM `+schemaName+`.products`).Scan(ctx, &totalProducts); err != nil {
 		return nil, err
 	}
 
-	// Produtos disponíveis
 	var availableProducts int
-	availableQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true`
-	if err := s.db.NewRaw(availableQuery).Scan(ctx, &availableProducts); err != nil {
+	if err := s.db.NewRaw(`SELECT COUNT(DISTINCT p.id) FROM `+schemaName+`.products p JOIN `+schemaName+`.product_variations pv ON pv.product_id = p.id WHERE pv.is_available = true`).Scan(ctx, &availableProducts); err != nil {
 		return nil, err
 	}
 
-	// Produtos com custo
 	var productsWithCost int
-	costQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true AND cost > 0`
-	if err := s.db.NewRaw(costQuery).Scan(ctx, &productsWithCost); err != nil {
-		return nil, err
-	}
-
-	// Produtos sem custo
-	var productsWithoutCost int
-	noCostQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true AND (cost = 0 OR cost IS NULL)`
-	if err := s.db.NewRaw(noCostQuery).Scan(ctx, &productsWithoutCost); err != nil {
-		return nil, err
-	}
-
-	// Produtos com preço
-	var productsWithPrice int
-	priceQuery := `SELECT COUNT(*) FROM ` + schemaName + `.products WHERE is_available = true AND price > 0`
-	if err := s.db.NewRaw(priceQuery).Scan(ctx, &productsWithPrice); err != nil {
-		return nil, err
-	}
-
-	// Lista de produtos para debug
-	var products []map[string]interface{}
-	productsQuery := `
-		SELECT 
-			id::text as product_id,
-			name as product_name,
-			price,
-			cost,
-			is_available,
-			CASE 
-				WHEN price > 0 AND cost > 0
-				THEN ((price - cost) / price) * 100
-				WHEN price > 0 AND (cost = 0 OR cost IS NULL)
-				THEN 100
-				ELSE 0 
-			END AS profit_margin
-		FROM ` + schemaName + `.products 
-		WHERE is_available = true 
-		ORDER BY name`
-
-	if err := s.db.NewRaw(productsQuery).Scan(ctx, &products); err != nil {
+	if err := s.db.NewRaw(`SELECT COUNT(DISTINCT p.id) FROM `+schemaName+`.products p JOIN `+schemaName+`.product_variations pv ON pv.product_id = p.id WHERE pv.is_available = true AND pv.cost > 0`).Scan(ctx, &productsWithCost); err != nil {
 		return nil, err
 	}
 
 	return map[string]interface{}{
-		"total_products":        totalProducts,
-		"available_products":    availableProducts,
-		"products_with_cost":    productsWithCost,
-		"products_without_cost": productsWithoutCost,
-		"products_with_price":   productsWithPrice,
-		"products":              products,
+		"total_products":     totalProducts,
+		"available_products": availableProducts,
+		"products_with_cost": productsWithCost,
 	}, nil
 }
 
@@ -1176,17 +1102,18 @@ func (s *ReportService) OverallProfitability(ctx context.Context, start, end tim
 	query := `
         SELECT 
             COALESCE(SUM(i.quantity * i.price), 0) AS total_revenue,
-            COALESCE(SUM(i.quantity * p.cost), 0) AS total_cost,
-            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * p.cost), 0) AS total_profit,
+            COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS total_cost,
+            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS total_profit,
             CASE 
                 WHEN COALESCE(SUM(i.quantity * i.price), 0) > 0 
-                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * p.cost), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
+                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
                 ELSE 0 
             END AS profit_margin
         FROM ` + schemaName + `.order_items i
         JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
         JOIN ` + schemaName + `.orders o ON o.id = g.order_id
         JOIN ` + schemaName + `.products p ON p.id = i.product_id
+        LEFT JOIN ` + schemaName + `.product_variations pv ON pv.id = i.product_variation_id
         WHERE o.created_at BETWEEN ? AND ?`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
