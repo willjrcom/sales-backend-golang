@@ -1,1 +1,1 @@
-ALTER TABLE product_categories ADD COLUMN allow_fractional BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE product_categories ADD COLUMN IF NOT EXISTS allow_fractional BOOLEAN NOT NULL DEFAULT FALSE;
