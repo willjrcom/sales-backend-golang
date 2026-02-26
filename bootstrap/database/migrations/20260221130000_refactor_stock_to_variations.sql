@@ -1,16 +1,32 @@
 -- Add product_variation_id to order_items
 ALTER TABLE "order_items" ADD COLUMN IF NOT EXISTS "product_variation_id" uuid;
-ALTER TABLE "order_items" ADD CONSTRAINT IF NOT EXISTS fk_order_items_product_variation FOREIGN KEY ("product_variation_id") REFERENCES "product_variations" ("id") ON DELETE SET NULL;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_order_items_product_variation') THEN
+        ALTER TABLE "order_items" ADD CONSTRAINT fk_order_items_product_variation FOREIGN KEY ("product_variation_id") REFERENCES "product_variations" ("id") ON DELETE SET NULL;
+    END IF;
+END $$;
 
 -- Add product_variation_id to stocks
 ALTER TABLE "stocks" ADD COLUMN IF NOT EXISTS "product_variation_id" uuid;
-ALTER TABLE "stocks" ADD CONSTRAINT IF NOT EXISTS fk_stocks_product_variation FOREIGN KEY ("product_variation_id") REFERENCES "product_variations" ("id") ON DELETE SET NULL;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_stocks_product_variation') THEN
+        ALTER TABLE "stocks" ADD CONSTRAINT fk_stocks_product_variation FOREIGN KEY ("product_variation_id") REFERENCES "product_variations" ("id") ON DELETE SET NULL;
+    END IF;
+END $$;
 
 -- Add product_id and product_variation_id to stock_alerts
 ALTER TABLE "stock_alerts" ADD COLUMN IF NOT EXISTS "product_id" uuid;
 ALTER TABLE "stock_alerts" ADD COLUMN IF NOT EXISTS "product_variation_id" uuid;
-ALTER TABLE "stock_alerts" ADD CONSTRAINT IF NOT EXISTS fk_stock_alerts_product FOREIGN KEY ("product_id") REFERENCES "products" ("id") ON DELETE CASCADE;
-ALTER TABLE "stock_alerts" ADD CONSTRAINT IF NOT EXISTS fk_stock_alerts_product_variation FOREIGN KEY ("product_variation_id") REFERENCES "product_variations" ("id") ON DELETE CASCADE;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_stock_alerts_product') THEN
+        ALTER TABLE "stock_alerts" ADD CONSTRAINT fk_stock_alerts_product FOREIGN KEY ("product_id") REFERENCES "products" ("id") ON DELETE CASCADE;
+    END IF;
+END $$;
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'fk_stock_alerts_product_variation') THEN
+        ALTER TABLE "stock_alerts" ADD CONSTRAINT fk_stock_alerts_product_variation FOREIGN KEY ("product_variation_id") REFERENCES "product_variations" ("id") ON DELETE CASCADE;
+    END IF;
+END $$;
 
 -- Data migration: Populate variations for existing items and stocks
 UPDATE "order_items" oi
