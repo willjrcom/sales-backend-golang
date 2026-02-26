@@ -195,6 +195,7 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 		Relation("GroupItem.Category").
 		Relation("Products").
 		Relation("Queue").
+		OrderExpr("process.status = ? DESC", orderprocessentity.ProcessStatusStarted).
 		Order("o.created_at ASC").
 		Order("process.created_at ASC").
 		Scan(ctx); err != nil {
