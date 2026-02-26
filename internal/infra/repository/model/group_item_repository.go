@@ -9,4 +9,5 @@ type GroupItemRepository interface {
 	DeleteGroupItem(ctx context.Context, id string, complementItemID *string) error
 	GetGroupItemsByOrderIDAndStatus(ctx context.Context, id string, status string) ([]GroupItem, error)
 	GetGroupItemsByStatus(ctx context.Context, status string) ([]GroupItem, error)
+	UpsertGroupItemSnapshot(ctx context.Context, snapshot *OrderGroupItemSnapshot) error
 }

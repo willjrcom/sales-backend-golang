@@ -47,6 +47,7 @@ type OrderProcessCommonAttributes struct {
 	OrderID       uuid.UUID
 	GroupItemID   uuid.UUID
 	GroupItem     *orderentity.GroupItem
+	Snapshot      *orderentity.GroupItemSnapshot
 	ProcessRuleID uuid.UUID
 	Status        StatusProcess
 	Products      []productentity.Product

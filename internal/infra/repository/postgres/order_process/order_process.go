@@ -186,16 +186,10 @@ func (r *ProcessRepositoryBun) GetProcessesByProcessRuleID(ctx context.Context, 
 		Where("process.process_rule_id = ?", id).
 		Where("process.status IN (?)", bun.In(validStatus)).
 		Where("emp.user_id = ? or process.employee_id is null", userID).
-		Relation("GroupItem").
-		Relation("GroupItem.Items", func(sq *bun.SelectQuery) *bun.SelectQuery {
-			return sq.Where("is_additional = ?", false)
-		}).
-		Relation("GroupItem.Items.AdditionalItems").
-		Relation("GroupItem.ComplementItem").
-		Relation("GroupItem.Category").
+		Relation("Snapshot").
 		Relation("Products").
 		Relation("Queue").
-		OrderExpr("process.status = ? DESC", orderprocessentity.ProcessStatusStarted).
+		OrderExpr("process.status = ? DESC", "Started").
 		Order("o.created_at ASC").
 		Order("process.created_at ASC").
 		Scan(ctx); err != nil {

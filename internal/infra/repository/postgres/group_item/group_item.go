@@ -177,3 +177,25 @@ func (r *GroupItemRepositoryBun) GetGroupItemsByOrderIDAndStatus(ctx context.Con
 	}
 	return items, nil
 }
+
+func (r *GroupItemRepositoryBun) UpsertGroupItemSnapshot(ctx context.Context, snapshot *model.OrderGroupItemSnapshot) error {
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	if _, err := tx.NewInsert().Model(snapshot).
+		On("CONFLICT (group_item_id) DO UPDATE").
+		Set("data = EXCLUDED.data").
+		Exec(ctx); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return nil
+}

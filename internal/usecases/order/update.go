@@ -2,12 +2,14 @@ package orderusecases
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
 
 	"github.com/google/uuid"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	orderprocessentity "github.com/willjrcom/sales-backend-go/internal/domain/order_process"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -16,6 +18,7 @@ import (
 	orderprocessdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_process"
 	orderqueuedto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_queue"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	entitymodel "github.com/willjrcom/sales-backend-go/internal/infra/repository/model/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/rabbitmq"
 )
 
@@ -52,6 +55,25 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 			order.GroupItems[i].PendingGroupItem()
 			order.GroupItems[i].StartGroupItem()
 			order.GroupItems[i].ReadyGroupItem()
+		}
+
+		// Generate snapshot for all group items (including those that move directly to Started/Ready)
+		groupItemDTO := &groupitemdto.GroupItemDTO{}
+		groupItemDTO.FromDomain(&order.GroupItems[i])
+
+		if data, err := json.Marshal(groupItemDTO); err == nil {
+			snapshot := &model.OrderGroupItemSnapshot{
+				Entity:      entitymodel.FromDomain(entity.NewEntity()),
+				GroupItemID: groupItem.ID,
+				Data:        data,
+			}
+
+			if err := s.sgi.r.UpsertGroupItemSnapshot(ctx, snapshot); err != nil {
+				fmt.Printf("error upserting group item snapshot: %v\n", err)
+			}
+		}
+
+		if !groupItem.UseProcessRule {
 			continue
 		}
 

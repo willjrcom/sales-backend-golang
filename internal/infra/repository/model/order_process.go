@@ -18,16 +18,17 @@ type OrderProcess struct {
 }
 
 type OrderProcessCommonAttributes struct {
-	OrderNumber   int         `bun:"order_number,notnull"`
-	OrderType     string      `bun:"order_type,notnull"`
-	EmployeeID    *uuid.UUID  `bun:"employee_id,type:uuid"`
-	OrderID       uuid.UUID   `bun:"order_id,type:uuid,notnull"`
-	GroupItemID   uuid.UUID   `bun:"group_item_id,type:uuid,notnull"`
-	GroupItem     *GroupItem  `bun:"rel:belongs-to,join:group_item_id=id"`
-	ProcessRuleID uuid.UUID   `bun:"process_rule_id,type:uuid,notnull"`
-	Status        string      `bun:"status,notnull"`
-	Products      []Product   `bun:"m2m:process_to_product_to_group_item,join:Process=Product"`
-	Queue         *OrderQueue `bun:"rel:has-one,join:group_item_id=group_item_id,join:process_rule_id=process_rule_id"`
+	OrderNumber   int                     `bun:"order_number,notnull"`
+	OrderType     string                  `bun:"order_type,notnull"`
+	EmployeeID    *uuid.UUID              `bun:"employee_id,type:uuid"`
+	OrderID       uuid.UUID               `bun:"order_id,type:uuid,notnull"`
+	GroupItemID   uuid.UUID               `bun:"group_item_id,type:uuid,notnull"`
+	GroupItem     *GroupItem              `bun:"rel:belongs-to,join:group_item_id=id"`
+	Snapshot      *OrderGroupItemSnapshot `bun:"rel:belongs-to,join:group_item_id=group_item_id"`
+	ProcessRuleID uuid.UUID               `bun:"process_rule_id,type:uuid,notnull"`
+	Status        string                  `bun:"status,notnull"`
+	Products      []Product               `bun:"m2m:process_to_product_to_group_item,join:Process=Product"`
+	Queue         *OrderQueue             `bun:"rel:has-one,join:group_item_id=group_item_id,join:process_rule_id=process_rule_id"`
 }
 
 type OrderProcessTimeLogs struct {
@@ -59,6 +60,7 @@ func (op *OrderProcess) FromDomain(orderProcess *orderprocessentity.OrderProcess
 			OrderID:       orderProcess.OrderID,
 			GroupItemID:   orderProcess.GroupItemID,
 			GroupItem:     &GroupItem{},
+			Snapshot:      &OrderGroupItemSnapshot{},
 			ProcessRuleID: orderProcess.ProcessRuleID,
 			Status:        string(orderProcess.Status),
 			Products:      []Product{},
@@ -78,6 +80,7 @@ func (op *OrderProcess) FromDomain(orderProcess *orderprocessentity.OrderProcess
 	}
 
 	op.GroupItem.FromDomain(orderProcess.GroupItem)
+	op.Snapshot.FromDomain(orderProcess.Snapshot)
 	op.Queue.FromDomain(orderProcess.Queue)
 
 	for _, product := range orderProcess.Products {
@@ -100,6 +103,7 @@ func (op *OrderProcess) ToDomain() *orderprocessentity.OrderProcess {
 			OrderID:       op.OrderID,
 			GroupItemID:   op.GroupItemID,
 			GroupItem:     op.GroupItem.ToDomain(),
+			Snapshot:      op.Snapshot.ToDomain(),
 			ProcessRuleID: op.ProcessRuleID,
 			Status:        orderprocessentity.StatusProcess(op.Status),
 			Products:      []productentity.Product{},

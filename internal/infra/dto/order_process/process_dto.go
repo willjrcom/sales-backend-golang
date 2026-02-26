@@ -20,6 +20,7 @@ type OrderProcessDTO struct {
 	OrderID           uuid.UUID                           `json:"order_id,omitempty"`
 	GroupItemID       uuid.UUID                           `json:"group_item_id,omitempty"`
 	GroupItem         *groupitemdto.GroupItemDTO          `json:"group_item,omitempty"`
+	Snapshot          *groupitemdto.GroupItemSnapshotDTO  `json:"snapshot,omitempty"`
 	ProcessRuleID     uuid.UUID                           `json:"process_rule_id,omitempty"`
 	Status            orderprocessentity.StatusProcess    `json:"status,omitempty"`
 	Products          []productcategorydto.ProductDTO     `json:"products,omitempty"`
@@ -51,6 +52,7 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 		OrderID:           orderProcess.OrderID,
 		GroupItemID:       orderProcess.GroupItemID,
 		GroupItem:         &groupitemdto.GroupItemDTO{},
+		Snapshot:          &groupitemdto.GroupItemSnapshotDTO{},
 		ProcessRuleID:     orderProcess.ProcessRuleID,
 		Status:            orderProcess.Status,
 		StartedAt:         orderProcess.StartedAt,
@@ -67,6 +69,7 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 	}
 
 	s.GroupItem.FromDomain(orderProcess.GroupItem)
+	s.Snapshot.FromDomain(orderProcess.Snapshot)
 	s.Queue.FromDomain(orderProcess.Queue)
 
 	for _, product := range orderProcess.Products {
@@ -77,6 +80,9 @@ func (s *OrderProcessDTO) FromDomain(orderProcess *orderprocessentity.OrderProce
 
 	if orderProcess.GroupItem == nil {
 		s.GroupItem = nil
+	}
+	if orderProcess.Snapshot == nil {
+		s.Snapshot = nil
 	}
 	if orderProcess.Queue == nil {
 		s.Queue = nil
