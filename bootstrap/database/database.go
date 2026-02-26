@@ -222,6 +222,22 @@ func createPublicTables(db *bun.DB) error {
 		return err
 	}
 
+	if err := createTableIfNotExists(ctx, tx, (*model.CategoryToSponsor)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, tx, (*model.CategoryToAdvertising)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, tx, (*model.Sponsor)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, tx, (*model.Advertising)(nil)); err != nil {
+		return err
+	}
+
 	if err := createTableIfNotExists(ctx, tx, (*model.CompanyCategory)(nil)); err != nil {
 		return err
 	}
@@ -256,26 +272,6 @@ func createPublicTables(db *bun.DB) error {
 	if err := createTableIfNotExists(ctx, tx, (*model.Contact)(nil)); err != nil {
 		return err
 	}
-
-	if err := createTableIfNotExists(ctx, tx, (*model.Sponsor)(nil)); err != nil {
-		return err
-	}
-
-	if err := createTableIfNotExists(ctx, tx, (*model.Advertising)(nil)); err != nil {
-		return err
-	}
-
-	if err := createTableIfNotExists(ctx, tx, (*model.CategoryToSponsor)(nil)); err != nil {
-		return err
-	}
-
-	if err := createTableIfNotExists(ctx, tx, (*model.CategoryToAdvertising)(nil)); err != nil {
-		return err
-	}
-
-	// if err := setupPublicMigrations(ctx, tx); err != nil {
-	// 	return err
-	// }
 
 	if err := tx.Commit(); err != nil {
 		return err
@@ -344,6 +340,7 @@ func registerModels(db *bun.DB) error {
 	db.RegisterModel((*model.ProductCategoryWithOrderProcess)(nil))
 	db.RegisterModel((*model.ProcessRule)(nil))
 	db.RegisterModel((*model.ProcessRuleWithOrderProcess)(nil))
+	db.RegisterModel((*model.ProductVariation)(nil))
 	db.RegisterModel((*model.Product)(nil))
 
 	db.RegisterModel((*model.Stock)(nil))
@@ -378,20 +375,18 @@ func registerModels(db *bun.DB) error {
 	db.RegisterModel((*model.PlaceToTables)(nil))
 	db.RegisterModel((*model.Place)(nil))
 
-	db.RegisterModel((*model.CategoryToSponsor)(nil))
-	db.RegisterModel((*model.CategoryToAdvertising)(nil))
-
 	db.RegisterModel((*model.Shift)(nil))
 	db.RegisterModel((*model.CompanyToUsers)(nil))
 	db.RegisterModel((*model.CompanyToCategory)(nil))
+	db.RegisterModel((*model.CategoryToSponsor)(nil))
+	db.RegisterModel((*model.CategoryToAdvertising)(nil))
+	db.RegisterModel((*model.Sponsor)(nil))
+	db.RegisterModel((*model.Advertising)(nil))
 	db.RegisterModel((*model.CompanyCategory)(nil))
 	db.RegisterModel((*model.Company)(nil))
 	db.RegisterModel((*model.CompanyPayment)(nil))
 	db.RegisterModel((*model.User)(nil))
 	var _ bun.BeforeSelectHook = (*model.User)(nil)
-
-	db.RegisterModel((*model.Sponsor)(nil))
-	db.RegisterModel((*model.Advertising)(nil))
 
 	// Fiscal invoice models
 	db.RegisterModel((*model.CompanyUsageCost)(nil))
@@ -425,6 +420,10 @@ func createTables(ctx context.Context, tx *bun.Tx) error {
 	}
 
 	if err := createTableIfNotExists(ctx, tx, (*model.ProcessRule)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, tx, (*model.ProductVariation)(nil)); err != nil {
 		return err
 	}
 
