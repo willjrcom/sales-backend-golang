@@ -95,7 +95,7 @@ func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*mo
 	return nil, errors.New("order not found")
 }
 
-func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder, withCategory bool, queryCondition string) ([]model.Order, error) {
+func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder) ([]model.Order, error) {
 	orders := make([]model.Order, 0)
 
 	for _, p := range r.orders {
@@ -106,7 +106,55 @@ func (r *OrderRepositoryLocal) GetAllOrders(ctx context.Context, shiftID string,
 }
 
 // GetAllOrdersWithDelivery returns orders with delivery information, paginated by page and perPage
-func (r *OrderRepositoryLocal) GetAllOrdersWithDelivery(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
+func (r *OrderRepositoryLocal) GetAllOrdersWithReadyDelivery(ctx context.Context, page, perPage int) ([]model.Order, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	all := []model.Order{}
+	for _, o := range r.orders {
+		if o.Delivery != nil {
+			all = append(all, *o)
+		}
+	}
+	if page < 1 || perPage < 1 {
+		return []model.Order{}, nil
+	}
+	start := (page - 1) * perPage
+	if start >= len(all) {
+		return []model.Order{}, nil
+	}
+	end := start + perPage
+	if end > len(all) {
+		end = len(all)
+	}
+	return all[start:end], nil
+}
+
+// GetAllOrdersWithDelivery returns orders with delivery information, paginated by page and perPage
+func (r *OrderRepositoryLocal) GetAllOrdersWithShippedDelivery(ctx context.Context, page, perPage int) ([]model.Order, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	all := []model.Order{}
+	for _, o := range r.orders {
+		if o.Delivery != nil {
+			all = append(all, *o)
+		}
+	}
+	if page < 1 || perPage < 1 {
+		return []model.Order{}, nil
+	}
+	start := (page - 1) * perPage
+	if start >= len(all) {
+		return []model.Order{}, nil
+	}
+	end := start + perPage
+	if end > len(all) {
+		end = len(all)
+	}
+	return all[start:end], nil
+}
+
+// GetAllOrdersWithDelivery returns orders with delivery information, paginated by page and perPage
+func (r *OrderRepositoryLocal) GetAllOrdersWithFinishedDelivery(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	all := []model.Order{}

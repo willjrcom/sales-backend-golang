@@ -91,7 +91,7 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 		return err
 	}
 
-	shiftModel, err := s.r.GetFullCurrentShift(ctx)
+	shiftModel, err := s.r.GetCurrentShiftWithOrders(ctx)
 	if err != nil {
 		return err
 	}
@@ -101,16 +101,6 @@ func (s *Service) CloseShift(ctx context.Context, dto *shiftdto.ShiftUpdateClose
 		return ErrShiftAlreadyClosed
 	}
 
-	orderStatus := []orderentity.StatusOrder{
-		orderentity.OrderStatusFinished,
-		orderentity.OrderStatusCancelled,
-	}
-	orders, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), orderStatus, true, "AND")
-	if err != nil {
-		return err
-	}
-
-	shiftModel.Orders = orders
 	shift = shiftModel.ToDomain()
 
 	shift.CloseShift(endChange)
@@ -136,8 +126,8 @@ func (s *Service) GetOnlyShiftDomainByID(ctx context.Context, dtoID *entitydto.I
 	return shiftModel.ToDomain(), nil
 }
 
-func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IDRequest) (shiftDTO *shiftdto.ShiftDTO, err error) {
-	shiftModel, err := s.r.GetShiftByID(ctx, dtoID.ID.String())
+func (s *Service) GetShiftByIDWithOrders(ctx context.Context, dtoID *entitydto.IDRequest) (shiftDTO *shiftdto.ShiftDTO, err error) {
+	shiftModel, err := s.r.GetShiftByIDWithOrders(ctx, dtoID.ID.String())
 	if err != nil {
 		return nil, err
 	}
@@ -153,21 +143,10 @@ func (s *Service) GetShiftByID(ctx context.Context, dtoID *entitydto.IDRequest) 
 }
 
 func (s *Service) GetCurrentShift(ctx context.Context) (shiftDTO *shiftdto.ShiftDTO, err error) {
-	shiftModel, err := s.r.GetFullCurrentShift(ctx)
+	shiftModel, err := s.r.GetCurrentShiftWithOrders(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	orderStatus := []orderentity.StatusOrder{
-		orderentity.OrderStatusFinished,
-		orderentity.OrderStatusCancelled,
-	}
-	orders, err := s.ro.GetAllOrders(ctx, shiftModel.ID.String(), orderStatus, true, "AND")
-	if err != nil {
-		return nil, err
-	}
-
-	shiftModel.Orders = orders
 
 	shift := shiftModel.ToDomain()
 	if err := s.LoadShiftWithProductionAnalytics(ctx, shift); err != nil {

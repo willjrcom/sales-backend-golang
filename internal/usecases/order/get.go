@@ -70,7 +70,7 @@ func (s *OrderService) GetOrdersTableByTableId(ctx context.Context, dto *orderta
 	}
 }
 
-func (s *OrderService) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, error) {
+func (s *OrderService) GetAllOpenedOrders(ctx context.Context) ([]orderdto.OrderDTO, error) {
 	shiftID := uuid.Nil
 	shiftModel, _ := s.rs.GetCurrentShift(ctx)
 	if shiftModel != nil {
@@ -83,7 +83,7 @@ func (s *OrderService) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, e
 		orderentity.OrderStatusReady,
 	}
 
-	if orderModels, err := s.ro.GetAllOrders(ctx, shiftID.String(), validStatuses, false, "OR"); err != nil {
+	if orderModels, err := s.ro.GetAllOrders(ctx, shiftID.String(), validStatuses); err != nil {
 		return nil, err
 	} else {
 		orders := make([]orderdto.OrderDTO, 0)
@@ -97,14 +97,44 @@ func (s *OrderService) GetAllOrders(ctx context.Context) ([]orderdto.OrderDTO, e
 	}
 }
 
-func (s *OrderService) GetAllOrdersWithDelivery(ctx context.Context, page, perPage int) ([]orderdto.OrderDTO, error) {
+func (s *OrderService) GetAllOrdersWithReadyDelivery(ctx context.Context, page, perPage int) ([]orderdto.OrderDTO, error) {
+	if orderModels, err := s.ro.GetAllOrdersWithReadyDelivery(ctx, page, perPage); err != nil {
+		return nil, err
+	} else {
+		orders := make([]orderdto.OrderDTO, 0)
+		for _, orderModel := range orderModels {
+			order := orderModel.ToDomain()
+			orderDTO := &orderdto.OrderDTO{}
+			orderDTO.FromDomain(order)
+			orders = append(orders, *orderDTO)
+		}
+		return orders, nil
+	}
+}
+
+func (s *OrderService) GetAllOrdersWithShippedDelivery(ctx context.Context, page, perPage int) ([]orderdto.OrderDTO, error) {
+	if orderModels, err := s.ro.GetAllOrdersWithShippedDelivery(ctx, page, perPage); err != nil {
+		return nil, err
+	} else {
+		orders := make([]orderdto.OrderDTO, 0)
+		for _, orderModel := range orderModels {
+			order := orderModel.ToDomain()
+			orderDTO := &orderdto.OrderDTO{}
+			orderDTO.FromDomain(order)
+			orders = append(orders, *orderDTO)
+		}
+		return orders, nil
+	}
+}
+
+func (s *OrderService) GetAllOrdersWithFinishedDelivery(ctx context.Context, page, perPage int) ([]orderdto.OrderDTO, error) {
 	shiftID := uuid.Nil
 	shiftModel, _ := s.rs.GetCurrentShift(ctx)
 	if shiftModel != nil {
 		shiftID = shiftModel.ID
 	}
 
-	if orderModels, err := s.ro.GetAllOrdersWithDelivery(ctx, shiftID.String(), page, perPage); err != nil {
+	if orderModels, err := s.ro.GetAllOrdersWithFinishedDelivery(ctx, shiftID.String(), page, perPage); err != nil {
 		return nil, err
 	} else {
 		orders := make([]orderdto.OrderDTO, 0)

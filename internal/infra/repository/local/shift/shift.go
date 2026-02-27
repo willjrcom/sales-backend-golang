@@ -43,7 +43,27 @@ func (r *ShiftRepositoryLocal) GetShiftByID(ctx context.Context, id string) (*mo
 	return nil, nil
 }
 
+func (r *ShiftRepositoryLocal) GetShiftByIDWithOrders(ctx context.Context, id string) (*model.Shift, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	if s, ok := r.shifts[id]; ok {
+		return s, nil
+	}
+	return nil, nil
+}
+
 func (r *ShiftRepositoryLocal) GetCurrentShift(ctx context.Context) (*model.Shift, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for _, s := range r.shifts {
+		if s.EndChange == nil {
+			return s, nil
+		}
+	}
+	return nil, nil
+}
+
+func (r *ShiftRepositoryLocal) GetCurrentShiftWithOrders(ctx context.Context) (*model.Shift, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	for _, s := range r.shifts {

@@ -29,8 +29,10 @@ func NewHandlerOrder(orderService *orderusecases.OrderService) *handler.Handler 
 
 	c.With().Group(func(c chi.Router) {
 		c.Get("/{id}", h.handlerGetOrderById)
-		c.Get("/all", h.handlerGetAllOrders)
-		c.Get("/all/delivery", h.GetAllOrdersWithDelivery)
+		c.Get("/all/opened", h.handlerGetAllOpenedOrders)
+		c.Get("/all/delivery/ready", h.GetAllOrdersWithReadyDelivery)
+		c.Get("/all/delivery/shipped", h.GetAllOrdersWithShippedDelivery)
+		c.Get("/all/delivery/finished", h.GetAllOrdersWithFinishedDelivery)
 		c.Get("/all/pickup/ready", h.GetAllOrdersWithPickupReady)
 		c.Get("/all/pickup/delivered", h.GetAllOrdersWithPickupDelivered)
 		c.Get("/all/pickup/by-contact/{contact}", h.GetAllOrdersWithPickupByContact)
@@ -71,10 +73,10 @@ func (h *handlerOrderImpl) handlerGetOrderById(w http.ResponseWriter, r *http.Re
 	jsonpkg.ResponseJson(w, r, http.StatusOK, order)
 }
 
-func (h *handlerOrderImpl) handlerGetAllOrders(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderImpl) handlerGetAllOpenedOrders(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	orders, err := h.s.GetAllOrders(ctx)
+	orders, err := h.s.GetAllOpenedOrders(ctx)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
@@ -83,12 +85,40 @@ func (h *handlerOrderImpl) handlerGetAllOrders(w http.ResponseWriter, r *http.Re
 	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
 }
 
-func (h *handlerOrderImpl) GetAllOrdersWithDelivery(w http.ResponseWriter, r *http.Request) {
+func (h *handlerOrderImpl) GetAllOrdersWithReadyDelivery(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	page, perPage := headerservice.GetPageAndPerPage(r, 0, 20)
 
-	orders, err := h.s.GetAllOrdersWithDelivery(ctx, page, perPage)
+	orders, err := h.s.GetAllOrdersWithReadyDelivery(ctx, page, perPage)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
+}
+
+func (h *handlerOrderImpl) GetAllOrdersWithShippedDelivery(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 20)
+
+	orders, err := h.s.GetAllOrdersWithShippedDelivery(ctx, page, perPage)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
+}
+
+func (h *handlerOrderImpl) GetAllOrdersWithFinishedDelivery(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	page, perPage := headerservice.GetPageAndPerPage(r, 0, 20)
+
+	orders, err := h.s.GetAllOrdersWithFinishedDelivery(ctx, page, perPage)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return

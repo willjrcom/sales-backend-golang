@@ -3,9 +3,12 @@ package shiftrepositorybun
 import (
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	"golang.org/x/net/context"
 )
+
+const CURRENT_SHIFT_QUERY = "shift.closed_at is NULL AND shift.end_change is NULL"
 
 type ShiftRepositoryBun struct {
 	db *bun.DB
@@ -86,7 +89,31 @@ func (r *ShiftRepositoryBun) GetShiftByID(ctx context.Context, id string) (*mode
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(shift).Where("shift.id = ?", id).Relation("Attendant").Relation("Orders").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(shift).Where("shift.id = ?", id).Relation("Attendant").Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return shift, nil
+}
+
+func (r *ShiftRepositoryBun) GetShiftByIDWithOrders(ctx context.Context, id string) (*model.Shift, error) {
+	shift := &model.Shift{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	if err := tx.NewSelect().Model(shift).Where("shift.id = ?", id).Relation("Attendant").
+		Relation("Orders", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Where("status = ? OR status = ?", orderentity.OrderStatusFinished, orderentity.OrderStatusCancelled)
+		}).Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -107,7 +134,9 @@ func (r *ShiftRepositoryBun) GetCurrentShift(ctx context.Context) (*model.Shift,
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(shift).Where("shift.closed_at is NULL AND shift.end_change is NULL").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(shift).
+		Where(CURRENT_SHIFT_QUERY).
+		Relation("Attendant").Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -116,8 +145,7 @@ func (r *ShiftRepositoryBun) GetCurrentShift(ctx context.Context) (*model.Shift,
 	}
 	return shift, nil
 }
-
-func (r *ShiftRepositoryBun) GetFullCurrentShift(ctx context.Context) (*model.Shift, error) {
+func (r *ShiftRepositoryBun) GetCurrentShiftWithOrders(ctx context.Context) (*model.Shift, error) {
 	shift := &model.Shift{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -128,7 +156,13 @@ func (r *ShiftRepositoryBun) GetFullCurrentShift(ctx context.Context) (*model.Sh
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := tx.NewSelect().Model(shift).Where("shift.closed_at is NULL AND shift.end_change is NULL").Relation("Attendant").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(shift).
+		Where(CURRENT_SHIFT_QUERY).
+		Relation("Attendant").
+		Relation("Orders", func(q *bun.SelectQuery) *bun.SelectQuery {
+			return q.Where("status = ? OR status = ?", orderentity.OrderStatusFinished, orderentity.OrderStatusCancelled)
+		}).
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 
@@ -150,7 +184,6 @@ func (r *ShiftRepositoryBun) GetAllShifts(ctx context.Context, page int, perPage
 	defer tx.Rollback()
 
 	if err := tx.NewSelect().Model(&Shifts).
-		Relation("Orders").
 		OrderExpr("shift.opened_at DESC").
 		Limit(perPage).
 		Offset(page * perPage).

@@ -451,7 +451,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	return order, nil
 }
 
-func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder, withCategory bool, queryCondition string) ([]model.Order, error) {
+func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder) ([]model.Order, error) {
 	orders := []model.Order{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -462,13 +462,8 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 	defer cancel()
 	defer tx.Rollback()
 
-	if queryCondition == "" {
-		queryCondition = "OR"
-	}
-
 	query := tx.NewSelect().Model(&orders).
-		// use quoted alias for reserved keyword 'order'
-		Where(`"order"."status" IN (?) `+queryCondition+` "order"."shift_id" = ?`, bun.In(withStatus), shiftID).
+		Where(`"order"."status" IN (?) OR "order"."shift_id" = ?`, bun.In(withStatus), shiftID).
 		Relation("Attendant").
 		Relation("Table").
 		Relation("Delivery").
@@ -484,7 +479,7 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 	return orders, nil
 }
 
-func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
+func (r *OrderRepositoryBun) GetAllOrdersWithReadyDelivery(ctx context.Context, page, perPage int) ([]model.Order, error) {
 	orders := []model.Order{}
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
@@ -495,15 +490,138 @@ func (r *OrderRepositoryBun) GetAllOrdersWithDelivery(ctx context.Context, shift
 	defer cancel()
 	defer tx.Rollback()
 
-	validStatuses := []orderentity.StatusOrder{
-		orderentity.OrderStatusReady,
+	query := tx.NewSelect().Model(&orders).
+		Where("delivery.id IS NOT NULL").
+		Relation("Delivery.Client").
+		Relation("Delivery.Address").
+		Where(`"order"."status" = ?`, orderentity.OrderStatusReady).
+		Where("delivery.status = ?", orderentity.OrderDeliveryStatusReady).
+		Order("order.created_at ASC").
+		Limit(perPage).
+		Offset(page * perPage)
+
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
 	}
+
+	// Coletar todos os DriverIDs
+	var driverIDs []uuid.UUID
+	for i := range orders {
+		if orders[i].Delivery != nil && orders[i].Delivery.DriverID != nil {
+			driverIDs = append(driverIDs, *orders[i].Delivery.DriverID)
+		}
+	}
+
+	// Buscar todos os drivers em uma query separada
+	var drivers []model.DeliveryDriver
+	if len(driverIDs) > 0 {
+		if err := tx.NewSelect().Model(&drivers).
+			Where("id IN (?)", bun.In(driverIDs)).
+			Scan(ctx); err != nil {
+			return nil, err
+		}
+	}
+
+	// Mapear drivers por ID
+	driverMap := make(map[uuid.UUID]*model.DeliveryDriver, len(drivers))
+	for i := range drivers {
+		d := drivers[i]
+		driverMap[d.ID] = &d
+	}
+	for i := range orders {
+		if orders[i].Delivery != nil && orders[i].Delivery.DriverID != nil {
+			if driver, ok := driverMap[*orders[i].Delivery.DriverID]; ok {
+				orders[i].Delivery.Driver = driver
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
+func (r *OrderRepositoryBun) GetAllOrdersWithShippedDelivery(ctx context.Context, page, perPage int) ([]model.Order, error) {
+	orders := []model.Order{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
 
 	query := tx.NewSelect().Model(&orders).
 		Where("delivery.id IS NOT NULL").
 		Relation("Delivery.Client").
 		Relation("Delivery.Address").
-		Where(`"order"."status" IN (?) OR "order"."shift_id" = ?`, bun.In(validStatuses), shiftID).
+		Where(`"order"."status" = ?`, orderentity.OrderStatusReady).
+		Where("delivery.status = ?", orderentity.OrderDeliveryStatusShipped).
+		Order("order.created_at ASC").
+		Limit(perPage).
+		Offset(page * perPage)
+
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	// Coletar todos os DriverIDs
+	var driverIDs []uuid.UUID
+	for i := range orders {
+		if orders[i].Delivery != nil && orders[i].Delivery.DriverID != nil {
+			driverIDs = append(driverIDs, *orders[i].Delivery.DriverID)
+		}
+	}
+
+	// Buscar todos os drivers em uma query separada
+	var drivers []model.DeliveryDriver
+	if len(driverIDs) > 0 {
+		if err := tx.NewSelect().Model(&drivers).
+			Where("id IN (?)", bun.In(driverIDs)).
+			Scan(ctx); err != nil {
+			return nil, err
+		}
+	}
+
+	// Mapear drivers por ID
+	driverMap := make(map[uuid.UUID]*model.DeliveryDriver, len(drivers))
+	for i := range drivers {
+		d := drivers[i]
+		driverMap[d.ID] = &d
+	}
+	for i := range orders {
+		if orders[i].Delivery != nil && orders[i].Delivery.DriverID != nil {
+			if driver, ok := driverMap[*orders[i].Delivery.DriverID]; ok {
+				orders[i].Delivery.Driver = driver
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
+func (r *OrderRepositoryBun) GetAllOrdersWithFinishedDelivery(ctx context.Context, shiftID string, page, perPage int) ([]model.Order, error) {
+	orders := []model.Order{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	query := tx.NewSelect().Model(&orders).
+		Where("delivery.id IS NOT NULL").
+		Relation("Delivery.Client").
+		Relation("Delivery.Address").
+		Where(`"order"."status" = ? OR "order"."shift_id" = ?`, orderentity.OrderStatusReady, shiftID).
+		Where("delivery.status = ?", orderentity.OrderDeliveryStatusDelivered).
 		Order("order.created_at ASC").
 		Limit(perPage).
 		Offset(page * perPage)

@@ -28,7 +28,7 @@ func NewHandlerShift(shiftService *shiftusecases.Service) *handler.Handler {
 	c.With().Group(func(c chi.Router) {
 		c.Post("/open", h.handlerOpenShift)
 		c.Put("/close", h.handlerCloseShift)
-		c.Get("/{id}", h.handlerGetShiftByID)
+		c.Get("/{id}", h.handlerGetShiftByIDWithOrders)
 		c.Get("/current", h.handlerGetCurrentShift)
 		c.Get("/all", h.handlerGetAllShifts)
 		c.Put("/redeem/add", h.handlerAddRedeem)
@@ -72,7 +72,7 @@ func (h *handlerShiftImpl) handlerCloseShift(w http.ResponseWriter, r *http.Requ
 	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
 }
 
-func (h *handlerShiftImpl) handlerGetShiftByID(w http.ResponseWriter, r *http.Request) {
+func (h *handlerShiftImpl) handlerGetShiftByIDWithOrders(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	id := chi.URLParam(r, "id")
@@ -84,7 +84,7 @@ func (h *handlerShiftImpl) handlerGetShiftByID(w http.ResponseWriter, r *http.Re
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	shift, err := h.s.GetShiftByID(ctx, dtoId)
+	shift, err := h.s.GetShiftByIDWithOrders(ctx, dtoId)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
