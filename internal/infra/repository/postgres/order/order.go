@@ -445,12 +445,7 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 	query := tx.NewSelect().Model(&orders).
 		// use quoted alias for reserved keyword 'order'
 		Where(`"order"."status" IN (?) `+queryCondition+` "order"."shift_id" = ?`, bun.In(withStatus), shiftID).
-		Relation("GroupItems.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
-			return q.Where("is_additional = ?", false)
-		}).
-		Relation("GroupItems.Items.AdditionalItems").
 		Relation("Attendant").
-		Relation("Payments").
 		Relation("Table").
 		Relation("Delivery").
 		Relation("Pickup").
@@ -459,101 +454,6 @@ func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, w
 	if err := query.Scan(ctx); err != nil {
 		return nil, err
 	}
-
-	var complementItems []model.Item
-	var complementIDs []uuid.UUID
-	for i := range orders {
-		for j := range orders[i].GroupItems {
-			if orders[i].GroupItems[j].ComplementItemID != nil {
-				complementIDs = append(complementIDs, *orders[i].GroupItems[j].ComplementItemID)
-			}
-		}
-	}
-	if len(complementIDs) > 0 {
-		if err := tx.NewSelect().Model(&complementItems).
-			Where("id IN (?)", bun.In(complementIDs)).
-			Scan(ctx); err != nil {
-			return nil, err
-		}
-		compMap := make(map[uuid.UUID]*model.Item, len(complementItems))
-		for k := range complementItems {
-			ci := complementItems[k]
-			compMap[ci.ID] = &ci
-		}
-		for i := range orders {
-			for j := range orders[i].GroupItems {
-				g := &orders[i].GroupItems[j]
-				if g.ComplementItemID != nil {
-					if ci, ok := compMap[*g.ComplementItemID]; ok {
-						g.ComplementItem = ci
-					}
-				}
-			}
-		}
-	}
-	// optionally load categories if requested
-	if withCategory {
-		var categories []model.ProductCategory
-		var categoryIDs []uuid.UUID
-		for i := range orders {
-			for j := range orders[i].GroupItems {
-				categoryIDs = append(categoryIDs, orders[i].GroupItems[j].CategoryID)
-			}
-		}
-		if len(categoryIDs) > 0 {
-			if err := tx.NewSelect().Model(&categories).
-				Where("id IN (?)", bun.In(categoryIDs)).
-				Scan(ctx); err != nil {
-				return nil, err
-			}
-			catMap := make(map[uuid.UUID]*model.ProductCategory, len(categories))
-			for k := range categories {
-				ci := categories[k]
-				catMap[ci.ID] = &ci
-			}
-			for i := range orders {
-				for j := range orders[i].GroupItems {
-					g := &orders[i].GroupItems[j]
-					if cat, ok := catMap[g.CategoryID]; ok {
-						g.Category = cat
-					}
-				}
-			}
-		}
-	}
-
-	// Coletar todos os DriverIDs dos deliveries
-	var driverIDs []uuid.UUID
-	for i := range orders {
-		if orders[i].Delivery != nil && orders[i].Delivery.DriverID != nil {
-			driverIDs = append(driverIDs, *orders[i].Delivery.DriverID)
-		}
-	}
-
-	// Buscar todos os drivers em uma query separada
-	var drivers []model.DeliveryDriver
-	if len(driverIDs) > 0 {
-		if err := tx.NewSelect().Model(&drivers).
-			Where("id IN (?)", bun.In(driverIDs)).
-			Scan(ctx); err != nil {
-			return nil, err
-		}
-	}
-
-	// Mapear drivers por ID
-	driverMap := make(map[uuid.UUID]*model.DeliveryDriver, len(drivers))
-	for i := range drivers {
-		d := drivers[i]
-		driverMap[d.ID] = &d
-	}
-	for i := range orders {
-		if orders[i].Delivery != nil && orders[i].Delivery.DriverID != nil {
-			if driver, ok := driverMap[*orders[i].Delivery.DriverID]; ok {
-				orders[i].Delivery.Driver = driver
-			}
-		}
-	}
-
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
@@ -646,6 +546,25 @@ func (r *OrderRepositoryBun) GetAllOrdersWithPickup(ctx context.Context, shiftID
 		Offset(page * perPage)
 
 	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
+func (r *OrderRepositoryBun) GetOrdersByStatus(ctx context.Context, status orderentity.StatusOrder) ([]model.Order, error) {
+	orders := []model.Order{}
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	if err := tx.NewSelect().Model(&orders).Where("status = ?", status).Scan(ctx); err != nil {
 		return nil, err
 	}
 

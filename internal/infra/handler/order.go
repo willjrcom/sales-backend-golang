@@ -332,7 +332,7 @@ func (h *handlerOrderImpl) handlerCancelOrder(w http.ResponseWriter, r *http.Req
 
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
-	if err := h.s.CancelOrder(ctx, dtoId); err != nil {
+	if err := h.s.CancelOrder(ctx, dtoId, false); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}

@@ -6,9 +6,12 @@ import (
 	"time"
 
 	"github.com/uptrace/bun"
+	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
+	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	billing "github.com/willjrcom/sales-backend-go/internal/usecases/checkout"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
+	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 )
 
 type DailyScheduler struct {
@@ -19,9 +22,10 @@ type DailyScheduler struct {
 	companySubscriptionRepo model.CompanySubscriptionRepository
 	checkoutUseCase         *billing.CheckoutUseCase
 	companyUseCase          *companyusecases.Service
+	orderUseCase            *orderusecases.OrderService
 }
 
-func NewDailyScheduler(db *bun.DB, companyRepo model.CompanyRepository, orderRepo model.OrderRepository, companyPaymentRepo model.CompanyPaymentRepository, companySubscriptionRepo model.CompanySubscriptionRepository, checkoutUseCase *billing.CheckoutUseCase, companyUseCase *companyusecases.Service) *DailyScheduler {
+func NewDailyScheduler(db *bun.DB, companyRepo model.CompanyRepository, orderRepo model.OrderRepository, companyPaymentRepo model.CompanyPaymentRepository, companySubscriptionRepo model.CompanySubscriptionRepository, checkoutUseCase *billing.CheckoutUseCase, companyUseCase *companyusecases.Service, orderUseCase *orderusecases.OrderService) *DailyScheduler {
 	return &DailyScheduler{
 		db:                      db,
 		companyRepo:             companyRepo,
@@ -30,6 +34,7 @@ func NewDailyScheduler(db *bun.DB, companyRepo model.CompanyRepository, orderRep
 		companySubscriptionRepo: companySubscriptionRepo,
 		checkoutUseCase:         checkoutUseCase,
 		companyUseCase:          companyUseCase,
+		orderUseCase:            orderUseCase,
 	}
 }
 
@@ -67,11 +72,21 @@ func (s *DailyScheduler) CleanStagingOrders(ctx context.Context) {
 
 	for _, schema := range schemas {
 		ctxSchema := context.WithValue(ctx, model.Schema("schema"), schema)
-		if err := s.orderRepo.DeleteOrdersByStatus(ctxSchema, "Staging"); err != nil {
-			log.Printf("Scheduler: Error deleting staging orders in schema %s: %v", schema, err)
+
+		orders, err := s.orderRepo.GetOrdersByStatus(ctxSchema, orderentity.OrderStatusStaging)
+		if err != nil {
+			log.Printf("Scheduler: Error fetching staging orders in schema %s: %v", schema, err)
 			continue
 		}
-		log.Printf("Scheduler: Cleaned staging orders in schema %s", schema)
+
+		for _, order := range orders {
+			dtoID := &entitydto.IDRequest{ID: order.ID}
+			if err := s.orderUseCase.CancelOrder(ctxSchema, dtoID, true); err != nil {
+				log.Printf("Scheduler: Error cancelling staging order %s in schema %s: %v", order.ID, schema, err)
+			}
+		}
+
+		log.Printf("Scheduler: Cleaned %d staging orders in schema %s", len(orders), schema)
 	}
 }
 

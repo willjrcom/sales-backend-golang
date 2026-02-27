@@ -226,7 +226,7 @@ func (s *OrderService) FinishOrder(ctx context.Context, dto *entitydto.IDRequest
 	return nil
 }
 
-func (s *OrderService) CancelOrder(ctx context.Context, dtoOrderID *entitydto.IDRequest) (err error) {
+func (s *OrderService) CancelOrder(ctx context.Context, dtoOrderID *entitydto.IDRequest, isSystem bool) (err error) {
 	orderModel, err := s.ro.GetOrderById(ctx, dtoOrderID.ID.String())
 
 	if err != nil {
@@ -239,12 +239,14 @@ func (s *OrderService) CancelOrder(ctx context.Context, dtoOrderID *entitydto.ID
 	}
 
 	// Update order to new shift
-	currentShift, _ := s.rs.GetCurrentShift(ctx)
-	if currentShift == nil {
-		return fmt.Errorf("must open a new shift")
-	}
+	if !isSystem {
+		currentShift, _ := s.rs.GetCurrentShift(ctx)
+		if currentShift == nil {
+			return fmt.Errorf("must open a new shift")
+		}
 
-	order.ShiftID = currentShift.ID
+		order.ShiftID = currentShift.ID
+	}
 
 	// Restaurar estoque dos produtos do pedido cancelado
 	if err := s.restoreStockFromOrder(ctx, order); err != nil {

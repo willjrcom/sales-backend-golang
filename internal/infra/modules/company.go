@@ -14,9 +14,10 @@ import (
 	mercadopagoservice "github.com/willjrcom/sales-backend-go/internal/infra/service/mercadopago"
 	billingusecases "github.com/willjrcom/sales-backend-go/internal/usecases/checkout"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
+	orderusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order"
 )
 
-func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyUsageCostRepository, orderRepository model.OrderRepository) (model.CompanyRepository, *companyusecases.Service, *billingusecases.CheckoutUseCase, *handler.Handler) {
+func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyUsageCostRepository, orderRepository model.OrderRepository, orderService *orderusecases.OrderService) (model.CompanyRepository, *companyusecases.Service, *billingusecases.CheckoutUseCase, *handler.Handler) {
 	companyRepository := companyrepositorybun.NewCompanyRepositoryBun(db)
 	companySubscriptionRepo := companyrepositorybun.NewCompanySubscriptionRepositoryBun(db)
 	companyPaymentRepo := companyrepositorybun.NewCompanyPaymentRepositoryBun(db)
@@ -29,7 +30,7 @@ func NewCompanyModule(db *bun.DB, chi *server.ServerChi, costRepo model.CompanyU
 	costService := companyusecases.NewUsageCostService(costRepo, companyRepository)
 
 	// Start Daily Scheduler
-	dailyScheduler := scheduler.NewDailyScheduler(db, companyRepository, orderRepository, companyPaymentRepo, companySubscriptionRepo, checkoutUC, service)
+	dailyScheduler := scheduler.NewDailyScheduler(db, companyRepository, orderRepository, companyPaymentRepo, companySubscriptionRepo, checkoutUC, service, orderService)
 	dailyScheduler.Start(context.Background())
 
 	handler := handlerimpl.NewHandlerCompany(service, checkoutUC, costService, dailyScheduler)

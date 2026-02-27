@@ -191,6 +191,20 @@ func (r *OrderRepositoryLocal) DeleteOrderTable(ctx context.Context, id string) 
 	return errors.New("table not found")
 }
 
+func (r *OrderRepositoryLocal) GetOrdersByStatus(ctx context.Context, status orderentity.StatusOrder) ([]model.Order, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	orders := make([]model.Order, 0)
+
+	for _, p := range r.orders {
+		if p.Status == string(status) {
+			orders = append(orders, *p)
+		}
+	}
+
+	return orders, nil
+}
+
 func (r *OrderRepositoryLocal) AddPaymentOrder(ctx context.Context, payment *model.PaymentOrder) error {
 
 	orderID := payment.OrderID.String()

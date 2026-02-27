@@ -116,12 +116,6 @@ func (i *GroupItem) CalculateTotalPrice() {
 	qtdItems := 0.0
 	totalPrice := decimal.Zero
 
-	if i.Status == StatusGroupCancelled {
-		i.GroupDetails.TotalPrice = decimal.Zero
-		i.GroupDetails.Quantity = 0.0
-		return
-	}
-
 	for j := range i.Items {
 		totalPrice = totalPrice.Add(i.Items[j].CalculateTotalPrice())
 		qtdItems += i.Items[j].Quantity
