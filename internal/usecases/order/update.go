@@ -346,7 +346,7 @@ func (s *OrderService) AddPayment(ctx context.Context, dto *entitydto.IDRequest,
 
 	order.AddPayment(paymentOrder)
 
-	order.CalculateTotalPrice()
+	order.CalculateTotalPaid()
 
 	paymentOrderModel := &model.PaymentOrder{}
 	paymentOrderModel.FromDomain(paymentOrder)
@@ -379,19 +379,15 @@ func (s *OrderService) UpdateOrderObservation(ctx context.Context, dtoId *entity
 	return nil
 }
 
-func (s *OrderService) UpdateOrderTotal(ctx context.Context, id string) error {
-	orderModel, err := s.ro.GetOrderById(ctx, id)
+func (s *OrderService) UpdateTotalFees(ctx context.Context, id string) error {
+	orderModel, err := s.ro.GetOnlyOrderById(ctx, id)
 	if err != nil {
 		return err
 	}
 
 	order := orderModel.ToDomain()
-
-	order.CalculateTotalPrice()
-
-	if err := s.updateFreeDelivery(ctx, order); err != nil {
-		return err
-	}
+	order.CalculateFees()
+	order.CalculateTotal()
 
 	orderModel.FromDomain(order)
 	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
@@ -401,36 +397,38 @@ func (s *OrderService) UpdateOrderTotal(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *OrderService) updateFreeDelivery(ctx context.Context, order *orderentity.Order) error {
-	if order.Delivery == nil {
-		return nil
+func (s *OrderService) UpdateOrderTotal(ctx context.Context, id string) error {
+	orderModel, err := s.ro.GetOrderById(ctx, id)
+	if err != nil {
+		return err
 	}
 
-	IsDeliveryFreeUpdated := order.Delivery.IsDeliveryFree
+	order := orderModel.ToDomain()
 
 	company, err := s.sc.GetCompany(ctx)
 	if err != nil {
 		return err
 	}
 
-	minOrderForFree, _ := company.Preferences.GetDecimal(companyentity.MinOrderValueForFreeDelivery)
+	if order.Delivery != nil {
+		minOrderForFree, _ := company.Preferences.GetDecimal(companyentity.MinOrderValueForFreeDelivery)
 
-	order.Delivery.IsDeliveryFree = false
-	if !minOrderForFree.IsZero() && order.TotalPayable.GreaterThan(minOrderForFree) {
-		order.Delivery.IsDeliveryFree = true
+		order.Delivery.IsDeliveryFree = false
+		if !minOrderForFree.IsZero() && order.SubTotal.GreaterThan(minOrderForFree) {
+			order.Delivery.IsDeliveryFree = true
+		}
+
+		deliveryOrder := &model.OrderDelivery{}
+		deliveryOrder.FromDomain(order.Delivery)
+		if err := s.rdo.UpdateOrderDelivery(ctx, deliveryOrder); err != nil {
+			return err
+		}
 	}
 
-	if IsDeliveryFreeUpdated == order.Delivery.IsDeliveryFree {
-		return nil
-	}
+	order.CalculateTotalOrder()
 
-	// Run again with IsDeliveryFree changes
-	order.CalculateTotalPrice()
-
-	deliveryModel := &model.OrderDelivery{}
-
-	deliveryModel.FromDomain(order.Delivery)
-	if err := s.rdo.UpdateOrderDelivery(ctx, deliveryModel); err != nil {
+	orderModel.FromDomain(order)
+	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
 		return err
 	}
 

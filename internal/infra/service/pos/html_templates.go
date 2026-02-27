@@ -244,8 +244,12 @@ const OrderReceiptTemplate = `
 
     <div class="totals bold">
         <div class="row">
+            <span class="col-name">SUBTOTAL:</span>
+            <span class="col-price">{{formatMoney .SubTotal}}</span>
+        </div>
+        <div class="row">
             <span class="col-name">TOTAL:</span>
-            <span class="col-price">{{formatMoney .TotalPayable}}</span>
+            <span class="col-price">{{formatMoney .Total}}</span>
         </div>
     </div>
 
@@ -335,7 +339,8 @@ const ShiftReportTemplate = `
     {{range .Orders}}
     <div class="row">
         <span class="col-name">Pedido #{{.OrderNumber}}</span>
-        <span class="col-price">{{formatMoney .TotalPayable}}</span>
+        <span class="col-price">{{formatMoney .SubTotal}}</span>
+        <span class="col-price">{{formatMoney .Total}}</span>
     </div>
     {{end}}
 

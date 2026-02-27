@@ -283,6 +283,30 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 	return nil
 }
 
+func (r *OrderRepositoryBun) GetOnlyOrderById(ctx context.Context, id string) (order *model.Order, err error) {
+	order = &model.Order{}
+	order.ID = uuid.MustParse(id)
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	if err := tx.NewSelect().Model(order).WherePK().
+		Relation("Payments").
+		Relation("Table").
+		Relation("Delivery").
+		Relation("Pickup").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return order, nil
+}
+
 func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order *model.Order, err error) {
 	order = &model.Order{}
 	order.ID = uuid.MustParse(id)

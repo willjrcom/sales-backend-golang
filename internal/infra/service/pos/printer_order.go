@@ -209,7 +209,7 @@ func printAdditionalItem(buf *bytes.Buffer, add *orderentity.Item) {
 
 // formatTotalFooter writes the total payable amount to the buffer.
 func formatTotalFooter(buf *bytes.Buffer, o *orderentity.Order) {
-	fmt.Fprintf(buf, "TOTAL:\tR$ %7.2f%s", d2f(o.TotalPayable), newline)
+	fmt.Fprintf(buf, "TOTAL:\tR$ %7.2f%s", d2f(o.SubTotal), newline)
 }
 
 // formatDeliverySection prints delivery-related details if present.

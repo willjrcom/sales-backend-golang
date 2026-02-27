@@ -121,7 +121,7 @@ func (s *Shift) Load(deliveryDrivers map[uuid.UUID]orderentity.DeliveryDriver, p
 		}
 
 		// ensure totals are up to date
-		s.TotalSales = s.TotalSales.Add(o.TotalPayable)
+		s.TotalSales = s.TotalSales.Add(o.SubTotal)
 		for _, g := range o.GroupItems {
 			cat := ""
 			if g.Category != nil {

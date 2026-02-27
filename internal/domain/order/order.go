@@ -40,10 +40,12 @@ type OrderCommonAttributes struct {
 	Status      StatusOrder
 	GroupItems  []GroupItem
 	Payments    []PaymentOrder
+	Fees        []AdditionalFee
 }
 
 type OrderDetail struct {
-	TotalPayable  decimal.Decimal
+	SubTotal      decimal.Decimal
+	Total         decimal.Decimal
 	TotalPaid     decimal.Decimal
 	TotalChange   decimal.Decimal
 	QuantityItems float64
@@ -67,11 +69,24 @@ type OrderTimeLogs struct {
 	ArchivedAt  *time.Time
 }
 
+type AdditionalFeeName string
+
+const (
+	AdditionalFeeTypeTableTax    AdditionalFeeName = "table_tax"
+	AdditionalFeeTypeDeliveryFee AdditionalFeeName = "delivery_fee"
+)
+
+type AdditionalFee struct {
+	Name  AdditionalFeeName
+	Value decimal.Decimal
+}
+
 func NewDefaultOrder(shiftID uuid.UUID, currentOrderNumber int, attendantID *uuid.UUID) *Order {
 	order := &Order{
 		Entity: entity.NewEntity(),
 		OrderCommonAttributes: OrderCommonAttributes{
 			OrderNumber: currentOrderNumber,
+			Fees:        []AdditionalFee{},
 			OrderDetail: OrderDetail{
 				ShiftID:     shiftID,
 				AttendantID: attendantID,
@@ -176,7 +191,7 @@ func (o *Order) FinishOrder() (err error) {
 		totalPaid = totalPaid.Add(payment.TotalPaid)
 	}
 
-	if totalPaid.LessThan(o.TotalPayable) {
+	if totalPaid.LessThan(o.Total) {
 		return ErrOrderPaidLessThanTotal
 	}
 
@@ -236,7 +251,7 @@ func (o *Order) UnarchiveOrder() (err error) {
 
 func (o *Order) ValidatePayments() error {
 	// Error if the total paid exceeds the total payable
-	if o.TotalPaid.GreaterThan(o.TotalPayable) {
+	if o.TotalPaid.GreaterThan(o.Total) {
 		return ErrOrderPaidMoreThanTotal
 	}
 
@@ -248,35 +263,67 @@ func (o *Order) AddPayment(payment *PaymentOrder) {
 	o.Payments = append(o.Payments, *payment)
 }
 
-func (o *Order) CalculateTotalPrice() {
-	o.TotalPayable = decimal.Zero
+func (o *Order) CalculateTotalOrder() {
+	o.CalculateSubTotal()
+	o.CalculateFees()
+	o.CalculateTotal()
+	o.CalculateTotalPaid()
+}
+
+func (o *Order) CalculateSubTotal() {
+	o.SubTotal = decimal.Zero
 	o.QuantityItems = 0.0
 
 	for i := range o.GroupItems {
 		o.GroupItems[i].CalculateTotalPrice()
-		o.TotalPayable = o.TotalPayable.Add(o.GroupItems[i].TotalPrice)
+		o.SubTotal = o.SubTotal.Add(o.GroupItems[i].TotalPrice)
 		o.QuantityItems += o.GroupItems[i].Quantity
 	}
 
+	o.SubTotal = o.SubTotal.Round(2)
+}
+
+func (o *Order) CalculateFees() {
+	o.Fees = []AdditionalFee{}
+
+	if o.Table != nil && !o.Table.TaxRate.IsZero() {
+		taxRate := o.SubTotal.Mul(o.Table.TaxRate.Div(decimal.NewFromInt(100)))
+		o.Fees = append(o.Fees, AdditionalFee{
+			Name:  AdditionalFeeTypeTableTax,
+			Value: taxRate.Round(2),
+		})
+	}
+
+	if o.Delivery != nil && o.Delivery.DeliveryTax != nil && !o.Delivery.IsDeliveryFree {
+		o.Fees = append(o.Fees, AdditionalFee{
+			Name:  AdditionalFeeTypeDeliveryFee,
+			Value: o.Delivery.DeliveryTax.Round(2),
+		})
+	}
+}
+
+func (o *Order) CalculateTotal() {
+	totalFees := decimal.Zero
+	for _, fee := range o.Fees {
+		totalFees = totalFees.Add(fee.Value)
+	}
+
+	o.Total = o.SubTotal.Add(totalFees).Round(2)
+}
+
+func (o *Order) CalculateTotalPaid() {
 	o.TotalPaid = decimal.Zero
 	for _, payment := range o.Payments {
 		o.TotalPaid = o.TotalPaid.Add(payment.TotalPaid)
 	}
 
-	if o.Table != nil && !o.Table.TaxRate.IsZero() {
-		taxRate := o.TotalPayable.Mul(o.Table.TaxRate.Div(decimal.NewFromInt(100)))
-		o.TotalPayable = o.TotalPayable.Add(taxRate)
-	}
+	o.TotalPaid = o.TotalPaid.Round(2)
 
-	if o.Delivery != nil && o.Delivery.DeliveryTax != nil && !o.Delivery.IsDeliveryFree {
-		o.TotalPayable = o.TotalPayable.Add(*o.Delivery.DeliveryTax)
-	}
-
-	o.TotalPayable = o.TotalPayable.Round(2)
-
-	if o.TotalPaid.GreaterThan(o.TotalPayable) {
-		o.TotalChange = o.TotalPaid.Sub(o.TotalPayable)
+	if o.TotalPaid.GreaterThan(o.Total) {
+		o.TotalChange = o.TotalPaid.Sub(o.Total)
 	} else {
 		o.TotalChange = decimal.Zero
 	}
+
+	o.TotalChange = o.TotalChange.Round(2)
 }

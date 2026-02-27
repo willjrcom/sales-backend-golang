@@ -79,6 +79,14 @@ func (r *OrderRepositoryLocal) UpdateOrderWithRelations(ctx context.Context, ord
 	return nil
 }
 
+func (r *OrderRepositoryLocal) GetOnlyOrderById(ctx context.Context, id string) (*model.Order, error) {
+	if p, ok := r.orders[uuid.MustParse(id)]; ok {
+		return p, nil
+	}
+
+	return nil, errors.New("order not found")
+}
+
 func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*model.Order, error) {
 	if p, ok := r.orders[uuid.MustParse(id)]; ok {
 		return p, nil

@@ -25,7 +25,7 @@ type SalesByDayDTO struct {
 	Total decimal.Decimal `bun:"total"`
 }
 
-// SalesTotalByDay returns total sales (sum of total_payable) per day in the given period.
+// SalesTotalByDay returns total sales (sum of total) per day in the given period.
 func (s *ReportService) SalesTotalByDay(ctx context.Context, start, end time.Time) ([]SalesByDayDTO, error) {
 	schemaName, err := database.GetCurrentSchema(ctx)
 	if err != nil {
@@ -34,7 +34,7 @@ func (s *ReportService) SalesTotalByDay(ctx context.Context, start, end time.Tim
 
 	var resp []SalesByDayDTO
 	query := `
-        SELECT TO_CHAR(created_at, 'DD/MM') AS day, SUM(total_payable) AS total
+        SELECT TO_CHAR(created_at, 'DD/MM') AS day, SUM(total) AS total
         FROM ` + schemaName + `.orders
         WHERE created_at BETWEEN ? AND ?
         GROUP BY day
@@ -61,7 +61,7 @@ func (s *ReportService) RevenueCumulativeByMonth(ctx context.Context, start, end
 	var resp []CumulativeRevenueDTO
 	query := `
         WITH M AS (
-            SELECT date_trunc('month', created_at)::date AS mon, SUM(total_payable) AS rev
+            SELECT date_trunc('month', created_at)::date AS mon, SUM(total) AS rev
             FROM ` + schemaName + `.orders
             WHERE created_at BETWEEN ? AND ?
             GROUP BY mon
@@ -91,7 +91,7 @@ func (s *ReportService) SalesByHour(ctx context.Context, day time.Time) ([]Hourl
 	start := time.Date(day.Year(), day.Month(), day.Day(), 0, 0, 0, 0, day.Location())
 	end := start.Add(24 * time.Hour)
 	query := `
-        SELECT EXTRACT(hour FROM created_at)::int AS hr, SUM(total_payable) AS total
+        SELECT EXTRACT(hour FROM created_at)::int AS hr, SUM(total) AS total
         FROM ` + schemaName + `.orders
         WHERE created_at >= ? AND created_at < ?
         GROUP BY hr
@@ -124,7 +124,7 @@ func (s *ReportService) SalesByChannel(ctx context.Context, start, end time.Time
                 WHEN p.id IS NOT NULL THEN 'pickup'
                 ELSE 'unknown'
             END AS channel,
-            SUM(o.total_payable) AS total
+            SUM(o.total) AS total
         FROM ` + schemaName + `.orders o
         LEFT JOIN ` + schemaName + `.order_deliveries d ON d.order_id = o.id
         LEFT JOIN ` + schemaName + `.order_tables t ON t.order_id = o.id
@@ -152,7 +152,7 @@ func (s *ReportService) AvgTicketByDay(ctx context.Context, start, end time.Time
 
 	var resp []AvgTicketDTO
 	query := `
-        SELECT date(created_at) AS key, AVG(total_payable) AS avg_ticket
+        SELECT date(created_at) AS key, AVG(total) AS avg_ticket
         FROM ` + schemaName + `.orders
         WHERE created_at BETWEEN ? AND ?
         GROUP BY key
@@ -179,7 +179,7 @@ func (s *ReportService) AvgTicketByChannel(ctx context.Context, start, end time.
                 WHEN p.id IS NOT NULL THEN 'pickup'
                 ELSE 'unknown'
             END AS key,
-            AVG(o.total_payable) AS avg_ticket
+            AVG(o.total) AS avg_ticket
         FROM ` + schemaName + `.orders o
         LEFT JOIN ` + schemaName + `.order_deliveries d ON d.order_id = o.id
         LEFT JOIN ` + schemaName + `.order_tables t ON t.order_id = o.id
@@ -651,7 +651,7 @@ func (s *ReportService) SalesByShift(ctx context.Context, start, end time.Time) 
 
 	var resp []SalesByShiftDTO
 	query := `
-        SELECT to_char(s.opened_at, 'DD/MM HH24:MI') AS opened_at, SUM(o.total_payable) AS total
+        SELECT to_char(s.opened_at, 'DD/MM HH24:MI') AS opened_at, SUM(o.total) AS total
         FROM ` + schemaName + `.orders o
 		JOIN ` + schemaName + `.shifts s ON s.id = o.shift_id
         WHERE o.created_at BETWEEN ? AND ?
@@ -730,7 +730,7 @@ func (s *ReportService) SalesByPlace(ctx context.Context, start, end time.Time) 
 
 	var resp []SalesByPlaceDTO
 	query := `
-        SELECT pl.name AS place, SUM(o.total_payable) AS total
+        SELECT pl.name AS place, SUM(o.total) AS total
         FROM ` + schemaName + `.orders o
         JOIN ` + schemaName + `.order_tables ot ON ot.order_id = o.id
         JOIN ` + schemaName + `.place_to_tables pt ON pt.table_id = ot.table_id
@@ -920,7 +920,7 @@ func (s *ReportService) DailySales(ctx context.Context, day time.Time) (*DailySa
 	end := start.Add(24 * time.Hour)
 	var resp DailySalesDTO
 	query := `
-        SELECT COUNT(*) AS total_orders, SUM(total_payable) AS total_sales
+        SELECT COUNT(*) AS total_orders, SUM(total) AS total_sales
         FROM ` + schemaName + `.orders
         WHERE created_at >= ? AND created_at < ?`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {

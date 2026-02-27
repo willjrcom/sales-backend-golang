@@ -21,12 +21,14 @@ type OrderDTO struct {
 	CreatedAt   time.Time                   `json:"created_at"`
 	OrderNumber int                         `json:"order_number"`
 	Status      orderentity.StatusOrder     `json:"status"`
-	GroupsItems []groupitemdto.GroupItemDTO `json:"group_items"`
+	GroupItems  []groupitemdto.GroupItemDTO `json:"group_items"`
 	Payments    []PaymentOrderDTO           `json:"payments"`
+	Fees        []AdditionalFee             `json:"fees"`
 }
 
 type OrderDetail struct {
-	TotalPayable  decimal.Decimal          `json:"total_payable"`
+	SubTotal      decimal.Decimal          `json:"sub_total"`
+	Total         decimal.Decimal          `json:"total"`
 	TotalPaid     decimal.Decimal          `json:"total_paid"`
 	TotalChange   decimal.Decimal          `json:"total_change"`
 	QuantityItems float64                  `json:"quantity_items"`
@@ -50,16 +52,17 @@ type OrderTimeLogs struct {
 	ArchivedAt  *time.Time `json:"archived_at"`
 }
 
+type AdditionalFee struct {
+	Name  string          `json:"name"`
+	Value decimal.Decimal `json:"value"`
+}
+
 func (o *OrderDTO) FromDomain(order *orderentity.Order) {
 	if order == nil {
 		return
 	}
 	*o = OrderDTO{
-		OrderType: OrderType{
-			Delivery: &orderdeliverydto.OrderDeliveryDTO{},
-			Table:    &ordertabledto.OrderTableDTO{},
-			Pickup:   &orderpickupdto.OrderPickupDTO{},
-		},
+		OrderType: OrderType{},
 		OrderTimeLogs: OrderTimeLogs{
 			PendingAt:   order.PendingAt,
 			ReadyAt:     order.ReadyAt,
@@ -68,58 +71,76 @@ func (o *OrderDTO) FromDomain(order *orderentity.Order) {
 			ArchivedAt:  order.ArchivedAt,
 		},
 		OrderDetail: OrderDetail{
-			TotalPayable:  order.TotalPayable,
+			SubTotal:      order.SubTotal,
+			Total:         order.Total,
 			TotalPaid:     order.TotalPaid,
 			TotalChange:   order.TotalChange,
 			QuantityItems: order.QuantityItems,
 			Observation:   order.Observation,
 			AttendantID:   order.AttendantID,
-			Attendant:     &employeedto.EmployeeDTO{},
 			ShiftID:       order.ShiftID,
 		},
 		ID:          order.ID,
 		CreatedAt:   order.CreatedAt,
 		OrderNumber: order.OrderNumber,
 		Status:      order.Status,
-		GroupsItems: []groupitemdto.GroupItemDTO{},
-		Payments:    []PaymentOrderDTO{},
 	}
 
-	o.Delivery.FromDomain(order.Delivery)
-	o.Table.FromDomain(order.Table)
-	o.Pickup.FromDomain(order.Pickup)
-	o.Attendant.FromDomain(order.Attendant)
-
-	for _, group := range order.GroupItems {
-		groupItemDTO := groupitemdto.GroupItemDTO{}
-		groupItemDTO.FromDomain(&group)
-		o.GroupsItems = append(o.GroupsItems, groupItemDTO)
+	if order.Delivery != nil {
+		o.Delivery = &orderdeliverydto.OrderDeliveryDTO{}
+		o.Delivery.FromDomain(order.Delivery)
+	}
+	if order.Table != nil {
+		o.Table = &ordertabledto.OrderTableDTO{}
+		o.Table.FromDomain(order.Table)
+	}
+	if order.Pickup != nil {
+		o.Pickup = &orderpickupdto.OrderPickupDTO{}
+		o.Pickup.FromDomain(order.Pickup)
+	}
+	if order.Attendant != nil {
+		o.Attendant = &employeedto.EmployeeDTO{}
+		o.Attendant.FromDomain(order.Attendant)
 	}
 
-	for _, payment := range order.Payments {
-		paymentOrderDTO := PaymentOrderDTO{}
-		paymentOrderDTO.FromDomain(&payment)
-		o.Payments = append(o.Payments, paymentOrderDTO)
+	if len(order.GroupItems) > 0 {
+		o.GroupItems = make([]groupitemdto.GroupItemDTO, len(order.GroupItems))
+		for i := range order.GroupItems {
+			o.GroupItems[i].FromDomain(&order.GroupItems[i])
+		}
 	}
 
-	if order.Delivery == nil {
-		o.Delivery = nil
-	}
-	if order.Table == nil {
-		o.Table = nil
-	}
-	if order.Pickup == nil {
-		o.Pickup = nil
-	}
-	if order.Attendant == nil {
-		o.Attendant = nil
+	if len(order.Payments) > 0 {
+		o.Payments = make([]PaymentOrderDTO, len(order.Payments))
+		for i := range order.Payments {
+			o.Payments[i].FromDomain(&order.Payments[i])
+		}
 	}
 
-	if len(order.GroupItems) == 0 {
-		o.GroupsItems = nil
-	}
-	if len(order.Payments) == 0 {
-		o.Payments = nil
+	if len(order.Fees) > 0 {
+		o.Fees = make([]AdditionalFee, len(order.Fees))
+		for i := range order.Fees {
+			o.Fees[i] = AdditionalFee{
+				Name:  string(order.Fees[i].Name),
+				Value: order.Fees[i].Value,
+			}
+		}
 	}
 
+	if order.Delivery != nil {
+		o.Delivery = &orderdeliverydto.OrderDeliveryDTO{}
+		o.Delivery.FromDomain(order.Delivery)
+	}
+	if order.Table != nil {
+		o.Table = &ordertabledto.OrderTableDTO{}
+		o.Table.FromDomain(order.Table)
+	}
+	if order.Pickup != nil {
+		o.Pickup = &orderpickupdto.OrderPickupDTO{}
+		o.Pickup.FromDomain(order.Pickup)
+	}
+	if order.Attendant != nil {
+		o.Attendant = &employeedto.EmployeeDTO{}
+		o.Attendant.FromDomain(order.Attendant)
+	}
 }

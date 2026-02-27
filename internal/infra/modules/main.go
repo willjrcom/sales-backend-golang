@@ -84,7 +84,7 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, rabb
 	stockService.AddDependencies(productRepository, itemRepository, employeeRepository)
 
 	orderService.AddDependencies(orderRepository, shiftRepository, productRepository, processRuleRepository, orderDeliveryRepository, stockRepository, stockMovementRepository, companySubscriptionRepo, groupItemService, orderProcessService, orderQueueService, orderDeliveryService, orderPickupService, orderTableService, companyService, employeeRepository, rabbitmq, clientService)
-	orderDeliveryService.AddDependencies(addressRepository, clientRepository, orderRepository, orderService, deliveryDriverRepository, companyService, rabbitmq)
+	orderDeliveryService.AddDependencies(addressRepository, clientRepository, orderRepository, orderService, deliveryDriverRepository, companyRepository, rabbitmq)
 	deliveryDriverService.AddDependencies(employeeRepository)
 	orderTableService.AddDependencies(tableRepository, orderService, companyService)
 	orderPickupService.AddDependencies(orderService)

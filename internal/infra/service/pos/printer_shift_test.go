@@ -17,7 +17,7 @@ func Test_FormatShift(t *testing.T) {
 			OrderCommonAttributes: orderentity.OrderCommonAttributes{
 				OrderNumber: 1,
 				OrderDetail: orderentity.OrderDetail{
-					TotalPayable: decimal.NewFromInt(10),
+					SubTotal: decimal.NewFromInt(10),
 				},
 			},
 		},
@@ -25,7 +25,7 @@ func Test_FormatShift(t *testing.T) {
 			OrderCommonAttributes: orderentity.OrderCommonAttributes{
 				OrderNumber: 2,
 				OrderDetail: orderentity.OrderDetail{
-					TotalPayable: decimal.NewFromInt(131),
+					SubTotal: decimal.NewFromInt(131),
 				},
 			},
 		},
@@ -33,7 +33,7 @@ func Test_FormatShift(t *testing.T) {
 			OrderCommonAttributes: orderentity.OrderCommonAttributes{
 				OrderNumber: 3,
 				OrderDetail: orderentity.OrderDetail{
-					TotalPayable: decimal.NewFromInt(110),
+					SubTotal: decimal.NewFromInt(110),
 				},
 			},
 		},
@@ -41,7 +41,7 @@ func Test_FormatShift(t *testing.T) {
 			OrderCommonAttributes: orderentity.OrderCommonAttributes{
 				OrderNumber: 4,
 				OrderDetail: orderentity.OrderDetail{
-					TotalPayable: decimal.NewFromInt(10),
+					SubTotal: decimal.NewFromInt(10),
 				},
 			},
 		},

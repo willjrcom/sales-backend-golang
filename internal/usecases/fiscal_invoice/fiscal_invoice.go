@@ -159,7 +159,7 @@ func (s *Service) EmitNFCeOrder(ctx context.Context, orderID uuid.UUID) (*fiscal
 
 	// If no payments yet, add "dinheiro" with total
 	if len(formasPagamento) == 0 {
-		valorTotal, _ := orderModel.TotalPayable.Float64()
+		valorTotal, _ := orderModel.SubTotal.Float64()
 		formasPagamento = append(formasPagamento, focusnfe.PaymentMethod{
 			FormaPagamento: "01", // 01 = Dinheiro
 			ValorPagamento: valorTotal,

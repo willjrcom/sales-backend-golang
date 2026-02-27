@@ -20,14 +20,16 @@ type Order struct {
 type OrderCommonAttributes struct {
 	OrderType
 	OrderDetail
-	OrderNumber int            `bun:"order_number,notnull"`
-	Status      string         `bun:"status,notnull"`
-	GroupItems  []GroupItem    `bun:"rel:has-many,join:id=order_id"`
-	Payments    []PaymentOrder `bun:"rel:has-many,join:id=order_id"`
+	OrderNumber int             `bun:"order_number,notnull"`
+	Status      string          `bun:"status,notnull"`
+	GroupItems  []GroupItem     `bun:"rel:has-many,join:id=order_id"`
+	Payments    []PaymentOrder  `bun:"rel:has-many,join:id=order_id"`
+	Fees        []AdditionalFee `bun:"column:fees,type:jsonb"`
 }
 
 type OrderDetail struct {
-	TotalPayable  *decimal.Decimal `bun:"total_payable,type:decimal(10,2)"`
+	SubTotal      *decimal.Decimal `bun:"sub_total,type:decimal(10,2)"`
+	Total         *decimal.Decimal `bun:"total,type:decimal(10,2)"`
 	TotalPaid     *decimal.Decimal `bun:"total_paid,type:decimal(10,2)"`
 	TotalChange   *decimal.Decimal `bun:"total_change,type:decimal(10,2)"`
 	QuantityItems float64          `bun:"quantity_items"`
@@ -51,6 +53,11 @@ type OrderTimeLogs struct {
 	ArchivedAt  *time.Time `bun:"archived_at"`
 }
 
+type AdditionalFee struct {
+	Name  string          `json:"name"`
+	Value decimal.Decimal `json:"value"`
+}
+
 func (o *Order) FromDomain(order *orderentity.Order) {
 	if order == nil {
 		return
@@ -60,16 +67,10 @@ func (o *Order) FromDomain(order *orderentity.Order) {
 		OrderCommonAttributes: OrderCommonAttributes{
 			OrderNumber: order.OrderNumber,
 			Status:      string(order.Status),
-			GroupItems:  []GroupItem{},
-			Payments:    []PaymentOrder{},
-			OrderType: OrderType{
-				Delivery: &OrderDelivery{},
-				Table:    &OrderTable{},
-				Pickup:   &OrderPickup{},
-			},
+			OrderType:   OrderType{},
 			OrderDetail: OrderDetail{
-				Attendant:     &Employee{},
-				TotalPayable:  &order.TotalPayable,
+				SubTotal:      &order.SubTotal,
+				Total:         &order.Total,
 				TotalPaid:     &order.TotalPaid,
 				TotalChange:   &order.TotalChange,
 				QuantityItems: order.QuantityItems,
@@ -97,22 +98,49 @@ func (o *Order) FromDomain(order *orderentity.Order) {
 		o.Payments[i].FromDomain(&order.Payments[i])
 	}
 
-	o.OrderType.Delivery.FromDomain(order.Delivery)
-	o.OrderType.Table.FromDomain(order.Table)
-	o.OrderType.Pickup.FromDomain(order.Pickup)
-	o.OrderDetail.Attendant.FromDomain(order.Attendant)
+	if order.Delivery != nil {
+		o.OrderType.Delivery = &OrderDelivery{}
+		o.OrderType.Delivery.FromDomain(order.Delivery)
+	}
+	if order.Table != nil {
+		o.OrderType.Table = &OrderTable{}
+		o.OrderType.Table.FromDomain(order.Table)
+	}
+	if order.Pickup != nil {
+		o.OrderType.Pickup = &OrderPickup{}
+		o.OrderType.Pickup.FromDomain(order.Pickup)
+	}
 
-	if order.Delivery == nil {
-		o.OrderType.Delivery = nil
+	if order.Attendant != nil {
+		o.OrderDetail.Attendant = &Employee{}
+		o.OrderDetail.Attendant.FromDomain(order.Attendant)
 	}
-	if order.Table == nil {
-		o.OrderType.Table = nil
+
+	if len(order.Fees) > 0 {
+		o.Fees = make([]AdditionalFee, len(order.Fees))
+		for i := range order.Fees {
+			o.Fees[i] = AdditionalFee{
+				Name:  string(order.Fees[i].Name),
+				Value: order.Fees[i].Value,
+			}
+		}
 	}
-	if order.Pickup == nil {
-		o.OrderType.Pickup = nil
+
+	if order.Delivery != nil {
+		o.OrderType.Delivery = &OrderDelivery{}
+		o.OrderType.Delivery.FromDomain(order.Delivery)
 	}
-	if order.Attendant == nil {
-		o.OrderDetail.Attendant = nil
+	if order.Table != nil {
+		o.OrderType.Table = &OrderTable{}
+		o.OrderType.Table.FromDomain(order.Table)
+	}
+	if order.Pickup != nil {
+		o.OrderType.Pickup = &OrderPickup{}
+		o.OrderType.Pickup.FromDomain(order.Pickup)
+	}
+	if order.Attendant != nil {
+		o.OrderDetail.Attendant = &Employee{}
+		o.OrderDetail.Attendant.FromDomain(order.Attendant)
 	}
 }
 
@@ -133,7 +161,8 @@ func (o *Order) ToDomain() *orderentity.Order {
 				Pickup:   &orderentity.OrderPickup{},
 			},
 			OrderDetail: orderentity.OrderDetail{
-				TotalPayable:  o.GetTotalPayable(),
+				SubTotal:      o.GetSubTotal(),
+				Total:         o.GetTotal(),
 				TotalPaid:     o.GetTotalPaid(),
 				TotalChange:   o.GetTotalChange(),
 				QuantityItems: o.QuantityItems,
@@ -159,6 +188,13 @@ func (o *Order) ToDomain() *orderentity.Order {
 		order.Payments = append(order.Payments, *o.Payments[i].ToDomain())
 	}
 
+	for i := range o.Fees {
+		order.Fees = append(order.Fees, orderentity.AdditionalFee{
+			Name:  orderentity.AdditionalFeeName(o.Fees[i].Name),
+			Value: o.Fees[i].Value,
+		})
+	}
+
 	order.Delivery = o.Delivery.ToDomain()
 	order.Table = o.Table.ToDomain()
 	order.Pickup = o.Pickup.ToDomain()
@@ -166,11 +202,18 @@ func (o *Order) ToDomain() *orderentity.Order {
 	return order
 }
 
-func (o *Order) GetTotalPayable() decimal.Decimal {
-	if o.TotalPayable == nil {
+func (o *Order) GetSubTotal() decimal.Decimal {
+	if o.SubTotal == nil {
 		return decimal.Zero
 	}
-	return *o.TotalPayable
+	return *o.SubTotal
+}
+
+func (o *Order) GetTotal() decimal.Decimal {
+	if o.Total == nil {
+		return decimal.Zero
+	}
+	return *o.Total
 }
 
 func (o *Order) GetTotalPaid() decimal.Decimal {

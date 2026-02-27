@@ -225,7 +225,7 @@ func (s *OrderTableService) AddTableTax(ctx context.Context, dtoID *entitydto.ID
 		return err
 	}
 
-	return s.os.UpdateOrderTotal(ctx, orderTable.OrderID.String())
+	return s.os.UpdateTotalFees(ctx, orderTable.OrderID.String())
 }
 
 // RemoveTableTax sets the table tax rate to zero for the order-table.
@@ -246,7 +246,7 @@ func (s *OrderTableService) RemoveTableTax(ctx context.Context, dtoID *entitydto
 		return err
 	}
 
-	return s.os.UpdateOrderTotal(ctx, orderTable.OrderID.String())
+	return s.os.UpdateTotalFees(ctx, orderTable.OrderID.String())
 }
 
 func (s *OrderTableService) CloseOrderTable(ctx context.Context, dtoID *entitydto.IDRequest) error {

@@ -84,7 +84,7 @@ func Test_FormatOrder(t *testing.T) {
 				},
 			},
 			OrderDetail: orderentity.OrderDetail{
-				TotalPayable:  decimal.NewFromFloat(150.45),
+				SubTotal:      decimal.NewFromFloat(150.45),
 				TotalPaid:     decimal.NewFromFloat(120.45),
 				TotalChange:   decimal.NewFromFloat(30.45),
 				QuantityItems: 2.0,

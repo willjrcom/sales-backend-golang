@@ -6,17 +6,17 @@ import (
 	"fmt"
 
 	"github.com/shopspring/decimal"
+	addressentity "github.com/willjrcom/sales-backend-go/internal/domain/address"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderdeliverydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_delivery"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/rabbitmq"
-	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 )
 
 var (
-	ErrOrderLaunched  = errors.New("order already launched")
+	ErrOrderLaunched  = errors.New("order already shipped")
 	ErrOrderDelivered = errors.New("order already delivered")
 )
 
@@ -27,7 +27,7 @@ type IDeliveryService interface {
 	IUpdateDeliveryService
 }
 type ISetupDeliveryService interface {
-	AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, so *OrderService, rdd model.DeliveryDriverRepository, cs *companyusecases.Service, rabbitmq *rabbitmq.RabbitMQ)
+	AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, os *OrderService, rdd model.DeliveryDriverRepository, companyRepo model.CompanyRepository, rabbitmq *rabbitmq.RabbitMQ)
 }
 
 type ICreateDeliveryService interface {
@@ -51,27 +51,27 @@ type IUpdateDeliveryService interface {
 }
 
 type OrderDeliveryService struct {
-	rdo      model.OrderDeliveryRepository
-	ra       model.AddressRepository
-	rc       model.ClientRepository
-	ro       model.OrderRepository
-	rdd      model.DeliveryDriverRepository
-	so       *OrderService
-	cs       *companyusecases.Service
-	rabbitmq *rabbitmq.RabbitMQ
+	rdo         model.OrderDeliveryRepository
+	ra          model.AddressRepository
+	rc          model.ClientRepository
+	ro          model.OrderRepository
+	rdd         model.DeliveryDriverRepository
+	so          *OrderService
+	companyRepo model.CompanyRepository
+	rabbitmq    *rabbitmq.RabbitMQ
 }
 
 func NewDeliveryService(rdo model.OrderDeliveryRepository) IDeliveryService {
 	return &OrderDeliveryService{rdo: rdo}
 }
 
-func (s *OrderDeliveryService) AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, os *OrderService, rdd model.DeliveryDriverRepository, cs *companyusecases.Service, rabbitmq *rabbitmq.RabbitMQ) {
+func (s *OrderDeliveryService) AddDependencies(ra model.AddressRepository, rc model.ClientRepository, ro model.OrderRepository, os *OrderService, rdd model.DeliveryDriverRepository, companyRepo model.CompanyRepository, rabbitmq *rabbitmq.RabbitMQ) {
 	s.ra = ra
 	s.rc = rc
 	s.ro = ro
 	s.so = os
 	s.rdd = rdd
-	s.cs = cs
+	s.companyRepo = companyRepo
 	s.rabbitmq = rabbitmq
 }
 
@@ -82,7 +82,7 @@ func (s *OrderDeliveryService) CreateOrderDelivery(ctx context.Context, dto *ord
 		return nil, err
 	}
 
-	company, err := s.cs.GetCompany(ctx)
+	company, err := s.companyRepo.GetCompany(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -119,18 +119,39 @@ func (s *OrderDeliveryService) CreateOrderDelivery(ctx context.Context, dto *ord
 	delivery.ClientID = client.ID
 	delivery.AddressID = client.Address.ID
 
+	deliveryTax, err := s.CalculateDeliveryTax(ctx, client.Address, company.ToDomain())
+	if err != nil {
+		return nil, err
+	}
+
+	delivery.DeliveryTax = &deliveryTax
+	deliveryModel := &model.OrderDelivery{}
+	deliveryModel.FromDomain(delivery)
+	if err = s.rdo.CreateOrderDelivery(ctx, deliveryModel); err != nil {
+		return nil, err
+	}
+
+	// Update delivery tax
+	if err := s.so.UpdateTotalFees(ctx, delivery.OrderID.String()); err != nil {
+		return nil, err
+	}
+
+	return orderdeliverydto.FromDomain(delivery.ID, orderID), nil
+}
+
+func (s *OrderDeliveryService) CalculateDeliveryTax(ctx context.Context, address *addressentity.Address, company *companyentity.Company) (decimal.Decimal, error) {
 	// Delivery Tax Logic
 	var calculatedTax decimal.Decimal
-	if client.Address.DeliveryTax.GreaterThan(decimal.Zero) {
+	if address.DeliveryTax.GreaterThan(decimal.Zero) {
 		// 1. Manual override takes precedence
-		calculatedTax = client.Address.DeliveryTax
-	} else if client.Address.Distance > 0 {
+		calculatedTax = address.DeliveryTax
+	} else if address.Distance > 0 {
 		// 2. Dynamic calculation based on distance
 		feePerKm, _ := company.Preferences.GetDecimal(companyentity.DeliveryFeePerKm)
-		calculatedTax = feePerKm.Mul(decimal.NewFromFloat(client.Address.Distance))
+		calculatedTax = feePerKm.Mul(decimal.NewFromFloat(address.Distance))
 	} else {
 		// 3. Fallback to delivery_tax (even if 0) if no distance
-		calculatedTax = client.Address.DeliveryTax
+		calculatedTax = address.DeliveryTax
 	}
 
 	// Apply Minimum Tax
@@ -140,20 +161,7 @@ func (s *OrderDeliveryService) CreateOrderDelivery(ctx context.Context, dto *ord
 		}
 	}
 
-	delivery.DeliveryTax = &calculatedTax
-
-	deliveryModel := &model.OrderDelivery{}
-	deliveryModel.FromDomain(delivery)
-	if err = s.rdo.CreateOrderDelivery(ctx, deliveryModel); err != nil {
-		return nil, err
-	}
-
-	// Update delivery tax
-	if err := s.so.UpdateOrderTotal(ctx, delivery.OrderID.String()); err != nil {
-		return nil, err
-	}
-
-	return orderdeliverydto.FromDomain(delivery.ID, orderID), nil
+	return calculatedTax, nil
 }
 
 func (s *OrderDeliveryService) GetDeliveryById(ctx context.Context, dto *entitydto.IDRequest) (*orderdeliverydto.OrderDeliveryDTO, error) {
@@ -246,12 +254,30 @@ func (s *OrderDeliveryService) ShipOrderDelivery(ctx context.Context, dtoShip *o
 		return err
 	}
 
-	company, err := s.cs.GetCompany(ctx)
+	company, err := s.companyRepo.GetCompany(ctx)
 	if err != nil {
 		return err
 	}
 
 	for i := range orderDeliveries {
+		orderModel, err := s.so.ro.GetOnlyOrderById(ctx, orderDeliveries[i].OrderID.String())
+		if err != nil {
+			return err
+		}
+
+		order := orderModel.ToDomain()
+		if order.Status == orderentity.OrderStatusFinished {
+			return errors.New("order is finished")
+		}
+		if order.Status == orderentity.OrderStatusCancelled {
+			return errors.New("order is cancelled")
+		}
+		if order.Status == orderentity.OrderStatusPending {
+			return errors.New("order is pending")
+		}
+		if order.Status == orderentity.OrderStatusStaging {
+			return errors.New("order is staging")
+		}
 		if err := orderDeliveries[i].Ship(&dtoShip.DriverID); err != nil {
 			return err
 		}
@@ -329,9 +355,25 @@ func (s *OrderDeliveryService) UpdateDeliveryAddress(ctx context.Context, dtoID 
 		return ErrOrderLaunched
 	}
 
+	company, err := s.companyRepo.GetCompany(ctx)
+	if err != nil {
+		return err
+	}
+
 	orderDeliveryModel.AddressID = orderDeliveryModel.Client.Address.ID
 
+	address := orderDeliveryModel.Client.Address.ToDomain()
+	deliveryTax, err := s.CalculateDeliveryTax(ctx, address, company.ToDomain())
+	if err != nil {
+		return err
+	}
+
+	orderDeliveryModel.DeliveryTax = &deliveryTax
 	if err := s.rdo.UpdateOrderDelivery(ctx, orderDeliveryModel); err != nil {
+		return err
+	}
+
+	if err := s.so.UpdateTotalFees(ctx, orderDeliveryModel.OrderID.String()); err != nil {
 		return err
 	}
 
@@ -360,10 +402,6 @@ func (s *OrderDeliveryService) UpdateDeliveryDriver(ctx context.Context, dtoID *
 
 	orderDeliveryModel.FromDomain(orderDelivery)
 	if err := s.rdo.UpdateOrderDelivery(ctx, orderDeliveryModel); err != nil {
-		return err
-	}
-
-	if err := s.so.UpdateOrderTotal(ctx, orderDelivery.OrderID.String()); err != nil {
 		return err
 	}
 
