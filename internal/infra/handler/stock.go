@@ -275,7 +275,7 @@ func (h *handlerStockImpl) handlerAdjustStock(w http.ResponseWriter, r *http.Req
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	stockAdjust := &stockdto.StockMovementAdjustDTO{}
-	if err := jsonpkg.ParseBody(r, &stockAdjust); err != nil {
+	if err := jsonpkg.ParseBody(r, stockAdjust); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}

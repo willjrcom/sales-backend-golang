@@ -148,7 +148,7 @@ func (h *handlerProcessImpl) handlerCancelProcess(w http.ResponseWriter, r *http
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	dtoCancel := &processdto.OrderProcessCancelDTO{}
-	if err := jsonpkg.ParseBody(r, &dtoCancel); err != nil {
+	if err := jsonpkg.ParseBody(r, dtoCancel); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}

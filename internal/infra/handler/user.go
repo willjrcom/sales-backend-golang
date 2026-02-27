@@ -295,7 +295,7 @@ func (h *handlerUserImpl) handlerValidatePasswordResetToken(w http.ResponseWrite
 	ctx := r.Context()
 
 	req := &companydto.UserResetTokenRequestDTO{}
-	if err := jsonpkg.ParseBody(r, &req); err != nil {
+	if err := jsonpkg.ParseBody(r, req); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}

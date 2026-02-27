@@ -46,8 +46,8 @@ func handlerGeneratePresignedURL(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	// Parse request body
-	var req s3dto.PresignRequestDTO
-	if err := jsonpkg.ParseBody(r, &req); err != nil {
+	req := &s3dto.PresignRequestDTO{}
+	if err := jsonpkg.ParseBody(r, req); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, err)
 		return
 	}

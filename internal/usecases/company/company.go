@@ -17,6 +17,7 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/service/focusnfe"
 	geocodeservice "github.com/willjrcom/sales-backend-go/internal/infra/service/geocode"
 	schemaservice "github.com/willjrcom/sales-backend-go/internal/infra/service/header"
+	"github.com/willjrcom/sales-backend-go/internal/infra/service/rabbitmq"
 	employeeusecases "github.com/willjrcom/sales-backend-go/internal/usecases/employee"
 	userusecases "github.com/willjrcom/sales-backend-go/internal/usecases/user"
 )
@@ -32,13 +33,14 @@ type Service struct {
 	focusClient             *focusnfe.Client
 	costRepo                model.CompanyUsageCostRepository
 	companySubscriptionRepo model.CompanySubscriptionRepository
+	rabbitmq                *rabbitmq.RabbitMQ
 }
 
 func NewService(r model.CompanyRepository, companyPaymentRepo model.CompanyPaymentRepository, focusClient *focusnfe.Client) *Service {
 	return &Service{r: r, companyPaymentRepo: companyPaymentRepo, focusClient: focusClient}
 }
 
-func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Service, u model.UserRepository, us userusecases.Service, es employeeusecases.Service, costRepo model.CompanyUsageCostRepository, companySubscriptionRepo model.CompanySubscriptionRepository) {
+func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Service, u model.UserRepository, us userusecases.Service, es employeeusecases.Service, costRepo model.CompanyUsageCostRepository, companySubscriptionRepo model.CompanySubscriptionRepository, rabbitmq *rabbitmq.RabbitMQ) {
 	s.a = a
 	s.s = ss
 	s.u = u
@@ -46,6 +48,7 @@ func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Se
 	s.es = es
 	s.costRepo = costRepo
 	s.companySubscriptionRepo = companySubscriptionRepo
+	s.rabbitmq = rabbitmq
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (response *companydto.CompanySchemaDTO, err error) {

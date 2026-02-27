@@ -74,12 +74,12 @@ func (s *Service) CreateUser(ctx context.Context, dto *companydto.UserCreateDTO)
 
 		bodyEmail := &emailservice.BodyEmail{
 			Email:   user.Email,
-			Subject: "Bem-vindo à GazalTech",
+			Subject: "Bem-vindo à GFood",
 			Body: `<div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px;">
-			<h2 style="color: #eab308; margin-bottom: 16px;">Bem-vindo à GazalTech</h2>
+			<h2 style="color: #eab308; margin-bottom: 16px;">Bem-vindo à GFood</h2>
 			
 			<p style="color: #333; font-size: 16px; margin-bottom: 24px;">
-				Sua conta foi criada com sucesso.<br>
+				Sua conta foi criada com sucesso: ` + dto.Email + `.<br>
 				Clique no botão abaixo para acessar o sistema:
 			</p>
 
@@ -91,7 +91,7 @@ func (s *Service) CreateUser(ctx context.Context, dto *companydto.UserCreateDTO)
 			
 			<p style="color: #999; font-size: 13px; margin-top: 24px;">
 				Atenciosamente,<br>
-				Equipe GazalTech
+				Equipe GFood
 			</p>
 			</div>
 		`,
@@ -175,6 +175,10 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 		return err
 	}
 
+	if id, _ := s.r.GetIDByEmail(ctx, *email); id == nil {
+		return ErrInvalidEmail
+	}
+
 	token, err := jwtservice.CreatePasswordResetToken(*email)
 	if err != nil {
 		return err
@@ -190,11 +194,11 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 		Email:   *email,
 		Subject: "Redefinição de senha",
 		Body: `<div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px;">
-		<h2 style="color: #eab308; margin-bottom: 16px;">Redefinição de Senha - GazalTech</h2>
+		<h2 style="color: #eab308; margin-bottom: 16px;">Redefinição de Senha - GFood</h2>
 		
 		<p style="color: #333; font-size: 16px; margin-bottom: 24px;">
 			Recebemos uma solicitação para redefinir a senha da sua conta.<br>
-			Clique no botão abaixo ou use o código para redefinir sua senha:
+			Clique no botão abaixo para redefinir sua senha:
 		</p>
 
 		<div style="text-align: center; margin-bottom: 24px;">
@@ -203,19 +207,15 @@ func (s *Service) ForgetUserPassword(ctx context.Context, dto *companydto.UserFo
 			</a>
 		</div>
 		
-		<div style="background: #f3f4f6; border-radius: 6px; padding: 20px; text-align: center; margin-bottom: 16px;">
-			<p style="margin: 0 0 8px; font-size: 14px; color: #666;">Ou copie este código:</p>
-			<span id="reset-code" style="font-size: 15px; color: #222; word-break: break-word; font-family: monospace; font-weight: bold;">` + token + `</span>
-		</div>
-		
 		<p style="color: #666; font-size: 14px;">
+			Este link é exclusivo para sua conta e garante a segurança da redefinição.<br>
 			Se você não solicitou essa alteração, ignore este e-mail.<br>
-			<b>O código expira em 30 minutos.</b>
+			<b>O link expira em 30 minutos.</b>
 		</p>
 		
 		<p style="color: #999; font-size: 13px; margin-top: 24px;">
 			Atenciosamente,<br>
-			Equipe GazalTech
+			Equipe GFood
 		</p>
 		</div>
 	`,
