@@ -27,8 +27,6 @@ func NewHandlerOrderProcess(processService *orderusecases.OrderProcessService) *
 	c.With().Group(func(c chi.Router) {
 		c.Post("/new", h.handlerCreateProcess)
 		c.Post("/start/{id}", h.handlerStartProcess)
-		c.Post("/pause/{id}", h.handlerPauseProcess)
-		c.Post("/continue/{id}", h.handlerContinueProcess)
 		c.Post("/finish/{id}", h.handlerFinishProcess)
 		c.Post("/cancel/{id}", h.handlerCancelProcess)
 		c.Get("/{id}", h.handlerGetProcess)
@@ -71,44 +69,6 @@ func (h *handlerProcessImpl) handlerStartProcess(w http.ResponseWriter, r *http.
 	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
 
 	if err := h.s.StartProcess(ctx, dtoId); err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
-}
-
-func (h *handlerProcessImpl) handlerPauseProcess(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	id := chi.URLParam(r, "id")
-
-	if id == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
-		return
-	}
-
-	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
-
-	if err := h.s.PauseProcess(ctx, dtoId); err != nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
-		return
-	}
-
-	jsonpkg.ResponseJson(w, r, http.StatusOK, nil)
-}
-
-func (h *handlerProcessImpl) handlerContinueProcess(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	id := chi.URLParam(r, "id")
-
-	if id == "" {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
-		return
-	}
-
-	dtoId := &entitydto.IDRequest{ID: uuid.MustParse(id)}
-
-	if err := h.s.ContinueProcess(ctx, dtoId); err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
 	}

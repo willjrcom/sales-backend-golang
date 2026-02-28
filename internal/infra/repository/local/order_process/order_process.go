@@ -37,7 +37,7 @@ func (r *OrderProcessRepositoryLocal) DeleteProcess(ctx context.Context, id stri
 	return nil
 }
 
-func (r *OrderProcessRepositoryLocal) GetProcessById(ctx context.Context, id string) (*model.OrderProcess, error) {
+func (r *OrderProcessRepositoryLocal) GetProcessById(ctx context.Context, id string, withSnapshot bool) (*model.OrderProcess, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	if p, ok := r.processes[id]; ok {

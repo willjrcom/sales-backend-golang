@@ -97,7 +97,7 @@ func (s *OrderProcessService) StartProcess(ctx context.Context, dtoID *entitydto
 		return err
 	}
 
-	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String())
+	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String(), false)
 	if err != nil {
 		return err
 	}
@@ -132,46 +132,8 @@ func (s *OrderProcessService) StartProcess(ctx context.Context, dtoID *entitydto
 	return nil
 }
 
-func (s *OrderProcessService) PauseProcess(ctx context.Context, dtoID *entitydto.IDRequest) error {
-	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String())
-	if err != nil {
-		return err
-	}
-
-	process := processModel.ToDomain()
-	if err := process.PauseProcess(); err != nil {
-		return err
-	}
-
-	processModel.FromDomain(process)
-	if err := s.r.UpdateProcess(ctx, processModel); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *OrderProcessService) ContinueProcess(ctx context.Context, dtoID *entitydto.IDRequest) error {
-	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String())
-	if err != nil {
-		return err
-	}
-
-	process := processModel.ToDomain()
-	if err := process.ContinueProcess(); err != nil {
-		return err
-	}
-
-	processModel.FromDomain(process)
-	if err := s.r.UpdateProcess(ctx, processModel); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydto.IDRequest) (nextProcessID uuid.UUID, err error) {
-	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String())
+	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String(), false)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -251,16 +213,6 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 		return uuid.Nil, nil
 	}
 
-	// Start next queue
-	startQueueInput := &orderqueuedto.QueueCreateDTO{
-		GroupItemID: process.GroupItemID,
-		JoinedAt:    *process.FinishedAt,
-	}
-
-	if _, err := s.sq.StartQueue(ctx, startQueueInput); err != nil {
-		return uuid.Nil, err
-	}
-
 	processRule, err := s.rpr.GetProcessRuleById(ctx, process.ProcessRuleID.String())
 	if err != nil {
 		return uuid.Nil, err
@@ -279,6 +231,16 @@ func (s *OrderProcessService) FinishProcess(ctx context.Context, dtoID *entitydt
 	if existing != nil {
 		// Process already exists for the next step — return its ID without creating a duplicate
 		return existing.ID, nil
+	}
+
+	// Start next queue only if the process doesn't exist yet
+	startQueueInput := &orderqueuedto.QueueCreateDTO{
+		GroupItemID: process.GroupItemID,
+		JoinedAt:    *process.FinishedAt,
+	}
+
+	if _, err := s.sq.StartQueue(ctx, startQueueInput); err != nil {
+		return uuid.Nil, err
 	}
 
 	createProcessInput := &orderprocessdto.OrderProcessCreateDTO{
@@ -302,7 +264,7 @@ func (s *OrderProcessService) CancelProcess(ctx context.Context, dtoID *entitydt
 		return err
 	}
 
-	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String())
+	processModel, err := s.r.GetProcessById(ctx, dtoID.ID.String(), false)
 	if err != nil {
 		return err
 	}
@@ -325,7 +287,7 @@ func (s *OrderProcessService) CancelProcess(ctx context.Context, dtoID *entitydt
 }
 
 func (s *OrderProcessService) GetProcessById(ctx context.Context, dto *entitydto.IDRequest) (*orderprocessdto.OrderProcessDTO, error) {
-	if processModel, err := s.r.GetProcessById(ctx, dto.ID.String()); err != nil {
+	if processModel, err := s.r.GetProcessById(ctx, dto.ID.String(), true); err != nil {
 		return nil, err
 	} else {
 		process := processModel.ToDomain()
