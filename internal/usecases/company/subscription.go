@@ -45,6 +45,16 @@ func (s *Service) GetSubscriptionStatus(ctx context.Context) (*companydto.Subscr
 		default:
 			dto.Frequency = "MONTHLY"
 		}
+
+		return dto, nil
+	}
+
+	// get last plan
+	lastPlan, err := s.companySubscriptionRepo.GetLastPlan(ctx, company.ID)
+	if err == nil && lastPlan != nil {
+		expiresAt := lastPlan.EndDate.Format(time.RFC3339)
+		dto.ExpiresAt = &expiresAt
+		dto.IsCancelled = lastPlan.IsCancelled
 	}
 
 	return dto, nil

@@ -14,6 +14,7 @@ type CompanySubscriptionRepository interface {
 	MarkSubscriptionAsActive(ctx context.Context, companyID uuid.UUID, externalReference string) error
 	UpdateSubscriptionStatus(ctx context.Context, companyID uuid.UUID, status string, externalReference string) error
 	GetActiveSubscription(ctx context.Context, companyID uuid.UUID) (*CompanySubscription, error)
+	GetLastPlan(ctx context.Context, companyID uuid.UUID) (*CompanySubscription, error)
 	GetByPreapprovalID(ctx context.Context, preapprovalID string) (*CompanySubscription, error)
 	GetByExternalReference(ctx context.Context, externalReference string) (*CompanySubscription, error)
 	UpdateCompanyPlans(ctx context.Context) error

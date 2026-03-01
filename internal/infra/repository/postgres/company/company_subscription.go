@@ -195,6 +195,32 @@ func (r *CompanySubscriptionRepositoryBun) GetActiveSubscription(ctx context.Con
 	return active, nil
 }
 
+func (r *CompanySubscriptionRepositoryBun) GetLastPlan(ctx context.Context, companyID uuid.UUID) (*model.CompanySubscription, error) {
+	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	// Get Last Plan by end_date
+	last := &model.CompanySubscription{}
+	if err := tx.NewSelect().
+		Model(last).
+		Where("company_id = ?", companyID).
+		Order("end_date DESC").
+		Limit(1).
+		Scan(ctx); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return last, nil
+}
+
 func (r *CompanySubscriptionRepositoryBun) UpdateCompanyPlans(ctx context.Context) error {
 	ctx, tx, cancel, err := database.GetPublicTenantTransaction(ctx, r.db)
 	if err != nil {
