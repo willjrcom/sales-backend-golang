@@ -17,5 +17,10 @@ func (s *OrderService) DeleteOrderByID(ctx context.Context, dtoId *entitydto.IDR
 		return errors.New("order is not in staging status")
 	}
 
+	orderDomain := order.ToDomain()
+	if err := s.restoreStockFromOrder(ctx, orderDomain); err != nil {
+		return err
+	}
+
 	return s.ro.DeleteOrder(ctx, dtoId.ID.String())
 }
