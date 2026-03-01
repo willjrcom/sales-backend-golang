@@ -81,8 +81,8 @@ func (s *DailyScheduler) CleanStagingOrders(ctx context.Context) {
 
 		for _, order := range orders {
 			dtoID := &entitydto.IDRequest{ID: order.ID}
-			if err := s.orderUseCase.CancelOrder(ctxSchema, dtoID, true); err != nil {
-				log.Printf("Scheduler: Error cancelling staging order %s in schema %s: %v", order.ID, schema, err)
+			if err := s.orderUseCase.DeleteOrderByID(ctxSchema, dtoID); err != nil {
+				log.Printf("Scheduler: Error deleting staging order %s in schema %s: %v", order.ID, schema, err)
 			}
 		}
 
