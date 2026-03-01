@@ -451,6 +451,39 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	return order, nil
 }
 
+func (r *OrderRepositoryBun) GetAllOpenedOrders(ctx context.Context) ([]model.Order, error) {
+	orders := []model.Order{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+	validStatuses := []orderentity.StatusOrder{
+		orderentity.OrderStatusStaging,
+		orderentity.OrderStatusPending,
+		orderentity.OrderStatusReady,
+	}
+
+	query := tx.NewSelect().Model(&orders).
+		Where(`"order"."status" IN (?)`, bun.In(validStatuses)).
+		Relation("Attendant").
+		Relation("Table").
+		Relation("Delivery").
+		Relation("Pickup").
+		Order("order.created_at ASC")
+
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return orders, nil
+}
+
 func (r *OrderRepositoryBun) GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder) ([]model.Order, error) {
 	orders := []model.Order{}
 

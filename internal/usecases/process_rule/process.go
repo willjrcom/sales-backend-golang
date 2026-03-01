@@ -16,11 +16,16 @@ var (
 )
 
 type Service struct {
-	r model.ProcessRuleRepository
+	r  model.ProcessRuleRepository
+	rc model.CategoryRepository
 }
 
 func NewService(c model.ProcessRuleRepository) *Service {
 	return &Service{r: c}
+}
+
+func (s *Service) AddDependencies(rc model.CategoryRepository) {
+	s.rc = rc
 }
 
 func (s *Service) CreateProcessRule(ctx context.Context, dto *productcategorydto.ProcessRuleCreateDTO) (uuid.UUID, error) {
@@ -31,15 +36,39 @@ func (s *Service) CreateProcessRule(ctx context.Context, dto *productcategorydto
 	}
 
 	// Validate Order uniqueness
-	if _, err := s.r.GetProcessRuleByCategoryIdAndOrder(ctx, processRule.CategoryID.String(), int8(processRule.Order)); err == nil {
-		return uuid.Nil, errors.New("order number already exists in this category")
+	processRules, err := s.r.GetProcessRulesByCategoryId(ctx, processRule.CategoryID.String())
+	if err == nil {
+		for _, processRule := range processRules {
+			if processRule.Order == dto.Order {
+				return uuid.Nil, errors.New("order number already exists in this category")
+			}
+		}
 	}
+
+	// compare os processRules e crie o novo com 1 numero a mais que o maior
+	var maxOrder int8
+	for _, processRule := range processRules {
+		if processRule.Order > maxOrder {
+			maxOrder = processRule.Order
+		}
+	}
+	processRule.Order = maxOrder + 1
 
 	processRuleModel := &model.ProcessRule{}
 	processRuleModel.FromDomain(processRule)
 	err = s.r.CreateProcessRule(ctx, processRuleModel)
 
 	if err != nil {
+		return uuid.Nil, err
+	}
+
+	category, err := s.rc.GetCategoryById(ctx, processRule.CategoryID.String())
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	category.UseProcessRule = true
+	if err = s.rc.UpdateCategory(ctx, category); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -74,12 +103,25 @@ func (s *Service) UpdateProcessRule(ctx context.Context, dtoId *entitydto.IDRequ
 }
 
 func (s *Service) DeleteProcessRule(ctx context.Context, dto *entitydto.IDRequest) error {
-	if _, err := s.r.GetProcessRuleById(ctx, dto.ID.String()); err != nil {
+	processRuleModel, err := s.r.GetProcessRuleById(ctx, dto.ID.String())
+	if err != nil {
 		return err
 	}
 
 	if err := s.r.DeleteProcessRule(ctx, dto.ID.String()); err != nil {
 		return err
+	}
+
+	category, err := s.rc.GetCategoryById(ctx, processRuleModel.CategoryID.String())
+	if err != nil {
+		return err
+	}
+
+	if len(category.ProcessRules) == 0 {
+		category.UseProcessRule = false
+		if err = s.rc.UpdateCategory(ctx, category); err != nil {
+			return err
+		}
 	}
 
 	return nil

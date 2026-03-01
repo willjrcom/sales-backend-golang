@@ -15,6 +15,7 @@ type OrderRepository interface {
 	DeleteOrdersByStatus(ctx context.Context, status orderentity.StatusOrder) error
 	GetOrderById(ctx context.Context, id string) (*Order, error)
 	GetOnlyOrderById(ctx context.Context, id string) (*Order, error)
+	GetAllOpenedOrders(ctx context.Context) ([]Order, error)
 	GetAllOrders(ctx context.Context, shiftID string, withStatus []orderentity.StatusOrder) ([]Order, error)
 	GetAllOrdersWithReadyDelivery(ctx context.Context, page, perPage int) ([]Order, error)
 	GetAllOrdersWithShippedDelivery(ctx context.Context, page, perPage int) ([]Order, error)

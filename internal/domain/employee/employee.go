@@ -55,6 +55,7 @@ const (
 	PermissionOrderDeliveryControlFinished PermissionKey = "order-delivery-control-finished"
 	PermissionOrderPickupControl           PermissionKey = "order-pickup-control"
 	PermissionOrderProcess                 PermissionKey = "order-process"
+	PermissionEditOrderProcess             PermissionKey = "edit-order-process"
 	PermissionOrderTableControl            PermissionKey = "order-table-control"
 	PermissionPlace                        PermissionKey = "place"
 	PermissionPrint                        PermissionKey = "print"
@@ -81,6 +82,7 @@ func GetAllPermissions() []PermissionKey {
 		PermissionOrderDeliveryControlFinished,
 		PermissionOrderPickupControl,
 		PermissionOrderProcess,
+		PermissionEditOrderProcess,
 		PermissionOrderTableControl,
 		PermissionPlace,
 		PermissionPrint,

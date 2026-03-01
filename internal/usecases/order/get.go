@@ -71,6 +71,21 @@ func (s *OrderService) GetOrdersTableByTableId(ctx context.Context, dto *orderta
 }
 
 func (s *OrderService) GetAllOpenedOrders(ctx context.Context) ([]orderdto.OrderDTO, error) {
+	if orderModels, err := s.ro.GetAllOpenedOrders(ctx); err != nil {
+		return nil, err
+	} else {
+		orders := make([]orderdto.OrderDTO, 0)
+		for _, orderModel := range orderModels {
+			order := orderModel.ToDomain()
+			orderDTO := &orderdto.OrderDTO{}
+			orderDTO.FromDomain(order)
+			orders = append(orders, *orderDTO)
+		}
+		return orders, nil
+	}
+}
+
+func (s *OrderService) GetAllClosedOrders(ctx context.Context) ([]orderdto.OrderDTO, error) {
 	shiftID := uuid.Nil
 	shiftModel, _ := s.rs.GetCurrentShift(ctx)
 	if shiftModel != nil {
@@ -78,9 +93,8 @@ func (s *OrderService) GetAllOpenedOrders(ctx context.Context) ([]orderdto.Order
 	}
 
 	validStatuses := []orderentity.StatusOrder{
-		orderentity.OrderStatusStaging,
-		orderentity.OrderStatusPending,
-		orderentity.OrderStatusReady,
+		orderentity.OrderStatusFinished,
+		orderentity.OrderStatusCancelled,
 	}
 
 	if orderModels, err := s.ro.GetAllOrders(ctx, shiftID.String(), validStatuses); err != nil {

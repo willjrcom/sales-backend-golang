@@ -30,6 +30,7 @@ func NewHandlerOrder(orderService *orderusecases.OrderService) *handler.Handler 
 	c.With().Group(func(c chi.Router) {
 		c.Get("/{id}", h.handlerGetOrderById)
 		c.Get("/all/opened", h.handlerGetAllOpenedOrders)
+		c.Get("/all/closed", h.handlerGetAllClosedOrders)
 		c.Get("/all/delivery/ready", h.GetAllOrdersWithReadyDelivery)
 		c.Get("/all/delivery/shipped", h.GetAllOrdersWithShippedDelivery)
 		c.Get("/all/delivery/finished", h.GetAllOrdersWithFinishedDelivery)
@@ -77,6 +78,18 @@ func (h *handlerOrderImpl) handlerGetAllOpenedOrders(w http.ResponseWriter, r *h
 	ctx := r.Context()
 
 	orders, err := h.s.GetAllOpenedOrders(ctx)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, orders)
+}
+
+func (h *handlerOrderImpl) handlerGetAllClosedOrders(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	orders, err := h.s.GetAllClosedOrders(ctx)
 	if err != nil {
 		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
 		return
