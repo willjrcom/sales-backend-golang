@@ -38,16 +38,16 @@ func GetAllPlans() []Plan {
 		},
 		{
 			Key:      PlanIntermediate,
-			Name:     "Intermediário (+Fiscal)",
+			Name:     "Intermediário",
 			Price:    getEnvFloat("PRICE_INTERMEDIATE", 119.90),
-			Features: []string{"Tudo do Básico", "Emissão de NF-e/NFC-e", "Até 300 notas/mês"},
+			Features: []string{"Tudo do Básico", "Emissão de NF-e/NFC-e", "Até 100 notas/mês", "Menu Digital"},
 			Order:    2,
 		},
 		{
 			Key:      PlanAdvanced,
-			Name:     "Avançado (+Ilimitado)",
+			Name:     "Avançado",
 			Price:    getEnvFloat("PRICE_ADVANCED", 129.90),
-			Features: []string{"Tudo do Intermediário", "Notas Ilimitadas", "Suporte Prioritário"},
+			Features: []string{"Tudo do Intermediário", "Notas Ilimitadas", "Suporte Prioritário", "Tela de Gestão de Entregas", "Tela de Gestão de Mesas", "Tela de Gestão de Retiradas"},
 			Order:    3,
 		},
 	}
