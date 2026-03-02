@@ -275,8 +275,8 @@ func (o *Order) CalculateSubTotal() {
 	o.QuantityItems = 0.0
 
 	for i := range o.GroupItems {
-		o.GroupItems[i].CalculateTotalPrice()
-		o.SubTotal = o.SubTotal.Add(o.GroupItems[i].TotalPrice)
+		o.GroupItems[i].CalculateTotal()
+		o.SubTotal = o.SubTotal.Add(o.GroupItems[i].Total)
 		o.QuantityItems += o.GroupItems[i].Quantity
 	}
 

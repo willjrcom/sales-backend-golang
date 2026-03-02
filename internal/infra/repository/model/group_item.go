@@ -26,7 +26,8 @@ type GroupCommonAttributes struct {
 type GroupDetails struct {
 	Size             string           `bun:"size,notnull"`
 	Status           string           `bun:"status,notnull"`
-	TotalPrice       *decimal.Decimal `bun:"total_price,type:decimal(10,2)"`
+	SubTotal         *decimal.Decimal `bun:"sub_total,type:decimal(10,2)"`
+	Total            *decimal.Decimal `bun:"total,type:decimal(10,2)"`
 	Quantity         float64          `bun:"quantity"`
 	NeedPrint        bool             `bun:"need_print"`
 	PrinterName      string           `bun:"printer_name"`
@@ -59,7 +60,8 @@ func (g *GroupItem) FromDomain(groupItem *orderentity.GroupItem) {
 			GroupDetails: GroupDetails{
 				Size:             groupItem.Size,
 				Status:           string(groupItem.Status),
-				TotalPrice:       &groupItem.TotalPrice,
+				SubTotal:         &groupItem.SubTotal,
+				Total:            &groupItem.Total,
 				Quantity:         groupItem.Quantity,
 				NeedPrint:        groupItem.NeedPrint,
 				PrinterName:      groupItem.PrinterName,
@@ -103,7 +105,8 @@ func (g *GroupItem) ToDomain() *orderentity.GroupItem {
 			GroupDetails: orderentity.GroupDetails{
 				Size:             g.Size,
 				Status:           orderentity.StatusGroupItem(g.Status),
-				TotalPrice:       g.GetTotalPrice(),
+				SubTotal:         g.GetSubTotal(),
+				Total:            g.GetTotal(),
 				Quantity:         g.Quantity,
 				NeedPrint:        g.NeedPrint,
 				PrinterName:      g.PrinterName,
@@ -132,9 +135,16 @@ func (g *GroupItem) ToDomain() *orderentity.GroupItem {
 	return groupItem
 }
 
-func (g *GroupItem) GetTotalPrice() decimal.Decimal {
-	if g.TotalPrice == nil {
+func (g *GroupItem) GetSubTotal() decimal.Decimal {
+	if g.SubTotal == nil {
 		return decimal.Zero
 	}
-	return *g.TotalPrice
+	return *g.SubTotal
+}
+
+func (g *GroupItem) GetTotal() decimal.Decimal {
+	if g.Total == nil {
+		return decimal.Zero
+	}
+	return *g.Total
 }

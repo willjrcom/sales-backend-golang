@@ -129,7 +129,7 @@ func (s *Shift) Load(deliveryDrivers map[uuid.UUID]orderentity.DeliveryDriver, p
 			}
 
 			// sum revenue by category
-			rev := g.TotalPrice
+			rev := g.Total
 			if prev, ok := s.SalesByCategory[cat]; ok {
 				s.SalesByCategory[cat] = prev.Add(rev)
 			} else {

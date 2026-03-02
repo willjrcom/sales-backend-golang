@@ -11,8 +11,8 @@ type ItemDTO struct {
 	ID              uuid.UUID                      `json:"id"`
 	Name            string                         `json:"name"`
 	Observation     string                         `json:"observation"`
-	Price           decimal.Decimal                `json:"price"`
-	TotalPrice      decimal.Decimal                `json:"total_price"`
+	SubTotal        decimal.Decimal                `json:"sub_total"`
+	Total           decimal.Decimal                `json:"total"`
 	Size            string                         `json:"size"`
 	Quantity        float64                        `json:"quantity"`
 	GroupItemID     uuid.UUID                      `json:"group_item_id"`
@@ -32,8 +32,8 @@ func (i *ItemDTO) FromDomain(item *orderentity.Item) {
 		ID:              item.ID,
 		Name:            item.Name,
 		Observation:     item.Observation,
-		Price:           item.Price,
-		TotalPrice:      item.TotalPrice,
+		SubTotal:        item.SubTotal,
+		Total:           item.Total,
 		Size:            item.Size,
 		Quantity:        item.Quantity,
 		GroupItemID:     item.GroupItemID,

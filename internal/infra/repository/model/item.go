@@ -17,8 +17,8 @@ type Item struct {
 type ItemCommonAttributes struct {
 	Name               string           `bun:"name,notnull"`
 	Observation        string           `bun:"observation"`
-	Price              *decimal.Decimal `bun:"price,type:decimal(10,2),notnull"`
-	TotalPrice         *decimal.Decimal `bun:"total_price,type:decimal(10,2),notnull"`
+	SubTotal           *decimal.Decimal `bun:"sub_total,type:decimal(10,2),notnull"`
+	Total              *decimal.Decimal `bun:"total,type:decimal(10,2),notnull"`
 	Size               string           `bun:"size,notnull"`
 	Quantity           float64          `bun:"quantity,notnull"`
 	GroupItemID        uuid.UUID        `bun:"group_item_id,type:uuid"`
@@ -41,8 +41,8 @@ func (i *Item) FromDomain(item *orderentity.Item) {
 		ItemCommonAttributes: ItemCommonAttributes{
 			Name:               item.Name,
 			Observation:        item.Observation,
-			Price:              &item.Price,
-			TotalPrice:         &item.TotalPrice,
+			SubTotal:           &item.SubTotal,
+			Total:              &item.Total,
 			Size:               item.Size,
 			Quantity:           item.Quantity,
 			GroupItemID:        item.GroupItemID,
@@ -75,8 +75,8 @@ func (i *Item) ToDomain() *orderentity.Item {
 		ItemCommonAttributes: orderentity.ItemCommonAttributes{
 			Name:               i.Name,
 			Observation:        i.Observation,
-			Price:              i.GetPrice(),
-			TotalPrice:         i.GetTotalPrice(),
+			SubTotal:           i.GetSubTotal(),
+			Total:              i.GetTotal(),
 			Size:               i.Size,
 			Quantity:           i.Quantity,
 			GroupItemID:        i.GroupItemID,
@@ -98,16 +98,16 @@ func (i *Item) ToDomain() *orderentity.Item {
 	return item
 }
 
-func (i *Item) GetPrice() decimal.Decimal {
-	if i.Price == nil {
+func (i *Item) GetSubTotal() decimal.Decimal {
+	if i.SubTotal == nil {
 		return decimal.Zero
 	}
-	return *i.Price
+	return *i.SubTotal
 }
 
-func (i *Item) GetTotalPrice() decimal.Decimal {
-	if i.TotalPrice == nil {
+func (i *Item) GetTotal() decimal.Decimal {
+	if i.Total == nil {
 		return decimal.Zero
 	}
-	return *i.TotalPrice
+	return *i.Total
 }

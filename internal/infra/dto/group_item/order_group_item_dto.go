@@ -15,7 +15,8 @@ type GroupItemDTO struct {
 	ID               uuid.UUID                       `json:"id"`
 	Size             string                          `json:"size"`
 	Status           orderentity.StatusGroupItem     `json:"status"`
-	TotalPrice       decimal.Decimal                 `json:"total_price"`
+	SubTotal         decimal.Decimal                 `json:"sub_total"`
+	Total            decimal.Decimal                 `json:"total"`
 	Quantity         float64                         `json:"quantity"`
 	NeedPrint        bool                            `json:"need_print"`
 	PrinterName      string                          `json:"printer_name"`
@@ -47,7 +48,8 @@ func (i *GroupItemDTO) FromDomain(groupItem *orderentity.GroupItem) {
 		ID:               groupItem.ID,
 		Size:             groupItem.Size,
 		Status:           groupItem.Status,
-		TotalPrice:       groupItem.TotalPrice,
+		SubTotal:         groupItem.SubTotal,
+		Total:            groupItem.Total,
 		Quantity:         groupItem.Quantity,
 		NeedPrint:        groupItem.NeedPrint,
 		PrinterName:      groupItem.PrinterName,

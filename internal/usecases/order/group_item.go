@@ -151,7 +151,7 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 	groupItem.ComplementItemID = &itemComplement.ID
 	groupItem.ComplementItem = itemComplement
 
-	groupItem.CalculateTotalPrice()
+	groupItem.CalculateTotal()
 
 	groupItemModel.FromDomain(groupItem)
 	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
@@ -184,7 +184,7 @@ func (s *GroupItemService) DeleteComplementItem(ctx context.Context, dto *entity
 	groupItemModel.ComplementItem = nil
 
 	groupItem := groupItemModel.ToDomain()
-	groupItem.CalculateTotalPrice()
+	groupItem.CalculateTotal()
 
 	groupItemModel.FromDomain(groupItem)
 	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
@@ -206,7 +206,7 @@ func (s *GroupItemService) UpdateGroupItemTotal(ctx context.Context, id string) 
 
 	groupItem := groupItemModel.ToDomain()
 
-	groupItem.CalculateTotalPrice()
+	groupItem.CalculateTotal()
 
 	groupItemModel.FromDomain(groupItem)
 	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {

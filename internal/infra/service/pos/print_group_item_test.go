@@ -21,7 +21,7 @@ func Test_FormatGroupItem(t *testing.T) {
 						Name:        "Pizza mussarela",
 						Observation: "bem quente",
 						Size:        "G",
-						TotalPrice:  decimal.NewFromFloat(30.00),
+						Total:       decimal.NewFromFloat(30.00),
 						RemovedItems: []string{
 							"Tomate",
 						},
@@ -29,16 +29,16 @@ func Test_FormatGroupItem(t *testing.T) {
 						AdditionalItems: []orderentity.Item{
 							{
 								ItemCommonAttributes: orderentity.ItemCommonAttributes{
-									Name:       "Bacon",
-									TotalPrice: decimal.NewFromFloat(10.00),
-									Quantity:   1.0,
+									Name:     "Bacon",
+									Total:    decimal.NewFromFloat(10.00),
+									Quantity: 1.0,
 								},
 							},
 							{
 								ItemCommonAttributes: orderentity.ItemCommonAttributes{
-									Name:       "Cebola",
-									TotalPrice: decimal.NewFromFloat(10.00),
-									Quantity:   1.0,
+									Name:     "Cebola",
+									Total:    decimal.NewFromFloat(10.00),
+									Quantity: 1.0,
 								},
 							},
 						},
@@ -46,10 +46,10 @@ func Test_FormatGroupItem(t *testing.T) {
 				},
 				{
 					ItemCommonAttributes: orderentity.ItemCommonAttributes{
-						Name:       "Pizza calabresa",
-						TotalPrice: decimal.NewFromFloat(30.00),
-						Quantity:   0.5,
-						Size:       "G",
+						Name:     "Pizza calabresa",
+						Total:    decimal.NewFromFloat(30.00),
+						Quantity: 0.5,
+						Size:     "G",
 						RemovedItems: []string{
 							"Cebola",
 						},
@@ -58,7 +58,8 @@ func Test_FormatGroupItem(t *testing.T) {
 			},
 			GroupDetails: orderentity.GroupDetails{
 				Size:        "G",
-				TotalPrice:  decimal.NewFromFloat(100.00),
+				SubTotal:    decimal.NewFromFloat(100.00),
+				Total:       decimal.NewFromFloat(100.00),
 				Quantity:    1.0,
 				Observation: "sem molho",
 				Category: &productentity.ProductCategory{
@@ -69,7 +70,7 @@ func Test_FormatGroupItem(t *testing.T) {
 				ComplementItem: &orderentity.Item{
 					ItemCommonAttributes: orderentity.ItemCommonAttributes{
 						Name:        "Borda Recheada",
-						TotalPrice:  decimal.NewFromFloat(10.00),
+						Total:       decimal.NewFromFloat(10.00),
 						Observation: "bastante catupiry",
 						Size:        "G",
 						Quantity:    1.0,

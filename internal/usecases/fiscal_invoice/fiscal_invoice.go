@@ -125,8 +125,8 @@ func (s *Service) EmitNFCeOrder(ctx context.Context, orderID uuid.UUID) (*fiscal
 	itemNumber := 1
 	for _, group := range orderModel.GroupItems {
 		for _, item := range group.Items {
-			valorUnitario, _ := item.Price.Float64()
-			valorTotal, _ := item.TotalPrice.Float64()
+			valorUnitario, _ := item.SubTotal.Float64()
+			valorTotal, _ := item.Total.Float64()
 
 			nfceItem := focusnfe.NFCeItem{
 				NumeroItem:             itemNumber,

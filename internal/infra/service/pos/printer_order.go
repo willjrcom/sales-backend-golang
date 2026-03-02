@@ -161,14 +161,14 @@ func printGroupItem(buf *bytes.Buffer, group *orderentity.GroupItem) {
 	}
 
 	// Subtotal for this group
-	buf.WriteString(fmt.Sprintf("SUBTOTAL DO GRUPO:\tR$ %7.2f%s", d2f(group.TotalPrice), newline))
+	buf.WriteString(fmt.Sprintf("TOTAL DO GRUPO:\tR$ %7.2f%s", d2f(group.Total), newline))
 }
 
 func printComplementItem(buf *bytes.Buffer, comp *orderentity.Item, group *orderentity.GroupItem) {
 	buf.WriteString(escBoldOn)
 	// truncate complement name to 20 runes to avoid breaking UTF-8
 	name := truncate(comp.Name, 20)
-	fmt.Fprintf(buf, "%-4.1f\t%-20s\tR$ %7.2f%s", group.Quantity, name, d2f(comp.TotalPrice), newline)
+	fmt.Fprintf(buf, "%-4.1f\t%-20s\tR$ %7.2f%s", group.Quantity, name, d2f(comp.Total), newline)
 	buf.WriteString(escBoldOff)
 }
 
@@ -177,7 +177,7 @@ func printComplementItem(buf *bytes.Buffer, comp *orderentity.Item, group *order
 func printItem(buf *bytes.Buffer, item *orderentity.Item) {
 	// truncate item name to 20 runes to avoid breaking UTF-8
 	name := truncate(item.Name, 20)
-	fmt.Fprintf(buf, "%-4.1f\t%-20s\tR$ %7.2f%s", item.Quantity, name, d2f(item.TotalPrice), newline)
+	fmt.Fprintf(buf, "%-4.1f\t%-20s\tR$ %7.2f%s", item.Quantity, name, d2f(item.Total), newline)
 
 	for _, add := range item.AdditionalItems {
 		printAdditionalItem(buf, &add)
@@ -204,7 +204,7 @@ func printItem(buf *bytes.Buffer, item *orderentity.Item) {
 func printAdditionalItem(buf *bytes.Buffer, add *orderentity.Item) {
 	// truncate additional item name to 17 runes to avoid breaking UTF-8
 	name := truncate(add.Name, 17)
-	fmt.Fprintf(buf, "+\t%-17s\tR$ %7.2f%s", name, d2f(add.TotalPrice), newline)
+	fmt.Fprintf(buf, "+\t%-17s\tR$ %7.2f%s", name, d2f(add.Total), newline)
 }
 
 // formatTotalFooter writes the total payable amount to the buffer.

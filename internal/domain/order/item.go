@@ -25,8 +25,8 @@ type Item struct {
 type ItemCommonAttributes struct {
 	Name               string
 	Observation        string
-	Price              decimal.Decimal
-	TotalPrice         decimal.Decimal
+	SubTotal           decimal.Decimal
+	Total              decimal.Decimal
 	Size               string
 	Quantity           float64
 	GroupItemID        uuid.UUID
@@ -44,8 +44,8 @@ type ItemCommonAttributes struct {
 func NewItem(name string, price decimal.Decimal, quantity float64, size string, productID uuid.UUID, productVariationID uuid.UUID, categoryID uuid.UUID, flavor *string) *Item {
 	itemAdditionalCommonAttributes := ItemCommonAttributes{
 		Name:               name,
-		Price:              price,
-		TotalPrice:         price.Mul(decimal.NewFromFloat(quantity)),
+		SubTotal:           price,
+		Total:              price.Mul(decimal.NewFromFloat(quantity)),
 		Size:               size,
 		Quantity:           quantity,
 		ProductID:          productID,
@@ -80,13 +80,13 @@ func (i *Item) RemoveRemovedItem(name string) {
 	}
 }
 
-// CalculateTotalPrice computes the total price including additional items, updates TotalPrice, and returns it
-func (i *Item) CalculateTotalPrice() decimal.Decimal {
-	total := i.Price.Mul(decimal.NewFromFloat(i.Quantity)).Round(2)
+// CalculateTotal computes the total price including additional items, updates Total, and returns it
+func (i *Item) CalculateTotal() decimal.Decimal {
+	total := i.SubTotal.Mul(decimal.NewFromFloat(i.Quantity)).Round(2)
 
 	for j := range i.AdditionalItems {
-		total = total.Add(i.AdditionalItems[j].CalculateTotalPrice())
+		total = total.Add(i.AdditionalItems[j].CalculateTotal())
 	}
-	i.TotalPrice = total.Round(2)
-	return i.TotalPrice
+	i.Total = total.Round(2)
+	return i.Total
 }

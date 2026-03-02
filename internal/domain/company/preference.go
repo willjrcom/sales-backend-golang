@@ -19,6 +19,8 @@ const (
 	EnableDelivery Key = "enable_delivery"
 	// EnableTable toggles table service availability.
 	EnableTable Key = "enable_table"
+	// EnablePickup toggles pickup service availability.
+	EnablePickup Key = "enable_pickup"
 	// MinDeliveryTax is the minimum fee applied for delivery.
 	MinDeliveryTax Key = "min_delivery_tax"
 	// DeliveryFeePerKm is the fee applied per kilometer.
@@ -60,6 +62,7 @@ func NewDefaultPreferences() Preferences {
 	return Preferences{
 		EnableDelivery:               "true",
 		EnableTable:                  "true",
+		EnablePickup:                 "true",
 		TableTaxRate:                 "10",
 		MinDeliveryTax:               "0.00",
 		DeliveryFeePerKm:             "0.00",

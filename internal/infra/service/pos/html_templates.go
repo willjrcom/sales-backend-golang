@@ -213,7 +213,7 @@ const OrderReceiptTemplate = `
                 {{range .AdditionalItems}}
                     <div class="row">
                         <span class="col-name">+ {{.Quantity}}x {{.Name}}</span>
-                        <span class="col-price">{{formatMoney .TotalPrice}}</span>
+                        <span class="col-price">{{formatMoney .Total}}</span>
                     </div>
                 {{end}}
                 {{range .RemovedItems}}
@@ -229,13 +229,13 @@ const OrderReceiptTemplate = `
             {{if .ComplementItem}}
                 <div class="row">
                     <span class="col-name">Comp: {{.ComplementItem.Name}}</span>
-                    <span class="col-price">{{formatMoney .ComplementItem.TotalPrice}}</span>
+                    <span class="col-price">{{formatMoney .ComplementItem.Total}}</span>
                 </div>
             {{end}}
 
             <div class="row bold">
                 <span class="col-name">Subtotal:</span>
-                <span class="col-price">{{formatMoney .TotalPrice}}</span>
+                <span class="col-price">{{formatMoney .Total}}</span>
             </div>
 
             <div class="divider"></div>

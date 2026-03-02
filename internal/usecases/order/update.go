@@ -410,6 +410,7 @@ func (s *OrderService) UpdateOrderTotal(ctx context.Context, id string) error {
 		return err
 	}
 
+	order.CalculateSubTotal()
 	if order.Delivery != nil {
 		minOrderForFree, _ := company.Preferences.GetDecimal(companyentity.MinOrderValueForFreeDelivery)
 
@@ -417,18 +418,12 @@ func (s *OrderService) UpdateOrderTotal(ctx context.Context, id string) error {
 		if !minOrderForFree.IsZero() && order.SubTotal.GreaterThan(minOrderForFree) {
 			order.Delivery.IsDeliveryFree = true
 		}
-
-		deliveryOrder := &model.OrderDelivery{}
-		deliveryOrder.FromDomain(order.Delivery)
-		if err := s.rdo.UpdateOrderDelivery(ctx, deliveryOrder); err != nil {
-			return err
-		}
 	}
 
 	order.CalculateTotalOrder()
 
 	orderModel.FromDomain(order)
-	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
+	if err := s.ro.UpdateOrderWithRelations(ctx, orderModel); err != nil {
 		return err
 	}
 

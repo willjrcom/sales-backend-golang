@@ -34,7 +34,8 @@ type GroupCommonAttributes struct {
 type GroupDetails struct {
 	Size             string
 	Status           StatusGroupItem
-	TotalPrice       decimal.Decimal
+	SubTotal         decimal.Decimal
+	Total            decimal.Decimal
 	Quantity         float64
 	NeedPrint        bool
 	PrinterName      string
@@ -112,25 +113,28 @@ func (i *GroupItem) CancelGroupItem() {
 	*i.CancelledAt = time.Now().UTC()
 }
 
-func (i *GroupItem) CalculateTotalPrice() {
+func (i *GroupItem) CalculateTotal() {
 	qtdItems := 0.0
-	totalPrice := decimal.Zero
+	subTotal := decimal.Zero
 
 	for j := range i.Items {
-		totalPrice = totalPrice.Add(i.Items[j].CalculateTotalPrice())
+		subTotal = subTotal.Add(i.Items[j].CalculateTotal())
 		qtdItems += i.Items[j].Quantity
 	}
+
+	i.GroupDetails.SubTotal = subTotal.Round(2)
+	total := subTotal
 
 	if i.ComplementItem != nil {
 		i.ComplementItem.Quantity = qtdItems
 		// price * quantity
-		compTotal := i.ComplementItem.Price.Mul(decimal.NewFromFloat(qtdItems)).Round(2)
-		i.ComplementItem.TotalPrice = compTotal
-		totalPrice = totalPrice.Add(compTotal)
+		compTotal := i.ComplementItem.SubTotal.Mul(decimal.NewFromFloat(qtdItems)).Round(2)
+		i.ComplementItem.Total = compTotal
+		total = total.Add(compTotal)
 	}
 
 	i.GroupDetails.Quantity = qtdItems
-	i.GroupDetails.TotalPrice = totalPrice.Round(2)
+	i.GroupDetails.Total = total.Round(2)
 }
 
 func (i *GroupItem) CanAddItems() (bool, error) {

@@ -212,8 +212,8 @@ func (s *ItemService) DebitStockFromItem(ctx context.Context, item *orderentity.
 		decimal.NewFromFloat(item.Quantity),
 		groupItem.OrderID,
 		attendantID,
-		item.Price,
-		item.TotalPrice,
+		item.SubTotal,
+		item.Total,
 	)
 	if err != nil {
 		fmt.Printf("Erro ao reservar estoque para produto %s: %v\n", item.Name, err)
@@ -333,8 +333,8 @@ func (s ItemService) RestoreStockFromItem(ctx context.Context, item *orderentity
 		decimal.NewFromFloat(item.Quantity),
 		groupItem.OrderID,
 		attendantID,
-		item.Price,
-		item.TotalPrice,
+		item.SubTotal,
+		item.Total,
 	)
 	if err != nil {
 		fmt.Printf("Erro ao restaurar estoque para produto %s: %v\n", item.Name, err)
@@ -570,7 +570,7 @@ func (s *ItemService) UpdateItemTotal(ctx context.Context, id string) error {
 
 	item := itemModel.ToDomain()
 
-	item.CalculateTotalPrice()
+	item.CalculateTotal()
 
 	itemModel.FromDomain(item)
 	if err := s.ri.UpdateItem(ctx, itemModel); err != nil {
