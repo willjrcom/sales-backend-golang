@@ -11,6 +11,28 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
+func reconcileStockAfterDebit(stock *stockentity.Stock, quantity decimal.Decimal, orderID uuid.UUID) {
+	if orderID != uuid.Nil {
+		// Pedido com possível reserva prévia.
+		// Usa o saldo real de ReservedStock para saber quanto já foi pré-debitado
+		// de CurrentStock na etapa de reserva.
+		if stock.ReservedStock.GreaterThanOrEqual(quantity) {
+			// Reserva cobriu tudo: CurrentStock já foi decrementado. Só limpar reserva.
+			stock.ReservedStock = stock.ReservedStock.Sub(quantity)
+			return
+		}
+
+		// Reserva parcial ou falhou silenciosamente: decrementar a parte não reservada.
+		notReserved := quantity.Sub(stock.ReservedStock)
+		stock.ReservedStock = decimal.Zero
+		stock.CurrentStock = stock.CurrentStock.Sub(notReserved)
+		return
+	}
+
+	// Saída manual (sem reserva prévia): deduzir do saldo global agora.
+	stock.CurrentStock = stock.CurrentStock.Sub(quantity)
+}
+
 // DebitStockFIFO debita o estoque seguindo a estratégia FIFO (First-In, First-Out)
 func (s *Service) DebitStockFIFO(ctx context.Context, stockID uuid.UUID, quantity decimal.Decimal, orderID uuid.UUID, employeeID uuid.UUID, reason string) error {
 	// 1. Iniciar transação de tenant
@@ -105,23 +127,7 @@ func (s *Service) DebitStockFIFO(ctx context.Context, stockID uuid.UUID, quantit
 	}
 
 	stock := stockModel.ToDomain()
-	if orderID != uuid.Nil {
-		// Pedido com possível reserva prévia.
-		// Usa o saldo real de ReservedStock para saber quanto já foi pré-debitado
-		// de CurrentStock na etapa de reserva.
-		if stock.ReservedStock.GreaterThanOrEqual(quantity) {
-			// Reserva cobriu tudo: CurrentStock já foi decrementado. Só limpar reserva.
-			stock.ReservedStock = stock.ReservedStock.Sub(quantity)
-		} else {
-			// Reserva parcial ou falhou silenciosamente: decrementar a parte não reservada.
-			notReserved := quantity.Sub(stock.ReservedStock)
-			stock.ReservedStock = decimal.Zero
-			stock.CurrentStock = stock.CurrentStock.Sub(notReserved)
-		}
-	} else {
-		// Saída manual (sem reserva prévia): deduzir do saldo global agora.
-		stock.CurrentStock = stock.CurrentStock.Sub(quantity)
-	}
+	reconcileStockAfterDebit(stock, quantity, orderID)
 
 	stockModel.FromDomain(stock)
 	if err := s.stockRepo.UpdateStock(ctx, tx, stockModel); err != nil {
