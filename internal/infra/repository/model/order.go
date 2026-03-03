@@ -125,23 +125,6 @@ func (o *Order) FromDomain(order *orderentity.Order) {
 			}
 		}
 	}
-
-	if order.Delivery != nil {
-		o.OrderType.Delivery = &OrderDelivery{}
-		o.OrderType.Delivery.FromDomain(order.Delivery)
-	}
-	if order.Table != nil {
-		o.OrderType.Table = &OrderTable{}
-		o.OrderType.Table.FromDomain(order.Table)
-	}
-	if order.Pickup != nil {
-		o.OrderType.Pickup = &OrderPickup{}
-		o.OrderType.Pickup.FromDomain(order.Pickup)
-	}
-	if order.Attendant != nil {
-		o.OrderDetail.Attendant = &Employee{}
-		o.OrderDetail.Attendant.FromDomain(order.Attendant)
-	}
 }
 
 func (o *Order) ToDomain() *orderentity.Order {

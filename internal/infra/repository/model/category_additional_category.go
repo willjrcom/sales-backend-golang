@@ -7,8 +7,8 @@ import (
 
 type ProductCategoryToAdditional struct {
 	bun.BaseModel        `bun:"table:product_category_to_additional"`
-	CategoryID           uuid.UUID        `bun:"type:uuid,pk"`
+	CategoryID           uuid.UUID        `bun:"column:category_id,type:uuid,pk"`
 	Category             *ProductCategory `bun:"rel:belongs-to,join:category_id=id"`
-	AdditionalCategoryID uuid.UUID        `bun:"type:uuid,pk"`
+	AdditionalCategoryID uuid.UUID        `bun:"column:additional_category_id,type:uuid,pk"`
 	AdditionalCategory   *ProductCategory `bun:"rel:belongs-to,join:additional_category_id=id"`
 }

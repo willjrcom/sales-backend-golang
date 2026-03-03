@@ -68,9 +68,7 @@ func (g *GroupItem) FromDomain(groupItem *orderentity.GroupItem) {
 				UseProcessRule:   groupItem.UseProcessRule,
 				Observation:      groupItem.Observation,
 				CategoryID:       groupItem.CategoryID,
-				Category:         &ProductCategory{},
 				ComplementItemID: groupItem.ComplementItemID,
-				ComplementItem:   &Item{},
 				CancelledReason:  groupItem.CancelledReason,
 			},
 		},
@@ -83,8 +81,15 @@ func (g *GroupItem) FromDomain(groupItem *orderentity.GroupItem) {
 		},
 	}
 
-	g.Category.FromDomain(groupItem.Category)
-	g.ComplementItem.FromDomain(groupItem.ComplementItem)
+	if groupItem.Category != nil {
+		g.Category = &ProductCategory{}
+		g.Category.FromDomain(groupItem.Category)
+	}
+
+	if groupItem.ComplementItem != nil {
+		g.ComplementItem = &Item{}
+		g.ComplementItem.FromDomain(groupItem.ComplementItem)
+	}
 
 	for _, item := range groupItem.Items {
 		i := Item{}
