@@ -17,12 +17,6 @@ import (
 )
 
 func (s *Service) AddMovementStock(ctx context.Context, dtoID *entitydto.IDRequest, dto *stockdto.StockMovementCreateDTO) (*stockdto.StockMovementDTO, error) {
-	// 1. Buscar estoque
-	stockModel, err := s.stockRepo.GetStockByID(ctx, dtoID.ID.String())
-	if err != nil {
-		return nil, fmt.Errorf("erro ao buscar estoque %s: %w", dtoID.ID, err)
-	}
-
 	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
 	if !ok {
 		return nil, errors.New("context user not found")
@@ -47,6 +41,11 @@ func (s *Service) AddMovementStock(ctx context.Context, dtoID *entitydto.IDReque
 	}
 	defer cancel()
 	defer tx.Rollback()
+
+	stockModel, err := s.stockRepo.GetStockByIDForUpdate(ctx, tx, dtoID.ID.String())
+	if err != nil {
+		return nil, fmt.Errorf("erro ao buscar estoque %s para atualização: %w", dtoID.ID, err)
+	}
 
 	stock := stockModel.ToDomain()
 

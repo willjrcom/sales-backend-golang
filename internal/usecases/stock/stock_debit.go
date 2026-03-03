@@ -95,9 +95,9 @@ func (s *Service) DebitStockFIFO(ctx context.Context, stockID uuid.UUID, quantit
 	}
 
 	// 6. Atualizar o estoque principal (total)
-	stockModel, err := s.stockRepo.GetStockByID(ctx, stockID.String())
+	stockModel, err := s.stockRepo.GetStockByIDForUpdate(ctx, tx, stockID.String())
 	if err != nil {
-		return fmt.Errorf("erro ao buscar estoque principal: %w", err)
+		return fmt.Errorf("erro ao buscar estoque principal para atualização: %w", err)
 	}
 
 	stock := stockModel.ToDomain()
@@ -199,7 +199,7 @@ func (s *Service) RestoreStockFromOrder(ctx context.Context, orderID uuid.UUID, 
 		}
 
 		// 5. Atualizar estoque principal
-		stockModel, err := s.stockRepo.GetStockByID(ctx, movement.StockID.String())
+		stockModel, err := s.stockRepo.GetStockByIDForUpdate(ctx, tx, movement.StockID.String())
 		if err != nil {
 			return fmt.Errorf("erro ao buscar estoque %s para restauração: %w", movement.StockID.String(), err)
 		}

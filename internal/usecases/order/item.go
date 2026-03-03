@@ -209,7 +209,20 @@ func (s *ItemService) DebitStockFromItem(ctx context.Context, item *orderentity.
 		stockModel = &stocks[0]
 	}
 
-	stock := stockModel.ToDomain()
+	// Iniciar transação de tenant para salvar movimento e atualizar estoque
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	lockedStockModel, err := s.stockRepo.GetStockByIDForUpdate(ctx, tx, stockModel.ID.String())
+	if err != nil {
+		return fmt.Errorf("erro ao bloquear estoque para reserva: %w", err)
+	}
+
+	stock := lockedStockModel.ToDomain()
 
 	// RESERVAR estoque (não debitar FIFO). O FIFO só roda na finalização do pedido.
 	movement, err := stock.ReserveStock(
@@ -223,14 +236,6 @@ func (s *ItemService) DebitStockFromItem(ctx context.Context, item *orderentity.
 		return err
 	}
 
-	// Iniciar transação de tenant para salvar movimento e atualizar estoque
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
-	if err != nil {
-		return err
-	}
-	defer cancel()
-	defer tx.Rollback()
-
 	// Salvar movimento de reserva
 	movementModel := &model.StockMovement{}
 	movementModel.FromDomain(movement)
@@ -240,8 +245,8 @@ func (s *ItemService) DebitStockFromItem(ctx context.Context, item *orderentity.
 	}
 
 	// Atualizar estoque (CurrentStock diminuiu, ReservedStock aumentou)
-	stockModel.FromDomain(stock)
-	if err := s.stockRepo.UpdateStock(ctx, tx, stockModel); err != nil {
+	lockedStockModel.FromDomain(stock)
+	if err := s.stockRepo.UpdateStock(ctx, tx, lockedStockModel); err != nil {
 		fmt.Printf("Erro ao atualizar estoque: %v\n", err)
 		return err
 	}
@@ -346,8 +351,6 @@ func (s *ItemService) RestoreStockFromItem(ctx context.Context, item *orderentit
 		stockModel = &stocks[0]
 	}
 
-	stock := stockModel.ToDomain()
-
 	// Iniciar transação de tenant
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
 	if err != nil {
@@ -355,6 +358,13 @@ func (s *ItemService) RestoreStockFromItem(ctx context.Context, item *orderentit
 	}
 	defer cancel()
 	defer tx.Rollback()
+
+	lockedStockModel, err := s.stockRepo.GetStockByIDForUpdate(ctx, tx, stockModel.ID.String())
+	if err != nil {
+		return fmt.Errorf("erro ao bloquear estoque para restauração: %w", err)
+	}
+
+	stock := lockedStockModel.ToDomain()
 
 	// Restaurar estoque
 	movement, err := stock.RestoreStock(
@@ -378,8 +388,8 @@ func (s *ItemService) RestoreStockFromItem(ctx context.Context, item *orderentit
 	}
 
 	// Atualizar estoque
-	stockModel.FromDomain(stock)
-	if err := s.stockRepo.UpdateStock(ctx, tx, stockModel); err != nil {
+	lockedStockModel.FromDomain(stock)
+	if err := s.stockRepo.UpdateStock(ctx, tx, lockedStockModel); err != nil {
 		fmt.Printf("Erro ao atualizar estoque: %v\n", err)
 		return err
 	}
