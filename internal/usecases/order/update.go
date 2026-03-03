@@ -51,10 +51,11 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 			continue
 		}
 
-		if !groupItem.UseProcessRule {
+		if !groupItem.UseProcessRule || len(groupItem.Items) == 0 {
 			order.GroupItems[i].PendingGroupItem()
 			order.GroupItems[i].StartGroupItem()
 			order.GroupItems[i].ReadyGroupItem()
+			continue
 		}
 
 		// Generate snapshot for all group items (including those that move directly to Started/Ready)

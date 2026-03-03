@@ -37,12 +37,52 @@ type CompanyCommonAttributes struct {
 	IsBlocked    bool
 	ImagePath    string
 
+	// Opening Hours
+	Schedules []Schedule
+
 	// Categories
 	Categories []companycategoryentity.CompanyCategory
 
 	// Billing
 	MonthlyPaymentDueDay          int
 	MonthlyPaymentDueDayUpdatedAt *time.Time
+}
+
+type Schedule struct {
+	DayOfWeek int // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+	IsOpen    bool
+	Hours     []BusinessHour
+}
+
+type BusinessHour struct {
+	OpeningTime string // HH:MM
+	ClosingTime string // HH:MM
+}
+
+func (c *Company) IsOpen(t time.Time) bool {
+	day := int(t.Weekday())
+	hourMinute := t.Format("15:04")
+
+	for _, s := range c.Schedules {
+		if s.DayOfWeek == day {
+			if !s.IsOpen {
+				return false
+			}
+
+			if len(s.Hours) == 0 {
+				return true // Open all day if no specific hours set but IsOpen is true
+			}
+
+			for _, h := range s.Hours {
+				if hourMinute >= h.OpeningTime && hourMinute <= h.ClosingTime {
+					return true
+				}
+			}
+			return false
+		}
+	}
+
+	return true // Default to open if no schedule defined
 }
 
 type CompanyToUsers struct {
