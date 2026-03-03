@@ -155,9 +155,9 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 		attendantID = employee.ID
 	}
 
-	// Debit stock for the complement item
-	if err := s.si.DebitStockFromItem(ctx, itemComplement, groupItem, attendantID); err != nil {
-		return fmt.Errorf("estoque insuficiente para item complementar %s", productComplement.Name)
+	// Reserve stock for the complement item
+	if err := s.si.ReserveStockFromItem(ctx, itemComplement, groupItem, attendantID); err != nil {
+		fmt.Printf("Aviso: estoque insuficiente para item complementar %s: %v\n", productComplement.Name, err)
 	}
 
 	itemComplementModel := &model.Item{}

@@ -3,7 +3,6 @@ package orderusecases
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math"
 
@@ -145,24 +144,24 @@ func (s *OrderService) PendingOrder(ctx context.Context, dto *entitydto.IDReques
 // restoreStockFromOrder restaura estoque dos produtos do pedido cancelado
 func (s *OrderService) restoreStockFromOrder(ctx context.Context, order *orderentity.Order) error {
 	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
-	if !ok {
-		return errors.New("context user not found")
-	}
+	attendantID := uuid.Nil
 
-	userIDUUID := uuid.MustParse(userID)
-	employee, err := s.re.GetEmployeeByUserID(ctx, userIDUUID.String())
-	if err != nil {
-		return err
+	if ok {
+		userIDUUID := uuid.MustParse(userID)
+		employee, _ := s.re.GetEmployeeByUserID(ctx, userIDUUID.String())
+		if employee != nil {
+			attendantID = employee.ID
+		}
 	}
 
 	// Se o pedido já tiver sido finalizado, os movimentos de estoque foram "out" (débito efetivo)
 	// Caso contrário, são apenas reservas
 	if order.Status == orderentity.OrderStatusFinished {
-		return s.stockService.RestoreStockFromOrder(ctx, order.ID, employee.ID)
+		return s.stockService.RestoreStockFromOrder(ctx, order.ID, attendantID)
 	}
 
 	for _, groupItem := range order.GroupItems {
-		if err := s.sgi.restoreStockFromGroupItem(ctx, &groupItem, employee.ID); err != nil {
+		if err := s.sgi.restoreStockFromGroupItem(ctx, &groupItem, attendantID); err != nil {
 			fmt.Printf("Aviso: erro ao restaurar estoque do grupo %s no cancelamento: %v\n", groupItem.ID, err)
 			// Não bloquear o cancelamento por erro de estoque, mas registrar
 		}

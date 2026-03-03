@@ -153,14 +153,14 @@ func (s *GroupItemService) restoreStockFromGroupItem(ctx context.Context, groupI
 	for _, item := range groupItem.Items {
 		if item.ProductID != uuid.Nil {
 			if err := s.si.RestoreStockFromItem(ctx, &item, groupItem, attendantID); err != nil {
-				return err
+				fmt.Printf("Aviso: erro ao restaurar estoque do item %s: %v\n", item.Name, err)
 			}
 		}
 
 		for _, addItem := range item.AdditionalItems {
 			if addItem.ProductID != uuid.Nil {
 				if err := s.si.RestoreStockFromItem(ctx, &addItem, groupItem, attendantID); err != nil {
-					return err
+					fmt.Printf("Aviso: erro ao restaurar estoque do adicional %s: %v\n", addItem.Name, err)
 				}
 			}
 		}
@@ -168,7 +168,7 @@ func (s *GroupItemService) restoreStockFromGroupItem(ctx context.Context, groupI
 
 	if groupItem.ComplementItem != nil && groupItem.ComplementItem.ProductID != uuid.Nil {
 		if err := s.si.RestoreStockFromItem(ctx, groupItem.ComplementItem, groupItem, attendantID); err != nil {
-			return err
+			fmt.Printf("Aviso: erro ao restaurar estoque do complemento: %v\n", err)
 		}
 	}
 

@@ -483,7 +483,8 @@ func (s *Service) debitStockFromItem(ctx context.Context, item *model.Item, orde
 
 	// Debitar FIFO
 	if err := s.DebitStockFIFO(ctx, stockModel.ID, quantity, orderID, employeeID, reason); err != nil {
-		return fmt.Errorf("erro ao debitar estoque para item %s: %w", item.ProductID, err)
+		fmt.Printf("Aviso: erro ao debitar estoque para item %s: %v\n", item.ProductID, err)
+		return nil
 	}
 
 	// Verificar alertas
