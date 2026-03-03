@@ -18,7 +18,6 @@ type StockMovementDTO struct {
 	EmployeeID uuid.UUID       `json:"employee_id,omitempty"`
 	Quantity   decimal.Decimal `json:"quantity"`
 	Price      decimal.Decimal `json:"unit_cost"`
-	TotalPrice decimal.Decimal `json:"total_cost"`
 	CreatedAt  time.Time       `json:"created_at"`
 }
 
@@ -36,7 +35,6 @@ func (sm *StockMovementDTO) FromDomain(movement *stockentity.StockMovement) {
 		OrderID:    movement.OrderID,
 		EmployeeID: movement.EmployeeID,
 		Price:      movement.Price,
-		TotalPrice: movement.TotalPrice,
 		CreatedAt:  movement.CreatedAt,
 	}
 }

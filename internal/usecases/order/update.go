@@ -154,8 +154,17 @@ func (s *OrderService) restoreStockFromOrder(ctx context.Context, order *orderen
 		return err
 	}
 
+	// Se o pedido já tiver sido finalizado, os movimentos de estoque foram "out" (débito efetivo)
+	// Caso contrário, são apenas reservas
+	if order.Status == orderentity.OrderStatusFinished {
+		return s.stockService.RestoreStockFromOrder(ctx, order.ID, employee.ID)
+	}
+
 	for _, groupItem := range order.GroupItems {
-		s.sgi.restoreStockFromGroupItem(ctx, &groupItem, employee.ID)
+		if err := s.sgi.restoreStockFromGroupItem(ctx, &groupItem, employee.ID); err != nil {
+			fmt.Printf("Aviso: erro ao restaurar estoque do grupo %s no cancelamento: %v\n", groupItem.ID, err)
+			// Não bloquear o cancelamento por erro de estoque, mas registrar
+		}
 	}
 
 	return nil
@@ -218,6 +227,18 @@ func (s *OrderService) FinishOrder(ctx context.Context, dto *entitydto.IDRequest
 
 	order.ShiftID = currentShift.ID
 
+	// Debitar estoque
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	if ok {
+		userIDUUID := uuid.MustParse(userID)
+		employee, _ := s.re.GetEmployeeByUserID(ctx, userIDUUID.String())
+		if employee != nil {
+			if err := s.stockService.DebitStockFromOrder(ctx, order.ID, employee.ID); err != nil {
+				fmt.Printf("erro ao debitar estoque: %v\n", err)
+			}
+		}
+	}
+
 	orderModel.FromDomain(order)
 	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
 		return err
@@ -279,7 +300,9 @@ func (s *OrderService) CancelOrder(ctx context.Context, dtoOrderID *entitydto.ID
 	cancelDTO := &groupitemdto.OrderGroupItemCancelDTO{Reason: &reason}
 
 	for _, groupItem := range order.GroupItems {
-		if err = s.sgi.CancelGroupItem(ctx, groupItem.ID.String(), cancelDTO); err != nil {
+		// Fix #10: CancelGroupItem normalmente restaura estoque, mas aqui o restoreStockFromOrder já cuidou disso.
+		// Passamos skipStockRestore=true para evitar restauração dupla.
+		if err = s.sgi.CancelGroupItemSkipStockRestore(ctx, groupItem.ID.String(), cancelDTO); err != nil {
 			return err
 		}
 	}

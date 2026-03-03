@@ -952,24 +952,35 @@ func (s *ReportService) ProductProfitability(ctx context.Context, start, end tim
         SELECT 
             p.id::text AS product_id,
             p.name AS product_name,
-            COALESCE(SUM(i.quantity), 0) AS total_sold,
-            COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS total_cost,
-            COALESCE(SUM(i.quantity * i.price), 0) AS total_revenue,
-            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS profit,
+            COALESCE(sold.total_sold, 0) AS total_sold,
+            COALESCE(cost.total_cost, 0) AS total_cost,
+            COALESCE(sold.total_revenue, 0) AS total_revenue,
+            COALESCE(sold.total_revenue - cost.total_cost, 0) AS profit,
             CASE 
-                WHEN COALESCE(SUM(i.quantity * i.price), 0) > 0 
-                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
+                WHEN COALESCE(sold.total_revenue, 0) > 0 
+                THEN ((COALESCE(sold.total_revenue, 0) - COALESCE(cost.total_cost, 0)) / COALESCE(sold.total_revenue, 0)) * 100
                 ELSE 0 
             END AS profit_margin
-        FROM ` + schemaName + `.order_items i
-        JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
-        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
-        JOIN ` + schemaName + `.products p ON p.id = i.product_id
-        LEFT JOIN ` + schemaName + `.product_variations pv ON pv.id = i.product_variation_id
-        WHERE o.created_at BETWEEN ? AND ?
-        GROUP BY p.id, p.name
+        FROM ` + schemaName + `.products p
+        LEFT JOIN (
+            SELECT i.product_id, SUM(i.quantity) as total_sold, SUM(i.quantity * i.price) as total_revenue
+            FROM ` + schemaName + `.order_items i
+            JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
+            JOIN ` + schemaName + `.orders o ON o.id = g.order_id
+            WHERE o.created_at BETWEEN ? AND ?
+            GROUP BY i.product_id
+        ) sold ON sold.product_id = p.id
+        LEFT JOIN (
+            SELECT s.product_id, SUM(sm.quantity * sm.price) as total_cost
+            FROM ` + schemaName + `.stock_movements sm
+            JOIN ` + schemaName + `.stocks s ON s.id = sm.stock_id
+            WHERE sm.type = 'out' AND sm.order_id IS NOT NULL
+            AND sm.created_at BETWEEN ? AND ?
+            GROUP BY s.product_id
+        ) cost ON cost.product_id = p.id
+        WHERE sold.total_sold > 0 OR cost.total_cost > 0
         ORDER BY profit DESC`
-	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+	if err := s.db.NewRaw(query, start, end, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -996,25 +1007,37 @@ func (s *ReportService) CategoryProfitability(ctx context.Context, start, end ti
 	query := `
         SELECT 
             pc.name AS category_name,
-            COALESCE(SUM(i.quantity), 0) AS total_sold,
-            COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS total_cost,
-            COALESCE(SUM(i.quantity * i.price), 0) AS total_revenue,
-            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS profit,
+            COALESCE(SUM(sold.total_sold), 0) AS total_sold,
+            COALESCE(SUM(cost.total_cost), 0) AS total_cost,
+            COALESCE(SUM(sold.total_revenue), 0) AS total_revenue,
+            COALESCE(SUM(sold.total_revenue) - SUM(cost.total_cost), 0) AS profit,
             CASE 
-                WHEN COALESCE(SUM(i.quantity * i.price), 0) > 0 
-                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
+                WHEN COALESCE(SUM(sold.total_revenue), 0) > 0 
+                THEN ((COALESCE(SUM(sold.total_revenue), 0) - COALESCE(SUM(cost.total_cost), 0)) / COALESCE(SUM(sold.total_revenue), 0)) * 100
                 ELSE 0 
             END AS profit_margin
-        FROM ` + schemaName + `.order_items i
-        JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
-        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
-        JOIN ` + schemaName + `.products p ON p.id = i.product_id
-        LEFT JOIN ` + schemaName + `.product_variations pv ON pv.id = i.product_variation_id
-        JOIN ` + schemaName + `.product_categories pc ON pc.id = p.category_id
-        WHERE o.created_at BETWEEN ? AND ?
+        FROM ` + schemaName + `.product_categories pc
+        LEFT JOIN ` + schemaName + `.products p ON p.category_id = pc.id
+        LEFT JOIN (
+            SELECT i.product_id, SUM(i.quantity) as total_sold, SUM(i.quantity * i.price) as total_revenue
+            FROM ` + schemaName + `.order_items i
+            JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
+            JOIN ` + schemaName + `.orders o ON o.id = g.order_id
+            WHERE o.created_at BETWEEN ? AND ?
+            GROUP BY i.product_id
+        ) sold ON sold.product_id = p.id
+        LEFT JOIN (
+            SELECT s.product_id, SUM(sm.quantity * sm.price) as total_cost
+            FROM ` + schemaName + `.stock_movements sm
+            JOIN ` + schemaName + `.stocks s ON s.id = sm.stock_id
+            WHERE sm.type = 'out' AND sm.order_id IS NOT NULL
+            AND sm.created_at BETWEEN ? AND ?
+            GROUP BY s.product_id
+        ) cost ON cost.product_id = p.id
+        WHERE sold.total_sold > 0 OR cost.total_cost > 0
         GROUP BY pc.name
         ORDER BY profit DESC`
-	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+	if err := s.db.NewRaw(query, start, end, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return resp, nil
@@ -1037,28 +1060,29 @@ func (s *ReportService) LowProfitProducts(ctx context.Context, minMargin float64
 	}
 
 	var resp []LowProfitProductsDTO
-	// Use AVG(pv.price) and AVG(pv.cost) aggregated per product from variations
 	query := `
         SELECT 
             p.id::text AS product_id,
             p.name AS product_name,
             AVG(pv.price) AS price,
-            AVG(pv.cost) AS cost,
+            AVG(sb.cost_price) AS cost,
             CASE 
-                WHEN AVG(pv.price) > 0 AND AVG(pv.cost) > 0
-                THEN ((AVG(pv.price) - AVG(pv.cost)) / AVG(pv.price)) * 100
-                WHEN AVG(pv.price) > 0 AND (AVG(pv.cost) = 0 OR AVG(pv.cost) IS NULL)
+                WHEN AVG(pv.price) > 0 AND AVG(sb.cost_price) > 0
+                THEN ((AVG(pv.price) - AVG(sb.cost_price)) / AVG(pv.price)) * 100
+                WHEN AVG(pv.price) > 0 AND (AVG(sb.cost_price) = 0 OR AVG(sb.cost_price) IS NULL)
                 THEN 100
                 ELSE 0 
             END AS profit_margin
         FROM ` + schemaName + `.products p
         JOIN ` + schemaName + `.product_variations pv ON pv.product_id = p.id
+        LEFT JOIN ` + schemaName + `.stocks s ON s.product_variation_id = pv.id
+        LEFT JOIN ` + schemaName + `.stock_batches sb ON sb.stock_id = s.id AND sb.current_quantity > 0
         WHERE pv.price > 0
         AND pv.is_available = true
         GROUP BY p.id, p.name
         HAVING (
-            (AVG(pv.cost) > 0 AND ((AVG(pv.price) - AVG(pv.cost)) / AVG(pv.price)) * 100 < ?)
-            OR (AVG(pv.cost) = 0 OR AVG(pv.cost) IS NULL)
+            (AVG(sb.cost_price) > 0 AND ((AVG(pv.price) - AVG(sb.cost_price)) / AVG(pv.price)) * 100 < ?)
+            OR (AVG(sb.cost_price) = 0 OR AVG(sb.cost_price) IS NULL)
         )
         ORDER BY profit_margin ASC`
 	if err := s.db.NewRaw(query, minMargin).Scan(ctx, &resp); err != nil {
@@ -1085,10 +1109,10 @@ func (s *ReportService) DebugProducts(ctx context.Context) (map[string]interface
 	}
 
 	var productsWithCost int
-	if err := s.db.NewRaw(`SELECT COUNT(DISTINCT p.id) FROM `+schemaName+`.products p JOIN `+schemaName+`.product_variations pv ON pv.product_id = p.id WHERE pv.is_available = true AND pv.cost > 0`).Scan(ctx, &productsWithCost); err != nil {
+	queryWithCost := `SELECT COUNT(DISTINCT s.product_id) FROM ` + schemaName + `.stocks s JOIN ` + schemaName + `.stock_batches sb ON sb.stock_id = s.id WHERE sb.cost_price > 0`
+	if err := s.db.NewRaw(queryWithCost).Scan(ctx, &productsWithCost); err != nil {
 		return nil, err
 	}
-
 	return map[string]interface{}{
 		"total_products":     totalProducts,
 		"available_products": availableProducts,
@@ -1114,22 +1138,69 @@ func (s *ReportService) OverallProfitability(ctx context.Context, start, end tim
 	var resp OverallProfitabilityDTO
 	query := `
         SELECT 
-            COALESCE(SUM(i.quantity * i.price), 0) AS total_revenue,
-            COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS total_cost,
-            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS total_profit,
+            COALESCE(SUM(sold.total_revenue), 0) AS total_revenue,
+            COALESCE(SUM(cost.total_cost), 0) AS total_cost,
+            COALESCE(SUM(sold.total_revenue) - SUM(cost.total_cost), 0) AS total_profit,
             CASE 
-                WHEN COALESCE(SUM(i.quantity * i.price), 0) > 0 
-                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
+                WHEN COALESCE(SUM(sold.total_revenue), 0) > 0 
+                THEN ((COALESCE(SUM(sold.total_revenue), 0) - COALESCE(SUM(cost.total_cost), 0)) / COALESCE(SUM(sold.total_revenue), 0)) * 100
                 ELSE 0 
             END AS profit_margin
-        FROM ` + schemaName + `.order_items i
-        JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
-        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
-        JOIN ` + schemaName + `.products p ON p.id = i.product_id
-        LEFT JOIN ` + schemaName + `.product_variations pv ON pv.id = i.product_variation_id
-        WHERE o.created_at BETWEEN ? AND ?`
-	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+        FROM (
+            SELECT SUM(i.quantity * i.price) as total_revenue
+            FROM ` + schemaName + `.order_items i
+            JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
+            JOIN ` + schemaName + `.orders o ON o.id = g.order_id
+            WHERE o.created_at BETWEEN ? AND ?
+        ) sold,
+        (
+            SELECT SUM(sm.quantity * sm.price) as total_cost
+            FROM ` + schemaName + `.stock_movements sm
+            WHERE sm.type = 'out' AND sm.order_id IS NOT NULL
+            AND sm.created_at BETWEEN ? AND ?
+        ) cost`
+	if err := s.db.NewRaw(query, start, end, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil
+}
+
+// InventoryValuationDTO holds inventory valuation metrics.
+type InventoryValuationDTO struct {
+	ProductID       string          `bun:"product_id"`
+	ProductName     string          `bun:"product_name"`
+	VariationName   string          `bun:"variation_name"`
+	CurrentQuantity decimal.Decimal `bun:"current_quantity"`
+	Unit            string          `bun:"unit"`
+	TotalValue      decimal.Decimal `bun:"total_value"`
+}
+
+// InventoryValuation returns the total value of current inventory.
+func (s *ReportService) InventoryValuation(ctx context.Context) ([]InventoryValuationDTO, error) {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp []InventoryValuationDTO
+	query := `
+        SELECT 
+            p.id::text AS product_id,
+            p.name AS product_name,
+            COALESCE(sz.name, '') AS variation_name,
+            SUM(sb.current_quantity) AS current_quantity,
+            s.unit AS unit,
+            SUM(sb.current_quantity * sb.cost_price) AS total_value
+        FROM ` + schemaName + `.stock_batches sb
+        JOIN ` + schemaName + `.stocks s ON s.id = sb.stock_id
+        JOIN ` + schemaName + `.products p ON p.id = s.product_id
+        LEFT JOIN ` + schemaName + `.product_variations pv ON pv.id = s.product_variation_id
+        LEFT JOIN ` + schemaName + `.sizes sz ON sz.id = pv.size_id
+        WHERE sb.current_quantity > 0
+        GROUP BY p.id, p.name, sz.name, s.unit
+        ORDER BY total_value DESC`
+	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
 }

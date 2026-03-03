@@ -12,17 +12,15 @@ type ProductVariation struct {
 	SizeID      uuid.UUID
 	Size        *Size
 	Price       decimal.Decimal
-	Cost        decimal.Decimal
 	IsAvailable bool
 }
 
-func NewProductVariation(productID uuid.UUID, sizeID uuid.UUID, price decimal.Decimal, cost decimal.Decimal) *ProductVariation {
+func NewProductVariation(productID uuid.UUID, sizeID uuid.UUID, price decimal.Decimal) *ProductVariation {
 	return &ProductVariation{
 		Entity:      entity.NewEntity(),
 		ProductID:   productID,
 		SizeID:      sizeID,
 		Price:       price,
-		Cost:        cost,
 		IsAvailable: true,
 	}
 }

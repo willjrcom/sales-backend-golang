@@ -28,7 +28,7 @@ type StockAlertCommonAttributes struct {
 	ResolvedBy         *uuid.UUID        `bun:"resolved_by,type:uuid"`
 	ProductID          uuid.UUID         `bun:"product_id,type:uuid,notnull"`
 	Product            *Product          `bun:"rel:belongs-to"`
-	ProductVariationID uuid.UUID         `bun:"product_variation_id,type:uuid,notnull"`
+	ProductVariationID *uuid.UUID        `bun:"product_variation_id,type:uuid"`
 	ProductVariation   *ProductVariation `bun:"rel:belongs-to"`
 }
 
@@ -47,7 +47,7 @@ func (s *StockAlert) FromDomain(alert *stockentity.StockAlert) {
 			ResolvedAt:         alert.ResolvedAt,
 			ResolvedBy:         alert.ResolvedBy,
 			ProductID:          alert.ProductID,
-			ProductVariationID: alert.ProductVariationID,
+			ProductVariationID: nilIfZeroUUID(alert.ProductVariationID),
 		},
 	}
 }
@@ -80,7 +80,7 @@ func (s *StockAlert) ToDomain() *stockentity.StockAlert {
 			ResolvedBy:         s.ResolvedBy,
 			ProductID:          s.ProductID,
 			Product:            product,
-			ProductVariationID: s.ProductVariationID,
+			ProductVariationID: derefUUID(s.ProductVariationID),
 			ProductVariation:   productVariation,
 		},
 	}

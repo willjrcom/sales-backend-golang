@@ -27,6 +27,7 @@ type StockCommonAttributes struct {
 	Product            productentity.Product
 	ProductVariationID *uuid.UUID
 	CurrentStock       decimal.Decimal
+	ReservedStock      decimal.Decimal
 	MinStock           decimal.Decimal
 	MaxStock           decimal.Decimal
 	Unit               string
@@ -41,6 +42,7 @@ func NewStock(productID uuid.UUID, productVariationID *uuid.UUID, initialStock, 
 			ProductID:          productID,
 			ProductVariationID: productVariationID,
 			CurrentStock:       initialStock,
+			ReservedStock:      decimal.Zero,
 			MinStock:           minStock,
 			MaxStock:           maxStock,
 			Unit:               unit,
@@ -50,7 +52,7 @@ func NewStock(productID uuid.UUID, productVariationID *uuid.UUID, initialStock, 
 }
 
 // AddMovementStock adiciona estoque manualmente
-func (s *Stock) AddMovementStock(quantity decimal.Decimal, reason string, employeeID uuid.UUID, price decimal.Decimal, totalPrice decimal.Decimal) (*StockMovement, error) {
+func (s *Stock) AddMovementStock(quantity decimal.Decimal, reason string, employeeID uuid.UUID, price decimal.Decimal) (*StockMovement, error) {
 	if quantity.LessThanOrEqual(decimal.Zero) {
 		return nil, ErrInvalidQuantity
 	}
@@ -70,15 +72,14 @@ func (s *Stock) AddMovementStock(quantity decimal.Decimal, reason string, employ
 			Reason:     reason,
 			EmployeeID: employeeID,
 			Price:      price,
-			TotalPrice: totalPrice,
 		},
 	}
 
 	return movement, nil
 }
 
-// RemoveMovementStock remove estoque manualmente
-func (s *Stock) RemoveMovementStock(quantity decimal.Decimal, reason string, employeeID uuid.UUID, price decimal.Decimal, totalPrice decimal.Decimal) (*StockMovement, error) {
+// RemoveMovementStock remove estoque manualmente (sem lote específico, o serviço deve lidar com a distribuição)
+func (s *Stock) RemoveMovementStock(quantity decimal.Decimal, reason string, employeeID uuid.UUID, price decimal.Decimal) (*StockMovement, error) {
 	if quantity.LessThanOrEqual(decimal.Zero) {
 		return nil, ErrInvalidQuantity
 	}
@@ -102,7 +103,6 @@ func (s *Stock) RemoveMovementStock(quantity decimal.Decimal, reason string, emp
 			Reason:     reason,
 			EmployeeID: employeeID,
 			Price:      price,
-			TotalPrice: totalPrice,
 		},
 	}
 
@@ -147,8 +147,8 @@ func (s *Stock) AdjustMovementStock(newStock decimal.Decimal, reason string, emp
 	return movement, nil
 }
 
-// ReserveStock reserva estoque para um pedido (quando pedido fica pending)
-func (s *Stock) ReserveStock(quantity decimal.Decimal, orderID uuid.UUID, employeeID uuid.UUID, price decimal.Decimal, totalPrice decimal.Decimal) (*StockMovement, error) {
+// ReserveStock reserva estoque para um pedido
+func (s *Stock) ReserveStock(quantity decimal.Decimal, orderID uuid.UUID, employeeID uuid.UUID, price decimal.Decimal) (*StockMovement, error) {
 	if quantity.LessThanOrEqual(decimal.Zero) {
 		return nil, ErrInvalidQuantity
 	}
@@ -162,26 +162,26 @@ func (s *Stock) ReserveStock(quantity decimal.Decimal, orderID uuid.UUID, employ
 	}
 
 	s.CurrentStock = s.CurrentStock.Sub(quantity)
+	s.ReservedStock = s.ReservedStock.Add(quantity)
 
 	movement := &StockMovement{
 		Entity: entity.NewEntity(),
 		StockMovementCommonAttributes: StockMovementCommonAttributes{
 			StockID:    s.ID,
-			Type:       MovementTypeOut,
+			Type:       MovementTypeReserve,
 			Quantity:   quantity,
-			Reason:     "Reserva automática - Pedido pendente",
-			EmployeeID: employeeID,
+			Reason:     "Reserva para pedido",
 			OrderID:    &orderID,
+			EmployeeID: employeeID,
 			Price:      price,
-			TotalPrice: totalPrice,
 		},
 	}
 
 	return movement, nil
 }
 
-// RestoreStock restaura estoque quando pedido é cancelado
-func (s *Stock) RestoreStock(quantity decimal.Decimal, orderID uuid.UUID, employeeID uuid.UUID, price decimal.Decimal, totalPrice decimal.Decimal) (*StockMovement, error) {
+// RestoreStock restaura estoque reservado (ex: cancelamento)
+func (s *Stock) RestoreStock(quantity decimal.Decimal, orderID uuid.UUID, employeeID uuid.UUID, price decimal.Decimal, batchID *uuid.UUID) (*StockMovement, error) {
 	if quantity.LessThanOrEqual(decimal.Zero) {
 		return nil, ErrInvalidQuantity
 	}
@@ -190,19 +190,24 @@ func (s *Stock) RestoreStock(quantity decimal.Decimal, orderID uuid.UUID, employ
 		return nil, errors.New("stock control is not active")
 	}
 
+	if s.ReservedStock.LessThan(quantity) {
+		return nil, errors.New("insufficient reserved stock")
+	}
+
+	s.ReservedStock = s.ReservedStock.Sub(quantity)
 	s.CurrentStock = s.CurrentStock.Add(quantity)
 
 	movement := &StockMovement{
 		Entity: entity.NewEntity(),
 		StockMovementCommonAttributes: StockMovementCommonAttributes{
 			StockID:    s.ID,
-			Type:       MovementTypeIn,
+			BatchID:    batchID,
+			Type:       MovementTypeRestore,
 			Quantity:   quantity,
-			Reason:     "Restauração automática - Pedido cancelado",
-			EmployeeID: employeeID,
+			Reason:     "Restauração de reserva",
 			OrderID:    &orderID,
+			EmployeeID: employeeID,
 			Price:      price,
-			TotalPrice: totalPrice,
 		},
 	}
 
@@ -217,6 +222,12 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 		return alerts
 	}
 
+	// Resolver ProductVariationID com segurança (pode ser nil)
+	var variationID uuid.UUID
+	if s.ProductVariationID != nil {
+		variationID = *s.ProductVariationID
+	}
+
 	// Alerta de estoque baixo
 	if s.CurrentStock.LessThanOrEqual(s.MinStock) && s.CurrentStock.GreaterThan(decimal.Zero) {
 		alerts = append(alerts, &StockAlert{
@@ -227,7 +238,7 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 				Message:            "Estoque abaixo do mínimo",
 				IsResolved:         false,
 				ProductID:          s.ProductID,
-				ProductVariationID: *s.ProductVariationID,
+				ProductVariationID: variationID,
 			},
 		})
 	}
@@ -242,7 +253,7 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 				Message:            "Produto sem estoque",
 				IsResolved:         false,
 				ProductID:          s.ProductID,
-				ProductVariationID: *s.ProductVariationID,
+				ProductVariationID: variationID,
 			},
 		})
 	}
@@ -257,7 +268,7 @@ func (s *Stock) CheckAlerts() []*StockAlert {
 				Message:            "Estoque acima do máximo",
 				IsResolved:         false,
 				ProductID:          s.ProductID,
-				ProductVariationID: *s.ProductVariationID,
+				ProductVariationID: variationID,
 			},
 		})
 	}

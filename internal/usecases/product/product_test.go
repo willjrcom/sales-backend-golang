@@ -75,7 +75,6 @@ func TestCreateProduct(t *testing.T) {
 			{
 				SizeID:      sizeId,
 				Price:       decimal.NewFromInt(10),
-				Cost:        decimal.NewFromInt(5),
 				IsAvailable: true,
 			},
 		},
@@ -111,23 +110,7 @@ func TestCreateProductError(t *testing.T) {
 	_, err = productService.CreateProduct(ctx, dto)
 	assert.EqualError(t, err, productcategorydto.ErrNameRequired.Error())
 
-	// Test 3 - Price less than Cost (in variation)
-	dto = &productcategorydto.ProductCreateDTO{
-		SKU:        "sku",
-		Name:       "name",
-		CategoryID: ptrUUID(uuid.Nil),
-		Variations: []productcategorydto.ProductVariationCreateDTO{
-			{
-				SizeID: uuid.New(),
-				Price:  decimal.NewFromInt(1),
-				Cost:   decimal.NewFromInt(2),
-			},
-		},
-	}
-	_, err = productService.CreateProduct(ctx, dto)
-	assert.EqualError(t, err, productcategorydto.ErrCostGreaterThanPrice.Error())
-
-	// Test 4 - No Category
+	// Test 3 - No Category
 	dto = &productcategorydto.ProductCreateDTO{
 		SKU:  "sku",
 		Name: "name",
@@ -135,14 +118,13 @@ func TestCreateProductError(t *testing.T) {
 			{
 				SizeID: uuid.New(),
 				Price:  decimal.NewFromInt(2),
-				Cost:   decimal.NewFromInt(1),
 			},
 		},
 	}
 	_, err = productService.CreateProduct(ctx, dto)
 	assert.EqualError(t, err, productcategorydto.ErrCategoryRequired.Error())
 
-	// Test 5 - No Size (SizeID in variation is Nil)
+	// Test 4 - No Size (SizeID in variation is Nil)
 	dto = &productcategorydto.ProductCreateDTO{
 		SKU:        "sku",
 		Name:       "name",
@@ -150,7 +132,6 @@ func TestCreateProductError(t *testing.T) {
 		Variations: []productcategorydto.ProductVariationCreateDTO{
 			{
 				Price: decimal.NewFromInt(2),
-				Cost:  decimal.NewFromInt(1),
 			},
 		},
 	}
@@ -171,7 +152,7 @@ func TestUpdateProduct(t *testing.T) {
 		SKU:        "test-update",
 		Name:       "Original Name",
 		Variations: []productcategorydto.ProductVariationCreateDTO{
-			{SizeID: sizeId, Price: decimal.NewFromInt(10), Cost: decimal.NewFromInt(5)},
+			{SizeID: sizeId, Price: decimal.NewFromInt(10)},
 		},
 	}
 	productId, _ := productService.CreateProduct(ctx, createDto)

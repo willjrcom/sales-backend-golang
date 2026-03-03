@@ -86,8 +86,11 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, id string, dto *
 
 	groupItem := groupItemModel.ToDomain()
 
-	// Restaurar estoque dos itens do grupo se NÃO estiver em Staging (já baixou estoque) e NÃO estiver cancelado
-	if groupItem.Status != orderentity.StatusGroupStaging && groupItem.Status != orderentity.StatusGroupCancelled {
+	// Restaurar estoque dos itens do grupo se ainda NÃO estiver cancelado
+	// Itens em Staging JÁ têm reserva feita, então restaurar para todos os status != Cancelled
+	// NOTA: quando chamado a partir de CancelOrder, o restoreStockFromOrder já cuida disso.
+	// Aqui só restauramos se o cancelamento do grupo for isolado (não via CancelOrder).
+	if groupItem.Status != orderentity.StatusGroupCancelled {
 		userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
 		if !ok {
 			return errors.New("context user not found")
@@ -99,7 +102,10 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, id string, dto *
 			return err
 		}
 
-		s.restoreStockFromGroupItem(ctx, groupItem, employee.ID)
+		if err := s.restoreStockFromGroupItem(ctx, groupItem, employee.ID); err != nil {
+			fmt.Printf("Aviso: erro ao restaurar estoque no cancelamento do grupo %s: %v\n", groupItem.ID, err)
+			// Não bloquear o cancelamento por erro de estoque
+		}
 	}
 
 	if dto.Reason == nil || *dto.Reason == "" {
@@ -146,7 +152,57 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, id string, dto *
 func (s *GroupItemService) restoreStockFromGroupItem(ctx context.Context, groupItem *orderentity.GroupItem, attendantID uuid.UUID) error {
 	for _, item := range groupItem.Items {
 		if item.ProductID != uuid.Nil {
-			s.si.RestoreStockFromItem(ctx, &item, groupItem, attendantID)
+			// Fix #8: propagar erro em vez de ignorar
+			if err := s.si.RestoreStockFromItem(ctx, &item, groupItem, attendantID); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// CancelGroupItemSkipStockRestore cancela o grupo sem restaurar estoque.
+// Usado quando o estoque já foi restaurado pela chamada anterior (ex: restoreStockFromOrder em CancelOrder).
+func (s *GroupItemService) CancelGroupItemSkipStockRestore(ctx context.Context, id string, dto *groupitemdto.OrderGroupItemCancelDTO) (err error) {
+	groupItemModel, err := s.r.GetGroupByID(ctx, id, true)
+	if err != nil {
+		return err
+	}
+
+	groupItem := groupItemModel.ToDomain()
+
+	if dto.Reason == nil || *dto.Reason == "" {
+		return fmt.Errorf("reason is required")
+	}
+
+	groupItem.CancelledReason = *dto.Reason
+	groupItem.CancelGroupItem()
+
+	groupItemModel.FromDomain(groupItem)
+	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
+		return err
+	}
+
+	if err := s.UpdateGroupItemTotal(ctx, groupItemModel.ID.String()); err != nil {
+		return err
+	}
+
+	if err := s.so.UpdateOrderTotal(ctx, groupItemModel.OrderID.String()); err != nil {
+		return err
+	}
+
+	dtoId := &entitydto.IDRequest{ID: groupItemModel.ID}
+	processes, err := s.sop.GetProcessesByGroupItemID(ctx, dtoId)
+	if err != nil {
+		return err
+	}
+
+	for _, process := range processes {
+		dtoProcessID := entitydto.NewIdRequest(process.ID)
+		orderProcessCancelDTO := &orderprocessdto.OrderProcessCancelDTO{Reason: dto.Reason}
+		if err = s.sop.CancelProcess(ctx, dtoProcessID, orderProcessCancelDTO); err != nil {
+			return err
 		}
 	}
 

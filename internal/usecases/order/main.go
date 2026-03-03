@@ -6,6 +6,7 @@ import (
 	clientusecases "github.com/willjrcom/sales-backend-go/internal/usecases/client"
 	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 	orderqueueusecases "github.com/willjrcom/sales-backend-go/internal/usecases/order_queue"
+	stockusecases "github.com/willjrcom/sales-backend-go/internal/usecases/stock"
 )
 
 type OrderService struct {
@@ -16,6 +17,7 @@ type OrderService struct {
 	rdo                     model.OrderDeliveryRepository
 	stockRepo               model.StockRepository
 	stockMovementRepo       model.StockMovementRepository
+	stockService            *stockusecases.Service
 	companySubscriptionRepo model.CompanySubscriptionRepository
 	re                      model.EmployeeRepository
 	sgi                     *GroupItemService
@@ -41,6 +43,7 @@ func (s *OrderService) AddDependencies(
 	rdo model.OrderDeliveryRepository,
 	stockRepo model.StockRepository,
 	stockMovementRepo model.StockMovementRepository,
+	stockService *stockusecases.Service,
 	companySubscriptionRepo model.CompanySubscriptionRepository,
 	sgi *GroupItemService,
 	sop *OrderProcessService,
@@ -60,6 +63,7 @@ func (s *OrderService) AddDependencies(
 	s.rdo = rdo
 	s.stockRepo = stockRepo
 	s.stockMovementRepo = stockMovementRepo
+	s.stockService = stockService
 	s.companySubscriptionRepo = companySubscriptionRepo
 	s.sgi = sgi
 	s.sq = sq

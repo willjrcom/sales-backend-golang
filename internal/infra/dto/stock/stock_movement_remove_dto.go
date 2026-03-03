@@ -4,10 +4,9 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-// StockMovementRemoveDTO representa o DTO para criar movimento
+// StockMovementRemoveDTO representa o DTO para remover movimento
 type StockMovementRemoveDTO struct {
-	Reason     string          `json:"reason"`
-	Quantity   decimal.Decimal `json:"quantity,omitempty"`
-	Price      decimal.Decimal `json:"price,omitempty"`
-	TotalPrice decimal.Decimal `json:"total_price,omitempty"`
+	Reason   string          `json:"reason"`
+	Quantity decimal.Decimal `json:"quantity"`
+	Price    decimal.Decimal `json:"price,omitempty"` // Opcional para saída manual
 }

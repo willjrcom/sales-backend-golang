@@ -40,12 +40,15 @@ func NewHandlerStock(stockService *stockusecases.Service) *handler.Handler {
 		c.Post("/{id}/movement/adjust", h.handlerAdjustStock)
 		c.Get("/{stock_id}/movement", h.handlerGetMovementsByStockID)
 
-		// Alerts
+		// Alerts — static routes BEFORE parameterized to avoid chi wildcard conflicts
 		c.Get("/alerts", h.handlerGetAllAlerts)
+		c.Get("/alerts/expiry", h.handlerGetExpiryAlerts)         // Expiration alerts
+		c.Post("/alerts/expiry/check", h.handlerCheckExpirations) // Trigger check
 		c.Get("/alerts/{id}", h.handlerGetAlertByID)
 		c.Put("/alerts/{id}/resolve", h.handlerResolveAlert)
 		c.Delete("/alerts/{id}", h.handlerDeleteAlert)
 
+		c.Get("/{id}/batches", h.handlerGetBatchesByStockID)
 		// Reports
 		c.Get("/report", h.handlerGetStockReport)
 		c.Get("/low-stock", h.handlerGetLowStockProducts)
@@ -382,4 +385,47 @@ func (h *handlerStockImpl) handlerGetStockReport(w http.ResponseWriter, r *http.
 	w.Header().Set("X-Total-Count", strconv.Itoa(count))
 
 	jsonpkg.ResponseJson(w, r, http.StatusOK, report)
+}
+
+func (h *handlerStockImpl) handlerGetExpiryAlerts(w http.ResponseWriter, r *http.Request) {
+	alerts, err := h.s.GetExpiryAlerts(r.Context())
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, alerts)
+}
+
+func (h *handlerStockImpl) handlerCheckExpirations(w http.ResponseWriter, r *http.Request) {
+	daysStr := r.URL.Query().Get("days")
+	days := 30 // Default threshold
+	if daysStr != "" {
+		if d, err := strconv.Atoi(daysStr); err == nil {
+			days = d
+		}
+	}
+
+	if err := h.s.CheckExpirations(r.Context(), days); err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, map[string]string{"message": "Expiration check completed successfully"})
+}
+
+func (h *handlerStockImpl) handlerGetBatchesByStockID(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	if id == "" {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusBadRequest, errors.New("id is required"))
+		return
+	}
+
+	batches, err := h.s.GetBatchesByStockID(r.Context(), id)
+	if err != nil {
+		jsonpkg.ResponseErrorJson(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	jsonpkg.ResponseJson(w, r, http.StatusOK, batches)
 }

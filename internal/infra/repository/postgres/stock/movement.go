@@ -16,24 +16,10 @@ func NewStockMovementRepositoryBun(db *bun.DB) model.StockMovementRepository {
 	return &StockMovementRepositoryBun{db: db}
 }
 
-func (r *StockMovementRepositoryBun) CreateMovement(ctx context.Context, m *model.StockMovement) error {
-
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
-	if err != nil {
+func (r *StockMovementRepositoryBun) CreateMovement(ctx context.Context, db bun.IDB, m *model.StockMovement) error {
+	if _, err := db.NewInsert().Model(m).Exec(ctx); err != nil {
 		return err
 	}
-
-	defer cancel()
-	defer tx.Rollback()
-
-	if _, err := tx.NewInsert().Model(m).Exec(ctx); err != nil {
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
 	return nil
 }
 

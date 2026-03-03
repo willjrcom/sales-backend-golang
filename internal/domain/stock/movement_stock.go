@@ -14,13 +14,13 @@ type StockMovement struct {
 
 type StockMovementCommonAttributes struct {
 	StockID    uuid.UUID
+	BatchID    *uuid.UUID // ID do lote associado (opcional)
 	Type       MovementType
 	Quantity   decimal.Decimal
 	Reason     string
 	OrderID    *uuid.UUID
 	EmployeeID uuid.UUID
-	Price      decimal.Decimal
-	TotalPrice decimal.Decimal
+	Price      decimal.Decimal // Entrada: Custo do lote | Saída: Preço de venda
 }
 
 // MovementType define o tipo de movimento de estoque
@@ -31,5 +31,19 @@ const (
 	MovementTypeOut       MovementType = "out"        // Saída de estoque
 	MovementTypeAdjustIn  MovementType = "adjust_in"  // Ajuste manual
 	MovementTypeAdjustOut MovementType = "adjust_out" // Ajuste manual
-
+	MovementTypeReserve   MovementType = "reserve"    // Reserva para pedido
+	MovementTypeRestore   MovementType = "restore"    // Restauração de reserva
 )
+
+func NewStockMovement(stockID uuid.UUID, quantity decimal.Decimal, reason string, employeeID uuid.UUID, price decimal.Decimal) *StockMovement {
+	return &StockMovement{
+		Entity: entity.NewEntity(),
+		StockMovementCommonAttributes: StockMovementCommonAttributes{
+			StockID:    stockID,
+			Quantity:   quantity,
+			Reason:     reason,
+			EmployeeID: employeeID,
+			Price:      price,
+		},
+	}
+}
