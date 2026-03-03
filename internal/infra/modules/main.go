@@ -23,14 +23,14 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, rabb
 
 	shiftRepository, shiftService, _ := NewShiftModule(db, chi)
 
+	// Stock module - deve ser inicializado antes do item module para injeção de dependência
+	stockRepo, stockMovementRepo, _, _, stockService, _ := NewStockModule(db, chi)
+
 	groupItemRepository, groupItemService, _ := NewGroupItemModule(db, chi)
 	itemRepository, itemService, _ := NewItemModule(db, chi)
 
 	orderProcessRepository, orderProcessService, _ := NewOrderProcessModule(db, chi)
 	orderQueueRepository, orderQueueService, _ := NewOrderqueueModule(db, chi)
-
-	// Stock module - deve ser inicializado antes do order module
-	stockRepository, stockMovementRepository, _, stockService, _ := NewStockModule(db, chi)
 
 	orderRepository, orderService, _ := NewOrderModule(db, chi)
 	orderDeliveryRepository, orderDeliveryService, _ := NewOrderDeliveryModule(db, chi)
@@ -79,16 +79,15 @@ func MainModules(db *bun.DB, chi *server.ServerChi, s3 *s3service.S3Client, rabb
 	orderProcessService.AddDependencies(orderQueueService, processRuleRepository, groupItemService, orderRepository, employeeService, groupItemRepository, orderService)
 	processRuleService.AddDependencies(productCategoryRepository)
 
-	itemService.AddDependencies(groupItemRepository, orderRepository, productRepository, productCategoryRepository, employeeRepository, orderService, groupItemService, stockRepository, stockMovementRepository)
+	itemService.AddDependencies(groupItemRepository, orderRepository, productRepository, productCategoryRepository, employeeRepository, orderService, groupItemService, stockRepo, stockMovementRepo)
 	groupItemService.AddDependencies(itemRepository, productRepository, orderService, orderProcessService, employeeRepository, itemService)
 
-	stockService.AddDependencies(productRepository, itemRepository, employeeRepository)
-
-	orderService.AddDependencies(orderRepository, shiftRepository, productRepository, processRuleRepository, orderDeliveryRepository, stockRepository, stockMovementRepository, companySubscriptionRepo, groupItemService, orderProcessService, orderQueueService, orderDeliveryService, orderPickupService, orderTableService, companyService, employeeRepository, rabbitmq, clientService)
+	stockService.AddDependencies(productRepository, itemRepository, employeeRepository, orderRepository)
+	orderService.AddDependencies(orderRepository, shiftRepository, productRepository, processRuleRepository, orderDeliveryRepository, stockRepo, stockMovementRepo, stockService, companySubscriptionRepo, groupItemService, orderProcessService, orderQueueService, orderDeliveryService, orderPickupService, orderTableService, companyService, employeeRepository, rabbitmq, clientService)
 	orderDeliveryService.AddDependencies(addressRepository, clientRepository, orderRepository, orderService, deliveryDriverRepository, companyRepository, rabbitmq)
 	deliveryDriverService.AddDependencies(employeeRepository)
 	orderTableService.AddDependencies(tableRepository, orderService, companyService)
-	orderPickupService.AddDependencies(orderService)
+	orderPickupService.AddDependencies(orderService, companyService)
 
 	shiftService.AddDependencies(employeeService, orderRepository, deliveryDriverRepository, orderProcessRepository, orderQueueRepository, processRuleRepository, employeeRepository)
 	companyService.AddDependencies(addressRepository, *schemaService, userRepository, *userService, *employeeService, usageCostRepo, companySubscriptionRepo, rabbitmq)

@@ -5,37 +5,73 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/shopspring/decimal"
+	"github.com/uptrace/bun"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
+	stockentity "github.com/willjrcom/sales-backend-go/internal/domain/stock"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	stockdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/stock"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
 type Service struct {
+	db                *bun.DB
 	stockRepo         model.StockRepository
 	stockMovementRepo model.StockMovementRepository
+	stockBatchRepo    model.StockBatchRepository
 	stockAlertRepo    model.StockAlertRepository
 	productRepo       model.ProductRepository
 	itemRepo          model.ItemRepository
 	employeeRepo      model.EmployeeRepository
+	orderRepo         model.OrderRepository
 }
 
 func NewStockService(
+	db *bun.DB,
 	stockRepo model.StockRepository,
 	stockMovementRepo model.StockMovementRepository,
+	stockBatchRepo model.StockBatchRepository,
 	stockAlertRepo model.StockAlertRepository,
 ) *Service {
 	return &Service{
+		db:                db,
 		stockRepo:         stockRepo,
 		stockMovementRepo: stockMovementRepo,
+		stockBatchRepo:    stockBatchRepo,
 		stockAlertRepo:    stockAlertRepo,
 	}
 }
 
-func (s *Service) AddDependencies(productRepo model.ProductRepository, itemRepo model.ItemRepository, employeeRepo model.EmployeeRepository) {
+func (s *Service) AddDependencies(productRepo model.ProductRepository, itemRepo model.ItemRepository, employeeRepo model.EmployeeRepository, orderRepo model.OrderRepository) {
 	s.itemRepo = itemRepo
 	s.productRepo = productRepo
 	s.employeeRepo = employeeRepo
+	s.orderRepo = orderRepo
+}
+
+// createAlertsIfNotDuplicate persiste cada alerta somente se não houver outro alerta
+// ativo do mesmo tipo para o mesmo estoque (evita duplicatas).
+func (s *Service) createAlertsIfNotDuplicate(ctx context.Context, alerts []*stockentity.StockAlert) {
+	for _, alert := range alerts {
+		existing, err := s.stockAlertRepo.GetAlertsByStockID(ctx, alert.StockID.String())
+		duplicate := false
+		if err == nil {
+			for _, ea := range existing {
+				if !ea.IsResolved && ea.Type == model.AlertType(alert.Type) {
+					duplicate = true
+					break
+				}
+			}
+		}
+		if !duplicate {
+			alertModel := &model.StockAlert{}
+			alertModel.FromDomain(alert)
+			if err := s.stockAlertRepo.CreateAlert(ctx, alertModel); err != nil {
+				fmt.Printf("Aviso: erro ao criar alerta de estoque: %v\n", err)
+			}
+		}
+	}
 }
 
 // CreateStock cria um novo controle de estoque
@@ -70,15 +106,8 @@ func (s *Service) CreateStock(ctx context.Context, dto *stockdto.StockCreateDTO)
 		return nil, err
 	}
 
-	// Verificar alertas
-	alerts := stock.CheckAlerts()
-	for _, alert := range alerts {
-		alertModel := &model.StockAlert{}
-		alertModel.FromDomain(alert)
-		if err := s.stockAlertRepo.CreateAlert(ctx, alertModel); err != nil {
-			fmt.Printf("Erro ao criar alerta: %v\n", err)
-		}
-	}
+	// Verificar alertas (com deduplicação)
+	s.createAlertsIfNotDuplicate(ctx, stock.CheckAlerts())
 
 	// Retornar DTO
 	stockDTO := &stockdto.StockDTO{}
@@ -98,7 +127,7 @@ func (s *Service) UpdateStock(ctx context.Context, dtoID *entitydto.IDRequest, d
 	dto.UpdateDomain(stock)
 
 	stockModel.FromDomain(stock)
-	return s.stockRepo.UpdateStock(ctx, stockModel)
+	return s.stockRepo.UpdateStock(ctx, s.db, stockModel)
 }
 
 // GetStockByID busca estoque por ID
@@ -164,8 +193,6 @@ func (s *Service) GetAllStocks(ctx context.Context, page, perPage int) ([]stockd
 
 	return stocksDTO, count, nil
 }
-
-// AddMovementStock adiciona estoque manualmente
 
 // GetLowStockProducts busca produtos com estoque baixo
 func (s *Service) GetLowStockProducts(ctx context.Context) ([]stockdto.StockDTO, error) {
@@ -319,6 +346,13 @@ func (s *Service) ResolveAlert(ctx context.Context, alertID string) error {
 	now := time.Now().UTC()
 	alert.ResolvedAt = &now
 
+	// Fix #18: Registrar quem resolveu o alerta
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
+	if ok {
+		userUUID := uuid.MustParse(userID)
+		alert.ResolvedBy = &userUUID
+	}
+
 	return s.stockAlertRepo.UpdateAlert(ctx, alert)
 }
 
@@ -357,13 +391,17 @@ func (s *Service) GetStockReport(ctx context.Context, page, perPage int) (*stock
 	totalOutOfStock := len(outOfStockProducts)
 	totalActiveAlerts := len(activeAlerts)
 
-	// Calcular valor total do estoque
+	// Calcular valor total do estoque baseado nos lotes reais
 	totalStockValue := decimal.Zero
 	for _, stock := range stockModels {
-		// Usar o custo unitário do último movimento ou um valor padrão
-		// Por enquanto, vamos usar um valor estimado baseado no estoque atual
-		estimatedCost := decimal.NewFromFloat(10.0) // Valor estimado por unidade
-		totalStockValue = totalStockValue.Add(estimatedCost.Mul(stock.GetCurrentStock()))
+		batches, err := s.stockBatchRepo.GetActiveBatchesByStockID(ctx, stock.ID.String())
+		if err != nil {
+			continue
+		}
+		for _, batch := range batches {
+			batchDomain := batch.ToDomain()
+			totalStockValue = totalStockValue.Add(batchDomain.CurrentQuantity.Mul(batchDomain.CostPrice))
+		}
 	}
 
 	// Converter para DTOs
@@ -415,4 +453,95 @@ func (s *Service) GetStockReport(ctx context.Context, page, perPage int) (*stock
 	}
 
 	return report, count, nil
+}
+
+func (s *Service) debitStockFromItem(ctx context.Context, item *model.Item, orderID uuid.UUID, employeeID uuid.UUID) error {
+	reason := fmt.Sprintf("Venda Pedido %s", orderID)
+	quantity := decimal.NewFromFloat(item.Quantity)
+
+	var stockModel *model.Stock
+	var err error
+
+	if item.ProductVariationID != uuid.Nil {
+		// Buscar estoque pela variação
+		stockModel, err = s.stockRepo.GetStockByVariationID(ctx, item.ProductVariationID.String())
+		if err != nil {
+			return nil // sem controle de estoque para esta variação, ignorar
+		}
+	} else {
+		// Fallback por ProductID para produtos sem variação
+		stocks, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
+		if err != nil || len(stocks) == 0 {
+			return nil
+		}
+		stockModel = &stocks[0]
+	}
+
+	if stockModel == nil {
+		return nil
+	}
+
+	// Debitar FIFO
+	if err := s.DebitStockFIFO(ctx, stockModel.ID, quantity, orderID, employeeID, reason); err != nil {
+		fmt.Printf("Aviso: erro ao debitar estoque para item %s: %v\n", item.ProductID, err)
+		return nil
+	}
+
+	// Verificar alertas
+	if updatedStockModel, err := s.stockRepo.GetStockByID(ctx, stockModel.ID.String()); err == nil {
+		s.createAlertsIfNotDuplicate(ctx, updatedStockModel.ToDomain().CheckAlerts())
+	}
+
+	return nil
+}
+
+// DebitStockFromOrder debita o estoque de todos os itens de um pedido
+func (s *Service) DebitStockFromOrder(ctx context.Context, orderID uuid.UUID, employeeID uuid.UUID) error {
+	orderModel, err := s.orderRepo.GetOrderById(ctx, orderID.String())
+	if err != nil {
+		return fmt.Errorf("erro ao buscar pedido: %w", err)
+	}
+
+	for _, groupItem := range orderModel.GroupItems {
+		// 1. Itens principais e seus adicionais
+		for _, item := range groupItem.Items {
+			if err := s.debitStockFromItem(ctx, &item, orderID, employeeID); err != nil {
+				return err
+			}
+
+			// Processar adicionais do item
+			for _, addItem := range item.AdditionalItems {
+				if err := s.debitStockFromItem(ctx, &addItem, orderID, employeeID); err != nil {
+					return err
+				}
+			}
+		}
+
+		// 2. Complemento do grupo
+		if groupItem.ComplementItem != nil {
+			if err := s.debitStockFromItem(ctx, groupItem.ComplementItem, orderID, employeeID); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// GetBatchesByStockID retorna todos os lotes de um estoque
+func (s *Service) GetBatchesByStockID(ctx context.Context, stockID string) ([]stockdto.StockBatchDTO, error) {
+	batches, err := s.stockBatchRepo.GetBatchesByStockID(ctx, stockID)
+	if err != nil {
+		return nil, fmt.Errorf("erro ao buscar lotes do estoque: %w", err)
+	}
+
+	dtos := make([]stockdto.StockBatchDTO, 0, len(batches))
+	for _, b := range batches {
+		domain := b.ToDomain()
+		dto := stockdto.StockBatchDTO{}
+		dto.FromDomain(domain)
+		dtos = append(dtos, dto)
+	}
+
+	return dtos, nil
 }

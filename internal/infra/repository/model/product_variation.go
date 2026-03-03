@@ -15,32 +15,37 @@ type ProductVariation struct {
 	SizeID        uuid.UUID        `bun:"size_id,type:uuid,notnull"`
 	Size          *Size            `bun:"rel:belongs-to"`
 	Price         *decimal.Decimal `bun:"price,type:decimal(10,2),notnull"`
-	IsAvailable   bool             `bun:"is_available"`
+	IsAvailable   bool             `bun:"is_available,notnull,default:true"`
 }
 
-func (p *ProductVariation) ToDomain() productentity.ProductVariation {
-	return productentity.ProductVariation{
-		Entity:      p.Entity.ToDomain(),
-		ProductID:   p.ProductID,
-		SizeID:      p.SizeID,
-		Size:        p.Size.ToDomain(),
-		Price:       p.GetPrice(),
-		IsAvailable: p.IsAvailable,
+// ToDomain converte model para domain
+func (pv *ProductVariation) ToDomain() productentity.ProductVariation {
+	variation := productentity.ProductVariation{
+		Entity:      pv.Entity.ToDomain(),
+		ProductID:   pv.ProductID,
+		SizeID:      pv.SizeID,
+		Price:       pv.GetPrice(),
+		IsAvailable: pv.IsAvailable,
 	}
+
+	if pv.Size != nil {
+		variation.Size = pv.Size.ToDomain()
+	}
+
+	return variation
 }
 
-func (p *ProductVariation) FromDomain(productVariation productentity.ProductVariation) {
-	*p = ProductVariation{
-		Entity:      entitymodel.FromDomain(productVariation.Entity),
-		ProductID:   productVariation.ProductID,
-		SizeID:      productVariation.SizeID,
-		Price:       &productVariation.Price,
-		IsAvailable: productVariation.IsAvailable,
-	}
+// FromDomain converte domain para model
+func (pv *ProductVariation) FromDomain(variation productentity.ProductVariation) {
+	pv.ID = variation.ID
+	pv.ProductID = variation.ProductID
+	pv.SizeID = variation.SizeID
+	pv.Price = &variation.Price
+	pv.IsAvailable = variation.IsAvailable
 
-	if productVariation.Size != nil {
-		p.Size = &Size{}
-		p.Size.FromDomain(productVariation.Size)
+	if variation.Size != nil {
+		pv.Size = &Size{}
+		pv.Size.FromDomain(variation.Size)
 	}
 }
 

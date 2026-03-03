@@ -345,6 +345,7 @@ func registerModels(db *bun.DB) error {
 
 	db.RegisterModel((*model.Stock)(nil))
 	db.RegisterModel((*model.StockMovement)(nil))
+	db.RegisterModel((*model.StockBatch)(nil))
 	db.RegisterModel((*model.StockAlert)(nil))
 
 	db.RegisterModel((*model.Address)(nil))
@@ -436,6 +437,10 @@ func createTables(ctx context.Context, tx *bun.Tx) error {
 	}
 
 	if err := createTableIfNotExists(ctx, tx, (*model.StockMovement)(nil)); err != nil {
+		return err
+	}
+
+	if err := createTableIfNotExists(ctx, tx, (*model.StockBatch)(nil)); err != nil {
 		return err
 	}
 

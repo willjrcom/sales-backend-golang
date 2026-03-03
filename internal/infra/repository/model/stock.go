@@ -20,6 +20,7 @@ type StockCommonAttributes struct {
 	Product            Product          `bun:"product,rel:has-one,join:product_id=id"`
 	ProductVariationID *uuid.UUID       `bun:"product_variation_id,type:uuid"`
 	CurrentStock       *decimal.Decimal `bun:"current_stock,type:decimal(10,3),notnull"`
+	ReservedStock      *decimal.Decimal `bun:"reserved_stock,type:decimal(10,3),notnull"`
 	MinStock           *decimal.Decimal `bun:"min_stock,type:decimal(10,3),notnull"`
 	MaxStock           *decimal.Decimal `bun:"max_stock,type:decimal(10,3),notnull"`
 	Unit               string           `bun:"unit,notnull"`
@@ -37,6 +38,7 @@ func (s *Stock) FromDomain(stock *stockentity.Stock) {
 			ProductID:          stock.ProductID,
 			ProductVariationID: stock.ProductVariationID,
 			CurrentStock:       &stock.CurrentStock,
+			ReservedStock:      &stock.ReservedStock,
 			MinStock:           &stock.MinStock,
 			MaxStock:           &stock.MaxStock,
 			Unit:               stock.Unit,
@@ -57,6 +59,7 @@ func (s *Stock) ToDomain() *stockentity.Stock {
 			Product:            *s.Product.ToDomain(),
 			ProductVariationID: s.ProductVariationID,
 			CurrentStock:       s.GetCurrentStock(),
+			ReservedStock:      s.GetReservedStock(),
 			MinStock:           s.GetMinStock(),
 			MaxStock:           s.GetMaxStock(),
 			Unit:               s.Unit,
@@ -70,6 +73,13 @@ func (s *Stock) GetCurrentStock() decimal.Decimal {
 		return decimal.Zero
 	}
 	return *s.CurrentStock
+}
+
+func (s *Stock) GetReservedStock() decimal.Decimal {
+	if s.ReservedStock == nil {
+		return decimal.Zero
+	}
+	return *s.ReservedStock
 }
 
 func (s *Stock) GetMinStock() decimal.Decimal {

@@ -57,7 +57,7 @@ func (p *ProductUpdateDTO) UpdateDomain(product *productentity.Product) (err err
 	if p.Variations != nil {
 		product.Variations = []productentity.ProductVariation{}
 		for _, v := range *p.Variations {
-			product.AddVariation(v.ToDomain())
+			product.Variations = append(product.Variations, v.ToDomain(product.ID))
 		}
 	}
 

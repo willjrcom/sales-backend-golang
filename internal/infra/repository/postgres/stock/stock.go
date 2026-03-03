@@ -37,25 +37,24 @@ func (r *StockRepositoryBun) CreateStock(ctx context.Context, s *model.Stock) er
 	return nil
 }
 
-func (r *StockRepositoryBun) UpdateStock(ctx context.Context, s *model.Stock) error {
-
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
-	if err != nil {
+func (r *StockRepositoryBun) UpdateStock(ctx context.Context, db bun.IDB, s *model.Stock) error {
+	if _, err := db.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
 		return err
 	}
-
-	defer cancel()
-	defer tx.Rollback()
-
-	if _, err := tx.NewUpdate().Model(s).Where("id = ?", s.ID).Exec(ctx); err != nil {
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
 	return nil
+}
+
+func (r *StockRepositoryBun) GetStockByIDForUpdate(ctx context.Context, db bun.IDB, id string) (*model.Stock, error) {
+	stock := &model.Stock{}
+
+	if err := db.NewSelect().Model(stock).
+		Where("stock.id = ?", id).
+		For("UPDATE").
+		Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return stock, nil
 }
 
 func (r *StockRepositoryBun) GetStockByID(ctx context.Context, id string) (*model.Stock, error) {

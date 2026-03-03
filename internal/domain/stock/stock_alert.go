@@ -31,7 +31,9 @@ type StockAlertCommonAttributes struct {
 type AlertType string
 
 const (
-	AlertTypeLowStock   AlertType = "low_stock"    // Estoque baixo
-	AlertTypeOutOfStock AlertType = "out_of_stock" // Sem estoque
-	AlertTypeOverStock  AlertType = "over_stock"   // Estoque acima do máximo
+	AlertTypeLowStock       AlertType = "low_stock"       // Estoque baixo
+	AlertTypeOutOfStock     AlertType = "out_of_stock"    // Sem estoque
+	AlertTypeOverStock      AlertType = "over_stock"      // Estoque acima do máximo
+	AlertTypeNearExpiration AlertType = "near_expiration" // Próximo do vencimento
+	AlertTypeExpired        AlertType = "expired"         // Vencido
 )

@@ -13,22 +13,32 @@ type ProductVariationDTO struct {
 	ProductID   uuid.UUID        `json:"product_id"`
 	SizeID      uuid.UUID        `json:"size_id"`
 	Size        *sizedto.SizeDTO `json:"size"`
-	Price       decimal.Decimal  `json:"price"`
+	Price       *decimal.Decimal `json:"price"`
 	IsAvailable bool             `json:"is_available"`
 }
 
-func (d *ProductVariationDTO) FromDomain(variation productentity.ProductVariation) {
-	*d = ProductVariationDTO{
-		ID:          variation.ID,
-		ProductID:   variation.ProductID,
-		SizeID:      variation.SizeID,
-		Price:       variation.Price,
-		IsAvailable: variation.IsAvailable,
+func (pv *ProductVariationDTO) ToDomain() productentity.ProductVariation {
+	variation := productentity.ProductVariation{
+		Entity:      entity.Entity{ID: pv.ID},
+		ProductID:   pv.ProductID,
+		SizeID:      pv.SizeID,
+		Price:       *pv.Price, // Assuming Price is always non-nil when converting to domain
+		IsAvailable: pv.IsAvailable,
 	}
 
+	return variation
+}
+
+func (pv *ProductVariationDTO) FromDomain(variation productentity.ProductVariation) {
+	pv.ID = variation.ID
+	pv.ProductID = variation.ProductID
+	pv.SizeID = variation.SizeID
+	pv.Price = &variation.Price
+	pv.IsAvailable = variation.IsAvailable
+
 	if variation.Size != nil {
-		d.Size = &sizedto.SizeDTO{}
-		d.Size.FromDomain(variation.Size)
+		pv.Size = &sizedto.SizeDTO{}
+		pv.Size.FromDomain(variation.Size)
 	}
 }
 
@@ -38,11 +48,6 @@ type ProductVariationCreateDTO struct {
 	IsAvailable bool            `json:"is_available"`
 }
 
-func (d *ProductVariationCreateDTO) ToDomain() productentity.ProductVariation {
-	return productentity.ProductVariation{
-		Entity:      entity.NewEntity(),
-		SizeID:      d.SizeID,
-		Price:       d.Price,
-		IsAvailable: d.IsAvailable,
-	}
+func (d *ProductVariationCreateDTO) ToDomain(productID uuid.UUID) productentity.ProductVariation {
+	return *productentity.NewProductVariation(productID, d.SizeID, d.Price)
 }

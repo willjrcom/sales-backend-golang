@@ -3,7 +3,9 @@ package orderusecases
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"github.com/google/uuid"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -142,6 +144,22 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 	itemComplement := orderentity.NewItem(productComplement.Name, variation.Price, groupItem.Quantity, size, productComplement.ID, variation.ID, productComplement.CategoryID, nil)
 	itemComplement.AddSizeToName()
 
+	userID, ok := ctx.Value(model.UserValue("user_id")).(string)
+	attendantID := uuid.Nil
+	if ok {
+		userIDUUID := uuid.MustParse(userID)
+		employee, err := s.re.GetEmployeeByUserID(ctx, userIDUUID.String())
+		if err != nil {
+			return err
+		}
+		attendantID = employee.ID
+	}
+
+	// Reserve stock for the complement item
+	if err := s.si.ReserveStockFromItem(ctx, itemComplement, groupItem, attendantID); err != nil {
+		fmt.Printf("Aviso: estoque insuficiente para item complementar %s: %v\n", productComplement.Name, err)
+	}
+
 	itemComplementModel := &model.Item{}
 	itemComplementModel.FromDomain(itemComplement)
 	if err = s.ri.AddItem(ctx, itemComplementModel); err != nil {
@@ -174,6 +192,22 @@ func (s *GroupItemService) DeleteComplementItem(ctx context.Context, dto *entity
 
 	if groupItemModel.ComplementItemID == nil {
 		return ErrComplementItemNotFound
+	}
+
+	userID, ok := ctx.Value(model.UserValue("user_id")).(string)
+	attendantID := uuid.Nil
+	if ok {
+		userIDUUID := uuid.MustParse(userID)
+		employee, err := s.re.GetEmployeeByUserID(ctx, userIDUUID.String())
+		if err != nil {
+			return err
+		}
+		attendantID = employee.ID
+	}
+
+	// Restore stock for the complement item before deleting it
+	if err := s.si.RestoreStockFromItem(ctx, groupItemModel.ComplementItem.ToDomain(), groupItemModel.ToDomain(), attendantID); err != nil {
+		fmt.Printf("Aviso: erro ao restaurar estoque para item complementar %s: %v\n", groupItemModel.ComplementItem.Name, err)
 	}
 
 	if err := s.ri.DeleteItem(ctx, groupItemModel.ComplementItemID.String()); err != nil {

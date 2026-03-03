@@ -16,6 +16,7 @@ type StockDTO struct {
 	ProductVariationID *uuid.UUID                    `json:"product_variation_id"`
 	Product            productcategorydto.ProductDTO `json:"product"`
 	CurrentStock       decimal.Decimal               `json:"current_stock"`
+	ReservedStock      decimal.Decimal               `json:"reserved_stock"`
 	MinStock           decimal.Decimal               `json:"min_stock"`
 	MaxStock           decimal.Decimal               `json:"max_stock"`
 	Unit               string                        `json:"unit"`
@@ -41,6 +42,7 @@ func (s *StockDTO) FromDomain(stock *stockentity.Stock) {
 		ProductVariationID: stock.ProductVariationID,
 		Product:            productDTO,
 		CurrentStock:       stock.CurrentStock,
+		ReservedStock:      stock.ReservedStock,
 		MinStock:           stock.MinStock,
 		MaxStock:           stock.MaxStock,
 		Unit:               stock.Unit,

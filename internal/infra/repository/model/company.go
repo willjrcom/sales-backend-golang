@@ -28,6 +28,9 @@ type CompanyCommonAttributes struct {
 	IsBlocked    bool                      `bun:"is_blocked"`
 	ImagePath    string                    `bun:"image_path"`
 
+	// Opening Hours
+	Schedules []companyentity.Schedule `bun:"schedules,type:jsonb"`
+
 	// Categories
 	Categories []CompanyCategory `bun:"m2m:company_to_category,join:Company=Category"`
 
@@ -54,6 +57,7 @@ func (c *Company) FromDomain(company *companyentity.Company) {
 			Preferences:                   company.Preferences,
 			IsBlocked:                     company.IsBlocked,
 			ImagePath:                     company.ImagePath,
+			Schedules:                     company.Schedules,
 			Categories:                    []CompanyCategory{},
 			MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
 			MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
@@ -104,6 +108,7 @@ func (c *Company) ToDomain() *companyentity.Company {
 			Preferences:                   c.Preferences,
 			IsBlocked:                     c.IsBlocked,
 			ImagePath:                     c.ImagePath,
+			Schedules:                     c.Schedules,
 			Categories:                    categories,
 			MonthlyPaymentDueDay:          c.MonthlyPaymentDueDay,
 			MonthlyPaymentDueDayUpdatedAt: c.MonthlyPaymentDueDayUpdatedAt,

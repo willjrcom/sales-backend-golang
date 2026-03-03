@@ -110,21 +110,7 @@ func TestCreateProductError(t *testing.T) {
 	_, err = productService.CreateProduct(ctx, dto)
 	assert.EqualError(t, err, productcategorydto.ErrNameRequired.Error())
 
-	// Test 3 - Price less than Cost (in variation)
-	dto = &productcategorydto.ProductCreateDTO{
-		SKU:        "sku",
-		Name:       "name",
-		CategoryID: ptrUUID(uuid.Nil),
-		Variations: []productcategorydto.ProductVariationCreateDTO{
-			{
-				SizeID: uuid.New(),
-				Price:  decimal.NewFromInt(1),
-			},
-		},
-	}
-	_, err = productService.CreateProduct(ctx, dto)
-
-	// Test 4 - No Category
+	// Test 3 - No Category
 	dto = &productcategorydto.ProductCreateDTO{
 		SKU:  "sku",
 		Name: "name",
@@ -138,7 +124,7 @@ func TestCreateProductError(t *testing.T) {
 	_, err = productService.CreateProduct(ctx, dto)
 	assert.EqualError(t, err, productcategorydto.ErrCategoryRequired.Error())
 
-	// Test 5 - No Size (SizeID in variation is Nil)
+	// Test 4 - No Size (SizeID in variation is Nil)
 	dto = &productcategorydto.ProductCreateDTO{
 		SKU:        "sku",
 		Name:       "name",

@@ -204,18 +204,18 @@ func Test_FormatOrder(t *testing.T) {
 	assert.Contains(t, s, fmt.Sprintf("PEDIDO DE ENTREGA %d", o.OrderNumber))
 	// Deve conter seção de entrega e informações principais
 	assert.Contains(t, s, "ENTREGA")
-	assert.Contains(t, s, "Despachado:")
-	assert.Contains(t, s, "Cliente:")
+	assert.Contains(t, s, "DESPACHADO ") // "DESPACHADO ÀS:" after Latin-1 encoding
+	assert.Contains(t, s, "CLIENTE:")
 	assert.Contains(t, s, "Street, 123")
-	assert.Contains(t, s, "Complemento:")
-	assert.Contains(t, s, "Ref:")
-	assert.Contains(t, s, "Bairro:")
-	assert.Contains(t, s, "Cidade:")
+	assert.Contains(t, s, "COMPLEMENTO:")
+	assert.Contains(t, s, "REFER") // "REFERÊNCIA:" after encoding
+	assert.Contains(t, s, "BAIRRO:")
+	assert.Contains(t, s, "CIDADE:")
 	assert.Contains(t, s, "CEP:")
-	assert.Contains(t, s, "Entregador:")
-	assert.Contains(t, s, "Taxa entrega:")
-	assert.Contains(t, s, "Troco:")
-	assert.Contains(t, s, "Forma de pagamento:")
+	assert.Contains(t, s, "ENTREGADOR:")
+	assert.Contains(t, s, "Taxa de Entrega:")
+	assert.Contains(t, s, "TROCO:")
+	assert.Contains(t, s, "FORMA DE PAGAMENTO:")
 	// Itens do pedido e total
 	assert.Contains(t, s, "Pizza mussarela")
 	assert.Contains(t, s, "Borda Recheada")

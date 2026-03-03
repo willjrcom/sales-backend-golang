@@ -77,7 +77,7 @@ func (p *ProductCreateDTO) ToDomain() (*productentity.Product, error) {
 	product := productentity.NewProduct(productCommonAttributes)
 
 	for _, v := range p.Variations {
-		product.AddVariation(v.ToDomain())
+		product.Variations = append(product.Variations, v.ToDomain(product.ID))
 	}
 
 	return product, nil

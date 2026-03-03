@@ -46,9 +46,9 @@ func (s *OrderTableService) CreateOrderTable(ctx context.Context, dto *ordertabl
 		return nil, err
 	}
 
-	enableTable, err := company.Preferences.GetBool(companyentity.EnableTable)
-	if err == nil && !enableTable {
-		return nil, errors.New("order tables is disabled")
+	enableTable, _ := company.Preferences.GetBool(companyentity.EnableTable)
+	if !enableTable {
+		return nil, errors.New("order table is disabled")
 	}
 
 	orderID, err := s.os.CreateDefaultOrder(ctx)

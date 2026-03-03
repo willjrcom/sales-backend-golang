@@ -87,9 +87,9 @@ func (s *OrderDeliveryService) CreateOrderDelivery(ctx context.Context, dto *ord
 		return nil, err
 	}
 
-	enableDelivery, err := company.Preferences.GetBool(companyentity.EnableDelivery)
-	if err == nil && !enableDelivery {
-		return nil, errors.New("order tables is disabled")
+	enableDelivery, _ := company.Preferences.GetBool(companyentity.EnableDelivery)
+	if !enableDelivery {
+		return nil, errors.New("order delivery is disabled")
 	}
 
 	orderID, err := s.so.CreateDefaultOrder(ctx)

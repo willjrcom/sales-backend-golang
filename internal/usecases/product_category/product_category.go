@@ -209,8 +209,9 @@ func productsToMapDTOs(products []model.Product) []productcategorydto.ProductMap
 	dtos := []productcategorydto.ProductMapDTO{}
 	for _, p := range products {
 		dtos = append(dtos, productcategorydto.ProductMapDTO{
-			ID:   p.ID,
-			Name: p.Name,
+			VariationID: uuid.Nil,
+			ProductID:   p.ID,
+			Name:        p.Name,
 		})
 	}
 	return dtos
