@@ -432,7 +432,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 			Relation("Client.Contact").
 			Relation("Client.Address").
 			Relation("Address").
-			Relation("Driver").
+			Relation("Driver.Employee.User").
 			Scan(ctx); err != nil {
 			return nil, err
 		}
