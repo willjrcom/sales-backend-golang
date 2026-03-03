@@ -33,6 +33,10 @@ func (r *StockRepositoryLocal) UpdateStock(ctx context.Context, db bun.IDB, s *m
 	return nil
 }
 
+func (r *StockRepositoryLocal) GetStockByIDForUpdate(ctx context.Context, db bun.IDB, id string) (*model.Stock, error) {
+	return r.GetStockByID(ctx, id)
+}
+
 func (r *StockRepositoryLocal) GetStockByID(ctx context.Context, id string) (*model.Stock, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()

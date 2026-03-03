@@ -177,8 +177,9 @@ func (s *Service) GetAllProductsMap(ctx context.Context, isActive bool, category
 			}
 
 			dtos = append(dtos, productcategorydto.ProductMapDTO{
-				ID:   v.ID,
-				Name: name,
+				VariationID: v.ID,
+				ProductID:   p.ID,
+				Name:        name,
 			})
 		}
 	}

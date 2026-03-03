@@ -11,6 +11,64 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
+func movementRestoreKey(m model.StockMovement) string {
+	batchID := "nil"
+	if m.BatchID != nil {
+		batchID = m.BatchID.String()
+	}
+
+	return fmt.Sprintf("%s|%s|%s|%s", m.StockID.String(), batchID, m.GetQuantity().String(), m.GetPrice().String())
+}
+
+func getPendingOutMovementsToRestore(movements []model.StockMovement) []model.StockMovement {
+	outsByKey := map[string][]model.StockMovement{}
+	restoreCountByKey := map[string]int{}
+
+	for _, m := range movements {
+		switch m.Type {
+		case string(stockentity.MovementTypeOut):
+			key := movementRestoreKey(m)
+			outsByKey[key] = append(outsByKey[key], m)
+		case string(stockentity.MovementTypeRestore):
+			key := movementRestoreKey(m)
+			restoreCountByKey[key]++
+		}
+	}
+
+	pending := make([]model.StockMovement, 0)
+	for key, outs := range outsByKey {
+		skip := restoreCountByKey[key]
+		if skip >= len(outs) {
+			continue
+		}
+		pending = append(pending, outs[skip:]...)
+	}
+
+	return pending
+}
+
+func reconcileStockAfterDebit(stock *stockentity.Stock, quantity decimal.Decimal, orderID uuid.UUID) {
+	if orderID != uuid.Nil {
+		// Pedido com possível reserva prévia.
+		// Usa o saldo real de ReservedStock para saber quanto já foi pré-debitado
+		// de CurrentStock na etapa de reserva.
+		if stock.ReservedStock.GreaterThanOrEqual(quantity) {
+			// Reserva cobriu tudo: CurrentStock já foi decrementado. Só limpar reserva.
+			stock.ReservedStock = stock.ReservedStock.Sub(quantity)
+			return
+		}
+
+		// Reserva parcial ou falhou silenciosamente: decrementar a parte não reservada.
+		notReserved := quantity.Sub(stock.ReservedStock)
+		stock.ReservedStock = decimal.Zero
+		stock.CurrentStock = stock.CurrentStock.Sub(notReserved)
+		return
+	}
+
+	// Saída manual (sem reserva prévia): deduzir do saldo global agora.
+	stock.CurrentStock = stock.CurrentStock.Sub(quantity)
+}
+
 // DebitStockFIFO debita o estoque seguindo a estratégia FIFO (First-In, First-Out)
 func (s *Service) DebitStockFIFO(ctx context.Context, stockID uuid.UUID, quantity decimal.Decimal, orderID uuid.UUID, employeeID uuid.UUID, reason string) error {
 	// 1. Iniciar transação de tenant
@@ -29,6 +87,10 @@ func (s *Service) DebitStockFIFO(ctx context.Context, stockID uuid.UUID, quantit
 
 	remainingQuantity := quantity
 	movements := []*stockentity.StockMovement{}
+	var movementOrderID *uuid.UUID
+	if orderID != uuid.Nil {
+		movementOrderID = &orderID
+	}
 
 	// 3. Processar lotes (FIFO)
 	for _, bm := range batchesModel {
@@ -47,7 +109,7 @@ func (s *Service) DebitStockFIFO(ctx context.Context, stockID uuid.UUID, quantit
 				Type:       stockentity.MovementTypeOut,
 				Quantity:   consumeQuantity,
 				Reason:     reason,
-				OrderID:    &orderID,
+				OrderID:    movementOrderID,
 				EmployeeID: employeeID,
 				Price:      batch.CostPrice, // Valor de custo na saída (COGS)
 			},
@@ -76,7 +138,7 @@ func (s *Service) DebitStockFIFO(ctx context.Context, stockID uuid.UUID, quantit
 				Type:       stockentity.MovementTypeOut,
 				Quantity:   remainingQuantity,
 				Reason:     reason + " (Estoque Negativo)",
-				OrderID:    &orderID,
+				OrderID:    movementOrderID,
 				EmployeeID: employeeID,
 				Price:      decimal.Zero, // Custo zero para estoque não rastreado
 			},
@@ -95,29 +157,13 @@ func (s *Service) DebitStockFIFO(ctx context.Context, stockID uuid.UUID, quantit
 	}
 
 	// 6. Atualizar o estoque principal (total)
-	stockModel, err := s.stockRepo.GetStockByID(ctx, stockID.String())
+	stockModel, err := s.stockRepo.GetStockByIDForUpdate(ctx, tx, stockID.String())
 	if err != nil {
-		return fmt.Errorf("erro ao buscar estoque principal: %w", err)
+		return fmt.Errorf("erro ao buscar estoque principal para atualização: %w", err)
 	}
 
 	stock := stockModel.ToDomain()
-	if orderID != uuid.Nil {
-		// Pedido com possível reserva prévia.
-		// Usa o saldo real de ReservedStock para saber quanto já foi pré-debitado
-		// de CurrentStock na etapa de reserva.
-		if stock.ReservedStock.GreaterThanOrEqual(quantity) {
-			// Reserva cobriu tudo: CurrentStock já foi decrementado. Só limpar reserva.
-			stock.ReservedStock = stock.ReservedStock.Sub(quantity)
-		} else {
-			// Reserva parcial ou falhou silenciosamente: decrementar a parte não reservada.
-			notReserved := quantity.Sub(stock.ReservedStock)
-			stock.ReservedStock = decimal.Zero
-			stock.CurrentStock = stock.CurrentStock.Sub(notReserved)
-		}
-	} else {
-		// Saída manual (sem reserva prévia): deduzir do saldo global agora.
-		stock.CurrentStock = stock.CurrentStock.Sub(quantity)
-	}
+	reconcileStockAfterDebit(stock, quantity, orderID)
 
 	stockModel.FromDomain(stock)
 	if err := s.stockRepo.UpdateStock(ctx, tx, stockModel); err != nil {
@@ -140,8 +186,10 @@ func (s *Service) RestoreStockFromOrder(ctx context.Context, orderID uuid.UUID, 
 		return fmt.Errorf("erro ao buscar movimentos do pedido: %w", err)
 	}
 
-	// Se não houver movimentos, nada a fazer
-	if len(movementsModel) == 0 {
+	pendingOutMovements := getPendingOutMovementsToRestore(movementsModel)
+
+	// Se não houver saídas pendentes de restauração, nada a fazer
+	if len(pendingOutMovements) == 0 {
 		return nil
 	}
 
@@ -153,12 +201,7 @@ func (s *Service) RestoreStockFromOrder(ctx context.Context, orderID uuid.UUID, 
 	defer cancel()
 	defer tx.Rollback()
 
-	for _, mm := range movementsModel {
-		// Apenas restaurar o que foi efetivamente retirado (out)
-		if mm.Type != string(stockentity.MovementTypeOut) {
-			continue
-		}
-
+	for _, mm := range pendingOutMovements {
 		movement := mm.ToDomain()
 
 		// 3. Se houver lote, devolver para o lote
@@ -199,7 +242,7 @@ func (s *Service) RestoreStockFromOrder(ctx context.Context, orderID uuid.UUID, 
 		}
 
 		// 5. Atualizar estoque principal
-		stockModel, err := s.stockRepo.GetStockByID(ctx, movement.StockID.String())
+		stockModel, err := s.stockRepo.GetStockByIDForUpdate(ctx, tx, movement.StockID.String())
 		if err != nil {
 			return fmt.Errorf("erro ao buscar estoque %s para restauração: %w", movement.StockID.String(), err)
 		}

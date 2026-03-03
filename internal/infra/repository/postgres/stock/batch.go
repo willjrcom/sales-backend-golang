@@ -33,7 +33,10 @@ func (r *StockBatchRepositoryBun) UpdateBatch(ctx context.Context, db bun.IDB, b
 func (r *StockBatchRepositoryBun) GetBatchByID(ctx context.Context, db bun.IDB, id string) (*model.StockBatch, error) {
 	batch := &model.StockBatch{}
 
-	if err := db.NewSelect().Model(batch).Where("stock_batch.id = ?", id).Scan(ctx); err != nil {
+	if err := db.NewSelect().Model(batch).
+		Where("stock_batch.id = ?", id).
+		For("UPDATE").
+		Scan(ctx); err != nil {
 		return nil, err
 	}
 	return batch, nil

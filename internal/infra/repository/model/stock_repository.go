@@ -9,6 +9,7 @@ import (
 type StockRepository interface {
 	CreateStock(ctx context.Context, s *Stock) error
 	UpdateStock(ctx context.Context, db bun.IDB, s *Stock) error
+	GetStockByIDForUpdate(ctx context.Context, db bun.IDB, id string) (*Stock, error)
 	GetStockByID(ctx context.Context, id string) (*Stock, error)
 	GetStockByProductID(ctx context.Context, productID string) ([]Stock, error)
 	GetStockByVariationID(ctx context.Context, variationID string) (*Stock, error)

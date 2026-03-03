@@ -3,6 +3,7 @@ package productcategorydto
 import "github.com/google/uuid"
 
 type ProductMapDTO struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
+	VariationID uuid.UUID `json:"variation_id"`
+	ProductID   uuid.UUID `json:"product_id"`
+	Name        string    `json:"name"`
 }

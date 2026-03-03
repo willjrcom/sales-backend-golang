@@ -59,6 +59,11 @@ func (p *Product) ToDomain() *productentity.Product {
 		return nil
 	}
 
+	var category *productentity.ProductCategory
+	if p.Category != nil {
+		category = p.Category.ToDomain()
+	}
+
 	domain := &productentity.Product{
 		Entity: p.Entity.ToDomain(),
 		ProductCommonAttributes: productentity.ProductCommonAttributes{
@@ -69,12 +74,15 @@ func (p *Product) ToDomain() *productentity.Product {
 			Description: p.Description,
 			IsActive:    p.IsActive,
 			CategoryID:  p.CategoryID,
-			Category:    p.Category.ToDomain(),
+			Category:    category,
 		},
 		Variations: []productentity.ProductVariation{},
 	}
 
 	for _, v := range p.Variations {
+		if v == nil {
+			continue
+		}
 		domain.Variations = append(domain.Variations, v.ToDomain())
 	}
 
