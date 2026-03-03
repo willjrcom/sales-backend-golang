@@ -2,10 +2,13 @@ package orderusecases
 
 import (
 	"context"
+	"errors"
 
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
 	orderpickupdto "github.com/willjrcom/sales-backend-go/internal/infra/dto/order_pickup"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
+	companyusecases "github.com/willjrcom/sales-backend-go/internal/usecases/company"
 )
 
 type IPickupService interface {
@@ -16,7 +19,7 @@ type IPickupService interface {
 }
 
 type ISetupPickupService interface {
-	AddDependencies(os *OrderService)
+	AddDependencies(os *OrderService, cs *companyusecases.Service)
 }
 
 type ICreatePickupService interface {
@@ -40,15 +43,16 @@ type IUpdatePickupService interface {
 type OrderPickupService struct {
 	rp model.OrderPickupRepository
 	os *OrderService
-	ro model.OrderRepository
+	cs *companyusecases.Service
 }
 
 func NewPickupService(rp model.OrderPickupRepository) IPickupService {
 	return &OrderPickupService{rp: rp}
 }
 
-func (s *OrderPickupService) AddDependencies(os *OrderService) {
+func (s *OrderPickupService) AddDependencies(os *OrderService, cs *companyusecases.Service) {
 	s.os = os
+	s.cs = cs
 }
 
 func (s *OrderPickupService) CreateOrderPickup(ctx context.Context, dto *orderpickupdto.OrderPickupCreateDTO) (*orderpickupdto.PickupIDAndOrderIDDTO, error) {
@@ -56,6 +60,16 @@ func (s *OrderPickupService) CreateOrderPickup(ctx context.Context, dto *orderpi
 
 	if err != nil {
 		return nil, err
+	}
+
+	company, err := s.cs.GetCompany(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	enablePickup, _ := company.Preferences.GetBool(companyentity.EnablePickup)
+	if !enablePickup {
+		return nil, errors.New("order pickup is disabled")
 	}
 
 	orderID, err := s.os.CreateDefaultOrder(ctx)
