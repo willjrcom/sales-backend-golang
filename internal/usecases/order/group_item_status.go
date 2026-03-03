@@ -148,6 +148,16 @@ func (s *GroupItemService) restoreStockFromGroupItem(ctx context.Context, groupI
 		if item.ProductID != uuid.Nil {
 			s.si.RestoreStockFromItem(ctx, &item, groupItem, attendantID)
 		}
+
+		for _, addItem := range item.AdditionalItems {
+			if addItem.ProductID != uuid.Nil {
+				s.si.RestoreStockFromItem(ctx, &addItem, groupItem, attendantID)
+			}
+		}
+	}
+
+	if groupItem.ComplementItem != nil && groupItem.ComplementItem.ProductID != uuid.Nil {
+		s.si.RestoreStockFromItem(ctx, groupItem.ComplementItem, groupItem, attendantID)
 	}
 
 	return nil

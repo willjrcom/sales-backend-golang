@@ -769,3 +769,27 @@ func (r *OrderRepositoryBun) AddPaymentOrder(ctx context.Context, payment *model
 	}
 	return nil
 }
+
+func (r *OrderRepositoryBun) GetStaleStagingOrders(ctx context.Context, minutes int) ([]model.Order, error) {
+	orders := []model.Order{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	query := tx.NewSelect().Model(&orders).
+		Where("status = ?", orderentity.OrderStatusStaging).
+		Where("updated_at < (now() - interval '? minutes')", minutes)
+
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return orders, nil
+}

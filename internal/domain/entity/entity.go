@@ -17,3 +17,7 @@ func NewEntity() Entity {
 	now := time.Now().UTC()
 	return Entity{ID: uuid.New(), CreatedAt: now, UpdatedAt: now}
 }
+
+func (e *Entity) Touch() {
+	e.UpdatedAt = time.Now().UTC()
+}

@@ -2,6 +2,7 @@ package orderusecases
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
@@ -71,6 +72,16 @@ func (s *OrderService) GetOrdersTableByTableId(ctx context.Context, dto *orderta
 }
 
 func (s *OrderService) GetAllOpenedOrders(ctx context.Context) ([]orderdto.OrderDTO, error) {
+	// Cleanup stale staging orders
+	if staleOrders, err := s.ro.GetStaleStagingOrders(ctx, 10); err == nil {
+		for _, orderModel := range staleOrders {
+			dtoID := &entitydto.IDRequest{ID: orderModel.ID}
+			if err := s.DeleteOrderByID(ctx, dtoID); err != nil {
+				fmt.Printf("error deleting stale staging order %s: %v\n", orderModel.ID, err)
+			}
+		}
+	}
+
 	if orderModels, err := s.ro.GetAllOpenedOrders(ctx); err != nil {
 		return nil, err
 	} else {
