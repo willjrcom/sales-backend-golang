@@ -29,14 +29,17 @@ func (e *Employee) FromDomain(employee *employeeentity.Employee) {
 		Entity: entitymodel.FromDomain(employee.Entity),
 		EmployeeCommonAttributes: EmployeeCommonAttributes{
 			UserID:   employee.UserID,
-			User:     &User{},
 			IsActive: employee.IsActive,
 		},
 		Payments:    []PaymentEmployee{},
 		Permissions: make(map[string]bool),
 	}
 
-	e.User.FromDomain(employee.User)
+	if employee.User != nil {
+		e.User = &User{}
+		e.User.FromDomain(employee.User)
+	}
+
 	// map payments from domain
 	for _, pay := range employee.Payments {
 		p := PaymentEmployee{}

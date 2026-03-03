@@ -52,7 +52,6 @@ func (i *Item) FromDomain(item *orderentity.Item) {
 			RemovedItems:       item.RemovedItems,
 			ProductID:          item.ProductID,
 			ProductVariationID: item.ProductVariationID,
-			Product:            &Product{},
 			Flavor:             item.Flavor,
 		},
 	}
@@ -63,7 +62,10 @@ func (i *Item) FromDomain(item *orderentity.Item) {
 		i.AdditionalItems = append(i.AdditionalItems, ai)
 	}
 
-	i.Product.FromDomain(item.Product)
+	if item.Product != nil {
+		i.Product = &Product{}
+		i.Product.FromDomain(item.Product)
+	}
 }
 
 func (i *Item) ToDomain() *orderentity.Item {

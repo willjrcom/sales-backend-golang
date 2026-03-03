@@ -411,6 +411,7 @@ func (s *OrderService) UpdateTotalFees(ctx context.Context, id string) error {
 	order := orderModel.ToDomain()
 	order.CalculateFees()
 	order.CalculateTotal()
+	order.Touch()
 
 	orderModel.FromDomain(order)
 	if err := s.ro.UpdateOrder(ctx, orderModel); err != nil {
@@ -444,6 +445,7 @@ func (s *OrderService) UpdateOrderTotal(ctx context.Context, id string) error {
 	}
 
 	order.CalculateTotalOrder()
+	order.Touch()
 
 	orderModel.FromDomain(order)
 	if err := s.ro.UpdateOrderWithRelations(ctx, orderModel); err != nil {

@@ -790,7 +790,39 @@ func (s *ReportService) AdditionalItemsSold(ctx context.Context, start, end time
         JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
         JOIN ` + schemaName + `.orders o ON o.id = g.order_id
         WHERE o.created_at BETWEEN ? AND ? AND i.is_additional = TRUE
-        GROUP BY i.name`
+        GROUP BY i.name
+        ORDER BY quantity DESC
+        LIMIT 10`
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// ComplementItemsDTO holds total quantity of complement items sold.
+type ComplementItemsDTO struct {
+	Name     string  `bun:"name"`
+	Quantity float64 `bun:"quantity"`
+}
+
+// ComplementItemsSold returns total quantity of complement items sold.
+func (s *ReportService) ComplementItemsSold(ctx context.Context, start, end time.Time) ([]ComplementItemsDTO, error) {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp []ComplementItemsDTO
+	query := `
+        SELECT ci.name AS name, SUM(ci.quantity) AS quantity
+        FROM ` + schemaName + `.order_group_items g
+        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
+        JOIN ` + schemaName + `.order_items ci ON ci.id = g.complement_item_id
+        WHERE g.complement_item_id IS NOT NULL
+          AND o.created_at BETWEEN ? AND ?
+        GROUP BY ci.name
+        ORDER BY quantity DESC
+        LIMIT 10`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
@@ -927,280 +959,4 @@ func (s *ReportService) DailySales(ctx context.Context, day time.Time) (*DailySa
 		return nil, err
 	}
 	return &resp, nil
-}
-
-// ProductProfitabilityDTO holds profitability metrics per product.
-type ProductProfitabilityDTO struct {
-	ProductID    string           `bun:"product_id"`
-	ProductName  string           `bun:"product_name"`
-	TotalSold    *decimal.Decimal `bun:"total_sold"`
-	TotalCost    *decimal.Decimal `bun:"total_cost"`
-	TotalRevenue *decimal.Decimal `bun:"total_revenue"`
-	Profit       *decimal.Decimal `bun:"profit"`
-	ProfitMargin *decimal.Decimal `bun:"profit_margin"`
-}
-
-// ProductProfitability returns profitability analysis per product.
-func (s *ReportService) ProductProfitability(ctx context.Context, start, end time.Time) ([]ProductProfitabilityDTO, error) {
-	schemaName, err := database.GetCurrentSchema(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp []ProductProfitabilityDTO
-	query := `
-        SELECT 
-            p.id::text AS product_id,
-            p.name AS product_name,
-            COALESCE(sold.total_sold, 0) AS total_sold,
-            COALESCE(cost.total_cost, 0) AS total_cost,
-            COALESCE(sold.total_revenue, 0) AS total_revenue,
-            COALESCE(sold.total_revenue - cost.total_cost, 0) AS profit,
-            CASE 
-                WHEN COALESCE(sold.total_revenue, 0) > 0 
-                THEN ((COALESCE(sold.total_revenue, 0) - COALESCE(cost.total_cost, 0)) / COALESCE(sold.total_revenue, 0)) * 100
-                ELSE 0 
-            END AS profit_margin
-        FROM ` + schemaName + `.products p
-        LEFT JOIN (
-            SELECT i.product_id, SUM(i.quantity) as total_sold, SUM(i.quantity * i.price) as total_revenue
-            FROM ` + schemaName + `.order_items i
-            JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
-            JOIN ` + schemaName + `.orders o ON o.id = g.order_id
-            WHERE o.created_at BETWEEN ? AND ?
-            GROUP BY i.product_id
-        ) sold ON sold.product_id = p.id
-        LEFT JOIN (
-            SELECT s.product_id, SUM(sm.quantity * sm.price) as total_cost
-            FROM ` + schemaName + `.stock_movements sm
-            JOIN ` + schemaName + `.stocks s ON s.id = sm.stock_id
-            WHERE sm.type = 'out' AND sm.order_id IS NOT NULL
-            AND sm.created_at BETWEEN ? AND ?
-            GROUP BY s.product_id
-        ) cost ON cost.product_id = p.id
-        WHERE sold.total_sold > 0 OR cost.total_cost > 0
-        ORDER BY profit DESC`
-	if err := s.db.NewRaw(query, start, end, start, end).Scan(ctx, &resp); err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// CategoryProfitabilityDTO holds profitability metrics per category.
-type CategoryProfitabilityDTO struct {
-	CategoryName string           `bun:"category_name"`
-	TotalSold    *decimal.Decimal `bun:"total_sold"`
-	TotalCost    *decimal.Decimal `bun:"total_cost"`
-	TotalRevenue *decimal.Decimal `bun:"total_revenue"`
-	Profit       *decimal.Decimal `bun:"profit"`
-	ProfitMargin *decimal.Decimal `bun:"profit_margin"`
-}
-
-// CategoryProfitability returns profitability analysis per product category.
-func (s *ReportService) CategoryProfitability(ctx context.Context, start, end time.Time) ([]CategoryProfitabilityDTO, error) {
-	schemaName, err := database.GetCurrentSchema(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp []CategoryProfitabilityDTO
-	query := `
-        SELECT 
-            pc.name AS category_name,
-            COALESCE(SUM(sold.total_sold), 0) AS total_sold,
-            COALESCE(SUM(cost.total_cost), 0) AS total_cost,
-            COALESCE(SUM(sold.total_revenue), 0) AS total_revenue,
-            COALESCE(SUM(sold.total_revenue) - SUM(cost.total_cost), 0) AS profit,
-            CASE 
-                WHEN COALESCE(SUM(sold.total_revenue), 0) > 0 
-                THEN ((COALESCE(SUM(sold.total_revenue), 0) - COALESCE(SUM(cost.total_cost), 0)) / COALESCE(SUM(sold.total_revenue), 0)) * 100
-                ELSE 0 
-            END AS profit_margin
-        FROM ` + schemaName + `.product_categories pc
-        LEFT JOIN ` + schemaName + `.products p ON p.category_id = pc.id
-        LEFT JOIN (
-            SELECT i.product_id, SUM(i.quantity) as total_sold, SUM(i.quantity * i.price) as total_revenue
-            FROM ` + schemaName + `.order_items i
-            JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
-            JOIN ` + schemaName + `.orders o ON o.id = g.order_id
-            WHERE o.created_at BETWEEN ? AND ?
-            GROUP BY i.product_id
-        ) sold ON sold.product_id = p.id
-        LEFT JOIN (
-            SELECT s.product_id, SUM(sm.quantity * sm.price) as total_cost
-            FROM ` + schemaName + `.stock_movements sm
-            JOIN ` + schemaName + `.stocks s ON s.id = sm.stock_id
-            WHERE sm.type = 'out' AND sm.order_id IS NOT NULL
-            AND sm.created_at BETWEEN ? AND ?
-            GROUP BY s.product_id
-        ) cost ON cost.product_id = p.id
-        WHERE sold.total_sold > 0 OR cost.total_cost > 0
-        GROUP BY pc.name
-        ORDER BY profit DESC`
-	if err := s.db.NewRaw(query, start, end, start, end).Scan(ctx, &resp); err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// LowProfitProductsDTO holds products with low profit margin.
-type LowProfitProductsDTO struct {
-	ProductID    string           `bun:"product_id"`
-	ProductName  string           `bun:"product_name"`
-	Price        *decimal.Decimal `bun:"price"`
-	Cost         *decimal.Decimal `bun:"cost"`
-	ProfitMargin *decimal.Decimal `bun:"profit_margin"`
-}
-
-// LowProfitProducts returns products with profit margin below threshold.
-func (s *ReportService) LowProfitProducts(ctx context.Context, minMargin float64) ([]LowProfitProductsDTO, error) {
-	schemaName, err := database.GetCurrentSchema(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp []LowProfitProductsDTO
-	query := `
-        SELECT 
-            p.id::text AS product_id,
-            p.name AS product_name,
-            AVG(pv.price) AS price,
-            AVG(sb.cost_price) AS cost,
-            CASE 
-                WHEN AVG(pv.price) > 0 AND AVG(sb.cost_price) > 0
-                THEN ((AVG(pv.price) - AVG(sb.cost_price)) / AVG(pv.price)) * 100
-                WHEN AVG(pv.price) > 0 AND (AVG(sb.cost_price) = 0 OR AVG(sb.cost_price) IS NULL)
-                THEN 100
-                ELSE 0 
-            END AS profit_margin
-        FROM ` + schemaName + `.products p
-        JOIN ` + schemaName + `.product_variations pv ON pv.product_id = p.id
-        LEFT JOIN ` + schemaName + `.stocks s ON s.product_variation_id = pv.id
-        LEFT JOIN ` + schemaName + `.stock_batches sb ON sb.stock_id = s.id AND sb.current_quantity > 0
-        WHERE pv.price > 0
-        AND pv.is_available = true
-        GROUP BY p.id, p.name
-        HAVING (
-            (AVG(sb.cost_price) > 0 AND ((AVG(pv.price) - AVG(sb.cost_price)) / AVG(pv.price)) * 100 < ?)
-            OR (AVG(sb.cost_price) = 0 OR AVG(sb.cost_price) IS NULL)
-        )
-        ORDER BY profit_margin ASC`
-	if err := s.db.NewRaw(query, minMargin).Scan(ctx, &resp); err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// DebugProducts returns debug information about products
-func (s *ReportService) DebugProducts(ctx context.Context) (map[string]interface{}, error) {
-	schemaName, err := database.GetCurrentSchema(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var totalProducts int
-	if err := s.db.NewRaw(`SELECT COUNT(*) FROM `+schemaName+`.products`).Scan(ctx, &totalProducts); err != nil {
-		return nil, err
-	}
-
-	var availableProducts int
-	if err := s.db.NewRaw(`SELECT COUNT(DISTINCT p.id) FROM `+schemaName+`.products p JOIN `+schemaName+`.product_variations pv ON pv.product_id = p.id WHERE pv.is_available = true`).Scan(ctx, &availableProducts); err != nil {
-		return nil, err
-	}
-
-	var productsWithCost int
-	queryWithCost := `SELECT COUNT(DISTINCT s.product_id) FROM ` + schemaName + `.stocks s JOIN ` + schemaName + `.stock_batches sb ON sb.stock_id = s.id WHERE sb.cost_price > 0`
-	if err := s.db.NewRaw(queryWithCost).Scan(ctx, &productsWithCost); err != nil {
-		return nil, err
-	}
-	return map[string]interface{}{
-		"total_products":     totalProducts,
-		"available_products": availableProducts,
-		"products_with_cost": productsWithCost,
-	}, nil
-}
-
-// OverallProfitabilityDTO holds overall profitability metrics.
-type OverallProfitabilityDTO struct {
-	TotalRevenue *decimal.Decimal `bun:"total_revenue"`
-	TotalCost    *decimal.Decimal `bun:"total_cost"`
-	TotalProfit  *decimal.Decimal `bun:"total_profit"`
-	ProfitMargin *decimal.Decimal `bun:"profit_margin"`
-}
-
-// OverallProfitability returns overall profitability metrics for the period.
-func (s *ReportService) OverallProfitability(ctx context.Context, start, end time.Time) (*OverallProfitabilityDTO, error) {
-	schemaName, err := database.GetCurrentSchema(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp OverallProfitabilityDTO
-	query := `
-        SELECT 
-            COALESCE(SUM(sold.total_revenue), 0) AS total_revenue,
-            COALESCE(SUM(cost.total_cost), 0) AS total_cost,
-            COALESCE(SUM(sold.total_revenue) - SUM(cost.total_cost), 0) AS total_profit,
-            CASE 
-                WHEN COALESCE(SUM(sold.total_revenue), 0) > 0 
-                THEN ((COALESCE(SUM(sold.total_revenue), 0) - COALESCE(SUM(cost.total_cost), 0)) / COALESCE(SUM(sold.total_revenue), 0)) * 100
-                ELSE 0 
-            END AS profit_margin
-        FROM (
-            SELECT SUM(i.quantity * i.price) as total_revenue
-            FROM ` + schemaName + `.order_items i
-            JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
-            JOIN ` + schemaName + `.orders o ON o.id = g.order_id
-            WHERE o.created_at BETWEEN ? AND ?
-        ) sold,
-        (
-            SELECT SUM(sm.quantity * sm.price) as total_cost
-            FROM ` + schemaName + `.stock_movements sm
-            WHERE sm.type = 'out' AND sm.order_id IS NOT NULL
-            AND sm.created_at BETWEEN ? AND ?
-        ) cost`
-	if err := s.db.NewRaw(query, start, end, start, end).Scan(ctx, &resp); err != nil {
-		return nil, err
-	}
-	return &resp, nil
-}
-
-// InventoryValuationDTO holds inventory valuation metrics.
-type InventoryValuationDTO struct {
-	ProductID       string          `bun:"product_id"`
-	ProductName     string          `bun:"product_name"`
-	VariationName   string          `bun:"variation_name"`
-	CurrentQuantity decimal.Decimal `bun:"current_quantity"`
-	Unit            string          `bun:"unit"`
-	TotalValue      decimal.Decimal `bun:"total_value"`
-}
-
-// InventoryValuation returns the total value of current inventory.
-func (s *ReportService) InventoryValuation(ctx context.Context) ([]InventoryValuationDTO, error) {
-	schemaName, err := database.GetCurrentSchema(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp []InventoryValuationDTO
-	query := `
-        SELECT 
-            p.id::text AS product_id,
-            p.name AS product_name,
-            COALESCE(sz.name, '') AS variation_name,
-            SUM(sb.current_quantity) AS current_quantity,
-            s.unit AS unit,
-            SUM(sb.current_quantity * sb.cost_price) AS total_value
-        FROM ` + schemaName + `.stock_batches sb
-        JOIN ` + schemaName + `.stocks s ON s.id = sb.stock_id
-        JOIN ` + schemaName + `.products p ON p.id = s.product_id
-        LEFT JOIN ` + schemaName + `.product_variations pv ON pv.id = s.product_variation_id
-        LEFT JOIN ` + schemaName + `.sizes sz ON sz.id = pv.size_id
-        WHERE sb.current_quantity > 0
-        GROUP BY p.id, p.name, sz.name, s.unit
-        ORDER BY total_value DESC`
-	if err := s.db.NewRaw(query).Scan(ctx, &resp); err != nil {
-		return nil, err
-	}
-	return resp, nil
 }

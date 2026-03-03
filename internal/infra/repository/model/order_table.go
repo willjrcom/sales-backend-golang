@@ -56,8 +56,10 @@ func (t *OrderTable) FromDomain(table *orderentity.OrderTable) {
 		},
 	}
 
-	t.Table = &Table{}
-	t.Table.FromDomain(table.Table)
+	if table.Table != nil {
+		t.Table = &Table{}
+		t.Table.FromDomain(table.Table)
+	}
 }
 
 func (t *OrderTable) ToDomain() *orderentity.OrderTable {

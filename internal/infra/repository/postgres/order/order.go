@@ -78,24 +78,24 @@ func (r *OrderRepositoryBun) PendingOrder(ctx context.Context, p *model.Order) e
 		return err
 	}
 
-	for _, group := range p.GroupItems {
-		if _, err = tx.NewUpdate().Model(&group).WherePK().Exec(ctx); err != nil {
+	for i := range p.GroupItems {
+		if _, err = tx.NewUpdate().Model(&p.GroupItems[i]).WherePK().Exec(ctx); err != nil {
 			return err
 		}
 
-		for _, item := range group.Items {
-			if _, err = tx.NewUpdate().Model(&item).WherePK().Exec(ctx); err != nil {
+		for j := range p.GroupItems[i].Items {
+			if _, err = tx.NewUpdate().Model(&p.GroupItems[i].Items[j]).WherePK().Exec(ctx); err != nil {
 				return err
 			}
 
-			for _, additionalItem := range item.AdditionalItems {
-				if _, err = tx.NewUpdate().Model(&additionalItem).WherePK().Exec(ctx); err != nil {
+			for k := range p.GroupItems[i].Items[j].AdditionalItems {
+				if _, err = tx.NewUpdate().Model(&p.GroupItems[i].Items[j].AdditionalItems[k]).WherePK().Exec(ctx); err != nil {
 					return err
 				}
 			}
 
-			if group.ComplementItemID != nil && group.ComplementItem != nil {
-				if _, err = tx.NewUpdate().Model(group.ComplementItem).WherePK().Exec(ctx); err != nil {
+			if p.GroupItems[i].ComplementItemID != nil && p.GroupItems[i].ComplementItem != nil {
+				if _, err = tx.NewUpdate().Model(p.GroupItems[i].ComplementItem).WherePK().Exec(ctx); err != nil {
 					return err
 				}
 			}
@@ -252,24 +252,24 @@ func (r *OrderRepositoryBun) DeleteOrder(ctx context.Context, id string) error {
 		return err
 	}
 
-	for _, groupItem := range groupItems {
-		if groupItem.ComplementItem != nil {
-			if _, err := tx.NewDelete().Model(groupItem.ComplementItem).WherePK().Exec(ctx); err != nil {
+	for i := range groupItems {
+		if groupItems[i].ComplementItem != nil {
+			if _, err := tx.NewDelete().Model(groupItems[i].ComplementItem).WherePK().Exec(ctx); err != nil {
 				return err
 			}
 		}
 
-		for _, item := range groupItem.Items {
-			if _, err := tx.NewDelete().Model(&item).WherePK().Exec(ctx); err != nil {
+		for j := range groupItems[i].Items {
+			if _, err := tx.NewDelete().Model(&groupItems[i].Items[j]).WherePK().Exec(ctx); err != nil {
 				return err
 			}
 
-			if _, err := tx.NewDelete().Model(&model.ItemToAdditional{}).Where("item_id = ?", item.ID).Exec(ctx); err != nil {
+			if _, err := tx.NewDelete().Model(&model.ItemToAdditional{}).Where("item_id = ?", groupItems[i].Items[j].ID).Exec(ctx); err != nil {
 				return err
 			}
 
-			for _, additionalItem := range item.AdditionalItems {
-				if _, err := tx.NewDelete().Model(&additionalItem).WherePK().Exec(ctx); err != nil {
+			for k := range groupItems[i].Items[j].AdditionalItems {
+				if _, err := tx.NewDelete().Model(&groupItems[i].Items[j].AdditionalItems[k]).WherePK().Exec(ctx); err != nil {
 					return err
 				}
 			}
@@ -348,8 +348,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		}
 		compMap := make(map[uuid.UUID]*model.Item, len(complementItems))
 		for i := range complementItems {
-			ci := complementItems[i]
-			compMap[ci.ID] = &ci
+			compMap[complementItems[i].ID] = &complementItems[i]
 		}
 		for i := range order.GroupItems {
 			g := &order.GroupItems[i]
@@ -376,8 +375,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		}
 		catMap := make(map[uuid.UUID]*model.ProductCategory, len(categories))
 		for k := range categories {
-			ci := categories[k]
-			catMap[ci.ID] = &ci
+			catMap[categories[k].ID] = &categories[k]
 		}
 		for i := range order.GroupItems {
 			g := &order.GroupItems[i]
@@ -407,8 +405,7 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		}
 		prodMap := make(map[uuid.UUID]*model.Product, len(products))
 		for k := range products {
-			p := products[k]
-			prodMap[p.ID] = &p
+			prodMap[products[k].ID] = &products[k]
 		}
 		for i := range order.GroupItems {
 			g := &order.GroupItems[i]
@@ -428,12 +425,16 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 	}
 
 	if order.Delivery != nil {
-		if err := tx.NewSelect().Model(order.Delivery).WherePK().
+		queryDelivery := tx.NewSelect().Model(order.Delivery).WherePK().
 			Relation("Client.Contact").
 			Relation("Client.Address").
-			Relation("Address").
-			Relation("Driver").
-			Scan(ctx); err != nil {
+			Relation("Address")
+
+		if order.Delivery.DriverID != nil {
+			queryDelivery.Relation("Driver.Employee.User")
+		}
+
+		if err := queryDelivery.Scan(ctx); err != nil {
 			return nil, err
 		}
 	}
@@ -767,4 +768,28 @@ func (r *OrderRepositoryBun) AddPaymentOrder(ctx context.Context, payment *model
 		return err
 	}
 	return nil
+}
+
+func (r *OrderRepositoryBun) GetStaleStagingOrders(ctx context.Context, minutes int) ([]model.Order, error) {
+	orders := []model.Order{}
+
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cancel()
+	defer tx.Rollback()
+
+	query := tx.NewSelect().Model(&orders).
+		Where("status = ?", orderentity.OrderStatusStaging).
+		Where("updated_at < (now() - interval '? minutes')", minutes)
+
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return orders, nil
 }

@@ -335,6 +335,22 @@ func (s *Service) AdditionalItemsSold(ctx context.Context, req *reportdto.Additi
 	return resp, nil
 }
 
+// ComplementItemsSold returns total quantity of complement items.
+func (s *Service) ComplementItemsSold(ctx context.Context, req *reportdto.ComplementItemsRequest) ([]reportdto.ComplementItemsResponse, error) {
+	data, err := s.reportSvc.ComplementItemsSold(ctx, req.Start, req.End)
+	if err != nil {
+		return nil, err
+	}
+	resp := make([]reportdto.ComplementItemsResponse, len(data))
+	for i, d := range data {
+		resp[i] = reportdto.ComplementItemsResponse{
+			Name:     d.Name,
+			Quantity: d.Quantity,
+		}
+	}
+	return resp, nil
+}
+
 // AvgPickupTime returns average pickup wait time.
 func (s *Service) AvgPickupTime(ctx context.Context, req *reportdto.AvgPickupTimeRequest) (*reportdto.AvgPickupTimeResponse, error) {
 	d, err := s.reportSvc.AvgPickupTime(ctx, req.Start, req.End)
@@ -432,85 +448,4 @@ func (s *Service) TotalQueueTimeByGroupItem(ctx context.Context, req *reportdto.
 		}
 	}
 	return resp, nil
-}
-
-// ProductProfitability returns profitability analysis per product.
-func (s *Service) ProductProfitability(ctx context.Context, req *reportdto.ProductProfitabilityRequest) ([]reportdto.ProductProfitabilityResponse, error) {
-	data, err := s.reportSvc.ProductProfitability(ctx, req.Start, req.End)
-	if err != nil {
-		return nil, err
-	}
-	resp := make([]reportdto.ProductProfitabilityResponse, len(data))
-	for i, d := range data {
-		resp[i] = reportdto.ProductProfitabilityResponse{
-			ProductID:    d.ProductID,
-			ProductName:  d.ProductName,
-			TotalSold:    d.TotalSold,
-			TotalCost:    d.TotalCost,
-			TotalRevenue: d.TotalRevenue,
-			Profit:       d.Profit,
-			ProfitMargin: d.ProfitMargin,
-		}
-	}
-	return resp, nil
-}
-
-// CategoryProfitability returns profitability analysis per category.
-func (s *Service) CategoryProfitability(ctx context.Context, req *reportdto.CategoryProfitabilityRequest) ([]reportdto.CategoryProfitabilityResponse, error) {
-	data, err := s.reportSvc.CategoryProfitability(ctx, req.Start, req.End)
-	if err != nil {
-		return nil, err
-	}
-	resp := make([]reportdto.CategoryProfitabilityResponse, len(data))
-	for i, d := range data {
-		resp[i] = reportdto.CategoryProfitabilityResponse{
-			CategoryName: d.CategoryName,
-			TotalSold:    d.TotalSold,
-			TotalCost:    d.TotalCost,
-			TotalRevenue: d.TotalRevenue,
-			Profit:       d.Profit,
-			ProfitMargin: d.ProfitMargin,
-		}
-	}
-	return resp, nil
-}
-
-// LowProfitProducts returns products with low profit margin.
-func (s *Service) LowProfitProducts(ctx context.Context, req *reportdto.LowProfitProductsRequest) ([]reportdto.LowProfitProductsResponse, error) {
-	data, err := s.reportSvc.LowProfitProducts(ctx, req.MinMargin)
-	if err != nil {
-		return nil, err
-	}
-	resp := make([]reportdto.LowProfitProductsResponse, len(data))
-	for i, d := range data {
-		resp[i] = reportdto.LowProfitProductsResponse{
-			ProductID:    d.ProductID,
-			ProductName:  d.ProductName,
-			Price:        d.Price,
-			Cost:         d.Cost,
-			ProfitMargin: d.ProfitMargin,
-		}
-	}
-	return resp, nil
-}
-
-func (s *Service) DebugProducts(ctx context.Context) (interface{}, error) {
-	return s.reportSvc.DebugProducts(ctx)
-}
-
-// OverallProfitability returns overall profitability metrics.
-func (s *Service) OverallProfitability(ctx context.Context, req *reportdto.OverallProfitabilityRequest) (*reportdto.OverallProfitabilityResponse, error) {
-	data, err := s.reportSvc.OverallProfitability(ctx, req.Start, req.End)
-	if err != nil {
-		return nil, err
-	}
-
-	totalProfit := data.TotalProfit.Round(2)
-	profitMargin := data.ProfitMargin.Round(2)
-	return &reportdto.OverallProfitabilityResponse{
-		TotalRevenue: data.TotalRevenue,
-		TotalCost:    data.TotalCost,
-		TotalProfit:  &totalProfit,
-		ProfitMargin: &profitMargin,
-	}, nil
 }

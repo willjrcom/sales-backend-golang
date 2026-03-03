@@ -284,3 +284,7 @@ func (r *OrderRepositoryLocal) AddPaymentOrder(ctx context.Context, payment *mod
 	}
 	return errors.New("order not found")
 }
+
+func (r *OrderRepositoryLocal) GetStaleStagingOrders(ctx context.Context, minutes int) ([]model.Order, error) {
+	return []model.Order{}, nil
+}

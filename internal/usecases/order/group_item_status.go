@@ -152,10 +152,23 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, id string, dto *
 func (s *GroupItemService) restoreStockFromGroupItem(ctx context.Context, groupItem *orderentity.GroupItem, attendantID uuid.UUID) error {
 	for _, item := range groupItem.Items {
 		if item.ProductID != uuid.Nil {
-			// Fix #8: propagar erro em vez de ignorar
 			if err := s.si.RestoreStockFromItem(ctx, &item, groupItem, attendantID); err != nil {
 				return err
 			}
+		}
+
+		for _, addItem := range item.AdditionalItems {
+			if addItem.ProductID != uuid.Nil {
+				if err := s.si.RestoreStockFromItem(ctx, &addItem, groupItem, attendantID); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	if groupItem.ComplementItem != nil && groupItem.ComplementItem.ProductID != uuid.Nil {
+		if err := s.si.RestoreStockFromItem(ctx, groupItem.ComplementItem, groupItem, attendantID); err != nil {
+			return err
 		}
 	}
 

@@ -7,8 +7,8 @@ import (
 
 type ProductCategoryToComplement struct {
 	bun.BaseModel        `bun:"table:product_category_to_complement"`
-	CategoryID           uuid.UUID        `bun:"type:uuid,pk"`
+	CategoryID           uuid.UUID        `bun:"column:category_id,type:uuid,pk"`
 	Category             *ProductCategory `bun:"rel:belongs-to,join:category_id=id"`
-	ComplementCategoryID uuid.UUID        `bun:"type:uuid,pk"`
+	ComplementCategoryID uuid.UUID        `bun:"column:complement_category_id,type:uuid,pk"`
 	ComplementCategory   *ProductCategory `bun:"rel:belongs-to,join:complement_category_id=id"`
 }

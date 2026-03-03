@@ -455,6 +455,45 @@ func (s *Service) GetStockReport(ctx context.Context, page, perPage int) (*stock
 	return report, count, nil
 }
 
+func (s *Service) debitStockFromItem(ctx context.Context, item *model.Item, orderID uuid.UUID, employeeID uuid.UUID) error {
+	reason := fmt.Sprintf("Venda Pedido %s", orderID)
+	quantity := decimal.NewFromFloat(item.Quantity)
+
+	var stockModel *model.Stock
+	var err error
+
+	if item.ProductVariationID != uuid.Nil {
+		// Buscar estoque pela variação
+		stockModel, err = s.stockRepo.GetStockByVariationID(ctx, item.ProductVariationID.String())
+		if err != nil {
+			return nil // sem controle de estoque para esta variação, ignorar
+		}
+	} else {
+		// Fallback por ProductID para produtos sem variação
+		stocks, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
+		if err != nil || len(stocks) == 0 {
+			return nil
+		}
+		stockModel = &stocks[0]
+	}
+
+	if stockModel == nil {
+		return nil
+	}
+
+	// Debitar FIFO
+	if err := s.DebitStockFIFO(ctx, stockModel.ID, quantity, orderID, employeeID, reason); err != nil {
+		return fmt.Errorf("erro ao debitar estoque para item %s: %w", item.ProductID, err)
+	}
+
+	// Verificar alertas
+	if updatedStockModel, err := s.stockRepo.GetStockByID(ctx, stockModel.ID.String()); err == nil {
+		s.createAlertsIfNotDuplicate(ctx, updatedStockModel.ToDomain().CheckAlerts())
+	}
+
+	return nil
+}
+
 // DebitStockFromOrder debita o estoque de todos os itens de um pedido
 func (s *Service) DebitStockFromOrder(ctx context.Context, orderID uuid.UUID, employeeID uuid.UUID) error {
 	orderModel, err := s.orderRepo.GetOrderById(ctx, orderID.String())
@@ -463,41 +502,24 @@ func (s *Service) DebitStockFromOrder(ctx context.Context, orderID uuid.UUID, em
 	}
 
 	for _, groupItem := range orderModel.GroupItems {
+		// 1. Itens principais e seus adicionais
 		for _, item := range groupItem.Items {
-			reason := fmt.Sprintf("Venda Pedido %s", orderID)
-			quantity := decimal.NewFromFloat(item.Quantity)
+			if err := s.debitStockFromItem(ctx, &item, orderID, employeeID); err != nil {
+				return err
+			}
 
-			var stockModel *model.Stock
-
-			if item.ProductVariationID != uuid.Nil {
-				// Buscar estoque pela variação
-				stockModel, err = s.stockRepo.GetStockByVariationID(ctx, item.ProductVariationID.String())
-				if err != nil {
-					continue // sem controle de estoque para esta variação, ignorar
+			// Processar adicionais do item
+			for _, addItem := range item.AdditionalItems {
+				if err := s.debitStockFromItem(ctx, &addItem, orderID, employeeID); err != nil {
+					return err
 				}
-			} else {
-				// Fix #23: fallback por ProductID para produtos sem variação.
-				// Sem este fallback, reservas feitas pelo DebitStockFromItem pelo
-				// ProductID nunca seriam debitadas via FIFO, vazando ReservedStock.
-				stocks, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
-				if err != nil || len(stocks) == 0 {
-					continue
-				}
-				stockModel = &stocks[0]
 			}
+		}
 
-			if stockModel == nil {
-				continue
-			}
-
-			// Debitar FIFO
-			if err := s.DebitStockFIFO(ctx, stockModel.ID, quantity, orderID, employeeID, reason); err != nil {
-				return fmt.Errorf("erro ao debitar estoque para item %s: %w", item.ProductID, err)
-			}
-
-			// Verificar alertas automaticamente após cada debit de estoque (com deduplicação)
-			if updatedStockModel, err := s.stockRepo.GetStockByID(ctx, stockModel.ID.String()); err == nil {
-				s.createAlertsIfNotDuplicate(ctx, updatedStockModel.ToDomain().CheckAlerts())
+		// 2. Complemento do grupo
+		if groupItem.ComplementItem != nil {
+			if err := s.debitStockFromItem(ctx, groupItem.ComplementItem, orderID, employeeID); err != nil {
+				return err
 			}
 		}
 	}

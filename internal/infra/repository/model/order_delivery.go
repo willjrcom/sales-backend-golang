@@ -54,11 +54,8 @@ func (d *OrderDelivery) FromDomain(delivery *orderentity.OrderDelivery) {
 			Change:         &delivery.Change,
 			PaymentMethod:  string(delivery.PaymentMethod),
 			ClientID:       delivery.ClientID,
-			Client:         &Client{},
 			AddressID:      delivery.AddressID,
-			Address:        &Address{},
 			DriverID:       delivery.DriverID,
-			Driver:         &DeliveryDriver{},
 			OrderID:        delivery.OrderID,
 			OrderNumber:    delivery.OrderNumber,
 		},
@@ -71,9 +68,20 @@ func (d *OrderDelivery) FromDomain(delivery *orderentity.OrderDelivery) {
 		},
 	}
 
-	d.Address.FromDomain(delivery.Address)
-	d.Client.FromDomain(delivery.Client)
-	d.Driver.FromDomain(delivery.Driver)
+	if delivery.Address != nil {
+		d.Address = &Address{}
+		d.Address.FromDomain(delivery.Address)
+	}
+
+	if delivery.Client != nil {
+		d.Client = &Client{}
+		d.Client.FromDomain(delivery.Client)
+	}
+
+	if delivery.Driver != nil {
+		d.Driver = &DeliveryDriver{}
+		d.Driver.FromDomain(delivery.Driver)
+	}
 }
 
 func (d *OrderDelivery) ToDomain() *orderentity.OrderDelivery {
