@@ -15,7 +15,6 @@ type ProductVariation struct {
 	SizeID        uuid.UUID        `bun:"size_id,type:uuid,notnull"`
 	Size          *Size            `bun:"rel:belongs-to"`
 	Price         *decimal.Decimal `bun:"price,type:decimal(10,2),notnull"`
-	Cost          *decimal.Decimal `bun:"cost,type:decimal(10,2)"`
 	IsAvailable   bool             `bun:"is_available"`
 }
 
@@ -26,7 +25,6 @@ func (p *ProductVariation) ToDomain() productentity.ProductVariation {
 		SizeID:      p.SizeID,
 		Size:        p.Size.ToDomain(),
 		Price:       p.GetPrice(),
-		Cost:        p.GetCost(),
 		IsAvailable: p.IsAvailable,
 	}
 }
@@ -37,7 +35,6 @@ func (p *ProductVariation) FromDomain(productVariation productentity.ProductVari
 		ProductID:   productVariation.ProductID,
 		SizeID:      productVariation.SizeID,
 		Price:       &productVariation.Price,
-		Cost:        &productVariation.Cost,
 		IsAvailable: productVariation.IsAvailable,
 	}
 
@@ -52,11 +49,4 @@ func (p *ProductVariation) GetPrice() decimal.Decimal {
 		return decimal.Zero
 	}
 	return *p.Price
-}
-
-func (p *ProductVariation) GetCost() decimal.Decimal {
-	if p.Cost == nil {
-		return decimal.Zero
-	}
-	return *p.Cost
 }

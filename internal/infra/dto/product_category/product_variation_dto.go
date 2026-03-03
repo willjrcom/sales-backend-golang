@@ -14,7 +14,6 @@ type ProductVariationDTO struct {
 	SizeID      uuid.UUID        `json:"size_id"`
 	Size        *sizedto.SizeDTO `json:"size"`
 	Price       decimal.Decimal  `json:"price"`
-	Cost        decimal.Decimal  `json:"cost"`
 	IsAvailable bool             `json:"is_available"`
 }
 
@@ -24,7 +23,6 @@ func (d *ProductVariationDTO) FromDomain(variation productentity.ProductVariatio
 		ProductID:   variation.ProductID,
 		SizeID:      variation.SizeID,
 		Price:       variation.Price,
-		Cost:        variation.Cost,
 		IsAvailable: variation.IsAvailable,
 	}
 
@@ -37,7 +35,6 @@ func (d *ProductVariationDTO) FromDomain(variation productentity.ProductVariatio
 type ProductVariationCreateDTO struct {
 	SizeID      uuid.UUID       `json:"size_id"`
 	Price       decimal.Decimal `json:"price"`
-	Cost        decimal.Decimal `json:"cost"`
 	IsAvailable bool            `json:"is_available"`
 }
 
@@ -46,7 +43,6 @@ func (d *ProductVariationCreateDTO) ToDomain() productentity.ProductVariation {
 		Entity:      entity.NewEntity(),
 		SizeID:      d.SizeID,
 		Price:       d.Price,
-		Cost:        d.Cost,
 		IsAvailable: d.IsAvailable,
 	}
 }

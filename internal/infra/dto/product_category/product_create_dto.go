@@ -8,11 +8,10 @@ import (
 )
 
 var (
-	ErrSKURequired          = errors.New("sku is required")
-	ErrNameRequired         = errors.New("name is required")
-	ErrCostGreaterThanPrice = errors.New("cost must be greater than Price")
-	ErrCategoryRequired     = errors.New("category is required")
-	ErrSizeRequired         = errors.New("size is required")
+	ErrSKURequired      = errors.New("sku is required")
+	ErrNameRequired     = errors.New("name is required")
+	ErrCategoryRequired = errors.New("category is required")
+	ErrSizeRequired     = errors.New("size is required")
 )
 
 type ProductCreateDTO struct {
@@ -42,9 +41,6 @@ func (p *ProductCreateDTO) validate() error {
 	}
 
 	for _, v := range p.Variations {
-		if v.Price.LessThan(v.Cost) {
-			return ErrCostGreaterThanPrice
-		}
 		if v.SizeID == uuid.Nil {
 			return ErrSizeRequired
 		}

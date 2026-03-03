@@ -119,7 +119,7 @@ func (r *ProductRepositoryBun) UpdateProduct(ctx context.Context, p *model.Produ
 
 	for _, v := range toUpdate {
 		if _, err := tx.NewUpdate().Model(v).
-			Column("price", "cost", "is_available", "deleted_at").
+			Column("price", "is_available", "deleted_at").
 			WherePK().
 			Exec(ctx); err != nil {
 			return err
