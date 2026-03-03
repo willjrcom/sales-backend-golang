@@ -790,7 +790,39 @@ func (s *ReportService) AdditionalItemsSold(ctx context.Context, start, end time
         JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
         JOIN ` + schemaName + `.orders o ON o.id = g.order_id
         WHERE o.created_at BETWEEN ? AND ? AND i.is_additional = TRUE
-        GROUP BY i.name`
+        GROUP BY i.name
+        ORDER BY quantity DESC
+        LIMIT 10`
+	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+// ComplementItemsDTO holds total quantity of complement items sold.
+type ComplementItemsDTO struct {
+	Name     string  `bun:"name"`
+	Quantity float64 `bun:"quantity"`
+}
+
+// ComplementItemsSold returns total quantity of complement items sold.
+func (s *ReportService) ComplementItemsSold(ctx context.Context, start, end time.Time) ([]ComplementItemsDTO, error) {
+	schemaName, err := database.GetCurrentSchema(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var resp []ComplementItemsDTO
+	query := `
+        SELECT ci.name AS name, SUM(ci.quantity) AS quantity
+        FROM ` + schemaName + `.order_group_items g
+        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
+        JOIN ` + schemaName + `.order_items ci ON ci.id = g.complement_item_id
+        WHERE g.complement_item_id IS NOT NULL
+          AND o.created_at BETWEEN ? AND ?
+        GROUP BY ci.name
+        ORDER BY quantity DESC
+        LIMIT 10`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
@@ -923,211 +955,6 @@ func (s *ReportService) DailySales(ctx context.Context, day time.Time) (*DailySa
         SELECT COUNT(*) AS total_orders, SUM(total) AS total_sales
         FROM ` + schemaName + `.orders
         WHERE created_at >= ? AND created_at < ?`
-	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
-		return nil, err
-	}
-	return &resp, nil
-}
-
-// ProductProfitabilityDTO holds profitability metrics per product.
-type ProductProfitabilityDTO struct {
-	ProductID    string           `bun:"product_id"`
-	ProductName  string           `bun:"product_name"`
-	TotalSold    *decimal.Decimal `bun:"total_sold"`
-	TotalCost    *decimal.Decimal `bun:"total_cost"`
-	TotalRevenue *decimal.Decimal `bun:"total_revenue"`
-	Profit       *decimal.Decimal `bun:"profit"`
-	ProfitMargin *decimal.Decimal `bun:"profit_margin"`
-}
-
-// ProductProfitability returns profitability analysis per product.
-func (s *ReportService) ProductProfitability(ctx context.Context, start, end time.Time) ([]ProductProfitabilityDTO, error) {
-	schemaName, err := database.GetCurrentSchema(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp []ProductProfitabilityDTO
-	query := `
-        SELECT 
-            p.id::text AS product_id,
-            p.name AS product_name,
-            COALESCE(SUM(i.quantity), 0) AS total_sold,
-            COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS total_cost,
-            COALESCE(SUM(i.quantity * i.price), 0) AS total_revenue,
-            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS profit,
-            CASE 
-                WHEN COALESCE(SUM(i.quantity * i.price), 0) > 0 
-                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
-                ELSE 0 
-            END AS profit_margin
-        FROM ` + schemaName + `.order_items i
-        JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
-        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
-        JOIN ` + schemaName + `.products p ON p.id = i.product_id
-        LEFT JOIN ` + schemaName + `.product_variations pv ON pv.id = i.product_variation_id
-        WHERE o.created_at BETWEEN ? AND ?
-        GROUP BY p.id, p.name
-        ORDER BY profit DESC`
-	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// CategoryProfitabilityDTO holds profitability metrics per category.
-type CategoryProfitabilityDTO struct {
-	CategoryName string           `bun:"category_name"`
-	TotalSold    *decimal.Decimal `bun:"total_sold"`
-	TotalCost    *decimal.Decimal `bun:"total_cost"`
-	TotalRevenue *decimal.Decimal `bun:"total_revenue"`
-	Profit       *decimal.Decimal `bun:"profit"`
-	ProfitMargin *decimal.Decimal `bun:"profit_margin"`
-}
-
-// CategoryProfitability returns profitability analysis per product category.
-func (s *ReportService) CategoryProfitability(ctx context.Context, start, end time.Time) ([]CategoryProfitabilityDTO, error) {
-	schemaName, err := database.GetCurrentSchema(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp []CategoryProfitabilityDTO
-	query := `
-        SELECT 
-            pc.name AS category_name,
-            COALESCE(SUM(i.quantity), 0) AS total_sold,
-            COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS total_cost,
-            COALESCE(SUM(i.quantity * i.price), 0) AS total_revenue,
-            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS profit,
-            CASE 
-                WHEN COALESCE(SUM(i.quantity * i.price), 0) > 0 
-                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
-                ELSE 0 
-            END AS profit_margin
-        FROM ` + schemaName + `.order_items i
-        JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
-        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
-        JOIN ` + schemaName + `.products p ON p.id = i.product_id
-        LEFT JOIN ` + schemaName + `.product_variations pv ON pv.id = i.product_variation_id
-        JOIN ` + schemaName + `.product_categories pc ON pc.id = p.category_id
-        WHERE o.created_at BETWEEN ? AND ?
-        GROUP BY pc.name
-        ORDER BY profit DESC`
-	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// LowProfitProductsDTO holds products with low profit margin.
-type LowProfitProductsDTO struct {
-	ProductID    string           `bun:"product_id"`
-	ProductName  string           `bun:"product_name"`
-	Price        *decimal.Decimal `bun:"price"`
-	Cost         *decimal.Decimal `bun:"cost"`
-	ProfitMargin *decimal.Decimal `bun:"profit_margin"`
-}
-
-// LowProfitProducts returns products with profit margin below threshold.
-func (s *ReportService) LowProfitProducts(ctx context.Context, minMargin float64) ([]LowProfitProductsDTO, error) {
-	schemaName, err := database.GetCurrentSchema(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp []LowProfitProductsDTO
-	// Use AVG(pv.price) and AVG(pv.cost) aggregated per product from variations
-	query := `
-        SELECT 
-            p.id::text AS product_id,
-            p.name AS product_name,
-            AVG(pv.price) AS price,
-            AVG(pv.cost) AS cost,
-            CASE 
-                WHEN AVG(pv.price) > 0 AND AVG(pv.cost) > 0
-                THEN ((AVG(pv.price) - AVG(pv.cost)) / AVG(pv.price)) * 100
-                WHEN AVG(pv.price) > 0 AND (AVG(pv.cost) = 0 OR AVG(pv.cost) IS NULL)
-                THEN 100
-                ELSE 0 
-            END AS profit_margin
-        FROM ` + schemaName + `.products p
-        JOIN ` + schemaName + `.product_variations pv ON pv.product_id = p.id
-        WHERE pv.price > 0
-        AND pv.is_available = true
-        GROUP BY p.id, p.name
-        HAVING (
-            (AVG(pv.cost) > 0 AND ((AVG(pv.price) - AVG(pv.cost)) / AVG(pv.price)) * 100 < ?)
-            OR (AVG(pv.cost) = 0 OR AVG(pv.cost) IS NULL)
-        )
-        ORDER BY profit_margin ASC`
-	if err := s.db.NewRaw(query, minMargin).Scan(ctx, &resp); err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-// DebugProducts returns debug information about products
-func (s *ReportService) DebugProducts(ctx context.Context) (map[string]interface{}, error) {
-	schemaName, err := database.GetCurrentSchema(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var totalProducts int
-	if err := s.db.NewRaw(`SELECT COUNT(*) FROM `+schemaName+`.products`).Scan(ctx, &totalProducts); err != nil {
-		return nil, err
-	}
-
-	var availableProducts int
-	if err := s.db.NewRaw(`SELECT COUNT(DISTINCT p.id) FROM `+schemaName+`.products p JOIN `+schemaName+`.product_variations pv ON pv.product_id = p.id WHERE pv.is_available = true`).Scan(ctx, &availableProducts); err != nil {
-		return nil, err
-	}
-
-	var productsWithCost int
-	if err := s.db.NewRaw(`SELECT COUNT(DISTINCT p.id) FROM `+schemaName+`.products p JOIN `+schemaName+`.product_variations pv ON pv.product_id = p.id WHERE pv.is_available = true AND pv.cost > 0`).Scan(ctx, &productsWithCost); err != nil {
-		return nil, err
-	}
-
-	return map[string]interface{}{
-		"total_products":     totalProducts,
-		"available_products": availableProducts,
-		"products_with_cost": productsWithCost,
-	}, nil
-}
-
-// OverallProfitabilityDTO holds overall profitability metrics.
-type OverallProfitabilityDTO struct {
-	TotalRevenue *decimal.Decimal `bun:"total_revenue"`
-	TotalCost    *decimal.Decimal `bun:"total_cost"`
-	TotalProfit  *decimal.Decimal `bun:"total_profit"`
-	ProfitMargin *decimal.Decimal `bun:"profit_margin"`
-}
-
-// OverallProfitability returns overall profitability metrics for the period.
-func (s *ReportService) OverallProfitability(ctx context.Context, start, end time.Time) (*OverallProfitabilityDTO, error) {
-	schemaName, err := database.GetCurrentSchema(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	var resp OverallProfitabilityDTO
-	query := `
-        SELECT 
-            COALESCE(SUM(i.quantity * i.price), 0) AS total_revenue,
-            COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS total_cost,
-            COALESCE(SUM(i.quantity * i.price) - SUM(i.quantity * COALESCE(pv.cost, 0)), 0) AS total_profit,
-            CASE 
-                WHEN COALESCE(SUM(i.quantity * i.price), 0) > 0 
-                THEN ((COALESCE(SUM(i.quantity * i.price), 0) - COALESCE(SUM(i.quantity * COALESCE(pv.cost, 0)), 0)) / COALESCE(SUM(i.quantity * i.price), 0)) * 100
-                ELSE 0 
-            END AS profit_margin
-        FROM ` + schemaName + `.order_items i
-        JOIN ` + schemaName + `.order_group_items g ON g.id = i.group_item_id
-        JOIN ` + schemaName + `.orders o ON o.id = g.order_id
-        JOIN ` + schemaName + `.products p ON p.id = i.product_id
-        LEFT JOIN ` + schemaName + `.product_variations pv ON pv.id = i.product_variation_id
-        WHERE o.created_at BETWEEN ? AND ?`
 	if err := s.db.NewRaw(query, start, end).Scan(ctx, &resp); err != nil {
 		return nil, err
 	}
