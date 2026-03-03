@@ -29,6 +29,10 @@ func (s *Service) DebitStockFIFO(ctx context.Context, stockID uuid.UUID, quantit
 
 	remainingQuantity := quantity
 	movements := []*stockentity.StockMovement{}
+	var movementOrderID *uuid.UUID
+	if orderID != uuid.Nil {
+		movementOrderID = &orderID
+	}
 
 	// 3. Processar lotes (FIFO)
 	for _, bm := range batchesModel {
@@ -47,7 +51,7 @@ func (s *Service) DebitStockFIFO(ctx context.Context, stockID uuid.UUID, quantit
 				Type:       stockentity.MovementTypeOut,
 				Quantity:   consumeQuantity,
 				Reason:     reason,
-				OrderID:    &orderID,
+				OrderID:    movementOrderID,
 				EmployeeID: employeeID,
 				Price:      batch.CostPrice, // Valor de custo na saída (COGS)
 			},
@@ -76,7 +80,7 @@ func (s *Service) DebitStockFIFO(ctx context.Context, stockID uuid.UUID, quantit
 				Type:       stockentity.MovementTypeOut,
 				Quantity:   remainingQuantity,
 				Reason:     reason + " (Estoque Negativo)",
-				OrderID:    &orderID,
+				OrderID:    movementOrderID,
 				EmployeeID: employeeID,
 				Price:      decimal.Zero, // Custo zero para estoque não rastreado
 			},
