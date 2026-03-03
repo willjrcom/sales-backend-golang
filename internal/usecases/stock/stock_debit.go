@@ -11,6 +11,42 @@ import (
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
+func movementRestoreKey(m model.StockMovement) string {
+	batchID := "nil"
+	if m.BatchID != nil {
+		batchID = m.BatchID.String()
+	}
+
+	return fmt.Sprintf("%s|%s|%s|%s", m.StockID.String(), batchID, m.GetQuantity().String(), m.GetPrice().String())
+}
+
+func getPendingOutMovementsToRestore(movements []model.StockMovement) []model.StockMovement {
+	outsByKey := map[string][]model.StockMovement{}
+	restoreCountByKey := map[string]int{}
+
+	for _, m := range movements {
+		switch m.Type {
+		case string(stockentity.MovementTypeOut):
+			key := movementRestoreKey(m)
+			outsByKey[key] = append(outsByKey[key], m)
+		case string(stockentity.MovementTypeRestore):
+			key := movementRestoreKey(m)
+			restoreCountByKey[key]++
+		}
+	}
+
+	pending := make([]model.StockMovement, 0)
+	for key, outs := range outsByKey {
+		skip := restoreCountByKey[key]
+		if skip >= len(outs) {
+			continue
+		}
+		pending = append(pending, outs[skip:]...)
+	}
+
+	return pending
+}
+
 func reconcileStockAfterDebit(stock *stockentity.Stock, quantity decimal.Decimal, orderID uuid.UUID) {
 	if orderID != uuid.Nil {
 		// Pedido com possível reserva prévia.
@@ -150,8 +186,10 @@ func (s *Service) RestoreStockFromOrder(ctx context.Context, orderID uuid.UUID, 
 		return fmt.Errorf("erro ao buscar movimentos do pedido: %w", err)
 	}
 
-	// Se não houver movimentos, nada a fazer
-	if len(movementsModel) == 0 {
+	pendingOutMovements := getPendingOutMovementsToRestore(movementsModel)
+
+	// Se não houver saídas pendentes de restauração, nada a fazer
+	if len(pendingOutMovements) == 0 {
 		return nil
 	}
 
@@ -163,12 +201,7 @@ func (s *Service) RestoreStockFromOrder(ctx context.Context, orderID uuid.UUID, 
 	defer cancel()
 	defer tx.Rollback()
 
-	for _, mm := range movementsModel {
-		// Apenas restaurar o que foi efetivamente retirado (out)
-		if mm.Type != string(stockentity.MovementTypeOut) {
-			continue
-		}
-
+	for _, mm := range pendingOutMovements {
 		movement := mm.ToDomain()
 
 		// 3. Se houver lote, devolver para o lote
