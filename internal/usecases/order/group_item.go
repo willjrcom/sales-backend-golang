@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -21,6 +23,7 @@ var (
 )
 
 type GroupItemService struct {
+	db  *bun.DB
 	r   model.GroupItemRepository
 	ri  model.ItemRepository
 	rp  model.ProductRepository
@@ -30,8 +33,8 @@ type GroupItemService struct {
 	si  *ItemService
 }
 
-func NewGroupItemService(rgi model.GroupItemRepository) *GroupItemService {
-	return &GroupItemService{r: rgi}
+func NewGroupItemService(db *bun.DB, rgi model.GroupItemRepository) *GroupItemService {
+	return &GroupItemService{db: db, r: rgi}
 }
 
 func (s *GroupItemService) AddDependencies(ri model.ItemRepository, rp model.ProductRepository, so *OrderService, sop *OrderProcessService, re model.EmployeeRepository, si *ItemService) {
@@ -155,14 +158,21 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 		attendantID = employee.ID
 	}
 
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
 	// Reserve stock for the complement item
-	if err := s.si.ReserveStockFromItem(ctx, itemComplement, groupItem, attendantID); err != nil {
+	if err := s.si.reserveStockFromItemWithTx(ctx, tx, itemComplement, groupItem, attendantID); err != nil {
 		return err
 	}
 
 	itemComplementModel := &model.Item{}
 	itemComplementModel.FromDomain(itemComplement)
-	if err = s.ri.AddItem(ctx, itemComplementModel); err != nil {
+	if err = s.ri.AddItemWithTx(ctx, tx, itemComplementModel); err != nil {
 		return err
 	}
 
@@ -172,7 +182,11 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 	groupItem.CalculateTotal()
 
 	groupItemModel.FromDomain(groupItem)
-	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
+	if err := s.r.UpdateGroupItemWithTx(ctx, tx, groupItemModel); err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 

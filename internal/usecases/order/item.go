@@ -157,27 +157,33 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 	}
 
 	// Reservar estoque antes de salvar o item — se estoque insuficiente, loga aviso e continua.
-	if err := s.ReserveStockFromItem(ctx, item, groupItem, attendantID); err != nil {
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
+	if err != nil {
+		return nil, err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	if err := s.reserveStockFromItemWithTx(ctx, tx, item, groupItem, attendantID); err != nil {
 		return nil, err
 	}
 
 	// Salvar item após confirmar estoque.
-	// Em caso de falha de BD aqui (muito raro), a reserva será liberada no cancelamento do pedido.
-	if err = s.ri.AddItem(ctx, itemModel); err != nil {
+	if err = s.ri.AddItemWithTx(ctx, tx, itemModel); err != nil {
 		return nil, errors.New("add item error: " + err.Error())
 	}
 
-	GroupItemModel := &model.GroupItem{}
-	GroupItemModel.FromDomain(groupItem)
-
-	if err = s.rgi.UpdateGroupItem(ctx, groupItemModel); err != nil {
+	if err = s.rgi.UpdateGroupItemWithTx(ctx, tx, groupItemModel); err != nil {
 		return nil, errors.New("update group item error: " + err.Error())
 	}
 
 	// Update complement item
 	if groupItem.ComplementItemID != nil {
-		// Reserve stock for the complement item proportional to the new item's quantity
-		if err := s.ReserveStockFromItem(ctx, groupItem.ComplementItem, groupItem, attendantID); err != nil {
+		complementDelta := *groupItem.ComplementItem
+		complementDelta.Quantity = item.Quantity
+
+		// Reserve stock only for the proportional delta of the new item quantity
+		if err := s.reserveStockFromItemWithTx(ctx, tx, &complementDelta, groupItem, attendantID); err != nil {
 			return nil, err
 		}
 
@@ -185,9 +191,13 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 
 		complementItemModel := &model.Item{}
 		complementItemModel.FromDomain(groupItem.ComplementItem)
-		if err = s.ri.UpdateItem(ctx, complementItemModel); err != nil {
+		if err = s.ri.UpdateItemWithTx(ctx, tx, complementItemModel); err != nil {
 			return nil, errors.New("update complement item error: " + err.Error())
 		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
 	}
 
 	if err := s.sgi.UpdateGroupItemTotal(ctx, dto.GroupItemID.String()); err != nil {
@@ -202,20 +212,27 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 }
 
 func (s *ItemService) ReserveStockFromItem(ctx context.Context, item *orderentity.Item, groupItem *orderentity.GroupItem, attendantID uuid.UUID) error {
-	// Buscar estoque do produto/variação
-	stockModel, err := s.getStockToMove(ctx, item)
-	if err != nil {
-		fmt.Printf("Aviso: %v\n", err)
-		return nil // Se não encontrar estoque adequado, assume sem controle de estoque (comportamento original)
-	}
-
-	// Iniciar transação de tenant para salvar movimento e atualizar estoque
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
 	if err != nil {
 		return err
 	}
 	defer cancel()
 	defer tx.Rollback()
+
+	if err := s.reserveStockFromItemWithTx(ctx, tx, item, groupItem, attendantID); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (s *ItemService) reserveStockFromItemWithTx(ctx context.Context, tx *bun.Tx, item *orderentity.Item, groupItem *orderentity.GroupItem, attendantID uuid.UUID) error {
+	// Buscar estoque do produto/variação
+	stockModel, err := s.getStockToMove(ctx, item)
+	if err != nil {
+		fmt.Printf("Aviso: %v\n", err)
+		return nil // Se não encontrar estoque adequado, assume sem controle de estoque (comportamento original)
+	}
 
 	lockedStockModel, err := s.stockRepo.GetStockByIDForUpdate(ctx, tx, stockModel.ID.String())
 	if err != nil {
@@ -246,10 +263,6 @@ func (s *ItemService) ReserveStockFromItem(ctx context.Context, item *orderentit
 	lockedStockModel.FromDomain(stock)
 	if err := s.stockRepo.UpdateStock(ctx, tx, lockedStockModel); err != nil {
 		fmt.Printf("Aviso: erro ao atualizar estoque: %v\n", err)
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
 		return err
 	}
 
@@ -307,7 +320,9 @@ func (s *ItemService) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequ
 	// Update complement item quantity
 	if groupItem.ComplementItemID != nil && len(groupItem.Items) != 0 {
 		// Restore stock for the complement item proportional to the removed item's quantity
-		if err := s.RestoreStockFromItem(ctx, groupItem.ComplementItem.ToDomain(), groupItem.ToDomain(), attendantID); err != nil {
+		complementDelta := groupItem.ComplementItem.ToDomain()
+		complementDelta.Quantity = itemModel.Quantity
+		if err := s.RestoreStockFromItem(ctx, complementDelta, groupItem.ToDomain(), attendantID); err != nil {
 			fmt.Printf("Aviso: erro ao restaurar estoque para item complementar %s: %v\n", groupItem.ComplementItem.Name, err)
 		}
 
@@ -384,7 +399,7 @@ func (s *ItemService) RestoreStockFromItem(ctx context.Context, item *orderentit
 	)
 	if err != nil {
 		fmt.Printf("Aviso: erro ao restaurar estoque para produto %s: %v\n", item.Name, err)
-		return nil
+		return err
 	}
 
 	// Salvar movimento
@@ -392,14 +407,14 @@ func (s *ItemService) RestoreStockFromItem(ctx context.Context, item *orderentit
 	movementModel.FromDomain(movement)
 	if err := s.stockMovementRepo.CreateMovement(ctx, tx, movementModel); err != nil {
 		fmt.Printf("Aviso: erro ao salvar movimento de estoque: %v\n", err)
-		return nil
+		return err
 	}
 
 	// Atualizar estoque
 	lockedStockModel.FromDomain(stock)
 	if err := s.stockRepo.UpdateStock(ctx, tx, lockedStockModel); err != nil {
 		fmt.Printf("Aviso: erro ao atualizar estoque: %v\n", err)
-		return nil
+		return err
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -489,13 +504,24 @@ func (s *ItemService) AddAdditionalItemOrder(ctx context.Context, dto *entitydto
 	additionalItemModel := &model.Item{}
 	additionalItemModel.FromDomain(additionalItem)
 
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
 	// Debit stock for additional item
-	if err := s.ReserveStockFromItem(ctx, additionalItem, groupItem, attendantID); err != nil {
+	if err := s.reserveStockFromItemWithTx(ctx, tx, additionalItem, groupItem, attendantID); err != nil {
 		return uuid.Nil, err
 	}
 
-	if err = s.ri.AddAdditionalItem(ctx, item.ID, productAdditional.ID, additionalItemModel); err != nil {
+	if err = s.ri.AddAdditionalItemWithTx(ctx, tx, item.ID, productAdditional.ID, additionalItemModel); err != nil {
 		return uuid.Nil, errors.New("add additional item error: " + err.Error())
+	}
+
+	if err := tx.Commit(); err != nil {
+		return uuid.Nil, err
 	}
 
 	if err := s.UpdateItemTotal(ctx, item.ID.String()); err != nil {

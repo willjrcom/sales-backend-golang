@@ -17,55 +17,30 @@ func NewItemRepositoryBun(db *bun.DB) model.ItemRepository {
 	return &ItemRepositoryBun{db: db}
 }
 
-func (r *ItemRepositoryBun) AddItem(ctx context.Context, p *model.Item) error {
-
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
-	if err != nil {
-		return err
-	}
-
-	defer cancel()
-	defer tx.Rollback()
-
+func (r *ItemRepositoryBun) AddItemWithTx(ctx context.Context, tx *bun.Tx, p *model.Item) error {
 	if _, err := tx.NewInsert().Model(p).Exec(ctx); err != nil {
 		return err
 	}
 
-	if err := tx.Commit(); err != nil {
-		return err
-	}
 	return nil
 }
 
-func (r *ItemRepositoryBun) AddAdditionalItem(ctx context.Context, id uuid.UUID, productID uuid.UUID, additionalItem *model.Item) error {
-
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
-	if err != nil {
-		return err
-	}
-
-	defer cancel()
-	defer tx.Rollback()
-
+func (r *ItemRepositoryBun) AddAdditionalItemWithTx(ctx context.Context, tx *bun.Tx, id uuid.UUID, productID uuid.UUID, additionalItem *model.Item) error {
 	itemToAdditional := &model.ItemToAdditional{
 		ItemID:           id,
 		AdditionalItemID: additionalItem.ID,
 		ProductID:        productID,
 	}
 
-	if _, err = tx.NewDelete().Model(&model.ItemToAdditional{}).Where("item_id = ? AND product_id = ?", id, productID).Exec(ctx); err != nil {
+	if _, err := tx.NewDelete().Model(&model.ItemToAdditional{}).Where("item_id = ? AND product_id = ?", id, productID).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err = tx.NewInsert().Model(additionalItem).Exec(ctx); err != nil {
+	if _, err := tx.NewInsert().Model(additionalItem).Exec(ctx); err != nil {
 		return err
 	}
 
-	if _, err = tx.NewInsert().Model(itemToAdditional).Exec(ctx); err != nil {
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
+	if _, err := tx.NewInsert().Model(itemToAdditional).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -89,6 +64,14 @@ func (r *ItemRepositoryBun) UpdateItem(ctx context.Context, p *model.Item) error
 	if err := tx.Commit(); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (r *ItemRepositoryBun) UpdateItemWithTx(ctx context.Context, tx *bun.Tx, p *model.Item) error {
+	if _, err := tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
+		return err
+	}
+
 	return nil
 }
 
