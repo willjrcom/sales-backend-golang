@@ -190,7 +190,7 @@ func (r *OrderRepositoryLocal) GetAllOrdersWithFinishedDelivery(ctx context.Cont
 }
 
 // GetAllOrdersWithDelivery returns orders with delivery information, paginated by page and perPage
-func (r *OrderRepositoryLocal) GetAllOrdersWithPickup(ctx context.Context, shiftID string, status orderentity.StatusOrderPickup, page, perPage int) ([]model.Order, error) {
+func (r *OrderRepositoryLocal) GetAllOrdersWithPickup(ctx context.Context, status orderentity.StatusOrderPickup, page, perPage int) ([]model.Order, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	all := []model.Order{}

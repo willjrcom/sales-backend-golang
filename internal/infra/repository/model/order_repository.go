@@ -21,7 +21,7 @@ type OrderRepository interface {
 	GetAllOrdersWithReadyDelivery(ctx context.Context, page, perPage int) ([]Order, error)
 	GetAllOrdersWithShippedDelivery(ctx context.Context, page, perPage int) ([]Order, error)
 	GetAllOrdersWithFinishedDelivery(ctx context.Context, shiftID string, page, perPage int) ([]Order, error)
-	GetAllOrdersWithPickup(ctx context.Context, shiftID string, status orderentity.StatusOrderPickup, page, perPage int) ([]Order, error)
+	GetAllOrdersWithPickup(ctx context.Context, status orderentity.StatusOrderPickup, page, perPage int) ([]Order, error)
 	GetOrdersByStatus(ctx context.Context, status orderentity.StatusOrder) ([]Order, error)
 	AddPaymentOrder(ctx context.Context, payment *PaymentOrder) error
 }

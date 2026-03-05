@@ -195,13 +195,7 @@ func (s *OrderService) GetOrdersPickupByContact(ctx context.Context, contact str
 }
 
 func (s *OrderService) GetAllOrdersWithPickup(ctx context.Context, status orderentity.StatusOrderPickup, page, perPage int) ([]orderdto.OrderDTO, error) {
-	shiftID := uuid.Nil
-	shiftModel, _ := s.rs.GetCurrentShift(ctx)
-	if shiftModel != nil {
-		shiftID = shiftModel.ID
-	}
-
-	if orderModels, err := s.ro.GetAllOrdersWithPickup(ctx, shiftID.String(), status, page, perPage); err != nil {
+	if orderModels, err := s.ro.GetAllOrdersWithPickup(ctx, status, page, perPage); err != nil {
 		return nil, err
 	} else {
 		orders := make([]orderdto.OrderDTO, 0)
