@@ -248,7 +248,7 @@ func (r *ProcessRepositoryBun) GetProcessesByGroupItemID(ctx context.Context, id
 		processIDs = append(processIDs, p.ProcessID.String())
 	}
 
-	if err := tx.NewSelect().Model(&processes).Where("id in (?)", bun.In(processIDs)).Order("process.created_at ASC").Scan(ctx); err != nil {
+	if err := tx.NewSelect().Model(&processes).Where("process.id in (?)", bun.In(processIDs)).Relation("ProcessRule").Order("process.created_at ASC").Scan(ctx); err != nil {
 		return nil, err
 	}
 

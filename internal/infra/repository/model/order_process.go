@@ -26,6 +26,7 @@ type OrderProcessCommonAttributes struct {
 	GroupItem     *GroupItem              `bun:"rel:belongs-to,join:group_item_id=id"`
 	Snapshot      *OrderGroupItemSnapshot `bun:"rel:belongs-to,join:group_item_id=group_item_id"`
 	ProcessRuleID uuid.UUID               `bun:"process_rule_id,type:uuid,notnull"`
+	ProcessRule   *ProcessRule            `bun:"rel:belongs-to,join:process_rule_id=id"`
 	Status        string                  `bun:"status,notnull"`
 	Products      []Product               `bun:"m2m:process_to_product_to_group_item,join:Process=Product"`
 	Queue         *OrderQueue             `bun:"rel:has-one,join:group_item_id=group_item_id,join:process_rule_id=process_rule_id"`
@@ -62,6 +63,7 @@ func (op *OrderProcess) FromDomain(orderProcess *orderprocessentity.OrderProcess
 			GroupItem:     &GroupItem{},
 			Snapshot:      &OrderGroupItemSnapshot{},
 			ProcessRuleID: orderProcess.ProcessRuleID,
+			ProcessRule:   &ProcessRule{},
 			Status:        string(orderProcess.Status),
 			Products:      []Product{},
 			Queue:         &OrderQueue{},
@@ -80,6 +82,7 @@ func (op *OrderProcess) FromDomain(orderProcess *orderprocessentity.OrderProcess
 	}
 
 	op.GroupItem.FromDomain(orderProcess.GroupItem)
+	op.ProcessRule.FromDomain(orderProcess.ProcessRule)
 	op.Snapshot.FromDomain(orderProcess.Snapshot)
 	op.Queue.FromDomain(orderProcess.Queue)
 
@@ -105,6 +108,7 @@ func (op *OrderProcess) ToDomain() *orderprocessentity.OrderProcess {
 			GroupItem:     op.GroupItem.ToDomain(),
 			Snapshot:      op.Snapshot.ToDomain(),
 			ProcessRuleID: op.ProcessRuleID,
+			ProcessRule:   op.ProcessRule.ToDomain(),
 			Status:        orderprocessentity.StatusProcess(op.Status),
 			Products:      []productentity.Product{},
 			Queue:         op.Queue.ToDomain(),
