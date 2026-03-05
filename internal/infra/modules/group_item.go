@@ -12,7 +12,7 @@ import (
 
 func NewGroupItemModule(db *bun.DB, chi *server.ServerChi) (model.GroupItemRepository, *orderusecases.GroupItemService, *handler.Handler) {
 	repository := groupitemrepositorybun.NewGroupItemRepositoryBun(db)
-	service := orderusecases.NewGroupItemService(repository)
+	service := orderusecases.NewGroupItemService(db, repository)
 	handler := handlerimpl.NewHandlerGroupItem(service)
 	chi.AddHandler(handler)
 	return repository, service, handler

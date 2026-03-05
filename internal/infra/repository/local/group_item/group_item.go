@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
 
@@ -29,6 +30,10 @@ func (r *GroupItemRepositoryLocal) UpdateGroupItem(ctx context.Context, groupite
 	defer r.mu.Unlock()
 	r.items[groupitem.ID.String()] = groupitem
 	return nil
+}
+
+func (r *GroupItemRepositoryLocal) UpdateGroupItemWithTx(ctx context.Context, tx *bun.Tx, groupitem *model.GroupItem) error {
+	return r.UpdateGroupItem(ctx, groupitem)
 }
 
 func (r *GroupItemRepositoryLocal) GetGroupByID(ctx context.Context, id string, withRelation bool) (*model.GroupItem, error) {

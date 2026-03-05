@@ -56,6 +56,14 @@ func (r *GroupItemRepositoryBun) UpdateGroupItem(ctx context.Context, p *model.G
 	return nil
 }
 
+func (r *GroupItemRepositoryBun) UpdateGroupItemWithTx(ctx context.Context, tx *bun.Tx, p *model.GroupItem) error {
+	if _, err := tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string, complementItemID *string) error {
 
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
