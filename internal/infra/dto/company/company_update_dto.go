@@ -19,6 +19,7 @@ type CompanyUpdateDTO struct {
 	Preferences  companyentity.Preferences               `json:"preferences"`
 	Categories   []companycategorydto.CompanyCategoryDTO `json:"categories"`
 	ImagePath    *string                                 `json:"image_path"`
+	Schedules    []ScheduleDTO                           `json:"schedules"`
 
 	MonthlyPaymentDueDay *int `json:"monthly_payment_due_day,omitempty"`
 }
@@ -93,6 +94,24 @@ func (c *CompanyUpdateDTO) UpdateDomain(company *companyentity.Company) (err err
 			category := companycategoryentity.CompanyCategory{}
 			category.ID = catDTO.ID
 			company.Categories = append(company.Categories, category)
+		}
+	}
+
+	if len(c.Schedules) > 0 {
+		company.Schedules = make([]companyentity.Schedule, len(c.Schedules))
+		for i, sDTO := range c.Schedules {
+			company.Schedules[i] = companyentity.Schedule{
+				DayOfWeek: sDTO.DayOfWeek,
+				IsOpen:    sDTO.IsOpen,
+				Hours:     make([]companyentity.BusinessHour, len(sDTO.Hours)),
+			}
+
+			for j, hDTO := range sDTO.Hours {
+				company.Schedules[i].Hours[j] = companyentity.BusinessHour{
+					OpeningTime: hDTO.OpeningTime,
+					ClosingTime: hDTO.ClosingTime,
+				}
+			}
 		}
 	}
 

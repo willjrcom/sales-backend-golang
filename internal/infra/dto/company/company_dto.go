@@ -23,11 +23,46 @@ type CompanyDTO struct {
 	IsBlocked    bool                      `json:"is_blocked,omitempty"`
 	ImagePath    string                    `json:"image_path"`
 
+	// Schedules
+	Schedules []ScheduleDTO `json:"schedules,omitempty"`
+
 	// Categories
 	Categories []companycategorydto.CompanyCategoryDTO `json:"categories,omitempty"`
 
 	MonthlyPaymentDueDay          int        `json:"monthly_payment_due_day,omitempty"`
 	MonthlyPaymentDueDayUpdatedAt *time.Time `json:"monthly_payment_due_day_updated_at,omitempty"`
+}
+
+type ScheduleDTO struct {
+	DayOfWeek int               `json:"day_of_week"`
+	IsOpen    bool              `json:"is_open"`
+	Hours     []BusinessHourDTO `json:"hours"`
+}
+
+func (s *ScheduleDTO) FromDomain(schedule companyentity.Schedule) {
+	*s = ScheduleDTO{
+		DayOfWeek: schedule.DayOfWeek,
+		IsOpen:    schedule.IsOpen,
+		Hours:     []BusinessHourDTO{},
+	}
+
+	for _, hour := range schedule.Hours {
+		hourDTO := BusinessHourDTO{}
+		hourDTO.FromDomain(hour)
+		s.Hours = append(s.Hours, hourDTO)
+	}
+}
+
+type BusinessHourDTO struct {
+	OpeningTime string `json:"opening_time"`
+	ClosingTime string `json:"closing_time"`
+}
+
+func (b *BusinessHourDTO) FromDomain(hour companyentity.BusinessHour) {
+	*b = BusinessHourDTO{
+		OpeningTime: hour.OpeningTime,
+		ClosingTime: hour.ClosingTime,
+	}
 }
 
 func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
@@ -47,6 +82,7 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 		Preferences:                   company.Preferences,
 		IsBlocked:                     company.IsBlocked,
 		ImagePath:                     company.ImagePath,
+		Schedules:                     []ScheduleDTO{},
 		Categories:                    []companycategorydto.CompanyCategoryDTO{},
 		MonthlyPaymentDueDay:          company.MonthlyPaymentDueDay,
 		MonthlyPaymentDueDayUpdatedAt: company.MonthlyPaymentDueDayUpdatedAt,
@@ -62,6 +98,12 @@ func (c *CompanyDTO) FromDomain(company *companyentity.Company) {
 
 	if company.Address == nil {
 		c.Address = nil
+	}
+
+	for _, schedule := range company.Schedules {
+		scheduleDTO := ScheduleDTO{}
+		scheduleDTO.FromDomain(schedule)
+		c.Schedules = append(c.Schedules, scheduleDTO)
 	}
 
 	for _, category := range company.Categories {
