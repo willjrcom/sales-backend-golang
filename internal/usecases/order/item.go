@@ -158,7 +158,7 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 
 	// Reservar estoque antes de salvar o item — se estoque insuficiente, loga aviso e continua.
 	if err := s.ReserveStockFromItem(ctx, item, groupItem, attendantID); err != nil {
-		fmt.Printf("Aviso: não foi possível reservar estoque para %s: %v\n", item.Name, err)
+		return nil, err
 	}
 
 	// Salvar item após confirmar estoque.
@@ -178,7 +178,7 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 	if groupItem.ComplementItemID != nil {
 		// Reserve stock for the complement item proportional to the new item's quantity
 		if err := s.ReserveStockFromItem(ctx, groupItem.ComplementItem, groupItem, attendantID); err != nil {
-			fmt.Printf("Aviso: estoque insuficiente para item complementar %s: %v\n", groupItem.ComplementItem.Name, err)
+			return nil, err
 		}
 
 		groupItem.ComplementItem.Quantity += item.Quantity
@@ -232,21 +232,21 @@ func (s *ItemService) ReserveStockFromItem(ctx context.Context, item *orderentit
 	)
 	if err != nil {
 		fmt.Printf("Aviso: erro ao reservar estoque para produto %s: %v\n", item.Name, err)
-		return nil
+		return err
 	}
 
 	movementModel := &model.StockMovement{}
 	movementModel.FromDomain(movement)
 	if err := s.stockMovementRepo.CreateMovement(ctx, tx, movementModel); err != nil {
 		fmt.Printf("Aviso: erro ao salvar movimento de estoque: %v\n", err)
-		return nil
+		return err
 	}
 
 	// Atualizar estoque (CurrentStock diminuiu, ReservedStock aumentou)
 	lockedStockModel.FromDomain(stock)
 	if err := s.stockRepo.UpdateStock(ctx, tx, lockedStockModel); err != nil {
 		fmt.Printf("Aviso: erro ao atualizar estoque: %v\n", err)
-		return nil
+		return err
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -491,7 +491,7 @@ func (s *ItemService) AddAdditionalItemOrder(ctx context.Context, dto *entitydto
 
 	// Debit stock for additional item
 	if err := s.ReserveStockFromItem(ctx, additionalItem, groupItem, attendantID); err != nil {
-		fmt.Printf("Aviso: não foi possível reservar estoque para adicional %s: %v\n", additionalItem.Name, err)
+		return uuid.Nil, err
 	}
 
 	if err = s.ri.AddAdditionalItem(ctx, item.ID, productAdditional.ID, additionalItemModel); err != nil {
