@@ -52,7 +52,7 @@ func (s *Service) AddDependencies(a model.AddressRepository, ss schemaservice.Se
 }
 
 func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateDTO) (response *companydto.CompanySchemaDTO, err error) {
-	cnpjString, tradeName, contacts, categoryIDs, err := dto.ToDomain()
+	cnpjString, tradeName, email, contacts, categoryIDs, err := dto.ToDomain()
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +79,11 @@ func (s *Service) NewCompany(ctx context.Context, dto *companydto.CompanyCreateD
 	}
 
 	company := companyentity.NewCompany(cnpjData)
-	company.Email = userModel.Email
+	if email != "" {
+		company.Email = email
+	} else {
+		company.Email = userModel.Email
+	}
 	company.Contacts = contacts
 
 	for _, id := range categoryIDs {

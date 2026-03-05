@@ -16,6 +16,7 @@ var (
 type CompanyCreateDTO struct {
 	TradeName  string                                  `json:"trade_name"`
 	Cnpj       string                                  `json:"cnpj"`
+	Email      string                                  `json:"email"`
 	Contacts   []string                                `json:"contacts"`
 	Categories []companycategorydto.CompanyCategoryDTO `json:"categories"`
 }
@@ -36,9 +37,9 @@ func (c *CompanyCreateDTO) validate() error {
 	return nil
 }
 
-func (c *CompanyCreateDTO) ToDomain() (cnpj string, tradeName string, contacts []string, categoryIDs []string, err error) {
+func (c *CompanyCreateDTO) ToDomain() (cnpj string, tradeName string, email string, contacts []string, categoryIDs []string, err error) {
 	if err := c.validate(); err != nil {
-		return "", "", nil, nil, err
+		return "", "", "", nil, nil, err
 	}
 
 	for _, category := range c.Categories {
@@ -47,5 +48,5 @@ func (c *CompanyCreateDTO) ToDomain() (cnpj string, tradeName string, contacts [
 		}
 	}
 
-	return c.Cnpj, c.TradeName, c.Contacts, categoryIDs, nil
+	return c.Cnpj, c.TradeName, c.Email, c.Contacts, categoryIDs, nil
 }
