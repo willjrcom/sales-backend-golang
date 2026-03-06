@@ -125,6 +125,12 @@ func (i *GroupItem) CalculateTotal() {
 			additionalsTotal = additionalsTotal.Add(itemTotal)
 		} else {
 			prices = append(prices, i.Items[j].SubTotal)
+
+			// Extract the value of additional items attached to this specific regular item
+			// itemTotal = (SubTotal * Quantity) + Additionals
+			baseTotal := i.Items[j].SubTotal.Mul(decimal.NewFromFloat(i.Items[j].Quantity))
+			additionalsForItem := itemTotal.Sub(baseTotal)
+			additionalsTotal = additionalsTotal.Add(additionalsForItem)
 		}
 		qtdItems += i.Items[j].Quantity
 	}
