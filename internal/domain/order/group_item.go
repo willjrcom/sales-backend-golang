@@ -116,10 +116,26 @@ func (i *GroupItem) CancelGroupItem() {
 func (i *GroupItem) CalculateTotal() {
 	qtdItems := 0.0
 	subTotal := decimal.Zero
+	var prices []decimal.Decimal
+	var additionalsTotal decimal.Decimal
 
 	for j := range i.Items {
-		subTotal = subTotal.Add(i.Items[j].CalculateTotal())
+		itemTotal := i.Items[j].CalculateTotal()
+		if i.Items[j].IsAdditional {
+			additionalsTotal = additionalsTotal.Add(itemTotal)
+		} else {
+			prices = append(prices, i.Items[j].SubTotal)
+		}
 		qtdItems += i.Items[j].Quantity
+	}
+
+	if i.Category != nil && i.Category.AllowFractional && len(prices) > 0 {
+		splitPrice := productentity.CalculateSplitPrice(i.Category.SplitPricingStrategy, prices)
+		subTotal = splitPrice.Mul(decimal.NewFromFloat(qtdItems)).Add(additionalsTotal)
+	} else {
+		for j := range i.Items {
+			subTotal = subTotal.Add(i.Items[j].Total)
+		}
 	}
 
 	i.GroupDetails.SubTotal = subTotal.Round(2)
