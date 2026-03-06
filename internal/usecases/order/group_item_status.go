@@ -6,6 +6,8 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
+	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -86,10 +88,14 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, id string, dto *
 
 	groupItem := groupItemModel.ToDomain()
 
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
 	// Restaurar estoque dos itens do grupo se ainda NÃO estiver cancelado
-	// Itens em Staging JÁ têm reserva feita, então restaurar para todos os status != Cancelled
-	// NOTA: quando chamado a partir de CancelOrder, o restoreStockFromOrder já cuida disso.
-	// Aqui só restauramos se o cancelamento do grupo for isolado (não via CancelOrder).
 	if groupItem.Status != orderentity.StatusGroupCancelled {
 		userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
 		if !ok {
@@ -102,9 +108,8 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, id string, dto *
 			return err
 		}
 
-		if err := s.restoreStockFromGroupItem(ctx, groupItem, employee.ID); err != nil {
-			fmt.Printf("Aviso: erro ao restaurar estoque no cancelamento do grupo %s: %v\n", groupItem.ID, err)
-			// Não bloquear o cancelamento por erro de estoque
+		if err := s.restoreStockFromGroupItemWithTx(ctx, tx, groupItem, employee.ID); err != nil {
+			return err
 		}
 	}
 
@@ -116,15 +121,15 @@ func (s *GroupItemService) CancelGroupItem(ctx context.Context, id string, dto *
 	groupItem.CancelGroupItem()
 
 	groupItemModel.FromDomain(groupItem)
-	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
+	if err := s.r.UpdateGroupItemWithTx(ctx, tx, groupItemModel); err != nil {
 		return err
 	}
 
-	if err := s.UpdateGroupItemTotal(ctx, groupItemModel.ID.String()); err != nil {
+	if err := s.so.UpdateOrderTotalWithTx(ctx, tx, groupItemModel.OrderID.String()); err != nil {
 		return err
 	}
 
-	if err := s.so.UpdateOrderTotal(ctx, groupItemModel.OrderID.String()); err != nil {
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 
@@ -175,6 +180,32 @@ func (s *GroupItemService) restoreStockFromGroupItem(ctx context.Context, groupI
 	return nil
 }
 
+func (s *GroupItemService) restoreStockFromGroupItemWithTx(ctx context.Context, tx *bun.Tx, groupItem *orderentity.GroupItem, attendantID uuid.UUID) error {
+	for _, item := range groupItem.Items {
+		if item.ProductID != uuid.Nil {
+			if err := s.si.restoreStockFromItemWithTx(ctx, tx, &item, groupItem, attendantID); err != nil {
+				return err
+			}
+		}
+
+		for _, addItem := range item.AdditionalItems {
+			if addItem.ProductID != uuid.Nil {
+				if err := s.si.restoreStockFromItemWithTx(ctx, tx, &addItem, groupItem, attendantID); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	if groupItem.ComplementItem != nil && groupItem.ComplementItem.ProductID != uuid.Nil {
+		if err := s.si.restoreStockFromItemWithTx(ctx, tx, groupItem.ComplementItem, groupItem, attendantID); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // CancelGroupItemSkipStockRestore cancela o grupo sem restaurar estoque.
 // Usado quando o estoque já foi restaurado pela chamada anterior (ex: restoreStockFromOrder em CancelOrder).
 func (s *GroupItemService) CancelGroupItemSkipStockRestore(ctx context.Context, id string, dto *groupitemdto.OrderGroupItemCancelDTO) (err error) {
@@ -185,6 +216,13 @@ func (s *GroupItemService) CancelGroupItemSkipStockRestore(ctx context.Context, 
 
 	groupItem := groupItemModel.ToDomain()
 
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
 	if dto.Reason == nil || *dto.Reason == "" {
 		return fmt.Errorf("reason is required")
 	}
@@ -193,15 +231,15 @@ func (s *GroupItemService) CancelGroupItemSkipStockRestore(ctx context.Context, 
 	groupItem.CancelGroupItem()
 
 	groupItemModel.FromDomain(groupItem)
-	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
+	if err := s.r.UpdateGroupItemWithTx(ctx, tx, groupItemModel); err != nil {
 		return err
 	}
 
-	if err := s.UpdateGroupItemTotal(ctx, groupItemModel.ID.String()); err != nil {
+	if err := s.so.UpdateOrderTotalWithTx(ctx, tx, groupItemModel.OrderID.String()); err != nil {
 		return err
 	}
 
-	if err := s.so.UpdateOrderTotal(ctx, groupItemModel.OrderID.String()); err != nil {
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 

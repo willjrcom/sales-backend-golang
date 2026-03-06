@@ -76,7 +76,6 @@ func (r *ItemRepositoryBun) UpdateItemWithTx(ctx context.Context, tx *bun.Tx, p 
 }
 
 func (r *ItemRepositoryBun) DeleteItem(ctx context.Context, id string) error {
-
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -85,6 +84,14 @@ func (r *ItemRepositoryBun) DeleteItem(ctx context.Context, id string) error {
 	defer cancel()
 	defer tx.Rollback()
 
+	if err := r.DeleteItemWithTx(ctx, tx, id); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (r *ItemRepositoryBun) DeleteItemWithTx(ctx context.Context, tx *bun.Tx, id string) error {
 	// Apaga o item
 	if _, err := tx.NewDelete().Model(&model.Item{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
@@ -110,10 +117,6 @@ func (r *ItemRepositoryBun) DeleteItem(ctx context.Context, id string) error {
 		if _, err := tx.NewDelete().Model(&model.Item{}).Where("id in (?)", bun.In(additionalIds)).Exec(ctx); err != nil {
 			return err
 		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
 	}
 
 	return nil
@@ -162,6 +165,16 @@ func (r *ItemRepositoryBun) GetItemById(ctx context.Context, id string) (*model.
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
+	return item, nil
+}
+
+func (r *ItemRepositoryBun) GetItemByIdWithTx(ctx context.Context, tx *bun.Tx, id string) (*model.Item, error) {
+	item := &model.Item{}
+
+	if err := tx.NewSelect().Model(item).Where("item.id = ?", id).Relation("AdditionalItems").Scan(ctx); err != nil {
+		return nil, err
+	}
+
 	return item, nil
 }
 

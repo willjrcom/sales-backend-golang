@@ -2,10 +2,11 @@ package itemrepositorylocal
 
 import (
 	"context"
+	"sync"
+
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
-	"sync"
 )
 
 // ItemRepositoryLocal is an in-memory implementation of ItemRepository
@@ -42,6 +43,10 @@ func (r *ItemRepositoryLocal) DeleteItem(ctx context.Context, id string) error {
 	return nil
 }
 
+func (r *ItemRepositoryLocal) DeleteItemWithTx(ctx context.Context, tx *bun.Tx, id string) error {
+	return r.DeleteItem(ctx, id)
+}
+
 func (r *ItemRepositoryLocal) DeleteAdditionalItem(ctx context.Context, idAdditional uuid.UUID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -76,6 +81,10 @@ func (r *ItemRepositoryLocal) GetItemById(ctx context.Context, id string) (*mode
 		return it, nil
 	}
 	return nil, nil
+}
+
+func (r *ItemRepositoryLocal) GetItemByIdWithTx(ctx context.Context, tx *bun.Tx, id string) (*model.Item, error) {
+	return r.GetItemById(ctx, id)
 }
 
 func (r *ItemRepositoryLocal) GetItemByAdditionalItemID(ctx context.Context, idAdditional uuid.UUID) (*model.Item, error) {

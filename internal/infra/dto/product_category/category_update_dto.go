@@ -17,6 +17,7 @@ type CategoryUpdateDTO struct {
 	RemovableIngredients []string              `json:"removable_ingredients"`
 	IsActive             *bool                 `json:"is_active"`
 	AllowFractional      *bool                 `json:"allow_fractional"`
+	SplitPricingStrategy *string               `json:"split_pricing_strategy"`
 	AdditionalCategories []entitydto.IDRequest `json:"additional_categories"`
 	ComplementCategories []entitydto.IDRequest `json:"complement_categories"`
 }
@@ -71,6 +72,14 @@ func (c *CategoryUpdateDTO) UpdateDomain(category *productentity.ProductCategory
 
 	if c.AllowFractional != nil {
 		category.AllowFractional = *c.AllowFractional
+	}
+
+	if c.SplitPricingStrategy != nil {
+		strategy, err := productentity.ParseSplitPricingStrategy(*c.SplitPricingStrategy)
+		if err != nil {
+			return err
+		}
+		category.SplitPricingStrategy = strategy
 	}
 
 	return nil

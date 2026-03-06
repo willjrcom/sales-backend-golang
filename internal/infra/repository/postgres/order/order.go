@@ -154,28 +154,36 @@ func (r *OrderRepositoryBun) UpdateOrderWithRelations(ctx context.Context, p *mo
 	defer cancel()
 	defer tx.Rollback()
 
-	if _, err = tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
+	if err := r.UpdateOrderWithRelationsWithTx(ctx, tx, p); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (r *OrderRepositoryBun) UpdateOrderWithRelationsWithTx(ctx context.Context, tx *bun.Tx, p *model.Order) error {
+	if _, err := tx.NewUpdate().Model(p).Where("id = ?", p.ID).Exec(ctx); err != nil {
 		return err
 	}
 
 	for _, group := range p.GroupItems {
-		if _, err = tx.NewUpdate().Model(&group).WherePK().Exec(ctx); err != nil {
+		if _, err := tx.NewUpdate().Model(&group).WherePK().Exec(ctx); err != nil {
 			return err
 		}
 
 		for _, item := range group.Items {
-			if _, err = tx.NewUpdate().Model(&item).WherePK().Exec(ctx); err != nil {
+			if _, err := tx.NewUpdate().Model(&item).WherePK().Exec(ctx); err != nil {
 				return err
 			}
 
 			for _, additionalItem := range item.AdditionalItems {
-				if _, err = tx.NewUpdate().Model(&additionalItem).WherePK().Exec(ctx); err != nil {
+				if _, err := tx.NewUpdate().Model(&additionalItem).WherePK().Exec(ctx); err != nil {
 					return err
 				}
 			}
 
 			if group.ComplementItemID != nil && group.ComplementItem != nil {
-				if _, err = tx.NewUpdate().Model(group.ComplementItem).WherePK().Exec(ctx); err != nil {
+				if _, err := tx.NewUpdate().Model(group.ComplementItem).WherePK().Exec(ctx); err != nil {
 					return err
 				}
 			}
@@ -183,23 +191,19 @@ func (r *OrderRepositoryBun) UpdateOrderWithRelations(ctx context.Context, p *mo
 	}
 
 	if p.Delivery != nil {
-		if _, err = tx.NewUpdate().Model(p.Delivery).WherePK().Exec(ctx); err != nil {
+		if _, err := tx.NewUpdate().Model(p.Delivery).WherePK().Exec(ctx); err != nil {
 			return err
 		}
 
 	} else if p.Pickup != nil {
-		if _, err = tx.NewUpdate().Model(p.Pickup).WherePK().Exec(ctx); err != nil {
+		if _, err := tx.NewUpdate().Model(p.Pickup).WherePK().Exec(ctx); err != nil {
 			return err
 		}
 
 	} else if p.Table != nil {
-		if _, err = tx.NewUpdate().Model(p.Table).WherePK().Exec(ctx); err != nil {
+		if _, err := tx.NewUpdate().Model(p.Table).WherePK().Exec(ctx); err != nil {
 			return err
 		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
 	}
 
 	return nil
@@ -307,10 +311,19 @@ func (r *OrderRepositoryBun) GetOnlyOrderById(ctx context.Context, id string) (o
 	return order, nil
 }
 
-func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order *model.Order, err error) {
-	order = &model.Order{}
-	order.ID = uuid.MustParse(id)
+func (r *OrderRepositoryBun) ExistsOrderById(ctx context.Context, id string) (bool, error) {
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
+	if err != nil {
+		return false, err
+	}
 
+	defer cancel()
+	defer tx.Rollback()
+
+	return tx.NewSelect().Model(&model.Order{}).Where("id = ?", id).Exists(ctx)
+}
+
+func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order *model.Order, err error) {
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return nil, err
@@ -318,6 +331,18 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 
 	defer cancel()
 	defer tx.Rollback()
+
+	order, err = r.GetOrderByIdWithTx(ctx, tx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return order, tx.Commit()
+}
+
+func (r *OrderRepositoryBun) GetOrderByIdWithTx(ctx context.Context, tx *bun.Tx, id string) (order *model.Order, err error) {
+	order = &model.Order{}
+	order.ID = uuid.MustParse(id)
 
 	if err := tx.NewSelect().Model(order).WherePK().
 		Relation("GroupItems.Items", func(q *bun.SelectQuery) *bun.SelectQuery {
@@ -446,9 +471,6 @@ func (r *OrderRepositoryBun) GetOrderById(ctx context.Context, id string) (order
 		}
 	}
 
-	if err := tx.Commit(); err != nil {
-		return nil, err
-	}
 	return order, nil
 }
 

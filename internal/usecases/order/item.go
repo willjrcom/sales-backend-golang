@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
@@ -61,8 +60,8 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 		return nil, err
 	}
 
-	if _, err := s.ro.GetOrderById(ctx, dto.OrderID.String()); err != nil {
-		return nil, err
+	if exists, _ := s.ro.ExistsOrderById(ctx, dto.OrderID.String()); !exists {
+		return nil, errors.New("order not found")
 	}
 
 	productModel, err := s.rp.GetProductById(ctx, dto.ProductID.String())
@@ -120,7 +119,6 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 	}
 
 	groupItemModel, err := s.rgi.GetGroupByID(ctx, dto.GroupItemID.String(), true)
-
 	if err != nil {
 		return nil, errors.New("group item not found: " + err.Error())
 	}
@@ -137,9 +135,17 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 	}
 
 	item, err := dto.ToDomain(product, variation, groupItem, dto.Quantity)
-
 	if err != nil {
 		return nil, err
+	}
+
+	// Process Removed Items
+	for _, removedDTO := range dto.RemovedItems {
+		name, err := removedDTO.ToDomain()
+		if err != nil {
+			return nil, err
+		}
+		item.AddRemovedItem(*name)
 	}
 
 	itemModel := &model.Item{}
@@ -164,7 +170,8 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 	defer cancel()
 	defer tx.Rollback()
 
-	if err := s.reserveStockFromItemWithTx(ctx, tx, item, groupItem, attendantID); err != nil {
+	// Reserva o estoque do item
+	if err := s.reserveStockFromItemWithTx(ctx, tx, item, groupItem.OrderID, attendantID); err != nil {
 		return nil, err
 	}
 
@@ -173,8 +180,13 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 		return nil, errors.New("add item error: " + err.Error())
 	}
 
-	if err = s.rgi.UpdateGroupItemWithTx(ctx, tx, groupItemModel); err != nil {
-		return nil, errors.New("update group item error: " + err.Error())
+	// Update item total if it had additions
+	if len(dto.Additions) > 0 {
+		for _, additionDTO := range dto.Additions {
+			if _, err := s.addAdditionalItemWithTx(ctx, tx, item.ID, item.Size, groupItem, &additionDTO, attendantID); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	// Update complement item
@@ -183,7 +195,7 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 		complementDelta.Quantity = item.Quantity
 
 		// Reserve stock only for the proportional delta of the new item quantity
-		if err := s.reserveStockFromItemWithTx(ctx, tx, &complementDelta, groupItem, attendantID); err != nil {
+		if err := s.reserveStockFromItemWithTx(ctx, tx, &complementDelta, groupItem.OrderID, attendantID); err != nil {
 			return nil, err
 		}
 
@@ -196,79 +208,15 @@ func (s *ItemService) AddItemOrder(ctx context.Context, dto *itemdto.OrderItemCr
 		}
 	}
 
+	if err := s.so.UpdateOrderTotalWithTx(ctx, tx, dto.OrderID.String()); err != nil {
+		return nil, err
+	}
+
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 
-	if err := s.sgi.UpdateGroupItemTotal(ctx, dto.GroupItemID.String()); err != nil {
-		return nil, err
-	}
-
-	if err := s.so.UpdateOrderTotal(ctx, dto.OrderID.String()); err != nil {
-		return nil, err
-	}
-
 	return itemdto.FromDomain(item.ID, groupItem.ID), nil
-}
-
-func (s *ItemService) ReserveStockFromItem(ctx context.Context, item *orderentity.Item, groupItem *orderentity.GroupItem, attendantID uuid.UUID) error {
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
-	if err != nil {
-		return err
-	}
-	defer cancel()
-	defer tx.Rollback()
-
-	if err := s.reserveStockFromItemWithTx(ctx, tx, item, groupItem, attendantID); err != nil {
-		return err
-	}
-
-	return tx.Commit()
-}
-
-func (s *ItemService) reserveStockFromItemWithTx(ctx context.Context, tx *bun.Tx, item *orderentity.Item, groupItem *orderentity.GroupItem, attendantID uuid.UUID) error {
-	// Buscar estoque do produto/variação
-	stockModel, err := s.getStockToMove(ctx, item)
-	if err != nil {
-		fmt.Printf("Aviso: %v\n", err)
-		return nil // Se não encontrar estoque adequado, assume sem controle de estoque (comportamento original)
-	}
-
-	lockedStockModel, err := s.stockRepo.GetStockByIDForUpdate(ctx, tx, stockModel.ID.String())
-	if err != nil {
-		return fmt.Errorf("erro ao bloquear estoque para reserva: %w", err)
-	}
-
-	stock := lockedStockModel.ToDomain()
-
-	movement, err := stock.ReserveStock(
-		decimal.NewFromFloat(item.Quantity),
-		groupItem.OrderID,
-		attendantID,
-		item.SubTotal,
-	)
-	if err != nil {
-		fmt.Printf("Aviso: erro ao reservar estoque para produto %s: %v\n", item.Name, err)
-		return err
-	}
-
-	movementModel := &model.StockMovement{}
-	movementModel.FromDomain(movement)
-	if err := s.stockMovementRepo.CreateMovement(ctx, tx, movementModel); err != nil {
-		fmt.Printf("Aviso: erro ao salvar movimento de estoque: %v\n", err)
-		return err
-	}
-
-	// Atualizar estoque (CurrentStock diminuiu, ReservedStock aumentou)
-	lockedStockModel.FromDomain(stock)
-	if err := s.stockRepo.UpdateStock(ctx, tx, lockedStockModel); err != nil {
-		fmt.Printf("Aviso: erro ao atualizar estoque: %v\n", err)
-		return err
-	}
-
-	fmt.Printf("Estoque disponível: %f • Restará após adicionar: %f para produto %s\n", stock.CurrentStock.Add(decimal.NewFromFloat(item.Quantity)).InexactFloat64(), stock.CurrentStock.InexactFloat64(), item.Name)
-
-	return nil
 }
 
 func (s *ItemService) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequest) (groupItemDeleted bool, err error) {
@@ -284,6 +232,8 @@ func (s *ItemService) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequ
 		return false, err
 	}
 
+	groupItem := groupItemModel.ToDomain()
+
 	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
 	attendantID := uuid.Nil
 	if ok {
@@ -295,39 +245,50 @@ func (s *ItemService) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequ
 		attendantID = employee.ID
 	}
 
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
+	if err != nil {
+		return false, err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
 	// Restore stock for the item itself
-	if err := s.RestoreStockFromItem(ctx, item, groupItemModel.ToDomain(), attendantID); err != nil {
-		fmt.Printf("Aviso: erro ao restaurar estoque ao remover item %s: %v\n", item.Name, err)
+	if err := s.restoreStockFromItemWithTx(ctx, tx, item, groupItem, attendantID); err != nil {
+		return false, err
 	}
 
-	// Fix: Restaurar estoque dos adicionais do item
-	for _, addItem := range item.AdditionalItems {
-		if err := s.RestoreStockFromItem(ctx, &addItem, groupItemModel.ToDomain(), attendantID); err != nil {
-			fmt.Printf("Aviso: erro ao restaurar estoque do adicional %s ao remover item pai: %v\n", addItem.Name, err)
-		}
-	}
-
-	if err = s.ri.DeleteItem(ctx, dto.ID.String()); err != nil {
+	if err = s.ri.DeleteItemWithTx(ctx, tx, dto.ID.String()); err != nil {
 		return false, errors.New("delete item error: " + err.Error())
 	}
 
-	groupItem, err := s.rgi.GetGroupByID(ctx, itemModel.GroupItemID.String(), true)
+	// Restaurar estoque dos adicionais do item
+	for _, addItem := range item.AdditionalItems {
+		if err := s.restoreStockFromItemWithTx(ctx, tx, &addItem, groupItem, attendantID); err != nil {
+			return false, err
+		}
+	}
 
+	// Re-load group item to get updated items list (it will be empty if it was the last item)
+	groupItemModel, err = s.rgi.GetGroupByIDWithTx(ctx, tx, itemModel.GroupItemID.String(), true)
 	if err != nil {
 		return false, errors.New("group item not found: " + err.Error())
 	}
 
+	groupItem = groupItemModel.ToDomain()
+
 	// Update complement item quantity
 	if groupItem.ComplementItemID != nil && len(groupItem.Items) != 0 {
 		// Restore stock for the complement item proportional to the removed item's quantity
-		complementDelta := groupItem.ComplementItem.ToDomain()
+		complementDelta := *groupItem.ComplementItem
 		complementDelta.Quantity = itemModel.Quantity
-		if err := s.RestoreStockFromItem(ctx, complementDelta, groupItem.ToDomain(), attendantID); err != nil {
-			fmt.Printf("Aviso: erro ao restaurar estoque para item complementar %s: %v\n", groupItem.ComplementItem.Name, err)
+		if err := s.restoreStockFromItemWithTx(ctx, tx, &complementDelta, groupItem, attendantID); err != nil {
+			return false, err
 		}
 
 		groupItem.ComplementItem.Quantity -= itemModel.Quantity
-		if err = s.ri.UpdateItem(ctx, groupItem.ComplementItem); err != nil {
+		complementItemModel := &model.Item{}
+		complementItemModel.FromDomain(groupItem.ComplementItem)
+		if err = s.ri.UpdateItemWithTx(ctx, tx, complementItemModel); err != nil {
 			return false, errors.New("update complement item error: " + err.Error())
 		}
 	}
@@ -337,7 +298,7 @@ func (s *ItemService) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequ
 		var complementItemID *string
 		if groupItem.ComplementItemID != nil {
 			// If deleting the last item and a complement exists, restore ALL remaining stock of the complement
-			if err := s.RestoreStockFromItem(ctx, groupItem.ComplementItem.ToDomain(), groupItem.ToDomain(), attendantID); err != nil {
+			if err := s.restoreStockFromItemWithTx(ctx, tx, groupItem.ComplementItem, groupItem, attendantID); err != nil {
 				fmt.Printf("Aviso: erro ao restaurar estoque total do item complementar %s na deleção do grupo: %v\n", groupItem.ComplementItem.Name, err)
 			}
 
@@ -345,307 +306,30 @@ func (s *ItemService) DeleteItemOrder(ctx context.Context, dto *entitydto.IDRequ
 			*complementItemID = groupItem.ComplementItemID.String()
 		}
 
-		if err = s.rgi.DeleteGroupItem(ctx, groupItem.ID.String(), complementItemID); err != nil {
+		if err = s.rgi.DeleteGroupItemWithTx(ctx, tx, groupItem.ID.String(), complementItemID); err != nil {
 			return false, err
 		}
 
-		if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
+		if err := s.so.UpdateOrderTotalWithTx(ctx, tx, groupItem.OrderID.String()); err != nil {
+			return false, err
+		}
+
+		if err := tx.Commit(); err != nil {
 			return false, err
 		}
 
 		return true, nil
 	}
 
-	if err := s.sgi.UpdateGroupItemTotal(ctx, groupItem.ID.String()); err != nil {
+	if err := s.so.UpdateOrderTotalWithTx(ctx, tx, groupItem.OrderID.String()); err != nil {
 		return false, err
 	}
 
-	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
+	if err := tx.Commit(); err != nil {
 		return false, err
 	}
 
 	return false, nil
-}
-
-func (s *ItemService) RestoreStockFromItem(ctx context.Context, item *orderentity.Item, groupItem *orderentity.GroupItem, attendantID uuid.UUID) error {
-	// Buscar estoque do produto/variação
-	stockModel, err := s.getStockToMove(ctx, item)
-	if err != nil {
-		fmt.Printf("Aviso: %v\n", err)
-		return nil
-	}
-
-	// Iniciar transação de tenant
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
-	if err != nil {
-		return err
-	}
-	defer cancel()
-	defer tx.Rollback()
-
-	lockedStockModel, err := s.stockRepo.GetStockByIDForUpdate(ctx, tx, stockModel.ID.String())
-	if err != nil {
-		return fmt.Errorf("erro ao bloquear estoque para restauração: %w", err)
-	}
-
-	stock := lockedStockModel.ToDomain()
-
-	movement, err := stock.RestoreStock(
-		decimal.NewFromFloat(item.Quantity),
-		groupItem.OrderID,
-		attendantID,
-		item.SubTotal,
-		nil, // BatchID not available at reservation restoration
-	)
-	if err != nil {
-		fmt.Printf("Aviso: erro ao restaurar estoque para produto %s: %v\n", item.Name, err)
-		return err
-	}
-
-	// Salvar movimento
-	movementModel := &model.StockMovement{}
-	movementModel.FromDomain(movement)
-	if err := s.stockMovementRepo.CreateMovement(ctx, tx, movementModel); err != nil {
-		fmt.Printf("Aviso: erro ao salvar movimento de estoque: %v\n", err)
-		return err
-	}
-
-	// Atualizar estoque
-	lockedStockModel.FromDomain(stock)
-	if err := s.stockRepo.UpdateStock(ctx, tx, lockedStockModel); err != nil {
-		fmt.Printf("Aviso: erro ao atualizar estoque: %v\n", err)
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	fmt.Printf("Estoque creditado para produto %s: %f\n", item.Name, item.Quantity)
-
-	return nil
-}
-
-func (s *ItemService) AddAdditionalItemOrder(ctx context.Context, dto *entitydto.IDRequest, dtoAdditional *itemdto.OrderAdditionalItemCreateDTO) (id uuid.UUID, err error) {
-	productID, variationID, quantityValue, flavor, err := dtoAdditional.ToDomain()
-
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	item, err := s.ri.GetItemById(ctx, dto.ID.String())
-
-	if err != nil {
-		return uuid.Nil, errors.New("item not found: " + err.Error())
-	}
-
-	groupItemModel, err := s.rgi.GetGroupByID(ctx, item.GroupItemID.String(), true)
-	if err != nil {
-		return uuid.Nil, errors.New("group item not found: " + err.Error())
-	}
-
-	groupItem := groupItemModel.ToDomain()
-
-	if ok, err := groupItem.CanAddItems(); !ok {
-		return uuid.Nil, err
-	}
-
-	productAdditionalModel, err := s.rp.GetProductById(ctx, productID.String())
-	if err != nil {
-		return uuid.Nil, errors.New("product not found: " + err.Error())
-	}
-
-	productAdditional := productAdditionalModel.ToDomain()
-
-	var variationAdditional *productentity.ProductVariation
-	for _, v := range productAdditional.Variations {
-		if v.ID == variationID {
-			variationAdditional = &v
-			break
-		}
-	}
-
-	if variationAdditional == nil {
-		return uuid.Nil, errors.New("variation not found")
-	}
-
-	found := false
-	for _, additionalCategory := range groupItem.Category.AdditionalCategories {
-		if additionalCategory.ID == productAdditional.CategoryID {
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		return uuid.Nil, errors.New("additional category does not belong to this category")
-	}
-
-	normalizedFlavor, err := itemdto.NormalizeFlavor(flavor, productAdditional.Flavors)
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
-	attendantID := uuid.Nil
-	if ok {
-		userIDUUID := uuid.MustParse(userID)
-		employee, err := s.re.GetEmployeeByUserID(ctx, userIDUUID.String())
-		if err != nil {
-			return uuid.Nil, err
-		}
-		attendantID = employee.ID
-	}
-
-	additionalItem := orderentity.NewItem(productAdditional.Name, variationAdditional.Price, quantityValue, item.Size, productAdditional.ID, variationAdditional.ID, productAdditional.CategoryID, normalizedFlavor)
-	additionalItem.IsAdditional = true
-	additionalItem.GroupItemID = groupItem.ID
-
-	additionalItemModel := &model.Item{}
-	additionalItemModel.FromDomain(additionalItem)
-
-	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
-	if err != nil {
-		return uuid.Nil, err
-	}
-	defer cancel()
-	defer tx.Rollback()
-
-	// Debit stock for additional item
-	if err := s.reserveStockFromItemWithTx(ctx, tx, additionalItem, groupItem, attendantID); err != nil {
-		return uuid.Nil, err
-	}
-
-	if err = s.ri.AddAdditionalItemWithTx(ctx, tx, item.ID, productAdditional.ID, additionalItemModel); err != nil {
-		return uuid.Nil, errors.New("add additional item error: " + err.Error())
-	}
-
-	if err := tx.Commit(); err != nil {
-		return uuid.Nil, err
-	}
-
-	if err := s.UpdateItemTotal(ctx, item.ID.String()); err != nil {
-		return uuid.Nil, err
-	}
-
-	if err := s.sgi.UpdateGroupItemTotal(ctx, groupItem.ID.String()); err != nil {
-		return uuid.Nil, err
-	}
-
-	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
-		return uuid.Nil, err
-	}
-
-	return additionalItem.ID, nil
-}
-
-func (s *ItemService) DeleteAdditionalItemOrder(ctx context.Context, dtoAdditional *entitydto.IDRequest) (err error) {
-	additionalItem, err := s.ri.GetItemById(ctx, dtoAdditional.ID.String())
-	if err != nil {
-		return errors.New("item not found: " + err.Error())
-	}
-
-	groupItemModel, err := s.rgi.GetGroupByID(ctx, additionalItem.GroupItemID.String(), true)
-	if err != nil {
-		return errors.New("group item not found: " + err.Error())
-	}
-
-	item, err := s.ri.GetItemByAdditionalItemID(ctx, additionalItem.ID)
-	if err != nil {
-		return err
-	}
-	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
-	attendantID := uuid.Nil
-	if ok {
-		userIDUUID := uuid.MustParse(userID)
-		employee, _ := s.re.GetEmployeeByUserID(ctx, userIDUUID.String())
-		if employee != nil {
-			attendantID = employee.ID
-		}
-	}
-
-	// Fix: Restaurar estoque do adicional removido antes do banco de dados deletar o relacionamento (opcional se já tiver o objeto na mão)
-	if err := s.RestoreStockFromItem(ctx, additionalItem.ToDomain(), groupItemModel.ToDomain(), attendantID); err != nil {
-		fmt.Printf("Aviso: erro ao restaurar estoque do adicional %s removido: %v\n", additionalItem.Name, err)
-	}
-
-	if err = s.ri.DeleteAdditionalItem(ctx, dtoAdditional.ID); err != nil {
-		return err
-	}
-
-	if err := s.UpdateItemTotal(ctx, item.ID.String()); err != nil {
-		return err
-	}
-
-	if err := s.sgi.UpdateGroupItemTotal(ctx, groupItemModel.ID.String()); err != nil {
-		return err
-	}
-
-	if err := s.so.UpdateOrderTotal(ctx, groupItemModel.OrderID.String()); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (s *ItemService) AddRemovedItem(ctx context.Context, dtoID *entitydto.IDRequest, dto *itemdto.RemovedItemDTO) (err error) {
-	name, err := dto.ToDomain()
-	if err != nil {
-		return err
-	}
-
-	itemModel, err := s.ri.GetItemById(ctx, dtoID.ID.String())
-	if err != nil {
-		return err
-	}
-
-	item := itemModel.ToDomain()
-
-	category, err := s.rc.GetCategoryById(ctx, item.CategoryID.String())
-	if err != nil {
-		return err
-	}
-
-	found := false
-	for _, removedItem := range category.RemovableIngredients {
-		if removedItem == *name {
-			found = true
-		}
-	}
-
-	if !found {
-		return errors.New("removed item not found on category")
-	}
-
-	// Already added
-	for _, removedItem := range item.RemovedItems {
-		if removedItem == *name {
-			return nil
-		}
-	}
-
-	item.AddRemovedItem(*name)
-
-	itemModel.FromDomain(item)
-	return s.ri.UpdateItem(ctx, itemModel)
-}
-
-func (s *ItemService) RemoveRemovedItem(ctx context.Context, dtoID *entitydto.IDRequest, dto *itemdto.RemovedItemDTO) (err error) {
-	name, err := dto.ToDomain()
-	if err != nil {
-		return err
-	}
-
-	itemModel, err := s.ri.GetItemById(ctx, dtoID.ID.String())
-	if err != nil {
-		return err
-	}
-
-	item := itemModel.ToDomain()
-	item.RemoveRemovedItem(*name)
-
-	itemModel.FromDomain(item)
-	return s.ri.UpdateItem(ctx, itemModel)
 }
 
 func (s *ItemService) newGroupItem(ctx context.Context, orderID uuid.UUID, product *productentity.Product, variation *productentity.ProductVariation) (groupItem *orderentity.GroupItem, err error) {
@@ -668,24 +352,6 @@ func (s *ItemService) newGroupItem(ctx context.Context, orderID uuid.UUID, produ
 	return
 }
 
-func (s *ItemService) UpdateItemTotal(ctx context.Context, id string) error {
-	itemModel, err := s.ri.GetItemById(ctx, id)
-	if err != nil {
-		return err
-	}
-
-	item := itemModel.ToDomain()
-
-	item.CalculateTotal()
-
-	itemModel.FromDomain(item)
-	if err := s.ri.UpdateItem(ctx, itemModel); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *ItemService) getStockToMove(ctx context.Context, item *orderentity.Item) (*model.Stock, error) {
 	// 1. Tentar buscar estoque específico para a variação
 	stockModel, err := s.stockRepo.GetStockByVariationID(ctx, item.ProductVariationID.String())
@@ -696,7 +362,8 @@ func (s *ItemService) getStockToMove(ctx context.Context, item *orderentity.Item
 	// 2. Se não encontrar, buscar todos os estoques do produto
 	stocks, err := s.stockRepo.GetStockByProductID(ctx, item.ProductID.String())
 	if err != nil || len(stocks) == 0 {
-		return nil, fmt.Errorf("produto %s não tem controle de estoque configurado", item.Name)
+		fmt.Printf("produto %s não tem controle de estoque configurado", item.Name)
+		return nil, nil
 	}
 
 	// 3. Procurar por um registro de estoque "global" (sem variation_id)

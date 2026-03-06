@@ -21,6 +21,7 @@ type CategoryCreateDTO struct {
 	IsComplement         bool     `json:"is_complement"`
 	AllowFractional      bool     `json:"allow_fractional"`
 	IsActive             *bool    `json:"is_active"`
+	SplitPricingStrategy string   `json:"split_pricing_strategy"`
 }
 
 func (c *CategoryCreateDTO) validate() error {
@@ -41,6 +42,11 @@ func (c *CategoryCreateDTO) ToDomain() (*productentity.ProductCategory, error) {
 		isActive = *c.IsActive
 	}
 
+	strategy, err := productentity.ParseSplitPricingStrategy(c.SplitPricingStrategy)
+	if err != nil {
+		return nil, err
+	}
+
 	categoryCommonAttributes := productentity.ProductCategoryCommonAttributes{
 		Name:                 c.Name,
 		ImagePath:            c.ImagePath,
@@ -52,6 +58,7 @@ func (c *CategoryCreateDTO) ToDomain() (*productentity.ProductCategory, error) {
 		IsComplement:         c.IsComplement,
 		IsActive:             isActive,
 		AllowFractional:      c.AllowFractional,
+		SplitPricingStrategy: strategy,
 	}
 
 	return productentity.NewProductCategory(categoryCommonAttributes), nil

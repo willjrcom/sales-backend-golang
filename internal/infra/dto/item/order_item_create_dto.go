@@ -15,13 +15,15 @@ var (
 )
 
 type OrderItemCreateDTO struct {
-	OrderID     uuid.UUID  `json:"order_id"`
-	ProductID   uuid.UUID  `json:"product_id"`
-	VariationID uuid.UUID  `json:"variation_id"`
-	Quantity    float64    `json:"quantity"`
-	GroupItemID *uuid.UUID `json:"group_item_id"`
-	Observation string     `json:"observation"`
-	Flavor      *string    `json:"flavor,omitempty"`
+	OrderID      uuid.UUID                      `json:"order_id"`
+	ProductID    uuid.UUID                      `json:"product_id"`
+	VariationID  uuid.UUID                      `json:"variation_id"`
+	Quantity     float64                        `json:"quantity"`
+	GroupItemID  *uuid.UUID                     `json:"group_item_id"`
+	Observation  string                         `json:"observation"`
+	Flavor       *string                        `json:"flavor,omitempty"`
+	Additions    []OrderAdditionalItemCreateDTO `json:"additions,omitempty"`
+	RemovedItems []RemovedItemDTO               `json:"removed_items,omitempty"`
 }
 
 func (a *OrderItemCreateDTO) Validate() error {
@@ -39,6 +41,18 @@ func (a *OrderItemCreateDTO) Validate() error {
 
 	if a.Quantity == 0 {
 		return errors.New("quantity is required")
+	}
+
+	for _, addition := range a.Additions {
+		if err := addition.validate(); err != nil {
+			return err
+		}
+	}
+
+	for _, removed := range a.RemovedItems {
+		if err := removed.validate(); err != nil {
+			return err
+		}
 	}
 
 	return nil

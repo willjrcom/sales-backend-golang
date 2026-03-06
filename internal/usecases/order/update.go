@@ -7,6 +7,7 @@ import (
 	"math"
 
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
 	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	"github.com/willjrcom/sales-backend-go/internal/domain/entity"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
@@ -208,7 +209,7 @@ func (s *OrderService) ReadyOrder(ctx context.Context, dto *entitydto.IDRequest)
 }
 
 func (s *OrderService) FinishOrder(ctx context.Context, dto *entitydto.IDRequest) error {
-	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
+	orderModel, err := s.ro.GetOnlyOrderById(ctx, dto.ID.String())
 
 	if err != nil {
 		return err
@@ -311,7 +312,7 @@ func (s *OrderService) CancelOrder(ctx context.Context, dtoOrderID *entitydto.ID
 }
 
 func (s *OrderService) ArchiveOrder(ctx context.Context, dto *entitydto.IDRequest) (err error) {
-	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
+	orderModel, err := s.ro.GetOnlyOrderById(ctx, dto.ID.String())
 
 	if err != nil {
 		return err
@@ -331,7 +332,7 @@ func (s *OrderService) ArchiveOrder(ctx context.Context, dto *entitydto.IDReques
 }
 
 func (s *OrderService) UnarchiveOrder(ctx context.Context, dto *entitydto.IDRequest) error {
-	orderModel, err := s.ro.GetOrderById(ctx, dto.ID.String())
+	orderModel, err := s.ro.GetOnlyOrderById(ctx, dto.ID.String())
 
 	if err != nil {
 		return err
@@ -386,7 +387,7 @@ func (s *OrderService) AddPayment(ctx context.Context, dto *entitydto.IDRequest,
 }
 
 func (s *OrderService) UpdateOrderObservation(ctx context.Context, dtoId *entitydto.IDRequest, dto *orderdto.OrderUpdateObservationDTO) error {
-	orderModel, err := s.ro.GetOrderById(ctx, dtoId.ID.String())
+	orderModel, err := s.ro.GetOnlyOrderById(ctx, dtoId.ID.String())
 
 	if err != nil {
 		return err
@@ -421,8 +422,8 @@ func (s *OrderService) UpdateTotalFees(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *OrderService) UpdateOrderTotal(ctx context.Context, id string) error {
-	orderModel, err := s.ro.GetOrderById(ctx, id)
+func (s *OrderService) UpdateOrderTotalWithTx(ctx context.Context, tx *bun.Tx, id string) error {
+	orderModel, err := s.ro.GetOrderByIdWithTx(ctx, tx, id)
 	if err != nil {
 		return err
 	}
@@ -448,7 +449,7 @@ func (s *OrderService) UpdateOrderTotal(ctx context.Context, id string) error {
 	order.Touch()
 
 	orderModel.FromDomain(order)
-	if err := s.ro.UpdateOrderWithRelations(ctx, orderModel); err != nil {
+	if err := s.ro.UpdateOrderWithRelationsWithTx(ctx, tx, orderModel); err != nil {
 		return err
 	}
 

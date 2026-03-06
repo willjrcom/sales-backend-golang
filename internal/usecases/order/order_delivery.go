@@ -101,7 +101,7 @@ func (s *OrderDeliveryService) CreateOrderDelivery(ctx context.Context, dto *ord
 	delivery.OrderID = orderID
 
 	// Buscar o pedido para obter o OrderNumber
-	orderModel, err := s.ro.GetOrderById(ctx, orderID.String())
+	orderModel, err := s.ro.GetOnlyOrderById(ctx, orderID.String())
 	if err != nil {
 		return nil, err
 	}

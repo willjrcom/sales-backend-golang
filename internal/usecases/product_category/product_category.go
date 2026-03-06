@@ -275,5 +275,6 @@ func (s *Service) GetDefaultCategories(ctx context.Context) ([]productcategorydt
 			})
 		}
 		return dtos, nil
+
 	}
 }

@@ -51,7 +51,10 @@ func (p *ProductUpdateDTO) UpdateDomain(product *productentity.Product) (err err
 		product.IsActive = *p.IsActive
 	}
 	if p.CategoryID != nil {
-		product.Category.ID = *p.CategoryID
+		product.CategoryID = *p.CategoryID
+		if product.Category != nil {
+			product.Category.ID = *p.CategoryID
+		}
 	}
 
 	if p.Variations != nil {

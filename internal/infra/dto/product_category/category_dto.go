@@ -17,6 +17,7 @@ type CategoryDTO struct {
 	IsAdditional         bool              `json:"is_additional"`
 	IsComplement         bool              `json:"is_complement"`
 	AllowFractional      bool              `json:"allow_fractional"`
+	SplitPricingStrategy string            `json:"split_pricing_strategy"`
 	IsActive             bool              `json:"is_active"`
 	RemovableIngredients []string          `json:"removable_ingredients,omitempty"`
 	Sizes                []sizedto.SizeDTO `json:"sizes,omitempty"`
@@ -40,6 +41,7 @@ func (c *CategoryDTO) FromDomain(category *productentity.ProductCategory) {
 		IsAdditional:         category.IsAdditional,
 		IsComplement:         category.IsComplement,
 		AllowFractional:      category.AllowFractional,
+		SplitPricingStrategy: string(category.SplitPricingStrategy.OrDefault()),
 		IsActive:             category.IsActive,
 		RemovableIngredients: category.RemovableIngredients,
 		Sizes:                []sizedto.SizeDTO{},

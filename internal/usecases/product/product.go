@@ -93,21 +93,21 @@ func (s *Service) UpdateProduct(ctx context.Context, dtoId *entitydto.IDRequest,
 }
 
 func (s *Service) DeleteProductById(ctx context.Context, dto *entitydto.IDRequest) error {
-	product, err := s.rp.GetProductById(ctx, dto.ID.String())
+	// product, err := s.rp.GetProductById(ctx, dto.ID.String())
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
 	if err := s.rp.DeleteProduct(ctx, dto.ID.String()); err != nil {
 		return err
 	}
 
-	if product.ImagePath != nil {
-		if err := s.s3Service.DeleteObject(*product.ImagePath); err != nil {
-			return err
-		}
-	}
+	// if product.ImagePath != nil {
+	// 	if err := s.s3Service.DeleteObject(*product.ImagePath); err != nil {
+	// 		fmt.Printf("Aviso: erro ao deletar imagem do S3 para o produto %s: %v\n", product.ID, err)
+	// 	}
+	// }
 
 	return nil
 }

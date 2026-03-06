@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun"
 	"github.com/willjrcom/sales-backend-go/bootstrap/database"
+	companyentity "github.com/willjrcom/sales-backend-go/internal/domain/company"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	productentity "github.com/willjrcom/sales-backend-go/internal/domain/product"
 	entitydto "github.com/willjrcom/sales-backend-go/internal/infra/dto/entity"
@@ -61,7 +62,6 @@ func (s *GroupItemService) GetGroupByID(ctx context.Context, dto *entitydto.IDRe
 
 func (s *GroupItemService) DeleteGroupItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
 	groupItem, err := s.r.GetGroupByID(ctx, dto.ID.String(), true)
-
 	if err != nil {
 		return err
 	}
@@ -72,15 +72,22 @@ func (s *GroupItemService) DeleteGroupItem(ctx context.Context, dto *entitydto.I
 		*complementItemID = groupItem.ComplementItemID.String()
 	}
 
-	if err := s.r.DeleteGroupItem(ctx, groupItem.ID.String(), complementItemID); err != nil {
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
+	if err := s.r.DeleteGroupItemWithTx(ctx, tx, groupItem.ID.String(), complementItemID); err != nil {
 		return err
 	}
 
-	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
+	if err := s.so.UpdateOrderTotalWithTx(ctx, tx, groupItem.OrderID.String()); err != nil {
 		return err
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto.IDRequest, dtoComplement *entitydto.IDRequest, dtoVariationId *entitydto.IDRequest) (err error) {
@@ -166,7 +173,7 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 	defer tx.Rollback()
 
 	// Reserve stock for the complement item
-	if err := s.si.reserveStockFromItemWithTx(ctx, tx, itemComplement, groupItem, attendantID); err != nil {
+	if err := s.si.reserveStockFromItemWithTx(ctx, tx, itemComplement, groupItem.OrderID, attendantID); err != nil {
 		return err
 	}
 
@@ -186,11 +193,11 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 		return err
 	}
 
-	if err := tx.Commit(); err != nil {
+	if err := s.so.UpdateOrderTotalWithTx(ctx, tx, groupItem.OrderID.String()); err != nil {
 		return err
 	}
 
-	if err := s.so.UpdateOrderTotal(ctx, groupItem.OrderID.String()); err != nil {
+	if err := tx.Commit(); err != nil {
 		return err
 	}
 
@@ -199,7 +206,6 @@ func (s *GroupItemService) AddComplementItem(ctx context.Context, dto *entitydto
 
 func (s *GroupItemService) DeleteComplementItem(ctx context.Context, dto *entitydto.IDRequest) (err error) {
 	groupItemModel, err := s.r.GetGroupByID(ctx, dto.ID.String(), true)
-
 	if err != nil {
 		return err
 	}
@@ -208,7 +214,7 @@ func (s *GroupItemService) DeleteComplementItem(ctx context.Context, dto *entity
 		return ErrComplementItemNotFound
 	}
 
-	userID, ok := ctx.Value(model.UserValue("user_id")).(string)
+	userID, ok := ctx.Value(companyentity.UserValue("user_id")).(string)
 	attendantID := uuid.Nil
 	if ok {
 		userIDUUID := uuid.MustParse(userID)
@@ -219,12 +225,19 @@ func (s *GroupItemService) DeleteComplementItem(ctx context.Context, dto *entity
 		attendantID = employee.ID
 	}
 
+	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, s.db)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+	defer tx.Rollback()
+
 	// Restore stock for the complement item before deleting it
-	if err := s.si.RestoreStockFromItem(ctx, groupItemModel.ComplementItem.ToDomain(), groupItemModel.ToDomain(), attendantID); err != nil {
+	if err := s.si.restoreStockFromItemWithTx(ctx, tx, groupItemModel.ComplementItem.ToDomain(), groupItemModel.ToDomain(), attendantID); err != nil {
 		fmt.Printf("Aviso: erro ao restaurar estoque para item complementar %s: %v\n", groupItemModel.ComplementItem.Name, err)
 	}
 
-	if err := s.ri.DeleteItem(ctx, groupItemModel.ComplementItemID.String()); err != nil {
+	if err := s.ri.DeleteItemWithTx(ctx, tx, groupItemModel.ComplementItemID.String()); err != nil {
 		return err
 	}
 
@@ -235,31 +248,13 @@ func (s *GroupItemService) DeleteComplementItem(ctx context.Context, dto *entity
 	groupItem.CalculateTotal()
 
 	groupItemModel.FromDomain(groupItem)
-	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
+	if err := s.r.UpdateGroupItemWithTx(ctx, tx, groupItemModel); err != nil {
 		return err
 	}
 
-	if err := s.so.UpdateOrderTotal(ctx, groupItemModel.OrderID.String()); err != nil {
+	if err := s.so.UpdateOrderTotalWithTx(ctx, tx, groupItemModel.OrderID.String()); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func (s *GroupItemService) UpdateGroupItemTotal(ctx context.Context, id string) error {
-	groupItemModel, err := s.r.GetGroupByID(ctx, id, true)
-	if err != nil {
-		return err
-	}
-
-	groupItem := groupItemModel.ToDomain()
-
-	groupItem.CalculateTotal()
-
-	groupItemModel.FromDomain(groupItem)
-	if err := s.r.UpdateGroupItem(ctx, groupItemModel); err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit()
 }

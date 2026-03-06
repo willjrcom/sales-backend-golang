@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
 	orderentity "github.com/willjrcom/sales-backend-go/internal/domain/order"
 	"github.com/willjrcom/sales-backend-go/internal/infra/repository/model"
 )
@@ -79,6 +80,10 @@ func (r *OrderRepositoryLocal) UpdateOrderWithRelations(ctx context.Context, ord
 	return nil
 }
 
+func (r *OrderRepositoryLocal) UpdateOrderWithRelationsWithTx(ctx context.Context, tx *bun.Tx, order *model.Order) error {
+	return r.UpdateOrderWithRelations(ctx, order)
+}
+
 func (r *OrderRepositoryLocal) GetOnlyOrderById(ctx context.Context, id string) (*model.Order, error) {
 	if p, ok := r.orders[uuid.MustParse(id)]; ok {
 		return p, nil
@@ -87,7 +92,23 @@ func (r *OrderRepositoryLocal) GetOnlyOrderById(ctx context.Context, id string) 
 	return nil, errors.New("order not found")
 }
 
+func (r *OrderRepositoryLocal) ExistsOrderById(ctx context.Context, id string) (bool, error) {
+	if _, exists := r.orders[uuid.MustParse(id)]; exists {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 func (r *OrderRepositoryLocal) GetOrderById(ctx context.Context, id string) (*model.Order, error) {
+	if p, ok := r.orders[uuid.MustParse(id)]; ok {
+		return p, nil
+	}
+
+	return nil, errors.New("order not found")
+}
+
+func (r *OrderRepositoryLocal) GetOrderByIdWithTx(ctx context.Context, tx *bun.Tx, id string) (order *model.Order, err error) {
 	if p, ok := r.orders[uuid.MustParse(id)]; ok {
 		return p, nil
 	}

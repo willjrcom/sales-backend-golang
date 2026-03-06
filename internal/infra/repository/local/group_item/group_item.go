@@ -45,11 +45,19 @@ func (r *GroupItemRepositoryLocal) GetGroupByID(ctx context.Context, id string, 
 	return nil, nil
 }
 
+func (r *GroupItemRepositoryLocal) GetGroupByIDWithTx(ctx context.Context, tx *bun.Tx, id string, withRelation bool) (*model.GroupItem, error) {
+	return r.GetGroupByID(ctx, id, withRelation)
+}
+
 func (r *GroupItemRepositoryLocal) DeleteGroupItem(ctx context.Context, id string, complementItemID *string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	delete(r.items, id)
 	return nil
+}
+
+func (r *GroupItemRepositoryLocal) DeleteGroupItemWithTx(ctx context.Context, tx *bun.Tx, id string, complementItemID *string) error {
+	return r.DeleteGroupItem(ctx, id, complementItemID)
 }
 
 func (r *GroupItemRepositoryLocal) GetGroupItemsByOrderIDAndStatus(ctx context.Context, id string, status string) ([]model.GroupItem, error) {

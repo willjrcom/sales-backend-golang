@@ -10,12 +10,13 @@ type ProductCategoryWithOrderProcess struct {
 }
 
 type ProductCategoryWithOrderProcessCommonAttributes struct {
-	Name           string
-	ImagePath      string
-	UseProcessRule bool
-	IsAdditional   bool
-	IsComplement   bool
-	NeedPrint      bool
-	PrinterName    string
-	ProcessRules   []ProcessRuleWithOrderProcess
+	Name                 string
+	ImagePath            string
+	UseProcessRule       bool
+	IsAdditional         bool
+	IsComplement         bool
+	NeedPrint            bool
+	PrinterName          string
+	SplitPricingStrategy SplitPricingStrategy
+	ProcessRules         []ProcessRuleWithOrderProcess
 }

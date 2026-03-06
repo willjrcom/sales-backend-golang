@@ -81,7 +81,7 @@ func (s *OrderPickupService) CreateOrderPickup(ctx context.Context, dto *orderpi
 	orderPickup.OrderID = orderID
 
 	// Buscar o pedido para obter o OrderNumber
-	orderModel, err := s.os.ro.GetOrderById(ctx, orderID.String())
+	orderModel, err := s.os.ro.GetOnlyOrderById(ctx, orderID.String())
 	if err != nil {
 		return nil, err
 	}

@@ -65,7 +65,6 @@ func (r *GroupItemRepositoryBun) UpdateGroupItemWithTx(ctx context.Context, tx *
 }
 
 func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string, complementItemID *string) error {
-
 	ctx, tx, cancel, err := database.GetTenantTransaction(ctx, r.db)
 	if err != nil {
 		return err
@@ -74,21 +73,25 @@ func (r *GroupItemRepositoryBun) DeleteGroupItem(ctx context.Context, id string,
 	defer cancel()
 	defer tx.Rollback()
 
-	if _, err = tx.NewDelete().Model(&model.GroupItem{}).Where("id = ?", id).Exec(ctx); err != nil {
+	if err := r.DeleteGroupItemWithTx(ctx, tx, id, complementItemID); err != nil {
+		return err
+	}
+
+	return tx.Commit()
+}
+
+func (r *GroupItemRepositoryBun) DeleteGroupItemWithTx(ctx context.Context, tx *bun.Tx, id string, complementItemID *string) error {
+	if _, err := tx.NewDelete().Model(&model.GroupItem{}).Where("id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
 	if complementItemID != nil {
-		if _, err = tx.NewDelete().Model(&model.Item{}).Where("id = ?", complementItemID).Exec(ctx); err != nil {
+		if _, err := tx.NewDelete().Model(&model.Item{}).Where("id = ?", complementItemID).Exec(ctx); err != nil {
 			return err
 		}
 	}
 
-	if _, err = tx.NewDelete().Model(&model.Item{}).Where("group_item_id = ?", id).Exec(ctx); err != nil {
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
+	if _, err := tx.NewDelete().Model(&model.Item{}).Where("group_item_id = ?", id).Exec(ctx); err != nil {
 		return err
 	}
 
@@ -126,6 +129,29 @@ func (r *GroupItemRepositoryBun) GetGroupByID(ctx context.Context, id string, wi
 		return nil, err
 	}
 	return item, nil
+}
+
+func (r *GroupItemRepositoryBun) GetGroupByIDWithTx(ctx context.Context, tx *bun.Tx, id string, withRelation bool) (*model.GroupItem, error) {
+	groupItem := &model.GroupItem{}
+	query := tx.NewSelect().Model(groupItem).Where("group_item.id = ?", id).
+		Relation("Category").
+		Relation("ComplementItem")
+
+	if withRelation {
+		query.
+			Relation("Items", func(q *bun.SelectQuery) *bun.SelectQuery {
+				return q.Where("is_additional = ?", false)
+			}).
+			Relation("Items.AdditionalItems").
+			Relation("Category.ComplementCategories").
+			Relation("Category.AdditionalCategories")
+	}
+
+	if err := query.Scan(ctx); err != nil {
+		return nil, err
+	}
+
+	return groupItem, nil
 }
 
 func (r *GroupItemRepositoryBun) GetGroupItemsByStatus(ctx context.Context, status string) ([]model.GroupItem, error) {

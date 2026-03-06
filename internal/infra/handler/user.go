@@ -261,12 +261,6 @@ func (h *handlerUserImpl) handlerRefreshAccessToken(w http.ResponseWriter, r *ht
 		return
 	}
 
-	// Double check if token is valid object (even if expired, jwt-go returns it)
-	if token == nil {
-		jsonpkg.ResponseErrorJson(w, r, http.StatusUnauthorized, errors.New("access-token is nil"))
-		return
-	}
-
 	schema := jwtservice.GetSchemaFromAccessToken(token)
 	// Removed strict check for schema presence to allow refreshing Basic Access Tokens (pre-company selection)
 
